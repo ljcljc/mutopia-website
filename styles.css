@@ -19,7 +19,7 @@ body.loaded {
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 960px;
   margin: 0 auto;
   padding: 0 30px;
 }
@@ -172,9 +172,10 @@ body.loaded {
 /* 挑战区域样式 */
 .challenges-section {
   margin-top: -114px;
-  padding-top: 101px;
-  padding-bottom: 98px;
-  background: #c7b2ac;
+  /* padding-top: 101px;
+  padding-bottom: 98px; */
+  /* background: #c7b2ac; */
+  background-color: #f8f7f1;
   position: relative;
 }
 
@@ -184,12 +185,20 @@ body.loaded {
   top: 0;
   left: 0;
   right: 0;
+  max-width: 960px;
+  margin: 0 auto;
   height: 60px;
   background-color: #f8f7f1;
   background-image: url(./images/vague.png);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+}
+
+.challenges-section .container {
+  padding-top: 101px;
+  padding-bottom: 98px;
+  background-color: #c7b2ac;
 }
 
 .challenges-content {
@@ -406,21 +415,23 @@ body.loaded {
 
 /* 页脚样式 */
 .footer {
-  background-color: #8b4513;
+  background-color: #8b6357;
   color: white;
-  padding: 30px 0;
+  padding: 13px 0;
   text-align: center;
 }
 
 .footer p {
   font-family: 'Comfortaa', sans-serif;
-  font-weight: 400;
+  font-size: 14px;
+  color: #f8f7f1;
+  font-weight: 700;
+  line-height: 16px;
 }
 
 .footer a {
-  color: #ffb347;
   text-decoration: none;
-  font-weight: 500;
+  color: #f8f7f1;
 }
 
 .footer a:hover {
