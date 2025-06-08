@@ -112,6 +112,7 @@ body.loaded {
   width: 298px;
   height: 432px;
   overflow: hidden;
+  z-index: 1;
 }
 
 .dog-image {
@@ -140,50 +141,40 @@ body.loaded {
   border-radius: 91px 91px 91px 91px;
 }
 
-.hero-text h1 {
+.hero-text {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   font-family: 'Comfortaa', sans-serif;
-  font-size: 48px;
-  font-weight: 700;
-  color: #2c2c2c;
-  margin-bottom: 20px;
-  line-height: 1.2;
+  color: #8b6357;
 }
 
 .hero-description {
-  font-family: 'Comfortaa', sans-serif;
-  font-weight: 400;
   font-size: 18px;
-  color: #666;
-  margin-bottom: 30px;
-  line-height: 1.6;
+  line-height: 24px;
+  font-weight: 400;
 }
 
 .invite-section {
-  background-color: white;
-  padding: 25px;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-}
-
-.invite-section p {
-  font-family: 'Comfortaa', sans-serif;
-  font-weight: 500;
-  font-size: 16px;
-  color: #333;
-  margin-bottom: 8px;
+  font-weight: bold;
+  font-size: 14px;
+  color: #8b6357;
+  line-height: 18px;
+  font-weight: 700;
 }
 
 .highlight {
-  color: #ff6b35;
-  font-weight: 700;
+  color: #de622e;
   text-decoration: underline;
-  text-decoration-color: #ff6b35;
+  text-decoration-color: #de622e;
 }
 
 /* 挑战区域样式 */
 .challenges-section {
-  padding: 80px 0;
-  background: linear-gradient(135deg, #e8d5c4, #d4b5a0);
+  margin-top: -114px;
+  padding-top: 101px;
+  padding-bottom: 98px;
+  background: #c7b2ac;
   position: relative;
 }
 
@@ -194,124 +185,157 @@ body.loaded {
   left: 0;
   right: 0;
   height: 60px;
-  background: repeating-linear-gradient(
-    90deg,
-    transparent,
-    transparent 10px,
-    rgba(255, 255, 255, 0.1) 10px,
-    rgba(255, 255, 255, 0.1) 20px
-  );
+  background-color: #f8f7f1;
+  background-image: url(./images/vague.png);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
-.challenge-intro {
-  text-align: center;
-  margin-bottom: 60px;
-  opacity: 0;
-  transform: scale(0.9);
-  transition: all 0.7s ease-out;
-}
-
-.challenge-intro.animate-in {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.challenge-intro p {
-  font-family: 'Comfortaa', sans-serif;
-  font-size: 20px;
-  color: #2c2c2c;
-  font-weight: 500;
-  background-color: #ff6b35;
-  color: white;
-  padding: 25px 40px;
-  border-radius: 25px;
-  display: inline-block;
-  box-shadow: 0 15px 35px rgba(255, 107, 53, 0.3);
-  position: relative;
-}
-
-.challenge-intro p::after {
-  content: '';
-  position: absolute;
-  bottom: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 15px solid transparent;
-  border-right: 15px solid transparent;
-  border-top: 15px solid #ff6b35;
-}
-
-.testimonials {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-  max-width: 800px;
+.challenges-content {
+  max-width: 656px;
   margin: 0 auto;
 }
 
-.testimonial {
-  background-color: white;
-  padding: 25px;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+.challenge-intro-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.challenge-intro {
   position: relative;
-  transition: transform 0.3s ease;
-  opacity: 0;
-  transform: translateY(30px);
-  transition: all 0.6s ease-out;
+  width: 490px;
+  height: 86px;
+  text-align: right;
 }
 
-.testimonial.animate-in {
-  opacity: 1;
-  transform: translateY(0);
+.challenge-intro-shadow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 481px;
+  height: 86px;
+  background: #e7d8d1;
+  border-radius: 60px 60px 60px 60px;
 }
 
-.testimonial:hover {
-  transform: translateY(-5px);
+.challenge-intro-box {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 466px;
+  height: 79px;
+  background: #dd632d;
+  border-radius: 60px 60px 60px 60px;
+  text-align: left;
+}
+
+.challenge-intro-box p {
+  font-size: 15px;
+  line-height: 18px;
+  font-weight: 700;
+  color: #f8f7f1;
+}
+
+.testimonials {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.testimonial {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-radius: 16px;
+  max-width: 400px;
 }
 
 .testimonial.carlos {
-  align-self: flex-start;
-  max-width: 60%;
+  align-self: flex-end;
+}
+
+.testimonial.carlos .testimonial-content {
+  background-color: #f6eeea;
+}
+
+.testimonial.carlos .testimonial-content::after {
+  content: '';
+  position: absolute;
+  bottom: -27px;
+  right: 30px;
+  width: 24px;
+  height: 37px;
+  background-image: url(./images/talk.png);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .testimonial.emily {
-  align-self: flex-end;
-  max-width: 65%;
+  align-self: flex-start;
+}
+
+.testimonial.emily .testimonial-content {
+  background-color: #ffffff;
+}
+
+.testimonial.emily .testimonial-content::after {
+  content: '';
+  position: absolute;
+  top: -50px;
+  left: 108px;
+  width: 38px;
+  height: 38px;
+  background-image: url(./images/thought.png);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .testimonial.charlotte {
-  align-self: flex-start;
-  max-width: 70%;
+  align-self: center;
+}
+
+.testimonial.charlotte .testimonial-content {
+  background-color: #f6eeea;
+}
+
+.testimonial.charlotte .testimonial-content::after {
+  content: '';
+  position: absolute;
+  top: -24px;
+  right: 14px;
+  width: 38px;
+  height: 38px;
+  background-image: url(./images/comment.png);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .testimonial-header {
   font-family: 'Comfortaa', sans-serif;
   font-weight: 700;
-  font-size: 16px;
-  margin-bottom: 10px;
-  color: #8b4513;
+  font-size: 14px;
+  color: #000000;
+  line-height: 18px;
 }
 
 .testimonial-content {
+  position: relative;
+  padding: 6px 10px;
   font-family: 'Comfortaa', sans-serif;
-  font-weight: 400;
-  font-size: 15px;
-  color: #555;
+  font-weight: 500;
+  font-size: 12px;
+  color: #000000;
   line-height: 1.5;
   font-style: italic;
-}
-
-.testimonial::before {
-  content: '"';
-  position: absolute;
-  top: -5px;
-  left: 15px;
-  font-size: 40px;
-  color: #ff6b35;
-  font-weight: bold;
+  border-radius: 10px;
 }
 
 /* CTA区域样式 */
