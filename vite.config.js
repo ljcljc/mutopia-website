@@ -1,6 +1,6 @@
-import { defineConfig } from 'vite'
-import compression from 'vite-plugin-compression'
-import { ViteMinifyPlugin } from 'vite-plugin-minify'
+import { defineConfig } from 'vite';
+import compression from 'vite-plugin-compression';
+import { ViteMinifyPlugin } from 'vite-plugin-minify';
 
 export default defineConfig({
   // 插件配置
@@ -16,7 +16,7 @@ export default defineConfig({
       useShortDoctype: true,
       minifyCSS: true,
       minifyJS: true,
-      minifyURLs: true
+      minifyURLs: true,
     }),
     // Gzip压缩
     compression({
@@ -25,15 +25,15 @@ export default defineConfig({
       threshold: 1024,
       deleteOriginFile: false,
       verbose: true,
-      filter: /\.(js|mjs|json|css|html)$/i
-    })
+      filter: /\.(js|mjs|json|css|html)$/i,
+    }),
   ],
 
   // 开发服务器配置
   server: {
     port: 3000,
     open: true,
-    host: true
+    host: true,
   },
 
   // 构建配置
@@ -42,7 +42,7 @@ export default defineConfig({
     assetsDir: 'assets',
     sourcemap: false,
     minify: 'terser',
-    
+
     // 资源文件配置
     rollupOptions: {
       output: {
@@ -50,14 +50,14 @@ export default defineConfig({
         entryFileNames: 'assets/js/[name]-[hash].js',
         assetFileNames: ({ name }) => {
           if (/\.(gif|jpe?g|png|svg)$/.test(name ?? '')) {
-            return 'assets/images/[name]-[hash][extname]'
+            return 'assets/images/[name]-[hash][extname]';
           }
           if (/\.css$/.test(name ?? '')) {
-            return 'assets/css/[name]-[hash][extname]'
+            return 'assets/css/[name]-[hash][extname]';
           }
-          return 'assets/[name]-[hash][extname]'
-        }
-      }
+          return 'assets/[name]-[hash][extname]';
+        },
+      },
     },
 
     // JS/CSS压缩配置
@@ -66,15 +66,15 @@ export default defineConfig({
         drop_console: true,
         drop_debugger: true,
         pure_funcs: ['console.log'],
-        passes: 2
+        passes: 2,
       },
       mangle: {
-        safari10: true
+        safari10: true,
       },
       format: {
-        comments: false
-      }
-    }
+        comments: false,
+      },
+    },
   },
 
   // 静态资源处理
@@ -85,6 +85,6 @@ export default defineConfig({
 
   // CSS 配置
   css: {
-    devSourcemap: true
-  }
-}) 
+    devSourcemap: true,
+  },
+});

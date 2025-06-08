@@ -1,536 +1,530 @@
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-    font-family: 'Comfortaa', sans-serif;
-    font-weight: 700;
-    line-height: 1.6;
-    color: #333;
-    background-color: #F8F7F1;
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
+  font-family: 'Comfortaa', sans-serif;
+  font-weight: 700;
+  line-height: 1.6;
+  color: #333;
+  background-color: #f8f7f1;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
 }
 
 body.loaded {
-    opacity: 1;
+  opacity: 1;
 }
 
 .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 30px;
 }
 
 /* 头部样式 */
 .header {
-    background-color: #F8F7F1;
-    padding: 20px 0;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    /* box-shadow: 0 2px 10px rgba(0,0,0,0.05); */
+  background-color: #f8f7f1;
+  padding: 20px 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  /* box-shadow: 0 2px 10px rgba(0,0,0,0.05); */
 }
 
 .header .container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    transition: transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
 }
 
 .logo:hover {
-    transform: scale(1.05);
+  transform: scale(1.05);
 }
 
 .logo img {
-    width: 30px;
-    height: 30px;
+  width: 30px;
+  height: 30px;
 }
 
 .header-title {
-    font-family: 'Comfortaa';
-    font-size: 24px;
-    font-weight: 700;
-    color: #8B4513;
+  font-family: 'Comfortaa';
+  font-size: 24px;
+  font-weight: 700;
+  color: #8b4513;
 }
 
 .header-title:hover {
-    transform:  scale(1.05);
+  transform: scale(1.05);
 }
 
-.survey-btn, .cta-button {
-    font-family: 'Comfortaa', sans-serif;
-    font-weight: 500;
-    color: white;
-    border: none;
-    padding: 8px;
-    background-color: #8B6357;
-    border-radius: 4px 4px 4px 4px;
-    font-size: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
+.survey-btn,
+.cta-button {
+  font-family: 'Comfortaa', sans-serif;
+  font-weight: 500;
+  color: white;
+  border: none;
+  padding: 8px;
+  background-color: #8b6357;
+  border-radius: 4px 4px 4px 4px;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.survey-btn:hover, .cta-button:hover {
-    background-color: #A0522D;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(139, 69, 19, 0.3);
+.survey-btn:hover,
+.cta-button:hover {
+  background-color: #a0522d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(139, 69, 19, 0.3);
 }
 
 /* 英雄区域样式 */
 .hero-section {
-    padding: 80px 0;
-    background-color: #F8F7F1;
+  padding: 20px 0 0;
+  background-color: #f8f7f1;
 }
 
 .hero-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 60px;
-    align-items: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
 }
 
 .hero-image {
-    display: flex;
-    justify-content: center;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .dog-container {
-    position: relative;
+  position: relative;
+  width: 298px;
+  height: 432px;
+  overflow: hidden;
 }
 
 .dog-image {
-    width: 350px;
-    height: 400px;
-    background: linear-gradient(135deg, #FF6B35, #F7931E);
-    border-radius: 40px;
-    padding: 40px;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    box-shadow: 0 20px 40px rgba(255, 107, 53, 0.3);
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.3s ease-out;
-}
-
-.dog-image::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-    animation: shimmer 3s ease-in-out infinite;
-}
-
-@keyframes shimmer {
-    0%, 100% { opacity: 0; }
-    50% { opacity: 1; }
+  position: absolute;
+  width: 282px;
+  height: 416px;
+  background: #dd6b2c;
+  border-radius: 91px 91px 91px 91px;
+  overflow: hidden;
 }
 
 .dog-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 20px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+.dog-shadow {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 274px;
+  height: 427px;
+  background: #e7d8d1;
+  border-radius: 91px 91px 91px 91px;
 }
 
 .hero-text h1 {
-    font-family: 'Comfortaa', sans-serif;
-    font-size: 48px;
-    font-weight: 700;
-    color: #2c2c2c;
-    margin-bottom: 20px;
-    line-height: 1.2;
+  font-family: 'Comfortaa', sans-serif;
+  font-size: 48px;
+  font-weight: 700;
+  color: #2c2c2c;
+  margin-bottom: 20px;
+  line-height: 1.2;
 }
 
 .hero-description {
-    font-family: 'Comfortaa', sans-serif;
-    font-weight: 400;
-    font-size: 18px;
-    color: #666;
-    margin-bottom: 30px;
-    line-height: 1.6;
+  font-family: 'Comfortaa', sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 30px;
+  line-height: 1.6;
 }
 
 .invite-section {
-    background-color: white;
-    padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  background-color: white;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 .invite-section p {
-    font-family: 'Comfortaa', sans-serif;
-    font-weight: 500;
-    font-size: 16px;
-    color: #333;
-    margin-bottom: 8px;
+  font-family: 'Comfortaa', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 8px;
 }
 
 .highlight {
-    color: #FF6B35;
-    font-weight: 700;
-    text-decoration: underline;
-    text-decoration-color: #FF6B35;
+  color: #ff6b35;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: #ff6b35;
 }
 
 /* 挑战区域样式 */
 .challenges-section {
-    padding: 80px 0;
-    background: linear-gradient(135deg, #E8D5C4, #D4B5A0);
-    position: relative;
+  padding: 80px 0;
+  background: linear-gradient(135deg, #e8d5c4, #d4b5a0);
+  position: relative;
 }
 
 .challenges-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 60px;
-    background: repeating-linear-gradient(
-        90deg,
-        transparent,
-        transparent 10px,
-        rgba(255,255,255,0.1) 10px,
-        rgba(255,255,255,0.1) 20px
-    );
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 10px,
+    rgba(255, 255, 255, 0.1) 10px,
+    rgba(255, 255, 255, 0.1) 20px
+  );
 }
 
 .challenge-intro {
-    text-align: center;
-    margin-bottom: 60px;
-    opacity: 0;
-    transform: scale(0.9);
-    transition: all 0.7s ease-out;
+  text-align: center;
+  margin-bottom: 60px;
+  opacity: 0;
+  transform: scale(0.9);
+  transition: all 0.7s ease-out;
 }
 
 .challenge-intro.animate-in {
-    opacity: 1;
-    transform: scale(1);
+  opacity: 1;
+  transform: scale(1);
 }
 
 .challenge-intro p {
-    font-family: 'Comfortaa', sans-serif;
-    font-size: 20px;
-    color: #2c2c2c;
-    font-weight: 500;
-    background-color: #FF6B35;
-    color: white;
-    padding: 25px 40px;
-    border-radius: 25px;
-    display: inline-block;
-    box-shadow: 0 15px 35px rgba(255, 107, 53, 0.3);
-    position: relative;
+  font-family: 'Comfortaa', sans-serif;
+  font-size: 20px;
+  color: #2c2c2c;
+  font-weight: 500;
+  background-color: #ff6b35;
+  color: white;
+  padding: 25px 40px;
+  border-radius: 25px;
+  display: inline-block;
+  box-shadow: 0 15px 35px rgba(255, 107, 53, 0.3);
+  position: relative;
 }
 
 .challenge-intro p::after {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-left: 15px solid transparent;
-    border-right: 15px solid transparent;
-    border-top: 15px solid #FF6B35;
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-top: 15px solid #ff6b35;
 }
 
 .testimonials {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-    max-width: 800px;
-    margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .testimonial {
-    background-color: white;
-    padding: 25px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    position: relative;
-    transition: transform 0.3s ease;
-    opacity: 0;
-    transform: translateY(30px);
-    transition: all 0.6s ease-out;
+  background-color: white;
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  position: relative;
+  transition: transform 0.3s ease;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.6s ease-out;
 }
 
 .testimonial.animate-in {
-    opacity: 1;
-    transform: translateY(0);
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .testimonial:hover {
-    transform: translateY(-5px);
+  transform: translateY(-5px);
 }
 
 .testimonial.carlos {
-    align-self: flex-start;
-    max-width: 60%;
+  align-self: flex-start;
+  max-width: 60%;
 }
 
 .testimonial.emily {
-    align-self: flex-end;
-    max-width: 65%;
+  align-self: flex-end;
+  max-width: 65%;
 }
 
 .testimonial.charlotte {
-    align-self: flex-start;
-    max-width: 70%;
+  align-self: flex-start;
+  max-width: 70%;
 }
 
 .testimonial-header {
-    font-family: 'Comfortaa', sans-serif;
-    font-weight: 700;
-    font-size: 16px;
-    margin-bottom: 10px;
-    color: #8B4513;
+  font-family: 'Comfortaa', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: #8b4513;
 }
 
 .testimonial-content {
-    font-family: 'Comfortaa', sans-serif;
-    font-weight: 400;
-    font-size: 15px;
-    color: #555;
-    line-height: 1.5;
-    font-style: italic;
+  font-family: 'Comfortaa', sans-serif;
+  font-weight: 400;
+  font-size: 15px;
+  color: #555;
+  line-height: 1.5;
+  font-style: italic;
 }
 
 .testimonial::before {
-    content: '"';
-    position: absolute;
-    top: -5px;
-    left: 15px;
-    font-size: 40px;
-    color: #FF6B35;
-    font-weight: bold;
+  content: '"';
+  position: absolute;
+  top: -5px;
+  left: 15px;
+  font-size: 40px;
+  color: #ff6b35;
+  font-weight: bold;
 }
 
 /* CTA区域样式 */
 .cta-section {
-    padding: 100px 0;
-    background-color: #F8F7F1;
-    text-align: center;
+  padding: 100px 0;
+  background-color: #f8f7f1;
+  text-align: center;
 }
 
 .cta-content {
-    max-width: 600px;
-    margin: 0 auto;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .cta-logo .logo-large {
-    font-size: 60px;
-    margin-bottom: 30px;
-    color: #8B4513;
+  font-size: 60px;
+  margin-bottom: 30px;
+  color: #8b4513;
 }
 
 .cta-content h2 {
-    font-family: 'Comfortaa', sans-serif;
-    font-size: 36px;
-    font-weight: 700;
-    color: #2c2c2c;
-    margin-bottom: 15px;
-    line-height: 1.2;
+  font-family: 'Comfortaa', sans-serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: #2c2c2c;
+  margin-bottom: 15px;
+  line-height: 1.2;
 }
 
 .cta-subtitle {
-    font-family: 'Comfortaa', sans-serif;
-    font-weight: 500;
-    font-size: 18px;
-    color: #666;
-    margin-bottom: 40px;
+  font-family: 'Comfortaa', sans-serif;
+  font-weight: 500;
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 40px;
 }
 
 .cta-button {
-    font-size: 16px;
-    padding: 15px 35px;
-    margin-bottom: 25px;
-    animation: pulse 2s ease-in-out infinite;
+  font-size: 16px;
+  padding: 15px 35px;
+  margin-bottom: 25px;
+  animation: pulse 2s ease-in-out infinite;
 }
 
 .cta-button:hover {
-    animation: none;
+  animation: none;
 }
 
 .privacy-note {
-    font-family: 'Comfortaa', sans-serif;
-    font-weight: 400;
-    font-size: 14px;
-    color: #888;
-    font-style: italic;
+  font-family: 'Comfortaa', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  color: #888;
+  font-style: italic;
 }
 
 /* 页脚样式 */
 .footer {
-    background-color: #8B4513;
-    color: white;
-    padding: 30px 0;
-    text-align: center;
+  background-color: #8b4513;
+  color: white;
+  padding: 30px 0;
+  text-align: center;
 }
 
 .footer p {
-    font-family: 'Comfortaa', sans-serif;
-    font-weight: 400;
+  font-family: 'Comfortaa', sans-serif;
+  font-weight: 400;
 }
 
 .footer a {
-    color: #FFB347;
-    text-decoration: none;
-    font-weight: 500;
+  color: #ffb347;
+  text-decoration: none;
+  font-weight: 500;
 }
 
 .footer a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-    .hero-content {
-        grid-template-columns: 1fr;
-        gap: 40px;
-        text-align: center;
-    }
-    
-    .hero-text h1 {
-        font-family: 'Comfortaa', sans-serif;
-        font-weight: 700;
-        font-size: 36px;
-    }
-    
-    .dog-image {
-        width: 280px;
-        height: 320px;
-        padding: 30px;
-    }
-    
-    .testimonials {
-        gap: 20px;
-    }
-    
-    .testimonial.carlos,
-    .testimonial.emily,
-    .testimonial.charlotte {
-        align-self: stretch;
-        max-width: 100%;
-    }
-    
-    .cta-content h2 {
-        font-family: 'Comfortaa', sans-serif;
-        font-weight: 700;
-        font-size: 28px;
-    }
-    
-    .challenge-intro p {
-        font-size: 18px;
-        padding: 20px 30px;
-    }
+  .hero-content {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    text-align: center;
+  }
+
+  .hero-text h1 {
+    font-family: 'Comfortaa', sans-serif;
+    font-weight: 700;
+    font-size: 36px;
+  }
+
+  .dog-image {
+    width: 280px;
+    height: 320px;
+    padding: 30px;
+  }
+
+  .testimonials {
+    gap: 20px;
+  }
+
+  .testimonial.carlos,
+  .testimonial.emily,
+  .testimonial.charlotte {
+    align-self: stretch;
+    max-width: 100%;
+  }
+
+  .cta-content h2 {
+    font-family: 'Comfortaa', sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+  }
+
+  .challenge-intro p {
+    font-size: 18px;
+    padding: 20px 30px;
+  }
 }
 
 @media (max-width: 480px) {
-    .container {
-        padding: 0 15px;
-    }
-    
-    .header .container {
-        flex-direction: column;
-        gap: 15px;
-    }
-    
-    .hero-section,
-    .challenges-section,
-    .cta-section {
-        padding: 50px 0;
-    }
-    
-    .hero-text h1 {
-        font-family: 'Comfortaa', sans-serif;
-        font-weight: 700;
-        font-size: 28px;
-    }
-    
-    .hero-description {
-        font-size: 16px;
-    }
-    
-    .dog-image {
-        width: 240px;
-        height: 280px;
-        padding: 25px;
-    }
+  .container {
+    padding: 0 15px;
+  }
+
+  .header .container {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .hero-section,
+  .challenges-section,
+  .cta-section {
+    padding: 50px 0;
+  }
+
+  .hero-text h1 {
+    font-family: 'Comfortaa', sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+  }
+
+  .hero-description {
+    font-size: 16px;
+  }
+
+  .dog-image {
+    width: 240px;
+    height: 280px;
+    padding: 25px;
+  }
 }
 
 /* 加载动画 */
 @keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fadeInLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @keyframes pulse {
-    0%, 100% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.05);
-    }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
 }
 
 /* 滚动条样式 */
 ::-webkit-scrollbar {
-    width: 8px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #f1f1f1;
+  background: #f1f1f1;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #8B4513;
-    border-radius: 4px;
+  background: #8b4513;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #A0522D;
+  background: #a0522d;
 }
 
 /* 选择文本样式 */
 ::selection {
-    background-color: #FF6B35;
-    color: white;
+  background-color: #ff6b35;
+  color: white;
 }
 
 ::-moz-selection {
-    background-color: #FF6B35;
-    color: white;
-} 
+  background-color: #ff6b35;
+  color: white;
+}

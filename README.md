@@ -44,7 +44,7 @@ Mutopia is a service platform website designed specifically for pet groomers, ai
 ## Browser Compatibility
 
 - Chrome (Recommended)
-- Firefox  
+- Firefox
 - Safari
 - Edge
 
@@ -54,4 +54,4 @@ For questions or suggestions, please contact: hello@mutopia.ca
 
 ## Development Status
 
-Current version is a design prototype. Survey functionality is not yet implemented - clicking buttons will show alert messages. 
+Current version is a design prototype. Survey functionality is not yet implemented - clicking buttons will show alert messages.
