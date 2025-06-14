@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function () {
     rootMargin: '0px 0px -50px 0px',
   };
 
-  const observer = new IntersectionObserver(function (entries) {
+  const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         entry.target.classList.add('animate-in');
@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
       document.title = 'Mutopia - Pet Grooming Service Platform';
     } else {
       // Handle when page becomes invisible
-      document.title = '🐾 Don\'t go! Mutopia is waiting for you';
+      document.title = "🐾 Don't go! Mutopia is waiting for you";
     }
   });
 });

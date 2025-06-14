@@ -40,6 +40,10 @@ body.loaded {
   align-items: center;
 }
 
+.header .w-container {
+  display: none;
+}
+
 .logo {
   display: flex;
   align-items: center;
@@ -421,6 +425,10 @@ body.loaded {
   text-align: center;
 }
 
+.footer .w-container {
+  display: none;
+}
+
 .footer p {
   font-family: 'Comfortaa', sans-serif;
   font-size: 14px;
@@ -486,31 +494,44 @@ body.loaded {
     padding: 0 15px;
   }
 
-  .header .container {
+  .w-header {
+    padding: 32px 0;
+  }
+
+  .w-header .container {
+    display: none;
+  }
+
+  .w-header .w-container {
+    display: flex;
     flex-direction: column;
-    gap: 15px;
+    align-items: center;
+    gap: 32px;
   }
 
-  .hero-section,
-  .challenges-section,
-  .cta-section {
-    padding: 50px 0;
+  .w-container .logo-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
   }
 
-  .hero-text h1 {
-    font-family: 'Comfortaa', sans-serif;
-    font-weight: 700;
-    font-size: 28px;
+  .w-container .logo-wrapper .logo {
+    width: 60px;
+    height: 60px;
   }
 
-  .hero-description {
-    font-size: 16px;
+  .w-container .logo-wrapper .header-title {
+    font-size: 36px;
+    color: #8b6357;
   }
 
-  .dog-image {
-    width: 240px;
-    height: 280px;
-    padding: 25px;
+  .w-container .survey-btn,
+  .w-container .cta-button {
+    padding: 16px;
+    font-size: 20px;
+    background: #8b6357;
+    border-radius: 8px 8px 8px 8px;
   }
 }
 
