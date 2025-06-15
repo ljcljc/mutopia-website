@@ -6,9 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
   surveyButtons.forEach(button => {
     button.addEventListener('click', function () {
       // Simulate survey popup or redirect
-      alert(
-        'Thank you for your interest! Survey functionality coming soon.\n\nWe will contact you via email at hello@mutopia.ca'
-      );
+      window.open('https://forms.gle/BvSPhkEWtvPmxJmy6', '_blank');
     });
   });
 
