@@ -84,6 +84,7 @@ body.loaded {
   font-size: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
+  animation: pulse 2s ease-in-out infinite;
 }
 
 .survey-btn:hover,
@@ -413,7 +414,7 @@ body.loaded {
   margin: 19px 0;
   background: #8b6357;
   border-radius: 4px 4px 4px 4px;
-  animation: pulse 2s ease-in-out infinite;
+  /* animation: pulse 2s ease-in-out infinite; */
 }
 
 .cta-button:hover {
