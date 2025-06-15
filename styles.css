@@ -173,9 +173,9 @@ body.loaded {
 }
 
 .highlight {
-  color: #de622e;
+  color: #de6a07;
   text-decoration: underline;
-  text-decoration-color: #de622e;
+  text-decoration-color: #de6a07;
 }
 
 /* 挑战区域样式 */
@@ -250,7 +250,7 @@ body.loaded {
   justify-content: center;
   width: 466px;
   height: 79px;
-  background: #dd632d;
+  background: #de6a07;
   border-radius: 60px 60px 60px 60px;
   text-align: left;
 }
@@ -605,7 +605,7 @@ body.loaded {
     padding-right: calc(15 / 414 * 100vw);
     width: calc(356 / 414 * 100vw);
     height: calc(234 / 414 * 100vw);
-    background: #dd632d;
+    background: #de6a07;
     border-radius: calc(60 / 414 * 100vw);
   }
 
