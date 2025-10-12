@@ -5,26 +5,7 @@
 // biome-ignore lint: disable
 export {}
 declare global {
-  const ArrowRight: (typeof import('lucide-vue-next'))['ArrowRight'];
-  const Award: (typeof import('lucide-vue-next'))['Award'];
-  const Calendar: (typeof import('lucide-vue-next'))['Calendar'];
-  const Check: (typeof import('lucide-vue-next'))['Check'];
-  const ChevronDown: (typeof import('lucide-vue-next'))['ChevronDown'];
-  const Clock: (typeof import('lucide-vue-next'))['Clock'];
   const EffectScope: (typeof import('vue'))['EffectScope'];
-  const Facebook: (typeof import('lucide-vue-next'))['Facebook'];
-  const Heart: (typeof import('lucide-vue-next'))['Heart'];
-  const Instagram: (typeof import('lucide-vue-next'))['Instagram'];
-  const Mail: (typeof import('lucide-vue-next'))['Mail'];
-  const MapPin: (typeof import('lucide-vue-next'))['MapPin'];
-  const Menu: (typeof import('lucide-vue-next'))['Menu'];
-  const Quote: (typeof import('lucide-vue-next'))['Quote'];
-  const Shield: (typeof import('lucide-vue-next'))['Shield'];
-  const Smartphone: (typeof import('lucide-vue-next'))['Smartphone'];
-  const Star: (typeof import('lucide-vue-next'))['Star'];
-  const Twitter: (typeof import('lucide-vue-next'))['Twitter'];
-  const Users: (typeof import('lucide-vue-next'))['Users'];
-  const X: (typeof import('lucide-vue-next'))['X'];
   const computed: (typeof import('vue'))['computed'];
   const createApp: (typeof import('vue'))['createApp'];
   const customRef: (typeof import('vue'))['customRef'];

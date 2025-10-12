@@ -1,7 +1,5 @@
 <script setup lang="ts">
-// 所有UI组件和图标都自动可用
-// 注意：Scissors、Droplets、Brush、Sparkles 需要手动导入（未在自动导入配置中）
-import { Scissors, Droplets, Brush, Sparkles } from 'lucide-vue-next';
+import { Scissors, Droplets, Brush, Sparkles, Clock, ArrowRight } from 'lucide-vue-next';
 
 const mainServices = [
   {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// Button、Input、Separator、Facebook、Instagram、Twitter、Mail、MapPin 都自动可用
+import { Facebook, Instagram, Twitter, Mail, MapPin } from 'lucide-vue-next';
 </script>
 
 <template>

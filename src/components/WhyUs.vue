@@ -1,5 +1,6 @@
 <script setup lang="ts">
-// Shield、Clock、Users、Award、Heart、Smartphone 图标自动可用
+// 图标作为变量使用时需要手动导入
+import { Shield, Clock, Users, Award, Heart, Smartphone } from 'lucide-vue-next';
 
 const features = [
   {

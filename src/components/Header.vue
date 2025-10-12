@@ -1,7 +1,17 @@
 <script setup lang="ts">
-// ref、Button、Menu、X、AuthDialog 都自动可用
+import { Menu, X } from 'lucide-vue-next';
+import { useIsMobile } from './ui/use-mobile';
+
 const isMenuOpen = ref(false);
 const isAuthDialogOpen = ref(false);
+const isMobile = useIsMobile();
+
+// 当切换到桌面视图时自动关闭移动菜单
+watch(isMobile, mobile => {
+  if (!mobile) {
+    isMenuOpen.value = false;
+  }
+});
 </script>
 
 <template>

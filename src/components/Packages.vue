@@ -1,7 +1,6 @@
 <script setup lang="ts">
-// 所有UI组件和常用图标都自动可用
-// 注意：Crown、Gift 需要手动导入（未在自动导入配置中）
-import { Crown, Gift } from 'lucide-vue-next';
+// 图标作为变量使用时需要手动导入
+import { Crown, Gift, Star, Check } from 'lucide-vue-next';
 
 const packages = [
   {

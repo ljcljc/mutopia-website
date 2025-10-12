@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// Card、CardContent、Avatar、AvatarFallback、AvatarImage、Star、Quote 都自动可用
+import { Star, Quote } from 'lucide-vue-next';
 
 const testimonials = [
   {

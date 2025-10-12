@@ -9,35 +9,9 @@ export default defineConfig({
   plugins: [
     vue(),
     tailwindcss(),
-    // 自动导入 Vue API
+    // 自动导入 Vue API (不包括图标)
     AutoImport({
-      imports: [
-        'vue',
-        {
-          'lucide-vue-next': [
-            // 按需导入常用图标
-            'Menu',
-            'X',
-            'Calendar',
-            'Star',
-            'Heart',
-            'Shield',
-            'Clock',
-            'Users',
-            'Award',
-            'Smartphone',
-            'Quote',
-            'Facebook',
-            'Instagram',
-            'Twitter',
-            'Mail',
-            'MapPin',
-            'Check',
-            'ChevronDown',
-            'ArrowRight',
-          ],
-        },
-      ],
+      imports: ['vue'],
       dts: 'src/auto-imports.d.ts',
       eslintrc: {
         enabled: true,

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// 所有imports现在自动可用：Button组件、Calendar/Star/Heart图标
+import { Calendar, Star, Heart } from 'lucide-vue-next';
 </script>
 
 <template>
