@@ -1,9 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import Button from './ui/button.vue';
-import { Menu, X } from 'lucide-vue-next';
-import AuthDialog from './AuthDialog.vue';
-
+// ref、Button、Menu、X、AuthDialog 都自动可用
 const isMenuOpen = ref(false);
 const isAuthDialogOpen = ref(false);
 </script>

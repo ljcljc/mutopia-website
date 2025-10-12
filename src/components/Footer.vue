@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import Button from './ui/button.vue';
-import Input from './ui/input.vue';
-import Separator from './ui/separator.vue';
-import { Facebook, Instagram, Twitter, Mail, MapPin } from 'lucide-vue-next';
+// Button、Input、Separator、Facebook、Instagram、Twitter、Mail、MapPin 都自动可用
 </script>
 
 <template>

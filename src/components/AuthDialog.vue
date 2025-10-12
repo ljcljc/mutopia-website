@@ -1,18 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import Dialog from './ui/dialog.vue';
-import DialogContent from './ui/DialogContent.vue';
-import DialogHeader from './ui/DialogHeader.vue';
-import DialogTitle from './ui/DialogTitle.vue';
-import DialogDescription from './ui/DialogDescription.vue';
-import Tabs from './ui/tabs.vue';
-import TabsContent from './ui/TabsContent.vue';
-import TabsList from './ui/TabsList.vue';
-import TabsTrigger from './ui/TabsTrigger.vue';
-import Button from './ui/button.vue';
-import Input from './ui/input.vue';
-import Label from './ui/label.vue';
-import Separator from './ui/separator.vue';
+// ref、所有UI组件都自动可用
+// Loader2 需要手动导入
 import { Loader2 } from 'lucide-vue-next';
 
 interface Props {

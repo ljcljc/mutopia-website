@@ -1,10 +1,5 @@
 <script setup lang="ts">
-import Card from './ui/card.vue';
-import CardContent from './ui/CardContent.vue';
-import Avatar from './ui/avatar.vue';
-import AvatarFallback from './ui/AvatarFallback.vue';
-import AvatarImage from './ui/AvatarImage.vue';
-import { Star, Quote } from 'lucide-vue-next';
+// Card、CardContent、Avatar、AvatarFallback、AvatarImage、Star、Quote 都自动可用
 
 const testimonials = [
   {

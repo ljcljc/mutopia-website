@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import Accordion from './ui/accordion.vue';
-import AccordionContent from './ui/AccordionContent.vue';
-import AccordionItem from './ui/AccordionItem.vue';
-import AccordionTrigger from './ui/AccordionTrigger.vue';
+// Accordion及其子组件都自动可用
 
 const faqs = [
   {

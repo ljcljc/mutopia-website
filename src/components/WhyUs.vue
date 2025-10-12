@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Shield, Clock, Users, Award, Heart, Smartphone } from 'lucide-vue-next';
+// Shield、Clock、Users、Award、Heart、Smartphone 图标自动可用
 
 const features = [
   {

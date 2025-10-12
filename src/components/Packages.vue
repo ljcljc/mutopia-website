@@ -1,13 +1,7 @@
 <script setup lang="ts">
-import Button from './ui/button.vue';
-import Card from './ui/card.vue';
-import CardContent from './ui/CardContent.vue';
-import CardDescription from './ui/CardDescription.vue';
-import CardFooter from './ui/CardFooter.vue';
-import CardHeader from './ui/CardHeader.vue';
-import CardTitle from './ui/CardTitle.vue';
-import Badge from './ui/badge.vue';
-import { Check, Star, Crown, Gift } from 'lucide-vue-next';
+// 所有UI组件和常用图标都自动可用
+// 注意：Crown、Gift 需要手动导入（未在自动导入配置中）
+import { Crown, Gift } from 'lucide-vue-next';
 
 const packages = [
   {

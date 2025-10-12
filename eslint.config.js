@@ -4,6 +4,10 @@ import typescriptParser from '@typescript-eslint/parser';
 import vue from 'eslint-plugin-vue';
 import vueParser from 'vue-eslint-parser';
 import prettier from 'eslint-config-prettier';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+const autoImportGlobals = require('./.eslintrc-auto-import.json');
 
 export default [
   // Base JS recommended rules
@@ -31,6 +35,7 @@ export default [
         parser: typescriptParser,
       },
       globals: {
+        ...autoImportGlobals.globals,
         browser: true,
         es2020: true,
         node: true,
