@@ -3,8 +3,6 @@ import Button from './ui/button.vue';
 import Input from './ui/input.vue';
 import Separator from './ui/separator.vue';
 import { Facebook, Instagram, Twitter, Mail, MapPin } from 'lucide-vue-next';
-
-const mutopiaLogo = '/images/mutopia-logo.png';
 </script>
 
 <template>
@@ -46,7 +44,7 @@ const mutopiaLogo = '/images/mutopia-logo.png';
           <!-- Company Info -->
           <div class="space-y-6">
             <div class="flex items-center space-x-3 mb-4">
-              <img :src="mutopiaLogo" alt="Mutopia Logo" class="h-10 w-10" />
+              <img src="@/assets/images/mutopia-logo.png" alt="Mutopia Logo" class="h-10 w-10" />
               <h3 class="text-2xl font-bold">Mutopia</h3>
             </div>
             <div>

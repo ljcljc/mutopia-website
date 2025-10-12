@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import Button from './ui/button.vue';
-import ImageWithFallback from './figma/ImageWithFallback.vue';
 import { Calendar, Star, Heart } from 'lucide-vue-next';
-
-const groomingImage = '/images/grooming-hero.png';
 </script>
 
 <template>
@@ -66,8 +63,8 @@ const groomingImage = '/images/grooming-hero.png';
         <!-- Right Content - Image -->
         <div class="relative flex justify-center">
           <div class="relative transform rotate-3 hover:rotate-0 transition-transform duration-500">
-            <ImageWithFallback
-              :src="groomingImage"
+            <img
+              src="@/assets/images/grooming-hero.png"
               alt="Professional pet grooming with grooming tools"
               class="w-96 h-auto object-contain"
             />

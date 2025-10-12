@@ -5,7 +5,6 @@ import Avatar from './ui/avatar.vue';
 import AvatarFallback from './ui/AvatarFallback.vue';
 import AvatarImage from './ui/AvatarImage.vue';
 import { Star, Quote } from 'lucide-vue-next';
-import ImageWithFallback from './figma/ImageWithFallback.vue';
 
 const testimonials = [
   {
@@ -142,8 +141,8 @@ const testimonials = [
 
         <div class="grid md:grid-cols-2 gap-8">
           <div class="relative rounded-2xl overflow-hidden shadow-lg group">
-            <ImageWithFallback
-              src="https://images.unsplash.com/photo-1658595148900-c77873724e98?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHxtb2Rlcm4lMjBwZXQlMjBzcGElMjBpbnRlcmlvcnxlbnwxfHx8fDE3NTk0OTU1MjB8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+            <img
+              src="@/assets/images/grooming-setup.jpg"
               alt="Professional pet grooming setup"
               class="w-full h-[300px] object-cover group-hover:scale-105 transition-transform duration-300"
             />
@@ -156,8 +155,8 @@ const testimonials = [
           </div>
 
           <div class="relative rounded-2xl overflow-hidden shadow-lg group">
-            <ImageWithFallback
-              src="https://images.unsplash.com/photo-1644675443401-ea4c14bad0e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBkb2clMjBncm9vbWVyJTIwd29ya2luZ3xlbnwxfHx8fDE3NTk0MjE4MDl8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+            <img
+              src="@/assets/images/groomer-working.jpg"
               alt="Professional groomer at work"
               class="w-full h-[300px] object-cover group-hover:scale-105 transition-transform duration-300"
             />

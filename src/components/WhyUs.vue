@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Shield, Clock, Users, Award, Heart, Smartphone } from 'lucide-vue-next';
-import ImageWithFallback from './figma/ImageWithFallback.vue';
 
 const features = [
   {
@@ -83,8 +82,8 @@ const features = [
           <div
             class="rounded-3xl overflow-hidden shadow-xl transform -rotate-2 hover:rotate-0 transition-transform duration-500"
           >
-            <ImageWithFallback
-              src="https://images.unsplash.com/photo-1728448644193-34eb04460c95?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoYXBweSUyMGRvZyUyMGFmdGVyJTIwZ3Jvb21pbmd8ZW58MXx8fHwxNzU5NDk1NTIwfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+            <img
+              src="@/assets/images/happy-dog-grooming.jpg"
               alt="Happy dog after professional grooming"
               class="w-full h-[400px] object-cover"
             />

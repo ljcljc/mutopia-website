@@ -1,23 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap');
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
   --font-size: 14px;
-  --background: #F8F7F1;
-  --foreground: #4A3C2A;
+  --background: #f8f7f1;
+  --foreground: #4a3c2a;
   --card: #ffffff;
-  --card-foreground: #4A3C2A;
+  --card-foreground: #4a3c2a;
   --popover: oklch(1 0 0);
-  --popover-foreground: #4A3C2A;
+  --popover-foreground: #4a3c2a;
   --primary: #de6a07;
   --primary-foreground: oklch(1 0 0);
   --secondary: #8b6357;
   --secondary-foreground: oklch(1 0 0);
   --muted: #ececf0;
   --muted-foreground: #717182;
-  --accent: #F8F7F1;
+  --accent: #f8f7f1;
   --accent-foreground: #8b6357;
   --purple: #633479;
   --purple-foreground: #ffffff;
@@ -141,7 +141,7 @@
  * Base typography. This is not applied to elements which have an ancestor with a Tailwind text class.
  */
 @layer base {
-  :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) {
+  :where(:not(:has([class*=' text-']), :not(:has([class^='text-'])))) {
     h1 {
       font-size: var(--text-2xl);
       font-weight: var(--font-weight-medium);

@@ -4,7 +4,6 @@ import Button from './ui/button.vue';
 import { Menu, X } from 'lucide-vue-next';
 import AuthDialog from './AuthDialog.vue';
 
-const mutopiaLogo = '/images/mutopia-logo.png';
 const isMenuOpen = ref(false);
 const isAuthDialogOpen = ref(false);
 </script>
@@ -17,7 +16,7 @@ const isAuthDialogOpen = ref(false);
       <div class="flex justify-between items-center py-4">
         <!-- Logo -->
         <div class="flex items-center space-x-3">
-          <img :src="mutopiaLogo" alt="Mutopia Logo" class="h-10 w-10" />
+          <img src="@/assets/images/mutopia-logo.png" alt="Mutopia Logo" class="h-10 w-10" />
           <h1 class="text-2xl font-bold text-secondary">Mutopia</h1>
         </div>
 
