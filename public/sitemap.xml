@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <!-- Homepage -->
+  <url>
+    <loc>https://mutopia.ca/</loc>
+    <lastmod>2024-10-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://mutopia.ca/images/grooming-hero.png</image:loc>
+      <image:title>Professional Pet Grooming Services</image:title>
+      <image:caption>Mutopia提供专业的宠物美容服务</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://mutopia.ca/images/mutopia-logo.png</image:loc>
+      <image:title>Mutopia Logo</image:title>
+    </image:image>
+  </url>
+
+  <!-- Services Section -->
+  <url>
+    <loc>https://mutopia.ca/#services</loc>
+    <lastmod>2024-10-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Packages Section -->
+  <url>
+    <loc>https://mutopia.ca/#packages</loc>
+    <lastmod>2024-10-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Why Us Section -->
+  <url>
+    <loc>https://mutopia.ca/#why-us</loc>
+    <lastmod>2024-10-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- FAQ Section -->
+  <url>
+    <loc>https://mutopia.ca/#faq</loc>
+    <lastmod>2024-10-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Contact Section -->
+  <url>
+    <loc>https://mutopia.ca/#contact</loc>
+    <lastmod>2024-10-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+</urlset>
+
