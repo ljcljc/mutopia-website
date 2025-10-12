@@ -66,15 +66,39 @@ watch(isMobile, mobile => {
       <!-- Mobile Navigation -->
       <div v-if="isMenuOpen" class="md:hidden border-t border-border py-4">
         <nav class="flex flex-col space-y-4">
-          <a href="#services" class="text-foreground hover:text-primary transition-colors">
+          <a
+            href="#services"
+            class="text-foreground hover:text-primary transition-colors"
+            @click="isMenuOpen = false"
+          >
             Services
           </a>
-          <a href="#packages" class="text-foreground hover:text-primary transition-colors">
+          <a
+            href="#packages"
+            class="text-foreground hover:text-primary transition-colors"
+            @click="isMenuOpen = false"
+          >
             Packages
           </a>
-          <a href="#why-us" class="text-foreground hover:text-primary transition-colors">Why Us</a>
-          <a href="#faq" class="text-foreground hover:text-primary transition-colors">FAQ</a>
-          <a href="#contact" class="text-foreground hover:text-primary transition-colors">
+          <a
+            href="#why-us"
+            class="text-foreground hover:text-primary transition-colors"
+            @click="isMenuOpen = false"
+          >
+            Why Us
+          </a>
+          <a
+            href="#faq"
+            class="text-foreground hover:text-primary transition-colors"
+            @click="isMenuOpen = false"
+          >
+            FAQ
+          </a>
+          <a
+            href="#contact"
+            class="text-foreground hover:text-primary transition-colors"
+            @click="isMenuOpen = false"
+          >
             Contact
           </a>
           <div class="pt-4 space-y-2">
@@ -85,7 +109,12 @@ watch(isMobile, mobile => {
               variant="secondary"
               size="sm"
               class="w-full rounded-full"
-              @click="isAuthDialogOpen = true"
+              @click="
+                () => {
+                  isAuthDialogOpen = true;
+                  isMenuOpen = false;
+                }
+              "
             >
               Login / Sign Up
             </Button>
