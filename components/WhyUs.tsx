@@ -245,7 +245,7 @@ function DesktopImageSection() {
           </div>
         </div>
         <div
-          className="absolute bg-[rgba(99,52,121,0.78)] box-border content-stretch flex flex-col items-start left-[21.5px] right-[45px] px-[36px] py-[12px] rounded-[16px] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] top-[364.25px]"
+          className="absolute bg-[rgba(99,52,121,0.78)] box-border content-stretch flex flex-col items-start left-[28px] right-[28px] px-[36px] py-[12px] rounded-[16px] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] top-[364.25px]"
           data-name="Container"
         >
           <div className="content-center flex flex-wrap gap-[20px] items-center justify-between relative shrink-0 w-full">
