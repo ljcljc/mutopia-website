@@ -238,3 +238,70 @@ select:focus-visible,
   outline: none;
   box-shadow: none;
 }
+
+/* Prevent layout shift when scrollbar appears/disappears */
+html {
+  /* Ensure consistent scrollbar behavior */
+  scrollbar-gutter: stable;
+}
+
+/* Smooth transitions for modal open/close */
+body {
+  transition: padding-right 0.1s ease-in-out;
+}
+
+/* Ensure modal overlay covers the entire viewport */
+[data-radix-dialog-overlay] {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 50 !important;
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+  overflow: hidden !important;
+  padding-right: var(--scrollbar-width, 0px) !important;
+}
+
+/* Custom scrollbar styles to match the design */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Firefox scrollbar styles */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 #f1f1f1;
+}
+
+/* Scrollbar compensation area styling */
+body.modal-open::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: var(--scrollbar-width, 0px);
+  height: 100vh;
+  background: var(--scrollbar-track-color, #f1f1f1);
+  z-index: 1;
+  pointer-events: none;
+}

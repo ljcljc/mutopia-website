@@ -5,6 +5,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { XIcon } from "lucide-react";
 
 import { cn } from "./utils";
+import { useScrollLock } from "../../hooks/useScrollLock";
 
 function Dialog({
   ...props
@@ -34,27 +35,8 @@ const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
 >(({ className, ...props }, ref) => {
-  // Prevent body scroll and maintain scrollbar space when dialog opens
-  React.useEffect(() => {
-    const body = document.body;
-    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-
-    // Save original styles
-    const originalOverflow = body.style.overflow;
-    const originalPaddingRight = body.style.paddingRight;
-
-    // Apply styles to prevent layout shift
-    body.style.overflow = 'hidden';
-    if (scrollbarWidth > 0) {
-      body.style.paddingRight = `${scrollbarWidth}px`;
-    }
-
-    // Cleanup on unmount
-    return () => {
-      body.style.overflow = originalOverflow;
-      body.style.paddingRight = originalPaddingRight;
-    };
-  }, []);
+  // Use scroll lock hook to prevent body scroll and layout shift
+  useScrollLock(true);
 
   return (
     <DialogPrimitive.Overlay
