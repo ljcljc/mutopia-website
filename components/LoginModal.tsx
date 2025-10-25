@@ -84,7 +84,7 @@ function PrimitiveButton({ onClose, onBack }: { onClose: () => void; onBack?: ()
   return (
     <button
       onClick={handleClick}
-      className="block cursor-pointer opacity-70 overflow-visible relative shrink-0 size-[16px] hover:opacity-100 transition-opacity"
+      className="block cursor-pointer opacity-70 overflow-visible relative shrink-0 size-[16px] hover:opacity-100 transition-all duration-200 hover:scale-110"
       data-name="Primitive.button"
       aria-label={onBack ? "Back" : "Close"}
       type="button"
@@ -120,7 +120,7 @@ function PrimitiveDiv() {
 
 function Frame68({ onClose, onBack, title }: { onClose: () => void; onBack?: () => void; title: string }) {
   return (
-    <div className="absolute content-stretch flex flex-col gap-[8px] items-start left-0 top-0 w-full">
+    <div className="absolute content-stretch flex flex-col gap-[8px] items-start left-0 right-0 top-0">
       <Title onClose={onClose} onBack={onBack} title={title} />
       <PrimitiveDiv />
     </div>
@@ -146,7 +146,7 @@ function Frame70() {
 
 function Content() {
   return (
-    <div className="absolute box-border content-stretch flex flex-col gap-[4px] items-start left-0 px-[24px] py-0 top-[52px] w-full" data-name="Content">
+    <div className="absolute box-border content-stretch flex flex-col gap-[4px] items-start left-0 right-0 px-[24px] py-0 top-[52px]" data-name="Content">
       <Frame70 />
     </div>
   );
@@ -330,7 +330,7 @@ function AuthDialog({ email, setEmail, onContinue, onBlur, error, isLoading }: {
 }
 
 function PrimitiveDiv1() {
-  return <div className="absolute bg-[rgba(0,0,0,0.1)] h-px left-0 top-[-0.25px] right-0" data-name="Primitive.div" />;
+  return <div className="absolute bg-[rgba(0,0,0,0.1)] h-px left-0 right-0 top-[-0.25px]" data-name="Primitive.div" />;
 }
 
 function Text() {
@@ -736,7 +736,7 @@ function PasswordContainer({
                       <div className="basis-0 content-stretch flex flex-col gap-[12px] grow items-start min-h-px min-w-px relative shrink-0">
                         <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0 w-full">
                           <div className="content-stretch flex gap-[8px] h-[20px] items-center relative shrink-0 w-full cursor-pointer" onClick={() => setRememberMe(!rememberMe)}>
-                            <Checkbox checked={rememberMe} onChange={setRememberMe} />
+                            <Checkbox checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />
                             <p className="font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12px] text-nowrap whitespace-pre">Remember me</p>
                           </div>
                         </div>
@@ -985,7 +985,7 @@ export function LoginModal({ children, open, onOpenChange }: LoginModalProps) {
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="p-0 border-none bg-transparent shadow-none max-w-fit [&>button]:hidden">
+      <DialogContent className="p-0 border-none bg-transparent shadow-none max-w-fit [&>button]:hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-top-[2%] data-[state=open]:slide-in-from-top-[2%] duration-300">
         <DialogTitle className="sr-only">登录或注册</DialogTitle>
         <DialogDescription className="sr-only">
           请输入您的邮箱地址以登录或注册账户

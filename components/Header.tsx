@@ -233,8 +233,10 @@ function ButtonCompactSecondaryOrange() {
 }
 
 function ButtonCompactPrincipalOrange() {
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
   return (
-    <LoginModal>
+    <LoginModal open={isLoginModalOpen} onOpenChange={setIsLoginModalOpen}>
       <OrangeButton size="compact" showArrow={false} className="shrink-0">
         Log in/sign up
       </OrangeButton>
@@ -369,6 +371,7 @@ function MobileButton1() {
 
 function MobileButton2() {
   const { user } = useUser();
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   if (user) {
     const getInitials = (name: string) => {
@@ -418,7 +421,7 @@ function MobileButton2() {
   }
 
   return (
-    <LoginModal>
+    <LoginModal open={isLoginModalOpen} onOpenChange={setIsLoginModalOpen}>
       <div
         className="bg-[#8b6357] h-[48px] relative rounded-[2.47134e+07px] shrink-0 w-full cursor-pointer hover:bg-[#6f4e44] transition-colors"
         data-name="Button"
