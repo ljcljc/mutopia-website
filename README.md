@@ -287,14 +287,6 @@ mkdir -p public/assets
 # 然后全局搜索并替换所有 figma:asset 引用
 ```
 
-**选项 B：使用占位图片（快��测试）**
-
-```typescript
-// 在需要图片的组件中，临时使用占位服务
-const imageSrc =
-  "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800";
-```
-
 **选项 C：修改 ImageWithFallback 组件**
 
 ```typescript

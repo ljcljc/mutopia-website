@@ -1,5 +1,5 @@
 import svgPaths from "./svg-ne441427l6";
-import imgImageWithFallback from "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800&h=600&fit=crop&crop=center";
+const imgImageWithFallback = "/images/grooming-hero.png";
 
 function Why() {
   return (

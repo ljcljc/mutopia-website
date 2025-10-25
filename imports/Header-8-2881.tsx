@@ -1,4 +1,4 @@
-import imgIcon from "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800&h=600&fit=crop&crop=center";
+const imgIcon = "/images/logo.png";
 
 function Icon() {
   return (
