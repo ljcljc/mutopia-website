@@ -5,6 +5,20 @@
 @source "./App.tsx";
 @source "./main.tsx";
 
+/* Global font settings */
+body {
+  font-family: 'Comfortaa', cursive, ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: 'kern' 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ensure Comfortaa font is applied to all text elements */
+h1, h2, h3, h4, h5, h6, p, span, div, a, button, input, textarea, select, label {
+  font-family: 'Comfortaa', cursive, ui-sans-serif, system-ui, sans-serif;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
