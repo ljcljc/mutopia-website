@@ -1,5 +1,5 @@
 import { useState } from "react";
-import svgPaths from "../imports/svg-aj6ul1v84s";
+// import svgPaths from "../imports/svg-aj6ul1v84s";
 import { Card, CardContent } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";

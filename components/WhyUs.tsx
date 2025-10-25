@@ -386,13 +386,13 @@ function MobileSlide3() {
 }
 
 // Custom Arrow Components - Not used in mobile, arrows are part of Frame87
-function CustomPrevArrow() {
-  return <div style={{ display: "none" }} />;
-}
+// function CustomPrevArrow() {
+//   return <div style={{ display: "none" }} />;
+// }
 
-function CustomNextArrow() {
-  return <div style={{ display: "none" }} />;
-}
+// function CustomNextArrow() {
+//   return <div style={{ display: "none" }} />;
+// }
 
 export default function WhyUs() {
   const sliderRef = useRef<Slider>(null);

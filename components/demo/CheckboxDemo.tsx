@@ -11,7 +11,7 @@ import { OrangeButton } from '../OrangeButton';
 
 export function CheckboxDemo({ onBack }: { onBack: () => void }) {
   const [checked1, setChecked1] = useState(false);
-  const [checked2, setChecked2] = useState(true);
+  // const [checked2, setChecked2] = useState(true);
   const [formData, setFormData] = useState({
     terms: false,
     newsletter: false,

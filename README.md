@@ -11,6 +11,7 @@
 - **Lucide React** - 图标库
 - **Sonner** - Toast 通知
 - **Motion (Framer Motion)** - 动画库
+- **pnpm** - 包管理器
 
 ## 项目特点
 
@@ -178,11 +179,13 @@ cd mutopia-pet-landing
 3. **安装依赖**
 
 ```bash
+# 推荐使用 pnpm（更快、更节省空间）
+pnpm install
+
+# 或者使用其他包管理器
 npm install
 # 或
 yarn install
-# 或
-pnpm install
 ```
 
 4. **创建 Vite 配置文件**
@@ -298,13 +301,27 @@ mkdir -p public/assets
 
 ```bash
 # 开发模式
-npm run dev
+pnpm dev
 
 # 构建生产版本
-npm run build
+pnpm build
 
 # 预览生产构建
-npm run preview
+pnpm preview
+
+# 代码检查和修复
+pnpm lint
+pnpm lint:fix
+
+# 类型检查
+pnpm type-check
+
+# 清理和重新安装
+pnpm clean
+pnpm reinstall
+
+# 检查过时的依赖
+pnpm outdated
 ```
 
 访问 `http://localhost:5173`（默认端口）查看应用。

@@ -1,13 +1,13 @@
 /**
  * Custom Radio Component
- * 
+ *
  * Built from Figma designs with distinct states:
  * 1. Default: Unchecked with gray border #717182, dark text #4a3c2a
  * 2. Hover: Unchecked with gray text #717182 (on hover)
  * 3. Active: Checked with gray border #717182, orange dot #de6a07 (when pressed)
  * 4. Checked: Checked with blue background #2374ff, orange dot #de6a07 (checked state takes priority over focus)
  * 5. Disabled: 50% opacity, non-interactive
- * 
+ *
  * Features:
  * - Native radio functionality
  * - Accessible (proper ARIA attributes)
@@ -49,7 +49,7 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
   ) => {
     // Internal state for uncontrolled mode
     const [internalChecked, setInternalChecked] = useState(defaultChecked || false);
-    const [isFocused, setIsFocused] = useState(false);
+    const [, setIsFocused] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [isActive, setIsActive] = useState(false);
 
@@ -189,47 +189,47 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
           className={`relative shrink-0 size-[16px] transition-all duration-200 ${className}`}
           data-name="Radio"
         >
-          <svg 
-            className="block size-full" 
-            fill="none" 
-            preserveAspectRatio="none" 
+          <svg
+            className="block size-full"
+            fill="none"
+            preserveAspectRatio="none"
             viewBox="0 0 16 16"
           >
             <g>
               {/* Background fill (blue when checked) */}
               {radioStyle.showBlueFill && (
-                <rect 
-                  fill="#2374FF" 
+                <rect
+                  fill="#2374FF"
                   fillOpacity={radioStyle.blueFillOpacity}
-                  height="15" 
-                  rx="7.5" 
-                  width="15" 
-                  x="0.5" 
-                  y="0.5" 
+                  height="15"
+                  rx="7.5"
+                  width="15"
+                  x="0.5"
+                  y="0.5"
                 />
               )}
-              
+
               {/* Border stroke */}
               {radioStyle.showBorder && (
-                <rect 
-                  height="15" 
-                  rx="7.5" 
-                  stroke={radioStyle.borderColor} 
+                <rect
+                  height="15"
+                  rx="7.5"
+                  stroke={radioStyle.borderColor}
                   strokeOpacity={radioStyle.borderOpacity}
-                  width="15" 
-                  x="0.5" 
-                  y="0.5" 
+                  width="15"
+                  x="0.5"
+                  y="0.5"
                   fill="none"
                 />
               )}
-              
+
               {/* Inner dot (when checked) */}
               {radioStyle.showDot && (
-                <circle 
-                  cx="8" 
-                  cy="8" 
-                  fill={radioStyle.dotColor} 
-                  r="4" 
+                <circle
+                  cx="8"
+                  cy="8"
+                  fill={radioStyle.dotColor}
+                  r="4"
                 />
               )}
             </g>

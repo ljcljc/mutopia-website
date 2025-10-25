@@ -1,13 +1,13 @@
 /**
  * Custom Checkbox Component
- * 
+ *
  * Built from Figma designs with 5 distinct states:
  * 1. Default: Unchecked with gray border #717182, dark text #4a3c2a
  * 2. Hover: Unchecked with gray text #717182 (on hover)
  * 3. Focus: Checked with blue background #2374ff, white checkmark (no focus ring)
  * 4. Active: Checked with orange background #de6a07, gradient checkmark (when pressed)
  * 5. Checked: Checked with blue background #2374ff, white checkmark
- * 
+ *
  * Features:
  * - Native checkbox functionality
  * - Accessible (proper ARIA attributes)
@@ -51,7 +51,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
   ) => {
     // Internal state for uncontrolled mode
     const [internalChecked, setInternalChecked] = useState(defaultChecked || false);
-    const [isFocused, setIsFocused] = useState(false);
+    const [, setIsFocused] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [isActive, setIsActive] = useState(false);
 
@@ -189,17 +189,17 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
             <>
               {showGradientCheck ? (
                 // Gradient checkmark for active state
-                <svg 
-                  className="absolute inset-0 size-full" 
-                  fill="none" 
+                <svg
+                  className="absolute inset-0 size-full"
+                  fill="none"
                   viewBox="0 0 16 16"
                 >
                   <defs>
-                    <linearGradient 
-                      id="checkGradient" 
-                      x1="2" 
-                      y1="4.25" 
-                      x2="8.8634" 
+                    <linearGradient
+                      id="checkGradient"
+                      x1="2"
+                      y1="4.25"
+                      x2="8.8634"
                       y2="14.7739"
                       gradientUnits="userSpaceOnUse"
                     >
@@ -207,9 +207,9 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
                       <stop offset="1" stopColor="#FFFBEB" />
                     </linearGradient>
                   </defs>
-                  <path 
+                  <path
                     d={svgPaths.p30de4580}
-                    stroke="url(#checkGradient)" 
+                    stroke="url(#checkGradient)"
                     strokeWidth="2"
                   />
                 </svg>
