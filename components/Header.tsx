@@ -246,7 +246,7 @@ function ButtonCompactPrincipalOrange() {
 
 // User info component for logged-in users
 function UserInfo() {
-  const { user, logout } = useUser();
+  const { user } = useUser();
 
   if (!user) return null;
 

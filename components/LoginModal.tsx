@@ -5,10 +5,8 @@ import {
   DialogTrigger,
   DialogTitle,
   DialogDescription,
-  DialogClose,
 } from "./ui/dialog";
 import svgPaths from "../imports/svg-k47wfeqkxq";
-import svgPathsLogin from "../imports/svg-cw8zbza4oq";
 import svgPathsPassword from "../imports/svg-pvvyz0d5lt";
 import { toast } from "sonner";
 import { Spinner } from "./Spinner";
@@ -63,7 +61,7 @@ function Icon1() {
   );
 }
 
-function DialogContentElement({ onClose }: { onClose: () => void }) {
+function DialogContentElement() {
   return (
     <div className="absolute left-[-1px] overflow-clip size-px top-[13px] pointer-events-none" data-name="DialogContent">
       <p className="absolute font-['Comfortaa:Regular',_sans-serif] font-normal leading-[21px] left-0 text-[#4a3c2a] text-[14px] text-nowrap top-[0.5px] whitespace-pre">Close</p>
@@ -94,7 +92,7 @@ function PrimitiveButton({ onClose, onBack }: { onClose: () => void; onBack?: ()
       ) : (
         <>
           <Icon1 />
-          <DialogContentElement onClose={onClose} />
+          <DialogContentElement />
         </>
       )}
     </button>
@@ -232,13 +230,6 @@ function ErrorMessage({ message }: { message: string }) {
   );
 }
 
-function InputWithError({ value, onChange, onEnter, hasError }: { value: string; onChange: (value: string) => void; onEnter?: () => void; hasError: boolean }) {
-  return (
-    <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full">
-      <Input value={value} onChange={onChange} onEnter={onEnter} hasError={hasError} />
-    </div>
-  );
-}
 
 function InputDefault({ value, onChange, onEnter, onBlur, error }: { value: string; onChange: (value: string) => void; onEnter?: () => void; onBlur?: () => void; error?: string }) {
   const hasError = !!error;
