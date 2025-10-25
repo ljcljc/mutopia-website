@@ -1,0 +1,14 @@
+# robots.txt for Mutopia Pet Grooming
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://mutopia.ca/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 10
+
+# Disallow admin or private areas (if any)
+# Disallow: /admin/
+# Disallow: /private/
+
