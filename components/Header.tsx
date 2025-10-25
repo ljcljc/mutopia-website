@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Menu } from "lucide-react";
 // 使用实际图片替换占位图片
 const imgIcon = "/images/logo.png";
@@ -632,18 +632,42 @@ function Container({
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  // 滚动检测和智能阴影显示
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      setIsScrolled(scrollTop > 0);
+    };
+
+    // 检查初始滚动位置
+    handleScroll();
+
+    // 添加滚动事件监听器，使用 passive 选项优化性能
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    // 清理事件监听器防止内存泄漏
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  // 智能阴影显示：滚动时或菜单打开时显示阴影
+  const shouldShowShadow = isScrolled || isMenuOpen;
+  const shadowStyle = shouldShowShadow
+    ? "0 10px 15px -3px rgba(0, 0, 0, 0.10), 0 4px 6px -4px rgba(0, 0, 0, 0.10)"
+    : "none";
+
   return (
     <div
       className="bg-[rgba(255,255,255,0.95)] sticky top-0 w-full z-50 rounded-bl-[21px] rounded-br-[21px]"
       style={{
-        boxShadow: isMenuOpen
-          ? "0px 10px 15px -3px rgba(0,0,0,0.1), 0px 4px 6px -4px rgba(0,0,0,0.1)"
-          : "none",
+        boxShadow: shadowStyle,
         transition: "box-shadow 0.3s ease-in-out",
       }}
       data-name="Header"
