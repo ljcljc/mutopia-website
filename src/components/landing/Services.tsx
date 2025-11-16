@@ -1,9 +1,9 @@
 import { useState } from "react";
 // import svgPaths from "@/assets/icons/svg-aj6ul1v84s";
-import { Card, CardContent } from "./ui/card";
-import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
-import { OrangeButton } from "./OrangeButton";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { OrangeButton } from "@/components/OrangeButton";
 import iconClock from "@/assets/icons/icon-clock.svg";
 import iconBathBrush from "@/assets/icons/icon-bath-brush.svg";
 import iconFullGrooming from "@/assets/icons/icon-full-grooming.svg";
@@ -14,7 +14,7 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-} from "./ui/carousel";
+} from "@/components/ui/carousel";
 
 // Service Card Component
 interface ServiceCardProps {

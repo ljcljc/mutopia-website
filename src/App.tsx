@@ -1,13 +1,13 @@
-import Header from './components/Header';
-import Hero from './components/Hero';
-import WhyUs from './components/WhyUs';
-import Services from './components/Services';
-import Packages from './components/Packages';
-import FAQ from './components/FAQ';
-import Footer from './components/Footer';
-import ScrollToTop from './components/ScrollToTop';
-import { Toaster } from './components/ui/sonner';
-import { UserProvider } from './components/UserContext';
+import Header from '@/components/Header';
+import Hero from '@/components/landing/Hero';
+import WhyUs from '@/components/landing/WhyUs';
+import Services from '@/components/landing/Services';
+import Packages from '@/components/landing/Packages';
+import FAQ from '@/components/landing/FAQ';
+import Footer from '@/components/landing/Footer';
+import ScrollToTop from '@/components/ScrollToTop';
+import { Toaster } from '@/components/ui/sonner';
+import { UserProvider } from '@/components/UserContext';
 
 export default function App() {
   return (

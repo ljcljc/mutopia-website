@@ -1,6 +1,6 @@
 import svgPaths from "@/assets/icons/svg-zb4ynfxey2";
-import { PurpleButton } from "./PurpleButton";
-import { Badge } from "./ui/badge";
+import { PurpleButton } from "@/components/PurpleButton";
+import { Badge } from "@/components/ui/badge";
 // import { Check } from "lucide-react";
 
 interface FeatureItem {

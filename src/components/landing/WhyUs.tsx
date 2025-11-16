@@ -6,8 +6,8 @@ import iconArrowLeft from "@/assets/icons/icon-arrow-left.svg";
 import iconArrowRight from "@/assets/icons/icon-arrow-right.svg";
 // 使用占位图片替换 figma:asset 导入
 const imgImageWithFallback = "/images/happy-dog-grooming.png";
-import { Card, CardContent } from "./ui/card";
-import { Badge } from "./ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import iconCertifiedProfessionals from "@/assets/icons/icon-certified-professionals.svg";
 import iconConvenientScheduling from "@/assets/icons/icon-convenient-scheduling.svg";
 import iconPersonalizedCare from "@/assets/icons/icon-personalized-care.svg";

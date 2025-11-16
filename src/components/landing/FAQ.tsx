@@ -1,8 +1,8 @@
-import CustomAccordion from "./CustomAccordion";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
-import { PurpleButton } from "./PurpleButton";
-import { Label } from "./ui/label";
+import CustomAccordion from "@/components/CustomAccordion";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { PurpleButton } from "@/components/PurpleButton";
+import { Label } from "@/components/ui/label";
 import svgPaths from "@/assets/icons/svg-68mxca64pe";
 
 export default function FAQ() {
