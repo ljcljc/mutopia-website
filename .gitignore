@@ -259,3 +259,5 @@ storybook-static
 
 # Local development
 .local
+
+.serena

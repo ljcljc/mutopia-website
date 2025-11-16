@@ -1,5 +1,5 @@
-import svgPaths from "../imports/svg-jzpin5grdi";
-import svgPathsWithBg from "../imports/svg-osebktixv4";
+import svgPaths from "@/assets/icons/svg-jzpin5grdi";
+import svgPathsWithBg from "@/assets/icons/svg-osebktixv4";
 
 interface SpinnerProps {
   size?: "small" | "medium" | "large" | number;
@@ -31,7 +31,7 @@ export function Spinner({
     <div 
       className={`relative inline-block ${className}`}
       style={{ width: dimension, height: dimension }}
-      data-name={showTrack ? "Spinner With Track" : "Spinner"}
+      data-name="Spinner"
       role="status"
       aria-label="Loading"
     >

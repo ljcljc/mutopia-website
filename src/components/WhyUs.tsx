@@ -1,12 +1,19 @@
 import { useRef } from "react";
 import Slider from "react-slick";
-import svgPaths from "../imports/svg-s9drboz5og";
-import svgPathsMobile from "../imports/svg-ne441427l6";
+import svgPaths from "@/assets/icons/svg-s9drboz5og";
+import svgPathsMobile from "@/assets/icons/svg-ne441427l6";
+import iconArrowLeft from "@/assets/icons/icon-arrow-left.svg";
+import iconArrowRight from "@/assets/icons/icon-arrow-right.svg";
 // 使用占位图片替换 figma:asset 导入
 const imgImageWithFallback = "/images/happy-dog-grooming.png";
 import { Card, CardContent } from "./ui/card";
 import { Badge } from "./ui/badge";
-import { Shield, Users, Award, Heart, Smartphone, Clock } from "lucide-react";
+import iconCertifiedProfessionals from "@/assets/icons/icon-certified-professionals.svg";
+import iconConvenientScheduling from "@/assets/icons/icon-convenient-scheduling.svg";
+import iconPersonalizedCare from "@/assets/icons/icon-personalized-care.svg";
+import iconPremiumQuality from "@/assets/icons/icon-premium-quality.svg";
+import iconStressFreeExperience from "@/assets/icons/icon-stress-free-experience.svg";
+import iconRealTimeUpdates from "@/assets/icons/icon-real-time-updates.svg";
 
 // Feature Card Components for Desktop
 function FeatureCard1() {
@@ -15,7 +22,7 @@ function FeatureCard1() {
       <CardContent className="p-0 flex flex-col gap-[16px]">
         <div className="content-stretch flex gap-[10.5px] h-[42px] items-center">
           <Badge iconSize="custom" className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center">
-            <Shield className="size-[24px] text-white" strokeWidth={2} />
+            <img src={iconCertifiedProfessionals} alt="Certified Professionals" className="size-[24px]" />
           </Badge>
           <h3 className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
             Certified Professionals
@@ -36,7 +43,7 @@ function FeatureCard2() {
       <CardContent className="p-0 flex flex-col gap-[16px]">
         <div className="content-stretch flex gap-[10.5px] h-[42px] items-center">
           <Badge iconSize="custom" className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center">
-            <Clock className="size-[24px] text-white" strokeWidth={2} />
+            <img src={iconConvenientScheduling} alt="Convenient Scheduling" className="size-[24px]" />
           </Badge>
           <h3 className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
             Convenient Scheduling
@@ -57,7 +64,7 @@ function FeatureCard3() {
       <CardContent className="p-0 flex flex-col gap-[16px]">
         <div className="content-stretch flex gap-[10.5px] h-[42px] items-center">
           <Badge iconSize="custom" className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center">
-            <Users className="size-[24px] text-white" strokeWidth={2} />
+            <img src={iconPersonalizedCare} alt="Personalized Care" className="size-[24px]" />
           </Badge>
           <h3 className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
             Personalized Care
@@ -75,7 +82,7 @@ function FeatureCard4() {
       <CardContent className="p-0 flex flex-col gap-[16px]">
         <div className="content-stretch flex gap-[10.5px] h-[42px] items-center">
           <Badge iconSize="custom" className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center">
-            <Award className="size-[24px] text-white" strokeWidth={2} />
+            <img src={iconPremiumQuality} alt="Premium Quality" className="size-[24px]" />
           </Badge>
           <h3 className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
             Premium Quality
@@ -96,7 +103,7 @@ function FeatureCard5() {
       <CardContent className="p-0 flex flex-col gap-[16px]">
         <div className="content-stretch flex gap-[10.5px] h-[42px] items-center">
           <Badge iconSize="custom" className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center">
-            <Heart className="size-[24px] text-white" strokeWidth={2} />
+            <img src={iconStressFreeExperience} alt="Stress-Free Experience" className="size-[24px]" />
           </Badge>
           <h3 className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
             Stress-Free Experience
@@ -117,7 +124,7 @@ function FeatureCard6() {
       <CardContent className="p-0 flex flex-col gap-[16px]">
         <div className="content-stretch flex gap-[10.5px] h-[42px] items-center">
           <Badge iconSize="custom" className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center">
-            <Smartphone className="size-[24px] text-white" strokeWidth={2} />
+            <img src={iconRealTimeUpdates} alt="Real-Time Updates" className="size-[24px]" />
           </Badge>
           <h3 className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
             Real-Time Updates
@@ -338,12 +345,12 @@ function MobileSlide1() {
   return (
     <div className="content-stretch flex flex-col gap-[36px] items-start w-[238px]">
       <MobileFeatureCard
-        icon={<Shield className="size-[24px] text-white" strokeWidth={2} />}
+        icon={<img src={iconCertifiedProfessionals} alt="Certified Professionals" className="size-[24px]" />}
         title="Certified Professionals"
         description="All our groomers are certified, insured, and background-checked for your peace of mind."
       />
       <MobileFeatureCard
-        icon={<Clock className="size-[24px] text-white" strokeWidth={2} />}
+        icon={<img src={iconConvenientScheduling} alt="Convenient Scheduling" className="size-[24px]" />}
         title="Convenient Scheduling"
         description="Book appointments online 24/7. We work around your schedule, not the other way around."
       />
@@ -355,12 +362,12 @@ function MobileSlide2() {
   return (
     <div className="content-stretch flex flex-col gap-[36px] items-start w-[238px]">
       <MobileFeatureCard
-        icon={<Users className="size-[24px] text-white" strokeWidth={2} />}
+        icon={<img src={iconPersonalizedCare} alt="Personalized Care" className="size-[24px]" />}
         title="Personalized Care"
         description="Every pet is unique. We tailor our services to your pet's specific needs and temperament."
       />
       <MobileFeatureCard
-        icon={<Award className="size-[24px] text-white" strokeWidth={2} />}
+        icon={<img src={iconPremiumQuality} alt="Premium Quality" className="size-[24px]" />}
         title="Premium Quality"
         description="We use only the finest, pet-safe products and state-of-the-art equipment."
       />
@@ -372,12 +379,12 @@ function MobileSlide3() {
   return (
     <div className="content-stretch flex flex-col gap-[36px] items-start w-[238px]">
       <MobileFeatureCard
-        icon={<Heart className="size-[24px] text-white" strokeWidth={2} />}
+        icon={<img src={iconStressFreeExperience} alt="Stress-Free Experience" className="size-[24px]" />}
         title="Stress-Free Experience"
         description="Mobile service means no stressful car rides. Your pet stays comfortable at home."
       />
       <MobileFeatureCard
-        icon={<Smartphone className="size-[24px] text-white" strokeWidth={2} />}
+        icon={<img src={iconRealTimeUpdates} alt="Real-Time Updates" className="size-[24px]" />}
         title="Real-Time Updates"
         description="Get photos and updates throughout the grooming process via our mobile app."
       />
@@ -466,35 +473,11 @@ export default function WhyUs() {
                 className="flex items-center justify-center relative shrink-0 cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95"
                 aria-label="Previous"
               >
-                <div className="flex-none rotate-[180deg]">
-                  <div
-                    className="h-[36px] relative w-[16px]"
-                    data-name="Left"
-                  >
-                    <div
-                      className="absolute inset-[-1.85%_-2.03%_-1.85%_-4.67%]"
-                      style={
-                        {
-                          "--stroke-0": "rgba(222, 106, 7, 1)",
-                        } as React.CSSProperties
-                      }
-                    >
-                      <svg
-                        className="block size-full"
-                        fill="none"
-                        preserveAspectRatio="none"
-                        viewBox="0 0 18 38"
-                      >
-                        <path
-                          d={svgPathsMobile.p1c380980}
-                          id="Left"
-                          stroke="var(--stroke-0, #DE6A07)"
-                          strokeWidth="2"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
+                <img
+                  src={iconArrowLeft}
+                  alt="Previous"
+                  className="h-[36px] w-[16px] rotate-180"
+                />
               </button>
 
               <div className="w-[238px]">
@@ -584,33 +567,11 @@ export default function WhyUs() {
                 className="flex items-center justify-center relative shrink-0 cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95"
                 aria-label="Next"
               >
-                <div
-                  className="h-[36px] relative w-[16px]"
-                  data-name="Right"
-                >
-                  <div
-                    className="absolute inset-[-1.85%_-2.03%_-1.85%_-4.67%]"
-                    style={
-                      {
-                        "--stroke-0": "rgba(222, 106, 7, 1)",
-                      } as React.CSSProperties
-                    }
-                  >
-                    <svg
-                      className="block size-full"
-                      fill="none"
-                      preserveAspectRatio="none"
-                      viewBox="0 0 18 38"
-                    >
-                      <path
-                        d={svgPathsMobile.p1c380980}
-                        id="Right"
-                        stroke="var(--stroke-0, #DE6A07)"
-                        strokeWidth="2"
-                      />
-                    </svg>
-                  </div>
-                </div>
+                <img
+                  src={iconArrowRight}
+                  alt="Next"
+                  className="h-[36px] w-[16px]"
+                />
               </button>
             </div>
           </div>

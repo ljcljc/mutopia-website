@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
-import { Menu } from "lucide-react";
 // 使用实际图片替换占位图片
 const imgIcon = "/images/logo.png";
+import iconMenu from "@/assets/icons/icon-menu.svg";
 import { Button } from "./ui/button";
 import { motion, AnimatePresence } from "motion/react";
 import { OrangeButton } from "./OrangeButton";
 import { LoginModal } from "./LoginModal";
 import { useUser } from "./UserContext";
-import svgPaths from "../imports/svg-kzu0xk56ho";
+import svgPaths from "@/assets/icons/svg-kzu0xk56ho";
 
 // Helper function to handle smooth scroll to anchor with header offset
 const scrollToAnchor = (href: string) => {
@@ -620,7 +620,7 @@ function Container({
                 className="text-[#8b6357] hover:text-[#6f4e44] hover:bg-[#8b6357]/5 cursor-pointer"
                 aria-label="Toggle menu"
               >
-                <Menu size={24} />
+                <img src={iconMenu} alt="Menu" className="size-[24px]" />
               </Button>
             )}
           </motion.div>

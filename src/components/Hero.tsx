@@ -1,8 +1,11 @@
-import svgPaths from "../imports/svg-w2x3orw39j";
 // 使用占位图片替换 figma:asset 导入
 const imgImageWithFallback = "/images/grooming-hero.png";
 import { OrangeButton } from "./OrangeButton";
-import { Calendar, Heart, Star } from "lucide-react";
+import iconEasyBooking from "@/assets/icons/icon-easy-booking.svg";
+import iconPetFriendly from "@/assets/icons/icon-pet-friendly.svg";
+import iconProfessionalService from "@/assets/icons/icon-professional-service.svg";
+import heroWave from "@/assets/icons/hero-wave.svg";
+import heroEllipse from "@/assets/icons/hero-ellipse.svg";
 
 export default function Hero() {
   return (
@@ -12,43 +15,12 @@ export default function Hero() {
     >
       {/* Glow Effect */}
       <div className="absolute right-[10%] md:right-[15%] top-[50px] md:top-[69px] mix-blend-lighten size-[80px] md:size-[109px] pointer-events-none opacity-60">
-        <svg
+        <img
+          src={heroEllipse}
+          alt=""
           className="block size-full"
-          fill="none"
-          preserveAspectRatio="none"
-          viewBox="0 0 109 109"
-        >
-          <g
-            id="Ellipse 1"
-            opacity="0.6"
-            style={{ mixBlendMode: "lighten" }}
-          >
-            <circle
-              cx="54.5"
-              cy="54.5"
-              fill="url(#paint0_radial_6_718)"
-              fillOpacity="0.8"
-              r="54.5"
-            />
-          </g>
-          <defs>
-            <radialGradient
-              cx="0"
-              cy="0"
-              gradientTransform="translate(54.5 54.5) rotate(90) scale(54.5)"
-              gradientUnits="userSpaceOnUse"
-              id="paint0_radial_6_718"
-              r="1"
-            >
-              <stop stopColor="white" stopOpacity="0.8" />
-              <stop
-                offset="1"
-                stopColor="white"
-                stopOpacity="0"
-              />
-            </radialGradient>
-          </defs>
-        </svg>
+          style={{ mixBlendMode: "lighten" }}
+        />
       </div>
 
       {/* Main Content Container */}
@@ -80,9 +52,10 @@ export default function Hero() {
             <div className="flex flex-wrap gap-[24px] items-start">
               {/* Easy booking */}
               <div className="flex gap-[7px] items-center">
-                <Calendar
-                  className="size-[20px] text-[#DE6A07]"
-                  strokeWidth={1.66667}
+                <img
+                  src={iconEasyBooking}
+                  alt="Easy booking"
+                  className="size-[20px]"
                 />
                 <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
                   Easy booking
@@ -91,9 +64,10 @@ export default function Hero() {
 
               {/* Pet-friendly */}
               <div className="flex gap-[7px] items-center">
-                <Heart
-                  className="size-[20px] text-[#8B6357]"
-                  strokeWidth={1.66667}
+                <img
+                  src={iconPetFriendly}
+                  alt="Pet-friendly"
+                  className="size-[20px]"
                 />
                 <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
                   Pet-friendly
@@ -102,9 +76,10 @@ export default function Hero() {
 
               {/* Professional service */}
               <div className="flex gap-[7px] items-center">
-                <Star
-                  className="size-[20px] text-[#F0B100]"
-                  strokeWidth={1.66667}
+                <img
+                  src={iconProfessionalService}
+                  alt="Professional service"
+                  className="size-[20px]"
                 />
                 <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
                   Professional service
@@ -176,32 +151,35 @@ export default function Hero() {
           <div className="flex flex-wrap gap-[16px] items-start">
             {/* Easy booking */}
             <div className="flex gap-[7px] items-center">
-              <Calendar
-                className="size-[20px] text-[#DE6A07]"
-                strokeWidth={1.66667}
-              />
-              <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
-                Easy booking
-              </p>
-            </div>
+              <img
+                  src={iconEasyBooking}
+                  alt="Easy booking"
+                  className="size-[20px]"
+                />
+                <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
+                  Easy booking
+                </p>
+              </div>
 
-            {/* Pet-friendly */}
-            <div className="flex gap-[7px] items-center">
-              <Heart
-                className="size-[20px] text-[#8B6357]"
-                strokeWidth={1.66667}
-              />
-              <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
-                Pet-friendly
-              </p>
-            </div>
+              {/* Pet-friendly */}
+              <div className="flex gap-[7px] items-center">
+                <img
+                  src={iconPetFriendly}
+                  alt="Pet-friendly"
+                  className="size-[20px]"
+                />
+                <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
+                  Pet-friendly
+                </p>
+              </div>
 
-            {/* Professional service */}
-            <div className="flex gap-[7px] items-center">
-              <Star
-                className="size-[20px] text-[#F0B100]"
-                strokeWidth={1.66667}
-              />
+              {/* Professional service */}
+              <div className="flex gap-[7px] items-center">
+                <img
+                  src={iconProfessionalService}
+                  alt="Professional service"
+                  className="size-[20px]"
+                />
               <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
                 Professional service
               </p>
@@ -227,17 +205,12 @@ export default function Hero() {
         style={{ height: "139px" }}
       >
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[2674px] h-[139px] rotate-180 scale-y-[-100%]">
-          <svg
-            className="block size-full"
-            fill="none"
-            preserveAspectRatio="none"
-            viewBox="0 0 2676 141"
-          >
-            <g>
-              <path d={svgPaths.p30823500} fill="white" />
-              <path d={svgPaths.p7eb59f0} fill="white" />
-            </g>
-          </svg>
+          <img
+            src={heroWave}
+            alt=""
+            className="block size-full object-cover"
+            style={{ width: "100%", height: "100%" }}
+          />
         </div>
       </div>
     </div>

@@ -19,7 +19,7 @@
 
 import { forwardRef, useState, InputHTMLAttributes } from 'react';
 import { Check } from 'lucide-react';
-import svgPaths from '../imports/svg-1l4mtpqhh5';
+import svgPaths from '@/assets/icons/svg-1l4mtpqhh5';
 
 export interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'size'> {
   /** Label text to display next to checkbox */

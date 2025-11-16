@@ -3,7 +3,7 @@ import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { PurpleButton } from "./PurpleButton";
 import { Label } from "./ui/label";
-import svgPaths from "../imports/svg-68mxca64pe";
+import svgPaths from "@/assets/icons/svg-68mxca64pe";
 
 export default function FAQ() {
   const faqs = [

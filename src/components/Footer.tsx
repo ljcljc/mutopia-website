@@ -1,4 +1,9 @@
-import svgPaths from "../imports/svg-kyq498o3kk";
+import iconFooterLogo from "@/assets/icons/icon-footer-logo.svg";
+import iconEmail from "@/assets/icons/icon-email.svg";
+import iconLocation from "@/assets/icons/icon-location.svg";
+import iconSocial1 from "@/assets/icons/icon-social-1.svg";
+import iconSocial2 from "@/assets/icons/icon-social-2.svg";
+import iconSocial3 from "@/assets/icons/icon-social-3.svg";
 
 export default function Footer() {
   const quickLinks = [
@@ -31,12 +36,7 @@ export default function Footer() {
                 {/* Logo and Name */}
                 <div className="content-stretch flex gap-[10.5px] items-center w-full">
                   <div className="size-[31px] shrink-0">
-                    <svg className="block size-full" fill="none" viewBox="0 0 31 36">
-                      <g>
-                        <path d={svgPaths.pa66be00} fill="white" />
-                        <path d={svgPaths.p16478c00} fill="white" />
-                      </g>
-                    </svg>
+                    <img src={iconFooterLogo} alt="Logo" className="size-[31px]" />
                   </div>
                   <h3 className="font-['Comfortaa:Bold',_sans-serif] leading-[28px] text-white text-[21px]">
                     Mutopia
@@ -51,12 +51,13 @@ export default function Footer() {
                 {/* Email */}
                 <div className="content-stretch flex gap-[10.5px] items-center w-full">
                   <div className="size-[16px] shrink-0">
-                    <svg className="block size-full" fill="none" viewBox="0 0 16 16">
+                    {/* <svg className="block size-full" fill="none" viewBox="0 0 16 16">
                       <g>
                         <path d={svgPaths.p2f8e7e80} stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.33333" />
                         <path d={svgPaths.p17070980} stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.33333" />
                       </g>
-                    </svg>
+                    </svg> */}
+                    <img src={iconEmail} alt="Email" className="size-[16px]" />
                   </div>
                   <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[21px] text-[14px] text-white">
                     hello@mutopia.ca
@@ -66,12 +67,7 @@ export default function Footer() {
                 {/* Location */}
                 <div className="content-stretch flex gap-[10.5px] items-center w-full max-w-[273px]">
                   <div className="size-[16px] shrink-0">
-                    <svg className="block size-full" fill="none" viewBox="0 0 16 16">
-                      <g>
-                        <path d={svgPaths.p14548f00} stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.33333" />
-                        <path d={svgPaths.p17781bc0} stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.33333" />
-                      </g>
-                    </svg>
+                    <img src={iconLocation} alt="Location" className="size-[16px]" />
                   </div>
                   <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[21px] text-[14px] text-white">
                     Serving Greater Vancouver Area
@@ -128,13 +124,7 @@ export default function Footer() {
                       className="bg-[#de6a07] rounded-full size-[35px] flex items-center justify-center hover:bg-[rgba(222,106,7,0.8)] active:bg-[rgba(222,106,7,0.8)] focus-visible:bg-[rgba(222,106,7,0.8)] transition-colors duration-200 cursor-pointer group relative border-2 border-transparent focus-visible:border-[#2374ff] active:border-[#2374ff]"
                       aria-label="Facebook"
                     >
-                      <div className="size-[20px] relative z-10">
-                        <svg className="block size-full" fill="none" viewBox="0 0 20 20">
-                          <g>
-                            <path d={svgPaths.p30c8d680} stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.66667" />
-                          </g>
-                        </svg>
-                      </div>
+                      <img src={iconSocial1} alt="Facebook" className="size-[20px]" />
                     </a>
 
                     {/* Instagram */}
@@ -143,20 +133,7 @@ export default function Footer() {
                       className="bg-[#de6a07] rounded-full size-[35px] flex items-center justify-center hover:bg-[rgba(222,106,7,0.8)] active:bg-[rgba(222,106,7,0.8)] focus-visible:bg-[rgba(222,106,7,0.8)] transition-colors duration-200 cursor-pointer group relative border-2 border-transparent focus-visible:border-[#2374ff] active:border-[#2374ff]"
                       aria-label="Instagram"
                     >
-                      <div className="size-[20px] relative z-10">
-                        <svg className="block size-full" fill="none" viewBox="0 0 20 20">
-                          <g clipPath="url(#clip0_footer_instagram)">
-                            <path d={svgPaths.p4b98700} stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.66667" />
-                            <path d={svgPaths.p19f4a800} stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.66667" />
-                            <path d="M14.5833 5.41667H14.5917" stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.66667" />
-                          </g>
-                          <defs>
-                            <clipPath id="clip0_footer_instagram">
-                              <rect fill="white" height="20" width="20" />
-                            </clipPath>
-                          </defs>
-                        </svg>
-                      </div>
+                      <img src={iconSocial2} alt="Instagram" className="size-[20px]" />
                     </a>
 
                     {/* Twitter */}
@@ -165,13 +142,7 @@ export default function Footer() {
                       className="bg-[#de6a07] rounded-full size-[35px] flex items-center justify-center hover:bg-[rgba(222,106,7,0.8)] active:bg-[rgba(222,106,7,0.8)] focus-visible:bg-[rgba(222,106,7,0.8)] transition-colors duration-200 cursor-pointer group relative border-2 border-transparent focus-visible:border-[#2374ff] active:border-[#2374ff]"
                       aria-label="Twitter"
                     >
-                      <div className="size-[20px] relative z-10">
-                        <svg className="block size-full" fill="none" viewBox="0 0 20 20">
-                          <g>
-                            <path d={svgPaths.p2ffa5d80} stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.66667" />
-                          </g>
-                        </svg>
-                      </div>
+                      <img src={iconSocial3} alt="Twitter" className="size-[20px]" />
                     </a>
                   </div>
                 </div>

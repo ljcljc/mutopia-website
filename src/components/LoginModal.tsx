@@ -6,13 +6,13 @@ import {
   DialogTitle,
   DialogDescription,
 } from "./ui/dialog";
-import svgPaths from "../imports/svg-k47wfeqkxq";
-import svgPathsPassword from "../imports/svg-pvvyz0d5lt";
+import svgPaths from "@/assets/icons/svg-k47wfeqkxq";
+import svgPathsPassword from "@/assets/icons/svg-pvvyz0d5lt";
 import { toast } from "sonner";
 import { Spinner } from "./Spinner";
 import { Checkbox } from "./Checkbox";
 import { useUser } from "./UserContext";
-import { ArrowLeft } from "lucide-react";
+import iconArrowLeft from "@/assets/icons/icon-arrow-left.svg";
 
 // Mock API function to check if email is registered
 async function checkEmailRegistered(email: string): Promise<boolean> {
@@ -88,7 +88,7 @@ function PrimitiveButton({ onClose, onBack }: { onClose: () => void; onBack?: ()
       type="button"
     >
       {onBack ? (
-        <ArrowLeft className="size-[16px] text-[#717182]" strokeWidth={1.16667} />
+        <img src={iconArrowLeft} alt="Back" className="size-[16px]" />
       ) : (
         <>
           <Icon1 />
