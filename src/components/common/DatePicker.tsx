@@ -14,6 +14,7 @@ interface DatePickerProps {
   minDate?: string; // Format: YYYY-MM-DD or YYYY-MM
   maxDate?: string; // Format: YYYY-MM-DD or YYYY-MM
   mode?: "date" | "month"; // 'date' for full date picker, 'month' for year-month only
+  onBlur?: () => void;
 }
 
 const MONTHS = [
@@ -58,6 +59,7 @@ export function DatePicker({
   minDate = "1900-01-01",
   maxDate,
   mode = "date",
+  onBlur,
 }: DatePickerProps) {
   // Set default placeholder based on mode
   const defaultPlaceholder = mode === "month" ? "yyyy-mm" : "yyyy-mm-dd";
@@ -147,9 +149,14 @@ export function DatePicker({
         pickerRef.current &&
         !pickerRef.current.contains(event.target as Node)
       ) {
+        const wasOpen = isOpen;
         setIsOpen(false);
         setShowYearPicker(false);
         setShowMonthPicker(false);
+        // Call onBlur when calendar closes
+        if (wasOpen && onBlur) {
+          onBlur();
+        }
       }
     }
 
@@ -158,7 +165,7 @@ export function DatePicker({
       return () =>
         document.removeEventListener("mousedown", handleClickOutside);
     }
-  }, [isOpen]);
+  }, [isOpen, onBlur]);
 
   // Generate year range based on min and max dates
   const yearRange = useMemo(() => {
@@ -252,6 +259,10 @@ export function DatePicker({
     setIsOpen(false);
     setShowYearPicker(false);
     setShowMonthPicker(false);
+    // Call onBlur when date is selected
+    if (onBlur) {
+      onBlur();
+    }
   }
 
   function handlePrevMonth() {
@@ -310,6 +321,10 @@ export function DatePicker({
       const month = String(monthIndex + 1).padStart(2, "0");
       onChange(`${year}-${month}`);
       setIsOpen(false);
+      // Call onBlur when month is selected in month mode
+      if (onBlur) {
+        onBlur();
+      }
     }
   }
 

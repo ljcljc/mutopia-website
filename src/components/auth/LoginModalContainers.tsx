@@ -309,6 +309,10 @@ export function SignUpContainer({
   isLoading,
   onBlur,
   onConfirmPasswordBlur,
+  onFirstNameBlur,
+  onLastNameBlur,
+  onBirthdayBlur,
+  onAddressBlur,
 }: {
   firstName: string;
   lastName: string;
@@ -336,6 +340,10 @@ export function SignUpContainer({
   isLoading?: boolean;
   onBlur?: () => void;
   onConfirmPasswordBlur?: () => void;
+  onFirstNameBlur?: () => void;
+  onLastNameBlur?: () => void;
+  onBirthdayBlur?: () => void;
+  onAddressBlur?: () => void;
 }) {
   return (
     <div
@@ -352,6 +360,7 @@ export function SignUpContainer({
                 placeholder="First name"
                 value={firstName}
                 onChange={(event) => setFirstName(event.target.value)}
+                onBlur={onFirstNameBlur}
                 autoComplete="given-name"
                 error={firstNameError}
               />
@@ -365,6 +374,7 @@ export function SignUpContainer({
                 placeholder="Last name"
                 value={lastName}
                 onChange={(event) => setLastName(event.target.value)}
+                onBlur={onLastNameBlur}
                 autoComplete="family-name"
                 error={lastNameError}
               />
@@ -377,6 +387,7 @@ export function SignUpContainer({
               placeholder="yyyy-mm-dd"
               value={birthday}
               onChange={setBirthday}
+              onBlur={onBirthdayBlur}
               error={birthdayError}
               helperText={
                 birthdayError
@@ -403,6 +414,7 @@ export function SignUpContainer({
                 placeholder="Enter your address"
                 value={address}
                 onChange={(event) => setAddress(event.target.value)}
+                onBlur={onAddressBlur}
                 autoComplete="street-address"
                 error={addressError}
               />

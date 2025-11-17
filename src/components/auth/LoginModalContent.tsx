@@ -182,49 +182,170 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
   };
 
   const handlePasswordBlur = () => {
-    if (password) {
-      if (step === "signup") {
-        // For signup, use strong password validation
-        const result = validateSignUpForm({ email, password, confirmPassword });
-        if (!result.success && result.error) {
-          const passwordError = result.error.issues.find((e: z.ZodIssue) =>
-            e.path.includes("password")
-          );
-          if (passwordError) {
-            setPasswordError(passwordError.message);
-          }
+    // Always validate on blur, even if empty (to show required field errors)
+    if (step === "signup") {
+      // For signup, use strong password validation
+      const result = validateSignUpForm({
+        email,
+        firstName,
+        lastName,
+        birthday,
+        address,
+        password,
+        confirmPassword,
+      });
+      if (!result.success && result.error) {
+        const passwordError = result.error.issues.find((e: z.ZodIssue) =>
+          e.path.includes("password")
+        );
+        if (passwordError) {
+          setPasswordError(passwordError.message);
+        } else {
+          setPasswordError("");
         }
       } else {
-        // For login, use basic password validation
-        const result = validateLoginForm({ email, password, rememberMe });
-        if (!result.success && result.error) {
-          const passwordError = result.error.issues.find((e: z.ZodIssue) =>
-            e.path.includes("password")
-          );
-          if (passwordError) {
-            setPasswordError(passwordError.message);
-          }
+        setPasswordError("");
+      }
+    } else {
+      // For login, use basic password validation
+      const result = validateLoginForm({ email, password, rememberMe });
+      if (!result.success && result.error) {
+        const passwordError = result.error.issues.find((e: z.ZodIssue) =>
+          e.path.includes("password")
+        );
+        if (passwordError) {
+          setPasswordError(passwordError.message);
+        } else {
+          setPasswordError("");
         }
+      } else {
+        setPasswordError("");
       }
     }
   };
 
   const handleConfirmPasswordBlur = () => {
-    if (confirmPassword) {
-      // Validate confirm password matches password
-      const result = validateSignUpForm({ email, password, confirmPassword });
-      if (!result.success && result.error) {
-        const confirmPasswordError = result.error.issues.find((e: z.ZodIssue) =>
-          e.path.includes("confirmPassword")
-        );
-        if (confirmPasswordError) {
-          setConfirmPasswordError(confirmPasswordError.message);
-        } else {
-          setConfirmPasswordError("");
-        }
+    // Always validate on blur, even if empty (to show required field errors)
+    const result = validateSignUpForm({
+      email,
+      firstName,
+      lastName,
+      birthday,
+      address,
+      password,
+      confirmPassword,
+    });
+    if (!result.success && result.error) {
+      const confirmPasswordError = result.error.issues.find((e: z.ZodIssue) =>
+        e.path.includes("confirmPassword")
+      );
+      if (confirmPasswordError) {
+        setConfirmPasswordError(confirmPasswordError.message);
       } else {
         setConfirmPasswordError("");
       }
+    } else {
+      setConfirmPasswordError("");
+    }
+  };
+
+  const handleFirstNameBlur = () => {
+    // Always validate on blur, even if empty (to show required field errors)
+    const result = validateSignUpForm({
+      email,
+      firstName,
+      lastName,
+      birthday,
+      address,
+      password,
+      confirmPassword,
+    });
+    if (!result.success && result.error) {
+      const firstNameError = result.error.issues.find((e: z.ZodIssue) =>
+        e.path.includes("firstName")
+      );
+      if (firstNameError) {
+        setFirstNameError(firstNameError.message);
+      } else {
+        setFirstNameError("");
+      }
+    } else {
+      setFirstNameError("");
+    }
+  };
+
+  const handleLastNameBlur = () => {
+    // Always validate on blur, even if empty (to show required field errors)
+    const result = validateSignUpForm({
+      email,
+      firstName,
+      lastName,
+      birthday,
+      address,
+      password,
+      confirmPassword,
+    });
+    if (!result.success && result.error) {
+      const lastNameError = result.error.issues.find((e: z.ZodIssue) =>
+        e.path.includes("lastName")
+      );
+      if (lastNameError) {
+        setLastNameError(lastNameError.message);
+      } else {
+        setLastNameError("");
+      }
+    } else {
+      setLastNameError("");
+    }
+  };
+
+  const handleBirthdayBlur = () => {
+    // Always validate on blur, even if empty (to show required field errors)
+    const result = validateSignUpForm({
+      email,
+      firstName,
+      lastName,
+      birthday,
+      address,
+      password,
+      confirmPassword,
+    });
+    if (!result.success && result.error) {
+      const birthdayError = result.error.issues.find((e: z.ZodIssue) =>
+        e.path.includes("birthday")
+      );
+      if (birthdayError) {
+        setBirthdayError(birthdayError.message);
+      } else {
+        setBirthdayError("");
+      }
+    } else {
+      setBirthdayError("");
+    }
+  };
+
+  const handleAddressBlur = () => {
+    // Always validate on blur, even if empty (to show required field errors)
+    const result = validateSignUpForm({
+      email,
+      firstName,
+      lastName,
+      birthday,
+      address,
+      password,
+      confirmPassword,
+    });
+    if (!result.success && result.error) {
+      const addressError = result.error.issues.find((e: z.ZodIssue) =>
+        e.path.includes("address")
+      );
+      if (addressError) {
+        setAddressError(addressError.message);
+      } else {
+        setAddressError("");
+      }
+    } else {
+      setAddressError("");
     }
   };
 
@@ -393,7 +514,11 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="bg-white box-border content-stretch flex flex-col gap-[16px] items-start pb-[32px] pt-[12px] px-0 relative rounded-[20px] w-[420px] max-w-[calc(100vw-32px)]"
+      className={`bg-white box-border flex flex-col items-start relative rounded-[20px] w-[420px] max-w-[calc(100vw-32px)] ${
+        step === "signup"
+          ? "max-h-[90vh] overflow-hidden flex"
+          : "content-stretch gap-[16px] pb-[32px] pt-[12px] px-0"
+      }`}
       data-name={
         step === "email" ? "Modal_Log in or sign up_default" : "Modal_log in"
       }
@@ -402,69 +527,93 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
         aria-hidden="true"
         className="absolute border border-[rgba(0,0,0,0.2)] border-solid inset-0 pointer-events-none rounded-[20px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]"
       />
-      <WelcomeToMutopiaPet
-        onClose={onClose}
-        onBack={showBackButton ? handleBack : undefined}
-        title={title}
-        showRequired={step === "signup"}
-      />
-
-      {step === "email" ? (
-        <Container
-          email={email}
-          setEmail={handleEmailChange}
-          onContinue={handleContinue}
-          onBlur={handleEmailBlur}
-          onFocus={handleEmailFocus}
-          onGoogleClick={handleGoogleClick}
-          onFacebookClick={handleFacebookClick}
-          error={emailError}
-          isLoading={isLoading}
-        />
-      ) : step === "signup" ? (
-        <SignUpContainer
-          firstName={firstName}
-          lastName={lastName}
-          birthday={birthday}
-          address={address}
-          password={password}
-          confirmPassword={confirmPassword}
-          showPassword={showPassword}
-          optOutMarketing={optOutMarketing}
-          setFirstName={setFirstName}
-          setLastName={setLastName}
-          setBirthday={setBirthday}
-          setAddress={setAddress}
-          setPassword={setPassword}
-          setConfirmPassword={setConfirmPassword}
-          toggleShowPassword={toggleShowPassword}
-          setOptOutMarketing={setOptOutMarketing}
-          onSignUp={handleSignUp}
-          firstNameError={firstNameError}
-          lastNameError={lastNameError}
-          birthdayError={birthdayError}
-          addressError={addressError}
-          passwordError={passwordError}
-          confirmPasswordError={confirmPasswordError}
-          isLoading={isLoading}
-          onBlur={handlePasswordBlur}
-          onConfirmPasswordBlur={handleConfirmPasswordBlur}
-        />
+      {step === "signup" ? (
+        <>
+          {/* Fixed header for signup */}
+          <div className="shrink-0 pt-[12px] pb-[16px] px-0 w-full">
+            <WelcomeToMutopiaPet
+              onClose={onClose}
+              onBack={showBackButton ? handleBack : undefined}
+              title={title}
+              showRequired={step === "signup"}
+            />
+          </div>
+          {/* Scrollable content for signup */}
+          <div className="flex-1 overflow-y-auto w-full min-h-0">
+            <div className="flex flex-col gap-[16px] items-start pb-[32px] px-0 w-full">
+              <SignUpContainer
+                firstName={firstName}
+                lastName={lastName}
+                birthday={birthday}
+                address={address}
+                password={password}
+                confirmPassword={confirmPassword}
+                showPassword={showPassword}
+                optOutMarketing={optOutMarketing}
+                setFirstName={setFirstName}
+                setLastName={setLastName}
+                setBirthday={setBirthday}
+                setAddress={setAddress}
+                setPassword={setPassword}
+                setConfirmPassword={setConfirmPassword}
+                toggleShowPassword={toggleShowPassword}
+                setOptOutMarketing={setOptOutMarketing}
+                onSignUp={handleSignUp}
+                firstNameError={firstNameError}
+                lastNameError={lastNameError}
+                birthdayError={birthdayError}
+                addressError={addressError}
+                passwordError={passwordError}
+                confirmPasswordError={confirmPasswordError}
+                isLoading={isLoading}
+                onBlur={handlePasswordBlur}
+                onConfirmPasswordBlur={handleConfirmPasswordBlur}
+                onFirstNameBlur={handleFirstNameBlur}
+                onLastNameBlur={handleLastNameBlur}
+                onBirthdayBlur={handleBirthdayBlur}
+                onAddressBlur={handleAddressBlur}
+              />
+            </div>
+          </div>
+        </>
       ) : (
-        <PasswordContainer
-          password={password}
-          setPassword={handlePasswordChange}
-          onLogin={handleLogin}
-          onBlur={handlePasswordBlur}
-          showPassword={showPassword}
-          onTogglePassword={handleTogglePassword}
-          rememberMe={rememberMe}
-          setRememberMe={setRememberMe}
-          onForgotPassword={handleForgotPassword}
-          error={passwordError}
-          isLoading={isLoading}
-          isSignUp={false}
-        />
+        <div className="flex flex-col gap-[16px] items-start pb-[32px] pt-[12px] px-0 w-full">
+          <WelcomeToMutopiaPet
+            onClose={onClose}
+            onBack={showBackButton ? handleBack : undefined}
+            title={title}
+            showRequired={false}
+          />
+
+          {step === "email" ? (
+            <Container
+              email={email}
+              setEmail={handleEmailChange}
+              onContinue={handleContinue}
+              onBlur={handleEmailBlur}
+              onFocus={handleEmailFocus}
+              onGoogleClick={handleGoogleClick}
+              onFacebookClick={handleFacebookClick}
+              error={emailError}
+              isLoading={isLoading}
+            />
+          ) : (
+            <PasswordContainer
+              password={password}
+              setPassword={handlePasswordChange}
+              onLogin={handleLogin}
+              onBlur={handlePasswordBlur}
+              showPassword={showPassword}
+              onTogglePassword={handleTogglePassword}
+              rememberMe={rememberMe}
+              setRememberMe={setRememberMe}
+              onForgotPassword={handleForgotPassword}
+              error={passwordError}
+              isLoading={isLoading}
+              isSignUp={false}
+            />
+          )}
+        </div>
       )}
     </div>
   );
