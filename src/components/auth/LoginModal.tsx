@@ -7,7 +7,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Spinner, Checkbox } from "@/components/common";
+import { Spinner, Checkbox, CustomInput } from "@/components/common";
 import { 
   useAuthStore, 
   validateEmail, 
@@ -101,9 +101,9 @@ function Frame68({ onClose, onBack, title }: { onClose: () => void; onBack?: () 
 
 function Label({ showRequired = false }: { showRequired?: boolean }) {
   if (!showRequired) {
-    return (
-      <div className="basis-0 content-stretch flex gap-[8px] grow items-center justify-end min-h-px min-w-px relative shrink-0" data-name="Label">
-        <p className="font-['Comfortaa:Medium',_sans-serif] font-medium leading-[14px] relative shrink-0 text-[#4a3c2a] text-[10px] text-nowrap whitespace-pre"> </p>
+  return (
+    <div className="basis-0 content-stretch flex gap-[8px] grow items-center justify-end min-h-px min-w-px relative shrink-0" data-name="Label">
+      <p className="font-['Comfortaa:Medium',_sans-serif] font-medium leading-[14px] relative shrink-0 text-[#4a3c2a] text-[10px] text-nowrap whitespace-pre"> </p>
       </div>
     );
   }
@@ -140,78 +140,9 @@ function WelcomeToMutopiaPet({ onClose, onBack, title = "Log in or sign up", sho
   );
 }
 
-function PrimitiveLabel({ hasError }: { hasError: boolean }) {
-  return (
-    <div className="content-stretch flex gap-[7px] h-[12.25px] items-center relative shrink-0 w-full" data-name="Primitive.label">
-      <p className={`font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[14px] text-nowrap whitespace-pre ${hasError ? "text-[#de1507]" : "text-[#4a3c2a]"}`}>Email</p>
-    </div>
-  );
-}
-
-function Frame5({ value, onChange, onEnter, onBlur, onFocus, disabled, type = "email" }: { 
-  value: string; 
-  onChange: (value: string) => void; 
-  onEnter?: () => void; 
-  onBlur?: () => void;
-  onFocus?: () => void;
-  disabled?: boolean;
-  type?: "email" | "text" | "password";
-}) {
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && onEnter) {
-      onEnter();
-    }
-  };
-
-  return (
-    <div className="basis-0 content-stretch flex grow items-center min-h-px min-w-px relative shrink-0">
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={handleKeyDown}
-        onBlur={onBlur}
-        onFocus={onFocus}
-        disabled={disabled}
-        placeholder={type === "password" ? "Enter your password" : "Enter your email"}
-        className="basis-0 font-['Comfortaa:Regular',_sans-serif] font-normal grow leading-[normal] min-h-px min-w-px relative shrink-0 text-[#717182] text-[12.25px] placeholder:text-[#717182] bg-transparent border-none outline-none w-full disabled:cursor-not-allowed"
-      />
-    </div>
-  );
-}
-
-function Input({ value, onChange, onEnter, onBlur, onFocus, hasError, isFocused, disabled, type = "email" }: { 
-  value: string; 
-  onChange: (value: string) => void; 
-  onEnter?: () => void; 
-  onBlur?: () => void;
-  onFocus?: () => void;
-  hasError: boolean;
-  isFocused?: boolean;
-  disabled?: boolean;
-  type?: "email" | "text" | "password";
-}) {
-  const borderColor = hasError 
-    ? "border-[#de1507]" 
-    : isFocused 
-    ? "border-[#2374ff]" 
-    : "border-gray-200";
-  
-  return (
-    <div className={`bg-white h-[36px] relative rounded-[12px] shrink-0 w-full ${disabled ? "opacity-50 cursor-not-allowed" : ""}`} data-name="Input">
-      <div className="flex flex-row items-center overflow-clip rounded-[inherit] size-full">
-        <div className="box-border content-stretch flex h-[36px] items-center px-[16px] py-[4px] relative w-full">
-          <Frame5 value={value} onChange={onChange} onEnter={onEnter} onBlur={onBlur} onFocus={onFocus} disabled={disabled} type={type} />
-        </div>
-      </div>
-      <div aria-hidden="true" className={`absolute border border-solid inset-0 pointer-events-none rounded-[12px] ${borderColor}`} />
-    </div>
-  );
-}
-
 function Alert({ type = "error" }: { type?: "error" | "success" }) {
   if (type === "success") {
-    return (
+  return (
       <div className="relative shrink-0 size-[14px]" data-name="Alert">
         <img src={iconAlertSuccess} alt="Success" className="absolute inset-0 size-full" />
       </div>
@@ -234,32 +165,6 @@ function ErrorMessage({ message }: { message: string }) {
   );
 }
 
-
-function InputDefault({ value, onChange, onEnter, onBlur, onFocus, error, isFocused, disabled }: { 
-  value: string; 
-  onChange: (value: string) => void; 
-  onEnter?: () => void; 
-  onBlur?: () => void;
-  onFocus?: () => void;
-  error?: string;
-  isFocused?: boolean;
-  disabled?: boolean;
-}) {
-  const hasError = !!error;
-  return (
-    <div className="content-stretch flex flex-col gap-[8px] items-start relative shrink-0 w-full" data-name="Input_default">
-      <PrimitiveLabel hasError={hasError} />
-      {error ? (
-        <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full">
-          <Input value={value} onChange={onChange} onEnter={onEnter} onBlur={onBlur} onFocus={onFocus} hasError={hasError} isFocused={isFocused} disabled={disabled} />
-          <ErrorMessage message={error} />
-        </div>
-      ) : (
-        <Input value={value} onChange={onChange} onEnter={onEnter} onBlur={onBlur} onFocus={onFocus} hasError={hasError} isFocused={isFocused} disabled={disabled} />
-      )}
-    </div>
-  );
-}
 
 function Icon2() {
   return (
@@ -311,7 +216,7 @@ function ButtonMediumPrincipalOrange({ onClick, disabled, isLoading, text }: { o
   );
 }
 
-function Frame65({ email, setEmail, onContinue, onBlur, onFocus, error, isLoading, isFocused }: { 
+function Frame65({ email, setEmail, onContinue, onBlur, onFocus, error, isLoading }: { 
   email: string; 
   setEmail: (value: string) => void; 
   onContinue: () => void; 
@@ -319,17 +224,36 @@ function Frame65({ email, setEmail, onContinue, onBlur, onFocus, error, isLoadin
   onFocus?: () => void;
   error?: string; 
   isLoading?: boolean;
-  isFocused?: boolean;
 }) {
   return (
     <div className="content-stretch flex flex-col gap-[20px] items-start relative shrink-0 w-full">
-      <InputDefault value={email} onChange={setEmail} onEnter={onContinue} onBlur={onBlur} onFocus={onFocus} error={error} isFocused={isFocused} />
+      <div className="content-stretch flex flex-col gap-[4px] items-start w-full">
+        <CustomInput
+          label="Email"
+          placeholder="Enter your email"
+          type="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          onBlur={onBlur}
+          onFocus={onFocus}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              onContinue();
+            }
+          }}
+          disabled={isLoading}
+          error={error}
+          inputMode="email"
+          autoComplete="email"
+        />
+        {error && <ErrorMessage message={error} />}
+      </div>
       <ButtonMediumPrincipalOrange onClick={onContinue} disabled={isLoading} isLoading={isLoading} />
     </div>
   );
 }
 
-function AuthDialog({ email, setEmail, onContinue, onBlur, onFocus, error, isLoading, isFocused }: { 
+function AuthDialog({ email, setEmail, onContinue, onBlur, onFocus, error, isLoading }: { 
   email: string; 
   setEmail: (value: string) => void; 
   onContinue: () => void; 
@@ -337,11 +261,10 @@ function AuthDialog({ email, setEmail, onContinue, onBlur, onFocus, error, isLoa
   onFocus?: () => void;
   error?: string; 
   isLoading?: boolean;
-  isFocused?: boolean;
 }) {
   return (
     <div className="content-stretch flex flex-col gap-[14px] items-start relative shrink-0 w-full" data-name="AuthDialog">
-      <Frame65 email={email} setEmail={setEmail} onContinue={onContinue} onBlur={onBlur} onFocus={onFocus} error={error} isLoading={isLoading} isFocused={isFocused} />
+      <Frame65 email={email} setEmail={setEmail} onContinue={onContinue} onBlur={onBlur} onFocus={onFocus} error={error} isLoading={isLoading} />
     </div>
   );
 }
@@ -436,7 +359,7 @@ function AuthDialog4({ onGoogleClick, onFacebookClick }: { onGoogleClick: () => 
   );
 }
 
-function TabPanel({ email, setEmail, onContinue, onBlur, onFocus, onGoogleClick, onFacebookClick, error, isLoading, isFocused }: {
+function TabPanel({ email, setEmail, onContinue, onBlur, onFocus, onGoogleClick, onFacebookClick, error, isLoading }: {
   email: string;
   setEmail: (value: string) => void;
   onContinue: () => void;
@@ -446,12 +369,11 @@ function TabPanel({ email, setEmail, onContinue, onBlur, onFocus, onGoogleClick,
   onFacebookClick: () => void;
   error?: string;
   isLoading?: boolean;
-  isFocused?: boolean;
 }) {
   return (
     <div className="relative shrink-0 w-full" data-name="Tab Panel">
       <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border content-stretch flex flex-col gap-[28px] items-start relative w-full">
-        <AuthDialog email={email} setEmail={setEmail} onContinue={onContinue} onBlur={onBlur} onFocus={onFocus} error={error} isLoading={isLoading} isFocused={isFocused} />
+        <AuthDialog email={email} setEmail={setEmail} onContinue={onContinue} onBlur={onBlur} onFocus={onFocus} error={error} isLoading={isLoading} />
         <AuthDialog1 />
         <AuthDialog4 onGoogleClick={onGoogleClick} onFacebookClick={onFacebookClick} />
       </div>
@@ -459,7 +381,7 @@ function TabPanel({ email, setEmail, onContinue, onBlur, onFocus, onGoogleClick,
   );
 }
 
-function Container({ email, setEmail, onContinue, onBlur, onFocus, onGoogleClick, onFacebookClick, error, isLoading, isFocused }: {
+function Container({ email, setEmail, onContinue, onBlur, onFocus, onGoogleClick, onFacebookClick, error, isLoading }: {
   email: string;
   setEmail: (value: string) => void;
   onContinue: () => void;
@@ -469,7 +391,6 @@ function Container({ email, setEmail, onContinue, onBlur, onFocus, onGoogleClick
   onFacebookClick: () => void;
   error?: string;
   isLoading?: boolean;
-  isFocused?: boolean;
 }) {
   return (
     <div className="relative shrink-0 w-full" data-name="Container">
@@ -485,7 +406,6 @@ function Container({ email, setEmail, onContinue, onBlur, onFocus, onGoogleClick
             onFacebookClick={onFacebookClick}
             error={error}
             isLoading={isLoading}
-            isFocused={isFocused}
           />
         </div>
       </div>
@@ -715,34 +635,19 @@ function PasswordContainer({
                     />
                   )}
                   {isSignUp && confirmPassword !== undefined && setConfirmPassword && (
-                    <div className="content-stretch flex flex-col gap-[8px] items-start relative shrink-0 w-full" data-name="Input_default">
-                      <div className="content-stretch flex gap-[7px] h-[12.25px] items-center relative shrink-0 w-full" data-name="Primitive.label">
-                        <p className={`font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[14px] text-nowrap whitespace-pre ${confirmPasswordError ? "text-[#de1507]" : "text-[#4a3c2a]"}`}>Confirm Password</p>
-                      </div>
-                      {confirmPasswordError ? (
-                        <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full">
-                          <Input 
-                            value={confirmPassword} 
-                            onChange={setConfirmPassword} 
-                            hasError={!!confirmPasswordError} 
-                            isFocused={isFocused}
-                            onFocus={onFocus}
-                            onBlur={onBlur}
-                            type="password"
-                          />
-                          <ErrorMessage message={confirmPasswordError} />
-                        </div>
-                      ) : (
-                        <Input 
-                          value={confirmPassword} 
-                          onChange={setConfirmPassword} 
-                          hasError={!!confirmPasswordError} 
-                          isFocused={isFocused}
-                          onFocus={onFocus}
-                          onBlur={onBlur}
-                          type="password"
-                        />
-                      )}
+                    <div className="content-stretch flex flex-col gap-[4px] items-start w-full">
+                      <CustomInput
+                        label="Confirm password"
+                        type="password"
+                        placeholder="Re-enter your password"
+                        value={confirmPassword}
+                        onChange={(event) => setConfirmPassword(event.target.value)}
+                        onFocus={onFocus}
+                        onBlur={onBlur}
+                        autoComplete="new-password"
+                        error={confirmPasswordError}
+                      />
+                      {confirmPasswordError && <ErrorMessage message={confirmPasswordError} />}
                     </div>
                   )}
                   {!isSignUp && (
@@ -840,89 +745,71 @@ function SignUpContainer({
         <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border content-stretch flex flex-col gap-[20px] items-start relative w-full">
           <div className="content-stretch flex flex-col gap-[16px] items-start relative shrink-0 w-full">
             {/* First name */}
-            <TextInput
-              value={firstName}
-              onChange={setFirstName}
-              placeholder="First name"
-              hasError={!!firstNameError}
-              isFocused={isFocused}
-              label="First name"
-              error={firstNameError}
-              onFocus={onFocus}
-              onBlur={onBlur}
-            />
+            <div className="content-stretch flex flex-col gap-[4px] items-start w-full">
+              <CustomInput
+                label="First name"
+                placeholder="First name"
+                value={firstName}
+                onChange={(event) => setFirstName(event.target.value)}
+                onFocus={onFocus}
+                onBlur={onBlur}
+                autoComplete="given-name"
+                error={firstNameError}
+              />
+              {firstNameError && <ErrorMessage message={firstNameError} />}
+            </div>
 
             {/* Last name */}
-            <TextInput
-              value={lastName}
-              onChange={setLastName}
-              placeholder="Last name"
-              hasError={!!lastNameError}
-              isFocused={isFocused}
-              label="Last name"
-              error={lastNameError}
-              onFocus={onFocus}
-              onBlur={onBlur}
-            />
+            <div className="content-stretch flex flex-col gap-[4px] items-start w-full">
+              <CustomInput
+                label="Last name"
+                placeholder="Last name"
+                value={lastName}
+                onChange={(event) => setLastName(event.target.value)}
+                onFocus={onFocus}
+                onBlur={onBlur}
+                autoComplete="family-name"
+                error={lastNameError}
+              />
+              {lastNameError && <ErrorMessage message={lastNameError} />}
+            </div>
 
             {/* Date of birth */}
-            <div className="content-stretch flex flex-col gap-[8px] items-start relative shrink-0 w-full" data-name="Input_default">
-              <div className="content-stretch flex gap-[7px] h-[12.25px] items-center relative shrink-0 w-full" data-name="Primitive.label">
-                <p className={`font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[14px] text-nowrap whitespace-pre ${birthdayError ? "text-[#de1507]" : "text-[#4a3c2a]"}`}>Date of birth</p>
-              </div>
+            <div className="content-stretch flex flex-col gap-[4px] items-start w-full">
+              <CustomInput
+                label="Date of birth"
+                placeholder="yyyy-mm-dd"
+                type="date"
+                value={birthday}
+                onChange={(event) => setBirthday(event.target.value)}
+                onFocus={onFocus}
+                onBlur={onBlur}
+                error={birthdayError}
+                rightElement={<Calendar className="size-[14px] text-[#717182]" />}
+              />
               {birthdayError ? (
-                <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full">
-                  <TextInput
-                    value={birthday}
-                    onChange={setBirthday}
-                    placeholder="yyyy-mm-dd"
-                    hasError={!!birthdayError}
-                    isFocused={isFocused}
-                    label=""
-                    error={undefined}
-                    type="date"
-                    showIcon={true}
-                    iconComponent={<Calendar className="size-[14px] text-[#717182]" />}
-                    onFocus={onFocus}
-                    onBlur={onBlur}
-                  />
-                  <ErrorMessage message={birthdayError} />
-                </div>
+                <ErrorMessage message={birthdayError} />
               ) : (
-                <>
-                  <TextInput
-                    value={birthday}
-                    onChange={setBirthday}
-                    placeholder="yyyy-mm-dd"
-                    hasError={!!birthdayError}
-                    isFocused={isFocused}
-                    label=""
-                    error={undefined}
-                    type="date"
-                    showIcon={true}
-                    iconComponent={<Calendar className="size-[14px] text-[#717182]" />}
-                    onFocus={onFocus}
-                    onBlur={onBlur}
-                  />
-                  <div className="content-stretch flex gap-[4px] items-center relative shrink-0">
-                    <p className="font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#4c4c4c] text-[12px]">At least 18 years old. Your birthday won't be shared.</p>
-                  </div>
-                </>
+                <p className="font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#4c4c4c] text-[12px]">
+                  At least 18 years old. Your birthday won't be shared.
+                </p>
               )}
             </div>
 
             {/* Address */}
-            <TextInput
-              value={address}
-              onChange={setAddress}
-              placeholder="Enter your address"
-              hasError={!!addressError}
-              isFocused={isFocused}
-              label="Address"
-              error={addressError}
-              onFocus={onFocus}
-              onBlur={onBlur}
-            />
+            <div className="content-stretch flex flex-col gap-[4px] items-start w-full">
+              <CustomInput
+                label="Address"
+                placeholder="Enter your address"
+                value={address}
+                onChange={(event) => setAddress(event.target.value)}
+                onFocus={onFocus}
+                onBlur={onBlur}
+                autoComplete="street-address"
+                error={addressError}
+              />
+              {addressError && <ErrorMessage message={addressError} />}
+            </div>
 
             {/* Password */}
             <PasswordInput
@@ -1025,101 +912,6 @@ function SignUpContainer({
   );
 }
 
-// Generic text input component for signup form
-function TextInput({
-  value,
-  onChange,
-  onBlur,
-  onFocus,
-  placeholder,
-  hasError,
-  isFocused,
-  label,
-  error,
-  type = "text",
-  showIcon,
-  iconComponent,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  onBlur?: () => void;
-  onFocus?: () => void;
-  placeholder: string;
-  hasError: boolean;
-  isFocused?: boolean;
-  label: string;
-  error?: string;
-  type?: "text" | "email" | "password" | "date";
-  showIcon?: boolean;
-  iconComponent?: React.ReactNode;
-}) {
-  const borderColor = hasError
-    ? "border-[#de1507]"
-    : isFocused
-    ? "border-[#2374ff]"
-    : "border-gray-200";
-
-  return (
-    <div className="content-stretch flex flex-col gap-[8px] items-start relative shrink-0 w-full" data-name="Input_default">
-      <div className="content-stretch flex gap-[7px] h-[12.25px] items-center relative shrink-0 w-full" data-name="Primitive.label">
-        <p className={`font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[14px] text-nowrap whitespace-pre ${hasError ? "text-[#de1507]" : "text-[#4a3c2a]"}`}>{label}</p>
-      </div>
-      {error ? (
-        <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full">
-          <div className={`bg-white h-[36px] relative rounded-[12px] shrink-0 w-full ${hasError ? "border border-[#de1507]" : ""}`} data-name="Input">
-            <div className="flex flex-row items-center overflow-clip rounded-[inherit] size-full">
-              <div className="box-border content-stretch flex h-[36px] items-center px-[16px] py-[4px] relative w-full">
-                <div className="basis-0 content-stretch flex grow items-center min-h-px min-w-px relative shrink-0">
-                  <input
-                    type={type}
-                    value={value}
-                    onChange={(e) => onChange(e.target.value)}
-                    onBlur={onBlur}
-                    onFocus={onFocus}
-                    placeholder={placeholder}
-                    className="basis-0 font-['Comfortaa:Regular',_sans-serif] font-normal grow leading-[normal] min-h-px min-w-px relative shrink-0 text-[#717182] text-[12.25px] placeholder:text-[#717182] bg-transparent border-none outline-none w-full"
-                  />
-                  {showIcon && iconComponent && (
-                    <div className="relative shrink-0 size-[24px] flex items-center justify-center">
-                      {iconComponent}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-            <div aria-hidden="true" className={`absolute border border-solid inset-0 pointer-events-none rounded-[12px] ${borderColor}`} />
-          </div>
-          <ErrorMessage message={error} />
-        </div>
-      ) : (
-        <div className={`bg-white h-[36px] relative rounded-[12px] shrink-0 w-full`} data-name="Input">
-          <div className="flex flex-row items-center overflow-clip rounded-[inherit] size-full">
-            <div className="box-border content-stretch flex h-[36px] items-center px-[16px] py-[4px] relative w-full">
-              <div className="basis-0 content-stretch flex grow items-center min-h-px min-w-px relative shrink-0">
-                <input
-                  type={type}
-                  value={value}
-                  onChange={(e) => onChange(e.target.value)}
-                  onBlur={onBlur}
-                  onFocus={onFocus}
-                  placeholder={placeholder}
-                  className="basis-0 font-['Comfortaa:Regular',_sans-serif] font-normal grow leading-[normal] min-h-px min-w-px relative shrink-0 text-[#717182] text-[12.25px] placeholder:text-[#717182] bg-transparent border-none outline-none w-full"
-                />
-                {showIcon && iconComponent && (
-                  <div className="relative shrink-0 size-[24px] flex items-center justify-center">
-                    {iconComponent}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          <div aria-hidden="true" className={`absolute border border-solid inset-0 pointer-events-none rounded-[12px] ${borderColor}`} />
-        </div>
-      )}
-    </div>
-  );
-}
-
 function ModalContent({ onClose }: { onClose: () => void }) {
   const {
     step,
@@ -1133,7 +925,6 @@ function ModalContent({ onClose }: { onClose: () => void }) {
     birthday,
     address,
     optOutMarketing,
-    isEmailFocused,
     isPasswordFocused,
     emailError,
     passwordError,
@@ -1296,7 +1087,7 @@ function ModalContent({ onClose }: { onClose: () => void }) {
           const passwordError = result.error.issues.find((e: z.ZodIssue) => e.path.includes("password"));
           if (passwordError) {
             setPasswordError(passwordError.message);
-          }
+    }
         }
       }
     }
@@ -1314,7 +1105,7 @@ function ModalContent({ onClose }: { onClose: () => void }) {
       result.error.issues.forEach((err: z.ZodIssue) => {
         if (err.path.includes("email")) {
           setEmailError(err.message);
-        }
+    }
         if (err.path.includes("password")) {
           setPasswordError(err.message);
         }
@@ -1487,7 +1278,6 @@ function ModalContent({ onClose }: { onClose: () => void }) {
           onFacebookClick={handleFacebookClick}
           error={emailError}
           isLoading={isLoading}
-          isFocused={isEmailFocused}
         />
       ) : step === "signup" ? (
         <SignUpContainer

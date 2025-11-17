@@ -319,3 +319,35 @@ body.modal-open::after {
   z-index: 1;
   pointer-events: none;
 }
+
+/* Remove focus-visible outline on form elements and dialogs */
+input:focus-visible,
+textarea:focus-visible,
+button:focus-visible,
+select:focus-visible,
+[role="dialog"]:focus-visible,
+[role="alertdialog"]:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Remove focus-visible from all elements in modals/dialogs */
+[data-radix-focus-guard]:focus-visible,
+[data-radix-dialog-content]:focus-visible,
+[data-radix-dialog-overlay]:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Screen reader only - accessible but visually hidden */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
