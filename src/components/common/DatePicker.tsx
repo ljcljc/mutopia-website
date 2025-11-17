@@ -69,6 +69,7 @@ export function DatePicker({
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const pickerRef = useRef<HTMLDivElement>(null);
   const yearScrollRef = useRef<HTMLDivElement>(null);
+  const monthButtonRef = useRef<HTMLButtonElement>(null);
   const hasInitializedRef = useRef(false);
 
   // Parse date strings to get year and month limits
@@ -457,7 +458,7 @@ export function DatePicker({
 
           {/* Month Picker (Overlay) */}
           {showMonthPicker && (
-            <div className="absolute bg-white rounded-[8px] top-[16px] right-[16px] w-[140px] z-60 shadow-[0px_30px_84px_0px_rgba(19,10,46,0.08),0px_8px_32px_0px_rgba(19,10,46,0.07),0px_3px_14px_0px_rgba(19,10,46,0.03),0px_1px_3px_0px_rgba(19,10,46,0.13)]">
+            <div className="absolute bg-white rounded-[8px] top-[44px] left-[80px] w-[140px] z-60 shadow-[0px_30px_84px_0px_rgba(19,10,46,0.08),0px_8px_32px_0px_rgba(19,10,46,0.07),0px_3px_14px_0px_rgba(19,10,46,0.03),0px_1px_3px_0px_rgba(19,10,46,0.13)]">
               <div
                 aria-hidden="true"
                 className="absolute border border-[rgba(0,0,0,0.2)] border-solid inset-0 pointer-events-none rounded-[8px]"
@@ -540,6 +541,7 @@ export function DatePicker({
                   {currentYear}
                 </button>
                 <button
+                  ref={monthButtonRef}
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowMonthPicker(!showMonthPicker);

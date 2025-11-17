@@ -2,11 +2,11 @@
  * Custom Checkbox Component
  *
  * Built from Figma designs with 5 distinct states:
- * 1. Default: Unchecked with gray border #717182, dark text #4a3c2a
- * 2. Hover: Unchecked with gray text #717182 (on hover)
- * 3. Focus: Checked with blue background #2374ff, white checkmark (no focus ring)
- * 4. Active: Checked with orange background #de6a07, gradient checkmark (when pressed)
- * 5. Checked: Checked with blue background #2374ff, white checkmark
+ * 1. Default: Unchecked with white background, gray border #717182, dark text #4a3c2a
+ * 2. Hover: Unchecked with white background, gray border #717182, gray text #717182 (on hover)
+ * 3. Focus: Unchecked but focused with white background, gray border #717182
+ * 4. Active: Checked and pressed with orange background #de6a07, white checkmark
+ * 5. Checked: Checked state with orange background #de6a07, white checkmark
  *
  * Features:
  * - Native checkbox functionality
@@ -19,7 +19,6 @@
 
 import { forwardRef, useState, InputHTMLAttributes } from "react";
 import { Check } from "lucide-react";
-import svgPaths from "@/assets/icons/svg-1l4mtpqhh5";
 
 export interface CheckboxProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "size"> {
@@ -54,7 +53,6 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
     const [internalChecked, setInternalChecked] = useState(
       defaultChecked || false
     );
-    const [, setIsFocused] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [isActive, setIsActive] = useState(false);
 
@@ -75,14 +73,6 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
       onChange?.(e);
     };
 
-    const handleFocus = () => {
-      setIsFocused(true);
-    };
-
-    const handleBlur = () => {
-      setIsFocused(false);
-    };
-
     const handleMouseEnter = () => {
       setIsHovered(true);
     };
@@ -92,7 +82,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
     };
 
     const handleMouseDown = () => {
-      if (!disabled && isChecked) {
+      if (!disabled) {
         setIsActive(true);
       }
     };
@@ -111,44 +101,46 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
     };
 
     // Determine checkbox background and border based on state
+    // States from Figma:
+    // 1. Default: Unchecked, white background, gray border #717182
+    // 2. Hover: Unchecked, white background, gray border #717182, gray text #717182
+    // 3. Focus: Unchecked but focused, white background, gray border #717182
+    // 4. Active: Checked and pressed, orange background #de6a07, white checkmark
+    // 5. Checked: Checked state, orange background #de6a07, white checkmark
     const getCheckboxStyle = () => {
       // Disabled state
       if (disabled) {
         return {
-          background: isChecked ? "bg-[#2374ff]/50" : "bg-white",
+          background: isChecked ? "bg-[#de6a07]/50" : "bg-white",
           border: "border-[#717182]/30",
         };
       }
 
-      // Active state (checked + pressed): Orange background, gradient checkmark
+      // Active state (checked + pressed): Orange background, white checkmark
       if (isChecked && isActive) {
         return {
           background: "bg-[#de6a07]",
           border: "",
-          showGradientCheck: true,
         };
       }
 
-      // Focus state (checked + focused): Blue background, white checkmark, focus ring
-      // Checked state: Blue background, white checkmark
+      // Checked state (default checked): Orange background, white checkmark
       if (isChecked) {
         return {
-          background: "bg-[#2374ff]",
+          background: "bg-[#de6a07]",
           border: "",
-          showGradientCheck: false,
         };
       }
 
-      // Default/Hover state (unchecked): White background, gray border
+      // Default/Hover/Focus state (unchecked): White background, gray border
+      // Even when focused, unchecked checkbox should maintain white background and gray border
       return {
         background: "bg-white",
         border: "border-[#717182]",
-        showGradientCheck: false,
       };
     };
 
     const checkboxStyle = getCheckboxStyle();
-    const showGradientCheck = checkboxStyle.showGradientCheck;
 
     return (
       <label
@@ -167,8 +159,6 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           type="checkbox"
           checked={isChecked}
           onChange={handleChange}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
           disabled={disabled}
           className="sr-only"
           {...props}
@@ -189,47 +179,17 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
 
           {/* Checkmark icon (only visible when checked) */}
           {isChecked && (
-            <>
-              {showGradientCheck ? (
-                // Gradient checkmark for active state
-                <svg
-                  className="absolute inset-0 size-full"
-                  fill="none"
-                  viewBox="0 0 16 16"
-                >
-                  <defs>
-                    <linearGradient
-                      id="checkGradient"
-                      x1="2"
-                      y1="4.25"
-                      x2="8.8634"
-                      y2="14.7739"
-                      gradientUnits="userSpaceOnUse"
-                    >
-                      <stop stopColor="#FFF7ED" />
-                      <stop offset="1" stopColor="#FFFBEB" />
-                    </linearGradient>
-                  </defs>
-                  <path
-                    d={svgPaths.p30de4580}
-                    stroke="url(#checkGradient)"
-                    strokeWidth="2"
-                  />
-                </svg>
-              ) : (
-                // White checkmark for checked/focus state
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Check size={12} className="text-white" strokeWidth={3} />
-                </div>
-              )}
-            </>
+            // White checkmark for checked states (Active, Active-focus, or default checked)
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Check size={12} className="text-white" strokeWidth={3} />
+            </div>
           )}
         </div>
 
         {/* Label text */}
         {label && (
           <p
-            className={`font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[12px] text-nowrap whitespace-pre select-none transition-colors duration-200 ${getTextColor()}`}
+            className={`font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[12px] whitespace-normal select-none transition-colors duration-200 ${getTextColor()}`}
           >
             {label}
           </p>
