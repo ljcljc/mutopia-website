@@ -21,16 +21,23 @@ function FeatureCard1() {
     <Card className="border-0 shadow-none bg-transparent gap-[16px] p-0 w-full lg:w-[238px]">
       <CardContent className="p-0 flex flex-col gap-[16px]">
         <div className="content-stretch flex gap-[10.5px] h-[42px] items-center">
-          <Badge iconSize="custom" className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center">
-            <img src={iconCertifiedProfessionals} alt="Certified Professionals" className="size-[24px]" />
+          <Badge
+            iconSize="custom"
+            className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center"
+          >
+            <img
+              src={iconCertifiedProfessionals}
+              alt="Certified Professionals"
+              className="size-[24px]"
+            />
           </Badge>
           <h3 className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
             Certified Professionals
           </h3>
         </div>
         <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">
-          All our groomers are certified, insured, and
-          background-checked for your peace of mind.
+          All our groomers are certified, insured, and background-checked for
+          your peace of mind.
         </p>
       </CardContent>
     </Card>
@@ -42,16 +49,23 @@ function FeatureCard2() {
     <Card className="border-0 shadow-none bg-transparent gap-[16px] p-0 w-full lg:w-[238px]">
       <CardContent className="p-0 flex flex-col gap-[16px]">
         <div className="content-stretch flex gap-[10.5px] h-[42px] items-center">
-          <Badge iconSize="custom" className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center">
-            <img src={iconConvenientScheduling} alt="Convenient Scheduling" className="size-[24px]" />
+          <Badge
+            iconSize="custom"
+            className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center"
+          >
+            <img
+              src={iconConvenientScheduling}
+              alt="Convenient Scheduling"
+              className="size-[24px]"
+            />
           </Badge>
           <h3 className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
             Convenient Scheduling
           </h3>
         </div>
         <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">
-          Book appointments online 24/7. We work around your
-          schedule, not the other way around.
+          Book appointments online 24/7. We work around your schedule, not the
+          other way around.
         </p>
       </CardContent>
     </Card>
@@ -63,8 +77,15 @@ function FeatureCard3() {
     <Card className="border-0 shadow-none bg-transparent gap-[16px] p-0 w-full lg:w-[238px]">
       <CardContent className="p-0 flex flex-col gap-[16px]">
         <div className="content-stretch flex gap-[10.5px] h-[42px] items-center">
-          <Badge iconSize="custom" className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center">
-            <img src={iconPersonalizedCare} alt="Personalized Care" className="size-[24px]" />
+          <Badge
+            iconSize="custom"
+            className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center"
+          >
+            <img
+              src={iconPersonalizedCare}
+              alt="Personalized Care"
+              className="size-[24px]"
+            />
           </Badge>
           <h3 className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
             Personalized Care
@@ -81,16 +102,23 @@ function FeatureCard4() {
     <Card className="border-0 shadow-none bg-transparent gap-[16px] p-0 w-full lg:w-[238px]">
       <CardContent className="p-0 flex flex-col gap-[16px]">
         <div className="content-stretch flex gap-[10.5px] h-[42px] items-center">
-          <Badge iconSize="custom" className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center">
-            <img src={iconPremiumQuality} alt="Premium Quality" className="size-[24px]" />
+          <Badge
+            iconSize="custom"
+            className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center"
+          >
+            <img
+              src={iconPremiumQuality}
+              alt="Premium Quality"
+              className="size-[24px]"
+            />
           </Badge>
           <h3 className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
             Premium Quality
           </h3>
         </div>
         <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">
-          We use only the finest, pet-safe products and
-          state-of-the-art equipment.
+          We use only the finest, pet-safe products and state-of-the-art
+          equipment.
         </p>
       </CardContent>
     </Card>
@@ -102,16 +130,23 @@ function FeatureCard5() {
     <Card className="border-0 shadow-none bg-transparent gap-[16px] p-0 w-full lg:w-[238px]">
       <CardContent className="p-0 flex flex-col gap-[16px]">
         <div className="content-stretch flex gap-[10.5px] h-[42px] items-center">
-          <Badge iconSize="custom" className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center">
-            <img src={iconStressFreeExperience} alt="Stress-Free Experience" className="size-[24px]" />
+          <Badge
+            iconSize="custom"
+            className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center"
+          >
+            <img
+              src={iconStressFreeExperience}
+              alt="Stress-Free Experience"
+              className="size-[24px]"
+            />
           </Badge>
           <h3 className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
             Stress-Free Experience
           </h3>
         </div>
         <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">
-          Mobile service means no stressful car rides. Your pet
-          stays comfortable at home.
+          Mobile service means no stressful car rides. Your pet stays
+          comfortable at home.
         </p>
       </CardContent>
     </Card>
@@ -123,16 +158,23 @@ function FeatureCard6() {
     <Card className="border-0 shadow-none bg-transparent gap-[16px] p-0 w-full lg:w-[238px]">
       <CardContent className="p-0 flex flex-col gap-[16px]">
         <div className="content-stretch flex gap-[10.5px] h-[42px] items-center">
-          <Badge iconSize="custom" className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center">
-            <img src={iconRealTimeUpdates} alt="Real-Time Updates" className="size-[24px]" />
+          <Badge
+            iconSize="custom"
+            className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center"
+          >
+            <img
+              src={iconRealTimeUpdates}
+              alt="Real-Time Updates"
+              className="size-[24px]"
+            />
           </Badge>
           <h3 className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
             Real-Time Updates
           </h3>
         </div>
         <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">
-          Get photos and updates throughout the grooming process
-          via our mobile app.
+          Get photos and updates throughout the grooming process via our mobile
+          app.
         </p>
       </CardContent>
     </Card>
@@ -142,10 +184,7 @@ function FeatureCard6() {
 // Mobile Image Section Component
 function MobileImageSection() {
   return (
-    <div
-      className="relative w-full max-w-[393px] mx-auto"
-      data-name="Img"
-    >
+    <div className="relative w-full max-w-[393px] mx-auto" data-name="Img">
       <div className="relative h-[349px]" data-name="Container">
         <div
           className="absolute bg-[rgba(255,255,255,0)] box-border content-stretch flex flex-col h-[324px] items-start left-[2px] right-[2px] overflow-clip rounded-[21px] shadow-[0px_20px_25px_-5px_rgba(0,0,0,0.1),0px_8px_10px_-6px_rgba(0,0,0,0.1)] top-[-9px]"
@@ -345,12 +384,24 @@ function MobileSlide1() {
   return (
     <div className="content-stretch flex flex-col gap-[36px] items-start w-[238px]">
       <MobileFeatureCard
-        icon={<img src={iconCertifiedProfessionals} alt="Certified Professionals" className="size-[24px]" />}
+        icon={
+          <img
+            src={iconCertifiedProfessionals}
+            alt="Certified Professionals"
+            className="size-[24px]"
+          />
+        }
         title="Certified Professionals"
         description="All our groomers are certified, insured, and background-checked for your peace of mind."
       />
       <MobileFeatureCard
-        icon={<img src={iconConvenientScheduling} alt="Convenient Scheduling" className="size-[24px]" />}
+        icon={
+          <img
+            src={iconConvenientScheduling}
+            alt="Convenient Scheduling"
+            className="size-[24px]"
+          />
+        }
         title="Convenient Scheduling"
         description="Book appointments online 24/7. We work around your schedule, not the other way around."
       />
@@ -362,12 +413,24 @@ function MobileSlide2() {
   return (
     <div className="content-stretch flex flex-col gap-[36px] items-start w-[238px]">
       <MobileFeatureCard
-        icon={<img src={iconPersonalizedCare} alt="Personalized Care" className="size-[24px]" />}
+        icon={
+          <img
+            src={iconPersonalizedCare}
+            alt="Personalized Care"
+            className="size-[24px]"
+          />
+        }
         title="Personalized Care"
         description="Every pet is unique. We tailor our services to your pet's specific needs and temperament."
       />
       <MobileFeatureCard
-        icon={<img src={iconPremiumQuality} alt="Premium Quality" className="size-[24px]" />}
+        icon={
+          <img
+            src={iconPremiumQuality}
+            alt="Premium Quality"
+            className="size-[24px]"
+          />
+        }
         title="Premium Quality"
         description="We use only the finest, pet-safe products and state-of-the-art equipment."
       />
@@ -379,12 +442,24 @@ function MobileSlide3() {
   return (
     <div className="content-stretch flex flex-col gap-[36px] items-start w-[238px]">
       <MobileFeatureCard
-        icon={<img src={iconStressFreeExperience} alt="Stress-Free Experience" className="size-[24px]" />}
+        icon={
+          <img
+            src={iconStressFreeExperience}
+            alt="Stress-Free Experience"
+            className="size-[24px]"
+          />
+        }
         title="Stress-Free Experience"
         description="Mobile service means no stressful car rides. Your pet stays comfortable at home."
       />
       <MobileFeatureCard
-        icon={<img src={iconRealTimeUpdates} alt="Real-Time Updates" className="size-[24px]" />}
+        icon={
+          <img
+            src={iconRealTimeUpdates}
+            alt="Real-Time Updates"
+            className="size-[24px]"
+          />
+        }
         title="Real-Time Updates"
         description="Get photos and updates throughout the grooming process via our mobile app."
       />

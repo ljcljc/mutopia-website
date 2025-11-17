@@ -16,7 +16,10 @@ export const passwordSchema = z
 export const strongPasswordSchema = z
   .string()
   .min(8, "Password must be at least 8 characters")
-  .regex(/[0-9!@#$%^&*(),.?":{}|<>]/, "Password must contain a number or symbol")
+  .regex(
+    /[0-9!@#$%^&*(),.?":{}|<>]/,
+    "Password must contain a number or symbol"
+  )
   .max(100, "Password is too long");
 
 // Login form schema
@@ -27,32 +30,43 @@ export const loginFormSchema = z.object({
 });
 
 // Sign up form schema
-export const signUpFormSchema = z.object({
-  email: emailSchema,
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  birthday: z.string().min(1, "Date of birth is required").refine((date) => {
-    // Validate date format and age (at least 18 years old)
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!dateRegex.test(date)) return false;
-    const birthDate = new Date(date);
-    const today = new Date();
-    const age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      return age - 1 >= 18;
-    }
-    return age >= 18;
-  }, {
-    message: "You must be at least 18 years old",
-  }),
-  address: z.string().min(1, "Address is required"),
-  password: strongPasswordSchema,
-  confirmPassword: z.string().min(1, "Please confirm your password"),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
-  path: ["confirmPassword"],
-});
+export const signUpFormSchema = z
+  .object({
+    email: emailSchema,
+    firstName: z.string().min(1, "First name is required"),
+    lastName: z.string().min(1, "Last name is required"),
+    birthday: z
+      .string()
+      .min(1, "Date of birth is required")
+      .refine(
+        (date) => {
+          // Validate date format and age (at least 18 years old)
+          const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+          if (!dateRegex.test(date)) return false;
+          const birthDate = new Date(date);
+          const today = new Date();
+          const age = today.getFullYear() - birthDate.getFullYear();
+          const monthDiff = today.getMonth() - birthDate.getMonth();
+          if (
+            monthDiff < 0 ||
+            (monthDiff === 0 && today.getDate() < birthDate.getDate())
+          ) {
+            return age - 1 >= 18;
+          }
+          return age >= 18;
+        },
+        {
+          message: "You must be at least 18 years old",
+        }
+      ),
+    address: z.string().min(1, "Address is required"),
+    password: strongPasswordSchema,
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
 // Email step schema (for checking if email is registered)
 export const emailStepSchema = z.object({
@@ -63,4 +77,3 @@ export const emailStepSchema = z.object({
 export type LoginFormData = z.infer<typeof loginFormSchema>;
 export type SignUpFormData = z.infer<typeof signUpFormSchema>;
 export type EmailStepData = z.infer<typeof emailStepSchema>;
-

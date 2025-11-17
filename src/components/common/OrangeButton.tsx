@@ -23,7 +23,7 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
       className = "",
       ...props
     },
-    ref,
+    ref
   ) => {
     const baseStyles =
       "relative rounded-[32px] transition-all duration-200 cursor-pointer group";
@@ -157,7 +157,9 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
                     )}
                     {/* Content - invisible when loading but still takes up space */}
                     {typeof children === "string" ? (
-                      <p className={`font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#8b6357] text-[12px] text-nowrap whitespace-pre ${loading ? "invisible" : ""}`}>
+                      <p
+                        className={`font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#8b6357] text-[12px] text-nowrap whitespace-pre ${loading ? "invisible" : ""}`}
+                      >
                         {children}
                       </p>
                     ) : (
@@ -203,7 +205,10 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
 
     // Outline buttons have border-2, so they need different padding to maintain visual size
     const sizeStyles = {
-      standard: variant === "outline" ? "h-[48px] px-[30px] py-[16px]" : "h-[48px] px-[28px] py-[14px]",
+      standard:
+        variant === "outline"
+          ? "h-[48px] px-[30px] py-[16px]"
+          : "h-[48px] px-[28px] py-[14px]",
       medium: "h-[36px] px-[28px] py-[16px]",
     };
 
@@ -239,13 +244,13 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
             )}
             {/* Content - invisible when loading but still takes up space */}
             {typeof children === "string" ? (
-              <p className={`font-['Comfortaa:Bold',_sans-serif] leading-[24.5px] text-[16px] whitespace-nowrap ${loading ? "invisible" : ""}`}>
+              <p
+                className={`font-['Comfortaa:Bold',_sans-serif] leading-[24.5px] text-[16px] whitespace-nowrap ${loading ? "invisible" : ""}`}
+              >
                 {children}
               </p>
             ) : (
-              <div className={loading ? "invisible" : ""}>
-                {children}
-              </div>
+              <div className={loading ? "invisible" : ""}>{children}</div>
             )}
           </div>
         </button>
@@ -269,18 +274,18 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
           )}
           {/* Content - invisible when loading but still takes up space */}
           {typeof children === "string" ? (
-            <p className={`font-['Comfortaa:Bold',_sans-serif] leading-[24.5px] text-[#de6a07] text-[16px] whitespace-nowrap ${loading ? "invisible" : ""}`}>
+            <p
+              className={`font-['Comfortaa:Bold',_sans-serif] leading-[24.5px] text-[#de6a07] text-[16px] whitespace-nowrap ${loading ? "invisible" : ""}`}
+            >
               {children}
             </p>
           ) : (
-            <div className={loading ? "invisible" : ""}>
-              {children}
-            </div>
+            <div className={loading ? "invisible" : ""}>{children}</div>
           )}
         </div>
       </button>
     );
-  },
+  }
 );
 
 OrangeButton.displayName = "OrangeButton";

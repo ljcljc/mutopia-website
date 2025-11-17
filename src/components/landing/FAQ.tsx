@@ -37,14 +37,12 @@ export default function FAQ() {
         "Our full grooming service includes a premium bath with conditioning treatment, complete haircut and styling, nail trimming and filing, ear cleaning, teeth brushing, sanitary trim, and anal gland expression (if needed). We finish with a spritz of pet-safe cologne.",
     },
     {
-      question:
-        "Do you provide your own water and electricity?",
+      question: "Do you provide your own water and electricity?",
       answer:
         "Yes! Our mobile grooming vans are completely self-contained with their own water supply, heating system, and electrical generator. We don't need to use any of your utilities. However, we may occasionally request access to an outdoor outlet for extended appointments.",
     },
     {
-      question:
-        "What happens if I need to cancel or reschedule?",
+      question: "What happens if I need to cancel or reschedule?",
       answer:
         "We understand plans change! You can cancel or reschedule up to 24 hours before your appointment without any fees. Cancellations with less than 24 hours notice may incur a $25 fee. Premium members receive more flexible cancellation terms.",
     },
@@ -73,8 +71,8 @@ export default function FAQ() {
               </p>
               {/* Paragraph */}
               <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[28px] text-[16px] text-[rgba(74,60,42,0.7)] max-w-[265px] md:max-w-none text-center">
-                Everything you need to know about our services
-                and how we care for your pets.
+                Everything you need to know about our services and how we care
+                for your pets.
               </p>
             </div>
 
@@ -142,8 +140,8 @@ export default function FAQ() {
                       Contact us for more details
                     </p>
                     <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(255,255,255,0.9)] text-center">
-                      Our friendly customer service team is here
-                      to help you and your pet.
+                      Our friendly customer service team is here to help you and
+                      your pet.
                     </p>
 
                     {/* Name Input */}

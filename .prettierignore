@@ -1,0 +1,57 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+dist
+.vite
+build
+out
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Lock files
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated files
+*.tsbuildinfo
+coverage
+.nyc_output
+
+# Public assets (usually don't need formatting)
+public/images
+public/icons
+
+# SVG files (often have specific formatting)
+*.svg
+
+# Config files that should keep their format
+*.config.js
+*.config.ts
+vite.config.ts
+tailwind.config.js
+eslint.config.js
+

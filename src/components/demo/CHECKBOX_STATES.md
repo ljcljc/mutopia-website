@@ -2,17 +2,18 @@
 
 ## Five States Overview
 
-| # | State | Trigger | Background | Border | Checkmark | Text Color |
-|---|-------|---------|------------|--------|-----------|------------|
-| 1 | **Default** | Unchecked initial | White | Gray `#717182` | None | Dark `#4a3c2a` |
-| 2 | **Hover** | Mouse over (unchecked) | White | Gray `#717182` | None | Gray `#717182` |
-| 3 | **Focus** | Tab on checked | Blue `#2374ff` | None | White solid | Dark `#4a3c2a` |
-| 4 | **Active** | Click & hold (checked) | Orange `#de6a07` | None | Gradient | Dark `#4a3c2a` |
-| 5 | **Checked** | Selected | Blue `#2374ff` | None | White solid | Dark `#4a3c2a` |
+| #   | State       | Trigger                | Background       | Border         | Checkmark   | Text Color     |
+| --- | ----------- | ---------------------- | ---------------- | -------------- | ----------- | -------------- |
+| 1   | **Default** | Unchecked initial      | White            | Gray `#717182` | None        | Dark `#4a3c2a` |
+| 2   | **Hover**   | Mouse over (unchecked) | White            | Gray `#717182` | None        | Gray `#717182` |
+| 3   | **Focus**   | Tab on checked         | Blue `#2374ff`   | None           | White solid | Dark `#4a3c2a` |
+| 4   | **Active**  | Click & hold (checked) | Orange `#de6a07` | None           | Gradient    | Dark `#4a3c2a` |
+| 5   | **Checked** | Selected               | Blue `#2374ff`   | None           | White solid | Dark `#4a3c2a` |
 
 ## State Details
 
 ### 1. Default (Unchecked)
+
 ```
 Trigger: Initial state
 Background: White
@@ -23,6 +24,7 @@ Focus Ring: No
 ```
 
 ### 2. Hover
+
 ```
 Trigger: Mouse over unchecked checkbox
 Background: White
@@ -34,6 +36,7 @@ Transition: Text color fades smoothly
 ```
 
 ### 3. Focus
+
 ```
 Trigger: Tab to checked checkbox
 Background: Blue #2374ff
@@ -46,6 +49,7 @@ Note: Unchecked + focused = Default state
 ```
 
 ### 4. Active (Pressed)
+
 ```
 Trigger: Click and hold on checked checkbox
 Background: Orange #de6a07
@@ -57,6 +61,7 @@ Duration: While mouse is pressed
 ```
 
 ### 5. Checked
+
 ```
 Trigger: Click to select
 Background: Blue #2374ff
@@ -69,14 +74,18 @@ Focus Ring: No (unless also focused)
 ## Checkmark Variations
 
 ### Solid White Checkmark
+
 **Used in:** Focus, Checked states
+
 - Color: White `#FFFFFF`
 - Icon: Lucide-react Check
 - Size: 12px
 - Stroke Width: 3
 
 ### Gradient Checkmark
+
 **Used in:** Active state
+
 - Gradient: `#FFF7ED` → `#FFFBEB`
 - Direction: Top-left to bottom-right
 - SVG Path: From Figma import
@@ -85,6 +94,7 @@ Focus Ring: No (unless also focused)
 ## State Flow Diagrams
 
 ### Mouse Interaction Flow
+
 ```
 Default (unchecked)
     ↓ hover
@@ -100,6 +110,7 @@ Default (unchecked)
 ```
 
 ### Keyboard Interaction Flow
+
 ```
 Default (unchecked)
     ↓ Tab
@@ -114,23 +125,11 @@ Default (unchecked, gray border)
 
 ```css
 /* Backgrounds */
---bg-unchecked: #FFFFFF
---bg-checked: #2374ff
---bg-focus: #2374ff
---bg-active: #de6a07
-
-/* Borders */
---border-default: #717182
---border-focus-ring: #2374ff
-
-/* Text */
---text-default: #4a3c2a
---text-hover: #717182
-
-/* Checkmark */
---check-solid: #FFFFFF
---check-gradient-start: #FFF7ED
---check-gradient-end: #FFFBEB
+--bg-unchecked: #ffffff --bg-checked: #2374ff --bg-focus: #2374ff
+  --bg-active: #de6a07 /* Borders */ --border-default: #717182
+  --border-focus-ring: #2374ff /* Text */ --text-default: #4a3c2a
+  --text-hover: #717182 /* Checkmark */ --check-solid: #ffffff
+  --check-gradient-start: #fff7ed --check-gradient-end: #fffbeb;
 ```
 
 ## State Priority Logic
@@ -141,7 +140,7 @@ When multiple conditions are true:
    - Condition: `isChecked && isActive`
    - Display: Orange background, gradient checkmark
 
-2. **Focus** 
+2. **Focus**
    - Condition: `isChecked && isFocused`
    - Display: Blue background, white checkmark, focus ring
 
@@ -160,6 +159,7 @@ When multiple conditions are true:
 ## Transition Timing
 
 All state transitions use **200ms** duration:
+
 - Background color: `200ms`
 - Border color: `200ms`
 - Text color: `200ms`
@@ -170,6 +170,7 @@ Easing: Default (ease)
 ## Implementation Notes
 
 ### State Management
+
 ```typescript
 const [isChecked, setIsChecked] = useState(false);
 const [isFocused, setIsFocused] = useState(false);
@@ -178,6 +179,7 @@ const [isActive, setIsActive] = useState(false);
 ```
 
 ### Active State Detection
+
 ```typescript
 // Only activate when checkbox is already checked
 const handleMouseDown = () => {
@@ -192,30 +194,34 @@ const handleMouseUp = () => {
 ```
 
 ### Text Color Logic
+
 ```typescript
 const getTextColor = () => {
-  if (disabled) return 'text-[#717182]/50';
+  if (disabled) return "text-[#717182]/50";
   // Hover state: gray text when hovering over unchecked
-  if (isHovered && !isChecked) return 'text-[#717182]';
+  if (isHovered && !isChecked) return "text-[#717182]";
   // All other states: dark text
-  return 'text-[#4a3c2a]';
+  return "text-[#4a3c2a]";
 };
 ```
 
 ## Accessibility Features
 
 ### Keyboard Support
+
 - `Tab` - Navigate to checkbox
 - `Space` - Toggle checked state
 - `Shift + Tab` - Navigate backward
 
 ### Screen Reader
+
 - Announces "checkbox" role
 - Reads label text
 - States "checked" or "not checked"
 - Focus changes are announced
 
 ### Visual Indicators
+
 - Focus ring for keyboard navigation
 - Color contrast meets WCAG AA standards
 - State changes are visually distinct
@@ -223,6 +229,7 @@ const getTextColor = () => {
 ## Testing Checklist
 
 ### Visual Tests
+
 - [ ] Default state shows gray border
 - [ ] Hover changes text to gray (unchecked only)
 - [ ] Focus shows blue focus ring
@@ -232,6 +239,7 @@ const getTextColor = () => {
 - [ ] White checkmark appears in checked/focus states
 
 ### Interaction Tests
+
 - [ ] Click toggles checked state
 - [ ] Hover over unchecked changes text color
 - [ ] Tab navigation works
@@ -241,6 +249,7 @@ const getTextColor = () => {
 - [ ] Label click toggles checkbox
 
 ### Accessibility Tests
+
 - [ ] Screen reader announces state
 - [ ] Keyboard navigation works
 - [ ] Focus is visible
@@ -270,17 +279,16 @@ const getTextColor = () => {
 5. **Unchecked always looks the same**
    - Whether hovered, focused, or default - unchecked state has same gray border
    - Only the text color changes on hover
-   
 6. **No focus ring**
    - Focus ring has been removed from all states
    - Keyboard focus is still functional, just not visually indicated with a ring
 
 ## Browser Compatibility
 
-| Feature | Chrome | Firefox | Safari | Edge |
-|---------|--------|---------|--------|------|
-| Basic functionality | ✅ | ✅ | ✅ | ✅ |
-| CSS transitions | ✅ | ✅ | ✅ | ✅ |
-| SVG gradients | ✅ | ✅ | ✅ | ✅ |
-| Keyboard events | ✅ | ✅ | ✅ | ✅ |
-| Focus-visible | ✅ | ✅ | ✅ | ✅ |
+| Feature             | Chrome | Firefox | Safari | Edge |
+| ------------------- | ------ | ------- | ------ | ---- |
+| Basic functionality | ✅     | ✅      | ✅     | ✅   |
+| CSS transitions     | ✅     | ✅      | ✅     | ✅   |
+| SVG gradients       | ✅     | ✅      | ✅     | ✅   |
+| Keyboard events     | ✅     | ✅      | ✅     | ✅   |
+| Focus-visible       | ✅     | ✅      | ✅     | ✅   |

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import iconArrowLeft from "@/assets/icons/icon-arrow-left.svg";
 import iconArrowRight from "@/assets/icons/icon-arrow-right.svg";
 import iconCalendar from "@/assets/icons/icon-calendar.svg";
@@ -65,19 +65,18 @@ export function DatePicker({
   const [isOpen, setIsOpen] = useState(false);
   const [showYearPicker, setShowYearPicker] = useState(false);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState(
-    new Date().getMonth(),
-  );
-  const [currentYear, setCurrentYear] = useState(
-    new Date().getFullYear(),
-  );
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const pickerRef = useRef<HTMLDivElement>(null);
   const yearScrollRef = useRef<HTMLDivElement>(null);
   const hasInitializedRef = useRef(false);
 
   // Parse date strings to get year and month limits
-  const maxDateObj = maxDate ? new Date(maxDate) : null;
-  const minDateObj = new Date(minDate);
+  const maxDateObj = useMemo(
+    () => (maxDate ? new Date(maxDate) : null),
+    [maxDate]
+  );
+  const minDateObj = useMemo(() => new Date(minDate), [minDate]);
 
   // Set initial calendar view when opening
   useEffect(() => {
@@ -85,10 +84,7 @@ export function DatePicker({
       hasInitializedRef.current = true;
 
       const today = new Date();
-      const currentDisplayDate = new Date(
-        currentYear,
-        currentMonth,
-      );
+      const currentDisplayDate = new Date(currentYear, currentMonth);
 
       // Parse date constraints
       const maxDateObj = maxDate ? new Date(maxDate) : null;
@@ -100,7 +96,7 @@ export function DatePicker({
       if (maxDateObj) {
         const maxDisplayDate = new Date(
           maxDateObj.getFullYear(),
-          maxDateObj.getMonth(),
+          maxDateObj.getMonth()
         );
         if (currentDisplayDate > maxDisplayDate) {
           isInValidRange = false;
@@ -110,7 +106,7 @@ export function DatePicker({
       if (minDateObj) {
         const minDisplayDate = new Date(
           minDateObj.getFullYear(),
-          minDateObj.getMonth(),
+          minDateObj.getMonth()
         );
         if (currentDisplayDate < minDisplayDate) {
           isInValidRange = false;
@@ -157,33 +153,33 @@ export function DatePicker({
     }
 
     if (isOpen) {
-      document.addEventListener(
-        "mousedown",
-        handleClickOutside,
-      );
+      document.addEventListener("mousedown", handleClickOutside);
       return () =>
-        document.removeEventListener(
-          "mousedown",
-          handleClickOutside,
-        );
+        document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [isOpen]);
+
+  // Generate year range based on min and max dates
+  const yearRange = useMemo(() => {
+    const minYear = minDateObj.getFullYear();
+    const maxYear = maxDateObj
+      ? maxDateObj.getFullYear()
+      : new Date().getFullYear() + 10;
+    const yearCount = maxYear - minYear + 1;
+    return Array.from({ length: yearCount }, (_, i) => minYear + i);
+  }, [minDateObj, maxDateObj]);
 
   // Scroll to current year when year picker opens
   useEffect(() => {
     if (showYearPicker && yearScrollRef.current) {
-      const yearRange = generateYearRange();
       const currentYearIndex = yearRange.indexOf(currentYear);
       if (currentYearIndex !== -1) {
         // Scroll to center the current year (32px per item height)
         const scrollTop = currentYearIndex * 32 - 184;
-        yearScrollRef.current.scrollTop = Math.max(
-          0,
-          scrollTop,
-        );
+        yearScrollRef.current.scrollTop = Math.max(0, scrollTop);
       }
     }
-  }, [showYearPicker, currentYear]);
+  }, [showYearPicker, currentYear, yearRange]);
 
   // Get days in month
   function getDaysInMonth(year: number, month: number) {
@@ -199,18 +195,9 @@ export function DatePicker({
 
   // Generate calendar days
   function getCalendarDays() {
-    const daysInMonth = getDaysInMonth(
-      currentYear,
-      currentMonth,
-    );
-    const firstDay = getFirstDayOfMonth(
-      currentYear,
-      currentMonth,
-    );
-    const daysInPrevMonth = getDaysInMonth(
-      currentYear,
-      currentMonth - 1,
-    );
+    const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+    const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
+    const daysInPrevMonth = getDaysInMonth(currentYear, currentMonth - 1);
 
     const days: {
       day: number;
@@ -220,18 +207,12 @@ export function DatePicker({
 
     // Previous month days
     for (let i = firstDay - 1; i >= 0; i--) {
-      const prevMonth =
-        currentMonth === 0 ? 11 : currentMonth - 1;
-      const prevYear =
-        currentMonth === 0 ? currentYear - 1 : currentYear;
+      const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+      const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
       days.push({
         day: daysInPrevMonth - i,
         isCurrentMonth: false,
-        date: new Date(
-          prevYear,
-          prevMonth,
-          daysInPrevMonth - i,
-        ),
+        date: new Date(prevYear, prevMonth, daysInPrevMonth - i),
       });
     }
 
@@ -246,10 +227,8 @@ export function DatePicker({
 
     // Next month days to fill the grid
     const remainingDays = 42 - days.length; // 6 rows × 7 days
-    const nextMonth =
-      currentMonth === 11 ? 0 : currentMonth + 1;
-    const nextYear =
-      currentMonth === 11 ? currentYear + 1 : currentYear;
+    const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
+    const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
     for (let i = 1; i <= remainingDays; i++) {
       days.push({
         day: i,
@@ -323,7 +302,7 @@ export function DatePicker({
   function handleMonthClick(monthIndex: number) {
     setCurrentMonth(monthIndex);
     setShowMonthPicker(false);
-    
+
     // If in month mode, select the month and close the picker
     if (mode === "month") {
       const year = currentYear;
@@ -333,29 +312,11 @@ export function DatePicker({
     }
   }
 
-  // Generate year range based on min and max dates
-  function generateYearRange() {
-    const minYear = minDateObj.getFullYear();
-    const maxYear = maxDateObj
-      ? maxDateObj.getFullYear()
-      : new Date().getFullYear() + 10;
-    const yearCount = maxYear - minYear + 1;
-    return Array.from(
-      { length: yearCount },
-      (_, i) => minYear + i,
-    );
-  }
-
   const calendarDays = getCalendarDays();
-  const yearRange = generateYearRange();
 
   // Parse min and max dates for comparison
-  const minDateTime = minDate
-    ? new Date(minDate).setHours(0, 0, 0, 0)
-    : null;
-  const maxDateTime = maxDate
-    ? new Date(maxDate).setHours(0, 0, 0, 0)
-    : null;
+  const minDateTime = minDate ? new Date(minDate).setHours(0, 0, 0, 0) : null;
+  const maxDateTime = maxDate ? new Date(maxDate).setHours(0, 0, 0, 0) : null;
 
   // Check if a date is selected
   const selectedDate = value ? new Date(value) : null;
@@ -384,7 +345,9 @@ export function DatePicker({
           className="content-stretch flex gap-[7px] items-center relative shrink-0 w-full"
           data-name="Primitive.label"
         >
-          <p className={`font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[14px] text-nowrap whitespace-pre ${error ? "text-[#de1507]" : "text-[#4a3c2a]"}`}>
+          <p
+            className={`font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[14px] text-nowrap whitespace-pre ${error ? "text-[#de1507]" : "text-[#4a3c2a]"}`}
+          >
             {label}
           </p>
         </div>
@@ -404,7 +367,7 @@ export function DatePicker({
             <div className="box-border content-stretch flex h-[36px] items-center px-[16px] py-[4px] relative w-full">
               <div className="basis-0 content-stretch flex grow items-center min-h-px min-w-px relative shrink-0">
                 <p
-                  className={`basis-0 font-['Comfortaa:Regular',_sans-serif] font-normal grow leading-[normal] min-h-px min-w-px relative shrink-0 text-[12.25px] ${value ? "text-black" : "text-[#717182]"}`}
+                  className={`basis-0 font-['Comfortaa:Regular',sans-serif] font-normal grow leading-[normal] min-h-px min-w-px relative shrink-0 text-[12.25px] ${value ? "text-black" : "text-[#717182]"}`}
                 >
                   {value || displayPlaceholder}
                 </p>
@@ -431,12 +394,11 @@ export function DatePicker({
       {/* Calendar Popup */}
       {isOpen && (
         <div className="absolute bg-white box-border flex flex-col gap-[20px] p-[24px] rounded-[16px] top-[calc(100%+8px)] left-0 z-50 shadow-lg w-full max-w-[373px] border border-[rgba(0,0,0,0.2)] border-solid">
-
           {/* Year Picker (Overlay) */}
           {showYearPicker && (
             <div
               ref={yearScrollRef}
-              className="absolute bg-white h-[400px] rounded-[8px] top-[16px] left-[16px] w-[68px] z-[60] overflow-y-auto shadow-[0px_30px_84px_0px_rgba(19,10,46,0.08),0px_8px_32px_0px_rgba(19,10,46,0.07),0px_3px_14px_0px_rgba(19,10,46,0.03),0px_1px_3px_0px_rgba(19,10,46,0.13)]"
+              className="absolute bg-white h-[400px] rounded-[8px] top-[16px] left-[16px] w-[68px] z-60 overflow-y-auto shadow-[0px_30px_84px_0px_rgba(19,10,46,0.08),0px_8px_32px_0px_rgba(19,10,46,0.07),0px_3px_14px_0px_rgba(19,10,46,0.03),0px_1px_3px_0px_rgba(19,10,46,0.13)]"
               style={{
                 scrollbarWidth: "thin",
                 scrollbarColor: "#d1d5db transparent",
@@ -454,15 +416,12 @@ export function DatePicker({
                   const maxYear = maxDateObj
                     ? maxDateObj.getFullYear()
                     : new Date().getFullYear() + 10;
-                  const isDisabled =
-                    year < minYear || year > maxYear;
+                  const isDisabled = year < minYear || year > maxYear;
 
                   return (
                     <button
                       key={year}
-                      onClick={() =>
-                        !isDisabled && handleYearClick(year)
-                      }
+                      onClick={() => !isDisabled && handleYearClick(year)}
                       disabled={isDisabled}
                       className={`box-border content-stretch flex gap-[8px] items-start overflow-clip px-[16px] py-[4px] w-full transition-colors relative ${
                         isDisabled
@@ -473,10 +432,8 @@ export function DatePicker({
                       }`}
                     >
                       <p
-                        className={`basis-0 font-['Inter:${isSelected ? "Semi_Bold" : "Regular"}',_sans-serif] ${
-                          isSelected
-                            ? "font-semibold"
-                            : "font-normal"
+                        className={`basis-0 font-['Inter:${isSelected ? "Semi_Bold" : "Regular"}',sans-serif] ${
+                          isSelected ? "font-semibold" : "font-normal"
                         } grow leading-[24px] min-h-px min-w-px not-italic relative shrink-0 ${
                           isSelected
                             ? "text-[#f8f7fa] text-[14px]"
@@ -500,7 +457,7 @@ export function DatePicker({
 
           {/* Month Picker (Overlay) */}
           {showMonthPicker && (
-            <div className="absolute bg-white rounded-[8px] top-[16px] right-[16px] w-[140px] z-[60] shadow-[0px_30px_84px_0px_rgba(19,10,46,0.08),0px_8px_32px_0px_rgba(19,10,46,0.07),0px_3px_14px_0px_rgba(19,10,46,0.03),0px_1px_3px_0px_rgba(19,10,46,0.13)]">
+            <div className="absolute bg-white rounded-[8px] top-[16px] right-[16px] w-[140px] z-60 shadow-[0px_30px_84px_0px_rgba(19,10,46,0.08),0px_8px_32px_0px_rgba(19,10,46,0.07),0px_3px_14px_0px_rgba(19,10,46,0.03),0px_1px_3px_0px_rgba(19,10,46,0.13)]">
               <div
                 aria-hidden="true"
                 className="absolute border border-[rgba(0,0,0,0.2)] border-solid inset-0 pointer-events-none rounded-[8px]"
@@ -515,20 +472,14 @@ export function DatePicker({
                   if (maxDateObj) {
                     const maxYear = maxDateObj.getFullYear();
                     const maxMonth = maxDateObj.getMonth();
-                    if (
-                      currentYear === maxYear &&
-                      index > maxMonth
-                    ) {
+                    if (currentYear === maxYear && index > maxMonth) {
                       isDisabled = true;
                     }
                   }
                   if (minDateObj) {
                     const minYear = minDateObj.getFullYear();
                     const minMonth = minDateObj.getMonth();
-                    if (
-                      currentYear === minYear &&
-                      index < minMonth
-                    ) {
+                    if (currentYear === minYear && index < minMonth) {
                       isDisabled = true;
                     }
                   }
@@ -536,9 +487,7 @@ export function DatePicker({
                   return (
                     <button
                       key={month}
-                      onClick={() =>
-                        !isDisabled && handleMonthClick(index)
-                      }
+                      onClick={() => !isDisabled && handleMonthClick(index)}
                       disabled={isDisabled}
                       className={`relative shrink-0 w-full transition-colors ${
                         isDisabled
@@ -551,14 +500,10 @@ export function DatePicker({
                       <div className="overflow-clip rounded-[inherit] size-full">
                         <div className="box-border content-stretch flex gap-[8px] items-start px-[16px] py-[4px] relative w-full">
                           <p
-                            className={`basis-0 font-['Inter:${isSelected ? "Semi_Bold" : "Regular"}',_sans-serif] ${
-                              isSelected
-                                ? "font-semibold"
-                                : "font-normal"
+                            className={`basis-0 font-['Inter:${isSelected ? "Semi_Bold" : "Regular"}',sans-serif] ${
+                              isSelected ? "font-semibold" : "font-normal"
                             } grow leading-[24px] min-h-px min-w-px not-italic relative shrink-0 text-[14px] ${
-                              isSelected
-                                ? "text-[#f8f7fa]"
-                                : "text-[#19181a]"
+                              isSelected ? "text-[#f8f7fa]" : "text-[#19181a]"
                             }`}
                           >
                             {month}
@@ -639,7 +584,7 @@ export function DatePicker({
 
             {/* Days of Week - Only show in date mode */}
             {mode === "date" && (
-              <div className="content-stretch flex font-['Comfortaa:Medium',sans-serif] font-medium gap-[23px] items-center leading-[0] relative shrink-0 text-[12px] text-[rgba(60,60,67,0.6)] text-center whitespace-nowrap">
+              <div className="content-stretch flex font-['Comfortaa:Medium',sans-serif] font-medium gap-[23px] items-center leading-0 relative shrink-0 text-[12px] text-[rgba(60,60,67,0.6)] text-center whitespace-nowrap">
                 {DAYS.map((day) => (
                   <div
                     key={day}
@@ -657,17 +602,13 @@ export function DatePicker({
                 {Array.from({ length: 6 }).map((_, weekIndex) => (
                   <div
                     key={weekIndex}
-                    className="content-stretch flex font-['Comfortaa:Regular',sans-serif] font-normal items-center leading-[0] overflow-clip relative shrink-0 text-[16px] text-center w-full"
+                    className="content-stretch flex font-['Comfortaa:Regular',sans-serif] font-normal items-center leading-0 overflow-clip relative shrink-0 text-[16px] text-center w-full"
                   >
                     {calendarDays
                       .slice(weekIndex * 7, (weekIndex + 1) * 7)
                       .map((dayInfo, dayIndex) => {
-                        const selected = isDateSelected(
-                          dayInfo.date,
-                        );
-                        const disabled = isDateDisabled(
-                          dayInfo.date,
-                        );
+                        const selected = isDateSelected(dayInfo.date);
+                        const disabled = isDateDisabled(dayInfo.date);
                         const isCurrentMonth = dayInfo.isCurrentMonth;
                         return (
                           <div
@@ -695,9 +636,7 @@ export function DatePicker({
                             >
                               <p
                                 className={`font-['Comfortaa:${selected ? "Bold" : "Regular"}',sans-serif] ${
-                                  selected
-                                    ? "font-bold"
-                                    : "font-normal"
+                                  selected ? "font-bold" : "font-normal"
                                 } leading-[28px] whitespace-pre-wrap`}
                               >
                                 {dayInfo.day}
@@ -714,7 +653,7 @@ export function DatePicker({
             {/* Month mode instruction - Show when in month mode and no pickers are open */}
             {mode === "month" && !showYearPicker && !showMonthPicker && (
               <div className="flex items-center justify-center py-[24px]">
-                <p className="font-['Comfortaa:Regular',_sans-serif] font-normal text-[14px] text-[#717182] text-center">
+                <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] text-[#717182] text-center">
                   Click year or month to select
                 </p>
               </div>
@@ -727,15 +666,13 @@ export function DatePicker({
       {(helperText || error) && (
         <div className="content-stretch flex gap-[4px] items-center relative shrink-0 mt-[4px]">
           {error && (
-            <img
-              src={iconAlertError}
-              alt="Error"
-              className="size-[14px]"
-            />
+            <img src={iconAlertError} alt="Error" className="size-[14px]" />
           )}
-          <p className={`font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[12px] ${
-            error ? "text-[#de1507]" : "text-[#4c4c4c]"
-          }`}>
+          <p
+            className={`font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[12px] ${
+              error ? "text-[#de1507]" : "text-[#4c4c4c]"
+            }`}
+          >
             {error || helperText}
           </p>
         </div>

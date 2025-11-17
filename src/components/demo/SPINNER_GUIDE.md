@@ -26,13 +26,13 @@ interface SpinnerProps {
 
 ### Prop Details
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `size` | `"small" \| "medium" \| "large" \| number` | `"medium"` | Size of the spinner. Presets: small (16px), medium (24px), large (48px) |
-| `color` | `string` | `"white"` | Color of the spinner (any valid CSS color) |
-| `className` | `string` | `""` | Additional CSS classes |
-| `showTrack` | `boolean` | `false` | Whether to show background track/ring |
-| `trackOpacity` | `number` | `0.3` | Opacity of the background track (0-1) |
+| Prop           | Type                                       | Default    | Description                                                             |
+| -------------- | ------------------------------------------ | ---------- | ----------------------------------------------------------------------- |
+| `size`         | `"small" \| "medium" \| "large" \| number` | `"medium"` | Size of the spinner. Presets: small (16px), medium (24px), large (48px) |
+| `color`        | `string`                                   | `"white"`  | Color of the spinner (any valid CSS color)                              |
+| `className`    | `string`                                   | `""`       | Additional CSS classes                                                  |
+| `showTrack`    | `boolean`                                  | `false`    | Whether to show background track/ring                                   |
+| `trackOpacity` | `number`                                   | `0.3`      | Opacity of the background track (0-1)                                   |
 
 ## Usage Examples
 
@@ -58,17 +58,17 @@ import { Spinner } from './components/Spinner';
 
 ```tsx
 // Basic track
-<Spinner 
-  size="large" 
-  color="#25C8A8" 
-  showTrack 
+<Spinner
+  size="large"
+  color="#25C8A8"
+  showTrack
 />
 
 // Custom track opacity
-<Spinner 
-  size={40} 
-  color="#633479" 
-  showTrack 
+<Spinner
+  size={40}
+  color="#633479"
+  showTrack
   trackOpacity={0.2}
 />
 ```
@@ -76,21 +76,18 @@ import { Spinner } from './components/Spinner';
 ### In Buttons (Automatic)
 
 ```tsx
-import { OrangeButton } from './components/OrangeButton';
+import { OrangeButton } from "./components/OrangeButton";
 
-<OrangeButton 
-  variant="primary"
-  loading={isLoading}
->
+<OrangeButton variant="primary" loading={isLoading}>
   Submit
-</OrangeButton>
+</OrangeButton>;
 ```
 
 ### In Toast Notifications
 
 ```tsx
-import { toast } from 'sonner@2.0.3';
-import { Spinner } from './components/Spinner';
+import { toast } from "sonner@2.0.3";
+import { Spinner } from "./components/Spinner";
 
 toast.promise(apiCall, {
   loading: (
@@ -99,19 +96,21 @@ toast.promise(apiCall, {
       <span>Processing...</span>
     </div>
   ),
-  success: 'Done!',
-  error: 'Failed',
+  success: "Done!",
+  error: "Failed",
 });
 ```
 
 ### Custom Loading Overlay
 
 ```tsx
-{isLoading && (
-  <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80">
-    <Spinner size="large" color="#633479" showTrack />
-  </div>
-)}
+{
+  isLoading && (
+    <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80">
+      <Spinner size="large" color="#633479" showTrack />
+    </div>
+  );
+}
 ```
 
 ## When to Use Track Mode
@@ -134,6 +133,7 @@ Use basic mode (no track) when:
 ## Design Origin
 
 The spinner is extracted from Figma designs:
+
 - Basic mode: `/imports/svg-jzpin5grdi.ts`
 - Track mode: `/imports/svg-osebktixv4.ts`
 
@@ -142,6 +142,7 @@ Both modes maintain the exact visual design from Figma while adding flexibility 
 ## Accessibility
 
 The component includes proper ARIA attributes:
+
 - `role="status"` - Indicates a status update
 - `aria-label="Loading"` - Provides screen reader context
 

@@ -1,6 +1,7 @@
 import { forwardRef, InputHTMLAttributes, ReactNode } from "react";
 
-interface CustomInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'className'> {
+interface CustomInputProps
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "className"> {
   label?: string;
   error?: string;
   rightElement?: ReactNode;
@@ -13,7 +14,9 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
         {/* Label */}
         {label && (
           <div className="content-stretch flex gap-[7px] h-[12.25px] items-center relative shrink-0 w-full">
-            <p className={`font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[14px] text-nowrap whitespace-pre ${error ? 'text-[#de1507]' : 'text-[#4a3c2a]'}`}>
+            <p
+              className={`font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[14px] text-nowrap whitespace-pre ${error ? "text-[#de1507]" : "text-[#4a3c2a]"}`}
+            >
               {label}
             </p>
           </div>

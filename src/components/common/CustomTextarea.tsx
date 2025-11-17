@@ -28,10 +28,10 @@ export function CustomTextarea({
   const borderColor = error
     ? "border-[#de1507]"
     : isFocused
-    ? "border-[#2374ff]"
-    : isHovered
-    ? "border-[#717182]"
-    : "border-[#E5E7EB]";
+      ? "border-[#2374ff]"
+      : isHovered
+        ? "border-[#717182]"
+        : "border-[#E5E7EB]";
 
   const labelColor = error ? "text-[#de1507]" : "text-[#4a3c2a]";
 
@@ -53,7 +53,7 @@ export function CustomTextarea({
           <p
             className={cn(
               "font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] text-[14px] text-nowrap whitespace-pre",
-              labelColor,
+              labelColor
             )}
           >
             {label}
@@ -66,7 +66,7 @@ export function CustomTextarea({
         className={cn(
           "bg-white relative rounded-[12px] shrink-0 w-full h-[120px] transition-colors duration-200 border",
           borderColor,
-          disabled ? "opacity-60 cursor-not-allowed" : "",
+          disabled ? "opacity-60 cursor-not-allowed" : ""
         )}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -77,7 +77,7 @@ export function CustomTextarea({
           className={cn(
             "h-full resize-none border-none bg-transparent outline-none shadow-none font-['Comfortaa:Regular',sans-serif] font-normal text-[#717182] text-[12.25px] placeholder:text-[#717182] px-[16px] py-[12px]",
             "focus-visible:ring-0 focus-visible:border-none focus-visible:outline-none",
-            className,
+            className
           )}
           onFocus={handleFocus}
           onBlur={handleBlur}
@@ -100,10 +100,10 @@ export function CustomTextarea({
                   error
                     ? "#de1507"
                     : isFocused
-                    ? "#2374ff"
-                    : isHovered
-                    ? "#717182"
-                    : "#D6D6D6"
+                      ? "#2374ff"
+                      : isHovered
+                        ? "#717182"
+                        : "#D6D6D6"
                 }
                 strokeWidth="1.5"
                 strokeLinecap="round"
@@ -114,10 +114,10 @@ export function CustomTextarea({
                   error
                     ? "#de1507"
                     : isFocused
-                    ? "#2374ff"
-                    : isHovered
-                    ? "#717182"
-                    : "#D6D6D6"
+                      ? "#2374ff"
+                      : isHovered
+                        ? "#717182"
+                        : "#D6D6D6"
                 }
                 strokeWidth="1.5"
                 strokeLinecap="round"

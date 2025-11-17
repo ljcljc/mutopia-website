@@ -1,12 +1,12 @@
 /**
  * Checkbox Component Demo
- * 
+ *
  * Interactive demonstrations of the Checkbox component in all 5 states
  */
 
-import { useState } from 'react';
-import { ArrowLeft } from 'lucide-react';
-import { Checkbox, OrangeButton } from '@/components/common';
+import { useState } from "react";
+import { ArrowLeft } from "lucide-react";
+import { Checkbox, OrangeButton } from "@/components/common";
 
 export function CheckboxDemo({ onBack }: { onBack: () => void }) {
   const [checked1, setChecked1] = useState(false);
@@ -19,8 +19,8 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form data:', formData);
-    alert('Check console for form data');
+    console.log("Form data:", formData);
+    alert("Check console for form data");
   };
 
   return (
@@ -50,7 +50,7 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
           <p className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[rgba(74,60,42,0.8)] mb-8">
             Hover over, click, or use keyboard to see all state changes
           </p>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* State 1: Default */}
             <div className="border-2 border-gray-200 rounded-lg p-6">
@@ -136,29 +136,44 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 font-['Comfortaa:Regular',_sans-serif] text-[13px] text-[rgba(74,60,42,0.8)]">
               <div>
-                <p className="font-['Comfortaa:Bold',_sans-serif] text-[#717182] mb-1">Default:</p>
+                <p className="font-['Comfortaa:Bold',_sans-serif] text-[#717182] mb-1">
+                  Default:
+                </p>
                 <p>Initial unchecked state with gray border</p>
               </div>
               <div>
-                <p className="font-['Comfortaa:Bold',_sans-serif] text-[#717182] mb-1">Hover:</p>
+                <p className="font-['Comfortaa:Bold',_sans-serif] text-[#717182] mb-1">
+                  Hover:
+                </p>
                 <p>Move mouse over unchecked checkbox</p>
               </div>
               <div>
-                <p className="font-['Comfortaa:Bold',_sans-serif] text-[#2374ff] mb-1">Focus:</p>
-                <p>Tab to focus on a <strong>checked</strong> checkbox</p>
+                <p className="font-['Comfortaa:Bold',_sans-serif] text-[#2374ff] mb-1">
+                  Focus:
+                </p>
+                <p>
+                  Tab to focus on a <strong>checked</strong> checkbox
+                </p>
               </div>
               <div>
-                <p className="font-['Comfortaa:Bold',_sans-serif] text-[#de6a07] mb-1">Active:</p>
-                <p>Click and <strong>hold</strong> on checked checkbox</p>
+                <p className="font-['Comfortaa:Bold',_sans-serif] text-[#de6a07] mb-1">
+                  Active:
+                </p>
+                <p>
+                  Click and <strong>hold</strong> on checked checkbox
+                </p>
               </div>
               <div>
-                <p className="font-['Comfortaa:Bold',_sans-serif] text-[#2374ff] mb-1">Checked:</p>
+                <p className="font-['Comfortaa:Bold',_sans-serif] text-[#2374ff] mb-1">
+                  Checked:
+                </p>
                 <p>Click to select checkbox</p>
               </div>
             </div>
             <div className="mt-4 p-3 bg-white rounded border border-gray-200">
               <p className="font-['Comfortaa:Medium',_sans-serif] text-[12px] text-[#4a3c2a]">
-                ⚠️ <strong>注意：</strong>所有状态均<strong>无可见聚焦环</strong>，采用简洁设计风格
+                ⚠️ <strong>注意：</strong>所有状态均
+                <strong>无可见聚焦环</strong>，采用简洁设计风格
               </p>
             </div>
           </div>
@@ -223,7 +238,7 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
           <h2 className="font-['Comfortaa:Bold',_sans-serif] text-[28px] leading-[36px] text-[#633479] mb-6">
             Controlled Components
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Controlled Checkbox */}
             <div>
@@ -238,7 +253,10 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
                 />
                 <div className="p-4 bg-gray-50 rounded">
                   <p className="font-['Comfortaa:Medium',_sans-serif] text-[14px] text-[#4a3c2a]">
-                    State: <code className="bg-white px-2 py-1 rounded">{checked1 ? 'checked' : 'unchecked'}</code>
+                    State:{" "}
+                    <code className="bg-white px-2 py-1 rounded">
+                      {checked1 ? "checked" : "unchecked"}
+                    </code>
                   </p>
                 </div>
                 <button
@@ -259,7 +277,9 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
                 <Checkbox
                   label="Subscribe to newsletter"
                   defaultChecked={true}
-                  onCheckedChange={(checked) => console.log('Changed:', checked)}
+                  onCheckedChange={(checked) =>
+                    console.log("Changed:", checked)
+                  }
                 />
                 <div className="p-4 bg-gray-50 rounded">
                   <p className="font-['Comfortaa:Regular',_sans-serif] text-[13px] text-[rgba(74,60,42,0.7)]">
@@ -281,17 +301,23 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
               <Checkbox
                 label="I agree to the terms and conditions"
                 checked={formData.terms}
-                onCheckedChange={(checked) => setFormData({ ...formData, terms: checked })}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, terms: checked })
+                }
               />
               <Checkbox
                 label="Send me promotional emails and newsletters"
                 checked={formData.newsletter}
-                onCheckedChange={(checked) => setFormData({ ...formData, newsletter: checked })}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, newsletter: checked })
+                }
               />
               <Checkbox
                 label="Remember me on this device"
                 checked={formData.remember}
-                onCheckedChange={(checked) => setFormData({ ...formData, remember: checked })}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, remember: checked })
+                }
               />
             </div>
 
@@ -301,7 +327,13 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
               </OrangeButton>
               <button
                 type="button"
-                onClick={() => setFormData({ terms: false, newsletter: false, remember: false })}
+                onClick={() =>
+                  setFormData({
+                    terms: false,
+                    newsletter: false,
+                    remember: false,
+                  })
+                }
                 className="font-['Comfortaa:Medium',_sans-serif] text-[14px] text-[#717182] underline hover:text-[#4a3c2a] transition-colors"
               >
                 Clear All
@@ -318,7 +350,7 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
           <p className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
             Use for custom layouts or table rows
           </p>
-          
+
           <div className="space-y-6">
             {/* Table-like layout */}
             <div>
@@ -327,16 +359,23 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
               </h3>
               <div className="space-y-3">
                 {[
-                  { id: 1, task: 'Complete project proposal', checked: true },
-                  { id: 2, task: 'Review design mockups', checked: false },
-                  { id: 3, task: 'Send weekly report', checked: false },
+                  { id: 1, task: "Complete project proposal", checked: true },
+                  { id: 2, task: "Review design mockups", checked: false },
+                  { id: 3, task: "Send weekly report", checked: false },
                 ].map((item) => (
-                  <div key={item.id} className="flex items-center gap-4 p-3 bg-gray-50 rounded hover:bg-gray-100 transition-colors">
+                  <div
+                    key={item.id}
+                    className="flex items-center gap-4 p-3 bg-gray-50 rounded hover:bg-gray-100 transition-colors"
+                  >
                     <Checkbox
                       defaultChecked={item.checked}
-                      onCheckedChange={(checked) => console.log(`Task ${item.id}:`, checked)}
+                      onCheckedChange={(checked) =>
+                        console.log(`Task ${item.id}:`, checked)
+                      }
                     />
-                    <span className={`font-['Comfortaa:Regular',_sans-serif] text-[14px] ${item.checked ? 'line-through text-[rgba(74,60,42,0.5)]' : 'text-[#4a3c2a]'}`}>
+                    <span
+                      className={`font-['Comfortaa:Regular',_sans-serif] text-[14px] ${item.checked ? "line-through text-[rgba(74,60,42,0.5)]" : "text-[#4a3c2a]"}`}
+                    >
                       {item.task}
                     </span>
                   </div>
@@ -351,7 +390,10 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
               </h3>
               <div className="grid grid-cols-4 gap-4">
                 {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
-                  <div key={num} className="flex items-center justify-center p-4 bg-gray-50 rounded border-2 border-gray-200">
+                  <div
+                    key={num}
+                    className="flex items-center justify-center p-4 bg-gray-50 rounded border-2 border-gray-200"
+                  >
                     <Checkbox />
                   </div>
                 ))}
@@ -391,7 +433,7 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
                 Controlled Component:
               </p>
               <div className="bg-white p-4 rounded font-mono text-[12px] whitespace-pre-wrap">
-{`const [checked, setChecked] = useState(false);
+                {`const [checked, setChecked] = useState(false);
 
 <Checkbox 
   label="I agree" 
@@ -406,12 +448,29 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
                 Visual States:
               </p>
               <ul className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[#4a3c2a] space-y-1 list-disc list-inside ml-4">
-                <li><strong>Default:</strong> Gray border #717182, dark text #4a3c2a (unchecked)</li>
-                <li><strong>Hover:</strong> Gray text #717182 (unchecked only)</li>
-                <li><strong>Focus:</strong> Blue background #2374ff (checked + focused)</li>
-                <li><strong>Active:</strong> Orange background #de6a07, gradient checkmark (pressed)</li>
-                <li><strong>Checked:</strong> Blue background #2374ff, white checkmark</li>
-                <li><strong>⚠️ Note:</strong> All states have no visible focus ring (clean design)</li>
+                <li>
+                  <strong>Default:</strong> Gray border #717182, dark text
+                  #4a3c2a (unchecked)
+                </li>
+                <li>
+                  <strong>Hover:</strong> Gray text #717182 (unchecked only)
+                </li>
+                <li>
+                  <strong>Focus:</strong> Blue background #2374ff (checked +
+                  focused)
+                </li>
+                <li>
+                  <strong>Active:</strong> Orange background #de6a07, gradient
+                  checkmark (pressed)
+                </li>
+                <li>
+                  <strong>Checked:</strong> Blue background #2374ff, white
+                  checkmark
+                </li>
+                <li>
+                  <strong>⚠️ Note:</strong> All states have no visible focus
+                  ring (clean design)
+                </li>
               </ul>
             </div>
 

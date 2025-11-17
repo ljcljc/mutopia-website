@@ -17,9 +17,10 @@
  * - No visible focus ring (clean design)
  */
 
-import { forwardRef, useState, InputHTMLAttributes } from 'react';
+import { forwardRef, useState, InputHTMLAttributes } from "react";
 
-export interface RadioProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'size'> {
+export interface RadioProps
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "size"> {
   /** Label text to display next to radio */
   label?: string;
   /** Whether radio is checked (for controlled component) */
@@ -40,15 +41,17 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
       defaultChecked,
       onCheckedChange,
       onChange,
-      className = '',
-      containerClassName = '',
+      className = "",
+      containerClassName = "",
       disabled = false,
       ...props
     },
     ref
   ) => {
     // Internal state for uncontrolled mode
-    const [internalChecked, setInternalChecked] = useState(defaultChecked || false);
+    const [internalChecked, setInternalChecked] = useState(
+      defaultChecked || false
+    );
     const [, setIsFocused] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [isActive, setIsActive] = useState(false);
@@ -98,11 +101,11 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
 
     // Determine text color based on state
     const getTextColor = () => {
-      if (disabled) return 'text-[#717182]/50';
+      if (disabled) return "text-[#717182]/50";
       // Hover state: gray text when hovering over unchecked radio
-      if (isHovered && !isChecked) return 'text-[#717182]';
+      if (isHovered && !isChecked) return "text-[#717182]";
       // Default/Checked/Focus state: dark text
-      return 'text-[#4a3c2a]';
+      return "text-[#4a3c2a]";
     };
 
     // Determine radio background and border based on state
@@ -113,10 +116,10 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
           showBlueFill: isChecked,
           blueFillOpacity: 0.5,
           showBorder: true,
-          borderColor: '#717182',
+          borderColor: "#717182",
           borderOpacity: 0.3,
           showDot: isChecked,
-          dotColor: '#de6a07',
+          dotColor: "#de6a07",
         };
       }
 
@@ -126,10 +129,10 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
           showBlueFill: false,
           blueFillOpacity: 1,
           showBorder: true,
-          borderColor: '#717182',
+          borderColor: "#717182",
           borderOpacity: 1,
           showDot: true,
-          dotColor: '#de6a07',
+          dotColor: "#de6a07",
         };
       }
 
@@ -139,10 +142,10 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
           showBlueFill: true,
           blueFillOpacity: 1,
           showBorder: false,
-          borderColor: '',
+          borderColor: "",
           borderOpacity: 1,
           showDot: true,
-          dotColor: '#de6a07',
+          dotColor: "#de6a07",
         };
       }
 
@@ -151,10 +154,10 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
         showBlueFill: false,
         blueFillOpacity: 1,
         showBorder: true,
-        borderColor: '#717182',
+        borderColor: "#717182",
         borderOpacity: 1,
         showDot: false,
-        dotColor: '',
+        dotColor: "",
       };
     };
 
@@ -163,7 +166,7 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
     return (
       <label
         className={`content-stretch flex gap-[8px] items-center relative cursor-pointer ${
-          disabled ? 'cursor-not-allowed opacity-60' : ''
+          disabled ? "cursor-not-allowed opacity-60" : ""
         } ${containerClassName}`}
         data-name="Radio Label"
         onMouseEnter={handleMouseEnter}
@@ -225,12 +228,7 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
 
               {/* Inner dot (when checked) */}
               {radioStyle.showDot && (
-                <circle
-                  cx="8"
-                  cy="8"
-                  fill={radioStyle.dotColor}
-                  r="4"
-                />
+                <circle cx="8" cy="8" fill={radioStyle.dotColor} r="4" />
               )}
             </g>
           </svg>
@@ -249,15 +247,16 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
   }
 );
 
-Radio.displayName = 'Radio';
+Radio.displayName = "Radio";
 
 /**
  * Radio without label (for use in custom layouts)
  */
-export const RadioOnly = forwardRef<HTMLInputElement, Omit<RadioProps, 'label'>>(
-  (props, ref) => {
-    return <Radio ref={ref} {...props} />;
-  }
-);
+export const RadioOnly = forwardRef<
+  HTMLInputElement,
+  Omit<RadioProps, "label">
+>((props, ref) => {
+  return <Radio ref={ref} {...props} />;
+});
 
-RadioOnly.displayName = 'RadioOnly';
+RadioOnly.displayName = "RadioOnly";

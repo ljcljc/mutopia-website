@@ -1,13 +1,17 @@
 /**
  * Button Width Stability Demo
- * 
+ *
  * This component demonstrates how the button maintains its width
  * during loading state transitions, preventing layout shifts.
  */
 
-import { useState } from 'react';
-import { OrangeButton, PurpleButton, TertiaryButton } from '@/components/common';
-import { ArrowLeft } from 'lucide-react';
+import { useState } from "react";
+import {
+  OrangeButton,
+  PurpleButton,
+  TertiaryButton,
+} from "@/components/common";
+import { ArrowLeft } from "lucide-react";
 
 export function ButtonWidthDemo({ onBack }: { onBack: () => void }) {
   const [loading1, setLoading1] = useState(false);
@@ -31,8 +35,9 @@ export function ButtonWidthDemo({ onBack }: { onBack: () => void }) {
             Button Width Stability Demo
           </h1>
           <p className="font-['Comfortaa:Regular',_sans-serif] text-[18px] text-[#4a3c2a] mb-8">
-            Click the buttons below to see how they maintain their width during loading.
-            Notice there's no layout shift or jitter - the button stays exactly the same size.
+            Click the buttons below to see how they maintain their width during
+            loading. Notice there's no layout shift or jitter - the button stays
+            exactly the same size.
           </p>
         </div>
 
@@ -44,7 +49,7 @@ export function ButtonWidthDemo({ onBack }: { onBack: () => void }) {
           <div className="space-y-4">
             <div className="flex items-start gap-4">
               <div className="flex-1">
-                <OrangeButton 
+                <OrangeButton
                   variant="primary"
                   fullWidth
                   loading={loading1}
@@ -57,7 +62,7 @@ export function ButtonWidthDemo({ onBack }: { onBack: () => void }) {
                 </OrangeButton>
               </div>
               <div className="flex-1">
-                <OrangeButton 
+                <OrangeButton
                   variant="primary"
                   fullWidth
                   loading={loading1}
@@ -70,7 +75,7 @@ export function ButtonWidthDemo({ onBack }: { onBack: () => void }) {
                 </OrangeButton>
               </div>
               <div className="flex-1">
-                <OrangeButton 
+                <OrangeButton
                   variant="primary"
                   fullWidth
                   loading={loading1}
@@ -92,7 +97,7 @@ export function ButtonWidthDemo({ onBack }: { onBack: () => void }) {
             Stacked Layout (No Shift)
           </h2>
           <div className="space-y-3">
-            <PurpleButton 
+            <PurpleButton
               variant="primary"
               loading={loading2}
               onClick={() => {
@@ -103,7 +108,7 @@ export function ButtonWidthDemo({ onBack }: { onBack: () => void }) {
               Submit Application
             </PurpleButton>
             <div className="h-px bg-gray-200" />
-            <OrangeButton 
+            <OrangeButton
               variant="outline"
               loading={loading2}
               onClick={() => {
@@ -114,7 +119,7 @@ export function ButtonWidthDemo({ onBack }: { onBack: () => void }) {
               Save as Draft
             </OrangeButton>
             <div className="h-px bg-gray-200" />
-            <TertiaryButton 
+            <TertiaryButton
               variant="orange"
               loading={loading2}
               onClick={() => {
@@ -126,7 +131,8 @@ export function ButtonWidthDemo({ onBack }: { onBack: () => void }) {
             </TertiaryButton>
           </div>
           <p className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[rgba(74,60,42,0.7)] mt-4">
-            Watch the divider lines - they don't move because buttons maintain their width.
+            Watch the divider lines - they don't move because buttons maintain
+            their width.
           </p>
         </div>
 
@@ -137,14 +143,14 @@ export function ButtonWidthDemo({ onBack }: { onBack: () => void }) {
           </h2>
           <div className="space-y-4">
             <div className="flex items-center gap-4">
-              <OrangeButton 
+              <OrangeButton
                 variant="primary"
                 loading={loading3}
                 onClick={() => {
                   setLoading3(!loading3);
                 }}
               >
-                {loading3 ? 'Currently Loading' : 'Click to Toggle Loading'}
+                {loading3 ? "Currently Loading" : "Click to Toggle Loading"}
               </OrangeButton>
               <button
                 onClick={() => setLoading3(!loading3)}
@@ -155,8 +161,9 @@ export function ButtonWidthDemo({ onBack }: { onBack: () => void }) {
             </div>
             <div className="p-4 bg-gray-50 rounded">
               <p className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[#4a3c2a]">
-                <strong>How it works:</strong> The text becomes invisible but still occupies space,
-                while the spinner is absolutely positioned on top. This prevents any width changes.
+                <strong>How it works:</strong> The text becomes invisible but
+                still occupies space, while the spinner is absolutely positioned
+                on top. This prevents any width changes.
               </p>
             </div>
           </div>
@@ -169,16 +176,34 @@ export function ButtonWidthDemo({ onBack }: { onBack: () => void }) {
           </h2>
           <div className="space-y-3 font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[#4a3c2a]">
             <p>
-              <strong>Problem:</strong> Switching between text and a spinner typically changes the button width,
-              causing layout shifts and poor UX.
+              <strong>Problem:</strong> Switching between text and a spinner
+              typically changes the button width, causing layout shifts and poor
+              UX.
             </p>
             <p>
-              <strong>Solution:</strong> Our implementation uses a layered approach:
+              <strong>Solution:</strong> Our implementation uses a layered
+              approach:
             </p>
             <ol className="list-decimal list-inside ml-4 space-y-1">
-              <li>Text content uses <code className="bg-white px-1 rounded">className="invisible"</code> when loading (not <code className="bg-white px-1 rounded">display: none</code>)</li>
-              <li>This keeps the text in the layout flow, preserving the button's natural width</li>
-              <li>Spinner is absolutely positioned with <code className="bg-white px-1 rounded">position: absolute</code> and centered</li>
+              <li>
+                Text content uses{" "}
+                <code className="bg-white px-1 rounded">
+                  className="invisible"
+                </code>{" "}
+                when loading (not{" "}
+                <code className="bg-white px-1 rounded">display: none</code>)
+              </li>
+              <li>
+                This keeps the text in the layout flow, preserving the button's
+                natural width
+              </li>
+              <li>
+                Spinner is absolutely positioned with{" "}
+                <code className="bg-white px-1 rounded">
+                  position: absolute
+                </code>{" "}
+                and centered
+              </li>
               <li>Result: Zero layout shift, smooth transitions, better UX</li>
             </ol>
           </div>

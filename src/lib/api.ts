@@ -1,5 +1,5 @@
 // API utility functions
-import { http, setAuthToken, setRefreshToken, clearAuthTokens } from './http';
+import { http, setAuthToken, setRefreshToken, clearAuthTokens } from "./http";
 
 // ==================== 类型定义 ====================
 
@@ -140,9 +140,11 @@ export interface CreateBookingParams {
 /**
  * 检查邮箱是否已注册
  */
-export async function checkEmailRegistered(email: string): Promise<EmailCheckOut> {
+export async function checkEmailRegistered(
+  email: string
+): Promise<EmailCheckOut> {
   const response = await http.post<EmailCheckOut>(
-    '/api/auth/email/check',
+    "/api/auth/email/check",
     { email },
     { skipAuth: true }
   );
@@ -154,8 +156,8 @@ export async function checkEmailRegistered(email: string): Promise<EmailCheckOut
  */
 export async function sendCode(data: SendCodeIn): Promise<SendCodeOut> {
   const response = await http.post<SendCodeOut>(
-    '/api/auth/send_code',
-    { email: data.email, purpose: data.purpose || 'register' },
+    "/api/auth/send_code",
+    { email: data.email, purpose: data.purpose || "register" },
     { skipAuth: true }
   );
   return response.data;
@@ -166,7 +168,7 @@ export async function sendCode(data: SendCodeIn): Promise<SendCodeOut> {
  */
 export async function verifyCode(data: CodeVerifyIn): Promise<CodeVerifyOut> {
   const response = await http.post<CodeVerifyOut>(
-    '/api/auth/code/verify',
+    "/api/auth/code/verify",
     data,
     { skipAuth: true }
   );
@@ -177,16 +179,14 @@ export async function verifyCode(data: CodeVerifyIn): Promise<CodeVerifyOut> {
  * 用户登录
  */
 export async function login(data: LoginIn): Promise<TokenOut> {
-  const response = await http.post<TokenOut>(
-    '/api/auth/login',
-    data,
-    { skipAuth: true }
-  );
-  
+  const response = await http.post<TokenOut>("/api/auth/login", data, {
+    skipAuth: true,
+  });
+
   // 自动保存 token
   setAuthToken(response.data.access);
   setRefreshToken(response.data.refresh);
-  
+
   return response.data;
 }
 
@@ -195,32 +195,34 @@ export async function login(data: LoginIn): Promise<TokenOut> {
  */
 export async function refreshToken(refresh: string): Promise<TokenOut> {
   const response = await http.post<TokenOut>(
-    '/api/auth/refresh',
+    "/api/auth/refresh",
     { refresh },
     { skipAuth: true }
   );
-  
+
   // 自动保存新的 token
   setAuthToken(response.data.access);
   setRefreshToken(response.data.refresh);
-  
+
   return response.data;
 }
 
 /**
  * 完成注册
  */
-export async function registerComplete(data: RegisterCompleteIn): Promise<TokenOut> {
+export async function registerComplete(
+  data: RegisterCompleteIn
+): Promise<TokenOut> {
   const response = await http.post<TokenOut>(
-    '/api/auth/register/complete',
+    "/api/auth/register/complete",
     data,
     { skipAuth: true }
   );
-  
+
   // 自动保存 token
   setAuthToken(response.data.access);
   setRefreshToken(response.data.refresh);
-  
+
   return response.data;
 }
 
@@ -228,16 +230,18 @@ export async function registerComplete(data: RegisterCompleteIn): Promise<TokenO
  * 获取当前用户信息
  */
 export async function getCurrentUser(): Promise<MeOut> {
-  const response = await http.get<MeOut>('/api/auth/me');
+  const response = await http.get<MeOut>("/api/auth/me");
   return response.data;
 }
 
 /**
  * 发送密码重置验证码
  */
-export async function sendPasswordResetCode(email: string): Promise<SendCodeOut> {
+export async function sendPasswordResetCode(
+  email: string
+): Promise<SendCodeOut> {
   const response = await http.post<SendCodeOut>(
-    '/api/auth/password/forgot/send',
+    "/api/auth/password/forgot/send",
     { email },
     { skipAuth: true }
   );
@@ -247,9 +251,11 @@ export async function sendPasswordResetCode(email: string): Promise<SendCodeOut>
 /**
  * 验证密码重置验证码
  */
-export async function verifyPasswordResetCode(data: CodeVerifyIn): Promise<CodeVerifyOut> {
+export async function verifyPasswordResetCode(
+  data: CodeVerifyIn
+): Promise<CodeVerifyOut> {
   const response = await http.post<CodeVerifyOut>(
-    '/api/auth/password/forgot/verify',
+    "/api/auth/password/forgot/verify",
     data,
     { skipAuth: true }
   );
@@ -259,9 +265,11 @@ export async function verifyPasswordResetCode(data: CodeVerifyIn): Promise<CodeV
 /**
  * 重置密码
  */
-export async function resetPassword(data: ForgotPasswordResetIn): Promise<OkOut> {
+export async function resetPassword(
+  data: ForgotPasswordResetIn
+): Promise<OkOut> {
   const response = await http.post<OkOut>(
-    '/api/auth/password/forgot/reset',
+    "/api/auth/password/forgot/reset",
     data,
     { skipAuth: true }
   );
@@ -281,7 +289,7 @@ export function logout(): void {
  * 获取服务列表
  */
 export async function getServices(): Promise<ServiceOut[]> {
-  const response = await http.get<ServiceOut[]>('/api/catalog/services');
+  const response = await http.get<ServiceOut[]>("/api/catalog/services");
   return response.data;
 }
 
@@ -289,7 +297,7 @@ export async function getServices(): Promise<ServiceOut[]> {
  * 获取附加服务列表
  */
 export async function getAddOns(): Promise<AddOnOut[]> {
-  const response = await http.get<AddOnOut[]>('/api/catalog/add_ons');
+  const response = await http.get<AddOnOut[]>("/api/catalog/add_ons");
   return response.data;
 }
 
@@ -299,7 +307,7 @@ export async function getAddOns(): Promise<AddOnOut[]> {
  * 获取宠物列表
  */
 export async function getPets(): Promise<PetOut[]> {
-  const response = await http.get<PetOut[]>('/api/pets/pets');
+  const response = await http.get<PetOut[]>("/api/pets/pets");
   return response.data;
 }
 
@@ -309,17 +317,19 @@ export async function getPets(): Promise<PetOut[]> {
 export async function createPet(params: CreatePetParams): Promise<PetOut> {
   // 构建查询参数
   const queryParams = new URLSearchParams();
-  queryParams.append('name', params.name);
-  if (params.breed) queryParams.append('breed', params.breed);
+  queryParams.append("name", params.name);
+  if (params.breed) queryParams.append("breed", params.breed);
   if (params.weight_kg !== undefined && params.weight_kg !== null) {
-    queryParams.append('weight_kg', String(params.weight_kg));
+    queryParams.append("weight_kg", String(params.weight_kg));
   }
   if (params.age_years !== undefined && params.age_years !== null) {
-    queryParams.append('age_years', String(params.age_years));
+    queryParams.append("age_years", String(params.age_years));
   }
-  if (params.hair_condition) queryParams.append('hair_condition', params.hair_condition);
-  if (params.special_notes) queryParams.append('special_notes', params.special_notes);
-  
+  if (params.hair_condition)
+    queryParams.append("hair_condition", params.hair_condition);
+  if (params.special_notes)
+    queryParams.append("special_notes", params.special_notes);
+
   const response = await http.post<PetOut>(
     `/api/pets/pets?${queryParams.toString()}`,
     undefined,
@@ -341,14 +351,17 @@ export async function deletePet(petId: number): Promise<OkOut> {
 /**
  * 创建预约
  */
-export async function createBooking(params: CreateBookingParams): Promise<BookingOut> {
+export async function createBooking(
+  params: CreateBookingParams
+): Promise<BookingOut> {
   const queryParams = new URLSearchParams();
-  queryParams.append('pet_id', String(params.pet_id));
-  queryParams.append('service_id', String(params.service_id));
-  if (params.scheduled_time) queryParams.append('scheduled_time', params.scheduled_time);
-  if (params.notes) queryParams.append('notes', params.notes);
-  if (params.guest_id) queryParams.append('guest_id', params.guest_id);
-  
+  queryParams.append("pet_id", String(params.pet_id));
+  queryParams.append("service_id", String(params.service_id));
+  if (params.scheduled_time)
+    queryParams.append("scheduled_time", params.scheduled_time);
+  if (params.notes) queryParams.append("notes", params.notes);
+  if (params.guest_id) queryParams.append("guest_id", params.guest_id);
+
   const response = await http.post<BookingOut>(
     `/api/bookings/bookings?${queryParams.toString()}`,
     undefined
@@ -360,7 +373,7 @@ export async function createBooking(params: CreateBookingParams): Promise<Bookin
  * 获取我的预约列表
  */
 export async function getMyBookings(): Promise<BookingOut[]> {
-  const response = await http.get<BookingOut[]>('/api/bookings/bookings');
+  const response = await http.get<BookingOut[]>("/api/bookings/bookings");
   return response.data;
 }
 
@@ -410,12 +423,12 @@ export async function groomerConfirmBooking(
 export async function createAddOnRequest(
   bookingId: number,
   amount: number,
-  description: string = ''
+  description: string = ""
 ): Promise<AddOnRequestOut> {
   const queryParams = new URLSearchParams();
-  queryParams.append('amount', String(amount));
-  if (description) queryParams.append('description', description);
-  
+  queryParams.append("amount", String(amount));
+  if (description) queryParams.append("description", description);
+
   const response = await http.post<AddOnRequestOut>(
     `/api/bookings/bookings/${bookingId}/addon_request?${queryParams.toString()}`,
     undefined
@@ -429,12 +442,12 @@ export async function createAddOnRequest(
 export async function createReview(
   bookingId: number,
   rating: number,
-  comment: string = ''
+  comment: string = ""
 ): Promise<ReviewCreatedOut> {
   const queryParams = new URLSearchParams();
-  queryParams.append('rating', String(rating));
-  if (comment) queryParams.append('comment', comment);
-  
+  queryParams.append("rating", String(rating));
+  if (comment) queryParams.append("comment", comment);
+
   const response = await http.post<ReviewCreatedOut>(
     `/api/bookings/bookings/${bookingId}/review?${queryParams.toString()}`,
     undefined
@@ -484,13 +497,13 @@ export async function clientDecideAddOn(
  */
 export async function cancelBooking(
   bookingId: number,
-  reason: string = ''
+  reason: string = ""
 ): Promise<OkOut> {
   const queryParams = new URLSearchParams();
-  if (reason) queryParams.append('reason', reason);
-  
+  if (reason) queryParams.append("reason", reason);
+
   const response = await http.post<OkOut>(
-    `/api/bookings/bookings/${bookingId}/cancel${queryParams.toString() ? '?' + queryParams.toString() : ''}`,
+    `/api/bookings/bookings/${bookingId}/cancel${queryParams.toString() ? "?" + queryParams.toString() : ""}`,
     undefined
   );
   return response.data;
@@ -506,7 +519,9 @@ export interface PaymentIntentOut {
 /**
  * 创建押金支付意图
  */
-export async function createDepositIntent(bookingId: number): Promise<PaymentIntentOut> {
+export async function createDepositIntent(
+  bookingId: number
+): Promise<PaymentIntentOut> {
   const response = await http.post<PaymentIntentOut>(
     `/api/payments/payments/create_deposit_intent?booking_id=${bookingId}`,
     undefined
@@ -517,11 +532,12 @@ export async function createDepositIntent(bookingId: number): Promise<PaymentInt
 /**
  * 创建最终支付意图
  */
-export async function createFinalIntent(bookingId: number): Promise<PaymentIntentOut> {
+export async function createFinalIntent(
+  bookingId: number
+): Promise<PaymentIntentOut> {
   const response = await http.post<PaymentIntentOut>(
     `/api/payments/payments/create_final_intent?booking_id=${bookingId}`,
     undefined
   );
   return response.data;
 }
-

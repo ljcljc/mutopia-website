@@ -7,16 +7,30 @@
 
 /* Global font settings */
 body {
-  font-family: 'Comfortaa', cursive, ui-sans-serif, system-ui, sans-serif;
-  font-feature-settings: 'kern' 1;
+  font-family: "Comfortaa", cursive, ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "kern" 1;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /* Ensure Comfortaa font is applied to all text elements */
-h1, h2, h3, h4, h5, h6, p, span, div, a, button, input, textarea, select, label {
-  font-family: 'Comfortaa', cursive, ui-sans-serif, system-ui, sans-serif;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+div,
+a,
+button,
+input,
+textarea,
+select,
+label {
+  font-family: "Comfortaa", cursive, ui-sans-serif, system-ui, sans-serif;
 }
 
 @custom-variant dark (&:is(.dark *));
@@ -165,8 +179,8 @@ h1, h2, h3, h4, h5, h6, p, span, div, a, button, input, textarea, select, label 
 
 /* Hide scrollbar for IE, Edge and Firefox */
 .scrollbar-hide {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
   -webkit-overflow-scrolling: touch;
 }
 
@@ -309,7 +323,7 @@ html {
 
 /* Scrollbar compensation area styling */
 body.modal-open::after {
-  content: '';
+  content: "";
   position: fixed;
   top: 0;
   right: 0;

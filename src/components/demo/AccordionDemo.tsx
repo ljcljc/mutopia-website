@@ -1,22 +1,22 @@
-import { CustomAccordion, CustomAccordionItem } from '@/components/common';
-import { ArrowLeft } from 'lucide-react';
+import { CustomAccordion, CustomAccordionItem } from "@/components/common";
+import { ArrowLeft } from "lucide-react";
 
 export default function AccordionDemo({ onBack }: { onBack?: () => void }) {
   const demoFaqs = [
     {
-      question: 'How does mobile grooming work?',
+      question: "How does mobile grooming work?",
       answer:
-        'Our mobile grooming service brings professional pet grooming directly to your doorstep. We arrive in our fully-equipped grooming van, complete with all the tools and products needed to pamper your pet.',
+        "Our mobile grooming service brings professional pet grooming directly to your doorstep. We arrive in our fully-equipped grooming van, complete with all the tools and products needed to pamper your pet.",
     },
     {
-      question: 'How far in advance should I book?',
+      question: "How far in advance should I book?",
       answer:
-        'We recommend booking at least 1-2 weeks in advance to secure your preferred time slot. However, we often have same-day or next-day availability depending on your location.',
+        "We recommend booking at least 1-2 weeks in advance to secure your preferred time slot. However, we often have same-day or next-day availability depending on your location.",
     },
     {
-      question: 'What if my pet is anxious or aggressive?',
+      question: "What if my pet is anxious or aggressive?",
       answer:
-        'Our experienced groomers are trained to handle pets with various temperaments. We use calming techniques and take extra time to ensure your pet feels comfortable.',
+        "Our experienced groomers are trained to handle pets with various temperaments. We use calming techniques and take extra time to ensure your pet feels comfortable.",
     },
   ];
 
@@ -45,7 +45,7 @@ export default function AccordionDemo({ onBack }: { onBack?: () => void }) {
         {/* States Overview */}
         <div className="bg-white rounded-lg p-6 shadow-sm space-y-6">
           <h2 className="text-[#4a3c2a] mb-4">States Overview</h2>
-          
+
           <div className="space-y-8">
             {/* Default State */}
             <div className="space-y-3">
@@ -106,10 +106,11 @@ export default function AccordionDemo({ onBack }: { onBack?: () => void }) {
           <div className="space-y-2">
             <h2 className="text-[#4a3c2a]">Interactive Example</h2>
             <p className="text-[#717182] text-sm">
-              Click to expand/collapse, hover for orange border, tab for blue border
+              Click to expand/collapse, hover for orange border, tab for blue
+              border
             </p>
           </div>
-          
+
           <CustomAccordion items={demoFaqs} />
         </div>
 
@@ -117,15 +118,24 @@ export default function AccordionDemo({ onBack }: { onBack?: () => void }) {
         <div className="bg-white rounded-lg p-6 shadow-sm space-y-4">
           <h2 className="text-[#4a3c2a]">Features</h2>
           <ul className="space-y-2 text-[#717182] text-sm list-disc list-inside">
-            <li>Three distinct states: Default (gray), Hover (orange), Focus (blue)</li>
+            <li>
+              Three distinct states: Default (gray), Hover (orange), Focus
+              (blue)
+            </li>
             <li>States apply to both collapsed and expanded items</li>
-            <li>Smooth expand/collapse animation with content height transition</li>
+            <li>
+              Smooth expand/collapse animation with content height transition
+            </li>
             <li>Icon rotates 180° when expanded</li>
             <li>Keyboard accessible with focus states</li>
             <li>Single or multiple items can be open (configurable)</li>
             <li>Follows Figma design specifications exactly</li>
-            <li>Border color: gray-200 (#E5E7EB), orange (#DE6A07), blue (#2374FF)</li>
-            <li>Icon color: gray (#717182), orange (#DE6A07), blue (#2374FF)</li>
+            <li>
+              Border color: gray-200 (#E5E7EB), orange (#DE6A07), blue (#2374FF)
+            </li>
+            <li>
+              Icon color: gray (#717182), orange (#DE6A07), blue (#2374FF)
+            </li>
           </ul>
         </div>
 

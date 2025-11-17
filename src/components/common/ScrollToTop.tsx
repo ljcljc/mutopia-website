@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { ChevronUp } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Button } from '../ui/button';
+import { useState, useEffect } from "react";
+import { ChevronUp } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { Button } from "../ui/button";
 
 export default function ScrollToTop() {
   const [isVisible, setIsVisible] = useState(false);
@@ -16,17 +16,17 @@ export default function ScrollToTop() {
       }
     };
 
-    window.addEventListener('scroll', toggleVisibility);
+    window.addEventListener("scroll", toggleVisibility);
 
     return () => {
-      window.removeEventListener('scroll', toggleVisibility);
+      window.removeEventListener("scroll", toggleVisibility);
     };
   }, []);
 
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
-      behavior: 'smooth',
+      behavior: "smooth",
     });
   };
 
@@ -39,7 +39,7 @@ export default function ScrollToTop() {
           exit={{ opacity: 0, scale: 0.8, y: 20 }}
           transition={{
             duration: 0.3,
-            ease: [0.4, 0, 0.2, 1]
+            ease: [0.4, 0, 0.2, 1],
           }}
           className="fixed bottom-8 right-8 z-40 hidden md:block"
         >

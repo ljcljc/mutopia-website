@@ -1,11 +1,11 @@
 /**
  * Custom Accordion Component
- * 
+ *
  * Built from Figma designs with 3 distinct states for both collapsed and expanded:
  * 1. Default: Gray border (#E5E7EB), gray icon (#717182)
  * 2. Hover: Orange border (#DE6A07), orange icon (#DE6A07)
  * 3. Focus: Blue border (#2374FF), blue icon (#2374FF)
- * 
+ *
  * Features:
  * - Smooth expand/collapse animation
  * - Accessible (keyboard support, ARIA attributes)
@@ -13,7 +13,7 @@
  * - Consistent styling across states
  */
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from "react";
 
 interface CustomAccordionItemProps {
   question: string;
@@ -42,15 +42,15 @@ export function CustomAccordionItem({
 
   // Determine border and icon color based on state
   const getBorderColor = () => {
-    if (isFocused) return '#2374FF'; // Focus: blue
-    if (isHovered) return '#DE6A07'; // Hover: orange
-    return '#E5E7EB'; // Default: gray-200
+    if (isFocused) return "#2374FF"; // Focus: blue
+    if (isHovered) return "#DE6A07"; // Hover: orange
+    return "#E5E7EB"; // Default: gray-200
   };
 
   const getIconColor = () => {
-    if (isFocused) return '#2374FF'; // Focus: blue
-    if (isHovered) return '#DE6A07'; // Hover: orange
-    return '#717182'; // Default: gray
+    if (isFocused) return "#2374FF"; // Focus: blue
+    if (isHovered) return "#DE6A07"; // Hover: orange
+    return "#717182"; // Default: gray
   };
 
   return (
@@ -72,9 +72,9 @@ export function CustomAccordionItem({
           {/* Trigger Button */}
           <button
             className="box-border content-stretch flex w-full items-start justify-between pb-0 pt-[21px] px-0 relative rounded-[12px] shrink-0 outline-none focus:outline-none"
-            style={{ 
-              minHeight: isOpen ? 'auto' : '59.5px',
-              paddingBottom: isOpen ? '12px' : '0'
+            style={{
+              minHeight: isOpen ? "auto" : "59.5px",
+              paddingBottom: isOpen ? "12px" : "0",
             }}
             data-name="Primitive.button"
             onClick={onToggle}
@@ -90,13 +90,18 @@ export function CustomAccordionItem({
             </div>
 
             {/* Icon */}
-            <div className="relative shrink-0 size-[14px] mt-[1.5px]" data-name="Icon">
+            <div
+              className="relative shrink-0 size-[14px] mt-[1.5px]"
+              data-name="Icon"
+            >
               <svg
                 className="block size-full transition-transform duration-300"
                 fill="none"
                 preserveAspectRatio="none"
                 viewBox="0 0 14 14"
-                style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                style={{
+                  transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                }}
               >
                 <g>
                   <path
@@ -115,9 +120,9 @@ export function CustomAccordionItem({
           {/* Content */}
           <div
             style={{
-              height: isOpen ? `${contentHeight}px` : '0px',
-              overflow: 'hidden',
-              transition: 'height 300ms ease-in-out',
+              height: isOpen ? `${contentHeight}px` : "0px",
+              overflow: "hidden",
+              transition: "height 300ms ease-in-out",
             }}
           >
             <div ref={contentRef} className="pb-[21px] pt-[8px]">
@@ -144,7 +149,7 @@ interface CustomAccordionProps {
 
 export default function CustomAccordion({
   items,
-  className = '',
+  className = "",
   defaultOpenIndex,
   allowMultiple = false,
 }: CustomAccordionProps) {
@@ -160,9 +165,7 @@ export default function CustomAccordion({
           : [...prev, index]
       );
     } else {
-      setOpenIndexes((prev) =>
-        prev.includes(index) ? [] : [index]
-      );
+      setOpenIndexes((prev) => (prev.includes(index) ? [] : [index]));
     }
   };
 

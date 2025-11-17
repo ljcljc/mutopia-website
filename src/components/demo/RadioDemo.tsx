@@ -3,12 +3,12 @@
  * Showcases all 5 states of the custom Radio component
  */
 
-import { useState } from 'react';
-import { Radio } from '@/components/common';
-import { ArrowLeft } from 'lucide-react';
+import { useState } from "react";
+import { Radio } from "@/components/common";
+import { ArrowLeft } from "lucide-react";
 
 export default function RadioDemo({ onBack }: { onBack?: () => void }) {
-  const [selectedValue, setSelectedValue] = useState('option1');
+  const [selectedValue, setSelectedValue] = useState("option1");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8">
@@ -35,7 +35,7 @@ export default function RadioDemo({ onBack }: { onBack?: () => void }) {
         {/* States Overview */}
         <div className="bg-white rounded-lg p-6 shadow-sm space-y-6">
           <h2 className="text-[#4a3c2a] mb-4">States Overview</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Default State */}
             <div className="space-y-2">
@@ -59,9 +59,14 @@ export default function RadioDemo({ onBack }: { onBack?: () => void }) {
             <div className="space-y-2">
               <h3 className="text-[#4a3c2a]">3. Active State</h3>
               <p className="text-[#717182] text-sm mb-3">
-                Checked with gray border, orange dot (#de6a07) - click and hold to see
+                Checked with gray border, orange dot (#de6a07) - click and hold
+                to see
               </p>
-              <Radio label="Click and hold" checked={true} onChange={() => {}} />
+              <Radio
+                label="Click and hold"
+                checked={true}
+                onChange={() => {}}
+              />
             </div>
 
             {/* Checked State */}
@@ -77,7 +82,8 @@ export default function RadioDemo({ onBack }: { onBack?: () => void }) {
             <div className="space-y-2">
               <h3 className="text-[#4a3c2a]">5. Checked + Focused</h3>
               <p className="text-[#717182] text-sm mb-3">
-                Same as checked (blue background + orange dot) - checked state takes priority
+                Same as checked (blue background + orange dot) - checked state
+                takes priority
               </p>
               <Radio label="Tab to focus" checked={true} onChange={() => {}} />
             </div>
@@ -90,7 +96,12 @@ export default function RadioDemo({ onBack }: { onBack?: () => void }) {
               </p>
               <div className="space-y-2">
                 <Radio label="Disabled unchecked" disabled />
-                <Radio label="Disabled checked" checked={true} disabled onChange={() => {}} />
+                <Radio
+                  label="Disabled checked"
+                  checked={true}
+                  disabled
+                  onChange={() => {}}
+                />
               </div>
             </div>
           </div>
@@ -100,29 +111,30 @@ export default function RadioDemo({ onBack }: { onBack?: () => void }) {
         <div className="bg-white rounded-lg p-6 shadow-sm space-y-4">
           <h2 className="text-[#4a3c2a]">Radio Group Example</h2>
           <p className="text-[#717182] text-sm">
-            Selected: <span className="text-[#4a3c2a] font-medium">{selectedValue}</span>
+            Selected:{" "}
+            <span className="text-[#4a3c2a] font-medium">{selectedValue}</span>
           </p>
-          
+
           <div className="space-y-3">
             <Radio
               name="options"
               value="option1"
               label="Remember me"
-              checked={selectedValue === 'option1'}
+              checked={selectedValue === "option1"}
               onChange={(e) => setSelectedValue(e.target.value)}
             />
             <Radio
               name="options"
               value="option2"
               label="Keep me logged in"
-              checked={selectedValue === 'option2'}
+              checked={selectedValue === "option2"}
               onChange={(e) => setSelectedValue(e.target.value)}
             />
             <Radio
               name="options"
               value="option3"
               label="Auto-login on this device"
-              checked={selectedValue === 'option3'}
+              checked={selectedValue === "option3"}
               onChange={(e) => setSelectedValue(e.target.value)}
             />
           </div>
@@ -131,16 +143,18 @@ export default function RadioDemo({ onBack }: { onBack?: () => void }) {
         {/* Controlled vs Uncontrolled */}
         <div className="bg-white rounded-lg p-6 shadow-sm space-y-4">
           <h2 className="text-[#4a3c2a]">Controlled vs Uncontrolled</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Controlled */}
             <div className="space-y-3">
               <h3 className="text-[#4a3c2a]">Controlled</h3>
-              <p className="text-[#717182] text-sm">State managed by parent component</p>
+              <p className="text-[#717182] text-sm">
+                State managed by parent component
+              </p>
               <Radio
                 label="Controlled radio"
-                checked={selectedValue === 'controlled'}
-                onChange={() => setSelectedValue('controlled')}
+                checked={selectedValue === "controlled"}
+                onChange={() => setSelectedValue("controlled")}
               />
             </div>
 
@@ -148,10 +162,7 @@ export default function RadioDemo({ onBack }: { onBack?: () => void }) {
             <div className="space-y-3">
               <h3 className="text-[#4a3c2a]">Uncontrolled</h3>
               <p className="text-[#717182] text-sm">State managed internally</p>
-              <Radio
-                label="Uncontrolled radio"
-                defaultChecked={true}
-              />
+              <Radio label="Uncontrolled radio" defaultChecked={true} />
             </div>
           </div>
         </div>
@@ -159,7 +170,7 @@ export default function RadioDemo({ onBack }: { onBack?: () => void }) {
         {/* With Custom Styling */}
         <div className="bg-white rounded-lg p-6 shadow-sm space-y-4">
           <h2 className="text-[#4a3c2a]">Custom Styling</h2>
-          
+
           <div className="space-y-3">
             <Radio
               label="Radio with custom container class"
@@ -181,8 +192,12 @@ export default function RadioDemo({ onBack }: { onBack?: () => void }) {
                 <tr className="border-b border-slate-200">
                   <th className="text-left py-2 px-3 text-[#4a3c2a]">Prop</th>
                   <th className="text-left py-2 px-3 text-[#4a3c2a]">Type</th>
-                  <th className="text-left py-2 px-3 text-[#4a3c2a]">Default</th>
-                  <th className="text-left py-2 px-3 text-[#4a3c2a]">Description</th>
+                  <th className="text-left py-2 px-3 text-[#4a3c2a]">
+                    Default
+                  </th>
+                  <th className="text-left py-2 px-3 text-[#4a3c2a]">
+                    Description
+                  </th>
                 </tr>
               </thead>
               <tbody className="text-[#717182]">
@@ -190,7 +205,9 @@ export default function RadioDemo({ onBack }: { onBack?: () => void }) {
                   <td className="py-2 px-3 font-mono text-xs">label</td>
                   <td className="py-2 px-3">string</td>
                   <td className="py-2 px-3">-</td>
-                  <td className="py-2 px-3">Label text to display next to radio</td>
+                  <td className="py-2 px-3">
+                    Label text to display next to radio
+                  </td>
                 </tr>
                 <tr className="border-b border-slate-100">
                   <td className="py-2 px-3 font-mono text-xs">checked</td>
@@ -199,16 +216,24 @@ export default function RadioDemo({ onBack }: { onBack?: () => void }) {
                   <td className="py-2 px-3">Controlled checked state</td>
                 </tr>
                 <tr className="border-b border-slate-100">
-                  <td className="py-2 px-3 font-mono text-xs">defaultChecked</td>
+                  <td className="py-2 px-3 font-mono text-xs">
+                    defaultChecked
+                  </td>
                   <td className="py-2 px-3">boolean</td>
                   <td className="py-2 px-3">false</td>
-                  <td className="py-2 px-3">Default checked state (uncontrolled)</td>
+                  <td className="py-2 px-3">
+                    Default checked state (uncontrolled)
+                  </td>
                 </tr>
                 <tr className="border-b border-slate-100">
-                  <td className="py-2 px-3 font-mono text-xs">onCheckedChange</td>
+                  <td className="py-2 px-3 font-mono text-xs">
+                    onCheckedChange
+                  </td>
                   <td className="py-2 px-3">(checked: boolean) =&gt; void</td>
                   <td className="py-2 px-3">-</td>
-                  <td className="py-2 px-3">Callback when checked state changes</td>
+                  <td className="py-2 px-3">
+                    Callback when checked state changes
+                  </td>
                 </tr>
                 <tr className="border-b border-slate-100">
                   <td className="py-2 px-3 font-mono text-xs">disabled</td>
@@ -217,16 +242,22 @@ export default function RadioDemo({ onBack }: { onBack?: () => void }) {
                   <td className="py-2 px-3">Disable the radio</td>
                 </tr>
                 <tr className="border-b border-slate-100">
-                  <td className="py-2 px-3 font-mono text-xs">containerClassName</td>
+                  <td className="py-2 px-3 font-mono text-xs">
+                    containerClassName
+                  </td>
                   <td className="py-2 px-3">string</td>
                   <td className="py-2 px-3">''</td>
-                  <td className="py-2 px-3">Additional className for the container</td>
+                  <td className="py-2 px-3">
+                    Additional className for the container
+                  </td>
                 </tr>
                 <tr className="border-b border-slate-100">
                   <td className="py-2 px-3 font-mono text-xs">className</td>
                   <td className="py-2 px-3">string</td>
                   <td className="py-2 px-3">''</td>
-                  <td className="py-2 px-3">Additional className for the radio visual</td>
+                  <td className="py-2 px-3">
+                    Additional className for the radio visual
+                  </td>
                 </tr>
                 <tr>
                   <td className="py-2 px-3 font-mono text-xs">...props</td>
@@ -243,7 +274,7 @@ export default function RadioDemo({ onBack }: { onBack?: () => void }) {
         <div className="bg-slate-900 rounded-lg p-6 shadow-sm">
           <h2 className="text-white mb-4">Usage Example</h2>
           <pre className="text-green-400 text-sm overflow-x-auto">
-{`import { Radio } from './components/Radio';
+            {`import { Radio } from './components/Radio';
 
 // Basic usage
 <Radio label="Remember me" />

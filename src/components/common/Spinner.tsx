@@ -11,8 +11,8 @@ interface SpinnerProps {
   trackOpacity?: number;
 }
 
-export function Spinner({ 
-  size = "medium", 
+export function Spinner({
+  size = "medium",
   color = "white",
   className = "",
   showTrack = false,
@@ -28,7 +28,7 @@ export function Spinner({
   const dimension = typeof size === "number" ? size : sizeMap[size];
 
   return (
-    <div 
+    <div
       className={`relative inline-block ${className}`}
       style={{ width: dimension, height: dimension }}
       data-name="Spinner"
@@ -37,31 +37,27 @@ export function Spinner({
     >
       {/* Background Track (if enabled) */}
       {showTrack && (
-        <svg 
-          className="block size-full absolute inset-0" 
-          fill="none" 
+        <svg
+          className="block size-full absolute inset-0"
+          fill="none"
           viewBox="0 0 48 48"
         >
           <g>
-            <path 
-              d={svgPathsWithBg.p751f700} 
+            <path
+              d={svgPathsWithBg.p751f700}
               fill={color}
               opacity={trackOpacity}
             />
           </g>
         </svg>
       )}
-      
+
       {/* Spinning Arc */}
       <div className="absolute inset-0 animate-spin">
-        <svg 
-          className="block size-full" 
-          fill="none" 
-          viewBox="0 0 48 48"
-        >
+        <svg className="block size-full" fill="none" viewBox="0 0 48 48">
           <g>
-            <path 
-              d={showTrack ? svgPathsWithBg.p27d9200 : svgPaths.p3ead1300} 
+            <path
+              d={showTrack ? svgPathsWithBg.p27d9200 : svgPaths.p3ead1300}
               fill={color}
             />
           </g>

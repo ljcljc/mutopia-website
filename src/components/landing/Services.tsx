@@ -101,10 +101,7 @@ function ServiceCard({
                 </p>
                 <div className="content-stretch flex flex-col gap-[3.5px] items-start w-full">
                   {includes.map((item, index) => (
-                    <div
-                      key={index}
-                      className="h-[17.5px] relative w-full"
-                    >
+                    <div key={index} className="h-[17.5px] relative w-full">
                       <div className="absolute bg-[#de6a07] left-0 rounded-full size-[5.25px] top-[6.13px]" />
                       <p className="absolute font-['Comfortaa:Regular',_sans-serif] font-normal leading-[17.5px] left-[12.25px] text-[12.25px] text-[rgba(74,60,42,0.7)] top-[-0.5px]">
                         {item}
@@ -132,7 +129,9 @@ function ServiceCard({
                 Book Now
               </p>
               <img
-                src={isPopular ? iconButtonArrowPrimary : iconButtonArrowSecondary}
+                src={
+                  isPopular ? iconButtonArrowPrimary : iconButtonArrowSecondary
+                }
                 alt="Arrow"
                 className="size-[14px]"
               />
@@ -150,18 +149,11 @@ interface AdditionalServiceProps {
   price: string;
 }
 
-function AdditionalServiceItem({
-  name,
-  price,
-}: AdditionalServiceProps) {
+function AdditionalServiceItem({ name, price }: AdditionalServiceProps) {
   return (
     <div className="box-border flex h-[51px] items-center justify-between px-[15px] py-px rounded-[14px] w-full bg-white border border-[#E5E7EB]">
       <div className="flex gap-[10.5px] items-center min-w-0">
-        <img
-          src={iconExpressGroom}
-          alt={name}
-          className="size-[20px]"
-        />
+        <img src={iconExpressGroom} alt={name} className="size-[20px]" />
         <p className="font-['Comfortaa:Medium',_sans-serif] font-medium leading-[21px] text-[#4a3c2a] text-[14px] truncate">
           {name}
         </p>
@@ -174,17 +166,12 @@ function AdditionalServiceItem({
 }
 
 export default function Services() {
-  const [showAllServicesMobile, setShowAllServicesMobile] =
-    useState(false);
+  const [showAllServicesMobile, setShowAllServicesMobile] = useState(false);
 
   const services = [
     {
       icon: (
-        <img
-          src={iconBathBrush}
-          alt="Bath & Brush"
-          className="size-[32px]"
-        />
+        <img src={iconBathBrush} alt="Bath & Brush" className="size-[32px]" />
       ),
       title: "Bath & Brush",
       description:
@@ -208,8 +195,7 @@ export default function Services() {
         />
       ),
       title: "Full Grooming",
-      description:
-        "Complete wash, cut, nail trim, and styling for your pet",
+      description: "Complete wash, cut, nail trim, and styling for your pet",
       duration: "1.5-2 hours",
       price: "$95",
       includes: [
@@ -230,8 +216,7 @@ export default function Services() {
         />
       ),
       title: "Express Groom",
-      description:
-        "Quick touch-up for pets who need a fast refresh",
+      description: "Quick touch-up for pets who need a fast refresh",
       duration: "1 hour",
       price: "$75",
       includes: [
@@ -274,9 +259,8 @@ export default function Services() {
             </p>
             <div className="max-w-[672px] mx-auto">
               <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[28px] text-[16px] text-[rgba(74,60,42,0.7)] text-center">
-                From basic baths to full spa treatments, we
-                offer everything your pet needs to look and feel
-                their absolute best.
+                From basic baths to full spa treatments, we offer everything
+                your pet needs to look and feel their absolute best.
               </p>
             </div>
           </div>
@@ -285,11 +269,7 @@ export default function Services() {
         {/* Desktop View - Hidden on mobile */}
         <div className="hidden sm:flex content-start flex-wrap gap-[24px] items-stretch justify-center w-full max-w-7xl mx-auto px-8 md:px-12 lg:px-[57.5px]">
           {services.map((service, index) => (
-            <ServiceCard
-              key={index}
-              {...service}
-              isMobile={false}
-            />
+            <ServiceCard key={index} {...service} isMobile={false} />
           ))}
         </div>
 
@@ -304,18 +284,12 @@ export default function Services() {
           >
             <CarouselContent className="items-stretch gap-6 ml-0 pl-4">
               {services.map((service, index) => (
-                <CarouselItem
-                  key={index}
-                  className="pl-0 basis-[280px]"
-                >
+                <CarouselItem key={index} className="pl-0 basis-[280px]">
                   <ServiceCard {...service} isMobile={true} />
                 </CarouselItem>
               ))}
               {/* Spacer for right padding - 16px */}
-              <div
-                className="shrink-0 w-[16px]"
-                aria-hidden="true"
-              />
+              <div className="shrink-0 w-[16px]" aria-hidden="true" />
             </CarouselContent>
           </Carousel>
         </div>
@@ -331,31 +305,23 @@ export default function Services() {
                     Additional Services
                   </p>
                   <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[21px] text-[14px] text-[rgba(74,60,42,0.7)]">
-                    Enhance your pet's grooming experience with
-                    our premium add-ons
+                    Enhance your pet's grooming experience with our premium
+                    add-ons
                   </p>
                 </div>
 
                 {/* Additional Services Grid - Desktop: show all, 3 columns */}
                 <div className="hidden sm:grid grid-cols-3 gap-[20px] w-full max-w-7xl mx-auto px-[56px]">
                   {additionalServices.map((service, index) => (
-                    <AdditionalServiceItem
-                      key={index}
-                      {...service}
-                    />
+                    <AdditionalServiceItem key={index} {...service} />
                   ))}
                 </div>
 
                 {/* Additional Services Grid - Mobile: show with toggle, full width */}
                 <div className="flex sm:hidden flex-col gap-[20px] w-full px-0">
-                  {displayedServicesMobile.map(
-                    (service, index) => (
-                      <AdditionalServiceItem
-                        key={index}
-                        {...service}
-                      />
-                    ),
-                  )}
+                  {displayedServicesMobile.map((service, index) => (
+                    <AdditionalServiceItem key={index} {...service} />
+                  ))}
                 </div>
 
                 {/* View All Button - Mobile only */}
@@ -363,9 +329,7 @@ export default function Services() {
                   variant="outline"
                   className="sm:hidden h-[28px] rounded-[32px] w-[209px] border-2 border-[#8b6357] hover:bg-[#8b6357]/5"
                   onClick={() =>
-                    setShowAllServicesMobile(
-                      !showAllServicesMobile,
-                    )
+                    setShowAllServicesMobile(!showAllServicesMobile)
                   }
                 >
                   <p className="font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] text-[#8b6357] text-[12px]">

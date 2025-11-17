@@ -13,19 +13,19 @@
 ### 导入
 
 ```typescript
-import { http, HttpError } from '@/lib/http';
+import { http, HttpError } from "@/lib/http";
 ```
 
 ### GET 请求
 
 ```typescript
 try {
-  const response = await http.get<UserData>('/api/auth/me');
+  const response = await http.get<UserData>("/api/auth/me");
   console.log(response.data); // 响应数据
   console.log(response.status); // HTTP 状态码
 } catch (error) {
   if (error instanceof HttpError) {
-    console.error('HTTP Error:', error.status, error.message);
+    console.error("HTTP Error:", error.status, error.message);
   }
 }
 ```
@@ -35,14 +35,14 @@ try {
 ```typescript
 try {
   const response = await http.post<TokenOut>(
-    '/api/auth/login',
-    { email: 'user@example.com', password: 'password' },
+    "/api/auth/login",
+    { email: "user@example.com", password: "password" },
     { skipAuth: true } // 登录接口不需要认证
   );
   console.log(response.data);
 } catch (error) {
   if (error instanceof HttpError) {
-    console.error('Error:', error.status, error.message);
+    console.error("Error:", error.status, error.message);
   }
 }
 ```
@@ -51,13 +51,13 @@ try {
 
 ```typescript
 // PUT
-const response = await http.put('/api/pets/pets/1', { name: 'New Name' });
+const response = await http.put("/api/pets/pets/1", { name: "New Name" });
 
 // PATCH
-const response = await http.patch('/api/pets/pets/1', { name: 'New Name' });
+const response = await http.patch("/api/pets/pets/1", { name: "New Name" });
 
 // DELETE
-const response = await http.delete('/api/pets/pets/1');
+const response = await http.delete("/api/pets/pets/1");
 ```
 
 ## 请求配置
@@ -65,13 +65,14 @@ const response = await http.delete('/api/pets/pets/1');
 ### 基本配置
 
 ```typescript
-const response = await http.get('/api/endpoint', {
-  timeout: 10000,      // 超时时间（毫秒），默认 30 秒
-  retry: 2,            // 重试次数，默认 0
-  retryDelay: 1000,    // 重试延迟（毫秒），默认 1 秒
-  skipAuth: false,     // 跳过认证，默认 false
-  headers: {           // 自定义请求头
-    'Custom-Header': 'value',
+const response = await http.get("/api/endpoint", {
+  timeout: 10000, // 超时时间（毫秒），默认 30 秒
+  retry: 2, // 重试次数，默认 0
+  retryDelay: 1000, // 重试延迟（毫秒），默认 1 秒
+  skipAuth: false, // 跳过认证，默认 false
+  headers: {
+    // 自定义请求头
+    "Custom-Header": "value",
   },
 });
 ```
@@ -80,7 +81,7 @@ const response = await http.get('/api/endpoint', {
 
 ```typescript
 // 设置 10 秒超时
-const response = await http.get('/api/slow-endpoint', {
+const response = await http.get("/api/slow-endpoint", {
   timeout: 10000,
 });
 ```
@@ -89,7 +90,7 @@ const response = await http.get('/api/slow-endpoint', {
 
 ```typescript
 // 失败后重试 2 次，每次间隔 1 秒
-const response = await http.get('/api/unstable-endpoint', {
+const response = await http.get("/api/unstable-endpoint", {
   retry: 2,
   retryDelay: 1000,
 });
@@ -99,7 +100,7 @@ const response = await http.get('/api/unstable-endpoint', {
 
 ```typescript
 // 登录、注册等公开接口不需要认证
-const response = await http.post('/api/auth/login', data, {
+const response = await http.post("/api/auth/login", data, {
   skipAuth: true,
 });
 ```
@@ -112,13 +113,13 @@ const response = await http.post('/api/auth/login', data, {
 
 ```typescript
 try {
-  const response = await http.get('/api/endpoint');
+  const response = await http.get("/api/endpoint");
 } catch (error) {
   if (error instanceof HttpError) {
-    console.error('Status:', error.status);
-    console.error('Message:', error.message);
-    console.error('Data:', error.data); // 错误响应数据
-    
+    console.error("Status:", error.status);
+    console.error("Message:", error.message);
+    console.error("Data:", error.data); // 错误响应数据
+
     // 根据状态码处理
     if (error.status === 401) {
       // 未授权，可能需要重新登录
@@ -146,7 +147,7 @@ try {
 ### 设置 Token
 
 ```typescript
-import { setAuthToken, setRefreshToken } from '@/lib/http';
+import { setAuthToken, setRefreshToken } from "@/lib/http";
 
 // 登录成功后设置 token
 setAuthToken(response.data.access);
@@ -156,7 +157,7 @@ setRefreshToken(response.data.refresh);
 ### 清除 Token
 
 ```typescript
-import { clearAuthTokens } from '@/lib/http';
+import { clearAuthTokens } from "@/lib/http";
 
 // 登出时清除所有 token
 clearAuthTokens();
@@ -169,7 +170,7 @@ clearAuthTokens();
 如果接口不需要认证，使用 `skipAuth: true`：
 
 ```typescript
-const response = await http.post('/api/public-endpoint', data, {
+const response = await http.post("/api/public-endpoint", data, {
   skipAuth: true,
 });
 ```
@@ -180,10 +181,10 @@ const response = await http.post('/api/public-endpoint', data, {
 
 ```typescript
 interface HttpResponse<T> {
-  data: T;              // 响应数据
-  status: number;       // HTTP 状态码
-  statusText: string;   // HTTP 状态文本
-  headers: Headers;     // 响应头
+  data: T; // 响应数据
+  status: number; // HTTP 状态码
+  statusText: string; // HTTP 状态文本
+  headers: Headers; // 响应头
 }
 ```
 
@@ -196,7 +197,7 @@ interface User {
   email: string;
 }
 
-const response = await http.get<User>('/api/auth/me');
+const response = await http.get<User>("/api/auth/me");
 // response.data 的类型是 User
 ```
 
@@ -213,43 +214,43 @@ const response = await http.get<User>('/api/auth/me');
 ## 完整示例
 
 ```typescript
-import { http, HttpError } from '@/lib/http';
+import { http, HttpError } from "@/lib/http";
 
 // 登录
 async function login(email: string, password: string) {
   try {
     const response = await http.post<TokenOut>(
-      '/api/auth/login',
+      "/api/auth/login",
       { email, password },
       { skipAuth: true }
     );
-    
+
     // 保存 token
     setAuthToken(response.data.access);
     setRefreshToken(response.data.refresh);
-    
+
     return response.data;
   } catch (error) {
     if (error instanceof HttpError) {
       if (error.status === 401) {
-        throw new Error('Invalid email or password');
+        throw new Error("Invalid email or password");
       }
       throw error;
     }
-    throw new Error('Login failed');
+    throw new Error("Login failed");
   }
 }
 
 // 获取用户信息
 async function getCurrentUser() {
   try {
-    const response = await http.get<MeOut>('/api/auth/me');
+    const response = await http.get<MeOut>("/api/auth/me");
     return response.data;
   } catch (error) {
     if (error instanceof HttpError && error.status === 401) {
       // Token 过期，可能需要刷新
       clearAuthTokens();
-      throw new Error('Please login again');
+      throw new Error("Please login again");
     }
     throw error;
   }
@@ -261,6 +262,7 @@ async function getCurrentUser() {
 项目在 `src/lib/api.ts` 中提供了完整的 API 接口封装，包括：
 
 ### 认证相关
+
 - `checkEmailRegistered()` - 检查邮箱是否已注册
 - `sendCode()` - 发送验证码
 - `verifyCode()` - 验证验证码
@@ -274,15 +276,18 @@ async function getCurrentUser() {
 - `resetPassword()` - 重置密码
 
 ### 服务目录
+
 - `getServices()` - 获取服务列表
 - `getAddOns()` - 获取附加服务列表
 
 ### 宠物管理
+
 - `getPets()` - 获取宠物列表
 - `createPet()` - 创建宠物
 - `deletePet()` - 删除宠物
 
 ### 预约管理
+
 - `createBooking()` - 创建预约
 - `getMyBookings()` - 获取我的预约列表
 - `getGuestBookings()` - 获取访客预约列表
@@ -295,16 +300,23 @@ async function getCurrentUser() {
 - `cancelBooking()` - 取消预约
 
 ### 支付管理
+
 - `createDepositIntent()` - 创建押金支付意图
 - `createFinalIntent()` - 创建最终支付意图
 
 ### 使用示例
 
 ```typescript
-import { login, getCurrentUser, createBooking, getPets, getServices } from '@/lib/api';
+import {
+  login,
+  getCurrentUser,
+  createBooking,
+  getPets,
+  getServices,
+} from "@/lib/api";
 
 // 登录（自动保存 token）
-const tokens = await login({ email: 'user@example.com', password: 'password' });
+const tokens = await login({ email: "user@example.com", password: "password" });
 
 // 获取用户信息
 const user = await getCurrentUser();
@@ -317,7 +329,7 @@ const services = await getServices();
 const booking = await createBooking({
   pet_id: pets[0].id,
   service_id: services[0].id,
-  scheduled_time: '2024-01-01T10:00:00Z',
+  scheduled_time: "2024-01-01T10:00:00Z",
 });
 ```
 
@@ -356,4 +368,3 @@ try {
 6. **重试机制**: 仅对幂等操作使用重试（GET、PUT、DELETE）
 7. **自动 Token 管理**: 登录、注册、刷新 token 等操作会自动保存 token
 8. **自动刷新**: 401 错误时会自动尝试刷新 token，无需手动处理
-

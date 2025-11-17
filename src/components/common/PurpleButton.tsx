@@ -21,7 +21,7 @@ export const PurpleButton = forwardRef<HTMLButtonElement, PurpleButtonProps>(
       className = "",
       ...props
     },
-    ref,
+    ref
   ) => {
     const baseStyles =
       "relative rounded-[32px] transition-all duration-200 cursor-pointer group";
@@ -29,8 +29,14 @@ export const PurpleButton = forwardRef<HTMLButtonElement, PurpleButtonProps>(
 
     // Outline and bordered buttons have border-2, so they need different padding to maintain visual size
     const sizeStyles = {
-      standard: variant === "outline" || variant === "bordered" ? "h-[48px] px-[30px] py-[18px]" : "h-[48px] px-[28px] py-[14px]",
-      medium: variant === "outline" || variant === "bordered" ? "h-[36px] px-[30px] py-[18px]" : "h-[36px] px-[28px] py-[14px]",
+      standard:
+        variant === "outline" || variant === "bordered"
+          ? "h-[48px] px-[30px] py-[18px]"
+          : "h-[48px] px-[28px] py-[14px]",
+      medium:
+        variant === "outline" || variant === "bordered"
+          ? "h-[36px] px-[30px] py-[18px]"
+          : "h-[36px] px-[28px] py-[14px]",
     };
 
     const variantStyles = {
@@ -66,13 +72,13 @@ export const PurpleButton = forwardRef<HTMLButtonElement, PurpleButtonProps>(
             )}
             {/* Content - invisible when loading but still takes up space */}
             {typeof children === "string" ? (
-              <p className={`font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] whitespace-nowrap ${loading ? "invisible" : ""}`}>
+              <p
+                className={`font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] whitespace-nowrap ${loading ? "invisible" : ""}`}
+              >
                 {children}
               </p>
             ) : (
-              <div className={loading ? "invisible" : ""}>
-                {children}
-              </div>
+              <div className={loading ? "invisible" : ""}>{children}</div>
             )}
           </div>
         </button>
@@ -96,18 +102,18 @@ export const PurpleButton = forwardRef<HTMLButtonElement, PurpleButtonProps>(
           )}
           {/* Content - invisible when loading but still takes up space */}
           {typeof children === "string" ? (
-            <p className={`font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] whitespace-nowrap ${loading ? "invisible" : ""}`}>
+            <p
+              className={`font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] whitespace-nowrap ${loading ? "invisible" : ""}`}
+            >
               {children}
             </p>
           ) : (
-            <div className={loading ? "invisible" : ""}>
-              {children}
-            </div>
+            <div className={loading ? "invisible" : ""}>{children}</div>
           )}
         </div>
       </button>
     );
-  },
+  }
 );
 
 PurpleButton.displayName = "PurpleButton";

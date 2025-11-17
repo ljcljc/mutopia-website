@@ -1,46 +1,61 @@
 /**
  * Demo Hub - Main entry point for all component demos
- * 
+ *
  * Allows users to navigate between different demo pages
  */
 
-import { useState } from 'react';
-import { ComponentsDemo } from './ComponentsDemo';
-import { ButtonWidthDemo } from './ButtonWidthDemo';
-import { SpinnerExamples } from './SpinnerExamples';
-import { CheckboxDemo } from './CheckboxDemo';
-import RadioDemo from './RadioDemo';
-import AccordionDemo from './AccordionDemo';
-import { ArrowLeft, Sparkles, Activity, Layout, CheckSquare, Circle, ChevronDown } from 'lucide-react';
+import { useState } from "react";
+import { ComponentsDemo } from "./ComponentsDemo";
+import { ButtonWidthDemo } from "./ButtonWidthDemo";
+import { SpinnerExamples } from "./SpinnerExamples";
+import { CheckboxDemo } from "./CheckboxDemo";
+import RadioDemo from "./RadioDemo";
+import AccordionDemo from "./AccordionDemo";
+import {
+  ArrowLeft,
+  Sparkles,
+  Activity,
+  Layout,
+  CheckSquare,
+  Circle,
+  ChevronDown,
+} from "lucide-react";
 
-type DemoPage = 'hub' | 'components' | 'button-width' | 'spinner-examples' | 'checkbox' | 'radio' | 'accordion';
+type DemoPage =
+  | "hub"
+  | "components"
+  | "button-width"
+  | "spinner-examples"
+  | "checkbox"
+  | "radio"
+  | "accordion";
 
 export function DemoHub({ onBack }: { onBack: () => void }) {
-  const [currentDemo, setCurrentDemo] = useState<DemoPage>('hub');
+  const [currentDemo, setCurrentDemo] = useState<DemoPage>("hub");
 
   // If viewing a specific demo, render it
-  if (currentDemo === 'components') {
-    return <ComponentsDemo onBack={() => setCurrentDemo('hub')} />;
+  if (currentDemo === "components") {
+    return <ComponentsDemo onBack={() => setCurrentDemo("hub")} />;
   }
 
-  if (currentDemo === 'button-width') {
-    return <ButtonWidthDemo onBack={() => setCurrentDemo('hub')} />;
+  if (currentDemo === "button-width") {
+    return <ButtonWidthDemo onBack={() => setCurrentDemo("hub")} />;
   }
 
-  if (currentDemo === 'spinner-examples') {
-    return <SpinnerExamples onBack={() => setCurrentDemo('hub')} />;
+  if (currentDemo === "spinner-examples") {
+    return <SpinnerExamples onBack={() => setCurrentDemo("hub")} />;
   }
 
-  if (currentDemo === 'checkbox') {
-    return <CheckboxDemo onBack={() => setCurrentDemo('hub')} />;
+  if (currentDemo === "checkbox") {
+    return <CheckboxDemo onBack={() => setCurrentDemo("hub")} />;
   }
 
-  if (currentDemo === 'radio') {
-    return <RadioDemo onBack={() => setCurrentDemo('hub')} />;
+  if (currentDemo === "radio") {
+    return <RadioDemo onBack={() => setCurrentDemo("hub")} />;
   }
 
-  if (currentDemo === 'accordion') {
-    return <AccordionDemo onBack={() => setCurrentDemo('hub')} />;
+  if (currentDemo === "accordion") {
+    return <AccordionDemo onBack={() => setCurrentDemo("hub")} />;
   }
 
   // Hub page with all demos
@@ -68,8 +83,9 @@ export function DemoHub({ onBack }: { onBack: () => void }) {
             Interactive Demo Gallery
           </h1>
           <p className="font-['Comfortaa:Regular',_sans-serif] text-[18px] text-[rgba(74,60,42,0.8)] max-w-2xl mx-auto">
-            Explore our custom-built components with live examples and code snippets.
-            All components are built from Figma designs with pixel-perfect accuracy.
+            Explore our custom-built components with live examples and code
+            snippets. All components are built from Figma designs with
+            pixel-perfect accuracy.
           </p>
         </div>
 
@@ -81,7 +97,7 @@ export function DemoHub({ onBack }: { onBack: () => void }) {
             title="Component Showcase"
             description="Comprehensive demo of all buttons, spinners, and interactive elements with state management examples."
             color="purple"
-            onClick={() => setCurrentDemo('components')}
+            onClick={() => setCurrentDemo("components")}
           />
 
           {/* Button Width Demo Card */}
@@ -90,7 +106,7 @@ export function DemoHub({ onBack }: { onBack: () => void }) {
             title="Button Width Stability"
             description="See how buttons maintain perfect width during loading states without any layout shifts or jitter."
             color="orange"
-            onClick={() => setCurrentDemo('button-width')}
+            onClick={() => setCurrentDemo("button-width")}
           />
 
           {/* Spinner Examples Card */}
@@ -99,7 +115,7 @@ export function DemoHub({ onBack }: { onBack: () => void }) {
             title="Spinner Usage Guide"
             description="Real-world examples with basic and track modes. See how to integrate spinners in different loading scenarios."
             color="brown"
-            onClick={() => setCurrentDemo('spinner-examples')}
+            onClick={() => setCurrentDemo("spinner-examples")}
           />
 
           {/* Checkbox Demo Card */}
@@ -108,7 +124,7 @@ export function DemoHub({ onBack }: { onBack: () => void }) {
             title="Checkbox Component"
             description="Interactive checkboxes with 5 states: default, hover, focus, active, and checked. Features gradient checkmark on press."
             color="purple"
-            onClick={() => setCurrentDemo('checkbox')}
+            onClick={() => setCurrentDemo("checkbox")}
           />
 
           {/* Radio Demo Card */}
@@ -117,7 +133,7 @@ export function DemoHub({ onBack }: { onBack: () => void }) {
             title="Radio Component"
             description="Custom radio buttons with 5 states: default, hover, focus, active, and checked. Blue background with orange dot."
             color="orange"
-            onClick={() => setCurrentDemo('radio')}
+            onClick={() => setCurrentDemo("radio")}
           />
 
           {/* Accordion Demo Card */}
@@ -126,7 +142,7 @@ export function DemoHub({ onBack }: { onBack: () => void }) {
             title="Accordion Component"
             description="FAQ-style accordion with 3 states for each item: default (gray), hover (orange), and focus (blue). Smooth expand/collapse."
             color="brown"
-            onClick={() => setCurrentDemo('accordion')}
+            onClick={() => setCurrentDemo("accordion")}
           />
         </div>
 
@@ -163,15 +179,18 @@ interface DemoCardProps {
   icon: React.ReactNode;
   title: string;
   description: string;
-  color: 'purple' | 'orange' | 'brown';
+  color: "purple" | "orange" | "brown";
   onClick: () => void;
 }
 
 function DemoCard({ icon, title, description, color, onClick }: DemoCardProps) {
   const colorClasses = {
-    purple: 'hover:border-[#633479] hover:shadow-[0_8px_30px_rgba(99,52,121,0.12)]',
-    orange: 'hover:border-[#de6a07] hover:shadow-[0_8px_30px_rgba(222,106,7,0.12)]',
-    brown: 'hover:border-[#8b6357] hover:shadow-[0_8px_30px_rgba(139,99,87,0.12)]',
+    purple:
+      "hover:border-[#633479] hover:shadow-[0_8px_30px_rgba(99,52,121,0.12)]",
+    orange:
+      "hover:border-[#de6a07] hover:shadow-[0_8px_30px_rgba(222,106,7,0.12)]",
+    brown:
+      "hover:border-[#8b6357] hover:shadow-[0_8px_30px_rgba(139,99,87,0.12)]",
   };
 
   return (
@@ -188,7 +207,10 @@ function DemoCard({ icon, title, description, color, onClick }: DemoCardProps) {
       </p>
       <div className="flex items-center gap-2 font-['Comfortaa:Medium',_sans-serif] text-[14px] text-[#633479]">
         View Demo
-        <ArrowLeft size={16} className="rotate-180 group-hover:translate-x-1 transition-transform" />
+        <ArrowLeft
+          size={16}
+          className="rotate-180 group-hover:translate-x-1 transition-transform"
+        />
       </div>
     </button>
   );

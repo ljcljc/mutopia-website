@@ -19,10 +19,8 @@ const scrollToAnchor = (href: string) => {
     // Mobile: 100px (header + extra padding), Desktop: 80px
     const isMobile = window.innerWidth < 1024; // lg breakpoint
     const headerOffset = isMobile ? 100 : 80;
-    const elementPosition =
-      targetElement.getBoundingClientRect().top;
-    const offsetPosition =
-      elementPosition + window.scrollY - headerOffset;
+    const elementPosition = targetElement.getBoundingClientRect().top;
+    const offsetPosition = elementPosition + window.scrollY - headerOffset;
 
     window.scrollTo({
       top: offsetPosition,
@@ -33,10 +31,7 @@ const scrollToAnchor = (href: string) => {
 
 function Icon() {
   return (
-    <div
-      className="h-[39px] relative shrink-0 w-[35px]"
-      data-name="Icon"
-    >
+    <div className="h-[39px] relative shrink-0 w-[35px]" data-name="Icon">
       <img
         alt="Mutopia Logo"
         className="absolute bg-clip-padding border-0 border-[transparent] border-solid box-border inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full"
@@ -49,10 +44,7 @@ function Icon() {
 
 function Mutopia() {
   return (
-    <div
-      className="h-[28px] relative shrink-0 w-[92.82px]"
-      data-name="Mutopia"
-    >
+    <div className="h-[28px] relative shrink-0 w-[92.82px]" data-name="Mutopia">
       <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border h-[28px] relative w-[92.82px]">
         <p className="absolute font-['Comfortaa:Bold',_sans-serif] font-bold leading-[28px] left-0 text-[#8b6357] text-[21px] text-nowrap top-[-1px] whitespace-pre">
           Mutopia pet
@@ -77,18 +69,13 @@ function Logo() {
 }
 
 function Link() {
-  const handleClick = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-  ) => {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     scrollToAnchor("#why-us");
   };
 
   return (
-    <div
-      className="h-[21px] relative shrink-0 w-[53.398px]"
-      data-name="Link"
-    >
+    <div className="h-[21px] relative shrink-0 w-[53.398px]" data-name="Link">
       <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border h-[21px] relative w-[53.398px]">
         <a
           href="#why-us"
@@ -103,18 +90,13 @@ function Link() {
 }
 
 function Link1() {
-  const handleClick = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-  ) => {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     scrollToAnchor("#services");
   };
 
   return (
-    <div
-      className="h-[21px] relative shrink-0 w-[60.539px]"
-      data-name="Link"
-    >
+    <div className="h-[21px] relative shrink-0 w-[60.539px]" data-name="Link">
       <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border h-[21px] relative w-[60.539px]">
         <a
           href="#services"
@@ -129,18 +111,13 @@ function Link1() {
 }
 
 function Link2() {
-  const handleClick = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-  ) => {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     scrollToAnchor("#packages");
   };
 
   return (
-    <div
-      className="relative shrink-0 w-[68.508px]"
-      data-name="Link"
-    >
+    <div className="relative shrink-0 w-[68.508px]" data-name="Link">
       <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border content-stretch flex gap-[10px] items-center justify-center relative w-[68.508px]">
         <a
           href="#packages"
@@ -155,18 +132,13 @@ function Link2() {
 }
 
 function Link3() {
-  const handleClick = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-  ) => {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     scrollToAnchor("#faq");
   };
 
   return (
-    <div
-      className="h-[21px] relative shrink-0 w-[29.531px]"
-      data-name="Link"
-    >
+    <div className="h-[21px] relative shrink-0 w-[29.531px]" data-name="Link">
       <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border h-[21px] relative w-[29.531px]">
         <a
           href="#faq"
@@ -181,18 +153,13 @@ function Link3() {
 }
 
 function Link4() {
-  const handleClick = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-  ) => {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     scrollToAnchor("#contact");
   };
 
   return (
-    <div
-      className="h-[21px] relative shrink-0 w-[58.219px]"
-      data-name="Link"
-    >
+    <div className="h-[21px] relative shrink-0 w-[58.219px]" data-name="Link">
       <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border h-[21px] relative w-[58.219px]">
         <a
           href="#contact"
@@ -205,7 +172,6 @@ function Link4() {
     </div>
   );
 }
-
 
 function Navigation() {
   return (
@@ -226,7 +192,12 @@ function Navigation() {
 
 function ButtonCompactSecondaryOrange() {
   return (
-    <OrangeButton variant="secondary" size="compact" showArrow={false} className="shrink-0">
+    <OrangeButton
+      variant="secondary"
+      size="compact"
+      showArrow={false}
+      className="shrink-0"
+    >
       Apply as groomer
     </OrangeButton>
   );
@@ -252,9 +223,9 @@ function UserInfo() {
 
   const getInitials = (name: string) => {
     return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
+      .split(" ")
+      .map((word) => word[0])
+      .join("")
       .toUpperCase()
       .slice(0, 2);
   };
@@ -267,10 +238,29 @@ function UserInfo() {
         aria-label="Notifications"
       >
         <div className="relative shrink-0 size-[20px]">
-          <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 20 20">
+          <svg
+            className="block size-full"
+            fill="none"
+            preserveAspectRatio="none"
+            viewBox="0 0 20 20"
+          >
             <g id="Bell">
-              <path d={svgPaths.p18131300} id="Vector" stroke="var(--stroke-0, #4A3C2A)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" />
-              <path d={svgPaths.p23185c80} id="Vector_2" stroke="var(--stroke-0, #4A3C2A)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" />
+              <path
+                d={svgPaths.p18131300}
+                id="Vector"
+                stroke="var(--stroke-0, #4A3C2A)"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.6"
+              />
+              <path
+                d={svgPaths.p23185c80}
+                id="Vector_2"
+                stroke="var(--stroke-0, #4A3C2A)"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.6"
+              />
             </g>
           </svg>
         </div>
@@ -317,9 +307,7 @@ function MobileLink({
   href: string;
   onClick: () => void;
 }) {
-  const handleClick = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-  ) => {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
 
     // Close the menu first
@@ -332,10 +320,7 @@ function MobileLink({
   };
 
   return (
-    <div
-      className="h-[48px] relative shrink-0 w-full"
-      data-name="Link"
-    >
+    <div className="h-[48px] relative shrink-0 w-full" data-name="Link">
       <a
         href={href}
         onClick={handleClick}
@@ -376,9 +361,9 @@ function MobileButton2() {
   if (user) {
     const getInitials = (name: string) => {
       return name
-        .split(' ')
-        .map(word => word[0])
-        .join('')
+        .split(" ")
+        .map((word) => word[0])
+        .join("")
         .toUpperCase()
         .slice(0, 2);
     };
@@ -391,10 +376,29 @@ function MobileButton2() {
           aria-label="Notifications"
         >
           <div className="relative shrink-0 size-[24px]">
-            <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 20 20">
+            <svg
+              className="block size-full"
+              fill="none"
+              preserveAspectRatio="none"
+              viewBox="0 0 20 20"
+            >
               <g id="Bell">
-                <path d={svgPaths.p18131300} id="Vector" stroke="var(--stroke-0, #4A3C2A)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" />
-                <path d={svgPaths.p23185c80} id="Vector_2" stroke="var(--stroke-0, #4A3C2A)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" />
+                <path
+                  d={svgPaths.p18131300}
+                  id="Vector"
+                  stroke="var(--stroke-0, #4A3C2A)"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="1.6"
+                />
+                <path
+                  d={svgPaths.p23185c80}
+                  id="Vector_2"
+                  stroke="var(--stroke-0, #4A3C2A)"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="1.6"
+                />
               </g>
             </svg>
           </div>
@@ -473,31 +477,19 @@ function MobileMenu({
               transition={{ delay: 0.1, duration: 0.3 }}
               className="content-stretch flex flex-col items-start relative shrink-0 w-full"
             >
-              <MobileLink
-                href="#why-us"
-                onClick={handleLinkClick}
-              >
+              <MobileLink href="#why-us" onClick={handleLinkClick}>
                 Why Us
               </MobileLink>
-              <MobileLink
-                href="#services"
-                onClick={handleLinkClick}
-              >
+              <MobileLink href="#services" onClick={handleLinkClick}>
                 Services
               </MobileLink>
-              <MobileLink
-                href="#packages"
-                onClick={handleLinkClick}
-              >
+              <MobileLink href="#packages" onClick={handleLinkClick}>
                 Membership
               </MobileLink>
               <MobileLink href="#faq" onClick={handleLinkClick}>
                 FAQ
               </MobileLink>
-              <MobileLink
-                href="#contact"
-                onClick={handleLinkClick}
-              >
+              <MobileLink href="#contact" onClick={handleLinkClick}>
                 Contact
               </MobileLink>
             </motion.div>
@@ -532,10 +524,7 @@ function CloseButton({ onClick }: { onClick: () => void }) {
           className="h-[23.994px] overflow-clip relative shrink-0 w-full"
           data-name="Icon"
         >
-          <div
-            className="absolute inset-1/4"
-            data-name="Vector"
-          >
+          <div className="absolute inset-1/4" data-name="Vector">
             <div className="absolute inset-[-8.33%]">
               <svg
                 className="block size-full"
@@ -554,10 +543,7 @@ function CloseButton({ onClick }: { onClick: () => void }) {
               </svg>
             </div>
           </div>
-          <div
-            className="absolute inset-1/4"
-            data-name="Vector"
-          >
+          <div className="absolute inset-1/4" data-name="Vector">
             <div className="absolute inset-[-8.33%]">
               <svg
                 className="block size-full"
@@ -641,7 +627,8 @@ export default function Header() {
   // 滚动检测和智能阴影显示
   useEffect(() => {
     const handleScroll = () => {
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollTop =
+        window.pageYOffset || document.documentElement.scrollTop;
       setIsScrolled(scrollTop > 0);
     };
 
@@ -649,11 +636,11 @@ export default function Header() {
     handleScroll();
 
     // 添加滚动事件监听器，使用 passive 选项优化性能
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     // 清理事件监听器防止内存泄漏
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
@@ -675,10 +662,7 @@ export default function Header() {
       <div className="max-w-7xl mx-auto">
         <div className="min-w-inherit w-full">
           <div className="box-border content-stretch flex flex-col items-start min-w-inherit pb-px lg:pb-px pt-0 px-4 sm:px-8 md:px-12 lg:px-[57.5px] relative w-full">
-            <Container
-              isMenuOpen={isMenuOpen}
-              toggleMenu={toggleMenu}
-            />
+            <Container isMenuOpen={isMenuOpen} toggleMenu={toggleMenu} />
 
             {/* Mobile Menu - Inside the container */}
             <MobileMenu

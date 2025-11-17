@@ -22,14 +22,14 @@ interface AuthState {
   confirmPassword: string;
   rememberMe: boolean;
   showPassword: boolean;
-  
+
   // Sign up form data
   firstName: string;
   lastName: string;
   birthday: string;
   address: string;
   optOutMarketing: boolean;
-  
+
   // Form setters
   setEmail: (email: string) => void;
   setPassword: (password: string) => void;
@@ -44,9 +44,7 @@ interface AuthState {
 
   // UI state
   isEmailFocused: boolean;
-  isPasswordFocused: boolean;
   setIsEmailFocused: (focused: boolean) => void;
-  setIsPasswordFocused: (focused: boolean) => void;
 
   // Validation errors
   emailError: string;
@@ -92,7 +90,6 @@ const initialState = {
   address: "",
   optOutMarketing: false,
   isEmailFocused: false,
-  isPasswordFocused: false,
   emailError: "",
   passwordError: "",
   confirmPasswordError: "",
@@ -123,7 +120,8 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setRememberMe: (rememberMe) => set({ rememberMe }),
 
-  toggleShowPassword: () => set((state) => ({ showPassword: !state.showPassword })),
+  toggleShowPassword: () =>
+    set((state) => ({ showPassword: !state.showPassword })),
 
   setFirstName: (firstName) => {
     set({ firstName, firstNameError: "" });
@@ -145,13 +143,12 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setIsEmailFocused: (isEmailFocused) => set({ isEmailFocused }),
 
-  setIsPasswordFocused: (isPasswordFocused) => set({ isPasswordFocused }),
-
   setEmailError: (emailError) => set({ emailError }),
 
   setPasswordError: (passwordError) => set({ passwordError }),
 
-  setConfirmPasswordError: (confirmPasswordError) => set({ confirmPasswordError }),
+  setConfirmPasswordError: (confirmPasswordError) =>
+    set({ confirmPasswordError }),
 
   setFirstNameError: (firstNameError) => set({ firstNameError }),
 
@@ -161,15 +158,16 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setAddressError: (addressError) => set({ addressError }),
 
-  clearErrors: () => set({ 
-    emailError: "", 
-    passwordError: "", 
-    confirmPasswordError: "",
-    firstNameError: "",
-    lastNameError: "",
-    birthdayError: "",
-    addressError: "",
-  }),
+  clearErrors: () =>
+    set({
+      emailError: "",
+      passwordError: "",
+      confirmPasswordError: "",
+      firstNameError: "",
+      lastNameError: "",
+      birthdayError: "",
+      addressError: "",
+    }),
 
   setIsLoading: (isLoading) => set({ isLoading }),
 
@@ -188,19 +186,28 @@ export const useAuthStore = create<AuthState>((set) => ({
 }));
 
 // Validation helpers
-export const validateEmail = (email: string): { success: boolean; error?: string } => {
+export const validateEmail = (
+  email: string
+): { success: boolean; error?: string } => {
   try {
     emailSchema.parse(email);
     return { success: true };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return { success: false, error: error.issues[0]?.message || "Invalid email" };
+      return {
+        success: false,
+        error: error.issues[0]?.message || "Invalid email",
+      };
     }
     return { success: false, error: "Invalid email" };
   }
 };
 
-export const validateLoginForm = (data: { email: string; password: string; rememberMe?: boolean }): { success: boolean; error?: z.ZodError } => {
+export const validateLoginForm = (data: {
+  email: string;
+  password: string;
+  rememberMe?: boolean;
+}): { success: boolean; error?: z.ZodError } => {
   try {
     loginFormSchema.parse(data);
     return { success: true };
@@ -212,7 +219,15 @@ export const validateLoginForm = (data: { email: string; password: string; remem
   }
 };
 
-export const validateSignUpForm = (data: { email: string; firstName?: string; lastName?: string; birthday?: string; address?: string; password: string; confirmPassword: string }): { success: boolean; error?: z.ZodError } => {
+export const validateSignUpForm = (data: {
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  birthday?: string;
+  address?: string;
+  password: string;
+  confirmPassword: string;
+}): { success: boolean; error?: z.ZodError } => {
   try {
     signUpFormSchema.parse(data);
     return { success: true };
@@ -223,4 +238,3 @@ export const validateSignUpForm = (data: { email: string; firstName?: string; la
     return { success: false };
   }
 };
-

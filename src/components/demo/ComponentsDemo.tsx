@@ -4,10 +4,16 @@
  * A comprehensive showcase of all custom components with interactive examples
  */
 
-import { useState } from 'react';
-import { Spinner, OrangeButton, PurpleButton, TertiaryButton, Checkbox } from '@/components/common';
-import { toast } from 'sonner';
-import { ArrowLeft } from 'lucide-react';
+import { useState } from "react";
+import {
+  Spinner,
+  OrangeButton,
+  PurpleButton,
+  TertiaryButton,
+  Checkbox,
+} from "@/components/common";
+import { toast } from "sonner";
+import { ArrowLeft } from "lucide-react";
 
 export function ComponentsDemo({ onBack }: { onBack: () => void }) {
   const [loading1, setLoading1] = useState(false);
@@ -16,37 +22,31 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
 
   const handleSubmit1 = () => {
     setLoading1(true);
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 3000)),
-      {
-        loading: (
-          <div className="flex items-center gap-2">
-            <Spinner size="small" color="#633479" />
-            <span>Submitting...</span>
-          </div>
-        ),
-        success: 'Form submitted successfully!',
-        error: 'Error submitting form',
-      }
-    );
+    toast.promise(new Promise((resolve) => setTimeout(resolve, 3000)), {
+      loading: (
+        <div className="flex items-center gap-2">
+          <Spinner size="small" color="#633479" />
+          <span>Submitting...</span>
+        </div>
+      ),
+      success: "Form submitted successfully!",
+      error: "Error submitting form",
+    });
     setTimeout(() => setLoading1(false), 3000);
   };
 
   const handleSubmit2 = () => {
     setLoading2(true);
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
-      {
-        loading: (
-          <div className="flex items-center gap-2">
-            <Spinner size="small" color="#de6a07" />
-            <span>Processing...</span>
-          </div>
-        ),
-        success: 'Request completed!',
-        error: 'Request failed',
-      }
-    );
+    toast.promise(new Promise((resolve) => setTimeout(resolve, 2000)), {
+      loading: (
+        <div className="flex items-center gap-2">
+          <Spinner size="small" color="#de6a07" />
+          <span>Processing...</span>
+        </div>
+      ),
+      success: "Request completed!",
+      error: "Request failed",
+    });
     setTimeout(() => setLoading2(false), 2000);
   };
 
@@ -80,7 +80,8 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
             Spinner Component
           </h2>
           <p className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
-            Rotating spinner with customizable size and color, built from Figma design
+            Rotating spinner with customizable size and color, built from Figma
+            design
           </p>
 
           {/* Basic Spinners */}
@@ -176,7 +177,12 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
                 Opacity 0.1
               </p>
               <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-200">
-                <Spinner size={32} color="#633479" showTrack trackOpacity={0.1} />
+                <Spinner
+                  size={32}
+                  color="#633479"
+                  showTrack
+                  trackOpacity={0.1}
+                />
               </div>
             </div>
             <div className="flex flex-col items-center gap-3">
@@ -184,7 +190,12 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
                 Opacity 0.3
               </p>
               <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-200">
-                <Spinner size={32} color="#633479" showTrack trackOpacity={0.3} />
+                <Spinner
+                  size={32}
+                  color="#633479"
+                  showTrack
+                  trackOpacity={0.3}
+                />
               </div>
             </div>
             <div className="flex flex-col items-center gap-3">
@@ -192,7 +203,12 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
                 Opacity 0.5
               </p>
               <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-200">
-                <Spinner size={32} color="#633479" showTrack trackOpacity={0.5} />
+                <Spinner
+                  size={32}
+                  color="#633479"
+                  showTrack
+                  trackOpacity={0.5}
+                />
               </div>
             </div>
             <div className="flex flex-col items-center gap-3">
@@ -200,7 +216,12 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
                 Opacity 0.8
               </p>
               <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-200">
-                <Spinner size={32} color="#633479" showTrack trackOpacity={0.8} />
+                <Spinner
+                  size={32}
+                  color="#633479"
+                  showTrack
+                  trackOpacity={0.8}
+                />
               </div>
             </div>
           </div>
@@ -213,7 +234,8 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
           </h2>
           <div className="mb-6 p-4 bg-green-50 rounded-lg">
             <p className="font-['Comfortaa:Medium',_sans-serif] text-[14px] text-[#4a3c2a]">
-              ✓ Button width stays constant during loading - no layout shift or jitter
+              ✓ Button width stays constant during loading - no layout shift or
+              jitter
             </p>
           </div>
           <div className="space-y-8">
@@ -327,7 +349,8 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
             Checkbox Component
           </h2>
           <p className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
-            Interactive checkbox with 5 states: default, hover, focus, active, and checked
+            Interactive checkbox with 5 states: default, hover, focus, active,
+            and checked
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -367,7 +390,9 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
 
           <div className="mt-6 p-4 bg-green-50 rounded-lg">
             <p className="font-['Comfortaa:Medium',_sans-serif] text-[14px] text-[#4a3c2a]">
-              💡 See the full <span className="text-[#2374ff] font-bold">Checkbox Demo</span> page for more examples and use cases
+              💡 See the full{" "}
+              <span className="text-[#2374ff] font-bold">Checkbox Demo</span>{" "}
+              page for more examples and use cases
             </p>
           </div>
         </div>
@@ -392,9 +417,7 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
                   <p className="font-['Comfortaa:Medium',_sans-serif] text-[12px] text-[rgba(74,60,42,0.7)] mb-2">
                     Default State
                   </p>
-                  <TertiaryButton variant="orange">
-                    Click Me
-                  </TertiaryButton>
+                  <TertiaryButton variant="orange">Click Me</TertiaryButton>
                 </div>
                 <div>
                   <p className="font-['Comfortaa:Medium',_sans-serif] text-[12px] text-[rgba(74,60,42,0.7)] mb-2">
@@ -417,17 +440,13 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
                   <p className="font-['Comfortaa:Medium',_sans-serif] text-[12px] text-[rgba(74,60,42,0.7)] mb-2">
                     Default State
                   </p>
-                  <TertiaryButton variant="brown">
-                    Click Me
-                  </TertiaryButton>
+                  <TertiaryButton variant="brown">Click Me</TertiaryButton>
                 </div>
                 <div>
                   <p className="font-['Comfortaa:Medium',_sans-serif] text-[12px] text-[rgba(74,60,42,0.7)] mb-2">
                     Hover to see border
                   </p>
-                  <TertiaryButton variant="brown">
-                    Hover Over Me
-                  </TertiaryButton>
+                  <TertiaryButton variant="brown">Hover Over Me</TertiaryButton>
                 </div>
               </div>
             </div>
@@ -445,11 +464,21 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
                 Spinner Component:
               </p>
               <ul className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[#4a3c2a] space-y-1 list-disc list-inside ml-4">
-                <li>Sizes: "small" (16px), "medium" (24px), "large" (48px), or custom number</li>
+                <li>
+                  Sizes: "small" (16px), "medium" (24px), "large" (48px), or
+                  custom number
+                </li>
                 <li>Customizable color prop</li>
                 <li>Built-in rotation animation</li>
-                <li>Optional background track with <code className="bg-white px-1 rounded">showTrack</code> prop</li>
-                <li>Adjustable track opacity with <code className="bg-white px-1 rounded">trackOpacity</code> prop (0-1)</li>
+                <li>
+                  Optional background track with{" "}
+                  <code className="bg-white px-1 rounded">showTrack</code> prop
+                </li>
+                <li>
+                  Adjustable track opacity with{" "}
+                  <code className="bg-white px-1 rounded">trackOpacity</code>{" "}
+                  prop (0-1)
+                </li>
                 <li>Can be used in buttons, toasts, or standalone</li>
               </ul>
             </div>
@@ -458,8 +487,13 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
                 Button Loading States:
               </p>
               <ul className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[#4a3c2a] space-y-1 list-disc list-inside ml-4">
-                <li>Add <code className="bg-white px-1 rounded">loading</code> prop to any button</li>
-                <li>Spinner overlays the text while maintaining button width</li>
+                <li>
+                  Add <code className="bg-white px-1 rounded">loading</code>{" "}
+                  prop to any button
+                </li>
+                <li>
+                  Spinner overlays the text while maintaining button width
+                </li>
                 <li>No layout shift or jitter during state transitions</li>
                 <li>Button becomes disabled during loading</li>
                 <li>Works with all button variants and sizes</li>
@@ -470,9 +504,17 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
                 Tertiary Button:
               </p>
               <ul className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[#4a3c2a] space-y-1 list-disc list-inside ml-4">
-                <li><strong>Default:</strong> Transparent background, no border, colored text</li>
-                <li><strong>Hover:</strong> Border appears in the theme color</li>
-                <li><strong>Focus/Active:</strong> Border changes to blue (#2374ff)</li>
+                <li>
+                  <strong>Default:</strong> Transparent background, no border,
+                  colored text
+                </li>
+                <li>
+                  <strong>Hover:</strong> Border appears in the theme color
+                </li>
+                <li>
+                  <strong>Focus/Active:</strong> Border changes to blue
+                  (#2374ff)
+                </li>
               </ul>
             </div>
             <div>
@@ -480,11 +522,24 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
                 Checkbox Component:
               </p>
               <ul className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[#4a3c2a] space-y-1 list-disc list-inside ml-4">
-                <li><strong>Default:</strong> Gray border #717182, dark text</li>
-                <li><strong>Hover:</strong> Gray text #717182 (unchecked only)</li>
-                <li><strong>Focus:</strong> Blue background #2374ff with focus ring</li>
-                <li><strong>Active:</strong> Orange background #de6a07, gradient checkmark</li>
-                <li><strong>Checked:</strong> Blue background #2374ff, white checkmark</li>
+                <li>
+                  <strong>Default:</strong> Gray border #717182, dark text
+                </li>
+                <li>
+                  <strong>Hover:</strong> Gray text #717182 (unchecked only)
+                </li>
+                <li>
+                  <strong>Focus:</strong> Blue background #2374ff with focus
+                  ring
+                </li>
+                <li>
+                  <strong>Active:</strong> Orange background #de6a07, gradient
+                  checkmark
+                </li>
+                <li>
+                  <strong>Checked:</strong> Blue background #2374ff, white
+                  checkmark
+                </li>
                 <li>Keyboard accessible with Tab navigation</li>
               </ul>
             </div>

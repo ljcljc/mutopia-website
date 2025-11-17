@@ -36,7 +36,11 @@ export default function Footer() {
                 {/* Logo and Name */}
                 <div className="content-stretch flex gap-[10.5px] items-center w-full">
                   <div className="size-[31px] shrink-0">
-                    <img src={iconFooterLogo} alt="Logo" className="size-[31px]" />
+                    <img
+                      src={iconFooterLogo}
+                      alt="Logo"
+                      className="size-[31px]"
+                    />
                   </div>
                   <h3 className="font-['Comfortaa:Bold',_sans-serif] leading-[28px] text-white text-[21px]">
                     Mutopia
@@ -45,7 +49,8 @@ export default function Footer() {
 
                 {/* Description */}
                 <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] text-[14px] text-white max-w-[224px]">
-                  Premium pet grooming services bringing professional care directly to your door. Your pet's comfort is our priority.
+                  Premium pet grooming services bringing professional care
+                  directly to your door. Your pet's comfort is our priority.
                 </p>
 
                 {/* Email */}
@@ -67,7 +72,11 @@ export default function Footer() {
                 {/* Location */}
                 <div className="content-stretch flex gap-[10.5px] items-center w-full max-w-[273px]">
                   <div className="size-[16px] shrink-0">
-                    <img src={iconLocation} alt="Location" className="size-[16px]" />
+                    <img
+                      src={iconLocation}
+                      alt="Location"
+                      className="size-[16px]"
+                    />
                   </div>
                   <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[21px] text-[14px] text-white">
                     Serving Greater Vancouver Area
@@ -124,7 +133,11 @@ export default function Footer() {
                       className="bg-[#de6a07] rounded-full size-[35px] flex items-center justify-center hover:bg-[rgba(222,106,7,0.8)] active:bg-[rgba(222,106,7,0.8)] focus-visible:bg-[rgba(222,106,7,0.8)] transition-colors duration-200 cursor-pointer group relative border-2 border-transparent focus-visible:border-[#2374ff] active:border-[#2374ff]"
                       aria-label="Facebook"
                     >
-                      <img src={iconSocial1} alt="Facebook" className="size-[20px]" />
+                      <img
+                        src={iconSocial1}
+                        alt="Facebook"
+                        className="size-[20px]"
+                      />
                     </a>
 
                     {/* Instagram */}
@@ -133,7 +146,11 @@ export default function Footer() {
                       className="bg-[#de6a07] rounded-full size-[35px] flex items-center justify-center hover:bg-[rgba(222,106,7,0.8)] active:bg-[rgba(222,106,7,0.8)] focus-visible:bg-[rgba(222,106,7,0.8)] transition-colors duration-200 cursor-pointer group relative border-2 border-transparent focus-visible:border-[#2374ff] active:border-[#2374ff]"
                       aria-label="Instagram"
                     >
-                      <img src={iconSocial2} alt="Instagram" className="size-[20px]" />
+                      <img
+                        src={iconSocial2}
+                        alt="Instagram"
+                        className="size-[20px]"
+                      />
                     </a>
 
                     {/* Twitter */}
@@ -142,7 +159,11 @@ export default function Footer() {
                       className="bg-[#de6a07] rounded-full size-[35px] flex items-center justify-center hover:bg-[rgba(222,106,7,0.8)] active:bg-[rgba(222,106,7,0.8)] focus-visible:bg-[rgba(222,106,7,0.8)] transition-colors duration-200 cursor-pointer group relative border-2 border-transparent focus-visible:border-[#2374ff] active:border-[#2374ff]"
                       aria-label="Twitter"
                     >
-                      <img src={iconSocial3} alt="Twitter" className="size-[20px]" />
+                      <img
+                        src={iconSocial3}
+                        alt="Twitter"
+                        className="size-[20px]"
+                      />
                     </a>
                   </div>
                 </div>
@@ -158,13 +179,22 @@ export default function Footer() {
                 © 2026 Mutopia. All rights reserved.
               </p>
               <div className="flex flex-wrap gap-[16px] md:gap-[24px] items-center justify-center order-1 md:order-2">
-                <a href="#" className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[17.5px] text-[12.25px] text-white hover:text-[#de6a07] transition-colors duration-200 cursor-pointer">
+                <a
+                  href="#"
+                  className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[17.5px] text-[12.25px] text-white hover:text-[#de6a07] transition-colors duration-200 cursor-pointer"
+                >
                   Privacy Policy
                 </a>
-                <a href="#" className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[17.5px] text-[12.25px] text-white hover:text-[#de6a07] transition-colors duration-200 cursor-pointer">
+                <a
+                  href="#"
+                  className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[17.5px] text-[12.25px] text-white hover:text-[#de6a07] transition-colors duration-200 cursor-pointer"
+                >
                   Terms of Service
                 </a>
-                <a href="#" className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[17.5px] text-[12.25px] text-white hover:text-[#de6a07] transition-colors duration-200 cursor-pointer">
+                <a
+                  href="#"
+                  className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[17.5px] text-[12.25px] text-white hover:text-[#de6a07] transition-colors duration-200 cursor-pointer"
+                >
                   Cookie Policy
                 </a>
               </div>

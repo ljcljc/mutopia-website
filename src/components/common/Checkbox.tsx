@@ -17,11 +17,12 @@
  * - No visible focus ring (clean design)
  */
 
-import { forwardRef, useState, InputHTMLAttributes } from 'react';
-import { Check } from 'lucide-react';
-import svgPaths from '@/assets/icons/svg-1l4mtpqhh5';
+import { forwardRef, useState, InputHTMLAttributes } from "react";
+import { Check } from "lucide-react";
+import svgPaths from "@/assets/icons/svg-1l4mtpqhh5";
 
-export interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'size'> {
+export interface CheckboxProps
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "size"> {
   /** Label text to display next to checkbox */
   label?: string;
   /** Whether checkbox is checked (for controlled component) */
@@ -42,15 +43,17 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
       defaultChecked,
       onCheckedChange,
       onChange,
-      className = '',
-      containerClassName = '',
+      className = "",
+      containerClassName = "",
       disabled = false,
       ...props
     },
     ref
   ) => {
     // Internal state for uncontrolled mode
-    const [internalChecked, setInternalChecked] = useState(defaultChecked || false);
+    const [internalChecked, setInternalChecked] = useState(
+      defaultChecked || false
+    );
     const [, setIsFocused] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [isActive, setIsActive] = useState(false);
@@ -100,11 +103,11 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
 
     // Determine text color based on state
     const getTextColor = () => {
-      if (disabled) return 'text-[#717182]/50';
+      if (disabled) return "text-[#717182]/50";
       // Hover state: gray text when hovering over unchecked checkbox
-      if (isHovered && !isChecked) return 'text-[#717182]';
+      if (isHovered && !isChecked) return "text-[#717182]";
       // Default/Checked/Focus state: dark text
-      return 'text-[#4a3c2a]';
+      return "text-[#4a3c2a]";
     };
 
     // Determine checkbox background and border based on state
@@ -112,16 +115,16 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
       // Disabled state
       if (disabled) {
         return {
-          background: isChecked ? 'bg-[#2374ff]/50' : 'bg-white',
-          border: 'border-[#717182]/30',
+          background: isChecked ? "bg-[#2374ff]/50" : "bg-white",
+          border: "border-[#717182]/30",
         };
       }
 
       // Active state (checked + pressed): Orange background, gradient checkmark
       if (isChecked && isActive) {
         return {
-          background: 'bg-[#de6a07]',
-          border: '',
+          background: "bg-[#de6a07]",
+          border: "",
           showGradientCheck: true,
         };
       }
@@ -130,16 +133,16 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
       // Checked state: Blue background, white checkmark
       if (isChecked) {
         return {
-          background: 'bg-[#2374ff]',
-          border: '',
+          background: "bg-[#2374ff]",
+          border: "",
           showGradientCheck: false,
         };
       }
 
       // Default/Hover state (unchecked): White background, gray border
       return {
-        background: 'bg-white',
-        border: 'border-[#717182]',
+        background: "bg-white",
+        border: "border-[#717182]",
         showGradientCheck: false,
       };
     };
@@ -150,7 +153,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
     return (
       <label
         className={`content-stretch flex gap-[8px] items-center relative cursor-pointer ${
-          disabled ? 'cursor-not-allowed opacity-60' : ''
+          disabled ? "cursor-not-allowed opacity-60" : ""
         } ${containerClassName}`}
         data-name="Checkbox Label"
         onMouseEnter={handleMouseEnter}
@@ -221,8 +224,6 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
               )}
             </>
           )}
-
-
         </div>
 
         {/* Label text */}
@@ -238,15 +239,16 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
   }
 );
 
-Checkbox.displayName = 'Checkbox';
+Checkbox.displayName = "Checkbox";
 
 /**
  * Checkbox without label (for use in custom layouts)
  */
-export const CheckboxOnly = forwardRef<HTMLInputElement, Omit<CheckboxProps, 'label'>>(
-  (props, ref) => {
-    return <Checkbox ref={ref} {...props} />;
-  }
-);
+export const CheckboxOnly = forwardRef<
+  HTMLInputElement,
+  Omit<CheckboxProps, "label">
+>((props, ref) => {
+  return <Checkbox ref={ref} {...props} />;
+});
 
-CheckboxOnly.displayName = 'CheckboxOnly';
+CheckboxOnly.displayName = "CheckboxOnly";

@@ -43,9 +43,9 @@ export default function Hero() {
 
             {/* Description */}
             <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[28px] text-[16px] text-[rgba(74,60,42,0.7)] w-[489px]">
-              Transform your furry friend with our professional
-              grooming services. Book online, relax at home, and
-              let our certified groomers come to you.
+              Transform your furry friend with our professional grooming
+              services. Book online, relax at home, and let our certified
+              groomers come to you.
             </p>
 
             {/* Features */}
@@ -93,10 +93,7 @@ export default function Hero() {
                 Book Appointment
               </OrangeButton>
 
-              <OrangeButton
-                variant="outline"
-                className="w-[170px]"
-              >
+              <OrangeButton variant="outline" className="w-[170px]">
                 View Services
               </OrangeButton>
             </div>
@@ -142,9 +139,9 @@ export default function Hero() {
 
           {/* Description */}
           <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[28px] text-[16px] text-[rgba(74,60,42,0.7)]">
-            Transform your furry friend with our professional
-            grooming services. Book online, relax at home, and
-            let our certified groomers come to you.
+            Transform your furry friend with our professional grooming services.
+            Book online, relax at home, and let our certified groomers come to
+            you.
           </p>
 
           {/* Features */}
@@ -152,34 +149,34 @@ export default function Hero() {
             {/* Easy booking */}
             <div className="flex gap-[7px] items-center">
               <img
-                  src={iconEasyBooking}
-                  alt="Easy booking"
-                  className="size-[20px]"
-                />
-                <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
-                  Easy booking
-                </p>
-              </div>
+                src={iconEasyBooking}
+                alt="Easy booking"
+                className="size-[20px]"
+              />
+              <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
+                Easy booking
+              </p>
+            </div>
 
-              {/* Pet-friendly */}
-              <div className="flex gap-[7px] items-center">
-                <img
-                  src={iconPetFriendly}
-                  alt="Pet-friendly"
-                  className="size-[20px]"
-                />
-                <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
-                  Pet-friendly
-                </p>
-              </div>
+            {/* Pet-friendly */}
+            <div className="flex gap-[7px] items-center">
+              <img
+                src={iconPetFriendly}
+                alt="Pet-friendly"
+                className="size-[20px]"
+              />
+              <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
+                Pet-friendly
+              </p>
+            </div>
 
-              {/* Professional service */}
-              <div className="flex gap-[7px] items-center">
-                <img
-                  src={iconProfessionalService}
-                  alt="Professional service"
-                  className="size-[20px]"
-                />
+            {/* Professional service */}
+            <div className="flex gap-[7px] items-center">
+              <img
+                src={iconProfessionalService}
+                alt="Professional service"
+                className="size-[20px]"
+              />
               <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
                 Professional service
               </p>
@@ -188,9 +185,7 @@ export default function Hero() {
 
           {/* Buttons */}
           <div className="flex flex-col gap-[14px] w-full">
-            <OrangeButton fullWidth>
-              Book Appointment
-            </OrangeButton>
+            <OrangeButton fullWidth>Book Appointment</OrangeButton>
 
             <OrangeButton variant="outline" fullWidth>
               View Services

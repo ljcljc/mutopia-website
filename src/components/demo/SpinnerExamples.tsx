@@ -10,10 +10,10 @@
  * - Smooth transitions without any jitter or reflow
  */
 
-import { useState } from 'react';
-import { Spinner, OrangeButton, PurpleButton } from '@/components/common';
-import { toast } from 'sonner';
-import { ArrowLeft } from 'lucide-react';
+import { useState } from "react";
+import { Spinner, OrangeButton, PurpleButton } from "@/components/common";
+import { toast } from "sonner";
+import { ArrowLeft } from "lucide-react";
 
 export function SpinnerExamples({ onBack }: { onBack: () => void }) {
   return (
@@ -102,10 +102,10 @@ function Example2() {
   const handleSubmit = async () => {
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      toast.success('Form submitted successfully!');
-    } catch (error) {
-      toast.error('Error submitting form');
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      toast.success("Form submitted successfully!");
+    } catch (_error) {
+      toast.error("Error submitting form");
     } finally {
       setIsLoading(false);
     }
@@ -128,7 +128,7 @@ function Example2() {
       </OrangeButton>
       <div className="mt-4 p-4 bg-gray-100 rounded">
         <code className="text-[12px] font-mono text-[#4a3c2a] whitespace-pre-wrap">
-{`<OrangeButton
+          {`<OrangeButton
   variant="primary"
   loading={isLoading}
   onClick={handleSubmit}
@@ -155,8 +155,8 @@ function Example3() {
           <span>Processing your request...</span>
         </div>
       ),
-      success: 'Request completed!',
-      error: 'Request failed',
+      success: "Request completed!",
+      error: "Request failed",
     });
   };
 
@@ -168,12 +168,10 @@ function Example3() {
       <p className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
         Show spinner in toast notifications for API calls
       </p>
-      <PurpleButton onClick={handleApiCall}>
-        Make API Call
-      </PurpleButton>
+      <PurpleButton onClick={handleApiCall}>Make API Call</PurpleButton>
       <div className="mt-4 p-4 bg-gray-100 rounded">
         <code className="text-[12px] font-mono text-[#4a3c2a] whitespace-pre-wrap">
-{`toast.promise(apiCall, {
+          {`toast.promise(apiCall, {
   loading: (
     <div className="flex items-center gap-2">
       <Spinner size="small" color="#de6a07" />
@@ -203,7 +201,7 @@ function Example4() {
       </p>
       <div className="relative">
         {/* Content */}
-        <div className={isLoading ? 'opacity-50 pointer-events-none' : ''}>
+        <div className={isLoading ? "opacity-50 pointer-events-none" : ""}>
           <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[21px] mb-4">
             Your Content Here
           </h3>
@@ -225,7 +223,7 @@ function Example4() {
             variant="outline"
             onClick={() => setIsLoading(!isLoading)}
           >
-            {isLoading ? 'Stop Loading' : 'Start Loading'}
+            {isLoading ? "Stop Loading" : "Start Loading"}
           </OrangeButton>
         </div>
       </div>
@@ -243,10 +241,10 @@ function Example5() {
     setData(null);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setData('Data loaded successfully!');
-    } catch (error) {
-      setData('Error loading data');
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      setData("Data loaded successfully!");
+    } catch (_error) {
+      setData("Error loading data");
     } finally {
       setIsLoadingData(false);
     }
@@ -297,11 +295,11 @@ function Example6() {
   });
 
   const handleClick = async (buttonId: keyof typeof loadingStates) => {
-    setLoadingStates(prev => ({ ...prev, [buttonId]: true }));
+    setLoadingStates((prev) => ({ ...prev, [buttonId]: true }));
 
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    setLoadingStates(prev => ({ ...prev, [buttonId]: false }));
+    setLoadingStates((prev) => ({ ...prev, [buttonId]: false }));
     toast.success(`${buttonId} completed!`);
   };
 
@@ -317,7 +315,7 @@ function Example6() {
         <PurpleButton
           variant="primary"
           loading={loadingStates.button1}
-          onClick={() => handleClick('button1')}
+          onClick={() => handleClick("button1")}
         >
           Action 1
         </PurpleButton>
@@ -325,7 +323,7 @@ function Example6() {
         <OrangeButton
           variant="primary"
           loading={loadingStates.button2}
-          onClick={() => handleClick('button2')}
+          onClick={() => handleClick("button2")}
         >
           Action 2
         </OrangeButton>
@@ -333,7 +331,7 @@ function Example6() {
         <OrangeButton
           variant="outline"
           loading={loadingStates.button3}
-          onClick={() => handleClick('button3')}
+          onClick={() => handleClick("button3")}
         >
           Action 3
         </OrangeButton>

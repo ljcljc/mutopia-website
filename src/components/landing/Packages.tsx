@@ -57,14 +57,11 @@ export default function Packages() {
                 <br />
                 Packages
               </span>
-              <span className="hidden md:inline">
-                Membership Packages
-              </span>
+              <span className="hidden md:inline">Membership Packages</span>
             </h2>
             <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[28px] text-[16px] text-[rgba(255,255,255,0.8)] max-w-[588px] px-4 md:px-0">
-              Save money and ensure your pet always looks their
-              best with our convenient monthly membership
-              packages.
+              Save money and ensure your pet always looks their best with our
+              convenient monthly membership packages.
             </p>
           </div>
 
