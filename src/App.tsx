@@ -5,7 +5,7 @@ import Services from '@/components/landing/Services';
 import Packages from '@/components/landing/Packages';
 import FAQ from '@/components/landing/FAQ';
 import Footer from '@/components/landing/Footer';
-import ScrollToTop from '@/components/ScrollToTop';
+import { ScrollToTop } from '@/components/common';
 import { Toaster } from '@/components/ui/sonner';
 export default function App() {
   return (

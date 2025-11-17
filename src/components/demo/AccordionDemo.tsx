@@ -1,4 +1,4 @@
-import CustomAccordion, { CustomAccordionItem } from '../CustomAccordion';
+import { CustomAccordion, CustomAccordionItem } from '@/components/common';
 import { ArrowLeft } from 'lucide-react';
 
 export default function AccordionDemo({ onBack }: { onBack?: () => void }) {

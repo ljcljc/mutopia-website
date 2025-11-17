@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { Radio } from '../Radio';
+import { Radio } from '@/components/common';
 import { ArrowLeft } from 'lucide-react';
 
 export default function RadioDemo({ onBack }: { onBack?: () => void }) {

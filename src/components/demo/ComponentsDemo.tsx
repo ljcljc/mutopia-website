@@ -5,11 +5,7 @@
  */
 
 import { useState } from 'react';
-import { Spinner } from '../Spinner';
-import { OrangeButton } from '../OrangeButton';
-import { PurpleButton } from '../PurpleButton';
-import { TertiaryButton } from '../TertiaryButton';
-import { Checkbox } from '../Checkbox';
+import { Spinner, OrangeButton, PurpleButton, TertiaryButton, Checkbox } from '@/components/common';
 import { toast } from 'sonner';
 import { ArrowLeft } from 'lucide-react';
 

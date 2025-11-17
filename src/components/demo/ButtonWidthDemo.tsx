@@ -6,9 +6,7 @@
  */
 
 import { useState } from 'react';
-import { OrangeButton } from '../OrangeButton';
-import { PurpleButton } from '../PurpleButton';
-import { TertiaryButton } from '../TertiaryButton';
+import { OrangeButton, PurpleButton, TertiaryButton } from '@/components/common';
 import { ArrowLeft } from 'lucide-react';
 
 export function ButtonWidthDemo({ onBack }: { onBack: () => void }) {

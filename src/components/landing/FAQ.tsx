@@ -1,7 +1,6 @@
-import CustomAccordion from "@/components/CustomAccordion";
+import { CustomAccordion, PurpleButton } from "@/components/common";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { PurpleButton } from "@/components/PurpleButton";
 import { Label } from "@/components/ui/label";
 import svgPaths from "@/assets/icons/svg-68mxca64pe";
 

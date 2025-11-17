@@ -11,9 +11,7 @@
  */
 
 import { useState } from 'react';
-import { Spinner } from '../Spinner';
-import { OrangeButton } from '../OrangeButton';
-import { PurpleButton } from '../PurpleButton';
+import { Spinner, OrangeButton, PurpleButton } from '@/components/common';
 import { toast } from 'sonner';
 import { ArrowLeft } from 'lucide-react';
 

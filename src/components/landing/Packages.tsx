@@ -1,5 +1,5 @@
 import svgPaths from "@/assets/icons/svg-zb4ynfxey2";
-import { PurpleButton } from "@/components/PurpleButton";
+import { PurpleButton } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
 // import { Check } from "lucide-react";
 

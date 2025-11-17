@@ -5,9 +5,8 @@
  */
 
 import { useState } from 'react';
-import { Checkbox } from '../Checkbox';
 import { ArrowLeft } from 'lucide-react';
-import { OrangeButton } from '../OrangeButton';
+import { Checkbox, OrangeButton } from '@/components/common';
 
 export function CheckboxDemo({ onBack }: { onBack: () => void }) {
   const [checked1, setChecked1] = useState(false);

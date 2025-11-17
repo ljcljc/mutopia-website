@@ -4,7 +4,7 @@ const imgIcon = "/images/logo.png";
 import iconMenu from "@/assets/icons/icon-menu.svg";
 import { Button } from "./ui/button";
 import { motion, AnimatePresence } from "motion/react";
-import { OrangeButton } from "./OrangeButton";
+import { OrangeButton } from "@/components/common";
 import { LoginModal } from "@/components/auth/LoginModal";
 import { useAuthStore } from "@/components/auth/authStore";
 import svgPaths from "@/assets/icons/svg-kzu0xk56ho";

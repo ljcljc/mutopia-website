@@ -1,6 +1,6 @@
 // 使用占位图片替换 figma:asset 导入
 const imgImageWithFallback = "/images/grooming-hero.png";
-import { OrangeButton } from "@/components/OrangeButton";
+import { OrangeButton } from "@/components/common";
 import iconEasyBooking from "@/assets/icons/icon-easy-booking.svg";
 import iconPetFriendly from "@/assets/icons/icon-pet-friendly.svg";
 import iconProfessionalService from "@/assets/icons/icon-professional-service.svg";

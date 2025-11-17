@@ -7,8 +7,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Spinner } from "@/components/Spinner";
-import { Checkbox } from "@/components/Checkbox";
+import { Spinner, Checkbox } from "@/components/common";
 import { 
   useAuthStore, 
   validateEmail, 

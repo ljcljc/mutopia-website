@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { OrangeButton } from "@/components/OrangeButton";
+import { OrangeButton } from "@/components/common";
 import iconClock from "@/assets/icons/icon-clock.svg";
 import iconBathBrush from "@/assets/icons/icon-bath-brush.svg";
 import iconFullGrooming from "@/assets/icons/icon-full-grooming.svg";
