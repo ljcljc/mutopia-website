@@ -7,7 +7,7 @@ import iconGoogle from "@/assets/icons/icon-google.svg";
 import iconFacebook from "@/assets/icons/icon-facebook.svg";
 
 // Email form component
-export function Frame65({
+export function EmailForm({
   email,
   setEmail,
   onContinue,
@@ -56,7 +56,7 @@ export function Frame65({
   );
 }
 
-export function AuthDialog({
+export function EmailFormContainer({
   email,
   setEmail,
   onContinue,
@@ -78,7 +78,7 @@ export function AuthDialog({
       className="content-stretch flex flex-col gap-[14px] items-start relative shrink-0 w-full"
       data-name="AuthDialog"
     >
-      <Frame65
+      <EmailForm
         email={email}
         setEmail={setEmail}
         onContinue={onContinue}
@@ -92,7 +92,7 @@ export function AuthDialog({
 }
 
 // Divider component
-export function PrimitiveDiv1() {
+export function DividerLine() {
   return (
     <div
       className="absolute bg-[rgba(0,0,0,0.1)] h-px left-0 right-0 top-[-0.25px]"
@@ -101,7 +101,7 @@ export function PrimitiveDiv1() {
   );
 }
 
-export function Text() {
+export function DividerText() {
   return (
     <div
       className="absolute bg-white h-[17.5px] left-1/2 -translate-x-1/2 top-[-8.25px] px-[14px]"
@@ -114,17 +114,17 @@ export function Text() {
   );
 }
 
-export function AuthDialog1() {
+export function Divider() {
   return (
     <div className="h-px relative shrink-0 w-full" data-name="AuthDialog">
-      <PrimitiveDiv1 />
-      <Text />
+      <DividerLine />
+      <DividerText />
     </div>
   );
 }
 
 // Social login buttons
-export function AuthDialog2() {
+export function GoogleIcon() {
   return (
     <div className="relative shrink-0 size-[14px]" data-name="AuthDialog">
       <img src={iconGoogle} alt="Google" className="block size-full" />
@@ -132,10 +132,10 @@ export function AuthDialog2() {
   );
 }
 
-export function Frame60() {
+export function GoogleButtonContent() {
   return (
     <div className="absolute content-stretch flex gap-[12px] items-center left-[16px] right-[16px] top-[7.75px]">
-      <AuthDialog2 />
+      <GoogleIcon />
       <p className="basis-0 font-['Comfortaa:Bold',sans-serif] font-bold grow leading-[20px] min-h-px min-w-px relative shrink-0 text-[#717182] text-[14px] text-center">
         Continue with Google
       </p>
@@ -143,7 +143,7 @@ export function Frame60() {
   );
 }
 
-export function Button({ onClick }: { onClick: () => void }) {
+export function GoogleButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
@@ -154,12 +154,12 @@ export function Button({ onClick }: { onClick: () => void }) {
         aria-hidden="true"
         className="absolute border border-[rgba(0,0,0,0.1)] border-solid inset-0 pointer-events-none rounded-[16px]"
       />
-      <Frame60 />
+      <GoogleButtonContent />
     </button>
   );
 }
 
-export function AuthDialog3() {
+export function FacebookIcon() {
   return (
     <div className="relative shrink-0 size-[14px]" data-name="AuthDialog">
       <img src={iconFacebook} alt="Facebook" className="block size-full" />
@@ -167,10 +167,10 @@ export function AuthDialog3() {
   );
 }
 
-export function Frame61() {
+export function FacebookButtonContent() {
   return (
     <div className="absolute content-stretch flex gap-[12px] items-center left-[18px] right-[18px] top-[8.25px]">
-      <AuthDialog3 />
+      <FacebookIcon />
       <p className="basis-0 font-['Comfortaa:Bold',sans-serif] font-bold grow leading-[20px] min-h-px min-w-px relative shrink-0 text-[#717182] text-[14px] text-center">
         Continue with Facebook
       </p>
@@ -178,7 +178,7 @@ export function Frame61() {
   );
 }
 
-export function Button1({ onClick }: { onClick: () => void }) {
+export function FacebookButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
@@ -189,12 +189,12 @@ export function Button1({ onClick }: { onClick: () => void }) {
         aria-hidden="true"
         className="absolute border border-[rgba(0,0,0,0.1)] border-solid inset-0 pointer-events-none rounded-[16px]"
       />
-      <Frame61 />
+      <FacebookButtonContent />
     </button>
   );
 }
 
-export function AuthDialog4({
+export function SocialLoginButtons({
   onGoogleClick,
   onFacebookClick,
 }: {
@@ -206,14 +206,14 @@ export function AuthDialog4({
       className="content-stretch flex flex-col gap-[10.5px] items-start relative shrink-0 w-full"
       data-name="AuthDialog"
     >
-      <Button onClick={onGoogleClick} />
-      <Button1 onClick={onFacebookClick} />
+      <GoogleButton onClick={onGoogleClick} />
+      <FacebookButton onClick={onFacebookClick} />
     </div>
   );
 }
 
-// Tab panel and container
-export function TabPanel({
+// Email step content
+export function EmailStepContent({
   email,
   setEmail,
   onContinue,
@@ -237,7 +237,7 @@ export function TabPanel({
   return (
     <div className="relative shrink-0 w-full" data-name="Tab Panel">
       <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex flex-col gap-[28px] items-start relative w-full">
-        <AuthDialog
+        <EmailFormContainer
           email={email}
           setEmail={setEmail}
           onContinue={onContinue}
@@ -246,8 +246,8 @@ export function TabPanel({
           error={error}
           isLoading={isLoading}
         />
-        <AuthDialog1 />
-        <AuthDialog4
+        <Divider />
+        <SocialLoginButtons
           onGoogleClick={onGoogleClick}
           onFacebookClick={onFacebookClick}
         />
@@ -256,7 +256,7 @@ export function TabPanel({
   );
 }
 
-export function Container({
+export function EmailStepContainer({
   email,
   setEmail,
   onContinue,
@@ -281,7 +281,7 @@ export function Container({
     <div className="relative shrink-0 w-full" data-name="Container">
       <div className="size-full">
         <div className="box-border content-stretch flex flex-col gap-[28px] items-start px-[24px] py-0 relative w-full">
-          <TabPanel
+          <EmailStepContent
             email={email}
             setEmail={setEmail}
             onContinue={onContinue}

@@ -9,7 +9,7 @@ import {
 import { checkEmailRegistered } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { WelcomeToMutopiaPet } from "./LoginModalUI";
-import { Container } from "./LoginModalForms";
+import { EmailStepContainer } from "./LoginModalForms";
 import {
   PasswordContainer,
   SignUpContainer,
@@ -586,7 +586,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
           />
 
           {step === "email" ? (
-            <Container
+            <EmailStepContainer
               email={email}
               setEmail={handleEmailChange}
               onContinue={handleContinue}
