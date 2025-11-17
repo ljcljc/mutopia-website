@@ -161,6 +161,7 @@ coverage/
 
 # Environment files
 .env*
+!.env.example
 
 # Package manager lock files (keep package-lock.json but ignore others)
 yarn.lock

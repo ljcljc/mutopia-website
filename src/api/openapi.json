@@ -1,0 +1,1322 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "Mutopia API", "version": "1.0", "description": "" },
+  "paths": {
+    "/api/auth/send_code": {
+      "post": {
+        "operationId": "api_auth_send_code",
+        "summary": "Send Code",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SendCodeOut" }
+              }
+            }
+          }
+        },
+        "tags": ["auth"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SendCodeIn" }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/auth/email/check": {
+      "post": {
+        "operationId": "api_auth_email_check",
+        "summary": "Email Check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/EmailCheckOut" }
+              }
+            }
+          }
+        },
+        "tags": ["auth"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/EmailCheckIn" }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/auth/code/verify": {
+      "post": {
+        "operationId": "api_auth_code_verify",
+        "summary": "Code Verify",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CodeVerifyOut" }
+              }
+            }
+          }
+        },
+        "tags": ["auth"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CodeVerifyIn" }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/auth/register/complete": {
+      "post": {
+        "operationId": "api_auth_register_complete",
+        "summary": "Register Complete",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TokenOut" }
+              }
+            }
+          }
+        },
+        "tags": ["auth"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterCompleteIn" }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "operationId": "api_auth_login",
+        "summary": "Login",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TokenOut" }
+              }
+            }
+          }
+        },
+        "tags": ["auth"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginIn" }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/auth/refresh": {
+      "post": {
+        "operationId": "api_auth_refresh_token",
+        "summary": "Refresh Token",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TokenOut" }
+              }
+            }
+          }
+        },
+        "tags": ["auth"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RefreshIn" }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/auth/guest/start": {
+      "post": {
+        "operationId": "api_auth_guest_start",
+        "summary": "Guest Start",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "email",
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Email"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GuestStartOut" }
+              }
+            }
+          }
+        },
+        "tags": ["auth"]
+      }
+    },
+    "/api/auth/guest/upgrade": {
+      "post": {
+        "operationId": "api_auth_upgrade_guest",
+        "summary": "Upgrade Guest",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TokenOut" }
+              }
+            }
+          }
+        },
+        "tags": ["auth"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpgradeGuestIn" }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/auth/social/link": {
+      "post": {
+        "operationId": "api_auth_link_social",
+        "summary": "Link Social",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OkOut" }
+              }
+            }
+          }
+        },
+        "tags": ["auth"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SocialIn" }
+            }
+          },
+          "required": true
+        },
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/auth/social/login": {
+      "post": {
+        "operationId": "api_auth_social_login",
+        "summary": "Social Login",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TokenOut" }
+              }
+            }
+          }
+        },
+        "tags": ["auth"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SocialLoginIn" }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "operationId": "api_auth_me",
+        "summary": "Me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MeOut" }
+              }
+            }
+          }
+        },
+        "tags": ["auth"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/auth/password/forgot/send": {
+      "post": {
+        "operationId": "api_auth_password_forgot_send",
+        "summary": "Password Forgot Send",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SendCodeOut" }
+              }
+            }
+          }
+        },
+        "tags": ["auth"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ForgotPasswordSendIn" }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/auth/password/forgot/verify": {
+      "post": {
+        "operationId": "api_auth_password_forgot_verify",
+        "summary": "Password Forgot Verify",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CodeVerifyOut" }
+              }
+            }
+          }
+        },
+        "tags": ["auth"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CodeVerifyIn" }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/auth/password/forgot/reset": {
+      "post": {
+        "operationId": "api_auth_password_forgot_reset",
+        "summary": "Password Forgot Reset",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OkOut" }
+              }
+            }
+          }
+        },
+        "tags": ["auth"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ForgotPasswordResetIn" }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/catalog/services": {
+      "get": {
+        "operationId": "api_services_list_services",
+        "summary": "List Services",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": { "$ref": "#/components/schemas/ServiceOut" },
+                  "title": "Response",
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["services"]
+      }
+    },
+    "/api/catalog/add_ons": {
+      "get": {
+        "operationId": "api_services_list_addons",
+        "summary": "List Addons",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": { "$ref": "#/components/schemas/AddOnOut" },
+                  "title": "Response",
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["services"]
+      }
+    },
+    "/api/pets/pets": {
+      "get": {
+        "operationId": "api_pets_list_pets",
+        "summary": "List Pets",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": { "$ref": "#/components/schemas/PetOut" },
+                  "title": "Response",
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["pets"],
+        "security": [{ "JWTAuth": [] }]
+      },
+      "post": {
+        "operationId": "api_pets_create_pet",
+        "summary": "Create Pet",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "schema": { "title": "Name", "type": "string" },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "breed",
+            "schema": { "default": "", "title": "Breed", "type": "string" },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "weight_kg",
+            "schema": {
+              "anyOf": [{ "type": "number" }, { "type": "null" }],
+              "title": "Weight Kg"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "age_years",
+            "schema": {
+              "anyOf": [{ "type": "integer" }, { "type": "null" }],
+              "title": "Age Years"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "hair_condition",
+            "schema": {
+              "default": "",
+              "title": "Hair Condition",
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "special_notes",
+            "schema": {
+              "default": "",
+              "title": "Special Notes",
+              "type": "string"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PetOut" }
+              }
+            }
+          }
+        },
+        "tags": ["pets"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/pets/pets/{pet_id}": {
+      "delete": {
+        "operationId": "api_pets_delete_pet",
+        "summary": "Delete Pet",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pet_id",
+            "schema": { "title": "Pet Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OkOut" }
+              }
+            }
+          }
+        },
+        "tags": ["pets"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/bookings/bookings": {
+      "post": {
+        "operationId": "api_bookings_create_booking",
+        "summary": "Create Booking",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pet_id",
+            "schema": { "title": "Pet Id", "type": "integer" },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "service_id",
+            "schema": { "title": "Service Id", "type": "integer" },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "scheduled_time",
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Scheduled Time"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "notes",
+            "schema": { "default": "", "title": "Notes", "type": "string" },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "guest_id",
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Guest Id"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BookingOut" }
+              }
+            }
+          }
+        },
+        "tags": ["bookings"]
+      },
+      "get": {
+        "operationId": "api_bookings_my_bookings",
+        "summary": "My Bookings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": { "$ref": "#/components/schemas/BookingOut" },
+                  "title": "Response",
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["bookings"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/bookings/bookings/guest": {
+      "get": {
+        "operationId": "api_bookings_guest_bookings",
+        "summary": "Guest Bookings",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "guest_id",
+            "schema": { "title": "Guest Id", "type": "string" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": { "$ref": "#/components/schemas/BookingOut" },
+                  "title": "Response",
+                  "type": "array"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["bookings"]
+      }
+    },
+    "/api/bookings/bookings/{booking_id}/groomer_confirm": {
+      "post": {
+        "operationId": "api_bookings_groomer_confirm",
+        "summary": "Groomer Confirm",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "schema": { "title": "Booking Id", "type": "integer" },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "confirm",
+            "schema": {
+              "default": true,
+              "title": "Confirm",
+              "type": "boolean"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OkOut" }
+              }
+            }
+          }
+        },
+        "tags": ["bookings"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/bookings/bookings/{booking_id}/addon_request": {
+      "post": {
+        "operationId": "api_bookings_create_addon_request",
+        "summary": "Create Addon Request",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "schema": { "title": "Booking Id", "type": "integer" },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "amount",
+            "schema": { "title": "Amount", "type": "number" },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "description",
+            "schema": {
+              "default": "",
+              "title": "Description",
+              "type": "string"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AddOnRequestOut" }
+              }
+            }
+          }
+        },
+        "tags": ["bookings"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/bookings/bookings/{booking_id}/review": {
+      "post": {
+        "operationId": "api_bookings_create_review",
+        "summary": "Create Review",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "schema": { "title": "Booking Id", "type": "integer" },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "rating",
+            "schema": { "title": "Rating", "type": "integer" },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "comment",
+            "schema": { "default": "", "title": "Comment", "type": "string" },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ReviewCreatedOut" }
+              }
+            }
+          }
+        },
+        "tags": ["bookings"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/bookings/bookings/{booking_id}/check_in": {
+      "post": {
+        "operationId": "api_bookings_check_in",
+        "summary": "Check In",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "schema": { "title": "Booking Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OkOut" }
+              }
+            }
+          }
+        },
+        "tags": ["bookings"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/bookings/bookings/{booking_id}/check_out": {
+      "post": {
+        "operationId": "api_bookings_check_out",
+        "summary": "Check Out",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "schema": { "title": "Booking Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CheckOutOut" }
+              }
+            }
+          }
+        },
+        "tags": ["bookings"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/bookings/bookings/{booking_id}/addon_request/{request_id}/client_decide": {
+      "post": {
+        "operationId": "api_bookings_client_decide_addon",
+        "summary": "Client Decide Addon",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "schema": { "title": "Booking Id", "type": "integer" },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "request_id",
+            "schema": { "title": "Request Id", "type": "integer" },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "approve",
+            "schema": {
+              "default": true,
+              "title": "Approve",
+              "type": "boolean"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CheckOutOut" }
+              }
+            }
+          }
+        },
+        "tags": ["bookings"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/bookings/bookings/{booking_id}/cancel": {
+      "post": {
+        "operationId": "api_bookings_cancel_booking",
+        "summary": "Cancel Booking",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "schema": { "title": "Booking Id", "type": "integer" },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "reason",
+            "schema": { "default": "", "title": "Reason", "type": "string" },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OkOut" }
+              }
+            }
+          }
+        },
+        "tags": ["bookings"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/payments/payments/create_deposit_intent": {
+      "post": {
+        "operationId": "api_payments_create_deposit_intent",
+        "summary": "Create Deposit Intent",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "booking_id",
+            "schema": { "title": "Booking Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PaymentIntentOut" }
+              }
+            }
+          }
+        },
+        "tags": ["payments"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/payments/payments/create_final_intent": {
+      "post": {
+        "operationId": "api_payments_create_final_intent",
+        "summary": "Create Final Intent",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "booking_id",
+            "schema": { "title": "Booking Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PaymentIntentOut" }
+              }
+            }
+          }
+        },
+        "tags": ["payments"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/payments/webhooks/stripe": {
+      "post": {
+        "operationId": "api_payments_stripe_webhook",
+        "summary": "Stripe Webhook",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OkOut" }
+              }
+            }
+          }
+        },
+        "tags": ["payments"]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SendCodeOut": {
+        "properties": { "ok": { "title": "Ok", "type": "boolean" } },
+        "required": ["ok"],
+        "title": "SendCodeOut",
+        "type": "object"
+      },
+      "SendCodeIn": {
+        "properties": {
+          "email": { "title": "Email", "type": "string" },
+          "purpose": {
+            "default": "register",
+            "title": "Purpose",
+            "type": "string"
+          }
+        },
+        "required": ["email"],
+        "title": "SendCodeIn",
+        "type": "object"
+      },
+      "EmailCheckOut": {
+        "properties": {
+          "exists": { "title": "Exists", "type": "boolean" },
+          "code_sent": { "title": "Code Sent", "type": "boolean" }
+        },
+        "required": ["exists", "code_sent"],
+        "title": "EmailCheckOut",
+        "type": "object"
+      },
+      "EmailCheckIn": {
+        "properties": { "email": { "title": "Email", "type": "string" } },
+        "required": ["email"],
+        "title": "EmailCheckIn",
+        "type": "object"
+      },
+      "CodeVerifyOut": {
+        "properties": {
+          "ok": { "title": "Ok", "type": "boolean" },
+          "vs_token": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Vs Token"
+          }
+        },
+        "required": ["ok"],
+        "title": "CodeVerifyOut",
+        "type": "object"
+      },
+      "CodeVerifyIn": {
+        "properties": {
+          "email": { "title": "Email", "type": "string" },
+          "code": { "title": "Code", "type": "string" },
+          "purpose": { "title": "Purpose", "type": "string" }
+        },
+        "required": ["email", "code", "purpose"],
+        "title": "CodeVerifyIn",
+        "type": "object"
+      },
+      "TokenOut": {
+        "properties": {
+          "access": { "title": "Access", "type": "string" },
+          "refresh": { "title": "Refresh", "type": "string" }
+        },
+        "required": ["access", "refresh"],
+        "title": "TokenOut",
+        "type": "object"
+      },
+      "RegisterCompleteIn": {
+        "properties": {
+          "vs_token": { "title": "Vs Token", "type": "string" },
+          "first_name": { "title": "First Name", "type": "string" },
+          "last_name": { "title": "Last Name", "type": "string" },
+          "birthday": { "title": "Birthday", "type": "string" },
+          "password1": { "title": "Password1", "type": "string" },
+          "password2": { "title": "Password2", "type": "string" }
+        },
+        "required": [
+          "vs_token",
+          "first_name",
+          "last_name",
+          "birthday",
+          "password1",
+          "password2"
+        ],
+        "title": "RegisterCompleteIn",
+        "type": "object"
+      },
+      "LoginIn": {
+        "properties": {
+          "email": { "title": "Email", "type": "string" },
+          "password": { "title": "Password", "type": "string" }
+        },
+        "required": ["email", "password"],
+        "title": "LoginIn",
+        "type": "object"
+      },
+      "RefreshIn": {
+        "properties": { "refresh": { "title": "Refresh", "type": "string" } },
+        "required": ["refresh"],
+        "title": "RefreshIn",
+        "type": "object"
+      },
+      "GuestStartOut": {
+        "properties": {
+          "guest_id": { "title": "Guest Id", "type": "string" },
+          "expires_at": { "title": "Expires At", "type": "string" }
+        },
+        "required": ["guest_id", "expires_at"],
+        "title": "GuestStartOut",
+        "type": "object"
+      },
+      "UpgradeGuestIn": {
+        "properties": {
+          "guest_id": { "title": "Guest Id", "type": "string" },
+          "email": { "title": "Email", "type": "string" },
+          "password": { "title": "Password", "type": "string" }
+        },
+        "required": ["guest_id", "email", "password"],
+        "title": "UpgradeGuestIn",
+        "type": "object"
+      },
+      "OkOut": {
+        "properties": {
+          "ok": { "default": true, "title": "Ok", "type": "boolean" }
+        },
+        "title": "OkOut",
+        "type": "object"
+      },
+      "SocialIn": {
+        "properties": {
+          "provider": { "title": "Provider", "type": "string" },
+          "provider_account_id": {
+            "title": "Provider Account Id",
+            "type": "string"
+          },
+          "email": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Email"
+          },
+          "raw_info": {
+            "additionalProperties": true,
+            "default": {},
+            "title": "Raw Info",
+            "type": "object"
+          }
+        },
+        "required": ["provider", "provider_account_id"],
+        "title": "SocialIn",
+        "type": "object"
+      },
+      "SocialLoginIn": {
+        "properties": {
+          "provider": { "title": "Provider", "type": "string" },
+          "id_token": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Id Token"
+          },
+          "access_token": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Access Token"
+          },
+          "first_name": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "First Name"
+          },
+          "last_name": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Last Name"
+          },
+          "birthday": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Birthday"
+          }
+        },
+        "required": ["provider"],
+        "title": "SocialLoginIn",
+        "type": "object"
+      },
+      "MeOut": {
+        "properties": {
+          "id": { "title": "Id", "type": "integer" },
+          "email": { "title": "Email", "type": "string" },
+          "phone": { "title": "Phone", "type": "string" },
+          "first_name": { "title": "First Name", "type": "string" },
+          "last_name": { "title": "Last Name", "type": "string" },
+          "birthday": { "title": "Birthday", "type": "string" },
+          "role": { "title": "Role", "type": "string" },
+          "is_email_verified": {
+            "title": "Is Email Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "phone",
+          "first_name",
+          "last_name",
+          "birthday",
+          "role",
+          "is_email_verified"
+        ],
+        "title": "MeOut",
+        "type": "object"
+      },
+      "ForgotPasswordSendIn": {
+        "properties": { "email": { "title": "Email", "type": "string" } },
+        "required": ["email"],
+        "title": "ForgotPasswordSendIn",
+        "type": "object"
+      },
+      "ForgotPasswordResetIn": {
+        "properties": {
+          "vs_token": { "title": "Vs Token", "type": "string" },
+          "password1": { "title": "Password1", "type": "string" },
+          "password2": { "title": "Password2", "type": "string" }
+        },
+        "required": ["vs_token", "password1", "password2"],
+        "title": "ForgotPasswordResetIn",
+        "type": "object"
+      },
+      "ServiceOut": {
+        "properties": {
+          "id": { "title": "Id", "type": "integer" },
+          "name": { "title": "Name", "type": "string" },
+          "type": { "title": "Type", "type": "string" },
+          "description": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Description"
+          },
+          "base_price": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "title": "Base Price"
+          }
+        },
+        "required": ["id", "name", "type", "base_price"],
+        "title": "ServiceOut",
+        "type": "object"
+      },
+      "AddOnOut": {
+        "properties": {
+          "id": { "title": "Id", "type": "integer" },
+          "name": { "title": "Name", "type": "string" },
+          "description": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Description"
+          },
+          "price": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "title": "Price"
+          },
+          "is_variable": { "title": "Is Variable", "type": "boolean" }
+        },
+        "required": ["id", "name", "price", "is_variable"],
+        "title": "AddOnOut",
+        "type": "object"
+      },
+      "PetOut": {
+        "properties": {
+          "id": { "title": "Id", "type": "integer" },
+          "name": { "title": "Name", "type": "string" },
+          "breed": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Breed"
+          },
+          "weight_kg": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              { "type": "null" }
+            ],
+            "title": "Weight Kg"
+          },
+          "age_years": {
+            "anyOf": [{ "type": "integer" }, { "type": "null" }],
+            "title": "Age Years"
+          },
+          "hair_condition": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Hair Condition"
+          },
+          "special_notes": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Special Notes"
+          }
+        },
+        "required": ["id", "name"],
+        "title": "PetOut",
+        "type": "object"
+      },
+      "BookingOut": {
+        "properties": {
+          "id": { "title": "Id", "type": "integer" },
+          "status": { "title": "Status", "type": "string" },
+          "scheduled_time": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Scheduled Time"
+          },
+          "deposit_amount": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "title": "Deposit Amount"
+          },
+          "final_amount": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "title": "Final Amount"
+          }
+        },
+        "required": ["id", "status", "deposit_amount", "final_amount"],
+        "title": "BookingOut",
+        "type": "object"
+      },
+      "AddOnRequestOut": {
+        "properties": {
+          "id": { "title": "Id", "type": "integer" },
+          "status": { "title": "Status", "type": "string" }
+        },
+        "required": ["id", "status"],
+        "title": "AddOnRequestOut",
+        "type": "object"
+      },
+      "ReviewCreatedOut": {
+        "properties": {
+          "ok": { "title": "Ok", "type": "boolean" },
+          "review_id": { "title": "Review Id", "type": "integer" }
+        },
+        "required": ["ok", "review_id"],
+        "title": "ReviewCreatedOut",
+        "type": "object"
+      },
+      "CheckOutOut": {
+        "properties": {
+          "ok": { "title": "Ok", "type": "boolean" },
+          "status": { "title": "Status", "type": "string" }
+        },
+        "required": ["ok", "status"],
+        "title": "CheckOutOut",
+        "type": "object"
+      },
+      "PaymentIntentOut": {
+        "properties": {
+          "client_secret": { "title": "Client Secret", "type": "string" },
+          "payment_id": { "title": "Payment Id", "type": "integer" }
+        },
+        "required": ["client_secret", "payment_id"],
+        "title": "PaymentIntentOut",
+        "type": "object"
+      }
+    },
+    "securitySchemes": { "JWTAuth": { "type": "http", "scheme": "bearer" } }
+  },
+  "servers": []
+}

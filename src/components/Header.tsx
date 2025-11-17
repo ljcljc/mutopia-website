@@ -5,8 +5,8 @@ import iconMenu from "@/assets/icons/icon-menu.svg";
 import { Button } from "./ui/button";
 import { motion, AnimatePresence } from "motion/react";
 import { OrangeButton } from "./OrangeButton";
-import { LoginModal } from "./LoginModal";
-import { useUser } from "./UserContext";
+import { LoginModal } from "@/components/auth/LoginModal";
+import { useAuthStore } from "@/components/auth/authStore";
 import svgPaths from "@/assets/icons/svg-kzu0xk56ho";
 
 // Helper function to handle smooth scroll to anchor with header offset
@@ -246,7 +246,7 @@ function ButtonCompactPrincipalOrange() {
 
 // User info component for logged-in users
 function UserInfo() {
-  const { user } = useUser();
+  const user = useAuthStore((state) => state.user);
 
   if (!user) return null;
 
@@ -292,7 +292,7 @@ function UserInfo() {
 }
 
 function Buttons() {
-  const { user } = useUser();
+  const user = useAuthStore((state) => state.user);
 
   return (
     <div
@@ -370,7 +370,7 @@ function MobileButton1() {
 }
 
 function MobileButton2() {
-  const { user } = useUser();
+  const user = useAuthStore((state) => state.user);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   if (user) {
