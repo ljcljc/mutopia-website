@@ -1,67 +1,141 @@
 import * as React from "react";
-import svgPaths from "../imports/svg-ub9blg1p12";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/components/ui/utils";
 
-export interface CustomTextareaProps extends React.ComponentProps<"textarea"> {
+export interface CustomTextareaProps
+  extends React.ComponentProps<typeof Textarea> {
   label?: string;
+  helperText?: string;
+  error?: string;
+  showResizeHandle?: boolean;
 }
 
-export function CustomTextarea({ 
-  label = "Message", 
+export function CustomTextarea({
+  label = "Message",
   placeholder = "Enter your message",
   className,
-  ...props 
+  helperText,
+  error,
+  showResizeHandle = true,
+  onFocus,
+  onBlur,
+  disabled,
+  ...props
 }: CustomTextareaProps) {
   const [isFocused, setIsFocused] = React.useState(false);
   const [isHovered, setIsHovered] = React.useState(false);
-  
+
+  const borderColor = error
+    ? "border-[#de1507]"
+    : isFocused
+    ? "border-[#2374ff]"
+    : isHovered
+    ? "border-[#717182]"
+    : "border-[#E5E7EB]";
+
+  const labelColor = error ? "text-[#de1507]" : "text-[#4a3c2a]";
+
+  const handleFocus = (event: React.FocusEvent<HTMLTextAreaElement>) => {
+    setIsFocused(true);
+    onFocus?.(event);
+  };
+
+  const handleBlur = (event: React.FocusEvent<HTMLTextAreaElement>) => {
+    setIsFocused(false);
+    onBlur?.(event);
+  };
+
   return (
     <div className="content-stretch flex flex-col gap-[8px] items-start relative w-full">
       {/* Label */}
       {label && (
         <div className="content-stretch flex gap-[7px] h-[12.25px] items-center relative shrink-0 w-full">
-          <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[14px] text-nowrap whitespace-pre">
+          <p
+            className={cn(
+              "font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] text-[14px] text-nowrap whitespace-pre",
+              labelColor,
+            )}
+          >
             {label}
           </p>
         </div>
       )}
-      
+
       {/* Textarea Container */}
-      <div 
-        className="bg-white h-[120px] max-h-[120px] relative rounded-[12px] shrink-0 w-full"
+      <div
+        className={cn(
+          "bg-white relative rounded-[12px] shrink-0 w-full h-[120px] transition-colors duration-200 border",
+          borderColor,
+          disabled ? "opacity-60 cursor-not-allowed" : "",
+        )}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <div className="box-border content-stretch flex h-[120px] items-start max-h-inherit overflow-clip px-[16px] py-[12px] relative rounded-[inherit] w-full">
-          {/* Textarea */}
-          <textarea
-            placeholder={placeholder}
-            className="basis-0 font-['Comfortaa:Regular',_sans-serif] font-normal grow leading-[normal] min-h-px min-w-px relative shrink-0 text-[#717182] text-[12.25px] bg-transparent border-none outline-none resize-none w-full h-full placeholder:text-[#717182]"
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            {...props}
-          />
-          
-          {/* Resize Icon */}
-          <div className="absolute h-[17.5px] right-[16px] bottom-[12px] w-[15.5px] pointer-events-none">
-            <div className="absolute inset-[-1.89%_-2.42%_-1.89%_-2.41%]">
-              <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 17 19">
-                <path 
-                  d={svgPaths.p34271f00} 
-                  stroke={isFocused ? "#D6D6D6" : isHovered ? "#717182" : "#D6D6D6"} 
-                />
-              </svg>
-            </div>
-          </div>
-        </div>
-        
-        {/* Border */}
-        <div 
-          aria-hidden="true" 
-          className={`absolute border border-solid inset-0 pointer-events-none rounded-[12px] transition-colors ${
-            isFocused ? 'border-[#2374ff]' : isHovered ? 'border-[#717182]' : 'border-gray-200'
-          }`} 
+        <Textarea
+          placeholder={placeholder}
+          disabled={disabled}
+          className={cn(
+            "h-full resize-none border-none bg-transparent outline-none shadow-none font-['Comfortaa:Regular',sans-serif] font-normal text-[#717182] text-[12.25px] placeholder:text-[#717182] px-[16px] py-[12px]",
+            "focus-visible:ring-0 focus-visible:border-none focus-visible:outline-none",
+            className,
+          )}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          {...props}
         />
+
+        {/* Resize Icon */}
+        {showResizeHandle && (
+          <div className="absolute right-[16px] bottom-[12px] pointer-events-none">
+            <svg
+              className="block"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+            >
+              <path
+                d="M1 15L15 1"
+                stroke={
+                  error
+                    ? "#de1507"
+                    : isFocused
+                    ? "#2374ff"
+                    : isHovered
+                    ? "#717182"
+                    : "#D6D6D6"
+                }
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+              <path
+                d="M5 15L15 5"
+                stroke={
+                  error
+                    ? "#de1507"
+                    : isFocused
+                    ? "#2374ff"
+                    : isHovered
+                    ? "#717182"
+                    : "#D6D6D6"
+                }
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
+        )}
       </div>
+
+      {error ? (
+        <p className="font-['Comfortaa:Medium',sans-serif] text-[12px] text-[#de1507]">
+          {error}
+        </p>
+      ) : helperText ? (
+        <p className="font-['Comfortaa:Medium',sans-serif] text-[12px] text-[#4c4c4c]">
+          {helperText}
+        </p>
+      ) : null}
     </div>
   );
 }

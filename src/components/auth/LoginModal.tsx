@@ -7,7 +7,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Spinner, Checkbox, CustomInput } from "@/components/common";
+import { Spinner, Checkbox, CustomInput, DatePicker } from "@/components/common";
 import { 
   useAuthStore, 
   validateEmail, 
@@ -25,7 +25,6 @@ import iconAlertError from "@/assets/icons/icon-alert-error.svg";
 import iconAlertSuccess from "@/assets/icons/icon-alert-success.svg";
 import { checkEmailRegistered } from "@/lib/api";
 import { HttpError } from "@/lib/http";
-import { Calendar } from "lucide-react";
 
 function Icon1() {
   return (
@@ -775,26 +774,23 @@ function SignUpContainer({
             </div>
 
             {/* Date of birth */}
-            <div className="content-stretch flex flex-col gap-[4px] items-start w-full">
-              <CustomInput
-                label="Date of birth"
-                placeholder="yyyy-mm-dd"
-                type="date"
-                value={birthday}
-                onChange={(event) => setBirthday(event.target.value)}
-                onFocus={onFocus}
-                onBlur={onBlur}
-                error={birthdayError}
-                rightElement={<Calendar className="size-[14px] text-[#717182]" />}
-              />
-              {birthdayError ? (
-                <ErrorMessage message={birthdayError} />
-              ) : (
-                <p className="font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#4c4c4c] text-[12px]">
-                  At least 18 years old. Your birthday won't be shared.
-                </p>
-              )}
-            </div>
+            <DatePicker
+              label="Date of birth"
+              placeholder="yyyy-mm-dd"
+              value={birthday}
+              onChange={setBirthday}
+              error={birthdayError}
+              helperText={birthdayError ? undefined : "At least 18 years old. Your birthday won't be shared."}
+              minDate={(() => {
+                const today = new Date();
+                const minDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+                return minDate.toISOString().split('T')[0];
+              })()}
+              maxDate={(() => {
+                const today = new Date();
+                return today.toISOString().split('T')[0];
+              })()}
+            />
 
             {/* Address */}
             <div className="content-stretch flex flex-col gap-[4px] items-start w-full">
