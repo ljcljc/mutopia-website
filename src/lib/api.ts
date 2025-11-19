@@ -33,6 +33,23 @@ export interface CodeVerifyOut {
   vs_token?: string | null;
 }
 
+export interface LoginPasswordCheckIn {
+  email: string;
+  password: string;
+}
+
+export interface LoginPasswordCheckOut {
+  ok: boolean;
+  detail?: string | null;
+}
+
+export interface LoginConfirmIn {
+  email: string;
+  password: string;
+  code: string;
+}
+
+// Deprecated: Use LoginConfirmIn instead
 export interface LoginIn {
   email: string;
   password: string;
@@ -52,6 +69,8 @@ export interface RegisterCompleteIn {
   first_name: string;
   last_name: string;
   birthday: string;
+  address: string;
+  receive_marketing_message: boolean;
   password1: string;
   password2: string;
 }
@@ -59,10 +78,11 @@ export interface RegisterCompleteIn {
 export interface MeOut {
   id: number;
   email: string;
-  phone: string;
-  first_name: string;
-  last_name: string;
-  birthday: string;
+  first_name?: string | null;
+  last_name?: string | null;
+  birthday?: string | null;
+  address?: string | null;
+  receive_marketing_message: boolean;
   role: string;
   is_email_verified: boolean;
 }
@@ -176,9 +196,23 @@ export async function verifyCode(data: CodeVerifyIn): Promise<CodeVerifyOut> {
 }
 
 /**
- * 用户登录
+ * 检查密码是否正确（登录前验证）
  */
-export async function login(data: LoginIn): Promise<TokenOut> {
+export async function loginPasswordCheck(
+  data: LoginPasswordCheckIn
+): Promise<LoginPasswordCheckOut> {
+  const response = await http.post<LoginPasswordCheckOut>(
+    "/api/auth/login/password-check",
+    data,
+    { skipAuth: true }
+  );
+  return response.data;
+}
+
+/**
+ * 用户登录（需要验证码）
+ */
+export async function login(data: LoginConfirmIn): Promise<TokenOut> {
   const response = await http.post<TokenOut>("/api/auth/login", data, {
     skipAuth: true,
   });
