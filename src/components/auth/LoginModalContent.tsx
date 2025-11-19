@@ -1,12 +1,20 @@
 import { toast } from "sonner";
 import { z } from "zod";
+import { useEffect } from "react";
 import {
   useAuthStore,
   validateEmail,
   validateLoginForm,
   validateSignUpForm,
 } from "@/components/auth/authStore";
-import { checkEmailRegistered } from "@/lib/api";
+import {
+  checkEmailRegistered,
+  sendCode,
+  registerComplete,
+  login as loginAPI,
+  getCurrentUser,
+  loginPasswordCheck,
+} from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { WelcomeToMutopiaPet } from "./LoginModalUI";
 import { EmailStepContainer } from "./LoginModalForms";
@@ -14,6 +22,7 @@ import {
   PasswordContainer,
   SignUpContainer,
 } from "./LoginModalContainers";
+import { VerifyEmailContainer } from "./VerifyEmailContainer";
 
 export function ModalContent({ onClose }: { onClose: () => void }) {
   const {
@@ -28,6 +37,8 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
     birthday,
     address,
     optOutMarketing,
+    verificationCode,
+    verificationMode,
     emailError,
     passwordError,
     confirmPasswordError,
@@ -47,6 +58,8 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
     setBirthday,
     setAddress,
     setOptOutMarketing,
+    setVerificationCode,
+    setVerificationMode,
     setIsEmailFocused,
     setEmailError,
     setPasswordError,
@@ -59,6 +72,21 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
     reset,
     login,
   } = useAuthStore();
+
+  // Load remembered credentials on mount
+  useEffect(() => {
+    try {
+      const rememberedEmail = localStorage.getItem("remembered_email");
+      const rememberedPassword = localStorage.getItem("remembered_password");
+      if (rememberedEmail && rememberedPassword) {
+        setEmail(rememberedEmail);
+        setPassword(rememberedPassword);
+        setRememberMe(true);
+      }
+    } catch (e) {
+      console.warn("Failed to load remembered credentials:", e);
+    }
+  }, [setEmail, setPassword, setRememberMe]);
 
   const handleEmailChange = (value: string) => {
     setEmail(value);
@@ -299,28 +327,45 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
     }
   };
 
-  const handleBirthdayBlur = () => {
-    // Always validate on blur, even if empty (to show required field errors)
-    const result = validateSignUpForm({
-      email,
-      firstName,
-      lastName,
-      birthday,
-      address,
-      password,
-      confirmPassword,
-    });
-    if (!result.success && result.error) {
-      const birthdayError = result.error.issues.find((e: z.ZodIssue) =>
-        e.path.includes("birthday")
-      );
-      if (birthdayError) {
-        setBirthdayError(birthdayError.message);
+  const handleBirthdayBlur = (value?: string) => {
+    // Only validate birthday field, don't validate other fields
+    // This prevents triggering validation errors for other fields (like address)
+    // when the user is just selecting a date
+    try {
+      const birthdaySchema = z
+        .string()
+        .min(1, "Date of birth is required")
+        .refine(
+          (date) => {
+            // Validate date format and age (at least 18 years old)
+            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!dateRegex.test(date)) return false;
+            const birthDate = new Date(date);
+            const today = new Date();
+            const age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (
+              monthDiff < 0 ||
+              (monthDiff === 0 && today.getDate() < birthDate.getDate())
+            ) {
+              return age - 1 >= 18;
+            }
+            return age >= 18;
+          },
+          {
+            message: "You must be at least 18 years old",
+          }
+        );
+
+      const birthdayValue = value ?? birthday;
+      birthdaySchema.parse(birthdayValue);
+      setBirthdayError("");
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        setBirthdayError(error.issues[0]?.message || "Invalid date of birth");
       } else {
         setBirthdayError("");
       }
-    } else {
-      setBirthdayError("");
     }
   };
 
@@ -365,34 +410,61 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
       return;
     }
 
-    // Mock API call to verify password
+    // Step 1: Check password
     setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setPasswordError("");
+      const response = await loginPasswordCheck({ email, password });
 
-      // Mock: password "123456" is correct
-      if (password === "123456" || password === "password") {
-        toast.success("Login successful!");
-        // Extract name from email
-        const name = email.split("@")[0];
-        const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
-
-        const user = {
-          name: capitalizedName,
-          email: email,
-        };
-
-        login(user);
-
-        setTimeout(() => {
-          reset();
-          onClose();
-        }, 500);
-      } else {
-        setPasswordError("Incorrect password");
+      if (!response.ok) {
+        const errorMessage =
+          response.detail || "Incorrect email or password. Please try again.";
+        setPasswordError(errorMessage);
+        toast.error(errorMessage);
+        setIsLoading(false);
+        return;
       }
+
+      // Step 2: Send verification code for login
+      try {
+        await sendCode({ email, purpose: "login" });
+        toast.success("Verification code sent to your email. Please check your inbox.");
+      } catch (sendCodeError) {
+        // If code was already sent recently, that's okay, continue
+        if (sendCodeError instanceof HttpError) {
+          if (sendCodeError.status === 400) {
+            // Code might have been sent already, continue
+            console.log("Verification code may have been sent already");
+          } else {
+            throw sendCodeError;
+          }
+        } else {
+          throw sendCodeError;
+        }
+      }
+
+      // Step 3: Navigate to verification email step for login
+      setVerificationMode("login");
+      setStep("verify-email");
     } catch (err) {
-      toast.error("Something went wrong. Please try again.");
+      let errorMessage = "Something went wrong. Please try again.";
+
+      if (err instanceof HttpError) {
+        if (err.status === 400) {
+          errorMessage = err.message || "Invalid email or password.";
+        } else if (err.status >= 400 && err.status < 500) {
+          errorMessage = err.message || "Unable to log in. Please check your credentials.";
+        } else if (err.status === 0) {
+          errorMessage = err.message || "Network error. Please try again.";
+        } else {
+          errorMessage = err.message || "Server error. Please try again later.";
+        }
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+
+      setPasswordError(errorMessage);
+      toast.error(errorMessage);
       console.error("Error during login:", err);
     } finally {
       setIsLoading(false);
@@ -438,31 +510,46 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
       return;
     }
 
-    // Mock API call to sign up
     setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Send verification code
+      try {
+        await sendCode({ email, purpose: "register" });
+        toast.success("Verification code sent to your email. Please check your inbox.");
+      } catch (sendCodeError) {
+        // If code was already sent recently, that's okay, continue
+        if (sendCodeError instanceof HttpError) {
+          if (sendCodeError.status === 400) {
+            // Code might have been sent already, continue
+            console.log("Verification code may have been sent already");
+          } else {
+            throw sendCodeError;
+          }
+        } else {
+          throw sendCodeError;
+        }
+      }
 
-      toast.success("Sign up successful!");
-
-      const capitalizedFirstName =
-        firstName.charAt(0).toUpperCase() + firstName.slice(1);
-      const capitalizedLastName =
-        lastName.charAt(0).toUpperCase() + lastName.slice(1);
-
-      const user = {
-        name: `${capitalizedFirstName} ${capitalizedLastName}`,
-        email: email,
-      };
-
-      login(user);
-
-      setTimeout(() => {
-        reset();
-        onClose();
-      }, 500);
+      // Navigate to verification email step
+      setStep("verify-email");
     } catch (err) {
-      toast.error("Something went wrong. Please try again.");
+      let errorMessage = "Something went wrong. Please try again.";
+
+      if (err instanceof HttpError) {
+        if (err.status === 400) {
+          errorMessage = err.message || "Invalid input. Please check your information.";
+        } else if (err.status === 409) {
+          errorMessage = "Email already registered. Please login instead.";
+        } else if (err.status >= 400 && err.status < 500) {
+          errorMessage = err.message || "Invalid request. Please check your information.";
+        } else {
+          errorMessage = err.message || "Server error. Please try again later.";
+        }
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+
+      toast.error(errorMessage);
       console.error("Error during sign up:", err);
     } finally {
       setIsLoading(false);
@@ -497,11 +584,123 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
   };
 
   const handleBack = () => {
-    setStep("email");
-    setPassword("");
-    setConfirmPassword("");
-    setPasswordError("");
-    setConfirmPasswordError("");
+    if (step === "verify-email") {
+      if (verificationMode === "login") {
+        setStep("password");
+      } else {
+        setStep("signup");
+      }
+      setVerificationCode(["", "", "", "", "", ""]);
+    } else {
+      setStep("email");
+      setPassword("");
+      setConfirmPassword("");
+      setPasswordError("");
+      setConfirmPasswordError("");
+    }
+  };
+
+  const handleVerifyEmail = async (vsToken: string) => {
+    setIsLoading(true);
+    try {
+      if (verificationMode === "login") {
+        // Login flow: Call login API with verification code
+        const codeString = verificationCode.join("");
+        await loginAPI({
+          email,
+          password,
+          code: codeString,
+        });
+
+        // Get user information and update state
+        const userInfo = await getCurrentUser();
+        const user = {
+          name: `${userInfo.first_name || ""} ${userInfo.last_name || ""}`.trim() || email.split("@")[0],
+          email: userInfo.email,
+        };
+
+        login(user);
+        toast.success("Login successful!");
+
+        // Save password if rememberMe is checked
+        if (rememberMe) {
+          try {
+            localStorage.setItem("remembered_email", email);
+            localStorage.setItem("remembered_password", password);
+          } catch (e) {
+            console.warn("Failed to save remembered credentials:", e);
+          }
+        } else {
+          // Clear remembered credentials if not checked
+          try {
+            localStorage.removeItem("remembered_email");
+            localStorage.removeItem("remembered_password");
+          } catch (e) {
+            console.warn("Failed to clear remembered credentials:", e);
+          }
+        }
+
+        setTimeout(() => {
+          reset();
+          onClose();
+        }, 500);
+      } else {
+        // Signup flow: Complete registration with vs_token
+        await registerComplete({
+          vs_token: vsToken,
+          first_name: firstName,
+          last_name: lastName,
+          birthday: birthday,
+          address: address,
+          receive_marketing_message: !optOutMarketing,
+          password1: password,
+          password2: confirmPassword,
+        });
+
+        // Get user information and update state
+        const userInfo = await getCurrentUser();
+        const user = {
+          name: `${userInfo.first_name || ""} ${userInfo.last_name || ""}`.trim(),
+          email: userInfo.email,
+        };
+
+        login(user);
+        toast.success("Sign up successful!");
+
+        setTimeout(() => {
+          reset();
+          onClose();
+        }, 500);
+      }
+    } catch (err) {
+      let errorMessage = "Something went wrong. Please try again.";
+
+      if (err instanceof HttpError) {
+        if (err.status === 400) {
+          errorMessage = err.message || "Invalid input. Please check your information.";
+        } else if (err.status >= 400 && err.status < 500) {
+          errorMessage = err.message || "Invalid request. Please check your information.";
+        } else {
+          errorMessage = err.message || "Server error. Please try again later.";
+        }
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+
+      toast.error(errorMessage);
+      console.error(`Error during ${verificationMode}:`, err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleChangeEmail = () => {
+    if (verificationMode === "login") {
+      setStep("password");
+    } else {
+      setStep("signup");
+    }
+    setVerificationCode(["", "", "", "", "", ""]);
   };
 
   const title =
@@ -509,8 +708,10 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
       ? "Log in or sign up"
       : step === "signup"
         ? "Sign up"
-        : "Log in";
-  const showBackButton = step === "password" || step === "signup";
+        : step === "verify-email"
+          ? "Verify your email"
+          : "Log in";
+  const showBackButton = step === "password" || step === "signup" || step === "verify-email";
 
   return (
     <div
@@ -597,6 +798,16 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
               error={emailError}
               isLoading={isLoading}
             />
+          ) : step === "verify-email" ? (
+            <VerifyEmailContainer
+              email={email}
+              verificationCode={verificationCode}
+              setVerificationCode={setVerificationCode}
+              onVerify={handleVerifyEmail}
+              onChangeEmail={handleChangeEmail}
+              isLoading={isLoading}
+              mode={verificationMode}
+            />
           ) : (
             <PasswordContainer
               password={password}
@@ -618,4 +829,3 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
     </div>
   );
 }
-

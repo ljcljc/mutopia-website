@@ -14,7 +14,7 @@ interface DatePickerProps {
   minDate?: string; // Format: YYYY-MM-DD or YYYY-MM
   maxDate?: string; // Format: YYYY-MM-DD or YYYY-MM
   mode?: "date" | "month"; // 'date' for full date picker, 'month' for year-month only
-  onBlur?: () => void;
+  onBlur?: (value?: string) => void;
 }
 
 const MONTHS = [
@@ -155,7 +155,7 @@ export function DatePicker({
         setShowMonthPicker(false);
         // Call onBlur when calendar closes
         if (wasOpen && onBlur) {
-          onBlur();
+          onBlur(value);
         }
       }
     }
@@ -255,13 +255,14 @@ export function DatePicker({
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
-    onChange(`${year}-${month}-${day}`);
+    const formattedDate = `${year}-${month}-${day}`;
+    onChange(formattedDate);
     setIsOpen(false);
     setShowYearPicker(false);
     setShowMonthPicker(false);
     // Call onBlur when date is selected
     if (onBlur) {
-      onBlur();
+      onBlur(formattedDate);
     }
   }
 
@@ -319,11 +320,12 @@ export function DatePicker({
     if (mode === "month") {
       const year = currentYear;
       const month = String(monthIndex + 1).padStart(2, "0");
-      onChange(`${year}-${month}`);
+      const formattedMonth = `${year}-${month}`;
+      onChange(formattedMonth);
       setIsOpen(false);
       // Call onBlur when month is selected in month mode
       if (onBlur) {
-        onBlur();
+        onBlur(formattedMonth);
       }
     }
   }
@@ -601,11 +603,11 @@ export function DatePicker({
 
             {/* Days of Week - Only show in date mode */}
             {mode === "date" && (
-              <div className="content-stretch flex font-['Comfortaa:Medium',sans-serif] font-medium gap-[23px] items-center leading-0 relative shrink-0 text-[12px] text-[rgba(60,60,67,0.6)] text-center whitespace-nowrap">
+              <div className="content-stretch flex font-['Comfortaa:Medium',sans-serif] font-medium items-center leading-0 relative shrink-0 text-[12px] text-[rgba(60,60,67,0.6)] text-center whitespace-nowrap">
                 {DAYS.map((day) => (
                   <div
                     key={day}
-                    className="flex flex-col justify-center relative shrink-0"
+                    className="flex flex-col h-[38.286px] justify-center relative shrink-0 w-[46.429px]"
                   >
                     <p className="leading-[17.5px]">{day}</p>
                   </div>
@@ -619,7 +621,7 @@ export function DatePicker({
                 {Array.from({ length: 6 }).map((_, weekIndex) => (
                   <div
                     key={weekIndex}
-                    className="content-stretch flex font-['Comfortaa:Regular',sans-serif] font-normal items-center leading-0 overflow-clip relative shrink-0 text-[16px] text-center w-full"
+                    className="content-stretch flex font-['Comfortaa:Regular',sans-serif] font-normal items-center leading-0 overflow-clip relative shrink-0 text-[16px] text-center w-full justify-start"
                   >
                     {calendarDays
                       .slice(weekIndex * 7, (weekIndex + 1) * 7)

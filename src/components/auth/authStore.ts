@@ -3,7 +3,8 @@ import { emailSchema, loginFormSchema, signUpFormSchema } from "./authSchemas";
 import { z } from "zod";
 import { clearAuthTokens } from "@/lib/http";
 
-export type LoginStep = "email" | "password" | "signup";
+export type LoginStep = "email" | "password" | "signup" | "verify-email";
+export type VerificationMode = "signup" | "login";
 
 export interface User {
   name: string;
@@ -29,6 +30,12 @@ interface AuthState {
   birthday: string;
   address: string;
   optOutMarketing: boolean;
+
+  // Verification code
+  verificationCode: string[];
+  verificationMode: VerificationMode;
+  setVerificationCode: (code: string[]) => void;
+  setVerificationMode: (mode: VerificationMode) => void;
 
   // Form setters
   setEmail: (email: string) => void;
@@ -89,6 +96,8 @@ const initialState = {
   birthday: "",
   address: "",
   optOutMarketing: false,
+  verificationCode: ["", "", "", "", "", ""],
+  verificationMode: "signup" as VerificationMode,
   isEmailFocused: false,
   emailError: "",
   passwordError: "",
@@ -141,6 +150,9 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setOptOutMarketing: (optOutMarketing) => set({ optOutMarketing }),
 
+  setVerificationCode: (verificationCode) => set({ verificationCode }),
+  setVerificationMode: (verificationMode) => set({ verificationMode }),
+
   setIsEmailFocused: (isEmailFocused) => set({ isEmailFocused }),
 
   setEmailError: (emailError) => set({ emailError }),
@@ -182,7 +194,12 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ user: null });
   },
 
-  reset: () => set(initialState),
+  reset: () =>
+    set({
+      ...initialState,
+      verificationCode: ["", "", "", "", "", ""],
+      verificationMode: "signup",
+    }),
 }));
 
 // Validation helpers

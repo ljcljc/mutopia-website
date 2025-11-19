@@ -239,18 +239,12 @@ export function PasswordContainer({
                     <div className="content-stretch flex gap-[16px] items-center relative shrink-0 w-full">
                       <div className="basis-0 content-stretch flex flex-col gap-[12px] grow items-start min-h-px min-w-px relative shrink-0">
                         <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0 w-full">
-                          <div
-                            className="content-stretch flex gap-[8px] h-[20px] items-center relative shrink-0 w-full cursor-pointer"
-                            onClick={() => setRememberMe(!rememberMe)}
-                          >
-                            <Checkbox
-                              checked={rememberMe}
-                              onChange={(e) => setRememberMe(e.target.checked)}
-                            />
-                            <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12px] text-nowrap whitespace-pre">
-                              Remember me
-                            </p>
-                          </div>
+                          <Checkbox
+                            checked={rememberMe}
+                            onCheckedChange={setRememberMe}
+                            label="Remember me"
+                            containerClassName="content-stretch flex gap-[8px] h-[20px] items-center relative shrink-0 w-full cursor-pointer"
+                          />
                         </div>
                       </div>
                       <button
@@ -342,7 +336,7 @@ export function SignUpContainer({
   onConfirmPasswordBlur?: () => void;
   onFirstNameBlur?: () => void;
   onLastNameBlur?: () => void;
-  onBirthdayBlur?: () => void;
+  onBirthdayBlur?: (value?: string) => void;
   onAddressBlur?: () => void;
 }) {
   return (
@@ -537,4 +531,3 @@ export function SignUpContainer({
     </div>
   );
 }
-
