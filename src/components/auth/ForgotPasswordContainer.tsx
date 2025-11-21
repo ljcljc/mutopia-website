@@ -109,7 +109,7 @@ export function ForgotPasswordContainer({
       const result = await verifyPasswordResetCode({
         email,
         code: codeString,
-        purpose: "forgot-password",
+        purpose: "forgot_password",
       });
 
       if (!result.ok || !result.vs_token) {

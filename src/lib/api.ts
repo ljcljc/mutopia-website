@@ -10,7 +10,6 @@ export interface EmailCheckIn {
 
 export interface EmailCheckOut {
   exists: boolean;
-  code_sent?: boolean; // Optional: indicates if verification code was sent
 }
 
 export interface SendCodeIn {
@@ -65,7 +64,8 @@ export interface RefreshIn {
 }
 
 export interface RegisterCompleteIn {
-  vs_token: string;
+  email: string;
+  code: string;
   first_name: string;
   last_name: string;
   birthday: string;
@@ -76,7 +76,7 @@ export interface RegisterCompleteIn {
 }
 
 export interface MeOut {
-  id: number;
+  id: string;
   email: string;
   first_name?: string | null;
   last_name?: string | null;
@@ -98,6 +98,11 @@ export interface SocialLoginIn {
 
 export interface ForgotPasswordSendIn {
   email: string;
+}
+
+export interface ForgotPasswordSendOut {
+  ok: boolean;
+  send_count: number;
 }
 
 export interface ForgotPasswordResetIn {
@@ -282,8 +287,8 @@ export async function getCurrentUser(): Promise<MeOut> {
  */
 export async function sendPasswordResetCode(
   email: string
-): Promise<SendCodeOut> {
-  const response = await http.post<SendCodeOut>(
+): Promise<ForgotPasswordSendOut> {
+  const response = await http.post<ForgotPasswordSendOut>(
     "/api/auth/password/forgot/send",
     { email },
     { skipAuth: true }

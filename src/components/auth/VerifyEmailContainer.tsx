@@ -66,7 +66,7 @@ export function VerifyEmailContainer({
     setIsResending(true);
     setError("");
     try {
-      await sendCode({ email, purpose: mode === "login" ? "login" : mode === "forgot-password" ? "forgot-password" : "register" });
+      await sendCode({ email, purpose: mode === "login" ? "login" : mode === "forgot-password" ? "forgot_password" : "register" });
       // Set codeResent to true to show success state
       setCodeResent(true);
       // Countdown will be reset by useEffect when codeResent becomes true

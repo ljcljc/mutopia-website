@@ -187,29 +187,49 @@ export function FacebookIcon() {
   );
 }
 
-export function FacebookButtonContent() {
+export function FacebookButtonContent({ isLoading }: { isLoading?: boolean }) {
   return (
     <div className="absolute content-stretch flex gap-[12px] items-center left-[18px] right-[18px] top-[8.25px]">
-      <FacebookIcon />
-      <p className="basis-0 font-['Comfortaa:Bold',sans-serif] font-bold grow leading-[20px] min-h-px min-w-px relative shrink-0 text-[#717182] text-[14px] text-center">
-        Continue with Facebook
-      </p>
+      {isLoading ? (
+        <>
+          <div className="relative shrink-0 size-[14px] flex items-center justify-center">
+            <div className="size-[14px] border-2 border-[#717182] border-t-transparent rounded-full animate-spin" />
+          </div>
+          <p className="basis-0 font-['Comfortaa:Bold',sans-serif] font-bold grow leading-[20px] min-h-px min-w-px relative shrink-0 text-[#717182] text-[14px] text-center">
+            Connecting...
+          </p>
+        </>
+      ) : (
+        <>
+          <FacebookIcon />
+          <p className="basis-0 font-['Comfortaa:Bold',sans-serif] font-bold grow leading-[20px] min-h-px min-w-px relative shrink-0 text-[#717182] text-[14px] text-center">
+            Continue with Facebook
+          </p>
+        </>
+      )}
     </div>
   );
 }
 
-export function FacebookButton({ onClick }: { onClick: () => void }) {
+export function FacebookButton({ 
+  onClick, 
+  isLoading = false 
+}: { 
+  onClick: () => void;
+  isLoading?: boolean;
+}) {
   return (
     <button
       onClick={onClick}
-      className="bg-white h-[36px] relative rounded-[16px] shrink-0 w-full hover:bg-gray-50 transition-colors cursor-pointer"
+      disabled={isLoading}
+      className="bg-white h-[36px] relative rounded-[16px] shrink-0 w-full hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
       data-name="Button"
     >
       <div
         aria-hidden="true"
         className="absolute border border-[rgba(0,0,0,0.1)] border-solid inset-0 pointer-events-none rounded-[16px]"
       />
-      <FacebookButtonContent />
+      <FacebookButtonContent isLoading={isLoading} />
     </button>
   );
 }
@@ -218,10 +238,12 @@ export function SocialLoginButtons({
   onGoogleClick,
   onFacebookClick,
   isGoogleLoading = false,
+  isFacebookLoading = false,
 }: {
   onGoogleClick: () => void;
   onFacebookClick: () => void;
   isGoogleLoading?: boolean;
+  isFacebookLoading?: boolean;
 }) {
   return (
     <div
@@ -229,7 +251,7 @@ export function SocialLoginButtons({
       data-name="AuthDialog"
     >
       <GoogleButton onClick={onGoogleClick} isLoading={isGoogleLoading} />
-      <FacebookButton onClick={onFacebookClick} />
+      <FacebookButton onClick={onFacebookClick} isLoading={isFacebookLoading} />
     </div>
   );
 }
@@ -246,6 +268,7 @@ export function EmailStepContent({
   error,
   isLoading,
   isGoogleLoading,
+  isFacebookLoading,
 }: {
   email: string;
   setEmail: (value: string) => void;
@@ -257,6 +280,7 @@ export function EmailStepContent({
   error?: string;
   isLoading?: boolean;
   isGoogleLoading?: boolean;
+  isFacebookLoading?: boolean;
 }) {
   return (
     <div className="relative shrink-0 w-full" data-name="Tab Panel">
@@ -275,6 +299,7 @@ export function EmailStepContent({
           onGoogleClick={onGoogleClick}
           onFacebookClick={onFacebookClick}
           isGoogleLoading={isGoogleLoading}
+          isFacebookLoading={isFacebookLoading}
         />
       </div>
     </div>
@@ -292,6 +317,7 @@ export function EmailStepContainer({
   error,
   isLoading,
   isGoogleLoading,
+  isFacebookLoading,
 }: {
   email: string;
   setEmail: (value: string) => void;
@@ -303,6 +329,7 @@ export function EmailStepContainer({
   error?: string;
   isLoading?: boolean;
   isGoogleLoading?: boolean;
+  isFacebookLoading?: boolean;
 }) {
   return (
     <div className="relative shrink-0 w-full" data-name="Container">
@@ -319,6 +346,7 @@ export function EmailStepContainer({
             error={error}
             isLoading={isLoading}
             isGoogleLoading={isGoogleLoading}
+            isFacebookLoading={isFacebookLoading}
           />
         </div>
       </div>

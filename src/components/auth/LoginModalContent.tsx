@@ -22,6 +22,11 @@ import {
   GoogleCredentialResponse,
   GoogleErrorResponse,
 } from "@/lib/googleAuth";
+import {
+  initializeFacebookAuth,
+  loginWithFacebook,
+  getFacebookUserInfo,
+} from "@/lib/facebookAuth";
 import { featureFlags, thirdPartyConfig } from "@/lib/env";
 import { HttpError } from "@/lib/http";
 import {
@@ -100,6 +105,8 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
 
   // Separate loading state for Google login (since it's async and uses popup)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  // Separate loading state for Facebook login
+  const [isFacebookLoading, setIsFacebookLoading] = useState(false);
 
   // Load remembered credentials on mount
   useEffect(() => {
@@ -139,6 +146,23 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
 
     initGoogleAuth();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Initialize Facebook Auth on mount
+  useEffect(() => {
+    if (!featureFlags.socialLogin || !thirdPartyConfig.facebookAppId) {
+      return;
+    }
+
+    const initFacebookAuth = async () => {
+      try {
+        await initializeFacebookAuth();
+      } catch (error) {
+        console.warn("Failed to initialize Facebook Auth:", error);
+      }
+    };
+
+    initFacebookAuth();
   }, []);
 
   const handleEmailChange = (value: string) => {
@@ -181,12 +205,6 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
         // Email is registered - proceed to password step
         console.log("Email is registered, proceeding to password step");
         setStep("password");
-
-        // Optional: Show info if verification code was sent
-        if (response.code_sent) {
-          // Code was sent, but we proceed to password step for login
-          // This info might be useful for future features
-        }
       } else {
         // Email is not registered - navigate to sign up
         console.log("Email is not registered, navigating to sign up");
@@ -749,13 +767,82 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
     }
   };
 
-  const handleFacebookClick = () => {
-    console.log("Continue with Facebook");
-    toast.success("Redirecting to Facebook login...");
-    // Here you would handle Facebook authentication
-    setTimeout(() => {
-      onClose();
-    }, 1000);
+  // Handle Facebook login
+  const handleFacebookClick = async () => {
+    if (!featureFlags.socialLogin) {
+      toast.error("Social login is not enabled.");
+      return;
+    }
+
+    if (!thirdPartyConfig.facebookAppId) {
+      toast.error("Facebook login is not configured.");
+      return;
+    }
+
+    // Set loading state when user clicks the button
+    setIsFacebookLoading(true);
+
+    try {
+      // Trigger Facebook login
+      const authResponse = await loginWithFacebook();
+      
+      if (authResponse.status === "connected" && authResponse.authResponse) {
+        // Get user information from Facebook
+        const userInfo = await getFacebookUserInfo(authResponse.authResponse.accessToken);
+        
+        // Call social login API
+        await socialLogin({
+          provider: "facebook",
+          access_token: authResponse.authResponse.accessToken,
+          first_name: userInfo.first_name || null,
+          last_name: userInfo.last_name || null,
+        });
+
+        // Get user information from backend
+        const backendUserInfo = await getCurrentUser();
+        const user = {
+          name: `${backendUserInfo.first_name || ""} ${backendUserInfo.last_name || ""}`.trim() || userInfo.name || userInfo.email?.split("@")[0] || "",
+          email: backendUserInfo.email,
+        };
+
+        // Update auth store
+        login(user);
+        toast.success("Login successful!");
+
+        // Close modal after a short delay
+        setTimeout(() => {
+          reset();
+          onClose();
+        }, 500);
+      } else {
+        throw new Error("Facebook login was cancelled or failed.");
+      }
+    } catch (err) {
+      let errorMessage = "Facebook login failed. Please try again.";
+
+      if (err instanceof HttpError) {
+        if (err.status === 400) {
+          errorMessage = err.message || "Invalid Facebook account. Please try again.";
+        } else if (err.status >= 400 && err.status < 500) {
+          errorMessage = err.message || "Authentication failed. Please try again.";
+        } else {
+          errorMessage = err.message || "Server error. Please try again later.";
+        }
+      } else if (err instanceof Error) {
+        // Check for specific Facebook errors
+        if (err.message.includes("App not active") || err.message.includes("app is not accessible")) {
+          errorMessage = "Facebook app is not active. Please check app settings or contact support. If you're a developer, make sure you've added yourself as a test user.";
+        } else {
+          errorMessage = err.message;
+        }
+      }
+
+      toast.error(errorMessage);
+      console.error("Error during Facebook login:", err);
+    } finally {
+      // Only clear Facebook loading state, don't touch isLoading
+      setIsFacebookLoading(false);
+    }
   };
 
   const handleForgotPassword = async () => {
@@ -871,7 +958,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
     }
   };
 
-  const handleVerifyEmail = async (vsToken: string) => {
+  const handleVerifyEmail = async (_vsToken: string) => {
     // For login mode, the login API is already called in VerifyEmailContainer
     // This function is only called for signup mode now
     if (verificationMode === "login") {
@@ -882,9 +969,12 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
 
     setIsLoading(true);
     try {
-      // Signup flow: Complete registration with vs_token
+      // Signup flow: Complete registration with email and code
+      // Get the verification code from the current state
+      const codeString = verificationCode.join("");
       await registerComplete({
-        vs_token: vsToken,
+        email: email,
+        code: codeString,
         first_name: firstName,
         last_name: lastName,
         birthday: birthday,
@@ -1147,6 +1237,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
                 error={emailError}
                 isLoading={isLoading}
                 isGoogleLoading={isGoogleLoading}
+                isFacebookLoading={isFacebookLoading}
               />
             </>
           ) : step === "verify-email" ? (
