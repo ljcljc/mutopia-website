@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 // 使用实际图片替换占位图片
 const imgIcon = "/images/logo.png";
 import iconMenu from "@/assets/icons/icon-menu.svg";
+import iconUser from "@/assets/icons/icon-user.svg";
+import iconNotify from "@/assets/icons/icon-notify.svg";
 import { Button } from "./ui/button";
 import { motion, AnimatePresence } from "motion/react";
 import { OrangeButton } from "@/components/common";
 import { LoginModal } from "@/components/auth/LoginModal";
 import { useAuthStore } from "@/components/auth/authStore";
-import svgPaths from "@/assets/icons/svg-kzu0xk56ho";
 
 // Helper function to handle smooth scroll to anchor with header offset
 const scrollToAnchor = (href: string) => {
@@ -221,62 +222,31 @@ function UserInfo() {
 
   if (!user) return null;
 
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((word) => word[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   return (
     <div className="content-stretch flex gap-[10.5px] items-center">
-      {/* Notification icon */}
-      <button
-        className="content-stretch flex gap-[10px] h-[28px] items-center justify-center relative shrink-0 w-[28px] cursor-pointer hover:opacity-80 transition-opacity"
-        aria-label="Notifications"
-      >
-        <div className="relative shrink-0 size-[20px]">
-          <svg
-            className="block size-full"
-            fill="none"
-            preserveAspectRatio="none"
-            viewBox="0 0 20 20"
-          >
-            <g id="Bell">
-              <path
-                d={svgPaths.p18131300}
-                id="Vector"
-                stroke="var(--stroke-0, #4A3C2A)"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1.6"
-              />
-              <path
-                d={svgPaths.p23185c80}
-                id="Vector_2"
-                stroke="var(--stroke-0, #4A3C2A)"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1.6"
-              />
-            </g>
-          </svg>
-        </div>
-      </button>
-
       {/* User avatar and name */}
       <div className="content-stretch flex gap-[8px] items-center cursor-pointer hover:opacity-80 transition-opacity group">
-        <div className="bg-[#633479] flex items-center justify-center relative rounded-full shrink-0 size-[28px]">
-          <span className="font-['Comfortaa:SemiBold',_sans-serif] font-semibold text-white text-[12px]">
-            {getInitials(user.name)}
-          </span>
-        </div>
-        <p className="font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] text-[#4a3c2a] text-[12px]">
+        <img
+          src={iconUser}
+          alt="User"
+          className="relative shrink-0 size-[20px]"
+        />
+        <p className="font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] text-[#8b6357] text-[12px]">
           {user.name}
         </p>
       </div>
+
+      {/* Notification icon */}
+      <button
+        className="relative shrink-0 size-[24px] cursor-pointer hover:opacity-80 transition-opacity"
+        aria-label="Notifications"
+      >
+        <img
+          src={iconNotify}
+          alt="Notifications"
+          className="block size-full"
+        />
+      </button>
     </div>
   );
 }
@@ -359,15 +329,6 @@ function MobileButton2() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   if (user) {
-    const getInitials = (name: string) => {
-      return name
-        .split(" ")
-        .map((word) => word[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2);
-    };
-
     return (
       <div className="content-stretch flex gap-[16px] items-center w-full">
         {/* Notification icon */}
@@ -375,42 +336,20 @@ function MobileButton2() {
           className="content-stretch flex gap-[10px] h-[48px] items-center justify-center relative shrink-0 w-[48px] cursor-pointer hover:opacity-80 transition-opacity bg-[#f5f5f5] rounded-[2.47134e+07px]"
           aria-label="Notifications"
         >
-          <div className="relative shrink-0 size-[24px]">
-            <svg
-              className="block size-full"
-              fill="none"
-              preserveAspectRatio="none"
-              viewBox="0 0 20 20"
-            >
-              <g id="Bell">
-                <path
-                  d={svgPaths.p18131300}
-                  id="Vector"
-                  stroke="var(--stroke-0, #4A3C2A)"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="1.6"
-                />
-                <path
-                  d={svgPaths.p23185c80}
-                  id="Vector_2"
-                  stroke="var(--stroke-0, #4A3C2A)"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="1.6"
-                />
-              </g>
-            </svg>
-          </div>
+          <img
+            src={iconNotify}
+            alt="Notifications"
+            className="relative shrink-0 size-[24px]"
+          />
         </button>
 
         {/* User info */}
         <div className="content-stretch flex gap-[12px] items-center flex-1 cursor-pointer hover:opacity-80 transition-opacity">
-          <div className="bg-[#633479] flex items-center justify-center relative rounded-full shrink-0 size-[48px]">
-            <span className="font-['Comfortaa:SemiBold',_sans-serif] font-semibold text-white text-[18px]">
-              {getInitials(user.name)}
-            </span>
-          </div>
+          <img
+            src={iconUser}
+            alt="User"
+            className="relative shrink-0 size-[48px]"
+          />
           <div className="flex flex-col flex-1">
             <p className="font-['Comfortaa:SemiBold',_sans-serif] font-semibold text-[#4a3c2a] text-[14px]">
               {user.name}

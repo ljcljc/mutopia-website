@@ -94,6 +94,33 @@ interface AuthState {
   reset: () => void;
 }
 
+// Load user info from localStorage on initialization
+const loadUserFromStorage = (): User | null => {
+  try {
+    const userInfoStr = localStorage.getItem("user_info");
+    if (userInfoStr) {
+      const userInfo = JSON.parse(userInfoStr);
+      // Validate that the stored user info has required fields
+      if (userInfo && typeof userInfo === "object" && userInfo.name && userInfo.email) {
+        return {
+          name: userInfo.name,
+          email: userInfo.email,
+          avatar: userInfo.avatar,
+        };
+      }
+    }
+  } catch (e) {
+    console.warn("Failed to load user info from localStorage:", e);
+    // Clear invalid data
+    try {
+      localStorage.removeItem("user_info");
+    } catch (clearError) {
+      console.warn("Failed to clear invalid user info from localStorage:", clearError);
+    }
+  }
+  return null;
+};
+
 const initialState = {
   step: "email" as LoginStep,
   email: "",
@@ -121,7 +148,7 @@ const initialState = {
   birthdayError: "",
   addressError: "",
   isLoading: false,
-  user: null as User | null,
+  user: loadUserFromStorage(),
 };
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -202,27 +229,57 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setIsLoading: (isLoading) => set({ isLoading }),
 
-  setUser: (user) => set({ user }),
+  setUser: (user) => {
+    set({ user });
+    // Save to localStorage when user is set
+    if (user) {
+      try {
+        localStorage.setItem("user_info", JSON.stringify(user));
+      } catch (e) {
+        console.warn("Failed to save user info to localStorage:", e);
+      }
+    } else {
+      try {
+        localStorage.removeItem("user_info");
+      } catch (e) {
+        console.warn("Failed to remove user info from localStorage:", e);
+      }
+    }
+  },
 
   login: (user) => {
     set({ user });
+    // Save to localStorage when user logs in
+    try {
+      localStorage.setItem("user_info", JSON.stringify(user));
+    } catch (e) {
+      console.warn("Failed to save user info to localStorage:", e);
+    }
   },
 
   logout: () => {
     clearAuthTokens();
     set({ user: null });
+    // Clear user info from localStorage when user logs out
+    try {
+      localStorage.removeItem("user_info");
+    } catch (e) {
+      console.warn("Failed to remove user info from localStorage:", e);
+    }
   },
 
   reset: () =>
-    set({
+    set((state) => ({
       ...initialState,
+      // Preserve user info when resetting form state
+      user: state.user,
       verificationCode: ["", "", "", "", "", ""],
       verificationMode: "signup",
       codeSendCount: 0,
       codeVerifyFailCount: 0,
       resetPasswordToken: null,
       passwordResetSuccess: false,
-    }),
+    })),
 }));
 
 // Validation helpers
