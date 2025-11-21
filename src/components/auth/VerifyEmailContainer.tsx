@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { VerificationCodeInput } from "./VerificationCodeInput";
 import { ButtonMediumPrincipalOrange } from "./LoginModalUI";
-import { sendCode, verifyCode } from "@/lib/api";
+import { sendCode, verifyCode, login as loginAPI } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
 
@@ -12,7 +12,10 @@ interface VerifyEmailContainerProps {
   onVerify: (vsToken: string) => void;
   onChangeEmail: () => void;
   isLoading?: boolean;
-  mode?: "signup" | "login"; // Verification mode
+  mode?: "signup" | "login" | "forgot-password"; // Verification mode
+  // For login mode only
+  password?: string;
+  onLoginSuccess?: () => void; // Callback after successful login
 }
 
 export function VerifyEmailContainer({
@@ -23,10 +26,13 @@ export function VerifyEmailContainer({
   onChangeEmail,
   isLoading = false,
   mode = "signup",
+  password,
+  onLoginSuccess,
 }: VerifyEmailContainerProps) {
   const [countdown, setCountdown] = useState(60);
   const [isResending, setIsResending] = useState(false);
   const [error, setError] = useState("");
+  const [codeResent, setCodeResent] = useState(false);
 
   // Countdown timer
   useEffect(() => {
@@ -38,6 +44,20 @@ export function VerifyEmailContainer({
     }
   }, [countdown]);
 
+  // Reset countdown when code is resent
+  useEffect(() => {
+    if (codeResent) {
+      setCountdown(60);
+    }
+  }, [codeResent]);
+
+  // Clear codeResent state when countdown reaches 0
+  useEffect(() => {
+    if (countdown === 0 && codeResent) {
+      setCodeResent(false);
+    }
+  }, [countdown, codeResent]);
+
   const handleResendCode = async () => {
     if (countdown > 0) {
       return; // Don't allow resend during countdown
@@ -46,8 +66,10 @@ export function VerifyEmailContainer({
     setIsResending(true);
     setError("");
     try {
-      await sendCode({ email, purpose: mode === "login" ? "login" : "register" });
-      setCountdown(60);
+      await sendCode({ email, purpose: mode === "login" ? "login" : mode === "forgot-password" ? "forgot-password" : "register" });
+      // Set codeResent to true to show success state
+      setCodeResent(true);
+      // Countdown will be reset by useEffect when codeResent becomes true
       toast.success("Verification code sent to your email.");
     } catch (err) {
       if (err instanceof HttpError) {
@@ -70,22 +92,36 @@ export function VerifyEmailContainer({
 
     setError("");
     try {
-      const result = await verifyCode({
-        email,
-        code: codeString,
-        purpose: mode === "login" ? "login" : "register",
-      });
-
-      // For login mode, we don't need vs_token, we'll use the code directly in login API
-      // For signup mode, we need vs_token
+      // For login mode, directly call login API (no need to verify code first)
       if (mode === "login") {
-        if (!result.ok) {
-          setError("Invalid verification code. Please try again.");
+        if (!password) {
+          setError("Password is required for login.");
           return;
         }
-        // For login, pass empty string as vsToken since we'll use code directly
+        
+        // Call login API directly with email, password, and code
+        await loginAPI({
+          email,
+          password,
+          code: codeString,
+        });
+        
+        // Call success callback (this will handle user state update, toast, and modal close)
+        // The callback will also call getCurrentUser internally
+        if (onLoginSuccess) {
+          await onLoginSuccess();
+        }
+        
+        // Also call onVerify with empty string to maintain compatibility
         onVerify("");
       } else {
+        // For signup mode, verify code first to get vs_token
+        const result = await verifyCode({
+          email,
+          code: codeString,
+          purpose: "register",
+        });
+
         if (!result.ok || !result.vs_token) {
           setError("Invalid verification code. Please try again.");
           return;
@@ -163,15 +199,36 @@ export function VerifyEmailContainer({
                     Change email
                   </p>
                 </button>
-                <button
-                  onClick={handleResendCode}
-                  disabled={countdown > 0 || isResending || isLoading}
-                  className="box-border content-stretch flex gap-[8px] items-center justify-center px-[12px] py-[4px] relative shrink-0 cursor-pointer hover:opacity-70 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12px]">
-                    {isResending ? "Sending..." : "Resend code"}
-                  </p>
-                </button>
+                {codeResent ? (
+                  <div className="box-border content-stretch flex gap-[8px] items-center justify-center px-[12px] py-[4px] relative shrink-0">
+                    <div className="flex h-[calc(1px*((var(--transform-inner-width)*1)+(var(--transform-inner-height)*0)))] items-center justify-center relative shrink-0 w-[calc(1px*((var(--transform-inner-height)*1)+(var(--transform-inner-width)*0)))]">
+                      <div className="flex-none rotate-[90deg]">
+                        <div className="relative size-[12px]">
+                          {/* Success icon - green circle with checkmark */}
+                          <div className="absolute aspect-square left-0 right-0 top-0">
+                            <div className="bg-[#6aa31c] rounded-full size-full" />
+                          </div>
+                          <div className="absolute h-[5.742px] left-[1.75px] top-[3.75px] w-[8.494px] text-white text-[8px] flex items-center justify-center">
+                            ✓
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12px]">
+                      Code resent
+                    </p>
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleResendCode}
+                    disabled={countdown > 0 || isResending || isLoading}
+                    className="box-border content-stretch flex gap-[8px] items-center justify-center px-[12px] py-[4px] relative shrink-0 cursor-pointer hover:opacity-70 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12px]">
+                      {isResending ? "Sending..." : "Resend code"}
+                    </p>
+                  </button>
+                )}
               </div>
             </div>
 

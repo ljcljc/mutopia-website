@@ -73,6 +73,17 @@ export const emailStepSchema = z.object({
   email: emailSchema,
 });
 
+// Reset password form schema (only validates password fields)
+export const resetPasswordFormSchema = z
+  .object({
+    password: strongPasswordSchema,
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Password doesn't match",
+    path: ["confirmPassword"],
+  });
+
 // Export types
 export type LoginFormData = z.infer<typeof loginFormSchema>;
 export type SignUpFormData = z.infer<typeof signUpFormSchema>;

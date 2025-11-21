@@ -1,10 +1,10 @@
 import { create } from "zustand";
-import { emailSchema, loginFormSchema, signUpFormSchema } from "./authSchemas";
+import { emailSchema, loginFormSchema, signUpFormSchema, resetPasswordFormSchema } from "./authSchemas";
 import { z } from "zod";
 import { clearAuthTokens } from "@/lib/http";
 
-export type LoginStep = "email" | "password" | "signup" | "verify-email";
-export type VerificationMode = "signup" | "login";
+export type LoginStep = "email" | "password" | "signup" | "verify-email" | "forgot-password" | "change-email" | "reset-password";
+export type VerificationMode = "signup" | "login" | "forgot-password";
 
 export interface User {
   name: string;
@@ -36,6 +36,16 @@ interface AuthState {
   verificationMode: VerificationMode;
   setVerificationCode: (code: string[]) => void;
   setVerificationMode: (mode: VerificationMode) => void;
+
+  // Forgot password state
+  codeSendCount: number; // Number of times code has been sent (max 5)
+  codeVerifyFailCount: number; // Number of times code verification failed (max 5)
+  setCodeSendCount: (count: number) => void;
+  setCodeVerifyFailCount: (count: number) => void;
+  resetPasswordToken: string | null; // Token from successful code verification
+  setResetPasswordToken: (token: string | null) => void;
+  passwordResetSuccess: boolean; // Flag to show success message after password reset
+  setPasswordResetSuccess: (success: boolean) => void;
 
   // Form setters
   setEmail: (email: string) => void;
@@ -98,6 +108,10 @@ const initialState = {
   optOutMarketing: false,
   verificationCode: ["", "", "", "", "", ""],
   verificationMode: "signup" as VerificationMode,
+  codeSendCount: 0,
+  codeVerifyFailCount: 0,
+  resetPasswordToken: null as string | null,
+  passwordResetSuccess: false,
   isEmailFocused: false,
   emailError: "",
   passwordError: "",
@@ -153,6 +167,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   setVerificationCode: (verificationCode) => set({ verificationCode }),
   setVerificationMode: (verificationMode) => set({ verificationMode }),
 
+  setCodeSendCount: (codeSendCount) => set({ codeSendCount }),
+  setCodeVerifyFailCount: (codeVerifyFailCount) => set({ codeVerifyFailCount }),
+  setResetPasswordToken: (resetPasswordToken) => set({ resetPasswordToken }),
+  setPasswordResetSuccess: (passwordResetSuccess) => set({ passwordResetSuccess }),
+
   setIsEmailFocused: (isEmailFocused) => set({ isEmailFocused }),
 
   setEmailError: (emailError) => set({ emailError }),
@@ -199,6 +218,10 @@ export const useAuthStore = create<AuthState>((set) => ({
       ...initialState,
       verificationCode: ["", "", "", "", "", ""],
       verificationMode: "signup",
+      codeSendCount: 0,
+      codeVerifyFailCount: 0,
+      resetPasswordToken: null,
+      passwordResetSuccess: false,
     }),
 }));
 
@@ -247,6 +270,21 @@ export const validateSignUpForm = (data: {
 }): { success: boolean; error?: z.ZodError } => {
   try {
     signUpFormSchema.parse(data);
+    return { success: true };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { success: false, error };
+    }
+    return { success: false };
+  }
+};
+
+export const validateResetPasswordForm = (data: {
+  password: string;
+  confirmPassword: string;
+}): { success: boolean; error?: z.ZodError } => {
+  try {
+    resetPasswordFormSchema.parse(data);
     return { success: true };
   } catch (error) {
     if (error instanceof z.ZodError) {

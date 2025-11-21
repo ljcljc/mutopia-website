@@ -10,7 +10,7 @@ export interface EmailCheckIn {
 
 export interface EmailCheckOut {
   exists: boolean;
-  code_sent: boolean;
+  code_sent?: boolean; // Optional: indicates if verification code was sent
 }
 
 export interface SendCodeIn {

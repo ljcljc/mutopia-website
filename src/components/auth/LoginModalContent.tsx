@@ -11,9 +11,9 @@ import {
   checkEmailRegistered,
   sendCode,
   registerComplete,
-  login as loginAPI,
   getCurrentUser,
   loginPasswordCheck,
+  sendPasswordResetCode,
 } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { WelcomeToMutopiaPet } from "./LoginModalUI";
@@ -23,6 +23,9 @@ import {
   SignUpContainer,
 } from "./LoginModalContainers";
 import { VerifyEmailContainer } from "./VerifyEmailContainer";
+import { ForgotPasswordContainer } from "./ForgotPasswordContainer";
+import { ChangeEmailContainer } from "./ChangeEmailContainer";
+import { ResetPasswordContainer } from "./ResetPasswordContainer";
 
 export function ModalContent({ onClose }: { onClose: () => void }) {
   const {
@@ -39,6 +42,10 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
     optOutMarketing,
     verificationCode,
     verificationMode,
+    codeSendCount,
+    codeVerifyFailCount,
+    resetPasswordToken,
+    passwordResetSuccess,
     emailError,
     passwordError,
     confirmPasswordError,
@@ -60,6 +67,10 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
     setOptOutMarketing,
     setVerificationCode,
     setVerificationMode,
+    setCodeSendCount,
+    setCodeVerifyFailCount,
+    setResetPasswordToken,
+    setPasswordResetSuccess,
     setIsEmailFocused,
     setEmailError,
     setPasswordError,
@@ -574,9 +585,39 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
     }, 1000);
   };
 
-  const handleForgotPassword = () => {
-    toast.info("Password reset link would be sent to your email");
-    // TODO: Implement forgot password flow
+  const handleForgotPassword = async () => {
+    // Navigate to forgot password flow - start with email input
+    // Don't reset codeSendCount and codeVerifyFailCount if already in forgot password flow
+    // Only reset if starting fresh
+    if (step !== "forgot-password" && step !== "change-email" && step !== "reset-password") {
+      setCodeSendCount(0);
+      setCodeVerifyFailCount(0);
+      setResetPasswordToken(null);
+      setVerificationCode(["", "", "", "", "", ""]);
+      
+      // Send verification code immediately when entering forgot password flow
+      // Use a separate async operation that doesn't affect the login button state
+      // Navigate first, then send code in background
+      setStep("forgot-password");
+      setVerificationMode("forgot-password");
+      
+      // Send code after navigation (doesn't affect login button)
+      try {
+        await sendPasswordResetCode(email);
+        setCodeSendCount(1); // First send
+        toast.success("Verification code sent to your email.");
+      } catch (err) {
+        if (err instanceof HttpError) {
+          toast.error(err.message || "Failed to send verification code.");
+        } else {
+          toast.error("Failed to send verification code. Please try again.");
+        }
+        console.error("Error sending password reset code:", err);
+      }
+    } else {
+      setStep("forgot-password");
+      setVerificationMode("forgot-password");
+    }
   };
 
   const handleTogglePassword = () => {
@@ -587,91 +628,171 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
     if (step === "verify-email") {
       if (verificationMode === "login") {
         setStep("password");
+      } else if (verificationMode === "forgot-password") {
+        setStep("forgot-password");
       } else {
         setStep("signup");
       }
-      setVerificationCode(["", "", "", "", "", ""]);
+      // Don't clear verification code when going back, keep user input
+    } else if (step === "forgot-password") {
+      // From forgot-password, go back to password (login) step
+      // This is the entry point from login, so return to login
+      setStep("password");
+      // Don't clear verification code, keep user input
+    } else if (step === "change-email") {
+      // From change-email, go back to forgot-password
+      setStep("forgot-password");
+    } else if (step === "reset-password") {
+      setStep("forgot-password");
+      // Don't clear password fields, keep user input
+    } else if (step === "password") {
+      setStep("email");
+      // Don't clear password, keep user input (especially if rememberMe is checked)
+    } else if (step === "signup") {
+      setStep("email");
+      // Don't clear signup form data, keep user input
     } else {
       setStep("email");
-      setPassword("");
-      setConfirmPassword("");
-      setPasswordError("");
-      setConfirmPasswordError("");
+      // Only clear password when going back to email from other flows
+      if (verificationMode !== "login") {
+        setPassword("");
+        setConfirmPassword("");
+        setPasswordError("");
+        setConfirmPasswordError("");
+      }
+    }
+  };
+
+  const handleClose = () => {
+    // Clear password reset success flag when closing modal
+    if (passwordResetSuccess) {
+      setPasswordResetSuccess(false);
+    }
+    
+    // Navigate back to previous step instead of closing modal
+    // All state (password, rememberMe, etc.) is preserved when navigating
+    if (step === "change-email") {
+      // From change-email, go back to forgot-password
+      setStep("forgot-password");
+    } else if (step === "forgot-password") {
+      // From forgot-password, return to password step (log in) and keep all state
+      // This handles the case when user came from login step
+      setStep("password");
+    } else if (step === "reset-password") {
+      setStep("forgot-password");
+    } else if (step === "verify-email") {
+      if (verificationMode === "login") {
+        setStep("password");
+      } else if (verificationMode === "forgot-password") {
+        setStep("forgot-password");
+      } else {
+        setStep("signup");
+      }
+    } else if (step === "password") {
+      setStep("email");
+    } else if (step === "signup") {
+      setStep("email");
+    } else {
+      // Only close modal when in email step
+      onClose();
     }
   };
 
   const handleVerifyEmail = async (vsToken: string) => {
+    // For login mode, the login API is already called in VerifyEmailContainer
+    // This function is only called for signup mode now
+    if (verificationMode === "login") {
+      // Login flow is handled in VerifyEmailContainer, so this should not be called
+      // But we keep it for compatibility
+      return;
+    }
+
     setIsLoading(true);
     try {
-      if (verificationMode === "login") {
-        // Login flow: Call login API with verification code
-        const codeString = verificationCode.join("");
-        await loginAPI({
-          email,
-          password,
-          code: codeString,
-        });
+      // Signup flow: Complete registration with vs_token
+      await registerComplete({
+        vs_token: vsToken,
+        first_name: firstName,
+        last_name: lastName,
+        birthday: birthday,
+        address: address,
+        receive_marketing_message: !optOutMarketing,
+        password1: password,
+        password2: confirmPassword,
+      });
 
-        // Get user information and update state
-        const userInfo = await getCurrentUser();
-        const user = {
-          name: `${userInfo.first_name || ""} ${userInfo.last_name || ""}`.trim() || email.split("@")[0],
-          email: userInfo.email,
-        };
+      // Get user information and update state
+      const userInfo = await getCurrentUser();
+      const user = {
+        name: `${userInfo.first_name || ""} ${userInfo.last_name || ""}`.trim(),
+        email: userInfo.email,
+      };
 
-        login(user);
-        toast.success("Login successful!");
+      login(user);
+      toast.success("Sign up successful!");
 
-        // Save password if rememberMe is checked
-        if (rememberMe) {
-          try {
-            localStorage.setItem("remembered_email", email);
-            localStorage.setItem("remembered_password", password);
-          } catch (e) {
-            console.warn("Failed to save remembered credentials:", e);
-          }
+      setTimeout(() => {
+        reset();
+        onClose();
+      }, 500);
+    } catch (err) {
+      let errorMessage = "Something went wrong. Please try again.";
+
+      if (err instanceof HttpError) {
+        if (err.status === 400) {
+          errorMessage = err.message || "Invalid input. Please check your information.";
+        } else if (err.status >= 400 && err.status < 500) {
+          errorMessage = err.message || "Invalid request. Please check your information.";
         } else {
-          // Clear remembered credentials if not checked
-          try {
-            localStorage.removeItem("remembered_email");
-            localStorage.removeItem("remembered_password");
-          } catch (e) {
-            console.warn("Failed to clear remembered credentials:", e);
-          }
+          errorMessage = err.message || "Server error. Please try later.";
         }
-
-        setTimeout(() => {
-          reset();
-          onClose();
-        }, 500);
-      } else {
-        // Signup flow: Complete registration with vs_token
-        await registerComplete({
-          vs_token: vsToken,
-          first_name: firstName,
-          last_name: lastName,
-          birthday: birthday,
-          address: address,
-          receive_marketing_message: !optOutMarketing,
-          password1: password,
-          password2: confirmPassword,
-        });
-
-        // Get user information and update state
-        const userInfo = await getCurrentUser();
-        const user = {
-          name: `${userInfo.first_name || ""} ${userInfo.last_name || ""}`.trim(),
-          email: userInfo.email,
-        };
-
-        login(user);
-        toast.success("Sign up successful!");
-
-        setTimeout(() => {
-          reset();
-          onClose();
-        }, 500);
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
       }
+
+      toast.error(errorMessage);
+      console.error(`Error during ${verificationMode}:`, err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle login success callback (called from VerifyEmailContainer)
+  const handleLoginSuccess = async () => {
+    setIsLoading(true);
+    try {
+      // Get user information and update state
+      const userInfo = await getCurrentUser();
+      const user = {
+        name: `${userInfo.first_name || ""} ${userInfo.last_name || ""}`.trim() || email.split("@")[0],
+        email: userInfo.email,
+      };
+
+      login(user);
+      toast.success("Login successful!");
+
+      // Save password if rememberMe is checked
+      if (rememberMe) {
+        try {
+          localStorage.setItem("remembered_email", email);
+          localStorage.setItem("remembered_password", password);
+        } catch (e) {
+          console.warn("Failed to save remembered credentials:", e);
+        }
+      } else {
+        // Clear remembered credentials if not checked
+        try {
+          localStorage.removeItem("remembered_email");
+          localStorage.removeItem("remembered_password");
+        } catch (e) {
+          console.warn("Failed to clear remembered credentials:", e);
+        }
+      }
+
+      setTimeout(() => {
+        reset();
+        onClose();
+      }, 500);
     } catch (err) {
       let errorMessage = "Something went wrong. Please try again.";
 
@@ -688,7 +809,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
       }
 
       toast.error(errorMessage);
-      console.error(`Error during ${verificationMode}:`, err);
+      console.error("Error during login:", err);
     } finally {
       setIsLoading(false);
     }
@@ -697,10 +818,35 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
   const handleChangeEmail = () => {
     if (verificationMode === "login") {
       setStep("password");
+    } else if (verificationMode === "forgot-password") {
+      setStep("change-email");
     } else {
       setStep("signup");
     }
-    setVerificationCode(["", "", "", "", "", ""]);
+    // Don't clear verification code when changing email, keep user input
+  };
+
+  const handleForgotPasswordVerify = (resetToken: string) => {
+    setResetPasswordToken(resetToken);
+    // Clear password fields when entering reset password step
+    setPassword("");
+    setConfirmPassword("");
+    setPasswordError("");
+    setConfirmPasswordError("");
+    setStep("reset-password");
+  };
+
+  const handleChangeEmailContinue = () => {
+    setStep("forgot-password");
+  };
+
+  const handleResetPasswordComplete = () => {
+    // Reset all state and go back to email step
+    reset();
+    setStep("email");
+    // Set success flag after reset to show alert
+    // Alert will persist until modal is closed
+    setPasswordResetSuccess(true);
   };
 
   const title =
@@ -710,8 +856,14 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
         ? "Sign up"
         : step === "verify-email"
           ? "Verify your email"
-          : "Log in";
-  const showBackButton = step === "password" || step === "signup" || step === "verify-email";
+          : step === "forgot-password"
+            ? "Forgot password"
+            : step === "change-email"
+              ? "Change email address"
+              : step === "reset-password"
+                ? "Reset password"
+                : "Log in";
+  const showBackButton = step === "password" || step === "signup" || step === "verify-email" || step === "forgot-password" || step === "change-email" || step === "reset-password";
 
   return (
     <div
@@ -733,7 +885,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
           {/* Fixed header for signup */}
           <div className="shrink-0 pt-[12px] pb-[16px] px-0 w-full">
             <WelcomeToMutopiaPet
-              onClose={onClose}
+              onClose={handleClose}
               onBack={showBackButton ? handleBack : undefined}
               title={title}
               showRequired={step === "signup"}
@@ -780,24 +932,49 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
       ) : (
         <div className="flex flex-col gap-[16px] items-start pb-[32px] pt-[12px] px-0 w-full">
           <WelcomeToMutopiaPet
-            onClose={onClose}
+            onClose={handleClose}
             onBack={showBackButton ? handleBack : undefined}
             title={title}
             showRequired={false}
           />
 
           {step === "email" ? (
-            <EmailStepContainer
-              email={email}
-              setEmail={handleEmailChange}
-              onContinue={handleContinue}
-              onBlur={handleEmailBlur}
-              onFocus={handleEmailFocus}
-              onGoogleClick={handleGoogleClick}
-              onFacebookClick={handleFacebookClick}
-              error={emailError}
-              isLoading={isLoading}
-            />
+            <>
+              {/* Success message after password reset */}
+              {passwordResetSuccess && (
+                <div className="px-[24px] w-full">
+                  <div className="bg-[#f4ffde] border border-[#6aa31c] border-solid h-[36px] relative rounded-[8px] shrink-0 w-full mb-[16px]">
+                    <div className="box-border content-stretch flex h-[36px] items-center overflow-clip px-[16px] py-[4px] relative rounded-[inherit]">
+                      <div className="content-stretch flex gap-[8px] items-center relative shrink-0">
+                        <div className="relative shrink-0 size-[12px]">
+                          {/* Success icon - green circle with checkmark */}
+                          <div className="absolute aspect-square left-0 right-0 top-0">
+                            <div className="bg-[#6aa31c] rounded-full size-full" />
+                          </div>
+                          <div className="absolute h-[5.742px] left-[1.75px] top-[3.75px] w-[8.494px] text-white text-[8px] flex items-center justify-center">
+                            ✓
+                          </div>
+                        </div>
+                        <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] relative shrink-0 text-[#467900] text-[10px]">
+                          Your password is reset. You can log in with this new password.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <EmailStepContainer
+                email={email}
+                setEmail={handleEmailChange}
+                onContinue={handleContinue}
+                onBlur={handleEmailBlur}
+                onFocus={handleEmailFocus}
+                onGoogleClick={handleGoogleClick}
+                onFacebookClick={handleFacebookClick}
+                error={emailError}
+                isLoading={isLoading}
+              />
+            </>
           ) : step === "verify-email" ? (
             <VerifyEmailContainer
               email={email}
@@ -807,6 +984,42 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
               onChangeEmail={handleChangeEmail}
               isLoading={isLoading}
               mode={verificationMode}
+              password={verificationMode === "login" ? password : undefined}
+              onLoginSuccess={verificationMode === "login" ? handleLoginSuccess : undefined}
+            />
+          ) : step === "forgot-password" ? (
+            <ForgotPasswordContainer
+              email={email}
+              verificationCode={verificationCode}
+              setVerificationCode={setVerificationCode}
+              onVerify={handleForgotPasswordVerify}
+              onChangeEmail={handleChangeEmail}
+              isLoading={isLoading}
+              codeSendCount={codeSendCount}
+              codeVerifyFailCount={codeVerifyFailCount}
+              setCodeSendCount={setCodeSendCount}
+              setCodeVerifyFailCount={setCodeVerifyFailCount}
+            />
+          ) : step === "change-email" ? (
+            <ChangeEmailContainer
+              email={email}
+              setEmail={setEmail}
+              onContinue={handleChangeEmailContinue}
+              isLoading={isLoading}
+              setCodeSendCount={setCodeSendCount}
+            />
+          ) : step === "reset-password" ? (
+            <ResetPasswordContainer
+              password={password}
+              confirmPassword={confirmPassword}
+              setPassword={setPassword}
+              setConfirmPassword={setConfirmPassword}
+              showPassword={showPassword}
+              toggleShowPassword={toggleShowPassword}
+              onReset={handleResetPasswordComplete}
+              resetToken={resetPasswordToken || ""}
+              email={email}
+              isLoading={isLoading}
             />
           ) : (
             <PasswordContainer
