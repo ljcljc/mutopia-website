@@ -1,6 +1,6 @@
 import { toast } from "sonner";
 import { z } from "zod";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   useAuthStore,
   validateEmail,
@@ -14,7 +14,15 @@ import {
   getCurrentUser,
   loginPasswordCheck,
   sendPasswordResetCode,
+  socialLogin,
 } from "@/lib/api";
+import {
+  initializeGoogleAuth,
+  decodeGoogleIdToken,
+  GoogleCredentialResponse,
+  GoogleErrorResponse,
+} from "@/lib/googleAuth";
+import { featureFlags, thirdPartyConfig } from "@/lib/env";
 import { HttpError } from "@/lib/http";
 import {
   saveEncryptedItem,
@@ -90,6 +98,9 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
     login,
   } = useAuthStore();
 
+  // Separate loading state for Google login (since it's async and uses popup)
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
   // Load remembered credentials on mount
   useEffect(() => {
     const loadRememberedCredentials = async () => {
@@ -108,6 +119,27 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
     
     loadRememberedCredentials();
   }, [setEmail, setPassword, setRememberMe]);
+
+  // Initialize Google Auth on mount
+  useEffect(() => {
+    if (!featureFlags.socialLogin || !thirdPartyConfig.googleClientId) {
+      return;
+    }
+
+    const initGoogleAuth = async () => {
+      try {
+        await initializeGoogleAuth(
+          handleGoogleCredentialResponse,
+          handleGoogleError
+        );
+      } catch (error) {
+        console.warn("Failed to initialize Google Auth:", error);
+      }
+    };
+
+    initGoogleAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleEmailChange = (value: string) => {
     setEmail(value);
@@ -577,13 +609,144 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
     }
   };
 
+  // Handle Google credential response
+  const handleGoogleCredentialResponse = async (response: GoogleCredentialResponse) => {
+    // Only use isGoogleLoading to avoid affecting Continue button
+    // Keep isGoogleLoading true throughout the entire process
+    try {
+      // Decode the ID token to get user information
+      const decodedToken = decodeGoogleIdToken(response.credential);
+      
+      // Extract user information
+      const firstName = decodedToken.given_name || null;
+      const lastName = decodedToken.family_name || null;
+      const email = decodedToken.email;
+
+      // Call social login API (isGoogleLoading is already true from button click)
+      await socialLogin({
+        provider: "google",
+        id_token: response.credential,
+        first_name: firstName,
+        last_name: lastName,
+      });
+
+      // Get user information from backend
+      const userInfo = await getCurrentUser();
+      const user = {
+        name: `${userInfo.first_name || ""} ${userInfo.last_name || ""}`.trim() || email.split("@")[0],
+        email: userInfo.email,
+      };
+
+      // Update auth store
+      login(user);
+      toast.success("Login successful!");
+
+      // Close modal after a short delay
+      setTimeout(() => {
+        reset();
+        onClose();
+      }, 500);
+    } catch (err) {
+      let errorMessage = "Google login failed. Please try again.";
+
+      if (err instanceof HttpError) {
+        if (err.status === 400) {
+          errorMessage = err.message || "Invalid Google account. Please try again.";
+        } else if (err.status >= 400 && err.status < 500) {
+          errorMessage = err.message || "Authentication failed. Please try again.";
+        } else {
+          errorMessage = err.message || "Server error. Please try again later.";
+        }
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+
+      toast.error(errorMessage);
+      console.error("Error during Google login:", err);
+    } finally {
+      // Only clear Google loading state, don't touch isLoading
+      setIsGoogleLoading(false);
+    }
+  };
+
+  // Handle Google error response (defined before useEffect to avoid dependency issues)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handleGoogleError = (error: GoogleErrorResponse) => {
+    console.error("Google authentication error:", error);
+    setIsGoogleLoading(false);
+    toast.error("Google login was cancelled or failed. Please try again.");
+  };
+
   const handleGoogleClick = () => {
-    console.log("Continue with Google");
-    toast.success("Redirecting to Google login...");
-    // Here you would handle Google authentication
-    setTimeout(() => {
-      onClose();
-    }, 1000);
+    if (!featureFlags.socialLogin) {
+      toast.error("Social login is not enabled.");
+      return;
+    }
+
+    if (!thirdPartyConfig.googleClientId) {
+      toast.error("Google login is not configured.");
+      return;
+    }
+
+    // Set loading state when user clicks the button
+    setIsGoogleLoading(true);
+
+    try {
+      const google = (window as any).google;
+      if (!google || !google.accounts || !google.accounts.id) {
+        setIsGoogleLoading(false);
+        toast.error("Google authentication is not available. Please refresh the page.");
+        return;
+      }
+
+      // Debug: Log current origin for troubleshooting
+      console.log("[Google Login] Current origin:", window.location.origin);
+      console.log("[Google Login] Client ID:", thirdPartyConfig.googleClientId);
+
+      // Trigger Google sign-in popup using the ID token flow
+      // This will show a popup for the user to sign in with their Google account
+      google.accounts.id.prompt((notification: any) => {
+        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+          // If prompt is not displayed, try to render a button and click it
+          try {
+            const tempDiv = document.createElement("div");
+            tempDiv.id = "google-signin-temp";
+            tempDiv.style.position = "fixed";
+            tempDiv.style.left = "-9999px";
+            document.body.appendChild(tempDiv);
+
+            google.accounts.id.renderButton(tempDiv, {
+              type: "standard",
+              theme: "outline",
+              size: "large",
+              text: "signin_with",
+            });
+
+            // Try to click the button
+            setTimeout(() => {
+              const button = tempDiv.querySelector("div[role='button']") as HTMLElement;
+              if (button) {
+                button.click();
+              }
+              // Clean up
+              setTimeout(() => {
+                if (tempDiv.parentNode) {
+                  tempDiv.parentNode.removeChild(tempDiv);
+                }
+              }, 1000);
+            }, 100);
+          } catch (renderError) {
+            console.error("Error rendering Google button:", renderError);
+            setIsGoogleLoading(false);
+            toast.error("Failed to start Google login. Please try again.");
+          }
+        }
+      });
+    } catch (error) {
+      console.error("Error triggering Google login:", error);
+      setIsGoogleLoading(false);
+      toast.error("Failed to start Google login. Please try again.");
+    }
   };
 
   const handleFacebookClick = () => {
@@ -983,6 +1146,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
                 onFacebookClick={handleFacebookClick}
                 error={emailError}
                 isLoading={isLoading}
+                isGoogleLoading={isGoogleLoading}
               />
             </>
           ) : step === "verify-email" ? (

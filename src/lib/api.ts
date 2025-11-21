@@ -87,6 +87,15 @@ export interface MeOut {
   is_email_verified: boolean;
 }
 
+export interface SocialLoginIn {
+  provider: string;
+  id_token?: string | null;
+  access_token?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  birthday?: string | null;
+}
+
 export interface ForgotPasswordSendIn {
   email: string;
 }
@@ -315,6 +324,21 @@ export async function resetPassword(
  */
 export async function logout(): Promise<void> {
   await clearAuthTokens();
+}
+
+/**
+ * 社交登录（Google/Facebook 等）
+ */
+export async function socialLogin(data: SocialLoginIn): Promise<TokenOut> {
+  const response = await http.post<TokenOut>("/api/auth/social/login", data, {
+    skipAuth: true,
+  });
+
+  // 自动保存 token（加密存储）
+  await setAuthToken(response.data.access);
+  await setRefreshToken(response.data.refresh);
+
+  return response.data;
 }
 
 // ==================== 服务目录 API ====================

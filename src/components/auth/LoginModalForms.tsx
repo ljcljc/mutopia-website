@@ -132,29 +132,49 @@ export function GoogleIcon() {
   );
 }
 
-export function GoogleButtonContent() {
+export function GoogleButtonContent({ isLoading }: { isLoading?: boolean }) {
   return (
     <div className="absolute content-stretch flex gap-[12px] items-center left-[16px] right-[16px] top-[7.75px]">
-      <GoogleIcon />
-      <p className="basis-0 font-['Comfortaa:Bold',sans-serif] font-bold grow leading-[20px] min-h-px min-w-px relative shrink-0 text-[#717182] text-[14px] text-center">
-        Continue with Google
-      </p>
+      {isLoading ? (
+        <>
+          <div className="relative shrink-0 size-[14px] flex items-center justify-center">
+            <div className="size-[14px] border-2 border-[#717182] border-t-transparent rounded-full animate-spin" />
+          </div>
+          <p className="basis-0 font-['Comfortaa:Bold',sans-serif] font-bold grow leading-[20px] min-h-px min-w-px relative shrink-0 text-[#717182] text-[14px] text-center">
+            Connecting...
+          </p>
+        </>
+      ) : (
+        <>
+          <GoogleIcon />
+          <p className="basis-0 font-['Comfortaa:Bold',sans-serif] font-bold grow leading-[20px] min-h-px min-w-px relative shrink-0 text-[#717182] text-[14px] text-center">
+            Continue with Google
+          </p>
+        </>
+      )}
     </div>
   );
 }
 
-export function GoogleButton({ onClick }: { onClick: () => void }) {
+export function GoogleButton({ 
+  onClick, 
+  isLoading = false 
+}: { 
+  onClick: () => void;
+  isLoading?: boolean;
+}) {
   return (
     <button
       onClick={onClick}
-      className="bg-white h-[36px] relative rounded-[16px] shrink-0 w-full hover:bg-gray-50 transition-colors cursor-pointer"
+      disabled={isLoading}
+      className="bg-white h-[36px] relative rounded-[16px] shrink-0 w-full hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
       data-name="Button"
     >
       <div
         aria-hidden="true"
         className="absolute border border-[rgba(0,0,0,0.1)] border-solid inset-0 pointer-events-none rounded-[16px]"
       />
-      <GoogleButtonContent />
+      <GoogleButtonContent isLoading={isLoading} />
     </button>
   );
 }
@@ -197,16 +217,18 @@ export function FacebookButton({ onClick }: { onClick: () => void }) {
 export function SocialLoginButtons({
   onGoogleClick,
   onFacebookClick,
+  isGoogleLoading = false,
 }: {
   onGoogleClick: () => void;
   onFacebookClick: () => void;
+  isGoogleLoading?: boolean;
 }) {
   return (
     <div
       className="content-stretch flex flex-col gap-[10.5px] items-start relative shrink-0 w-full"
       data-name="AuthDialog"
     >
-      <GoogleButton onClick={onGoogleClick} />
+      <GoogleButton onClick={onGoogleClick} isLoading={isGoogleLoading} />
       <FacebookButton onClick={onFacebookClick} />
     </div>
   );
@@ -223,6 +245,7 @@ export function EmailStepContent({
   onFacebookClick,
   error,
   isLoading,
+  isGoogleLoading,
 }: {
   email: string;
   setEmail: (value: string) => void;
@@ -233,6 +256,7 @@ export function EmailStepContent({
   onFacebookClick: () => void;
   error?: string;
   isLoading?: boolean;
+  isGoogleLoading?: boolean;
 }) {
   return (
     <div className="relative shrink-0 w-full" data-name="Tab Panel">
@@ -250,6 +274,7 @@ export function EmailStepContent({
         <SocialLoginButtons
           onGoogleClick={onGoogleClick}
           onFacebookClick={onFacebookClick}
+          isGoogleLoading={isGoogleLoading}
         />
       </div>
     </div>
@@ -266,6 +291,7 @@ export function EmailStepContainer({
   onFacebookClick,
   error,
   isLoading,
+  isGoogleLoading,
 }: {
   email: string;
   setEmail: (value: string) => void;
@@ -276,6 +302,7 @@ export function EmailStepContainer({
   onFacebookClick: () => void;
   error?: string;
   isLoading?: boolean;
+  isGoogleLoading?: boolean;
 }) {
   return (
     <div className="relative shrink-0 w-full" data-name="Container">
@@ -291,6 +318,7 @@ export function EmailStepContainer({
             onFacebookClick={onFacebookClick}
             error={error}
             isLoading={isLoading}
+            isGoogleLoading={isGoogleLoading}
           />
         </div>
       </div>
