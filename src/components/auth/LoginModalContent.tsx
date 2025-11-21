@@ -16,6 +16,12 @@ import {
   sendPasswordResetCode,
 } from "@/lib/api";
 import { HttpError } from "@/lib/http";
+import {
+  saveEncryptedItem,
+  getEncryptedItem,
+  removeEncryptedItem,
+} from "@/lib/encryption";
+import { STORAGE_KEYS } from "@/lib/storageKeys";
 import { WelcomeToMutopiaPet } from "./LoginModalUI";
 import { EmailStepContainer } from "./LoginModalForms";
 import {
@@ -86,17 +92,21 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
 
   // Load remembered credentials on mount
   useEffect(() => {
-    try {
-      const rememberedEmail = localStorage.getItem("remembered_email");
-      const rememberedPassword = localStorage.getItem("remembered_password");
-      if (rememberedEmail && rememberedPassword) {
-        setEmail(rememberedEmail);
-        setPassword(rememberedPassword);
-        setRememberMe(true);
+    const loadRememberedCredentials = async () => {
+      try {
+        const rememberedEmail = await getEncryptedItem(STORAGE_KEYS.REMEMBERED_EMAIL);
+        const rememberedPassword = await getEncryptedItem(STORAGE_KEYS.REMEMBERED_PASSWORD);
+        if (rememberedEmail && rememberedPassword) {
+          setEmail(rememberedEmail);
+          setPassword(rememberedPassword);
+          setRememberMe(true);
+        }
+      } catch (e) {
+        console.warn("Failed to load remembered credentials:", e);
       }
-    } catch (e) {
-      console.warn("Failed to load remembered credentials:", e);
-    }
+    };
+    
+    loadRememberedCredentials();
   }, [setEmail, setPassword, setRememberMe]);
 
   const handleEmailChange = (value: string) => {
@@ -774,16 +784,16 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
       // Save password if rememberMe is checked
       if (rememberMe) {
         try {
-          localStorage.setItem("remembered_email", email);
-          localStorage.setItem("remembered_password", password);
+          await saveEncryptedItem(STORAGE_KEYS.REMEMBERED_EMAIL, email);
+          await saveEncryptedItem(STORAGE_KEYS.REMEMBERED_PASSWORD, password);
         } catch (e) {
           console.warn("Failed to save remembered credentials:", e);
         }
       } else {
         // Clear remembered credentials if not checked
         try {
-          localStorage.removeItem("remembered_email");
-          localStorage.removeItem("remembered_password");
+          removeEncryptedItem(STORAGE_KEYS.REMEMBERED_EMAIL);
+          removeEncryptedItem(STORAGE_KEYS.REMEMBERED_PASSWORD);
         } catch (e) {
           console.warn("Failed to clear remembered credentials:", e);
         }

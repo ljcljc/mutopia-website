@@ -2,6 +2,13 @@
 
 /// <reference lib="dom" />
 
+import {
+  saveEncryptedItem,
+  getEncryptedItem,
+  removeEncryptedItem,
+} from "./encryption";
+import { STORAGE_KEYS } from "./storageKeys";
+
 // 在开发环境使用代理路径，生产环境使用完整 URL
 const API_BASE_URL = import.meta.env.DEV
   ? "" // 开发环境使用相对路径，通过 Vite 代理
@@ -51,44 +58,44 @@ export class HttpError extends Error {
   }
 }
 
-// 获取认证 token（从 localStorage 或其他存储）
-const getAuthToken = (): string | null => {
+// 获取认证 token（从 localStorage 或其他存储，已加密）
+const getAuthToken = async (): Promise<string | null> => {
   try {
-    return localStorage.getItem("access_token");
+    return await getEncryptedItem(STORAGE_KEYS.ACCESS_TOKEN);
   } catch {
     return null;
   }
 };
 
-// 设置认证 token
-export const setAuthToken = (token: string | null): void => {
+// 设置认证 token（加密存储）
+export const setAuthToken = async (token: string | null): Promise<void> => {
   try {
     if (token) {
-      localStorage.setItem("access_token", token);
+      await saveEncryptedItem(STORAGE_KEYS.ACCESS_TOKEN, token);
     } else {
-      localStorage.removeItem("access_token");
+      removeEncryptedItem(STORAGE_KEYS.ACCESS_TOKEN);
     }
   } catch (error) {
     console.warn("Failed to set auth token:", error);
   }
 };
 
-// 获取刷新 token（用于 token 刷新功能）
-export const getRefreshToken = (): string | null => {
+// 获取刷新 token（用于 token 刷新功能，已加密）
+export const getRefreshToken = async (): Promise<string | null> => {
   try {
-    return localStorage.getItem("refresh_token");
+    return await getEncryptedItem(STORAGE_KEYS.REFRESH_TOKEN);
   } catch {
     return null;
   }
 };
 
-// 设置刷新 token
-export const setRefreshToken = (token: string | null): void => {
+// 设置刷新 token（加密存储）
+export const setRefreshToken = async (token: string | null): Promise<void> => {
   try {
     if (token) {
-      localStorage.setItem("refresh_token", token);
+      await saveEncryptedItem(STORAGE_KEYS.REFRESH_TOKEN, token);
     } else {
-      localStorage.removeItem("refresh_token");
+      removeEncryptedItem(STORAGE_KEYS.REFRESH_TOKEN);
     }
   } catch (error) {
     console.warn("Failed to set refresh token:", error);
@@ -96,9 +103,9 @@ export const setRefreshToken = (token: string | null): void => {
 };
 
 // 清除所有 tokens
-export const clearAuthTokens = (): void => {
-  setAuthToken(null);
-  setRefreshToken(null);
+export const clearAuthTokens = async (): Promise<void> => {
+  await setAuthToken(null);
+  await setRefreshToken(null);
 };
 
 // 解析响应数据
@@ -182,7 +189,7 @@ const request = async <T = unknown>(
 
   // 添加认证 token（如果需要）
   if (!skipAuth) {
-    const token = getAuthToken();
+    const token = await getAuthToken();
     if (token) {
       requestHeaders["Authorization"] = `Bearer ${token}`;
     }
@@ -286,7 +293,7 @@ const request = async <T = unknown>(
           } catch (refreshError) {
             debugLog("Token refresh failed:", refreshError);
             // Token 刷新失败，清除所有 token
-            clearAuthTokens();
+            await clearAuthTokens();
             throw new HttpError(
               "Session expired. Please login again.",
               401,
@@ -422,7 +429,7 @@ const refreshAccessToken = async (): Promise<boolean> => {
     return await refreshPromise;
   }
 
-  const refreshToken = getRefreshToken();
+  const refreshToken = await getRefreshToken();
   if (!refreshToken) {
     debugLog("No refresh token available");
     return false;

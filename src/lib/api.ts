@@ -217,9 +217,9 @@ export async function login(data: LoginConfirmIn): Promise<TokenOut> {
     skipAuth: true,
   });
 
-  // 自动保存 token
-  setAuthToken(response.data.access);
-  setRefreshToken(response.data.refresh);
+  // 自动保存 token（加密存储）
+  await setAuthToken(response.data.access);
+  await setRefreshToken(response.data.refresh);
 
   return response.data;
 }
@@ -234,9 +234,9 @@ export async function refreshToken(refresh: string): Promise<TokenOut> {
     { skipAuth: true }
   );
 
-  // 自动保存新的 token
-  setAuthToken(response.data.access);
-  setRefreshToken(response.data.refresh);
+  // 自动保存新的 token（加密存储）
+  await setAuthToken(response.data.access);
+  await setRefreshToken(response.data.refresh);
 
   return response.data;
 }
@@ -253,9 +253,9 @@ export async function registerComplete(
     { skipAuth: true }
   );
 
-  // 自动保存 token
-  setAuthToken(response.data.access);
-  setRefreshToken(response.data.refresh);
+  // 自动保存 token（加密存储）
+  await setAuthToken(response.data.access);
+  await setRefreshToken(response.data.refresh);
 
   return response.data;
 }
@@ -313,8 +313,8 @@ export async function resetPassword(
 /**
  * 用户登出（清除本地 token）
  */
-export function logout(): void {
-  clearAuthTokens();
+export async function logout(): Promise<void> {
+  await clearAuthTokens();
 }
 
 // ==================== 服务目录 API ====================

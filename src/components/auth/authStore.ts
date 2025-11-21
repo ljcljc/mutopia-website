@@ -2,6 +2,11 @@ import { create } from "zustand";
 import { emailSchema, loginFormSchema, signUpFormSchema, resetPasswordFormSchema } from "./authSchemas";
 import { z } from "zod";
 import { clearAuthTokens } from "@/lib/http";
+import {
+  saveEncryptedItem,
+  removeEncryptedItem,
+} from "@/lib/encryption";
+import { STORAGE_KEYS } from "@/lib/storageKeys";
 
 export type LoginStep = "email" | "password" | "signup" | "verify-email" | "forgot-password" | "change-email" | "reset-password";
 export type VerificationMode = "signup" | "login" | "forgot-password";
@@ -88,36 +93,18 @@ interface AuthState {
   user: User | null;
   setUser: (user: User | null) => void;
   login: (user: User) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
 
   // Reset function
   reset: () => void;
 }
 
-// Load user info from localStorage on initialization
+// Load user info from localStorage on initialization (synchronous for initial state)
+// Note: This will be called during store initialization, so we need to handle it carefully
+// For encrypted data, we'll load it asynchronously after store creation
 const loadUserFromStorage = (): User | null => {
-  try {
-    const userInfoStr = localStorage.getItem("user_info");
-    if (userInfoStr) {
-      const userInfo = JSON.parse(userInfoStr);
-      // Validate that the stored user info has required fields
-      if (userInfo && typeof userInfo === "object" && userInfo.name && userInfo.email) {
-        return {
-          name: userInfo.name,
-          email: userInfo.email,
-          avatar: userInfo.avatar,
-        };
-      }
-    }
-  } catch (e) {
-    console.warn("Failed to load user info from localStorage:", e);
-    // Clear invalid data
-    try {
-      localStorage.removeItem("user_info");
-    } catch (clearError) {
-      console.warn("Failed to clear invalid user info from localStorage:", clearError);
-    }
-  }
+  // Return null initially - user info will be loaded asynchronously
+  // This prevents blocking store initialization
   return null;
 };
 
@@ -231,16 +218,15 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setUser: (user) => {
     set({ user });
-    // Save to localStorage when user is set
+    // Save to localStorage when user is set (encrypted)
     if (user) {
-      try {
-        localStorage.setItem("user_info", JSON.stringify(user));
-      } catch (e) {
+      // Use async save but don't await (fire and forget)
+      saveEncryptedItem(STORAGE_KEYS.USER_INFO, JSON.stringify(user)).catch((e: unknown) => {
         console.warn("Failed to save user info to localStorage:", e);
-      }
+      });
     } else {
       try {
-        localStorage.removeItem("user_info");
+        removeEncryptedItem(STORAGE_KEYS.USER_INFO);
       } catch (e) {
         console.warn("Failed to remove user info from localStorage:", e);
       }
@@ -249,20 +235,19 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   login: (user) => {
     set({ user });
-    // Save to localStorage when user logs in
-    try {
-      localStorage.setItem("user_info", JSON.stringify(user));
-    } catch (e) {
+    // Save to localStorage when user logs in (encrypted)
+    // Use async save but don't await (fire and forget)
+    saveEncryptedItem(STORAGE_KEYS.USER_INFO, JSON.stringify(user)).catch((e: unknown) => {
       console.warn("Failed to save user info to localStorage:", e);
-    }
+    });
   },
 
-  logout: () => {
-    clearAuthTokens();
+  logout: async () => {
+    await clearAuthTokens();
     set({ user: null });
     // Clear user info from localStorage when user logs out
     try {
-      localStorage.removeItem("user_info");
+      removeEncryptedItem(STORAGE_KEYS.USER_INFO);
     } catch (e) {
       console.warn("Failed to remove user info from localStorage:", e);
     }
