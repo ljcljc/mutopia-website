@@ -9,10 +9,17 @@
   },
   "scripts": {
     "dev": "vite",
+    "dev:debug": "VITE_DEBUG=true vite",
+    "dev:test": "vite --mode test",
+    "dev:test:debug": "VITE_DEBUG=true vite --mode test",
     "build": "tsc && vite build",
+    "build:test": "tsc && vite build --mode test",
+    "build:prod": "tsc && vite build --mode production",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --ext ts,tsx --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,scss,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,scss,md}\"",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf node_modules dist .vite",
     "reinstall": "pnpm clean && pnpm install",
@@ -65,7 +72,9 @@
     "slick-carousel": "^1.8.1",
     "sonner": "^1.7.3",
     "tailwind-merge": "^2.5.4",
-    "vaul": "^1.1.2"
+    "vaul": "^1.1.2",
+    "zod": "^4.1.12",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.0",
@@ -77,8 +86,10 @@
     "@typescript-eslint/parser": "^8.15.0",
     "@vitejs/plugin-react": "^4.3.1",
     "eslint": "^9.15.0",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.14",
+    "prettier": "^3.6.2",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.2",
     "vite": "^7.1.12"
