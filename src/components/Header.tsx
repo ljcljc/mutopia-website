@@ -9,6 +9,14 @@ import { motion, AnimatePresence } from "motion/react";
 import { OrangeButton } from "@/components/common";
 import { LoginModal } from "@/components/auth/LoginModal";
 import { useAuthStore } from "@/components/auth/authStore";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { logout } from "@/lib/api";
+import { toast } from "sonner";
 
 // Helper function to handle smooth scroll to anchor with header offset
 const scrollToAnchor = (href: string) => {
@@ -219,22 +227,50 @@ function ButtonCompactPrincipalOrange() {
 // User info component for logged-in users
 function UserInfo() {
   const user = useAuthStore((state) => state.user);
+  const logoutUser = useAuthStore((state) => state.logout);
 
   if (!user) return null;
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      await logoutUser();
+      toast.success("Logged out successfully");
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Even if API logout fails, clear local state
+      await logoutUser();
+      toast.success("Logged out successfully");
+    }
+  };
+
   return (
     <div className="content-stretch flex gap-[10.5px] items-center">
-      {/* User avatar and name */}
-      <div className="content-stretch flex gap-[8px] items-center cursor-pointer hover:opacity-80 transition-opacity group">
-        <img
-          src={iconUser}
-          alt="User"
-          className="relative shrink-0 size-[20px]"
-        />
-        <p className="font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] text-[#8b6357] text-[12px]">
-          {user.name}
-        </p>
-      </div>
+      {/* User avatar and name with dropdown */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <div className="content-stretch flex gap-[8px] items-center cursor-pointer hover:opacity-80 transition-opacity group">
+            <img
+              src={iconUser}
+              alt="User"
+              className="relative shrink-0 size-[20px]"
+            />
+            <p className="font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] text-[#8b6357] text-[12px]">
+              {user.name}
+            </p>
+          </div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="min-w-[160px]">
+          <DropdownMenuItem
+            onClick={handleLogout}
+            className="cursor-pointer text-[#8b6357] hover:text-[#6f4e44] hover:bg-[#8b6357]/5"
+          >
+            <span className="font-['Comfortaa:Regular',_sans-serif] font-normal text-[14px]">
+              Log out
+            </span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {/* Notification icon */}
       <button
@@ -326,39 +362,73 @@ function MobileButton1() {
 
 function MobileButton2() {
   const user = useAuthStore((state) => state.user);
+  const logoutUser = useAuthStore((state) => state.logout);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      await logoutUser();
+      toast.success("Logged out successfully");
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Even if API logout fails, clear local state
+      await logoutUser();
+      toast.success("Logged out successfully");
+    }
+  };
 
   if (user) {
     return (
-      <div className="content-stretch flex gap-[16px] items-center w-full">
-        {/* Notification icon */}
-        <button
-          className="content-stretch flex gap-[10px] h-[48px] items-center justify-center relative shrink-0 w-[48px] cursor-pointer hover:opacity-80 transition-opacity bg-[#f5f5f5] rounded-[2.47134e+07px]"
-          aria-label="Notifications"
-        >
-          <img
-            src={iconNotify}
-            alt="Notifications"
-            className="relative shrink-0 size-[24px]"
-          />
-        </button>
+      <div className="content-stretch flex flex-col gap-[12px] w-full">
+        <div className="content-stretch flex gap-[16px] items-center w-full">
+          {/* Notification icon */}
+          <button
+            className="content-stretch flex gap-[10px] h-[48px] items-center justify-center relative shrink-0 w-[48px] cursor-pointer hover:opacity-80 transition-opacity bg-[#f5f5f5] rounded-[2.47134e+07px]"
+            aria-label="Notifications"
+          >
+            <img
+              src={iconNotify}
+              alt="Notifications"
+              className="relative shrink-0 size-[24px]"
+            />
+          </button>
 
-        {/* User info */}
-        <div className="content-stretch flex gap-[12px] items-center flex-1 cursor-pointer hover:opacity-80 transition-opacity">
-          <img
-            src={iconUser}
-            alt="User"
-            className="relative shrink-0 size-[48px]"
-          />
-          <div className="flex flex-col flex-1">
-            <p className="font-['Comfortaa:SemiBold',_sans-serif] font-semibold text-[#4a3c2a] text-[14px]">
-              {user.name}
-            </p>
-            <p className="font-['Comfortaa:Regular',_sans-serif] font-normal text-[#717182] text-[12px]">
-              {user.email}
-            </p>
+          {/* User info */}
+          <div className="content-stretch flex gap-[12px] items-center flex-1">
+            <img
+              src={iconUser}
+              alt="User"
+              className="relative shrink-0 size-[48px]"
+            />
+            <div className="flex flex-col flex-1">
+              <p className="font-['Comfortaa:SemiBold',_sans-serif] font-semibold text-[#4a3c2a] text-[14px]">
+                {user.name}
+              </p>
+              <p className="font-['Comfortaa:Regular',_sans-serif] font-normal text-[#717182] text-[12px]">
+                {user.email}
+              </p>
+            </div>
           </div>
         </div>
+
+        {/* Logout button */}
+        <button
+          onClick={handleLogout}
+          className="bg-[#f8f7f1] h-[48px] relative rounded-[2.47134e+07px] shrink-0 w-full cursor-pointer hover:bg-[#f0efe8] transition-colors"
+        >
+          <div
+            aria-hidden="true"
+            className="absolute border-[0.737px] border-[rgba(0,0,0,0.1)] border-solid inset-0 pointer-events-none rounded-[2.47134e+07px]"
+          />
+          <div className="flex flex-row items-center justify-center size-full">
+            <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border content-stretch flex gap-[5.25px] h-[48px] items-center justify-center px-[11.237px] py-[0.737px] relative w-full">
+              <p className="font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12.25px] text-nowrap whitespace-pre">
+                Log out
+              </p>
+            </div>
+          </div>
+        </button>
       </div>
     );
   }

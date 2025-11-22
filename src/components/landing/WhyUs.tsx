@@ -551,7 +551,7 @@ export default function WhyUs() {
                 <img
                   src={iconArrowLeft}
                   alt="Previous"
-                  className="h-[36px] w-[16px] rotate-180"
+                  className="h-[36px] w-[16px]"
                 />
               </button>
 
