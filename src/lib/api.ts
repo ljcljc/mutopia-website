@@ -604,3 +604,97 @@ export async function createFinalIntent(
   );
   return response.data;
 }
+
+// ==================== 访客相关 API ====================
+
+export interface GuestStartOut {
+  guest_id: string;
+  expires_at: string;
+}
+
+export interface UpgradeGuestIn {
+  guest_id: string;
+  email: string;
+  password: string;
+}
+
+/**
+ * 访客开始（创建访客会话）
+ */
+export async function guestStart(
+  email?: string | null
+): Promise<GuestStartOut> {
+  const queryParams = new URLSearchParams();
+  if (email) queryParams.append("email", email);
+
+  const response = await http.post<GuestStartOut>(
+    `/api/auth/guest/start${queryParams.toString() ? "?" + queryParams.toString() : ""}`,
+    undefined,
+    { skipAuth: true }
+  );
+  return response.data;
+}
+
+/**
+ * 升级访客账户为正式账户
+ */
+export async function upgradeGuest(
+  data: UpgradeGuestIn
+): Promise<TokenOut> {
+  const response = await http.post<TokenOut>(
+    "/api/auth/guest/upgrade",
+    data,
+    { skipAuth: true }
+  );
+
+  // 自动保存 token（加密存储）
+  await setAuthToken(response.data.access);
+  await setRefreshToken(response.data.refresh);
+
+  return response.data;
+}
+
+// ==================== 社交账号关联 API ====================
+
+export interface SocialIn {
+  provider: string;
+  provider_account_id: string;
+  email?: string | null;
+  raw_info?: Record<string, unknown>;
+}
+
+/**
+ * 关联社交账号（需要认证）
+ */
+export async function linkSocial(data: SocialIn): Promise<OkOut> {
+  const response = await http.post<OkOut>("/api/auth/social/link", data);
+  return response.data;
+}
+
+// ==================== 公共 API ====================
+
+export interface FeedbackIn {
+  name: string;
+  email: string;
+  message: string;
+}
+
+export interface FeedbackOut {
+  id: number;
+  name: string;
+  email: string;
+  message: string;
+  created_at: string;
+}
+
+/**
+ * 提交反馈
+ */
+export async function submitFeedback(data: FeedbackIn): Promise<FeedbackOut> {
+  const response = await http.post<FeedbackOut>(
+    "/api/public/feedback",
+    data,
+    { skipAuth: true }
+  );
+  return response.data;
+}
