@@ -10,9 +10,13 @@ import {
 import { STORAGE_KEYS } from "./storageKeys";
 
 // 在开发环境使用代理路径，生产环境使用完整 URL
+// 如果部署在 Cloudflare Pages，可以使用相对路径通过 Cloudflare Workers 代理
 const API_BASE_URL = import.meta.env.DEV
   ? "" // 开发环境使用相对路径，通过 Vite 代理
-  : import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+  : import.meta.env.VITE_API_BASE_URL || 
+    (import.meta.env.VITE_USE_RELATIVE_API === "true" 
+      ? "" // 使用相对路径（通过 Cloudflare Workers 代理）
+      : "http://localhost:8000");
 const DEBUG = import.meta.env.VITE_DEBUG === "true" || import.meta.env.DEV;
 
 // Debug logger helper
