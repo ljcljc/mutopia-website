@@ -34,6 +34,7 @@ export function VerifyEmailContainer({
   const [isResending, setIsResending] = useState(false);
   const [error, setError] = useState("");
   const [codeResent, setCodeResent] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Countdown timer
   useEffect(() => {
@@ -92,11 +93,13 @@ export function VerifyEmailContainer({
     }
 
     setError("");
+    setIsSubmitting(true); // Set loading state immediately
     try {
       // For login mode, directly call login API (no need to verify code first)
       if (mode === "login") {
         if (!password) {
           setError("Password is required for login.");
+          setIsSubmitting(false);
           return;
         }
         
@@ -125,6 +128,7 @@ export function VerifyEmailContainer({
 
         if (!result.ok || !result.vs_token) {
           setError("Invalid verification code. Please try again.");
+          setIsSubmitting(false);
           return;
         }
         onVerify(result.vs_token);
@@ -135,7 +139,9 @@ export function VerifyEmailContainer({
       } else {
         setError("Invalid verification code. Please try again.");
       }
+      setIsSubmitting(false);
     }
+    // Note: Don't set isSubmitting to false on success, as the modal will close
   };
 
   const isCodeComplete = verificationCode.join("").length === 6;
@@ -230,8 +236,8 @@ export function VerifyEmailContainer({
             {/* Submit button */}
             <ButtonMediumPrincipalOrange
               onClick={handleSubmit}
-              disabled={!isCodeComplete || isLoading}
-              isLoading={isLoading}
+              disabled={!isCodeComplete || isLoading || isSubmitting}
+              isLoading={isLoading || isSubmitting}
               text="Submit"
             />
           </div>
