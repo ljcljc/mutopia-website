@@ -646,6 +646,8 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
       const firstName = decodedToken.given_name || null;
       const lastName = decodedToken.family_name || null;
       const email = decodedToken.email;
+      // Google ID token may contain birthdate in YYYY-MM-DD format
+      const birthday = decodedToken.birthdate || null;
 
       // Call social login API (isGoogleLoading is already true from button click)
       await socialLogin({
@@ -653,6 +655,8 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
         id_token: response.credential,
         first_name: firstName,
         last_name: lastName,
+        email: email || null,
+        birthday: birthday,
       });
 
       // Get user information from backend
@@ -852,16 +856,55 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
         // Get user information from Facebook
         const userInfo = await getFacebookUserInfo(authResponse.authResponse.accessToken);
         
+        // Check if email is a Facebook temporary email (fb_*@users.facebook.com)
+        const isTemporaryEmail = userInfo.email && /^fb_\d+@users\.facebook\.com$/.test(userInfo.email);
+        
+        // Determine email to send: null if temporary email, otherwise use the actual email
+        const emailToSend = isTemporaryEmail ? null : (userInfo.email || null);
+        
+        // Format birthday: Facebook returns MM/DD/YYYY, convert to YYYY-MM-DD if needed
+        let birthdayFormatted: string | null = null;
+        if (userInfo.birthday) {
+          // Facebook birthday format: MM/DD/YYYY or YYYY-MM-DD
+          // Check if it's MM/DD/YYYY format and convert to YYYY-MM-DD
+          const birthdayMatch = userInfo.birthday.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+          if (birthdayMatch) {
+            // Convert MM/DD/YYYY to YYYY-MM-DD
+            const [, month, day, year] = birthdayMatch;
+            birthdayFormatted = `${year}-${month}-${day}`;
+          } else {
+            // Already in YYYY-MM-DD format or other format, use as is
+            birthdayFormatted = userInfo.birthday;
+          }
+        }
+        
+        if (isTemporaryEmail) {
+          console.warn("[Facebook Login] Temporary email detected:", userInfo.email);
+          // Don't pass email to backend if it's a temporary email
+          // Backend should handle this case by using Facebook ID or other identifier
+        }
+        
         // Call social login API
         await socialLogin({
           provider: "facebook",
           access_token: authResponse.authResponse.accessToken,
           first_name: userInfo.first_name || null,
           last_name: userInfo.last_name || null,
+          email: emailToSend,
+          birthday: birthdayFormatted,
         });
 
         // Get user information from backend
         const backendUserInfo = await getCurrentUser();
+        
+        // Check if backend returned a temporary email
+        const backendIsTemporaryEmail = backendUserInfo.email && /^fb_\d+@users\.facebook\.com$/.test(backendUserInfo.email);
+        
+        if (backendIsTemporaryEmail) {
+          console.warn("[Facebook Login] Backend returned temporary email:", backendUserInfo.email);
+          // You might want to show a message to the user or handle this case differently
+        }
+        
         const user = {
           name: `${backendUserInfo.first_name || ""} ${backendUserInfo.last_name || ""}`.trim() || userInfo.name || userInfo.email?.split("@")[0] || "",
           email: backendUserInfo.email,

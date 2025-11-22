@@ -94,6 +94,7 @@ export interface SocialLoginIn {
   first_name?: string | null;
   last_name?: string | null;
   birthday?: string | null;
+  email?: string | null;
 }
 
 export interface ForgotPasswordSendIn {

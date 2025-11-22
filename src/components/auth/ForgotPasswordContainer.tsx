@@ -6,6 +6,7 @@ import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
 import iconAlertError from "@/assets/icons/icon-alert-error.svg";
 import iconAlertSuccess from "@/assets/icons/icon-alert-success.svg";
+import iconAlertWarning from "@/assets/icons/icon-alert-warning.svg";
 import { getSendCountFromError } from "./forgotPasswordUtils";
 
 interface ForgotPasswordContainerProps {
@@ -227,16 +228,16 @@ export function ForgotPasswordContainer({
   const showLastAttemptWarning = codeVerifyFailCount === 4;
   
   // 验证码输入框显示条件：
-  // - 验证失败次数 < 4
-  // - 且未达到最大发送次数（如果达到最大发送次数，应该显示联系方式界面，而不是输入框）
-  // 注意：当 isMaxSendReached && codeVerifyFailCount < 4 时，应该显示联系方式界面，不显示输入框
-  const shouldShowCodeInput = codeVerifyFailCount < 4 && !isMaxSendReached;
+  // - 验证失败次数 < 5
+  // - 且未达到最大发送次数（send_count < 5）
+  // - 注意：当 send_count >= 5 时，不显示输入框，而是显示警告信息和 Contact 按钮
+  const shouldShowCodeInput = codeVerifyFailCount < MAX_VERIFY_FAIL_COUNT && !isMaxSendReached;
   
   // 是否可以重新发送：倒计时结束 && 未达到最大发送次数 && 未达到最大验证失败次数
   const canResend = countdown === 0 && codeSendCount < MAX_SEND_COUNT && codeVerifyFailCount < MAX_VERIFY_FAIL_COUNT;
   
   // 是否显示倒计时：未显示警告 && 未达到最大失败次数 && 未达到最大发送次数
-  // 注意：当 isMaxSendReached && codeVerifyFailCount < 4 时，应该显示联系方式界面，不显示倒计时
+  // 注意：当达到最大发送次数时，不再显示倒计时（因为不能再发送了）
   const shouldShowCountdown = !showLastAttemptWarning && !isMaxAttemptsReached && !isMaxSendReached;
 
   return (
@@ -337,7 +338,7 @@ export function ForgotPasswordContainer({
                     {codeResent ? (
                       <div className="box-border content-stretch flex gap-[8px] items-center justify-center px-[12px] py-[4px] relative shrink-0">
                         <div className="flex h-[calc(1px*((var(--transform-inner-width)*1)+(var(--transform-inner-height)*0)))] items-center justify-center relative shrink-0 w-[calc(1px*((var(--transform-inner-height)*1)+(var(--transform-inner-width)*0)))]">
-                          <div className="flex-none rotate-90">
+                          <div className="flex-none">
                             <div className="relative size-[12px]">
                               <img src={iconAlertSuccess} alt="Success" className="block size-full" />
                             </div>
@@ -353,9 +354,20 @@ export function ForgotPasswordContainer({
                         disabled={!canResend || isResending || isLoading}
                         className="box-border content-stretch flex gap-[8px] items-center justify-center px-[12px] py-[4px] relative shrink-0 cursor-pointer hover:opacity-70 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12px]">
-                          Resend code
-                        </p>
+                        {isResending ? (
+                          <>
+                            <div className="relative shrink-0 size-[12px]">
+                              <div className="size-[12px] border-2 border-[#4a3c2a] border-t-transparent rounded-full animate-spin" />
+                            </div>
+                            <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12px]">
+                              Sending...
+                            </p>
+                          </>
+                        ) : (
+                          <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12px]">
+                            Resend code
+                          </p>
+                        )}
                       </button>
                     )}
                   </div>
@@ -368,15 +380,7 @@ export function ForgotPasswordContainer({
                   <div className="box-border content-stretch flex h-[36px] items-center overflow-clip px-[16px] py-[4px] relative rounded-[inherit]">
                     <div className="content-stretch flex gap-[8px] items-center relative shrink-0">
                       <div className="relative shrink-0 size-[12px]">
-                        {/* Alert icon */}
-                        <div className="absolute h-[16px] left-[-16.67%] right-[-16.67%] -top-px">
-                          <div className="absolute bottom-1/4 left-[11.26%] right-[11.26%] top-[6.25%]">
-                            <div className="bg-[#e8b600] w-full h-full" style={{ clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)" }} />
-                          </div>
-                        </div>
-                        <div className="absolute h-[7.82px] left-[5.5px] top-[2.18px] w-[1.23px] text-[#b08a00] text-[10px] font-bold">
-                          !
-                        </div>
+                        <img src={iconAlertWarning} alt="Warning" className="block size-full" />
                       </div>
                       <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] relative shrink-0 text-[#b08a00] text-[10px]">
                         1 attempt left. Verify your email adresse and resend code.
@@ -386,24 +390,8 @@ export function ForgotPasswordContainer({
                 </div>
               )}
 
-              {/* 状态4: 第5次失败后显示错误 */}
-              {isMaxAttemptsReached && (
-                <div className="border border-[#de1507] border-solid h-[36px] relative rounded-[8px] shrink-0 w-full">
-                  <div className="box-border content-stretch flex h-[36px] items-center overflow-clip px-[16px] py-[4px] relative rounded-[inherit]">
-                    <div className="content-stretch flex gap-[8px] items-center relative shrink-0">
-                      <div className="relative shrink-0 size-[12px]">
-                        <img src={iconAlertError} alt="Error" className="block size-full" />
-                      </div>
-                      <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] relative shrink-0 text-[#de1507] text-[10px]">
-                        For security reason. Please contact us to reset your password.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* 最大发送次数 reached 且验证失败次数 < 4: 显示联系方式界面 */}
-              {isMaxSendReached && codeVerifyFailCount < 4 && (
+              {/* 状态4: 第5次失败后或达到最大发送次数后显示错误 */}
+              {(isMaxAttemptsReached || (isMaxSendReached && codeVerifyFailCount < MAX_VERIFY_FAIL_COUNT)) && (
                 <div className="border border-[#de1507] border-solid h-[36px] relative rounded-[8px] shrink-0 w-full">
                   <div className="box-border content-stretch flex h-[36px] items-center overflow-clip px-[16px] py-[4px] relative rounded-[inherit]">
                     <div className="content-stretch flex gap-[8px] items-center relative shrink-0">
@@ -444,7 +432,7 @@ export function ForgotPasswordContainer({
             )}
 
             {/* 状态4和最大发送次数: Contact 按钮 */}
-            {(isMaxAttemptsReached || (isMaxSendReached && codeVerifyFailCount < 4)) && (
+            {(isMaxAttemptsReached || (isMaxSendReached && codeVerifyFailCount < MAX_VERIFY_FAIL_COUNT)) && (
               <ButtonMediumPrincipalOrange
                 onClick={() => {
                   // Close modal first

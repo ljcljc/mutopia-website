@@ -29,6 +29,7 @@ export interface FacebookUserInfo {
   email?: string;
   first_name?: string;
   last_name?: string;
+  birthday?: string; // Format: MM/DD/YYYY or YYYY-MM-DD
   picture?: {
     data: {
       url: string;
@@ -157,7 +158,7 @@ export function loginWithFacebook(): Promise<FacebookAuthResponse> {
         }
       },
       {
-        scope: "email,public_profile", // 请求的权限
+        scope: "email,public_profile,user_birthday", // 请求的权限（包括生日）
       }
     );
   });
@@ -178,7 +179,7 @@ export function getFacebookUserInfo(accessToken: string): Promise<FacebookUserIn
     FB.api(
       "/me",
       {
-        fields: "id,name,email,first_name,last_name,picture",
+        fields: "id,name,email,first_name,last_name,birthday,picture",
         access_token: accessToken,
       },
       (response: FacebookUserInfo | { error?: { message: string } }) => {

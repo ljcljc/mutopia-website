@@ -98,6 +98,8 @@ export async function initializeGoogleAuth(
       cancel_on_tap_outside: true,
       // 启用 FedCM 以消除警告并确保未来兼容性
       use_fedcm_for_prompt: true,
+      // 注意：Google Identity Services 默认会请求 OpenID Connect 的基本信息，包括 email
+      // ID token 中会包含 email 字段（如果用户授权）
     });
     console.log("[Google Auth] Initialized successfully with FedCM enabled");
   } catch (error) {
@@ -184,6 +186,7 @@ export function decodeGoogleIdToken(idToken: string): {
   picture?: string;
   given_name?: string;
   family_name?: string;
+  birthdate?: string; // Format: YYYY-MM-DD (if available)
 } {
   try {
     // JWT token 格式: header.payload.signature
