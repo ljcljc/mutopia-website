@@ -336,18 +336,40 @@ export async function logout(): Promise<void> {
  * 添加了重试机制以处理网络连接问题
  */
 export async function socialLogin(data: SocialLoginIn): Promise<TokenOut> {
-  const response = await http.post<TokenOut>("/api/auth/social/login", data, {
-    skipAuth: true,
-    retry: 2, // 重试 2 次（总共 3 次尝试）
-    retryDelay: 1000, // 每次重试延迟 1 秒
-    timeout: 30000, // 30 秒超时
-  });
+  // 添加调试信息
+  if (import.meta.env.DEV || import.meta.env.VITE_DEBUG === "true") {
+    console.log("[Social Login] Request data:", {
+      provider: data.provider,
+      hasIdToken: !!data.id_token,
+      hasAccessToken: !!data.access_token,
+      firstName: data.first_name,
+      lastName: data.last_name,
+    });
+  }
 
-  // 自动保存 token（加密存储）
-  await setAuthToken(response.data.access);
-  await setRefreshToken(response.data.refresh);
+  try {
+    const response = await http.post<TokenOut>("/api/auth/social/login", data, {
+      skipAuth: true,
+      retry: 2, // 重试 2 次（总共 3 次尝试）
+      retryDelay: 1000, // 每次重试延迟 1 秒
+      timeout: 30000, // 30 秒超时
+    });
 
-  return response.data;
+    // 自动保存 token（加密存储）
+    await setAuthToken(response.data.access);
+    await setRefreshToken(response.data.refresh);
+
+    return response.data;
+  } catch (error) {
+    // 添加详细的错误日志
+    console.error("[Social Login] Error details:", {
+      error,
+      provider: data.provider,
+      url: "/api/auth/social/login",
+      timestamp: new Date().toISOString(),
+    });
+    throw error;
+  }
 }
 
 // ==================== 服务目录 API ====================

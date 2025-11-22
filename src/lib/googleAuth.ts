@@ -96,8 +96,10 @@ export async function initializeGoogleAuth(
       callback: callback,
       auto_select: false,
       cancel_on_tap_outside: true,
+      // 启用 FedCM 以消除警告并确保未来兼容性
+      use_fedcm_for_prompt: true,
     });
-    console.log("[Google Auth] Initialized successfully");
+    console.log("[Google Auth] Initialized successfully with FedCM enabled");
   } catch (error) {
     console.error("[Google Auth] Initialization error:", error);
     throw error;
@@ -107,6 +109,7 @@ export async function initializeGoogleAuth(
 /**
  * 触发 Google 登录弹窗
  * 注意：此方法已更新以兼容 FedCM
+ * 建议使用 renderButton 方法而不是 prompt，以获得更好的 FedCM 兼容性
  */
 export function promptGoogleLogin(): void {
   if (!isGoogleScriptLoaded()) {
@@ -116,16 +119,25 @@ export function promptGoogleLogin(): void {
   const google = (window as any).google;
   
   // 使用 FedCM 兼容的方式处理通知
+  // 注意：即使启用了 use_fedcm_for_prompts，仍然建议使用 renderButton 而不是 prompt
   google.accounts.id.prompt((notification: any) => {
     // FedCM 兼容：使用 getNotDisplayedReason 和 getSkippedReason 替代旧方法
-    const notDisplayedReason = notification.getNotDisplayedReason?.();
-    const skippedReason = notification.getSkippedReason?.();
-    
-    // 如果提示未显示或被跳过，可以记录原因（用于调试）
-    if (notDisplayedReason || skippedReason) {
-      console.log("[Google Auth] Prompt not displayed:", notDisplayedReason);
-      console.log("[Google Auth] Prompt skipped:", skippedReason);
+    // 这些方法在 FedCM 模式下可用
+    if (typeof notification.getNotDisplayedReason === "function") {
+      const notDisplayedReason = notification.getNotDisplayedReason();
+      if (notDisplayedReason) {
+        console.log("[Google Auth] Prompt not displayed:", notDisplayedReason);
+      }
     }
+    
+    if (typeof notification.getSkippedReason === "function") {
+      const skippedReason = notification.getSkippedReason();
+      if (skippedReason) {
+        console.log("[Google Auth] Prompt skipped:", skippedReason);
+      }
+    }
+    
+    // 注意：不再使用已弃用的 isNotDisplayed() 和 isSkippedMoment() 方法
   });
 }
 
@@ -188,4 +200,3 @@ export function decodeGoogleIdToken(idToken: string): {
     throw new Error(`Failed to decode Google ID token: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
 }
-

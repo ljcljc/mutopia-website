@@ -202,6 +202,15 @@ const request = async <T = unknown>(
     body: fetchConfig.body,
   });
 
+  // 在生产环境也记录关键请求信息（用于调试连接问题）
+  if (import.meta.env.PROD && url.includes("/api/auth/social/login")) {
+    console.log("[HTTP] Social login request:", {
+      method: config.method || "GET",
+      url: fullUrl,
+      hasBody: !!fetchConfig.body,
+    });
+  }
+
   // 请求函数
   const makeRequest = async (): Promise<Response> => {
     const controller = new AbortController();
