@@ -1,7 +1,4 @@
-import { CustomAccordion, PurpleButton } from "@/components/common";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import { CustomAccordion } from "@/components/common";
 import svgPaths from "@/assets/icons/svg-68mxca64pe";
 
 export default function FAQ() {
@@ -124,101 +121,6 @@ export default function FAQ() {
 
             {/* Accordion List */}
             <CustomAccordion items={faqs} />
-          </div>
-
-          {/* Contact Form */}
-          <div
-            id="contact"
-            className="content-start flex flex-wrap gap-0 items-start justify-center w-full md:max-w-[784px]"
-          >
-            <div className="basis-0 bg-[#633479] grow min-h-px min-w-px rounded-tl-none rounded-tr-none md:rounded-tl-[40px] md:rounded-tr-[40px]">
-              <div className="flex flex-col items-center size-full">
-                <div className="box-border content-stretch flex flex-col gap-[28px] items-center px-[28px] md:px-[80px] py-[36px] w-full">
-                  {/* Form Header and Fields - Combined */}
-                  <div className="content-stretch flex flex-col gap-[12px] items-center w-full">
-                    <p className="font-['Comfortaa:Bold',_sans-serif] leading-[normal] text-[24px] text-center text-white">
-                      Contact us for more details
-                    </p>
-                    <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(255,255,255,0.9)] text-center">
-                      Our friendly customer service team is here to help you and
-                      your pet.
-                    </p>
-
-                    {/* Name Input */}
-                    <div className="content-stretch flex flex-col gap-[8px] items-start w-full max-w-[348px]">
-                      <Label
-                        htmlFor="name"
-                        className="content-stretch flex gap-[7px] h-[12.25px] items-center w-full font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] text-[14px]"
-                        style={{
-                          background:
-                            "var(--Background-light, linear-gradient(135deg, #FFF7ED 0%, #FFFBEB 100%))",
-                          backgroundClip: "text",
-                          WebkitBackgroundClip: "text",
-                          WebkitTextFillColor: "transparent",
-                        }}
-                      >
-                        Name
-                      </Label>
-                      <Input
-                        id="name"
-                        type="text"
-                        placeholder="Enter your name"
-                        className="bg-white h-[36px] rounded-[12px] border border-gray-200 w-full px-[16px] py-[4px] font-['Comfortaa:Regular',_sans-serif] font-normal text-[12.25px] placeholder:text-[#717182]"
-                      />
-                    </div>
-
-                    {/* Email Input */}
-                    <div className="content-stretch flex flex-col gap-[8px] items-start w-full max-w-[348px]">
-                      <Label
-                        htmlFor="email"
-                        className="content-stretch flex gap-[7px] h-[12.25px] items-center w-full font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] text-[14px]"
-                        style={{
-                          background:
-                            "var(--Background-light, linear-gradient(135deg, #FFF7ED 0%, #FFFBEB 100%))",
-                          backgroundClip: "text",
-                          WebkitBackgroundClip: "text",
-                          WebkitTextFillColor: "transparent",
-                        }}
-                      >
-                        Email
-                      </Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="Enter your email"
-                        className="bg-white h-[36px] rounded-[12px] border border-gray-200 w-full px-[16px] py-[4px] font-['Comfortaa:Regular',_sans-serif] font-normal text-[12.25px] placeholder:text-[#717182]"
-                      />
-                    </div>
-
-                    {/* Message Textarea */}
-                    <div className="content-stretch flex flex-col gap-[8px] items-start w-full max-w-[349px]">
-                      <Label
-                        htmlFor="message"
-                        className="content-stretch flex gap-[7px] h-[12.25px] items-center w-full font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] text-[14px] text-white"
-                      >
-                        Message
-                      </Label>
-                      <Textarea
-                        id="message"
-                        placeholder="Enter your message"
-                        className="bg-white h-[120px] max-h-[120px] rounded-[12px] border border-gray-200 w-full px-[16px] py-[12px] font-['Comfortaa:Regular',_sans-serif] font-normal text-[12.25px] placeholder:text-[#717182] resize-none"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Submit Button */}
-                  <PurpleButton
-                    variant="bordered"
-                    size="medium"
-                    className="w-[209px]"
-                  >
-                    <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px]">
-                      Submit
-                    </p>
-                  </PurpleButton>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>

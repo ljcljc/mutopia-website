@@ -5,6 +5,7 @@ import WhyUs from "@/components/landing/WhyUs";
 import Services from "@/components/landing/Services";
 import Packages from "@/components/landing/Packages";
 import FAQ from "@/components/landing/FAQ";
+import Contact from "@/components/landing/Contact";
 import Footer from "@/components/landing/Footer";
 import { ScrollToTop } from "@/components/common";
 import { Toaster } from "@/components/ui/sonner";
@@ -56,6 +57,7 @@ export default function App() {
           <Services />
           <Packages />
           <FAQ />
+          <Contact />
         </main>
         <Footer />
 

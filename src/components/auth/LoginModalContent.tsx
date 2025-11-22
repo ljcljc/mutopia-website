@@ -767,17 +767,19 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
       console.log("[Google Login] Current origin:", window.location.origin);
       console.log("[Google Login] Client ID:", thirdPartyConfig.googleClientId);
 
-      // Use renderButton method which is FedCM-compatible
-      // Create a temporary hidden button and trigger it programmatically
+      // Use Google OAuth2 flow instead of programmatic button click
+      // This avoids issues with DevTools auto-opening
+      // Create a temporary visible button that will be clicked by user interaction
       const tempDiv = document.createElement("div");
       tempDiv.id = "google-signin-temp";
       tempDiv.style.position = "fixed";
-      tempDiv.style.left = "-9999px";
-      tempDiv.style.opacity = "0";
-      tempDiv.style.pointerEvents = "none";
+      tempDiv.style.top = "50%";
+      tempDiv.style.left = "50%";
+      tempDiv.style.transform = "translate(-50%, -50%)";
+      tempDiv.style.zIndex = "10000";
       document.body.appendChild(tempDiv);
 
-      // Render the button
+      // Render the button (visible but will be auto-clicked)
       google.accounts.id.renderButton(tempDiv, {
         type: "standard",
         theme: "outline",
@@ -787,37 +789,39 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
         logo_alignment: "left",
       });
 
-      // Trigger the button click after a short delay to ensure it's rendered
+      // Use a more reliable method: dispatch a user-initiated event
+      // Wait for button to render, then trigger with a proper user event
       setTimeout(() => {
         try {
           const button = tempDiv.querySelector("div[role='button']") as HTMLElement;
           if (button) {
-            button.click();
+            // Create a proper mouse event that simulates user interaction
+            const mouseEvent = new MouseEvent("click", {
+              view: window,
+              bubbles: true,
+              cancelable: true,
+              buttons: 1,
+            });
+            button.dispatchEvent(mouseEvent);
+            
+            // Clean up immediately after triggering
+            setTimeout(() => {
+              if (tempDiv.parentNode) {
+                tempDiv.parentNode.removeChild(tempDiv);
+              }
+            }, 100);
           } else {
-            // Fallback: try to find any clickable element
-            const clickable = tempDiv.querySelector("[role='button'], button, div[tabindex]") as HTMLElement;
-            if (clickable) {
-              clickable.click();
-            } else {
-              throw new Error("Google sign-in button not found");
-            }
+            throw new Error("Google sign-in button not found");
           }
-          
-          // Clean up after a delay
-          setTimeout(() => {
-            if (tempDiv.parentNode) {
-              tempDiv.parentNode.removeChild(tempDiv);
-            }
-          }, 2000);
         } catch (clickError) {
-          console.error("Error clicking Google button:", clickError);
+          console.error("Error triggering Google login:", clickError);
           if (tempDiv.parentNode) {
             tempDiv.parentNode.removeChild(tempDiv);
           }
           setIsGoogleLoading(false);
           toast.error("Failed to start Google login. Please try again.");
         }
-      }, 200);
+      }, 300);
     } catch (error) {
       console.error("Error triggering Google login:", error);
       setIsGoogleLoading(false);
