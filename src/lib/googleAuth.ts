@@ -106,6 +106,7 @@ export async function initializeGoogleAuth(
 
 /**
  * 触发 Google 登录弹窗
+ * 注意：此方法已更新以兼容 FedCM
  */
 export function promptGoogleLogin(): void {
   if (!isGoogleScriptLoaded()) {
@@ -114,11 +115,16 @@ export function promptGoogleLogin(): void {
 
   const google = (window as any).google;
   
+  // 使用 FedCM 兼容的方式处理通知
   google.accounts.id.prompt((notification: any) => {
-    // 处理通知（如果需要）
-    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-      // 如果自动提示被跳过，使用按钮触发
-      // 这个函数通常由按钮点击触发
+    // FedCM 兼容：使用 getNotDisplayedReason 和 getSkippedReason 替代旧方法
+    const notDisplayedReason = notification.getNotDisplayedReason?.();
+    const skippedReason = notification.getSkippedReason?.();
+    
+    // 如果提示未显示或被跳过，可以记录原因（用于调试）
+    if (notDisplayedReason || skippedReason) {
+      console.log("[Google Auth] Prompt not displayed:", notDisplayedReason);
+      console.log("[Google Auth] Prompt skipped:", skippedReason);
     }
   });
 }

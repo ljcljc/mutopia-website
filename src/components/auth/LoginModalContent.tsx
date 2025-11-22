@@ -675,15 +675,34 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
       let errorMessage = "Google login failed. Please try again.";
 
       if (err instanceof HttpError) {
-        if (err.status === 400) {
+        if (err.status === 0) {
+          // 网络连接错误
+          errorMessage =
+            err.message ||
+            "Network error: Unable to connect to the server. Please check your internet connection and try again.";
+        } else if (err.status === 400) {
           errorMessage = err.message || "Invalid Google account. Please try again.";
+        } else if (err.status === 408) {
+          errorMessage = "Request timeout. Please check your internet connection and try again.";
         } else if (err.status >= 400 && err.status < 500) {
           errorMessage = err.message || "Authentication failed. Please try again.";
-        } else {
+        } else if (err.status >= 500) {
           errorMessage = err.message || "Server error. Please try again later.";
+        } else {
+          errorMessage = err.message || "An error occurred. Please try again.";
         }
       } else if (err instanceof Error) {
-        errorMessage = err.message;
+        // 检查是否是网络相关错误
+        if (
+          err.message.includes("Network error") ||
+          err.message.includes("Connection") ||
+          err.message.includes("fetch")
+        ) {
+          errorMessage =
+            "Network error: Unable to connect to the server. Please check your internet connection and try again.";
+        } else {
+          errorMessage = err.message;
+        }
       }
 
       toast.error(errorMessage);
@@ -694,8 +713,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
     }
   };
 
-  // Handle Google error response (defined before useEffect to avoid dependency issues)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Handle Google error response
   const handleGoogleError = (error: GoogleErrorResponse) => {
     console.error("Google authentication error:", error);
     setIsGoogleLoading(false);
@@ -717,7 +735,28 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
     setIsGoogleLoading(true);
 
     try {
-      const google = (window as any).google;
+      // Google Identity Services types
+      interface GoogleAccounts {
+        id: {
+          renderButton: (
+            element: HTMLElement,
+            options: {
+              type?: string;
+              theme?: string;
+              size?: string;
+              text?: string;
+              shape?: string;
+              logo_alignment?: string;
+            }
+          ) => void;
+        };
+      }
+      interface GoogleWindow extends Window {
+        google?: {
+          accounts: GoogleAccounts;
+        };
+      }
+      const google = (window as GoogleWindow).google;
       if (!google || !google.accounts || !google.accounts.id) {
         setIsGoogleLoading(false);
         toast.error("Google authentication is not available. Please refresh the page.");
@@ -728,45 +767,57 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
       console.log("[Google Login] Current origin:", window.location.origin);
       console.log("[Google Login] Client ID:", thirdPartyConfig.googleClientId);
 
-      // Trigger Google sign-in popup using the ID token flow
-      // This will show a popup for the user to sign in with their Google account
-      google.accounts.id.prompt((notification: any) => {
-        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-          // If prompt is not displayed, try to render a button and click it
-          try {
-            const tempDiv = document.createElement("div");
-            tempDiv.id = "google-signin-temp";
-            tempDiv.style.position = "fixed";
-            tempDiv.style.left = "-9999px";
-            document.body.appendChild(tempDiv);
+      // Use renderButton method which is FedCM-compatible
+      // Create a temporary hidden button and trigger it programmatically
+      const tempDiv = document.createElement("div");
+      tempDiv.id = "google-signin-temp";
+      tempDiv.style.position = "fixed";
+      tempDiv.style.left = "-9999px";
+      tempDiv.style.opacity = "0";
+      tempDiv.style.pointerEvents = "none";
+      document.body.appendChild(tempDiv);
 
-            google.accounts.id.renderButton(tempDiv, {
-              type: "standard",
-              theme: "outline",
-              size: "large",
-              text: "signin_with",
-            });
-
-            // Try to click the button
-            setTimeout(() => {
-              const button = tempDiv.querySelector("div[role='button']") as HTMLElement;
-              if (button) {
-                button.click();
-              }
-              // Clean up
-              setTimeout(() => {
-                if (tempDiv.parentNode) {
-                  tempDiv.parentNode.removeChild(tempDiv);
-                }
-              }, 1000);
-            }, 100);
-          } catch (renderError) {
-            console.error("Error rendering Google button:", renderError);
-            setIsGoogleLoading(false);
-            toast.error("Failed to start Google login. Please try again.");
-          }
-        }
+      // Render the button
+      google.accounts.id.renderButton(tempDiv, {
+        type: "standard",
+        theme: "outline",
+        size: "large",
+        text: "signin_with",
+        shape: "rectangular",
+        logo_alignment: "left",
       });
+
+      // Trigger the button click after a short delay to ensure it's rendered
+      setTimeout(() => {
+        try {
+          const button = tempDiv.querySelector("div[role='button']") as HTMLElement;
+          if (button) {
+            button.click();
+          } else {
+            // Fallback: try to find any clickable element
+            const clickable = tempDiv.querySelector("[role='button'], button, div[tabindex]") as HTMLElement;
+            if (clickable) {
+              clickable.click();
+            } else {
+              throw new Error("Google sign-in button not found");
+            }
+          }
+          
+          // Clean up after a delay
+          setTimeout(() => {
+            if (tempDiv.parentNode) {
+              tempDiv.parentNode.removeChild(tempDiv);
+            }
+          }, 2000);
+        } catch (clickError) {
+          console.error("Error clicking Google button:", clickError);
+          if (tempDiv.parentNode) {
+            tempDiv.parentNode.removeChild(tempDiv);
+          }
+          setIsGoogleLoading(false);
+          toast.error("Failed to start Google login. Please try again.");
+        }
+      }, 200);
     } catch (error) {
       console.error("Error triggering Google login:", error);
       setIsGoogleLoading(false);

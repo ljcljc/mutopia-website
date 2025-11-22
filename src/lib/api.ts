@@ -333,10 +333,14 @@ export async function logout(): Promise<void> {
 
 /**
  * 社交登录（Google/Facebook 等）
+ * 添加了重试机制以处理网络连接问题
  */
 export async function socialLogin(data: SocialLoginIn): Promise<TokenOut> {
   const response = await http.post<TokenOut>("/api/auth/social/login", data, {
     skipAuth: true,
+    retry: 2, // 重试 2 次（总共 3 次尝试）
+    retryDelay: 1000, // 每次重试延迟 1 秒
+    timeout: 30000, // 30 秒超时
   });
 
   // 自动保存 token（加密存储）

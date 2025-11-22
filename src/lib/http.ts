@@ -235,12 +235,37 @@ const request = async <T = unknown>(
       }
 
       // 处理网络错误
-      if (error instanceof TypeError && error.message.includes("fetch")) {
-        throw new HttpError(
-          "Network error: Unable to connect to the server. Please check your internet connection.",
-          0,
-          "Network Error"
-        );
+      if (error instanceof TypeError) {
+        // 检查是否是连接关闭错误
+        const errorMessage = error.message.toLowerCase();
+        if (
+          errorMessage.includes("fetch") ||
+          errorMessage.includes("failed to fetch") ||
+          errorMessage.includes("networkerror") ||
+          errorMessage.includes("connection")
+        ) {
+          throw new HttpError(
+            "Network error: Unable to connect to the server. Please check your internet connection and try again.",
+            0,
+            "Network Error"
+          );
+        }
+      }
+
+      // 处理其他类型的网络错误（如连接被关闭）
+      if (error instanceof Error) {
+        const errorMessage = error.message.toLowerCase();
+        if (
+          errorMessage.includes("connection") ||
+          errorMessage.includes("closed") ||
+          errorMessage.includes("aborted")
+        ) {
+          throw new HttpError(
+            "Connection error: The server closed the connection. Please try again.",
+            0,
+            "Connection Error"
+          );
+        }
       }
 
       throw error;
