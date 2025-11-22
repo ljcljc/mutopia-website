@@ -39,8 +39,10 @@ interface AuthState {
   // Verification code
   verificationCode: string[];
   verificationMode: VerificationMode;
+  forgotPasswordEmail: string | null;
   setVerificationCode: (code: string[]) => void;
   setVerificationMode: (mode: VerificationMode) => void;
+  setForgotPasswordEmail: (email: string | null) => void;
 
   // Forgot password state
   codeSendCount: number; // Number of times code has been sent (max 5)
@@ -126,6 +128,7 @@ const initialState = {
   codeVerifyFailCount: 0,
   resetPasswordToken: null as string | null,
   passwordResetSuccess: false,
+  forgotPasswordEmail: null as string | null,
   isEmailFocused: false,
   emailError: "",
   passwordError: "",
@@ -143,9 +146,24 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setStep: (step) => set({ step }),
 
-  setEmail: (email) => {
-    set({ email, emailError: "" });
-  },
+  setEmail: (email) =>
+    set((state) => {
+      const updates: Partial<AuthState> = {
+        email,
+        emailError: "",
+      };
+
+      if (
+        state.forgotPasswordEmail &&
+        state.forgotPasswordEmail !== email
+      ) {
+        updates.codeSendCount = 0;
+        updates.codeVerifyFailCount = 0;
+        updates.forgotPasswordEmail = null;
+      }
+
+      return updates;
+    }),
 
   setPassword: (password) => {
     set({ password, passwordError: "" });
@@ -180,6 +198,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setVerificationCode: (verificationCode) => set({ verificationCode }),
   setVerificationMode: (verificationMode) => set({ verificationMode }),
+  setForgotPasswordEmail: (forgotPasswordEmail) => set({ forgotPasswordEmail }),
 
   setCodeSendCount: (codeSendCount) => set({ codeSendCount }),
   setCodeVerifyFailCount: (codeVerifyFailCount) => set({ codeVerifyFailCount }),
@@ -264,6 +283,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       codeVerifyFailCount: 0,
       resetPasswordToken: null,
       passwordResetSuccess: false,
+      forgotPasswordEmail: null,
     })),
 }));
 

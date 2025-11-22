@@ -46,6 +46,10 @@ import { VerifyEmailContainer } from "./VerifyEmailContainer";
 import { ForgotPasswordContainer } from "./ForgotPasswordContainer";
 import { ChangeEmailContainer } from "./ChangeEmailContainer";
 import { ResetPasswordContainer } from "./ResetPasswordContainer";
+import { getSendCountFromError } from "./forgotPasswordUtils";
+
+// Maximum number of times a verification code can be sent
+const MAX_SEND_COUNT = 5;
 
 export function ModalContent({ onClose }: { onClose: () => void }) {
   const {
@@ -63,6 +67,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
     verificationCode,
     verificationMode,
     codeSendCount,
+    forgotPasswordEmail,
     codeVerifyFailCount,
     resetPasswordToken,
     passwordResetSuccess,
@@ -87,6 +92,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
     setOptOutMarketing,
     setVerificationCode,
     setVerificationMode,
+    setForgotPasswordEmail,
     setCodeSendCount,
     setCodeVerifyFailCount,
     setResetPasswordToken,
@@ -847,42 +853,136 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
   };
 
   const handleForgotPassword = async () => {
+    console.log("[handleForgotPassword] START", {
+      codeSendCount,
+      MAX_SEND_COUNT,
+      step,
+      email,
+      forgotPasswordEmail,
+      "codeSendCount >= MAX_SEND_COUNT": codeSendCount >= MAX_SEND_COUNT,
+    });
+
+    // First, check if codeSendCount is already >= MAX_SEND_COUNT
+    // This check must happen BEFORE any other logic to prevent sending code
+    if (codeSendCount >= MAX_SEND_COUNT) {
+      console.log("[handleForgotPassword] codeSendCount >= MAX_SEND_COUNT, skipping send code", {
+        codeSendCount,
+        MAX_SEND_COUNT,
+      });
+      // Navigate to forgot password step without sending code
+      // The ForgotPasswordContainer will show the contact interface
+      setStep("forgot-password");
+      setVerificationMode("forgot-password");
+      setForgotPasswordEmail(email);
+      // Don't reset codeSendCount, keep it at MAX_SEND_COUNT to show contact interface
+      setCodeVerifyFailCount(0);
+      setResetPasswordToken(null);
+      setVerificationCode(["", "", "", "", "", ""]);
+      console.log("[handleForgotPassword] Early return, no code sent");
+      return; // Early return to prevent sending code
+    }
+
+    console.log("[handleForgotPassword] codeSendCount < MAX_SEND_COUNT, proceeding", {
+      codeSendCount,
+      MAX_SEND_COUNT,
+    });
+
     // Navigate to forgot password flow - start with email input
     // Don't reset codeSendCount and codeVerifyFailCount if already in forgot password flow
     // Only reset if starting fresh
     if (step !== "forgot-password" && step !== "change-email" && step !== "reset-password") {
-      // Check if codeSendCount is already >= 5
-      // If so, don't send code, just navigate to forgot password step
-      // The ForgotPasswordContainer will show the contact interface
-      if (codeSendCount >= 5) {
-        setStep("forgot-password");
-        setVerificationMode("forgot-password");
-        // Don't reset codeSendCount, keep it at 5 to show contact interface
+      // Check if this is a different email (not null check, actual email comparison)
+      // Only reset counts if we're switching to a DIFFERENT email (not null)
+      // IMPORTANT: If forgotPasswordEmail is null, it means this is the first time entering the flow,
+      // but the backend may already have a record. So we should NOT reset the count.
+      // Only reset when explicitly switching to a different email.
+      const isNewForgotPasswordEmail = forgotPasswordEmail !== null && forgotPasswordEmail !== email;
+      console.log("[handleForgotPassword] Starting fresh", {
+        step,
+        isNewForgotPasswordEmail,
+        forgotPasswordEmail,
+        email,
+        "willResetCounts": isNewForgotPasswordEmail,
+      });
+
+      if (isNewForgotPasswordEmail) {
+        console.log("[handleForgotPassword] New email detected, resetting counts");
+        // Reset counts when switching to a different email
+        setCodeSendCount(0);
         setCodeVerifyFailCount(0);
         setResetPasswordToken(null);
         setVerificationCode(["", "", "", "", "", ""]);
-        return;
+      } else {
+        console.log("[handleForgotPassword] Same email or first time, keeping counts", {
+          forgotPasswordEmail,
+          email,
+          currentCodeSendCount: codeSendCount,
+        });
       }
-      
-      // Reset counts only if codeSendCount < 5
-      setCodeSendCount(0);
-      setCodeVerifyFailCount(0);
-      setResetPasswordToken(null);
-      setVerificationCode(["", "", "", "", "", ""]);
-      
+
       // Send verification code immediately when entering forgot password flow
       // Use a separate async operation that doesn't affect the login button state
       // Navigate first, then send code in background
       setStep("forgot-password");
       setVerificationMode("forgot-password");
+      setForgotPasswordEmail(email);
+      
+      // Double check before sending code (in case codeSendCount was updated)
+      // Re-read codeSendCount from store to get the latest value (avoid closure issues)
+      const latestCodeSendCount = useAuthStore.getState().codeSendCount;
+      console.log("[handleForgotPassword] Before sending code, double check with latest value", {
+        closureCodeSendCount: codeSendCount,
+        latestCodeSendCount,
+        MAX_SEND_COUNT,
+        "shouldSend": latestCodeSendCount < MAX_SEND_COUNT,
+      });
+      
+      if (latestCodeSendCount >= MAX_SEND_COUNT) {
+        console.log("[handleForgotPassword] Double check failed, latestCodeSendCount >= MAX_SEND_COUNT, aborting send", {
+          latestCodeSendCount,
+          MAX_SEND_COUNT,
+        });
+        return; // Don't send code if count is >= MAX_SEND_COUNT
+      }
       
       // Send code after navigation (doesn't affect login button)
+      // Note: We've already checked codeSendCount >= MAX_SEND_COUNT above and returned early if true
+      console.log("[handleForgotPassword] Calling sendPasswordResetCode API");
       try {
         const response = await sendPasswordResetCode(email);
+        console.log("[handleForgotPassword] sendPasswordResetCode success", {
+          send_count: response.send_count,
+        });
         // Use backend returned send_count instead of frontend calculation
         setCodeSendCount(response.send_count);
-        toast.success("Verification code sent to your email.");
+        setForgotPasswordEmail(email);
+        
+        // CRITICAL: Check if backend returned send_count >= MAX_SEND_COUNT
+        // If so, we should not have sent the code, but since we already did,
+        // we need to handle this case properly
+        if (response.send_count >= MAX_SEND_COUNT) {
+          console.log("[handleForgotPassword] WARNING: Backend returned send_count >= MAX_SEND_COUNT after sending code", {
+            send_count: response.send_count,
+            MAX_SEND_COUNT,
+          });
+          // Don't show success toast, as we've reached the limit
+          // The ForgotPasswordContainer will show the contact interface based on codeSendCount
+        } else {
+          toast.success("Verification code sent to your email.");
+        }
       } catch (err) {
+        console.error("[handleForgotPassword] sendPasswordResetCode error", err);
+        const sendCountFromError = getSendCountFromError(err);
+        if (sendCountFromError !== null) {
+          console.log("[handleForgotPassword] Extracted send_count from error", {
+            sendCountFromError,
+          });
+          setCodeSendCount(sendCountFromError);
+          if (sendCountFromError >= MAX_SEND_COUNT) {
+            setForgotPasswordEmail(email);
+          }
+        }
+
         if (err instanceof HttpError) {
           toast.error(err.message || "Failed to send verification code.");
         } else {
@@ -891,9 +991,15 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
         console.error("Error sending password reset code:", err);
       }
     } else {
+      console.log("[handleForgotPassword] Already in forgot password flow, just navigate", {
+        step,
+      });
       setStep("forgot-password");
       setVerificationMode("forgot-password");
+      setForgotPasswordEmail(email);
     }
+    
+    console.log("[handleForgotPassword] END");
   };
 
   const handleTogglePassword = () => {

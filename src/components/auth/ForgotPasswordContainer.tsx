@@ -6,6 +6,7 @@ import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
 import iconAlertError from "@/assets/icons/icon-alert-error.svg";
 import iconAlertSuccess from "@/assets/icons/icon-alert-success.svg";
+import { getSendCountFromError } from "./forgotPasswordUtils";
 
 interface ForgotPasswordContainerProps {
   email: string;
@@ -93,6 +94,8 @@ export function ForgotPasswordContainer({
    */
   const handleResendCode = async () => {
     // 检查是否达到最大发送次数
+    console.log("handleResendCode - codeSendCount:", codeSendCount, "MAX_SEND_COUNT:", MAX_SEND_COUNT);
+    
     if (codeSendCount >= MAX_SEND_COUNT) {
       return;
     }
@@ -122,6 +125,11 @@ export function ForgotPasswordContainer({
       setCountdown(60);
       toast.success("Verification code sent to your email.");
     } catch (err) {
+      const sendCountFromError = getSendCountFromError(err);
+      if (sendCountFromError !== null) {
+        setCodeSendCount(sendCountFromError);
+      }
+
       if (err instanceof HttpError) {
         setError(err.message || "Failed to send verification code.");
       } else {
