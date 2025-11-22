@@ -116,11 +116,43 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Use display=swap to ensure font loads, we'll handle flash prevention with JavaScript -->
     <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Hide content until fonts are loaded to prevent flash -->
+    <style>
+      body:not(.fonts-loaded) {
+        visibility: hidden;
+      }
+      body.fonts-loaded {
+        visibility: visible;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/main.tsx"></script>
+    <!-- Font loading detection to prevent flash -->
+    <script>
+      // Wait for fonts to load before showing content
+      if ('fonts' in document) {
+        Promise.all([
+          document.fonts.load('400 1em Comfortaa'),
+          document.fonts.load('500 1em Comfortaa'),
+          document.fonts.load('600 1em Comfortaa'),
+          document.fonts.load('700 1em Comfortaa'),
+        ]).then(() => {
+          document.body.classList.add('fonts-loaded');
+        }).catch(() => {
+          // If font loading fails, show content anyway after a timeout
+          setTimeout(() => {
+            document.body.classList.add('fonts-loaded');
+          }, 3000);
+        });
+      } else {
+        // Fallback for browsers without Font Loading API
+        document.body.classList.add('fonts-loaded');
+      }
+    </script>
   </body>
 </html>
 
