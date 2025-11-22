@@ -47,20 +47,20 @@ export default function App() {
   }, [setUser]);
 
   return (
-    <div className="min-h-screen">
-      <Header />
+      <div className="min-h-screen">
+        <Header />
 
-      <main>
-        <Hero />
-        <WhyUs />
-        <Services />
-        <Packages />
-        <FAQ />
-      </main>
-      <Footer />
+        <main>
+          <Hero />
+          <WhyUs />
+          <Services />
+          <Packages />
+          <FAQ />
+        </main>
+        <Footer />
 
-      <ScrollToTop />
-      <Toaster />
-    </div>
+        <ScrollToTop />
+        <Toaster />
+      </div>
   );
 }

@@ -4,6 +4,7 @@ import { ButtonMediumPrincipalOrange } from "./LoginModalUI";
 import { sendCode, verifyCode, login as loginAPI } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
+import iconAlertSuccess from "@/assets/icons/icon-alert-success.svg";
 
 interface VerifyEmailContainerProps {
   email: string;
@@ -202,15 +203,9 @@ export function VerifyEmailContainer({
                 {codeResent ? (
                   <div className="box-border content-stretch flex gap-[8px] items-center justify-center px-[12px] py-[4px] relative shrink-0">
                     <div className="flex h-[calc(1px*((var(--transform-inner-width)*1)+(var(--transform-inner-height)*0)))] items-center justify-center relative shrink-0 w-[calc(1px*((var(--transform-inner-height)*1)+(var(--transform-inner-width)*0)))]">
-                      <div className="flex-none rotate-[90deg]">
+                      <div className="flex-none">
                         <div className="relative size-[12px]">
-                          {/* Success icon - green circle with checkmark */}
-                          <div className="absolute aspect-square left-0 right-0 top-0">
-                            <div className="bg-[#6aa31c] rounded-full size-full" />
-                          </div>
-                          <div className="absolute h-[5.742px] left-[1.75px] top-[3.75px] w-[8.494px] text-white text-[8px] flex items-center justify-center">
-                            ✓
-                          </div>
+                          <img src={iconAlertSuccess} alt="Success" className="block size-full" />
                         </div>
                       </div>
                     </div>

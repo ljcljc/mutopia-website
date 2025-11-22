@@ -37,6 +37,7 @@ import {
 import { STORAGE_KEYS } from "@/lib/storageKeys";
 import { WelcomeToMutopiaPet } from "./LoginModalUI";
 import { EmailStepContainer } from "./LoginModalForms";
+import iconAlertSuccess from "@/assets/icons/icon-alert-success.svg";
 import {
   PasswordContainer,
   SignUpContainer,
@@ -850,6 +851,20 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
     // Don't reset codeSendCount and codeVerifyFailCount if already in forgot password flow
     // Only reset if starting fresh
     if (step !== "forgot-password" && step !== "change-email" && step !== "reset-password") {
+      // Check if codeSendCount is already >= 5
+      // If so, don't send code, just navigate to forgot password step
+      // The ForgotPasswordContainer will show the contact interface
+      if (codeSendCount >= 5) {
+        setStep("forgot-password");
+        setVerificationMode("forgot-password");
+        // Don't reset codeSendCount, keep it at 5 to show contact interface
+        setCodeVerifyFailCount(0);
+        setResetPasswordToken(null);
+        setVerificationCode(["", "", "", "", "", ""]);
+        return;
+      }
+      
+      // Reset counts only if codeSendCount < 5
       setCodeSendCount(0);
       setCodeVerifyFailCount(0);
       setResetPasswordToken(null);
@@ -863,8 +878,9 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
       
       // Send code after navigation (doesn't affect login button)
       try {
-        await sendPasswordResetCode(email);
-        setCodeSendCount(1); // First send
+        const response = await sendPasswordResetCode(email);
+        // Use backend returned send_count instead of frontend calculation
+        setCodeSendCount(response.send_count);
         toast.success("Verification code sent to your email.");
       } catch (err) {
         if (err instanceof HttpError) {
@@ -1099,8 +1115,14 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
     setStep("reset-password");
   };
 
-  const handleChangeEmailContinue = () => {
-    setStep("forgot-password");
+  const handleChangeEmailContinue = (isRegistered: boolean) => {
+    if (isRegistered) {
+      // Email is registered - navigate to login (password step)
+      setStep("password");
+    } else {
+      // Email is not registered - navigate to sign up
+      setStep("signup");
+    }
   };
 
   const handleResetPasswordComplete = () => {
@@ -1210,13 +1232,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
                     <div className="box-border content-stretch flex h-[36px] items-center overflow-clip px-[16px] py-[4px] relative rounded-[inherit]">
                       <div className="content-stretch flex gap-[8px] items-center relative shrink-0">
                         <div className="relative shrink-0 size-[12px]">
-                          {/* Success icon - green circle with checkmark */}
-                          <div className="absolute aspect-square left-0 right-0 top-0">
-                            <div className="bg-[#6aa31c] rounded-full size-full" />
-                          </div>
-                          <div className="absolute h-[5.742px] left-[1.75px] top-[3.75px] w-[8.494px] text-white text-[8px] flex items-center justify-center">
-                            ✓
-                          </div>
+                          <img src={iconAlertSuccess} alt="Success" className="block size-full" />
                         </div>
                         <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] relative shrink-0 text-[#467900] text-[10px]">
                           Your password is reset. You can log in with this new password.
@@ -1259,6 +1275,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
               setVerificationCode={setVerificationCode}
               onVerify={handleForgotPasswordVerify}
               onChangeEmail={handleChangeEmail}
+              onClose={onClose}
               isLoading={isLoading}
               codeSendCount={codeSendCount}
               codeVerifyFailCount={codeVerifyFailCount}
@@ -1271,7 +1288,6 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
               setEmail={setEmail}
               onContinue={handleChangeEmailContinue}
               isLoading={isLoading}
-              setCodeSendCount={setCodeSendCount}
             />
           ) : step === "reset-password" ? (
             <ResetPasswordContainer

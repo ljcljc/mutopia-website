@@ -2,7 +2,7 @@ import { useState } from "react";
 import React from "react";
 import { CustomInput } from "@/components/common/CustomInput";
 import { ButtonMediumPrincipalOrange } from "./LoginModalUI";
-import { sendPasswordResetCode } from "@/lib/api";
+import { checkEmailRegistered } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
 import { validateEmail } from "./authStore";
@@ -10,9 +10,8 @@ import { validateEmail } from "./authStore";
 interface ChangeEmailContainerProps {
   email: string;
   setEmail: (email: string) => void;
-  onContinue: () => void;
+  onContinue: (isRegistered: boolean) => void;
   isLoading?: boolean;
-  setCodeSendCount: (count: number) => void;
 }
 
 export function ChangeEmailContainer({
@@ -20,7 +19,6 @@ export function ChangeEmailContainer({
   setEmail,
   onContinue,
   isLoading = false,
-  setCodeSendCount,
 }: ChangeEmailContainerProps) {
   const [emailError, setEmailError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -40,26 +38,44 @@ export function ChangeEmailContainer({
   };
 
   const handleContinue = async () => {
-    // Validate email
+    // Step 1: Frontend validation
     const result = validateEmail(email);
     if (!result.success && result.error) {
       setEmailError(result.error);
       return;
     }
 
+    // Step 2: Check if email is registered
     setIsSubmitting(true);
+    setEmailError(""); // Clear any previous errors
+
     try {
-      await sendPasswordResetCode(email);
-      setCodeSendCount(1); // First send
-      toast.success("Verification code sent to your email.");
-      onContinue();
-    } catch (err) {
-      if (err instanceof HttpError) {
-        setEmailError(err.message || "Failed to send verification code.");
+      const response = await checkEmailRegistered(email);
+      
+      // Step 3: Navigate based on registration status
+      if (response.exists) {
+        // Email is registered - navigate to login (password step)
+        onContinue(true);
       } else {
-        setEmailError("Failed to send verification code. Please try again.");
+        // Email is not registered - navigate to sign up
+        onContinue(false);
       }
-      toast.error("Failed to send verification code.");
+    } catch (err) {
+      // Handle different types of errors
+      let errorMessage = "Something went wrong. Please try again.";
+      
+      if (err instanceof HttpError) {
+        if (err.status === 400) {
+          errorMessage = err.message || "Invalid email address.";
+        } else if (err.status >= 400 && err.status < 500) {
+          errorMessage = err.message || "Email verification failed. Please try again.";
+        } else {
+          errorMessage = err.message || "Server error. Please try again later.";
+        }
+      }
+      
+      setEmailError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
