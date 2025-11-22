@@ -70,11 +70,15 @@ web_modules/
 .yarn-integrity
 
 # dotenv environment variable files
+# Allow .env.development, .env.test, .env.production, .env.example to be committed
+# But ignore .env, .env.local, and .env.*.local files
 .env
-.env.development.local
-.env.test.local
-.env.production.local
 .env.local
+.env*.local
+!.env.example
+!.env.development
+!.env.test
+!.env.production
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -160,8 +164,16 @@ out/
 coverage/
 
 # Environment files
+# First, ignore all .env files
 .env*
+# Then, allow specific env files to be committed (these rules override the above)
 !.env.example
+!.env.development
+!.env.test
+!.env.production
+# But still ignore .env and .env.local files
+.env
+.env.local
 
 # Package manager lock files (keep package-lock.json but ignore others)
 yarn.lock
@@ -194,8 +206,10 @@ pids
 .yarn-integrity
 
 # dotenv environment variables file
+# Allow .env.development, .env.test, .env.production to be committed
+# But ignore .env and .env.local
 .env
-.env.test
+.env.local
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
