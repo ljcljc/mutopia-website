@@ -1018,13 +1018,6 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
         });
       }
 
-      // Send verification code immediately when entering forgot password flow
-      // Use a separate async operation that doesn't affect the login button state
-      // Navigate first, then send code in background
-      setStep("forgot-password");
-      setVerificationMode("forgot-password");
-      setForgotPasswordEmail(email);
-      
       // Double check before sending code (in case codeSendCount was updated)
       // Re-read codeSendCount from store to get the latest value (avoid closure issues)
       const latestCodeSendCount = useAuthStore.getState().codeSendCount;
@@ -1036,15 +1029,19 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
       });
       
       if (latestCodeSendCount >= MAX_SEND_COUNT) {
-        console.log("[handleForgotPassword] Double check failed, latestCodeSendCount >= MAX_SEND_COUNT, aborting send", {
+        console.log("[handleForgotPassword] Already at max send count, navigate directly without sending", {
           latestCodeSendCount,
           MAX_SEND_COUNT,
         });
+        // Already at max, navigate directly to show the error state
+        setStep("forgot-password");
+        setVerificationMode("forgot-password");
+        setForgotPasswordEmail(email);
         return; // Don't send code if count is >= MAX_SEND_COUNT
       }
       
-      // Send code after navigation (doesn't affect login button)
-      // Note: We've already checked codeSendCount >= MAX_SEND_COUNT above and returned early if true
+      // Send verification code BEFORE navigation to avoid flashing
+      // This ensures the UI shows the correct state immediately when navigating
       console.log("[handleForgotPassword] Calling sendPasswordResetCode API");
       try {
         const response = await sendPasswordResetCode(email);
@@ -1054,6 +1051,11 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
         // Use backend returned send_count instead of frontend calculation
         setCodeSendCount(response.send_count);
         setForgotPasswordEmail(email);
+        
+        // Navigate after getting the response to avoid flashing
+        // This ensures the UI shows the correct state immediately
+        setStep("forgot-password");
+        setVerificationMode("forgot-password");
         
         // CRITICAL: Check if backend returned send_count >= MAX_SEND_COUNT
         // If so, we should not have sent the code, but since we already did,
@@ -1076,10 +1078,12 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
             sendCountFromError,
           });
           setCodeSendCount(sendCountFromError);
-          if (sendCountFromError >= MAX_SEND_COUNT) {
-            setForgotPasswordEmail(email);
-          }
+          setForgotPasswordEmail(email);
         }
+
+        // Navigate even on error to show the correct state
+        setStep("forgot-password");
+        setVerificationMode("forgot-password");
 
         if (err instanceof HttpError) {
           toast.error(err.message || "Failed to send verification code.");
@@ -1359,7 +1363,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
       className={`bg-white box-border flex flex-col items-start relative rounded-[20px] w-[420px] max-w-[calc(100vw-32px)] ${
         step === "signup"
           ? "max-h-[90vh] overflow-hidden flex"
-          : "content-stretch gap-[16px] pb-[32px] pt-[12px] px-0"
+          : "content-stretch gap-[16px] px-0"
       }`}
       data-name={
         step === "email" ? "Modal_Log in or sign up_default" : "Modal_log in"
