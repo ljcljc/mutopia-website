@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { ProgressSteps } from "@/components/booking/steps";
+import { ProgressSteps } from "@/components/booking/ProgressSteps";
 import { OrangeButton } from "@/components/common/OrangeButton";
 import { Icon } from "@/components/common/Icon";
 import { useAuthStore } from "@/components/auth/authStore";
