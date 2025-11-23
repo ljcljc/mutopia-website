@@ -248,11 +248,13 @@ function UserInfo() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <div className="content-stretch flex gap-[8px] items-center cursor-pointer hover:opacity-80 transition-opacity group">
-            <Icon
-              name="user"
-              aria-label="User"
-              className="relative shrink-0 size-[20px]"
-            />
+            <div className="bg-[#8b6357] overflow-clip relative rounded-[100px] shrink-0 size-[20px] flex items-center justify-center" data-name="Icons/Avatar/Brown/Default/Rempli">
+              <Icon
+                name="user"
+                aria-label="User"
+                className="block size-full text-white"
+              />
+            </div>
             <p className="font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] text-[#8b6357] text-[12px]">
               {user.name}
             </p>
@@ -278,7 +280,7 @@ function UserInfo() {
         <Icon
           name="notify"
           aria-label="Notifications"
-          className="block size-full"
+          className="block size-full text-[#8b6357]"
         />
       </button>
     </div>
@@ -394,11 +396,13 @@ function MobileButton2() {
 
           {/* User info */}
           <div className="content-stretch flex gap-[12px] items-center flex-1">
-            <Icon
-              name="user"
-              aria-label="User"
-              className="relative shrink-0 size-[48px]"
-            />
+            <div className="bg-[#8b6357] overflow-clip relative rounded-[100px] shrink-0 size-[48px] flex items-center justify-center" data-name="Icons/Avatar/Brown/Default/Rempli">
+              <Icon
+                name="user"
+                aria-label="User"
+                className="block size-full text-white"
+              />
+            </div>
             <div className="flex flex-col flex-1">
               <p className="font-['Comfortaa:SemiBold',_sans-serif] font-semibold text-[#4a3c2a] text-[14px]">
                 {user.name}
@@ -613,7 +617,7 @@ function Container({
                 className="text-[#8b6357] hover:text-[#6f4e44] hover:bg-[#8b6357]/5 cursor-pointer"
                 aria-label="Toggle menu"
               >
-                <Icon name="menu" aria-label="Menu" className="size-[24px]" />
+                <Icon name="menu" aria-label="Menu" className="size-[24px] text-[#8b6357]" />
               </Button>
             )}
           </motion.div>

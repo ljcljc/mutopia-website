@@ -39,6 +39,9 @@ import IconAlertWarningSvg from "@/assets/icons/icon-alert-warning.svg?react";
 import IconEyeVisibleSvg from "@/assets/icons/icon-eye-visible.svg?react";
 import IconEyeInvisibleSvg from "@/assets/icons/icon-eye-invisible.svg?react";
 import IconFacebookSvg from "@/assets/icons/icon-facebook.svg?react";
+import IconFacebookAltSvg from "@/assets/icons/icon-facebook-alt.svg?react";
+import IconInstagramSvg from "@/assets/icons/icon-instagram.svg?react";
+import IconTwitterSvg from "@/assets/icons/icon-twitter.svg?react";
 import IconGoogleSvg from "@/assets/icons/icon-google.svg?react";
 import IconFooterLogoSvg from "@/assets/icons/icon-footer-logo.svg?react";
 import IconEasyBookingSvg from "@/assets/icons/icon-easy-booking.svg?react";
@@ -74,6 +77,9 @@ const iconComponentMap = {
   "eye-visible": IconEyeVisibleSvg,
   "eye-invisible": IconEyeInvisibleSvg,
   "facebook": IconFacebookSvg,
+  "facebook-alt": IconFacebookAltSvg,
+  "instagram": IconInstagramSvg,
+  "twitter": IconTwitterSvg,
   "google": IconGoogleSvg,
   "footer-logo": IconFooterLogoSvg,
   "easy-booking": IconEasyBookingSvg,

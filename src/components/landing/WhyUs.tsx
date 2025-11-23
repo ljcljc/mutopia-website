@@ -21,7 +21,7 @@ function FeatureCard1() {
             <Icon
               name="certified-professionals"
               aria-label="Certified Professionals"
-              className="size-[24px]"
+              className="size-[24px] text-white"
             />
           </Badge>
           <h3 className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
@@ -49,7 +49,7 @@ function FeatureCard2() {
             <Icon
               name="convenient-scheduling"
               aria-label="Convenient Scheduling"
-              className="size-[24px]"
+              className="size-[24px] text-white"
             />
           </Badge>
           <h3 className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
@@ -77,7 +77,7 @@ function FeatureCard3() {
             <Icon
               name="personalized-care"
               aria-label="Personalized Care"
-              className="size-[24px]"
+              className="size-[24px] text-white"
             />
           </Badge>
           <h3 className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
@@ -102,7 +102,7 @@ function FeatureCard4() {
             <Icon
               name="premium-quality"
               aria-label="Premium Quality"
-              className="size-[24px]"
+              className="size-[24px] text-white"
             />
           </Badge>
           <h3 className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
@@ -130,7 +130,7 @@ function FeatureCard5() {
             <Icon
               name="stress-free-experience"
               aria-label="Stress-Free Experience"
-              className="size-[24px]"
+              className="size-[24px] text-white"
             />
           </Badge>
           <h3 className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
@@ -158,7 +158,7 @@ function FeatureCard6() {
             <Icon
               name="real-time-updates"
               aria-label="Real-Time Updates"
-              className="size-[24px]"
+              className="size-[24px] text-white"
             />
           </Badge>
           <h3 className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">

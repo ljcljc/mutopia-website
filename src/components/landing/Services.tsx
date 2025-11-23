@@ -4,10 +4,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { OrangeButton } from "@/components/common";
-import iconClock from "@/assets/icons/icon-clock.svg";
-import iconBathBrush from "@/assets/icons/icon-bath-brush.svg";
-import iconFullGrooming from "@/assets/icons/icon-full-grooming.svg";
-import iconExpressGroom from "@/assets/icons/icon-express-groom.svg";
 import { Icon } from "@/components/common/Icon";
 import {
   Carousel,
@@ -75,10 +71,10 @@ function ServiceCard({
             <div className="content-stretch flex flex-col gap-[16px] items-start w-full">
               <div className="content-stretch flex h-[24.5px] items-center justify-between w-full">
                 <div className="flex gap-[7px] items-center">
-                  <img
-                    src={iconClock}
-                    alt="Duration"
-                    className="size-[16px] opacity-60"
+                  <Icon
+                    name="clock"
+                    aria-label="Duration"
+                    className="size-[16px] text-[rgba(74,60,42,0.6)] opacity-60"
                   />
                   <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[17.5px] text-[12.25px] text-[rgba(74,60,42,0.6)]">
                     {duration}
@@ -152,7 +148,11 @@ function AdditionalServiceItem({ name, price }: AdditionalServiceProps) {
   return (
     <div className="box-border flex h-[51px] items-center justify-between px-[15px] py-px rounded-[14px] w-full bg-white border border-[#E5E7EB]">
       <div className="flex gap-[10.5px] items-center min-w-0">
-        <img src={iconExpressGroom} alt={name} className="size-[20px]" />
+        <Icon
+          name="express-groom"
+          aria-label={name}
+          className="size-[20px] text-[#de6a07]"
+        />
         <p className="font-['Comfortaa:Medium',_sans-serif] font-medium leading-[21px] text-[#4a3c2a] text-[14px] truncate">
           {name}
         </p>
@@ -170,7 +170,11 @@ export default function Services() {
   const services = [
     {
       icon: (
-        <img src={iconBathBrush} alt="Bath & Brush" className="size-[32px]" />
+        <Icon
+          name="bath-brush"
+          aria-label="Bath & Brush"
+          className="size-[32px] text-[#de6a07]"
+        />
       ),
       title: "Bath & Brush",
       description:
@@ -187,10 +191,10 @@ export default function Services() {
     },
     {
       icon: (
-        <img
-          src={iconFullGrooming}
-          alt="Full Grooming"
-          className="size-[32px]"
+        <Icon
+          name="full-grooming"
+          aria-label="Full Grooming"
+          className="size-[32px] text-[#de6a07]"
         />
       ),
       title: "Full Grooming",
@@ -208,10 +212,10 @@ export default function Services() {
     },
     {
       icon: (
-        <img
-          src={iconExpressGroom}
-          alt="Express Groom"
-          className="size-[32px]"
+        <Icon
+          name="express-groom"
+          aria-label="Express Groom"
+          className="size-[32px] text-[#de6a07]"
         />
       ),
       title: "Express Groom",

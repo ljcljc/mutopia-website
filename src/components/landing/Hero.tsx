@@ -2,9 +2,7 @@
 const imgImageWithFallback = "/images/grooming-hero.png";
 import { useNavigate } from "react-router-dom";
 import { OrangeButton } from "@/components/common";
-import iconEasyBooking from "@/assets/icons/icon-easy-booking.svg";
-import iconPetFriendly from "@/assets/icons/icon-pet-friendly.svg";
-import iconProfessionalService from "@/assets/icons/icon-professional-service.svg";
+import { Icon } from "@/components/common/Icon";
 import heroWave from "@/assets/icons/hero-wave.svg";
 import heroEllipse from "@/assets/icons/hero-ellipse.svg";
 
@@ -58,10 +56,10 @@ export default function Hero() {
             <div className="flex flex-wrap gap-[24px] items-start">
               {/* Easy booking */}
               <div className="flex gap-[7px] items-center">
-                <img
-                  src={iconEasyBooking}
-                  alt="Easy booking"
-                  className="size-[20px]"
+                <Icon
+                  name="easy-booking"
+                  aria-label="Easy booking"
+                  className="size-[20px] text-[#de6a07]"
                 />
                 <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
                   Easy booking
@@ -70,10 +68,10 @@ export default function Hero() {
 
               {/* Pet-friendly */}
               <div className="flex gap-[7px] items-center">
-                <img
-                  src={iconPetFriendly}
-                  alt="Pet-friendly"
-                  className="size-[20px]"
+                <Icon
+                  name="pet-friendly"
+                  aria-label="Pet-friendly"
+                  className="size-[20px] text-[#de6a07]"
                 />
                 <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
                   Pet-friendly
@@ -82,10 +80,10 @@ export default function Hero() {
 
               {/* Professional service */}
               <div className="flex gap-[7px] items-center">
-                <img
-                  src={iconProfessionalService}
-                  alt="Professional service"
-                  className="size-[20px]"
+                <Icon
+                  name="professional-service"
+                  aria-label="Professional service"
+                  className="size-[20px] text-[#de6a07]"
                 />
                 <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
                   Professional service
@@ -154,10 +152,10 @@ export default function Hero() {
           <div className="flex flex-wrap gap-[16px] items-start">
             {/* Easy booking */}
             <div className="flex gap-[7px] items-center">
-              <img
-                src={iconEasyBooking}
-                alt="Easy booking"
-                className="size-[20px]"
+              <Icon
+                name="easy-booking"
+                aria-label="Easy booking"
+                className="size-[20px] text-[#de6a07]"
               />
               <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
                 Easy booking
@@ -166,10 +164,10 @@ export default function Hero() {
 
             {/* Pet-friendly */}
             <div className="flex gap-[7px] items-center">
-              <img
-                src={iconPetFriendly}
-                alt="Pet-friendly"
-                className="size-[20px]"
+              <Icon
+                name="pet-friendly"
+                aria-label="Pet-friendly"
+                className="size-[20px] text-[#de6a07]"
               />
               <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
                 Pet-friendly
@@ -178,10 +176,10 @@ export default function Hero() {
 
             {/* Professional service */}
             <div className="flex gap-[7px] items-center">
-              <img
-                src={iconProfessionalService}
-                alt="Professional service"
-                className="size-[20px]"
+              <Icon
+                name="professional-service"
+                aria-label="Professional service"
+                className="size-[20px] text-[#de6a07]"
               />
               <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
                 Professional service

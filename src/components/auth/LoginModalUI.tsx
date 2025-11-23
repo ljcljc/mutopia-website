@@ -64,7 +64,7 @@ export function PrimitiveButton({
       type="button"
     >
       {onBack ? (
-        <Icon name="close-arrow" aria-label="Back" className="size-[16px]" />
+        <Icon name="close-arrow" aria-label="Back" className="size-[16px] text-[#717182]" />
       ) : (
         <>
           <Icon1 />

@@ -580,7 +580,7 @@ export function DatePicker({
                   <Icon
                     name="nav-prev"
                     aria-label="Previous month"
-                    className="block size-full"
+                    className="block size-full text-[#DE6A07]"
                   />
                 </button>
 
@@ -592,7 +592,7 @@ export function DatePicker({
                   <Icon
                     name="nav-next"
                     aria-label="Next month"
-                    className="block size-full"
+                    className="block size-full text-[#DE6A07]"
                   />
                 </button>
               </div>

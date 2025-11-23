@@ -1,10 +1,5 @@
 import { Link } from "react-router-dom";
-import iconFooterLogo from "@/assets/icons/icon-footer-logo.svg";
-import iconEmail from "@/assets/icons/icon-email.svg";
-import iconLocation from "@/assets/icons/icon-location.svg";
-import iconSocial1 from "@/assets/icons/icon-social-1.svg";
-import iconSocial2 from "@/assets/icons/icon-social-2.svg";
-import iconSocial3 from "@/assets/icons/icon-social-3.svg";
+import { Icon } from "@/components/common/Icon";
 
 export default function Footer() {
   const quickLinks = [
@@ -37,10 +32,10 @@ export default function Footer() {
                 {/* Logo and Name */}
                 <div className="content-stretch flex gap-[10.5px] items-center w-full">
                   <div className="h-[35px] relative shrink-0 w-[31px]">
-                    <img
-                      src={iconFooterLogo}
-                      alt="Logo"
-                      className="block size-full"
+                    <Icon
+                      name="footer-logo"
+                      aria-label="Logo"
+                      className="block size-full text-white"
                     />
                   </div>
                   <h3 className="font-['Comfortaa:Bold',_sans-serif] font-bold leading-[28px] text-white text-[21px]">
@@ -57,10 +52,10 @@ export default function Footer() {
                 {/* Email */}
                 <div className="content-stretch flex gap-[10.5px] items-center w-full">
                   <div className="relative shrink-0 size-[16px]">
-                    <img
-                      src={iconEmail}
-                      alt="Email"
-                      className="block size-full"
+                    <Icon
+                      name="email"
+                      aria-label="Email"
+                      className="block size-full text-white"
                     />
                   </div>
                   <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[21px] text-[14px] text-white">
@@ -71,10 +66,10 @@ export default function Footer() {
                 {/* Location */}
                 <div className="content-stretch flex gap-[10.5px] items-center w-full max-w-[273px]">
                   <div className="relative shrink-0 size-[16px]">
-                    <img
-                      src={iconLocation}
-                      alt="Location"
-                      className="block size-full"
+                    <Icon
+                      name="location"
+                      aria-label="Location"
+                      className="block size-full text-white"
                     />
                   </div>
                   <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[21px] text-[14px] text-white">
@@ -144,10 +139,10 @@ export default function Footer() {
                       aria-label="Facebook"
                     >
                       <div className="relative shrink-0 size-[20px]">
-                        <img
-                          src={iconSocial1}
-                          alt="Facebook"
-                          className="block size-full"
+                        <Icon
+                          name="facebook-alt"
+                          aria-label="Facebook"
+                          className="block size-full text-white"
                         />
                       </div>
                     </a>
@@ -159,10 +154,10 @@ export default function Footer() {
                       aria-label="Instagram"
                     >
                       <div className="relative shrink-0 size-[20px]">
-                        <img
-                          src={iconSocial2}
-                          alt="Instagram"
-                          className="block size-full"
+                        <Icon
+                          name="instagram"
+                          aria-label="Instagram"
+                          className="block size-full text-white"
                         />
                       </div>
                     </a>
@@ -174,10 +169,10 @@ export default function Footer() {
                       aria-label="Twitter"
                     >
                       <div className="relative shrink-0 size-[20px]">
-                        <img
-                          src={iconSocial3}
-                          alt="Twitter"
-                          className="block size-full"
+                        <Icon
+                          name="twitter"
+                          aria-label="Twitter"
+                          className="block size-full text-white"
                         />
                       </div>
                     </a>
