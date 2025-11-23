@@ -36,9 +36,14 @@ export function CustomAccordionItem({
   // Calculate content height for smooth animation
   useEffect(() => {
     if (contentRef.current) {
-      setContentHeight(contentRef.current.scrollHeight);
+      // Use requestAnimationFrame to ensure accurate measurement
+      requestAnimationFrame(() => {
+        if (contentRef.current) {
+          setContentHeight(contentRef.current.scrollHeight);
+        }
+      });
     }
-  }, [answer]);
+  }, [answer, isOpen]);
 
   // Determine border and icon color based on state
   const getBorderColor = () => {
@@ -71,11 +76,10 @@ export function CustomAccordionItem({
         <div className="box-border content-stretch flex flex-col items-start px-[24px] py-0 relative size-full">
           {/* Trigger Button */}
           <button
-            className="box-border content-stretch flex w-full items-center justify-between px-0 relative rounded-[12px] shrink-0 outline-none focus:outline-none"
+            className="box-border content-stretch flex w-full items-center justify-between px-0 relative rounded-[12px] shrink-0 outline-none focus:outline-none transition-[padding-bottom] duration-300 ease-in-out"
             style={{
-              minHeight: isOpen ? "auto" : "59.5px",
               paddingTop: "21px",
-              paddingBottom: isOpen ? "12px" : "21px",
+              paddingBottom: isOpen ? "0px" : "21px",
             }}
             data-name="Primitive.button"
             onClick={onToggle}
@@ -121,12 +125,12 @@ export function CustomAccordionItem({
           {/* Content */}
           <div
             style={{
-              height: isOpen ? `${contentHeight}px` : "0px",
+              height: isOpen && contentHeight > 0 ? `${contentHeight}px` : "0px",
               overflow: "hidden",
-              transition: "height 300ms ease-in-out",
+              transition: "height 300ms cubic-bezier(0.4, 0, 0.2, 1)",
             }}
           >
-            <div ref={contentRef} className="pb-[21px] pt-[8px]">
+            <div ref={contentRef} className="pb-[21px] pt-[12px]">
               <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[21px] text-[12.25px] text-[rgba(74,60,42,0.7)]">
                 {answer}
               </p>

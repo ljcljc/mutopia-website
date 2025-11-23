@@ -381,7 +381,7 @@ function MobileSlide1() {
           <Icon
             name="certified-professionals"
             aria-label="Certified Professionals"
-            className="size-[24px]"
+            className="size-[24px] text-white"
           />
         }
         title="Certified Professionals"
@@ -392,7 +392,7 @@ function MobileSlide1() {
           <Icon
             name="convenient-scheduling"
             aria-label="Convenient Scheduling"
-            className="size-[24px]"
+            className="size-[24px] text-white"
           />
         }
         title="Convenient Scheduling"
@@ -410,7 +410,7 @@ function MobileSlide2() {
           <Icon
             name="personalized-care"
             aria-label="Personalized Care"
-            className="size-[24px]"
+            className="size-[24px] text-white"
           />
         }
         title="Personalized Care"
@@ -421,7 +421,7 @@ function MobileSlide2() {
           <Icon
             name="premium-quality"
             aria-label="Premium Quality"
-            className="size-[24px]"
+            className="size-[24px] text-white"
           />
         }
         title="Premium Quality"
@@ -439,7 +439,7 @@ function MobileSlide3() {
           <Icon
             name="stress-free-experience"
             aria-label="Stress-Free Experience"
-            className="size-[24px]"
+            className="size-[24px] text-white"
           />
         }
         title="Stress-Free Experience"
@@ -450,7 +450,7 @@ function MobileSlide3() {
           <Icon
             name="real-time-updates"
             aria-label="Real-Time Updates"
-            className="size-[24px]"
+            className="size-[24px] text-white"
           />
         }
         title="Real-Time Updates"
@@ -544,7 +544,7 @@ export default function WhyUs() {
                 <Icon
                   name="nav-prev"
                   aria-label="Previous"
-                  className="h-[36px] w-[16px]"
+                  className="h-[36px] w-[16px] text-[#DE6A07]"
                 />
               </button>
 
@@ -638,7 +638,7 @@ export default function WhyUs() {
                 <Icon
                   name="nav-next"
                   aria-label="Next"
-                  className="h-[36px] w-[16px]"
+                  className="h-[36px] w-[16px] text-[#DE6A07]"
                 />
               </button>
             </div>
