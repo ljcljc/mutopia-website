@@ -2,8 +2,8 @@ import { useRef } from "react";
 import Slider from "react-slick";
 import svgPaths from "@/assets/icons/svg-s9drboz5og";
 import svgPathsMobile from "@/assets/icons/svg-ne441427l6";
-import iconArrowLeft from "@/assets/icons/icon-arrow-left.svg";
-import iconArrowRight from "@/assets/icons/icon-arrow-right.svg";
+import iconNavPrev from "@/assets/icons/icon-nav-prev.svg";
+import iconNavNext from "@/assets/icons/icon-nav-next.svg";
 // 使用占位图片替换 figma:asset 导入
 const imgImageWithFallback = "/images/happy-dog-grooming.png";
 import { Card, CardContent } from "@/components/ui/card";
@@ -549,7 +549,7 @@ export default function WhyUs() {
                 aria-label="Previous"
               >
                 <img
-                  src={iconArrowLeft}
+                  src={iconNavPrev}
                   alt="Previous"
                   className="h-[36px] w-[16px]"
                 />
@@ -643,7 +643,7 @@ export default function WhyUs() {
                 aria-label="Next"
               >
                 <img
-                  src={iconArrowRight}
+                  src={iconNavNext}
                   alt="Next"
                   className="h-[36px] w-[16px]"
                 />

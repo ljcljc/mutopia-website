@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import iconArrowLeft from "@/assets/icons/icon-arrow-left.svg";
-import iconArrowRight from "@/assets/icons/icon-arrow-right.svg";
+import iconNavPrev from "@/assets/icons/icon-nav-prev.svg";
+import iconNavNext from "@/assets/icons/icon-nav-next.svg";
 import iconCalendar from "@/assets/icons/icon-calendar.svg";
 import iconAlertError from "@/assets/icons/icon-alert-error.svg";
 
@@ -581,7 +581,7 @@ export function DatePicker({
                   className="flex items-center justify-center h-[16px] w-[8.864px] hover:opacity-70 transition-opacity"
                 >
                   <img
-                    src={iconArrowLeft}
+                    src={iconNavPrev}
                     alt="Previous month"
                     className="block size-full"
                   />
@@ -593,7 +593,7 @@ export function DatePicker({
                   className="flex items-center justify-center h-[16px] w-[8.864px] hover:opacity-70 transition-opacity"
                 >
                   <img
-                    src={iconArrowRight}
+                    src={iconNavNext}
                     alt="Next month"
                     className="block size-full"
                   />

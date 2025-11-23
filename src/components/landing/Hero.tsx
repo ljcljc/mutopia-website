@@ -1,5 +1,6 @@
 // 使用占位图片替换 figma:asset 导入
 const imgImageWithFallback = "/images/grooming-hero.png";
+import { useNavigate } from "react-router-dom";
 import { OrangeButton } from "@/components/common";
 import iconEasyBooking from "@/assets/icons/icon-easy-booking.svg";
 import iconPetFriendly from "@/assets/icons/icon-pet-friendly.svg";
@@ -8,6 +9,11 @@ import heroWave from "@/assets/icons/hero-wave.svg";
 import heroEllipse from "@/assets/icons/hero-ellipse.svg";
 
 export default function Hero() {
+  const navigate = useNavigate();
+
+  const handleBookAppointment = () => {
+    navigate("/booking");
+  };
   return (
     <div
       className="relative w-full bg-gradient-to-b from-[#fdf8f3] to-[#f9f1e8] overflow-hidden"
@@ -89,7 +95,7 @@ export default function Hero() {
 
             {/* Buttons */}
             <div className="flex gap-[14px] items-start">
-              <OrangeButton className="w-[209px]">
+              <OrangeButton className="w-[209px]" onClick={handleBookAppointment}>
                 Book Appointment
               </OrangeButton>
 
@@ -185,7 +191,9 @@ export default function Hero() {
 
           {/* Buttons */}
           <div className="flex flex-col gap-[14px] w-full">
-            <OrangeButton fullWidth>Book Appointment</OrangeButton>
+            <OrangeButton fullWidth onClick={handleBookAppointment}>
+              Book Appointment
+            </OrangeButton>
 
             <OrangeButton variant="outline" fullWidth>
               View Services

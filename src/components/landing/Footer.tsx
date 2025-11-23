@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import iconFooterLogo from "@/assets/icons/icon-footer-logo.svg";
 import iconEmail from "@/assets/icons/icon-email.svg";
 import iconLocation from "@/assets/icons/icon-location.svg";
@@ -7,12 +8,12 @@ import iconSocial3 from "@/assets/icons/icon-social-3.svg";
 
 export default function Footer() {
   const quickLinks = [
-    { label: "Services", href: "#services" },
-    { label: "Packages", href: "#packages" },
-    { label: "Why Choose Us", href: "#why-us" },
-    { label: "FAQ", href: "#faq" },
-    { label: "Book Appointment", href: "#" },
-    { label: "Apply to Groomer", href: "#" },
+    { label: "Services", href: "#services", isAnchor: true },
+    { label: "Packages", href: "#packages", isAnchor: true },
+    { label: "Why Choose Us", href: "#why-us", isAnchor: true },
+    { label: "FAQ", href: "#faq", isAnchor: true },
+    { label: "Book Appointment", href: "/booking", isAnchor: false },
+    { label: "Apply to Groomer", href: "#", isAnchor: true },
   ];
 
   const supportLinks = [
@@ -88,15 +89,26 @@ export default function Footer() {
                   Quick Links
                 </h4>
                 <div className="content-stretch flex flex-col gap-[10.5px] items-start w-full">
-                  {quickLinks.map((link, index) => (
-                    <a
-                      key={index}
-                      href={link.href}
-                      className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[21px] text-[14px] text-white hover:text-[#de6a07] transition-colors duration-200 cursor-pointer"
-                    >
-                      {link.label}
-                    </a>
-                  ))}
+                  {quickLinks.map((link, index) => {
+                    const linkClassName = "font-['Comfortaa:Regular',_sans-serif] font-normal leading-[21px] text-[14px] text-white hover:text-[#de6a07] transition-colors duration-200 cursor-pointer";
+                    return link.isAnchor ? (
+                      <a
+                        key={index}
+                        href={link.href}
+                        className={linkClassName}
+                      >
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link
+                        key={index}
+                        to={link.href}
+                        className={linkClassName}
+                      >
+                        {link.label}
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
 
