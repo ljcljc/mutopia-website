@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
 // 使用实际图片替换占位图片
 const imgIcon = "/images/logo.png";
-import iconMenu from "@/assets/icons/icon-menu.svg";
-import iconUser from "@/assets/icons/icon-user.svg";
-import iconNotify from "@/assets/icons/icon-notify.svg";
+import { Icon } from "@/components/common/Icon";
 import { Button } from "./ui/button";
 import { motion, AnimatePresence } from "motion/react";
 import { OrangeButton } from "@/components/common";
@@ -38,7 +36,7 @@ const scrollToAnchor = (href: string) => {
   }
 };
 
-function Icon() {
+function LogoIcon() {
   return (
     <div className="h-[39px] relative shrink-0 w-[35px]" data-name="Icon">
       <img
@@ -70,7 +68,7 @@ function Logo() {
       data-name="Logo"
     >
       <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border content-stretch flex gap-[10.5px] h-[35px] items-center relative w-full">
-        <Icon />
+            <LogoIcon />
         <Mutopia />
       </div>
     </div>
@@ -250,9 +248,9 @@ function UserInfo() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <div className="content-stretch flex gap-[8px] items-center cursor-pointer hover:opacity-80 transition-opacity group">
-            <img
-              src={iconUser}
-              alt="User"
+            <Icon
+              name="user"
+              aria-label="User"
               className="relative shrink-0 size-[20px]"
             />
             <p className="font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] text-[#8b6357] text-[12px]">
@@ -277,9 +275,9 @@ function UserInfo() {
         className="relative shrink-0 size-[24px] cursor-pointer hover:opacity-80 transition-opacity"
         aria-label="Notifications"
       >
-        <img
-          src={iconNotify}
-          alt="Notifications"
+        <Icon
+          name="notify"
+          aria-label="Notifications"
           className="block size-full"
         />
       </button>
@@ -387,18 +385,18 @@ function MobileButton2() {
             className="content-stretch flex gap-[10px] h-[48px] items-center justify-center relative shrink-0 w-[48px] cursor-pointer hover:opacity-80 transition-opacity bg-[#f5f5f5] rounded-[2.47134e+07px]"
             aria-label="Notifications"
           >
-            <img
-              src={iconNotify}
-              alt="Notifications"
+            <Icon
+              name="notify"
+              aria-label="Notifications"
               className="relative shrink-0 size-[24px]"
             />
           </button>
 
           {/* User info */}
           <div className="content-stretch flex gap-[12px] items-center flex-1">
-            <img
-              src={iconUser}
-              alt="User"
+            <Icon
+              name="user"
+              aria-label="User"
               className="relative shrink-0 size-[48px]"
             />
             <div className="flex flex-col flex-1">
@@ -615,7 +613,7 @@ function Container({
                 className="text-[#8b6357] hover:text-[#6f4e44] hover:bg-[#8b6357]/5 cursor-pointer"
                 aria-label="Toggle menu"
               >
-                <img src={iconMenu} alt="Menu" className="size-[24px]" />
+                <Icon name="menu" aria-label="Menu" className="size-[24px]" />
               </Button>
             )}
           </motion.div>

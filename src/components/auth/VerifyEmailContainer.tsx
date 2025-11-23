@@ -4,7 +4,7 @@ import { ButtonMediumPrincipalOrange } from "./LoginModalUI";
 import { sendCode, verifyCode, login as loginAPI } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
-import iconAlertSuccess from "@/assets/icons/icon-alert-success.svg";
+import { Icon } from "@/components/common/Icon";
 
 interface VerifyEmailContainerProps {
   email: string;
@@ -211,7 +211,7 @@ export function VerifyEmailContainer({
                     <div className="flex h-[calc(1px*((var(--transform-inner-width)*1)+(var(--transform-inner-height)*0)))] items-center justify-center relative shrink-0 w-[calc(1px*((var(--transform-inner-height)*1)+(var(--transform-inner-width)*0)))]">
                       <div className="flex-none">
                         <div className="relative size-[12px]">
-                          <img src={iconAlertSuccess} alt="Success" className="block size-full" />
+                          <Icon name="alert-success" aria-label="Success" className="block size-full" />
                         </div>
                       </div>
                     </div>

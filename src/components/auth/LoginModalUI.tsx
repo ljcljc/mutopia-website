@@ -1,8 +1,5 @@
 import { Spinner } from "@/components/common";
-import iconCloseArrow from "@/assets/icons/icon-close-arrow.svg";
-import iconContinueArrow from "@/assets/icons/icon-continue-arrow.svg";
-import iconAlertError from "@/assets/icons/icon-alert-error.svg";
-import iconAlertSuccess from "@/assets/icons/icon-alert-success.svg";
+import { Icon } from "@/components/common/Icon";
 
 // Icon components
 export function Icon1() {
@@ -11,9 +8,9 @@ export function Icon1() {
       className="absolute left-0 overflow-clip size-[16px] top-[0.5px] pointer-events-none"
       data-name="Icon"
     >
-      <img
-        src={iconCloseArrow}
-        alt="Close"
+      <Icon
+        name="close-arrow"
+        aria-label="Close"
         className="block size-full rotate-180"
       />
     </div>
@@ -36,7 +33,7 @@ export function DialogContentElement() {
 export function Icon2() {
   return (
     <div className="relative shrink-0 size-[14px]" data-name="Icon">
-      <img src={iconContinueArrow} alt="Continue" className="block size-full" />
+      <Icon name="button-arrow" aria-label="Continue" className="block size-full text-white" />
     </div>
   );
 }
@@ -67,7 +64,7 @@ export function PrimitiveButton({
       type="button"
     >
       {onBack ? (
-        <img src={iconCloseArrow} alt="Back" className="size-[16px]" />
+        <Icon name="close-arrow" aria-label="Back" className="size-[16px]" />
       ) : (
         <>
           <Icon1 />
@@ -201,9 +198,9 @@ export function Alert({ type = "error" }: { type?: "error" | "success" }) {
   if (type === "success") {
     return (
       <div className="relative shrink-0 size-[14px]" data-name="Alert">
-        <img
-          src={iconAlertSuccess}
-          alt="Success"
+        <Icon
+          name="alert-success"
+          aria-label="Success"
           className="absolute inset-0 size-full"
         />
       </div>
@@ -212,9 +209,9 @@ export function Alert({ type = "error" }: { type?: "error" | "success" }) {
 
   return (
     <div className="relative shrink-0 size-[14px]" data-name="Alert">
-      <img
-        src={iconAlertError}
-        alt="Error"
+      <Icon
+        name="alert-error"
+        aria-label="Error"
         className="absolute inset-0 size-full"
       />
     </div>

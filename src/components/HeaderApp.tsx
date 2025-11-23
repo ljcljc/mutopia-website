@@ -1,11 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 const imgIcon = "/images/logo.png";
-import iconNavPrev from "@/assets/icons/icon-nav-prev.svg";
-import iconLocation from "@/assets/icons/icon-location.svg";
-import iconUser from "@/assets/icons/icon-user.svg";
-import iconNotify from "@/assets/icons/icon-notify.svg";
-import iconChevronDown from "@/assets/icons/icon-chevron-down.svg";
+import { Icon } from "@/components/common/Icon";
 import { useAuthStore } from "@/components/auth/authStore";
 import {
   DropdownMenu,
@@ -53,7 +49,7 @@ function BackToHomeButton() {
             <div className="absolute flex h-[12px] items-center justify-center left-0 top-0 w-[13.8px]">
               <div className="flex-none -rotate-90">
                 <div className="h-[13.8px] relative w-[12px]">
-                  <img alt="" className="block max-w-none size-full" src={iconNavPrev} />
+                  <Icon name="nav-prev" className="block max-w-none size-full" />
                 </div>
               </div>
             </div>
@@ -96,7 +92,7 @@ function AddressInput({ address, onAddressChange }: { address: string | null; on
       <div className="border border-gray-200 border-solid h-[34px] relative rounded-[8px] shrink-0 w-[278px]" data-name="Button">
         <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border content-stretch flex gap-[7px] h-[34px] items-center px-[15px] py-px relative w-[278px]">
           <div className="relative shrink-0 size-[18px]" data-name="Icon">
-            <img alt="" className="block max-w-none size-full" src={iconLocation} />
+            <Icon name="location" className="block max-w-none size-full" />
           </div>
           <input
             type="text"
@@ -108,7 +104,7 @@ function AddressInput({ address, onAddressChange }: { address: string | null; on
             autoFocus
           />
           <div className="relative shrink-0 size-[16px]" data-name="Icon">
-            <img alt="" className="block max-w-none size-full" src={iconChevronDown} />
+            <Icon name="chevron-down" className="block max-w-none size-full" />
           </div>
         </div>
       </div>
@@ -123,7 +119,7 @@ function AddressInput({ address, onAddressChange }: { address: string | null; on
     >
       <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border content-stretch flex gap-[7px] h-[34px] items-center px-[15px] py-px relative w-[278px]">
         <div className="relative shrink-0 size-[18px]" data-name="Icon">
-          <img alt="" className="block max-w-none size-full" src={iconLocation} />
+          <Icon name="location" className="block max-w-none size-full" />
         </div>
         <div className="flex-[1_0_0] h-[17.5px] min-h-px min-w-px relative shrink-0" data-name="Text">
           <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border h-[17.5px] overflow-clip relative rounded-[inherit] w-full">
@@ -133,7 +129,7 @@ function AddressInput({ address, onAddressChange }: { address: string | null; on
           </div>
         </div>
         <div className="relative shrink-0 size-[16px]" data-name="Icon">
-          <img alt="" className="block max-w-none size-full" src={iconChevronDown} />
+          <Icon name="chevron-down" className="block max-w-none size-full" />
         </div>
       </div>
     </div>
@@ -181,9 +177,9 @@ function UserInfo({ userInfo }: { userInfo: MeOut }) {
             <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border content-stretch flex gap-[8px] items-center px-[12px] py-[4px] relative w-[134px]">
               <div className="bg-[#8b6357] overflow-clip relative rounded-[100px] shrink-0 size-[20px]" data-name="Icons/Avatar/Brown/Default/Rempli">
                 <div className="absolute bottom-[10.92%] left-[14.77%] right-[14.77%] top-1/4" data-name="Avatar Placeholder">
-                  <img
-                    src={iconUser}
-                    alt="User"
+                  <Icon
+                    name="user"
+                    aria-label="User"
                     className="block max-w-none size-full"
                   />
                 </div>
@@ -213,9 +209,9 @@ function UserInfo({ userInfo }: { userInfo: MeOut }) {
       >
         <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border overflow-clip relative rounded-[inherit] size-[24px]">
           <div className="absolute inset-[8.33%_16.67%]" data-name="icon">
-            <img
-              src={iconNotify}
-              alt="Notifications"
+            <Icon
+              name="notify"
+              aria-label="Notifications"
               className="block max-w-none size-full"
             />
           </div>

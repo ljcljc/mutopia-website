@@ -1,8 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import iconNavPrev from "@/assets/icons/icon-nav-prev.svg";
-import iconNavNext from "@/assets/icons/icon-nav-next.svg";
-import iconCalendar from "@/assets/icons/icon-calendar.svg";
-import iconAlertError from "@/assets/icons/icon-alert-error.svg";
+import { Icon } from "./Icon";
 
 interface DatePickerProps {
   value: string;
@@ -391,9 +388,9 @@ export function DatePicker({
                 </p>
                 {/* Calendar Icon */}
                 <div className="h-[25.171px] relative shrink-0 w-[24px] flex items-center justify-center">
-                  <img
-                    src={iconCalendar}
-                    alt="Calendar"
+                  <Icon
+                    name="calendar"
+                    aria-label="Calendar"
                     className="block size-full"
                   />
                 </div>
@@ -580,9 +577,9 @@ export function DatePicker({
                   onClick={handlePrevMonth}
                   className="flex items-center justify-center h-[16px] w-[8.864px] hover:opacity-70 transition-opacity"
                 >
-                  <img
-                    src={iconNavPrev}
-                    alt="Previous month"
+                  <Icon
+                    name="nav-prev"
+                    aria-label="Previous month"
                     className="block size-full"
                   />
                 </button>
@@ -592,9 +589,9 @@ export function DatePicker({
                   onClick={handleNextMonth}
                   className="flex items-center justify-center h-[16px] w-[8.864px] hover:opacity-70 transition-opacity"
                 >
-                  <img
-                    src={iconNavNext}
-                    alt="Next month"
+                  <Icon
+                    name="nav-next"
+                    aria-label="Next month"
                     className="block size-full"
                   />
                 </button>
@@ -685,7 +682,7 @@ export function DatePicker({
       {(helperText || error) && (
         <div className="content-stretch flex gap-[4px] items-center relative shrink-0 mt-[4px]">
           {error && (
-            <img src={iconAlertError} alt="Error" className="size-[14px]" />
+            <Icon name="alert-error" aria-label="Error" className="size-[14px]" />
           )}
           <p
             className={`font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[12px] ${

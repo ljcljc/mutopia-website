@@ -4,9 +4,7 @@ import { ButtonMediumPrincipalOrange } from "./LoginModalUI";
 import { sendPasswordResetCode, verifyPasswordResetCode } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
-import iconAlertError from "@/assets/icons/icon-alert-error.svg";
-import iconAlertSuccess from "@/assets/icons/icon-alert-success.svg";
-import iconAlertWarning from "@/assets/icons/icon-alert-warning.svg";
+import { Icon } from "@/components/common/Icon";
 import { getSendCountFromError } from "./forgotPasswordUtils";
 
 interface ForgotPasswordContainerProps {
@@ -314,7 +312,7 @@ export function ForgotPasswordContainer({
                   {error && (error.includes("Wrong code") || error === "Enter your code.") && (
                     <div className="content-stretch flex gap-[4px] items-center relative shrink-0">
                       <div className="relative shrink-0 size-[12px]">
-                        <img src={iconAlertError} alt="Error" className="block size-full" />
+                        <Icon name="alert-error" aria-label="Error" className="block size-full" />
                       </div>
                       <p className={`font-['Comfortaa:${error === "Enter your code." ? "Medium" : "Regular"}',sans-serif] ${
                         error === "Enter your code." ? "font-medium" : "font-normal"
@@ -340,7 +338,7 @@ export function ForgotPasswordContainer({
                         <div className="flex h-[calc(1px*((var(--transform-inner-width)*1)+(var(--transform-inner-height)*0)))] items-center justify-center relative shrink-0 w-[calc(1px*((var(--transform-inner-height)*1)+(var(--transform-inner-width)*0)))]">
                           <div className="flex-none">
                             <div className="relative size-[12px]">
-                              <img src={iconAlertSuccess} alt="Success" className="block size-full" />
+                              <Icon name="alert-success" aria-label="Success" className="block size-full" />
                             </div>
                           </div>
                         </div>
@@ -380,7 +378,7 @@ export function ForgotPasswordContainer({
                   <div className="box-border content-stretch flex h-[36px] items-center overflow-clip px-[16px] py-[4px] relative rounded-[inherit]">
                     <div className="content-stretch flex gap-[8px] items-center relative shrink-0">
                       <div className="relative shrink-0 size-[12px]">
-                        <img src={iconAlertWarning} alt="Warning" className="block size-full" />
+                        <Icon name="alert-warning" aria-label="Warning" className="block size-full" />
                       </div>
                       <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] relative shrink-0 text-[#b08a00] text-[10px]">
                         1 attempt left. Verify your email adresse and resend code.
@@ -396,7 +394,7 @@ export function ForgotPasswordContainer({
                   <div className="box-border content-stretch flex h-[36px] items-center overflow-clip px-[16px] py-[4px] relative rounded-[inherit]">
                     <div className="content-stretch flex gap-[8px] items-center relative shrink-0">
                       <div className="relative shrink-0 size-[12px]">
-                        <img src={iconAlertError} alt="Error" className="block size-full" />
+                        <Icon name="alert-error" aria-label="Error" className="block size-full" />
                       </div>
                       <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] relative shrink-0 text-[#de1507] text-[10px]">
                         For security reason. Please contact us to reset your password.

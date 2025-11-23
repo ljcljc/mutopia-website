@@ -37,7 +37,7 @@ import {
 import { STORAGE_KEYS } from "@/lib/storageKeys";
 import { WelcomeToMutopiaPet } from "./LoginModalUI";
 import { EmailStepContainer } from "./LoginModalForms";
-import iconAlertSuccess from "@/assets/icons/icon-alert-success.svg";
+import { Icon } from "@/components/common/Icon";
 import {
   PasswordContainer,
   SignUpContainer,
@@ -1440,7 +1440,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
                     <div className="box-border content-stretch flex h-[36px] items-center overflow-clip px-[16px] py-[4px] relative rounded-[inherit]">
                       <div className="content-stretch flex gap-[8px] items-center relative shrink-0">
                         <div className="relative shrink-0 size-[12px]">
-                          <img src={iconAlertSuccess} alt="Success" className="block size-full" />
+                          <Icon name="alert-success" aria-label="Success" className="block size-full" />
                         </div>
                         <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] relative shrink-0 text-[#467900] text-[10px]">
                           Your password is reset. You can log in with this new password.

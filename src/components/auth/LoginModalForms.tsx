@@ -3,8 +3,7 @@ import {
   ButtonMediumPrincipalOrange,
   ErrorMessage,
 } from "./LoginModalUI";
-import iconGoogle from "@/assets/icons/icon-google.svg";
-import iconFacebook from "@/assets/icons/icon-facebook.svg";
+import { Icon } from "@/components/common/Icon";
 
 // Email form component
 export function EmailForm({
@@ -127,7 +126,7 @@ export function Divider() {
 export function GoogleIcon() {
   return (
     <div className="relative shrink-0 size-[14px]" data-name="AuthDialog">
-      <img src={iconGoogle} alt="Google" className="block size-full" />
+      <Icon name="google" aria-label="Google" className="block size-full" />
     </div>
   );
 }
@@ -182,7 +181,7 @@ export function GoogleButton({
 export function FacebookIcon() {
   return (
     <div className="relative shrink-0 size-[14px]" data-name="AuthDialog">
-      <img src={iconFacebook} alt="Facebook" className="block size-full" />
+      <Icon name="facebook" aria-label="Facebook" className="block size-full" />
     </div>
   );
 }

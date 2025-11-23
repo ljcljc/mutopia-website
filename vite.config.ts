@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import svgr from "vite-plugin-svgr";
 import { resolve } from "path";
 import { fileURLToPath } from "url";
 
@@ -16,8 +17,28 @@ export default defineConfig(({ mode }) => {
   
   return {
     plugins: [
-      tailwindcss(),
       react(),
+      svgr({
+        // 支持同时导入 URL 和组件
+        svgrOptions: {
+          icon: true,
+          // 移除 SVG 的固定宽高，使其可缩放
+          dimensions: false,
+          // 使用 currentColor 替代固定颜色
+          replaceAttrValues: {
+            "#DE6A07": "currentColor",
+            "#8B6357": "currentColor",
+            "#4a3c2a": "currentColor",
+            "#111113": "currentColor",
+            "white": "currentColor",
+            "#717182": "currentColor",
+          },
+        },
+        // 支持 ?react 和 ?url 两种导入方式
+        // 注意：include 应该匹配 ?react 查询参数
+        include: "**/*.svg?react",
+      }),
+      tailwindcss(),
     ],
     resolve: {
       alias: {

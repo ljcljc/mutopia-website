@@ -2,18 +2,11 @@ import { useRef } from "react";
 import Slider from "react-slick";
 import svgPaths from "@/assets/icons/svg-s9drboz5og";
 import svgPathsMobile from "@/assets/icons/svg-ne441427l6";
-import iconNavPrev from "@/assets/icons/icon-nav-prev.svg";
-import iconNavNext from "@/assets/icons/icon-nav-next.svg";
+import { Icon } from "@/components/common/Icon";
 // 使用占位图片替换 figma:asset 导入
 const imgImageWithFallback = "/images/happy-dog-grooming.png";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import iconCertifiedProfessionals from "@/assets/icons/icon-certified-professionals.svg";
-import iconConvenientScheduling from "@/assets/icons/icon-convenient-scheduling.svg";
-import iconPersonalizedCare from "@/assets/icons/icon-personalized-care.svg";
-import iconPremiumQuality from "@/assets/icons/icon-premium-quality.svg";
-import iconStressFreeExperience from "@/assets/icons/icon-stress-free-experience.svg";
-import iconRealTimeUpdates from "@/assets/icons/icon-real-time-updates.svg";
 
 // Feature Card Components for Desktop
 function FeatureCard1() {
@@ -25,9 +18,9 @@ function FeatureCard1() {
             iconSize="custom"
             className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center"
           >
-            <img
-              src={iconCertifiedProfessionals}
-              alt="Certified Professionals"
+            <Icon
+              name="certified-professionals"
+              aria-label="Certified Professionals"
               className="size-[24px]"
             />
           </Badge>
@@ -53,9 +46,9 @@ function FeatureCard2() {
             iconSize="custom"
             className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center"
           >
-            <img
-              src={iconConvenientScheduling}
-              alt="Convenient Scheduling"
+            <Icon
+              name="convenient-scheduling"
+              aria-label="Convenient Scheduling"
               className="size-[24px]"
             />
           </Badge>
@@ -81,9 +74,9 @@ function FeatureCard3() {
             iconSize="custom"
             className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center"
           >
-            <img
-              src={iconPersonalizedCare}
-              alt="Personalized Care"
+            <Icon
+              name="personalized-care"
+              aria-label="Personalized Care"
               className="size-[24px]"
             />
           </Badge>
@@ -106,9 +99,9 @@ function FeatureCard4() {
             iconSize="custom"
             className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center"
           >
-            <img
-              src={iconPremiumQuality}
-              alt="Premium Quality"
+            <Icon
+              name="premium-quality"
+              aria-label="Premium Quality"
               className="size-[24px]"
             />
           </Badge>
@@ -134,9 +127,9 @@ function FeatureCard5() {
             iconSize="custom"
             className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center"
           >
-            <img
-              src={iconStressFreeExperience}
-              alt="Stress-Free Experience"
+            <Icon
+              name="stress-free-experience"
+              aria-label="Stress-Free Experience"
               className="size-[24px]"
             />
           </Badge>
@@ -162,9 +155,9 @@ function FeatureCard6() {
             iconSize="custom"
             className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center"
           >
-            <img
-              src={iconRealTimeUpdates}
-              alt="Real-Time Updates"
+            <Icon
+              name="real-time-updates"
+              aria-label="Real-Time Updates"
               className="size-[24px]"
             />
           </Badge>
@@ -385,9 +378,9 @@ function MobileSlide1() {
     <div className="content-stretch flex flex-col gap-[36px] items-start w-[238px]">
       <MobileFeatureCard
         icon={
-          <img
-            src={iconCertifiedProfessionals}
-            alt="Certified Professionals"
+          <Icon
+            name="certified-professionals"
+            aria-label="Certified Professionals"
             className="size-[24px]"
           />
         }
@@ -396,9 +389,9 @@ function MobileSlide1() {
       />
       <MobileFeatureCard
         icon={
-          <img
-            src={iconConvenientScheduling}
-            alt="Convenient Scheduling"
+          <Icon
+            name="convenient-scheduling"
+            aria-label="Convenient Scheduling"
             className="size-[24px]"
           />
         }
@@ -414,9 +407,9 @@ function MobileSlide2() {
     <div className="content-stretch flex flex-col gap-[36px] items-start w-[238px]">
       <MobileFeatureCard
         icon={
-          <img
-            src={iconPersonalizedCare}
-            alt="Personalized Care"
+          <Icon
+            name="personalized-care"
+            aria-label="Personalized Care"
             className="size-[24px]"
           />
         }
@@ -425,9 +418,9 @@ function MobileSlide2() {
       />
       <MobileFeatureCard
         icon={
-          <img
-            src={iconPremiumQuality}
-            alt="Premium Quality"
+          <Icon
+            name="premium-quality"
+            aria-label="Premium Quality"
             className="size-[24px]"
           />
         }
@@ -443,9 +436,9 @@ function MobileSlide3() {
     <div className="content-stretch flex flex-col gap-[36px] items-start w-[238px]">
       <MobileFeatureCard
         icon={
-          <img
-            src={iconStressFreeExperience}
-            alt="Stress-Free Experience"
+          <Icon
+            name="stress-free-experience"
+            aria-label="Stress-Free Experience"
             className="size-[24px]"
           />
         }
@@ -454,9 +447,9 @@ function MobileSlide3() {
       />
       <MobileFeatureCard
         icon={
-          <img
-            src={iconRealTimeUpdates}
-            alt="Real-Time Updates"
+          <Icon
+            name="real-time-updates"
+            aria-label="Real-Time Updates"
             className="size-[24px]"
           />
         }
@@ -548,9 +541,9 @@ export default function WhyUs() {
                 className="flex items-center justify-center relative shrink-0 cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95"
                 aria-label="Previous"
               >
-                <img
-                  src={iconNavPrev}
-                  alt="Previous"
+                <Icon
+                  name="nav-prev"
+                  aria-label="Previous"
                   className="h-[36px] w-[16px]"
                 />
               </button>
@@ -642,9 +635,9 @@ export default function WhyUs() {
                 className="flex items-center justify-center relative shrink-0 cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95"
                 aria-label="Next"
               >
-                <img
-                  src={iconNavNext}
-                  alt="Next"
+                <Icon
+                  name="nav-next"
+                  aria-label="Next"
                   className="h-[36px] w-[16px]"
                 />
               </button>

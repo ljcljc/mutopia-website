@@ -8,8 +8,7 @@ import iconClock from "@/assets/icons/icon-clock.svg";
 import iconBathBrush from "@/assets/icons/icon-bath-brush.svg";
 import iconFullGrooming from "@/assets/icons/icon-full-grooming.svg";
 import iconExpressGroom from "@/assets/icons/icon-express-groom.svg";
-import iconButtonArrowPrimary from "@/assets/icons/icon-button-arrow-primary.svg";
-import iconButtonArrowSecondary from "@/assets/icons/icon-button-arrow-secondary.svg";
+import { Icon } from "@/components/common/Icon";
 import {
   Carousel,
   CarouselContent,
@@ -128,12 +127,12 @@ function ServiceCard({
               >
                 Book Now
               </p>
-              <img
-                src={
-                  isPopular ? iconButtonArrowPrimary : iconButtonArrowSecondary
-                }
-                alt="Arrow"
-                className="size-[14px]"
+              <Icon
+                name="button-arrow"
+                aria-label="Arrow"
+                className={`size-[14px] ${
+                  isPopular ? "text-white" : "text-[#de6a07]"
+                }`}
               />
             </div>
           </OrangeButton>

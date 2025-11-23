@@ -8,8 +8,7 @@ import {
   validatePassword,
   PasswordValidationMessages,
 } from "./LoginModalPasswordValidation";
-import iconEyeVisible from "@/assets/icons/icon-eye-visible.svg";
-import iconEyeInvisible from "@/assets/icons/icon-eye-invisible.svg";
+import { Icon } from "@/components/common/Icon";
 
 // Password input components
 export function VisibleIcon({
@@ -27,9 +26,9 @@ export function VisibleIcon({
       data-name="Visible"
       aria-label={showPassword ? "Hide password" : "Show password"}
     >
-      <img
-        src={showPassword ? iconEyeVisible : iconEyeInvisible}
-        alt={showPassword ? "Hide" : "Show"}
+      <Icon
+        name={showPassword ? "eye-visible" : "eye-invisible"}
+        aria-label={showPassword ? "Hide" : "Show"}
         className="block size-full"
       />
     </button>
