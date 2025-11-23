@@ -591,10 +591,6 @@ function Container({
       className="h-[62.984px] lg:h-[63px] relative shrink-0 w-full"
       data-name="Container"
     >
-      <div
-        aria-hidden="true"
-        className="absolute border-[0px_0px_1px] border-[rgba(0,0,0,0.2)] border-solid inset-0 pointer-events-none lg:hidden"
-      />
       <div className="flex flex-row items-center size-full">
         <div className="box-border content-stretch flex h-[62.984px] lg:h-[63px] items-center justify-between pb-px pt-0 px-0 lg:pl-0 lg:pr-[0.008px] lg:py-0 relative w-full">
           <Logo />

@@ -71,10 +71,11 @@ export function CustomAccordionItem({
         <div className="box-border content-stretch flex flex-col items-start px-[24px] py-0 relative size-full">
           {/* Trigger Button */}
           <button
-            className="box-border content-stretch flex w-full items-start justify-between pb-0 pt-[21px] px-0 relative rounded-[12px] shrink-0 outline-none focus:outline-none"
+            className="box-border content-stretch flex w-full items-center justify-between px-0 relative rounded-[12px] shrink-0 outline-none focus:outline-none"
             style={{
               minHeight: isOpen ? "auto" : "59.5px",
-              paddingBottom: isOpen ? "12px" : "0",
+              paddingTop: "21px",
+              paddingBottom: isOpen ? "12px" : "21px",
             }}
             data-name="Primitive.button"
             onClick={onToggle}
@@ -91,7 +92,7 @@ export function CustomAccordionItem({
 
             {/* Icon */}
             <div
-              className="relative shrink-0 size-[14px] mt-[1.5px]"
+              className="relative shrink-0 size-[14px]"
               data-name="Icon"
             >
               <svg
