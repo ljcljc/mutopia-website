@@ -11,6 +11,7 @@ export {
   CustomAccordionItem,
 } from "./CustomAccordion";
 export * from "./CustomInput";
+export * from "./CustomSelect";
 export * from "./CustomTextarea";
 export * from "./DatePicker";
 export * from "./OrangeButton";

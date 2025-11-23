@@ -2,6 +2,12 @@ import { create } from "zustand";
 import { getCurrentUser, type MeOut } from "@/lib/api";
 
 export type ServiceType = "mobile" | "instore";
+export type PetType = "dog" | "cat" | "other";
+export type CoatCondition = "not-matted" | "matted" | "severely-matted";
+export type Behavior = "friendly" | "anxious" | "hard-to-handle" | "senior-pets";
+export type GroomingFrequency = "weekly" | "bi-weekly" | "monthly" | "occasionally";
+export type WeightUnit = "lbs" | "kg";
+export type Gender = "male" | "female" | "neutered" | "spayed";
 
 interface BookingState {
   // Step management
@@ -10,12 +16,28 @@ interface BookingState {
   nextStep: () => void;
   previousStep: () => void;
 
-  // Form data
+  // Step 1: Form data
   address: string;
   serviceType: ServiceType;
   city: string;
   province: string;
   postCode: string;
+
+  // Step 2: Pet information
+  petName: string;
+  petType: PetType;
+  breed: string;
+  isMixedBreed: boolean;
+  dateOfBirth: string; // YYYY-MM format
+  gender: Gender | "";
+  weight: string;
+  weightUnit: WeightUnit;
+  coatCondition: CoatCondition | "";
+  behavior: Behavior | "";
+  groomingFrequency: GroomingFrequency | "";
+  petPhoto: File | null;
+  referenceStyles: File[];
+  specialNotes: string;
 
   // UI state
   isLoginModalOpen: boolean;
@@ -29,6 +51,20 @@ interface BookingState {
   setCity: (city: string) => void;
   setProvince: (province: string) => void;
   setPostCode: (postCode: string) => void;
+  setPetName: (name: string) => void;
+  setPetType: (type: PetType) => void;
+  setBreed: (breed: string) => void;
+  setIsMixedBreed: (isMixed: boolean) => void;
+  setDateOfBirth: (date: string) => void;
+  setGender: (gender: Gender | "") => void;
+  setWeight: (weight: string) => void;
+  setWeightUnit: (unit: WeightUnit) => void;
+  setCoatCondition: (condition: CoatCondition | "") => void;
+  setBehavior: (behavior: Behavior | "") => void;
+  setGroomingFrequency: (frequency: GroomingFrequency | "") => void;
+  setPetPhoto: (file: File | null) => void;
+  setReferenceStyles: (files: File[]) => void;
+  setSpecialNotes: (notes: string) => void;
   setIsLoginModalOpen: (isOpen: boolean) => void;
   loadUserInfo: () => Promise<void>;
   reset: () => void;
@@ -41,6 +77,20 @@ const initialState = {
   city: "",
   province: "BC",
   postCode: "",
+  petName: "",
+  petType: "dog" as PetType,
+  breed: "",
+  isMixedBreed: false,
+  dateOfBirth: "",
+  gender: "" as Gender | "",
+  weight: "",
+  weightUnit: "lbs" as WeightUnit,
+  coatCondition: "" as CoatCondition | "",
+  behavior: "" as Behavior | "",
+  groomingFrequency: "" as GroomingFrequency | "",
+  petPhoto: null as File | null,
+  referenceStyles: [] as File[],
+  specialNotes: "",
   isLoginModalOpen: false,
   userInfo: null as MeOut | null,
 };
@@ -64,6 +114,34 @@ export const useBookingStore = create<BookingState>((set) => ({
 
   setPostCode: (postCode) => set({ postCode }),
 
+  setPetName: (name) => set({ petName: name }),
+
+  setPetType: (type) => set({ petType: type }),
+
+  setBreed: (breed) => set({ breed }),
+
+  setIsMixedBreed: (isMixed) => set({ isMixedBreed: isMixed }),
+
+  setDateOfBirth: (date) => set({ dateOfBirth: date }),
+
+  setGender: (gender) => set({ gender }),
+
+  setWeight: (weight) => set({ weight }),
+
+  setWeightUnit: (unit) => set({ weightUnit: unit }),
+
+  setCoatCondition: (condition) => set({ coatCondition: condition }),
+
+  setBehavior: (behavior) => set({ behavior }),
+
+  setGroomingFrequency: (frequency) => set({ groomingFrequency: frequency }),
+
+  setPetPhoto: (file) => set({ petPhoto: file }),
+
+  setReferenceStyles: (files) => set({ referenceStyles: files }),
+
+  setSpecialNotes: (notes) => set({ specialNotes: notes }),
+
   setIsLoginModalOpen: (isLoginModalOpen) => set({ isLoginModalOpen }),
 
   loadUserInfo: async () => {
@@ -86,4 +164,3 @@ export const useBookingStore = create<BookingState>((set) => ({
 
   reset: () => set(initialState),
 }));
-

@@ -62,6 +62,10 @@ import IconRealTimeUpdatesSvg from "@/assets/icons/icon-real-time-updates.svg?re
 import IconCloseArrowSvg from "@/assets/icons/icon-close-arrow.svg?react";
 import IconVanSvg from "@/assets/icons/icon-van.svg?react";
 import IconShopSvg from "@/assets/icons/icon-shop.svg?react";
+import IconDogSvg from "@/assets/icons/icon-dog.svg?react";
+import IconCatSvg from "@/assets/icons/icon-cat.svg?react";
+import IconPetSvg from "@/assets/icons/icon-pet.svg?react";
+import IconSearchSvg from "@/assets/icons/icon-search.svg?react";
 
 // 图标组件映射表
 const iconComponentMap = {
@@ -103,6 +107,10 @@ const iconComponentMap = {
   "close-arrow": IconCloseArrowSvg,
   "van": IconVanSvg,
   "shop": IconShopSvg,
+  "dog": IconDogSvg,
+  "cat": IconCatSvg,
+  "pet": IconPetSvg,
+  "search": IconSearchSvg,
 } as const;
 
 export type IconName = keyof typeof iconComponentMap;

@@ -61,21 +61,23 @@ export default function Booking() {
         <div className="content-stretch flex flex-col gap-[32px] items-start relative shrink-0 w-full">
           {renderStepComponent()}
 
-          {/* Continue Button */}
-          <div className="content-stretch flex gap-[20px] items-start relative shrink-0 w-full">
-            <OrangeButton size="medium" onClick={nextStep}>
-              <div className="flex gap-[4px] items-center">
-                <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] text-[14px] text-white">
-                  Continue
-                </p>
-                <Icon
-                  name="button-arrow"
-                  aria-label="Arrow"
-                  className="size-[14px] text-white"
-                />
-              </div>
-            </OrangeButton>
-          </div>
+          {/* Continue Button - Only show for Step 1 */}
+          {currentStep === 1 && (
+            <div className="content-stretch flex gap-[20px] items-start relative shrink-0 w-full">
+              <OrangeButton size="medium" onClick={nextStep}>
+                <div className="flex gap-[4px] items-center">
+                  <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] text-[14px] text-white">
+                    Continue
+                  </p>
+                  <Icon
+                    name="button-arrow"
+                    aria-label="Arrow"
+                    className="size-[14px] text-white"
+                  />
+                </div>
+              </OrangeButton>
+            </div>
+          )}
         </div>
       </div>
     </div>
