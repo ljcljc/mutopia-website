@@ -24,11 +24,11 @@ function FeatureCard1() {
               className="size-[24px] text-white"
             />
           </Badge>
-          <h3 className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
+          <h3 className="font-['Comfortaa:Bold',sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
             Certified Professionals
           </h3>
         </div>
-        <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">
+        <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">
           All our groomers are certified, insured, and background-checked for
           your peace of mind.
         </p>
@@ -52,11 +52,11 @@ function FeatureCard2() {
               className="size-[24px] text-white"
             />
           </Badge>
-          <h3 className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
+          <h3 className="font-['Comfortaa:Bold',sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
             Convenient Scheduling
           </h3>
         </div>
-        <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">
+        <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">
           Book appointments online 24/7. We work around your schedule, not the
           other way around.
         </p>
@@ -80,11 +80,11 @@ function FeatureCard3() {
               className="size-[24px] text-white"
             />
           </Badge>
-          <h3 className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
+          <h3 className="font-['Comfortaa:Bold',sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
             Personalized Care
           </h3>
         </div>
-        <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">{`Every pet is unique. We tailor our services to your pet's specific needs and temperament.`}</p>
+        <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">{`Every pet is unique. We tailor our services to your pet's specific needs and temperament.`}</p>
       </CardContent>
     </Card>
   );
@@ -105,11 +105,11 @@ function FeatureCard4() {
               className="size-[24px] text-white"
             />
           </Badge>
-          <h3 className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
+          <h3 className="font-['Comfortaa:Bold',sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
             Premium Quality
           </h3>
         </div>
-        <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">
+        <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">
           We use only the finest, pet-safe products and state-of-the-art
           equipment.
         </p>
@@ -133,11 +133,11 @@ function FeatureCard5() {
               className="size-[24px] text-white"
             />
           </Badge>
-          <h3 className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
+          <h3 className="font-['Comfortaa:Bold',sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
             Stress-Free Experience
           </h3>
         </div>
-        <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">
+        <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">
           Mobile service means no stressful car rides. Your pet stays
           comfortable at home.
         </p>
@@ -161,11 +161,11 @@ function FeatureCard6() {
               className="size-[24px] text-white"
             />
           </Badge>
-          <h3 className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
+          <h3 className="font-['Comfortaa:Bold',sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
             Real-Time Updates
           </h3>
         </div>
-        <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">
+        <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">
           Get photos and updates throughout the grooming process via our mobile
           app.
         </p>
@@ -205,10 +205,10 @@ function MobileImageSection() {
                   className="content-stretch flex flex-col h-[45.5px] items-center relative shrink-0 text-center text-nowrap text-white whitespace-pre"
                   data-name="Container"
                 >
-                  <p className="font-['Comfortaa:Bold',_sans-serif] leading-[28px] relative shrink-0 text-[20px]">
+                  <p className="font-['Comfortaa:Bold',sans-serif] leading-[28px] relative shrink-0 text-[20px]">
                     100%
                   </p>
-                  <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[12px]">
+                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[12px]">
                     Verified groomer
                   </p>
                 </div>
@@ -216,10 +216,10 @@ function MobileImageSection() {
                   className="content-stretch flex flex-col h-[45.5px] items-center relative shrink-0 text-center text-nowrap text-white whitespace-pre"
                   data-name="Container"
                 >
-                  <p className="font-['Comfortaa:Bold',_sans-serif] leading-[28px] relative shrink-0 text-[20px]">
+                  <p className="font-['Comfortaa:Bold',sans-serif] leading-[28px] relative shrink-0 text-[20px]">
                     Quick
                   </p>
-                  <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[12px]">
+                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[12px]">
                     Availability
                   </p>
                 </div>
@@ -227,10 +227,10 @@ function MobileImageSection() {
                   className="content-stretch flex flex-col h-[45.5px] items-center relative shrink-0 text-center text-nowrap text-white whitespace-pre"
                   data-name="Container"
                 >
-                  <p className="font-['Comfortaa:Bold',_sans-serif] leading-[28px] relative shrink-0 text-[20px]">
+                  <p className="font-['Comfortaa:Bold',sans-serif] leading-[28px] relative shrink-0 text-[20px]">
                     Premium
                   </p>
-                  <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[12px]">
+                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[12px]">
                     Service
                   </p>
                 </div>
@@ -289,26 +289,26 @@ function DesktopImageSection() {
         >
           <div className="content-center flex flex-wrap gap-[20px] items-center justify-between relative shrink-0 w-full">
             <div className="content-stretch flex flex-col h-[45.5px] items-center relative shrink-0 text-center text-nowrap text-white whitespace-pre">
-              <p className="font-['Comfortaa:Bold',_sans-serif] leading-[28px] relative shrink-0 text-[20px]">
+              <p className="font-['Comfortaa:Bold',sans-serif] leading-[28px] relative shrink-0 text-[20px]">
                 100%
               </p>
-              <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[12px]">
+              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[12px]">
                 Verified groomer
               </p>
             </div>
             <div className="content-stretch flex flex-col h-[45.5px] items-center relative shrink-0 text-center text-nowrap text-white whitespace-pre">
-              <p className="font-['Comfortaa:Bold',_sans-serif] leading-[28px] relative shrink-0 text-[20px]">
+              <p className="font-['Comfortaa:Bold',sans-serif] leading-[28px] relative shrink-0 text-[20px]">
                 Quick
               </p>
-              <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[12px]">
+              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[12px]">
                 Availability
               </p>
             </div>
             <div className="content-stretch flex flex-col h-[45.5px] items-center relative shrink-0 text-center text-nowrap text-white whitespace-pre">
-              <p className="font-['Comfortaa:Bold',_sans-serif] leading-[28px] relative shrink-0 text-[20px]">
+              <p className="font-['Comfortaa:Bold',sans-serif] leading-[28px] relative shrink-0 text-[20px]">
                 Premium
               </p>
-              <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[12px]">
+              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[12px]">
                 Service
               </p>
             </div>
@@ -355,16 +355,16 @@ function MobileFeatureCard({
     <div className="content-stretch flex flex-col gap-[16px] items-start relative shrink-0 w-full">
       <div className="content-stretch flex flex-col gap-[10.5px] items-center justify-center relative shrink-0 w-full">
         <div className="bg-[rgba(222,106,7,0.8)] relative rounded-[12px] shrink-0 size-[42px] flex items-center justify-center">
-          <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border content-stretch flex items-center justify-center relative size-[42px]">
+          <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex items-center justify-center relative size-[42px]">
             {icon}
           </div>
         </div>
-        <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[#de6a07] text-[14px]">
+        <p className="font-['Comfortaa:Bold',sans-serif] leading-[20px] text-[#de6a07] text-[14px]">
           {title}
         </p>
       </div>
       <div className="h-[68.25px] relative shrink-0 w-full">
-        <p className="absolute font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] left-1/2 -translate-x-1/2 text-[14px] text-[rgba(74,60,42,0.7)] text-center top-0 w-[233px]">
+        <p className="absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] left-1/2 -translate-x-1/2 text-[14px] text-[rgba(74,60,42,0.7)] text-center top-0 w-[233px]">
           {description}
         </p>
       </div>
@@ -492,16 +492,16 @@ export default function WhyUs() {
   return (
     <div
       id="why-us"
-      className="bg-white relative w-full -mt-[1px] py-[56px] lg:py-[84px]"
+      className="bg-white relative w-full -mt-px py-[56px] lg:py-[84px]"
       data-name="WhyUs"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-8 md:px-12 lg:px-[57.5px]">
         {/* Title Section */}
         <div className="content-stretch flex flex-col gap-[16px] items-center relative shrink-0 text-center w-full mb-[48px] lg:mb-[56px]">
-          <p className="font-['Comfortaa:Bold',_sans-serif] leading-[40px] relative shrink-0 text-[32px] text-[rgba(99,52,121,0.8)] w-full">
+          <p className="font-['Comfortaa:Bold',sans-serif] leading-[40px] relative shrink-0 text-[32px] text-[rgba(99,52,121,0.8)] w-full">
             Why Choose Mutopia?
           </p>
-          <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[28px] relative shrink-0 text-[16px] text-[rgba(74,60,42,0.7)] w-full max-w-[672px] mx-auto">
+          <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[28px] relative shrink-0 text-[16px] text-[rgba(74,60,42,0.7)] w-full max-w-[672px] mx-auto">
             {`We're not just another grooming service. We're pet care specialists who understand that your furry family members deserve the very best.`}
           </p>
         </div>

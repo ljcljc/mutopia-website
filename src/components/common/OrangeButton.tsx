@@ -48,7 +48,7 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
             <div className="flex flex-row items-center justify-center size-full relative z-10">
               <div className="box-border content-stretch flex gap-[8px] items-center justify-center px-[12px] py-[16px] relative size-full">
                 <div className="relative shrink-0">
-                  <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border content-stretch flex gap-[5px] items-center relative">
+                  <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[5px] items-center relative">
                     {/* Spinner overlay */}
                     {loading && (
                       <div className="absolute inset-0 flex items-center justify-center">
@@ -58,7 +58,7 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
                     {/* Content - invisible when loading but still takes up space */}
                     {typeof children === "string" ? (
                       <p
-                        className={`bg-clip-text font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[12px] text-nowrap whitespace-pre ${loading ? "invisible" : ""}`}
+                        className={`bg-clip-text font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[12px] text-nowrap whitespace-pre ${loading ? "invisible" : ""}`}
                         style={{
                           backgroundImage:
                             "linear-gradient(180deg, #FFF7ED 0%, #FFFBEB 100%)",
@@ -148,7 +148,7 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
             <div className="flex flex-row items-center justify-center size-full relative z-10">
               <div className="box-border content-stretch flex gap-[8px] items-center justify-center px-[30px] py-[18px] relative size-full">
                 <div className="relative shrink-0">
-                  <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border content-stretch flex gap-[5px] items-center relative">
+                  <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[5px] items-center relative">
                     {/* Spinner overlay */}
                     {loading && (
                       <div className="absolute inset-0 flex items-center justify-center">
@@ -158,7 +158,7 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
                     {/* Content - invisible when loading but still takes up space */}
                     {typeof children === "string" ? (
                       <p
-                        className={`font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#8b6357] text-[12px] text-nowrap whitespace-pre ${loading ? "invisible" : ""}`}
+                        className={`font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#8b6357] text-[12px] text-nowrap whitespace-pre ${loading ? "invisible" : ""}`}
                       >
                         {children}
                       </p>
@@ -245,7 +245,7 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
             {/* Content - invisible when loading but still takes up space */}
             {typeof children === "string" ? (
               <p
-                className={`font-['Comfortaa:Bold',_sans-serif] leading-[24.5px] text-[16px] whitespace-nowrap ${loading ? "invisible" : ""}`}
+                className={`font-['Comfortaa:Bold',sans-serif] leading-[24.5px] text-[16px] whitespace-nowrap ${loading ? "invisible" : ""}`}
               >
                 {children}
               </p>
@@ -275,7 +275,7 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
           {/* Content - invisible when loading but still takes up space */}
           {typeof children === "string" ? (
             <p
-              className={`font-['Comfortaa:Bold',_sans-serif] leading-[24.5px] text-[#de6a07] text-[16px] whitespace-nowrap ${loading ? "invisible" : ""}`}
+              className={`font-['Comfortaa:Bold',sans-serif] leading-[24.5px] text-[#de6a07] text-[16px] whitespace-nowrap ${loading ? "invisible" : ""}`}
             >
               {children}
             </p>

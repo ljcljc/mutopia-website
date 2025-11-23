@@ -1,17 +1,11 @@
 // 使用占位图片替换 figma:asset 导入
 const imgImageWithFallback = "/images/grooming-hero.png";
-import { useNavigate } from "react-router-dom";
 import { OrangeButton } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
 import heroWave from "@/assets/icons/hero-wave.svg";
 import heroEllipse from "@/assets/icons/hero-ellipse.svg";
 
 export default function Hero() {
-  const navigate = useNavigate();
-
-  const handleBookAppointment = () => {
-    navigate("/booking");
-  };
   return (
     <div
       className="relative w-full bg-gradient-to-b from-[#fdf8f3] to-[#f9f1e8] overflow-hidden"
@@ -32,21 +26,21 @@ export default function Hero() {
         {/* Desktop & Tablet: Flexbox layout */}
         <div className="hidden md:flex items-start justify-between gap-[78px] px-8 lg:px-[57.5px] pt-[100px] pb-[180px]">
           {/* Left Content */}
-          <div className="flex flex-col gap-[32px] items-start flex-shrink-0 max-w-[567px]">
+          <div className="flex flex-col gap-[32px] items-start shrink-0 max-w-[567px]">
             {/* Title */}
             <div className="flex flex-col items-start w-full">
-              <p className="font-['Comfortaa:Bold',_sans-serif] leading-[65.625px] text-[56px] text-[#8b6357] whitespace-pre">
+              <p className="font-['Comfortaa:Bold',sans-serif] leading-[65.625px] text-[56px] text-[#8b6357] whitespace-pre">
                 Premium
                 <br />
                 Pet Grooming
               </p>
-              <p className="font-['Comfortaa:Bold',_sans-serif] leading-[65.625px] text-[56px] text-[#de6a07] whitespace-pre">
+              <p className="font-['Comfortaa:Bold',sans-serif] leading-[65.625px] text-[56px] text-[#de6a07] whitespace-pre">
                 Made Simple
               </p>
             </div>
 
             {/* Description */}
-            <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[28px] text-[16px] text-[rgba(74,60,42,0.7)] w-[489px]">
+            <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[28px] text-[16px] text-[rgba(74,60,42,0.7)] w-[489px]">
               Transform your furry friend with our professional grooming
               services. Book online, relax at home, and let our certified
               groomers come to you.
@@ -61,7 +55,7 @@ export default function Hero() {
                   aria-label="Easy booking"
                   className="size-[20px] text-[#de6a07]"
                 />
-                <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
+                <p className="font-['Comfortaa:Bold',sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
                   Easy booking
                 </p>
               </div>
@@ -73,7 +67,7 @@ export default function Hero() {
                   aria-label="Pet-friendly"
                   className="size-[20px] text-[#de6a07]"
                 />
-                <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
+                <p className="font-['Comfortaa:Bold',sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
                   Pet-friendly
                 </p>
               </div>
@@ -85,7 +79,7 @@ export default function Hero() {
                   aria-label="Professional service"
                   className="size-[20px] text-[#de6a07]"
                 />
-                <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
+                <p className="font-['Comfortaa:Bold',sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
                   Professional service
                 </p>
               </div>
@@ -93,7 +87,7 @@ export default function Hero() {
 
             {/* Buttons */}
             <div className="flex gap-[14px] items-start">
-              <OrangeButton className="w-[209px]" onClick={handleBookAppointment}>
+              <OrangeButton className="w-[209px]">
                 Book Appointment
               </OrangeButton>
 
@@ -106,7 +100,7 @@ export default function Hero() {
           {/* Right Image */}
 
           <div className="group relative shrink-0 w-[497px] h-[482.258px]">
-            <div className="flex-none h-[499.182px] rotate-[4deg] w-[360.779px] group-hover:rotate-[0deg] transition-transform duration-500 ease-out">
+            <div className="flex-none h-[499.182px] rotate-[4deg] w-[360.779px] group-hover:rotate-0 transition-transform duration-500 ease-out">
               <img
                 alt="Pet grooming service"
                 className="inset-0 max-w-none object-50%-50% object-contain pointer-events-none size-full"
@@ -120,12 +114,12 @@ export default function Hero() {
         <div className="md:hidden flex flex-col gap-[40px] px-4 pt-[60px] pb-[140px]">
           {/* Title */}
           <div className="flex flex-col items-start w-full">
-            <p className="font-['Comfortaa:Bold',_sans-serif] leading-[1.17] text-[32px] text-[#8b6357]">
+            <p className="font-['Comfortaa:Bold',sans-serif] leading-[1.17] text-[32px] text-[#8b6357]">
               Premium
               <br />
               Pet Grooming
             </p>
-            <p className="font-['Comfortaa:Bold',_sans-serif] leading-[1.17] text-[32px] text-[#de6a07]">
+            <p className="font-['Comfortaa:Bold',sans-serif] leading-[1.17] text-[32px] text-[#de6a07]">
               Made Simple
             </p>
           </div>
@@ -142,7 +136,7 @@ export default function Hero() {
           </div> */}
 
           {/* Description */}
-          <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[28px] text-[16px] text-[rgba(74,60,42,0.7)]">
+          <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[28px] text-[16px] text-[rgba(74,60,42,0.7)]">
             Transform your furry friend with our professional grooming services.
             Book online, relax at home, and let our certified groomers come to
             you.
@@ -157,7 +151,7 @@ export default function Hero() {
                 aria-label="Easy booking"
                 className="size-[20px] text-[#de6a07]"
               />
-              <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
+              <p className="font-['Comfortaa:Bold',sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
                 Easy booking
               </p>
             </div>
@@ -169,7 +163,7 @@ export default function Hero() {
                 aria-label="Pet-friendly"
                 className="size-[20px] text-[#de6a07]"
               />
-              <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
+              <p className="font-['Comfortaa:Bold',sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
                 Pet-friendly
               </p>
             </div>
@@ -181,7 +175,7 @@ export default function Hero() {
                 aria-label="Professional service"
                 className="size-[20px] text-[#de6a07]"
               />
-              <p className="font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
+              <p className="font-['Comfortaa:Bold',sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
                 Professional service
               </p>
             </div>
@@ -189,7 +183,7 @@ export default function Hero() {
 
           {/* Buttons */}
           <div className="flex flex-col gap-[14px] w-full">
-            <OrangeButton fullWidth onClick={handleBookAppointment}>
+            <OrangeButton fullWidth>
               Book Appointment
             </OrangeButton>
 
@@ -205,7 +199,7 @@ export default function Hero() {
         className="absolute bottom-0 left-0 right-0 w-full overflow-hidden pointer-events-none"
         style={{ height: "139px" }}
       >
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[2674px] h-[139px] rotate-180 scale-y-[-100%]">
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[2674px] h-[139px] rotate-180 -scale-y-100">
           <img
             src={heroWave}
             alt=""

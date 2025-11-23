@@ -1,7 +1,7 @@
 import { Outlet, useLocation } from "react-router-dom";
-import Header from "@/components/Header";
-import HeaderApp from "@/components/HeaderApp";
-import Footer from "@/components/landing/Footer";
+import Header from "@/components/layout/Header";
+import HeaderApp from "@/components/layout/HeaderApp";
+import Footer from "@/components/layout/Footer";
 import { ScrollToTop } from "@/components/common";
 import { Toaster } from "@/components/ui/sonner";
 

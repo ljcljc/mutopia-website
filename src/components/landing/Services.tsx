@@ -20,7 +20,6 @@ interface ServiceCardProps {
   price: string;
   includes: string[];
   isPopular?: boolean;
-  onBookClick?: () => void;
   isMobile?: boolean;
 }
 
@@ -32,14 +31,13 @@ function ServiceCard({
   price,
   includes,
   isPopular = false,
-  onBookClick,
   isMobile = false,
 }: ServiceCardProps) {
   return (
     <div className="relative pt-4 h-full">
       {isPopular && (
         <Badge className="absolute bg-[#de6a07] left-[24.5px] top-0 h-[24px] px-[16px] py-[4px] rounded-[12px] hover:bg-[#de6a07] z-10 whitespace-nowrap">
-          <p className="font-['Comfortaa:Medium',_sans-serif] font-medium leading-[14px] text-[10px] text-white whitespace-nowrap">
+          <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[14px] text-[10px] text-white whitespace-nowrap">
             Most Popular
           </p>
         </Badge>
@@ -58,10 +56,10 @@ function ServiceCard({
               </div>
 
               <div className="content-stretch flex flex-col gap-[12px] items-start w-full">
-                <h3 className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[28px] text-[#4a3c2a] text-[16px] text-center w-full">
+                <h3 className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[28px] text-[#4a3c2a] text-[16px] text-center w-full">
                   {title}
                 </h3>
-                <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)] text-center w-full">
+                <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)] text-center w-full">
                   {description}
                 </p>
               </div>
@@ -76,12 +74,12 @@ function ServiceCard({
                     aria-label="Duration"
                     className="size-[16px] text-[rgba(74,60,42,0.6)] opacity-60"
                   />
-                  <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[17.5px] text-[12.25px] text-[rgba(74,60,42,0.6)]">
+                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] text-[12.25px] text-[rgba(74,60,42,0.6)]">
                     {duration}
                   </p>
                 </div>
                 <div>
-                  <p className="font-['Comfortaa:SemiBold',_sans-serif] font-semibold leading-[24.5px] text-[#de6a07]">
+                  <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[24.5px] text-[#de6a07]">
                     <span className="text-[14px]">From</span>
                     <span className="text-[17.5px]"> </span>
                     <span className="text-[24px]">{price}</span>
@@ -91,14 +89,14 @@ function ServiceCard({
 
               {/* Includes */}
               <div className="content-stretch flex flex-col gap-[7px] items-start w-full">
-                <p className="font-['Comfortaa:Medium',_sans-serif] font-medium leading-[21px] text-[#4a3c2a] text-[14px]">
+                <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[21px] text-[#4a3c2a] text-[14px]">
                   Includes:
                 </p>
                 <div className="content-stretch flex flex-col gap-[3.5px] items-start w-full">
                   {includes.map((item, index) => (
                     <div key={index} className="h-[17.5px] relative w-full">
                       <div className="absolute bg-[#de6a07] left-0 rounded-full size-[5.25px] top-[6.13px]" />
-                      <p className="absolute font-['Comfortaa:Regular',_sans-serif] font-normal leading-[17.5px] left-[12.25px] text-[12.25px] text-[rgba(74,60,42,0.7)] top-[-0.5px]">
+                      <p className="absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] left-[12.25px] text-[12.25px] text-[rgba(74,60,42,0.7)] top-[-0.5px]">
                         {item}
                       </p>
                     </div>
@@ -113,11 +111,10 @@ function ServiceCard({
             variant={isPopular ? "primary" : "outline"}
             size="medium"
             fullWidth
-            onClick={onBookClick}
           >
             <div className="flex gap-[4px] items-center">
               <p
-                className={`font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] text-[14px] ${
+                className={`font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] text-[14px] ${
                   isPopular ? "text-white" : "text-[#de6a07]"
                 }`}
               >
@@ -153,11 +150,11 @@ function AdditionalServiceItem({ name, price }: AdditionalServiceProps) {
           aria-label={name}
           className="size-[20px] text-[#de6a07]"
         />
-        <p className="font-['Comfortaa:Medium',_sans-serif] font-medium leading-[21px] text-[#4a3c2a] text-[14px] truncate">
+        <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[21px] text-[#4a3c2a] text-[14px] truncate">
           {name}
         </p>
       </div>
-      <p className="font-['Comfortaa:SemiBold',_sans-serif] font-semibold leading-[21px] text-[#de6a07] text-[14px] shrink-0 ml-2">
+      <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[21px] text-[#de6a07] text-[14px] shrink-0 ml-2">
         {price}
       </p>
     </div>
@@ -257,11 +254,11 @@ export default function Services() {
         {/* Title Section - Centered with max-width */}
         <div className="max-w-7xl mx-auto px-4 sm:px-8 md:px-12 lg:px-[57.5px] w-full">
           <div className="content-stretch flex flex-col gap-[12px] items-center w-full">
-            <p className="font-['Comfortaa:Bold',_sans-serif] leading-[40px] text-[#4a3c2a] text-[32px] text-center">
+            <p className="font-['Comfortaa:Bold',sans-serif] leading-[40px] text-[#4a3c2a] text-[32px] text-center">
               Our Premium Services
             </p>
             <div className="max-w-[672px] mx-auto">
-              <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[28px] text-[16px] text-[rgba(74,60,42,0.7)] text-center">
+              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[28px] text-[16px] text-[rgba(74,60,42,0.7)] text-center">
                 From basic baths to full spa treatments, we offer everything
                 your pet needs to look and feel their absolute best.
               </p>
@@ -299,15 +296,15 @@ export default function Services() {
 
         {/* Additional Services - Full width, no margins */}
         <div className="w-full">
-          <div className="bg-white relative w-full border border-[1px] border-[#de6a07] rounded-xl">
+            <div className="bg-white relative w-full border border-[#de6a07] rounded-xl">
             <div className="flex flex-col items-center w-full py-[24px] px-0 sm:px-[24px]">
               <div className="flex flex-col gap-[28px] items-center w-full">
                 {/* Additional Services Title */}
                 <div className="flex flex-col gap-[7px] items-center text-center max-w-[493px] mx-auto px-4 sm:px-0">
-                  <p className="font-['Comfortaa:Bold',_sans-serif] leading-[28px] text-[#4a3c2a] text-[21px]">
+                  <p className="font-['Comfortaa:Bold',sans-serif] leading-[28px] text-[#4a3c2a] text-[21px]">
                     Additional Services
                   </p>
-                  <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[21px] text-[14px] text-[rgba(74,60,42,0.7)]">
+                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[21px] text-[14px] text-[rgba(74,60,42,0.7)]">
                     Enhance your pet's grooming experience with our premium
                     add-ons
                   </p>
@@ -335,7 +332,7 @@ export default function Services() {
                     setShowAllServicesMobile(!showAllServicesMobile)
                   }
                 >
-                  <p className="font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] text-[#8b6357] text-[12px]">
+                  <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] text-[#8b6357] text-[12px]">
                     {showAllServicesMobile
                       ? "Show Less"
                       : "View All Services & Pricing"}

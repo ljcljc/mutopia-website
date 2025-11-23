@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 // 使用实际图片替换占位图片
 const imgIcon = "/images/logo.png";
 import { Icon } from "@/components/common/Icon";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "motion/react";
 import { OrangeButton } from "@/components/common";
 import { LoginModal } from "@/components/auth/LoginModal";
@@ -41,10 +41,10 @@ function LogoIcon() {
     <div className="h-[39px] relative shrink-0 w-[35px]" data-name="Icon">
       <img
         alt="Mutopia Logo"
-        className="absolute bg-clip-padding border-0 border-[transparent] border-solid box-border inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full"
+        className="absolute bg-clip-padding border-0 border-transparent border-solid box-border inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full"
         src={imgIcon}
       />
-      <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border h-[39px] w-[35px]" />
+      <div className="bg-clip-padding border-0 border-transparent border-solid box-border h-[39px] w-[35px]" />
     </div>
   );
 }
@@ -52,8 +52,8 @@ function LogoIcon() {
 function Mutopia() {
   return (
     <div className="h-[28px] relative shrink-0 w-[92.82px]" data-name="Mutopia">
-      <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border h-[28px] relative w-[92.82px]">
-        <p className="absolute font-['Comfortaa:Bold',_sans-serif] font-bold leading-[28px] left-0 text-[#8b6357] text-[21px] text-nowrap top-[-1px] whitespace-pre">
+      <div className="bg-clip-padding border-0 border-transparent border-solid box-border h-[28px] relative w-[92.82px]">
+        <p className="absolute font-['Comfortaa:Bold',sans-serif] font-bold leading-[28px] left-0 text-[#8b6357] text-[21px] text-nowrap -top-px whitespace-pre">
           Mutopia pet
         </p>
       </div>
@@ -67,7 +67,7 @@ function Logo() {
       className="basis-0 grow h-[35px] min-h-px min-w-px relative shrink-0 lg:basis-0 lg:grow"
       data-name="Logo"
     >
-      <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border content-stretch flex gap-[10.5px] h-[35px] items-center relative w-full">
+      <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[10.5px] h-[35px] items-center relative w-full">
             <LogoIcon />
         <Mutopia />
       </div>
@@ -83,11 +83,11 @@ function Link() {
 
   return (
     <div className="h-[21px] relative shrink-0 w-[53.398px]" data-name="Link">
-      <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border h-[21px] relative w-[53.398px]">
+      <div className="bg-clip-padding border-0 border-transparent border-solid box-border h-[21px] relative w-[53.398px]">
         <a
           href="#why-us"
           onClick={handleClick}
-          className="absolute font-['Comfortaa:Regular',_sans-serif] font-normal leading-[21px] left-0 text-[#4a3c2a] text-[14px] text-nowrap top-[0.5px] whitespace-pre hover:text-[#8b6357] transition-colors no-underline cursor-pointer"
+          className="absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[21px] left-0 text-[#4a3c2a] text-[14px] text-nowrap top-[0.5px] whitespace-pre hover:text-[#8b6357] transition-colors no-underline cursor-pointer"
         >
           Why Us
         </a>
@@ -104,11 +104,11 @@ function Link1() {
 
   return (
     <div className="h-[21px] relative shrink-0 w-[60.539px]" data-name="Link">
-      <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border h-[21px] relative w-[60.539px]">
+      <div className="bg-clip-padding border-0 border-transparent border-solid box-border h-[21px] relative w-[60.539px]">
         <a
           href="#services"
           onClick={handleClick}
-          className="absolute font-['Comfortaa:Regular',_sans-serif] font-normal leading-[21px] left-0 text-[#4a3c2a] text-[14px] text-nowrap top-[0.5px] whitespace-pre hover:text-[#8b6357] transition-colors no-underline cursor-pointer"
+          className="absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[21px] left-0 text-[#4a3c2a] text-[14px] text-nowrap top-[0.5px] whitespace-pre hover:text-[#8b6357] transition-colors no-underline cursor-pointer"
         >
           Services
         </a>
@@ -125,11 +125,11 @@ function Link2() {
 
   return (
     <div className="relative shrink-0 w-[68.508px]" data-name="Link">
-      <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border content-stretch flex gap-[10px] items-center justify-center relative w-[68.508px]">
+      <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[10px] items-center justify-center relative w-[68.508px]">
         <a
           href="#packages"
           onClick={handleClick}
-          className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[21px] relative shrink-0 text-[#4a3c2a] text-[14px] w-[92px] hover:text-[#8b6357] transition-colors no-underline cursor-pointer"
+          className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[21px] relative shrink-0 text-[#4a3c2a] text-[14px] w-[92px] hover:text-[#8b6357] transition-colors no-underline cursor-pointer"
         >
           Membership
         </a>
@@ -146,11 +146,11 @@ function Link3() {
 
   return (
     <div className="h-[21px] relative shrink-0 w-[29.531px]" data-name="Link">
-      <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border h-[21px] relative w-[29.531px]">
+      <div className="bg-clip-padding border-0 border-transparent border-solid box-border h-[21px] relative w-[29.531px]">
         <a
           href="#faq"
           onClick={handleClick}
-          className="absolute font-['Comfortaa:Regular',_sans-serif] font-normal leading-[21px] left-0 text-[#4a3c2a] text-[14px] text-nowrap top-[0.5px] whitespace-pre hover:text-[#8b6357] transition-colors no-underline cursor-pointer"
+          className="absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[21px] left-0 text-[#4a3c2a] text-[14px] text-nowrap top-[0.5px] whitespace-pre hover:text-[#8b6357] transition-colors no-underline cursor-pointer"
         >
           FAQ
         </a>
@@ -167,11 +167,11 @@ function Link4() {
 
   return (
     <div className="h-[21px] relative shrink-0 w-[58.219px]" data-name="Link">
-      <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border h-[21px] relative w-[58.219px]">
+      <div className="bg-clip-padding border-0 border-transparent border-solid box-border h-[21px] relative w-[58.219px]">
         <a
           href="#contact"
           onClick={handleClick}
-          className="absolute font-['Comfortaa:Regular',_sans-serif] font-normal leading-[21px] left-0 text-[#4a3c2a] text-[14px] text-nowrap top-[0.5px] whitespace-pre hover:text-[#8b6357] transition-colors no-underline cursor-pointer"
+          className="absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[21px] left-0 text-[#4a3c2a] text-[14px] text-nowrap top-[0.5px] whitespace-pre hover:text-[#8b6357] transition-colors no-underline cursor-pointer"
         >
           Contact
         </a>
@@ -186,7 +186,7 @@ function Navigation() {
       className="h-[21px] relative shrink-0 hidden lg:block"
       data-name="Navigation"
     >
-      <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border content-stretch flex gap-[28px] h-[21px] items-center relative">
+      <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[28px] h-[21px] items-center relative">
         <Link />
         <Link1 />
         <Link2 />
@@ -255,7 +255,7 @@ function UserInfo() {
                 className="block size-full text-white"
               />
             </div>
-            <p className="font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] text-[#8b6357] text-[12px]">
+            <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] text-[#8b6357] text-[12px]">
               {user.name}
             </p>
           </div>
@@ -265,7 +265,7 @@ function UserInfo() {
             onClick={handleLogout}
             className="cursor-pointer text-[#8b6357] hover:text-[#6f4e44] hover:bg-[#8b6357]/5"
           >
-            <span className="font-['Comfortaa:Regular',_sans-serif] font-normal text-[14px]">
+            <span className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px]">
               Log out
             </span>
           </DropdownMenuItem>
@@ -295,7 +295,7 @@ function Buttons() {
       className="basis-0 grow h-[28px] min-h-px min-w-px relative shrink-0 hidden lg:block lg:basis-0 lg:grow"
       data-name="Buttons"
     >
-      <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border content-stretch flex gap-[10.5px] h-[28px] items-center justify-end relative w-full">
+      <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[10.5px] h-[28px] items-center justify-end relative w-full">
         <ButtonCompactSecondaryOrange />
         {user ? <UserInfo /> : <ButtonCompactPrincipalOrange />}
       </div>
@@ -330,7 +330,7 @@ function MobileLink({
       <a
         href={href}
         onClick={handleClick}
-        className="absolute flex flex-col font-['Comfortaa:Regular',_sans-serif] font-normal h-[48px] justify-center leading-[0] left-1/2 text-[#4a3c2a] text-[14px] text-center top-1/2 -translate-x-1/2 -translate-y-1/2 w-full hover:text-[#8b6357] transition-colors no-underline cursor-pointer"
+        className="absolute flex flex-col font-['Comfortaa:Regular',sans-serif] font-normal h-[48px] justify-center leading-0 left-1/2 text-[#4a3c2a] text-[14px] text-center top-1/2 -translate-x-1/2 -translate-y-1/2 w-full hover:text-[#8b6357] transition-colors no-underline cursor-pointer"
       >
         <p className="leading-[21px]">{children}</p>
       </a>
@@ -350,8 +350,8 @@ function MobileButton1() {
         className="absolute border-[0.737px] border-[rgba(0,0,0,0.1)] border-solid inset-0 pointer-events-none rounded-[2.47134e+07px]"
       />
       <div className="flex flex-row items-center justify-center size-full">
-        <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border content-stretch flex gap-[5.25px] h-[48px] items-center justify-center px-[11.237px] py-[0.737px] relative w-full">
-          <p className="font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12.25px] text-nowrap whitespace-pre">
+        <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[5.25px] h-[48px] items-center justify-center px-[11.237px] py-[0.737px] relative w-full">
+          <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12.25px] text-nowrap whitespace-pre">
             Apply to Groomer
           </p>
         </div>
@@ -404,10 +404,10 @@ function MobileButton2() {
               />
             </div>
             <div className="flex flex-col flex-1">
-              <p className="font-['Comfortaa:SemiBold',_sans-serif] font-semibold text-[#4a3c2a] text-[14px]">
+              <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[#4a3c2a] text-[14px]">
                 {user.name}
               </p>
-              <p className="font-['Comfortaa:Regular',_sans-serif] font-normal text-[#717182] text-[12px]">
+              <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#717182] text-[12px]">
                 {user.email}
               </p>
             </div>
@@ -424,8 +424,8 @@ function MobileButton2() {
             className="absolute border-[0.737px] border-[rgba(0,0,0,0.1)] border-solid inset-0 pointer-events-none rounded-[2.47134e+07px]"
           />
           <div className="flex flex-row items-center justify-center size-full">
-            <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border content-stretch flex gap-[5.25px] h-[48px] items-center justify-center px-[11.237px] py-[0.737px] relative w-full">
-              <p className="font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12.25px] text-nowrap whitespace-pre">
+            <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[5.25px] h-[48px] items-center justify-center px-[11.237px] py-[0.737px] relative w-full">
+              <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12.25px] text-nowrap whitespace-pre">
                 Log out
               </p>
             </div>
@@ -442,8 +442,8 @@ function MobileButton2() {
         data-name="Button"
       >
         <div className="flex flex-row items-center justify-center size-full">
-          <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border content-stretch flex gap-[5.25px] h-[48px] items-center justify-center px-[10.5px] py-0 relative w-full">
-            <p className="font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[12.25px] text-nowrap text-white whitespace-pre">
+          <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[5.25px] h-[48px] items-center justify-center px-[10.5px] py-0 relative w-full">
+            <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[12.25px] text-nowrap text-white whitespace-pre">
               Login / Sign Up
             </p>
           </div>
@@ -530,7 +530,7 @@ function CloseButton({ onClick }: { onClick: () => void }) {
       className="relative shrink-0 size-[23.994px] cursor-pointer"
       data-name="Button"
     >
-      <div className="bg-clip-padding border-0 border-[transparent] border-solid box-border content-stretch flex flex-col items-start relative size-[23.994px]">
+      <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex flex-col items-start relative size-[23.994px]">
         <div
           className="h-[23.994px] overflow-clip relative shrink-0 w-full"
           data-name="Icon"
@@ -682,3 +682,4 @@ export default function Header() {
     </div>
   );
 }
+
