@@ -5,6 +5,39 @@
 @source "./App.tsx";
 @source "./main.tsx";
 
+/* Local Comfortaa font faces */
+@font-face {
+  font-family: 'Comfortaa';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/comfortaa-regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Comfortaa';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/comfortaa-medium.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Comfortaa';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/comfortaa-semibold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Comfortaa';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/comfortaa-bold.ttf') format('truetype');
+}
+
 /* Global font settings */
 body {
   font-family: "Comfortaa", cursive, ui-sans-serif, system-ui, sans-serif;

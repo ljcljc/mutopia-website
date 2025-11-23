@@ -24,7 +24,10 @@
     "clean": "rm -rf node_modules dist .vite",
     "reinstall": "pnpm clean && pnpm install",
     "update": "pnpm update --interactive",
-    "outdated": "pnpm outdated"
+    "outdated": "pnpm outdated",
+    "download-fonts": "node scripts/download-fonts.js",
+    "generate-font-css": "node scripts/generate-font-css.js",
+    "setup-fonts": "pnpm download-fonts && pnpm generate-font-css"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.1",
