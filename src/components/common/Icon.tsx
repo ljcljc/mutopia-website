@@ -36,6 +36,7 @@ import IconCalendarSvg from "@/assets/icons/icon-calendar.svg?react";
 import IconAlertErrorSvg from "@/assets/icons/icon-alert-error.svg?react";
 import IconAlertSuccessSvg from "@/assets/icons/icon-alert-success.svg?react";
 import IconAlertWarningSvg from "@/assets/icons/icon-alert-warning.svg?react";
+import IconAlertInfoSvg from "@/assets/icons/icon-alert-info.svg?react";
 import IconEyeVisibleSvg from "@/assets/icons/icon-eye-visible.svg?react";
 import IconEyeInvisibleSvg from "@/assets/icons/icon-eye-invisible.svg?react";
 import IconFacebookSvg from "@/assets/icons/icon-facebook.svg?react";
@@ -74,6 +75,7 @@ const iconComponentMap = {
   "alert-error": IconAlertErrorSvg,
   "alert-success": IconAlertSuccessSvg,
   "alert-warning": IconAlertWarningSvg,
+  "alert-info": IconAlertInfoSvg,
   "eye-visible": IconEyeVisibleSvg,
   "eye-invisible": IconEyeInvisibleSvg,
   "facebook": IconFacebookSvg,
