@@ -66,6 +66,8 @@ import IconDogSvg from "@/assets/icons/icon-dog.svg?react";
 import IconCatSvg from "@/assets/icons/icon-cat.svg?react";
 import IconPetSvg from "@/assets/icons/icon-pet.svg?react";
 import IconSearchSvg from "@/assets/icons/icon-search.svg?react";
+import IconImageSvg from "@/assets/icons/icon-image.svg?react";
+import IconAddSvg from "@/assets/icons/icon-add.svg?react";
 
 // 图标组件映射表
 const iconComponentMap = {
@@ -111,6 +113,8 @@ const iconComponentMap = {
   "cat": IconCatSvg,
   "pet": IconPetSvg,
   "search": IconSearchSvg,
+  "image": IconImageSvg,
+  "add": IconAddSvg,
 } as const;
 
 export type IconName = keyof typeof iconComponentMap;

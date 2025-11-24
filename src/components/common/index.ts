@@ -13,6 +13,7 @@ export {
 export * from "./CustomInput";
 export * from "./CustomSelect";
 export * from "./CustomTextarea";
+export * from "./FileUpload";
 export * from "./DatePicker";
 export * from "./OrangeButton";
 export * from "./PurpleButton";

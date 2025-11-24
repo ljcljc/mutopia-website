@@ -28,6 +28,7 @@ interface BookingState {
   petType: PetType;
   breed: string;
   isMixedBreed: boolean;
+  precisePetType: string; // For "other" pet type
   dateOfBirth: string; // YYYY-MM format
   gender: Gender | "";
   weight: string;
@@ -55,6 +56,7 @@ interface BookingState {
   setPetType: (type: PetType) => void;
   setBreed: (breed: string) => void;
   setIsMixedBreed: (isMixed: boolean) => void;
+  setPrecisePetType: (type: string) => void;
   setDateOfBirth: (date: string) => void;
   setGender: (gender: Gender | "") => void;
   setWeight: (weight: string) => void;
@@ -81,6 +83,7 @@ const initialState = {
   petType: "dog" as PetType,
   breed: "",
   isMixedBreed: false,
+  precisePetType: "",
   dateOfBirth: "",
   gender: "" as Gender | "",
   weight: "",
@@ -121,6 +124,8 @@ export const useBookingStore = create<BookingState>((set) => ({
   setBreed: (breed) => set({ breed }),
 
   setIsMixedBreed: (isMixed) => set({ isMixedBreed: isMixed }),
+
+  setPrecisePetType: (type) => set({ precisePetType: type }),
 
   setDateOfBirth: (date) => set({ dateOfBirth: date }),
 

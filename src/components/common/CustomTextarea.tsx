@@ -8,6 +8,8 @@ export interface CustomTextareaProps
   helperText?: string;
   error?: string;
   showResizeHandle?: boolean;
+  labelClassName?: string;
+  helperTextClassName?: string;
 }
 
 export function CustomTextarea({
@@ -17,6 +19,8 @@ export function CustomTextarea({
   helperText,
   error,
   showResizeHandle = true,
+  labelClassName,
+  helperTextClassName,
   onFocus,
   onBlur,
   disabled,
@@ -31,7 +35,7 @@ export function CustomTextarea({
       ? "border-[#2374ff]"
       : isHovered
         ? "border-[#717182]"
-        : "border-[#E5E7EB]";
+        : "border-gray-200";
 
   const labelColor = error ? "text-[#de1507]" : "text-[#4a3c2a]";
 
@@ -53,7 +57,8 @@ export function CustomTextarea({
           <p
             className={cn(
               "font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] text-[14px] text-nowrap whitespace-pre",
-              labelColor
+              labelColor,
+              labelClassName
             )}
           >
             {label}
@@ -64,7 +69,7 @@ export function CustomTextarea({
       {/* Textarea Container */}
       <div
         className={cn(
-          "bg-white relative rounded-[12px] shrink-0 w-full h-[120px] transition-colors duration-200 border",
+          "bg-white relative rounded-[12px] shrink-0 w-full h-[120px] max-h-[120px] transition-colors duration-200 border",
           borderColor,
           disabled ? "opacity-60 cursor-not-allowed" : ""
         )}
@@ -75,7 +80,7 @@ export function CustomTextarea({
           placeholder={placeholder}
           disabled={disabled}
           className={cn(
-            "h-full resize-none border-none bg-transparent outline-none shadow-none font-['Comfortaa:Regular',sans-serif] font-normal text-[#717182] text-[12.25px] placeholder:text-[#717182] px-[16px] py-[12px]",
+            "h-full resize-none border-none bg-transparent outline-none shadow-none font-['Comfortaa:Regular',sans-serif] font-normal text-[#717182] text-[12px] leading-[18px] placeholder:text-[#717182] px-[16px] py-[12px]",
             "focus-visible:ring-0 focus-visible:border-none focus-visible:outline-none",
             className
           )}
@@ -86,11 +91,9 @@ export function CustomTextarea({
 
         {/* Resize Icon */}
         {showResizeHandle && (
-          <div className="absolute right-[16px] bottom-[12px] pointer-events-none">
+          <div className="absolute right-[16px] bottom-[12px] h-[17.5px] w-[15.5px] pointer-events-none">
             <svg
-              className="block"
-              width="16"
-              height="16"
+              className="block size-full"
               viewBox="0 0 16 16"
               fill="none"
             >
@@ -132,7 +135,10 @@ export function CustomTextarea({
           {error}
         </p>
       ) : helperText ? (
-        <p className="font-['Comfortaa:Medium',sans-serif] text-[12px] text-[#4c4c4c]">
+        <p className={cn(
+          "font-['Comfortaa:Regular',sans-serif] font-normal leading-[14px] text-[10.5px] text-[#6a7282]",
+          helperTextClassName
+        )}>
           {helperText}
         </p>
       ) : null}

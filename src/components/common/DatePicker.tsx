@@ -353,11 +353,11 @@ export function DatePicker({
   };
 
   return (
-    <div className="relative w-full" ref={pickerRef}>
+    <div className="content-stretch flex flex-col gap-[8px] items-start relative w-full">
       {/* Label */}
       {label && (
         <div
-          className="content-stretch flex gap-[7px] items-center relative shrink-0 w-full"
+          className="content-stretch flex gap-[7px] h-[12.25px] items-center relative shrink-0 w-full"
           data-name="Primitive.label"
         >
           <p
@@ -369,7 +369,7 @@ export function DatePicker({
       )}
 
       {/* Input */}
-      <div className="relative">
+      <div className="relative w-full" ref={pickerRef}>
         <div
           onClick={() => {
             setIsOpen(!isOpen);
