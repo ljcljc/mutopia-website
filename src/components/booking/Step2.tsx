@@ -193,39 +193,39 @@ export function Step2() {
 
             {/* Breed - Hidden when pet type is cat or other */}
             {petType !== "cat" && petType !== "other" && (
-              <div className="flex flex-col gap-[8px] items-start relative shrink-0 w-full">
-                <div className="flex h-[12.25px] items-center justify-between relative shrink-0 w-full">
+            <div className="flex flex-col gap-[8px] items-start relative shrink-0 w-full">
+              <div className="flex h-[12.25px] items-center justify-between relative shrink-0 w-full">
+                <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[14px]">
+                  Breed
+                </p>
+                <div className="flex gap-[4px] items-center justify-end relative shrink-0">
+                  <Switch 
+                    checked={isMixedBreed} 
+                    onCheckedChange={setIsMixedBreed}
+                  />
                   <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[14px]">
-                    Breed
+                    Mixed breed
                   </p>
-                  <div className="flex gap-[4px] items-center justify-end relative shrink-0">
-                    <Switch 
-                      checked={isMixedBreed} 
-                      onCheckedChange={setIsMixedBreed}
-                    />
-                    <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[14px]">
-                      Mixed breed
-                    </p>
-                  </div>
                 </div>
-                <CustomSelect
-                  placeholder="Select or type breed"
-                  value={breed}
-                  onValueChange={setBreed}
-                  leftElement={
-                    <Icon
-                      name="search"
-                      className="relative shrink-0 w-[20px] h-[20px] text-[#717182]"
-                    />
-                  }
-                >
-                  {getBreedOptions(petType).map((breedOption) => (
-                    <CustomSelectItem key={breedOption} value={breedOption}>
-                      {breedOption}
-                    </CustomSelectItem>
-                  ))}
-                </CustomSelect>
               </div>
+              <CustomSelect
+                placeholder="Select or type breed"
+                value={breed}
+                onValueChange={setBreed}
+                leftElement={
+                  <Icon
+                    name="search"
+                    className="relative shrink-0 w-[20px] h-[20px] text-[#717182]"
+                  />
+                }
+              >
+                {getBreedOptions(petType).map((breedOption) => (
+                  <CustomSelectItem key={breedOption} value={breedOption}>
+                    {breedOption}
+                  </CustomSelectItem>
+                ))}
+              </CustomSelect>
+            </div>
             )}
 
             {/* Precise pet type - Only shown when pet type is other */}
@@ -448,10 +448,10 @@ export function Step2() {
             </p>
             <div className="flex flex-col gap-[12px] items-start overflow-clip relative shrink-0 w-full">
               <FileUpload
-                accept="image/*"
+                          accept="image/*"
                 multiple={false}
                 maxSizeMB={10}
-                onChange={handlePetPhotoChange}
+                          onChange={handlePetPhotoChange}
                 icon="image"
                 buttonText="Click to upload"
                 fileTypeHint="JPG, JPEG, PNG less than 10MB"
@@ -469,14 +469,14 @@ export function Step2() {
       {/* Special Notes Card */}
       <div className="bg-white box-border flex flex-col gap-[20px] items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
         <div className="flex flex-col gap-[12px] items-start relative shrink-0 w-full">
-          <CustomTextarea
-            label="Special instruments or notes (optional)"
-            placeholder="e.g., 'My dog is nervous around clippers', 'Has sensitive skin', 'I have 2 pets and prefer to groom together..."
-            value={specialNotes}
-            onChange={(e) => setSpecialNotes(e.target.value)}
-            helperText="Include any health conditions, behavioral notes, or grooming preferences"
+            <CustomTextarea
+              label="Special instruments or notes (optional)"
+              placeholder="e.g., 'My dog is nervous around clippers', 'Has sensitive skin', 'I have 2 pets and prefer to groom together..."
+              value={specialNotes}
+              onChange={(e) => setSpecialNotes(e.target.value)}
+              helperText="Include any health conditions, behavioral notes, or grooming preferences"
             labelClassName="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] text-[16px]"
-          />
+            />
         </div>
       </div>
 

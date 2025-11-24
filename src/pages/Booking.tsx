@@ -49,7 +49,7 @@ export default function Booking() {
   return (
     <div className="box-border content-stretch flex flex-col gap-[60px] items-center pb-[100px] pt-[60px] px-0 w-full min-h-full relative bg-[#f9f1e8]">
       {/* Content */}
-      <div className="content-stretch flex flex-col gap-[16px] items-start relative shrink-0 w-[780px] max-w-[780px] px-4">
+      <div className="content-stretch flex flex-col gap-[16px] items-start relative shrink-0 w-[780px] max-w-[780px]">
         {/* Progress Steps */}
         <ProgressSteps
           currentStep={currentStep}

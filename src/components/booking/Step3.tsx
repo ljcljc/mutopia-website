@@ -1,5 +1,5 @@
 import { Icon } from "@/components/common/Icon";
-import { Checkbox, OrangeButton, CustomRadio } from "@/components/common";
+import { CommonCheckbox, OrangeButton, CustomRadio } from "@/components/common";
 import { useBookingStore } from "./bookingStore";
 import { cn } from "@/components/ui/utils";
 
@@ -125,7 +125,6 @@ export function Step3() {
                   key={pkg.id}
                   variant="package"
                   label={pkg.name}
-                  icon={pkg.icon as "bath-brush" | "full-grooming"}
                   description={pkg.description}
                   price={pkg.price}
                   duration={pkg.duration}
@@ -190,55 +189,15 @@ export function Step3() {
               {addOns.map((addOn) => {
                 const isSelected = selectedAddOns.includes(addOn.id);
                 return (
-                  <div
+                  <CommonCheckbox
                     key={addOn.id}
-                    className="border-2 border-gray-200 border-solid box-border content-stretch flex flex-col items-start p-[16px] relative rounded-[14px] shrink-0"
-                  >
-                    <div className="content-stretch flex items-start justify-between relative shrink-0 w-full">
-                      <div className="relative shrink-0">
-                        <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[8px] items-start relative">
-                          <div className="content-stretch flex gap-[10px] h-[21px] items-center relative shrink-0">
-                            <Checkbox
-                              checked={isSelected}
-                              onCheckedChange={() => toggleAddOn(addOn.id)}
-                              containerClassName="cursor-pointer"
-                            />
-                          </div>
-                          <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0">
-                            <div className="h-[21px] relative shrink-0">
-                              <p className="absolute font-['Comfortaa:Medium',sans-serif] font-medium leading-[21px] left-0 text-[14px] text-[#8b6357] top-[0.5px]">
-                                {addOn.name}
-                              </p>
-                            </div>
-                            <div className="content-stretch flex gap-[10px] items-center justify-center relative shrink-0 w-full">
-                              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[#4a5565] text-[12.25px]">
-                                {addOn.description}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="relative shrink-0">
-                        <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex flex-col gap-[4px] items-end justify-center relative">
-                          <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[21px] relative shrink-0 text-[14px] text-[#de6a07]">
-                            ${addOn.price}
-                          </p>
-                          {addOn.duration && (
-                            <div className="content-stretch flex gap-[7px] h-[17.5px] items-center relative shrink-0">
-                              <Icon name="clock" size={16} className="text-[rgba(74,60,42,0.6)]" />
-                              <div className="relative shrink-0">
-                                <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[10px] items-center justify-center relative">
-                                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[12.25px] text-[rgba(74,60,42,0.6)]">
-                                    {addOn.duration}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                    name={addOn.name}
+                    description={addOn.description}
+                    price={addOn.price}
+                    duration={addOn.duration}
+                    checked={isSelected}
+                    onCheckedChange={() => toggleAddOn(addOn.id)}
+                  />
                 );
               })}
             </div>

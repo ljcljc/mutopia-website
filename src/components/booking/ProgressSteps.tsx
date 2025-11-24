@@ -113,7 +113,7 @@ export function ProgressStepCompleted({ number }: { number: number }) {
                 ) : (
                   <ProgressStepInactive number={step} />
                 )}
-                {!isLast && <ProgressLine active={isCompleted || isActive} />}
+                <ProgressLine active={isCompleted || isActive} />
               </div>
             );
           })}
