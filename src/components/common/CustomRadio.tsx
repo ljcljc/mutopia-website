@@ -7,11 +7,14 @@ export interface CustomRadioProps {
   label: string;
   icon?: "dog" | "cat" | "pet" | "van" | "shop";
   description?: string; // For tiles with description (like GroomingFrequencyTile)
-  variant?: "simple" | "with-description"; // Layout variant
+  variant?: "simple" | "with-description" | "package"; // Layout variant
   isSelected?: boolean;
   onClick?: () => void;
   className?: string;
   disabled?: boolean;
+  // Package variant specific props
+  price?: string | number; // Price to display on the right
+  duration?: string; // Duration to display below price
 }
 
 // Shared radio button component
@@ -44,6 +47,35 @@ const hoverClasses = "hover:border-[#E5A56E]";
 const focusClasses = "focus-visible:ring-2 focus-visible:ring-[#2374ff] focus-visible:ring-offset-2 focus-visible:border-[#2374ff]";
 const disabledClasses = "opacity-50 cursor-not-allowed";
 
+// Shared component for price and duration display
+function PriceAndDuration({ priceText, duration }: { priceText?: string; duration?: string }) {
+  if (!priceText && !duration) return null;
+
+  return (
+    <div className="relative shrink-0">
+      <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex flex-col gap-[4px] items-end justify-center relative">
+        {priceText && (
+          <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[21px] relative shrink-0 text-[14px] text-[#de6a07]">
+            {priceText}
+          </p>
+        )}
+        {duration && (
+          <div className="content-stretch flex gap-[7px] h-[17.5px] items-center relative shrink-0">
+            <Icon name="clock" size={16} className="text-[rgba(74,60,42,0.6)]" />
+            <div className="relative shrink-0">
+              <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[10px] items-center justify-center relative">
+                <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[12.25px] text-[rgba(74,60,42,0.6)]">
+                  {duration}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function CustomRadio({
   label,
   icon,
@@ -53,6 +85,8 @@ export function CustomRadio({
   onClick,
   className,
   disabled,
+  price,
+  duration,
 }: CustomRadioProps) {
   const handleChange = () => {
     if (onClick && !disabled) {
@@ -76,6 +110,55 @@ export function CustomRadio({
     disabled && disabledClasses,
     className
   );
+
+  if (variant === "package") {
+    const priceText = typeof price === "number" ? `$${price}` : price;
+    return (
+      <button
+        type="button"
+        onClick={handleChange}
+        disabled={disabled}
+        className={cn(buttonClasses, "flex flex-col items-start p-[16px] w-full")}
+      >
+        <div className="content-stretch flex items-start justify-between relative shrink-0 w-full min-h-[42px]">
+          <div className="relative shrink-0">
+            <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[10px] items-start relative">
+              <RadioButton isChecked={isSelected} />
+              <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0">
+                <div className="h-[21px] relative shrink-0 w-[141.891px]">
+                  <p
+                    className={cn(
+                      "absolute leading-[21px] left-0 text-[14px] top-[0.5px] text-[#8b6357]",
+                      isSelected
+                        ? "font-['Comfortaa:Bold',sans-serif] font-bold"
+                        : "font-['Comfortaa:Medium',sans-serif] font-medium"
+                    )}
+                  >
+                    {label}
+                  </p>
+                </div>
+                {description && (
+                  <div className="content-stretch flex gap-[10px] items-center justify-center relative shrink-0 w-full min-h-[17.5px]">
+                    <p
+                      className={cn(
+                        "font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[#4a5565] text-[12.25px]",
+                        isSelected
+                          ? "font-['Comfortaa:Bold',sans-serif] font-bold"
+                          : "font-['Comfortaa:Regular',sans-serif] font-normal"
+                      )}
+                    >
+                      {description}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          <PriceAndDuration priceText={priceText} duration={duration} />
+        </div>
+      </button>
+    );
+  }
 
   if (variant === "with-description") {
     return (
@@ -159,6 +242,8 @@ export const CustomRadioItem = React.forwardRef<
     className,
     value,
     disabled,
+    price,
+    duration,
     ...props
   },
   ref
@@ -177,6 +262,62 @@ export const CustomRadioItem = React.forwardRef<
     disabled && disabledClasses,
     className
   );
+
+  if (variant === "package") {
+    const priceText = typeof price === "number" ? `$${price}` : price;
+    return (
+      <label htmlFor={inputId} className="cursor-pointer">
+        <RadioGroupPrimitive.Item
+          ref={ref}
+          id={inputId}
+          value={value}
+          disabled={disabled}
+          className="peer sr-only"
+          {...props}
+        />
+        <div
+          className={cn(
+            peerTileClasses,
+            "flex flex-col items-start p-[16px] w-full"
+          )}
+        >
+          <div className="content-stretch flex items-start justify-between relative shrink-0 w-full min-h-[42px]">
+            <div className="relative shrink-0">
+              <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[10px] items-start relative">
+                <RadioButtonPeer />
+                <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0">
+                  <div className="h-[21px] relative shrink-0 w-[141.891px]">
+                    <p
+                      className={cn(
+                        "absolute leading-[21px] left-0 text-[14px] top-[0.5px] text-[#8b6357]",
+                        "font-['Comfortaa:Medium',sans-serif] font-medium",
+                        "peer-data-[state=checked]:font-['Comfortaa:Bold',sans-serif] peer-data-[state=checked]:font-bold"
+                      )}
+                    >
+                      {label}
+                    </p>
+                  </div>
+                  {description && (
+                    <div className="content-stretch flex gap-[10px] items-center justify-center relative shrink-0 w-full min-h-[17.5px]">
+                      <p
+                        className={cn(
+                          "font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[#4a5565] text-[12.25px]",
+                          "peer-data-[state=checked]:font-['Comfortaa:Bold',sans-serif] peer-data-[state=checked]:font-bold"
+                        )}
+                      >
+                        {description}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            <PriceAndDuration priceText={priceText} duration={duration} />
+          </div>
+        </div>
+      </label>
+    );
+  }
 
   if (variant === "with-description") {
     return (

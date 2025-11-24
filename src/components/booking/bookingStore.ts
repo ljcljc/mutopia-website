@@ -8,6 +8,7 @@ export type Behavior = "friendly" | "anxious" | "hard-to-handle" | "senior-pets"
 export type GroomingFrequency = "weekly" | "bi-weekly" | "monthly" | "occasionally";
 export type WeightUnit = "lbs" | "kg";
 export type Gender = "male" | "female" | "neutered" | "spayed";
+export type ServicePackage = "premium-bath" | "full-grooming";
 
 interface BookingState {
   // Step management
@@ -40,6 +41,10 @@ interface BookingState {
   referenceStyles: File[];
   specialNotes: string;
 
+  // Step 3: Service package and add-ons
+  servicePackage: ServicePackage | "";
+  addOns: string[]; // Array of add-on IDs
+
   // UI state
   isLoginModalOpen: boolean;
 
@@ -67,6 +72,9 @@ interface BookingState {
   setPetPhoto: (file: File | null) => void;
   setReferenceStyles: (files: File[]) => void;
   setSpecialNotes: (notes: string) => void;
+  setServicePackage: (pkg: ServicePackage | "") => void;
+  setAddOns: (addOns: string[]) => void;
+  toggleAddOn: (addOnId: string) => void;
   setIsLoginModalOpen: (isOpen: boolean) => void;
   loadUserInfo: () => Promise<void>;
   reset: () => void;
@@ -94,6 +102,8 @@ const initialState = {
   petPhoto: null as File | null,
   referenceStyles: [] as File[],
   specialNotes: "",
+  servicePackage: "" as ServicePackage | "",
+  addOns: [] as string[],
   isLoginModalOpen: false,
   userInfo: null as MeOut | null,
 };
@@ -146,6 +156,21 @@ export const useBookingStore = create<BookingState>((set) => ({
   setReferenceStyles: (files) => set({ referenceStyles: files }),
 
   setSpecialNotes: (notes) => set({ specialNotes: notes }),
+
+  setServicePackage: (pkg) => set({ servicePackage: pkg }),
+
+  setAddOns: (addOns) => set({ addOns }),
+
+  toggleAddOn: (addOnId) =>
+    set((state) => {
+      const currentAddOns = state.addOns;
+      const isSelected = currentAddOns.includes(addOnId);
+      return {
+        addOns: isSelected
+          ? currentAddOns.filter((id) => id !== addOnId)
+          : [...currentAddOns, addOnId],
+      };
+    }),
 
   setIsLoginModalOpen: (isLoginModalOpen) => set({ isLoginModalOpen }),
 
