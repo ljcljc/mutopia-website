@@ -1,128 +1,12 @@
 import { useState, useEffect } from "react";
 import { Icon } from "@/components/common/Icon";
-import { CustomInput, CustomSelect, CustomSelectItem } from "@/components/common";
+import { CustomInput, CustomSelect, CustomSelectItem, CustomRadio } from "@/components/common";
 import { CustomTextarea } from "@/components/common/CustomTextarea";
 import { DatePicker } from "@/components/common/DatePicker";
 import { OrangeButton } from "@/components/common/OrangeButton";
 import { Switch } from "@/components/ui/switch";
 import { useBookingStore } from "./bookingStore";
 import type { WeightUnit, Gender, PetType } from "./bookingStore";
-
-// SelectTile component for pet type, coat condition, behavior, and grooming frequency
-function SelectTile({
-  label,
-  icon,
-  isSelected,
-  onClick,
-  className = "",
-}: {
-  label: string;
-  icon?: "dog" | "cat" | "pet";
-  isSelected: boolean;
-  onClick: () => void;
-  className?: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`border-2 border-solid box-border flex flex-col items-center justify-center p-[16px] relative rounded-[14px] w-auto cursor-pointer transition-colors ${
-        isSelected
-          ? "border-[#de6a07] bg-[#fff3e9]"
-          : "border-gray-200 bg-white hover:border-gray-300"
-      } ${className}`}
-    >
-      <div className="flex flex-col gap-[12px] items-center justify-center relative w-full">
-        <div className="flex gap-[8px] items-center justify-center relative">
-          <div className="relative size-[16px]">
-            <div
-              className={`size-[16px] rounded-full border-2 ${
-                isSelected
-                  ? "border-[#8b6357] bg-[#8b6357]"
-                  : "border-gray-300 bg-white"
-              }`}
-            >
-              {isSelected && (
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[6px] rounded-full bg-white" />
-              )}
-            </div>
-          </div>
-          <div className="flex flex-col gap-[4px] items-center relative">
-            <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[21px] relative text-[14px] text-[#8b6357] whitespace-nowrap">
-              {label}
-            </p>
-            {icon && (
-              <div className="flex items-center justify-center relative h-[24px]">
-                <div className="relative size-[24px]">
-                  <Icon
-                    name={icon}
-                    aria-label={icon}
-                    className="block size-full text-[#8b6357]"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </button>
-  );
-}
-
-// GroomingFrequencyTile component
-function GroomingFrequencyTile({
-  title,
-  description,
-  isSelected,
-  onClick,
-}: {
-  title: string;
-  description: string;
-  isSelected: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`border-2 border-solid box-border flex flex-col items-start p-[16px] relative rounded-[14px] w-full cursor-pointer transition-colors ${
-        isSelected
-          ? "border-[#de6a07] bg-[#fff3e9]"
-          : "border-gray-200 bg-white hover:border-gray-300"
-      }`}
-    >
-      <div className="flex gap-[123.758px] items-start relative shrink-0 w-full">
-        <div className="relative shrink-0">
-          <div className="bg-clip-padding border-0 border-transparent border-solid box-border flex gap-[8px] items-start relative">
-            <div className="flex gap-[10px] h-[21px] items-center relative shrink-0">
-              <div className="relative shrink-0 size-[16px]">
-                <div
-                  className={`size-[16px] rounded-full border-2 ${
-                    isSelected
-                      ? "border-[#8b6357] bg-[#8b6357]"
-                      : "border-gray-300 bg-white"
-                  }`}
-                >
-                  {isSelected && (
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[6px] rounded-full bg-white" />
-                  )}
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-col gap-[4px] items-start relative shrink-0">
-              <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[21px] relative text-[14px] text-[#8b6357]">
-                {title}
-              </p>
-              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative text-[#4a5565] text-[12.25px]">
-                {description}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </button>
-  );
-}
 
 
 // Breed options based on pet type
@@ -286,19 +170,19 @@ export function Step2() {
                 </p>
               </div>
               <div className="flex gap-[8px] items-start relative shrink-0">
-                <SelectTile
+                <CustomRadio
                   label="Dog"
                   icon="dog"
                   isSelected={petType === "dog"}
                   onClick={() => setPetType("dog")}
                 />
-                <SelectTile
+                <CustomRadio
                   label="Cat"
                   icon="cat"
                   isSelected={petType === "cat"}
                   onClick={() => setPetType("cat")}
                 />
-                <SelectTile
+                <CustomRadio
                   label="Other"
                   icon="pet"
                   isSelected={petType === "other"}
@@ -416,19 +300,19 @@ export function Step2() {
                   </p>
                 </div>
                 <div className="flex gap-[8px] items-stretch relative shrink-0">
-                  <SelectTile
+                  <CustomRadio
                     label="Not matted"
                     isSelected={coatCondition === "not-matted"}
                     onClick={() => setCoatCondition("not-matted")}
                     className="self-stretch"
                   />
-                  <SelectTile
+                  <CustomRadio
                     label="Matted"
                     isSelected={coatCondition === "matted"}
                     onClick={() => setCoatCondition("matted")}
                     className="self-stretch"
                   />
-                  <SelectTile
+                  <CustomRadio
                     label="Severely matted"
                     isSelected={coatCondition === "severely-matted"}
                     onClick={() => setCoatCondition("severely-matted")}
@@ -445,25 +329,25 @@ export function Step2() {
                   </p>
                 </div>
                 <div className="flex gap-[8px] items-stretch relative shrink-0">
-                  <SelectTile
+                  <CustomRadio
                     label="Friendly"
                     isSelected={behavior === "friendly"}
                     onClick={() => setBehavior("friendly")}
                     className="self-stretch"
                   />
-                  <SelectTile
+                  <CustomRadio
                     label="Anxious"
                     isSelected={behavior === "anxious"}
                     onClick={() => setBehavior("anxious")}
                     className="self-stretch"
                   />
-                  <SelectTile
+                  <CustomRadio
                     label="Hard to handle"
                     isSelected={behavior === "hard-to-handle"}
                     onClick={() => setBehavior("hard-to-handle")}
                     className="self-stretch"
                   />
-                  <SelectTile
+                  <CustomRadio
                     label="Senior pets"
                     isSelected={behavior === "senior-pets"}
                     onClick={() => setBehavior("senior-pets")}
@@ -488,7 +372,7 @@ export function Step2() {
                 <div className="flex gap-[8px] items-start relative shrink-0">
                   <Icon
                     name="alert-info"
-                    className="relative shrink-0 size-[12px] text-[#193cb8]"
+                    className="relative shrink-0 size-[12px] text-[#ffffff]"
                   />
                   <div className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[14px] relative shrink-0 text-[#193cb8] text-[10px] whitespace-nowrap">
                     <p className="font-['Comfortaa:Bold',sans-serif] font-bold mb-0">
@@ -503,29 +387,33 @@ export function Step2() {
             </div>
           </div>
           <div className="gap-[16px] grid grid-cols-2 grid-rows-2 h-[166px] relative shrink-0 w-full">
-            <GroomingFrequencyTile
-              title="Weekly"
+            <CustomRadio
+              label="Weekly"
               description="Once a week"
               isSelected={groomingFrequency === "weekly"}
               onClick={() => setGroomingFrequency("weekly")}
+              variant="with-description"
             />
-            <GroomingFrequencyTile
-              title="Bi-weekly"
+            <CustomRadio
+              label="Bi-weekly"
               description="Every 2 weeks"
               isSelected={groomingFrequency === "bi-weekly"}
               onClick={() => setGroomingFrequency("bi-weekly")}
+              variant="with-description"
             />
-            <GroomingFrequencyTile
-              title="Monthly"
+            <CustomRadio
+              label="Monthly"
               description="Once a month"
               isSelected={groomingFrequency === "monthly"}
               onClick={() => setGroomingFrequency("monthly")}
+              variant="with-description"
             />
-            <GroomingFrequencyTile
-              title="Occasionally"
+            <CustomRadio
+              label="Occasionally"
               description="As needed"
               isSelected={groomingFrequency === "occasionally"}
               onClick={() => setGroomingFrequency("occasionally")}
+              variant="with-description"
             />
           </div>
         </div>

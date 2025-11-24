@@ -1,6 +1,6 @@
 import { LoginModal } from "@/components/auth/LoginModal";
 import { Icon } from "@/components/common/Icon";
-import { CustomInput } from "@/components/common";
+import { CustomInput, CustomRadio } from "@/components/common";
 import { useAuthStore } from "@/components/auth/authStore";
 import { useBookingStore } from "./bookingStore";
 
@@ -200,91 +200,18 @@ export function Step1AddressAndServiceType() {
                   </p>
                 </div>
                 <div className="flex gap-[16px] items-stretch relative w-full">
-                  {/* Mobile Option */}
-                  <button
-                    type="button"
+                  <CustomRadio
+                    label="Mobile"
+                    icon="van"
+                    isSelected={serviceType === "mobile"}
                     onClick={() => setServiceType("mobile")}
-                    className={`border-2 border-solid box-border flex flex-col items-center justify-center p-[16px] relative rounded-[14px] w-auto cursor-pointer transition-colors ${
-                      serviceType === "mobile"
-                        ? "border-[#8b6357] bg-[rgba(139,99,87,0.05)]"
-                        : "border-gray-200 bg-white hover:border-gray-300"
-                    }`}
-                  >
-                    <div className="flex flex-col gap-[12px] items-center justify-center relative w-full">
-                      <div className="flex gap-[8px] items-center justify-center relative w-full">
-                        <div className="relative size-[16px]">
-                          <div
-                            className={`size-[16px] rounded-full border-2 ${
-                              serviceType === "mobile"
-                                ? "border-[#8b6357] bg-[#8b6357]"
-                                : "border-gray-300 bg-white"
-                            }`}
-                          >
-                            {serviceType === "mobile" && (
-                              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[6px] rounded-full bg-white" />
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex flex-col gap-[4px] items-center relative">
-                          <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[21px] relative text-[14px] text-[#8b6357]">
-                            Mobile
-                          </p>
-                          <div className="flex items-center justify-center relative h-[24px]">
-                            <div className="h-[18.164px] relative w-[24px]">
-                              <Icon
-                                name="van"
-                                aria-label="Van"
-                                className="block size-full text-[#8b6357]"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </button>
-
-                  {/* In Store Option */}
-                  <button
-                    type="button"
+                  />
+                  <CustomRadio
+                    label="In store"
+                    icon="shop"
+                    isSelected={serviceType === "instore"}
                     onClick={() => setServiceType("instore")}
-                    className={`border-2 border-solid box-border flex flex-col items-center justify-center p-[16px] relative rounded-[14px] w-auto cursor-pointer transition-colors ${
-                      serviceType === "instore"
-                        ? "border-[#8b6357] bg-[rgba(139,99,87,0.05)]"
-                        : "border-gray-200 bg-white hover:border-gray-300"
-                    }`}
-                  >
-                    <div className="flex flex-col gap-[12px] items-center justify-center relative w-full">
-                      <div className="flex gap-[8px] items-center justify-center relative w-full">
-                        <div className="relative size-[16px]">
-                          <div
-                            className={`size-[16px] rounded-full border-2 ${
-                              serviceType === "instore"
-                                ? "border-[#8b6357] bg-[#8b6357]"
-                                : "border-gray-300 bg-white"
-                            }`}
-                          >
-                            {serviceType === "instore" && (
-                              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[6px] rounded-full bg-white" />
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex flex-col gap-[4px] items-center relative">
-                          <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[21px] relative text-[14px] text-[#8b6357]">
-                            In store
-                          </p>
-                          <div className="flex items-center justify-center relative h-[24px]">
-                            <div className="relative size-[24px]">
-                              <Icon
-                                name="shop"
-                                aria-label="Shop"
-                                className="block size-full text-[#8b6357]"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </button>
+                  />
                 </div>
               </div>
             )}

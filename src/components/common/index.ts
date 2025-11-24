@@ -18,6 +18,7 @@ export * from "./OrangeButton";
 export * from "./PurpleButton";
 export * from "./Radio";
 export { default as ScrollToTop } from "./ScrollToTop";
+export * from "./CustomRadio";
 export * from "./Spinner";
 export * from "./TertiaryButton";
 
