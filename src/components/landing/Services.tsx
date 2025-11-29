@@ -2,7 +2,6 @@ import { useState } from "react";
 // import svgPaths from "@/assets/icons/svg-aj6ul1v84s";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { OrangeButton } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
 import {
@@ -146,7 +145,7 @@ function AdditionalServiceItem({ name, price }: AdditionalServiceProps) {
     <div className="box-border flex h-[51px] items-center justify-between px-[15px] py-px rounded-[14px] w-full bg-white border border-[#E5E7EB]">
       <div className="flex gap-[10.5px] items-center min-w-0">
         <Icon
-          name="express-groom"
+          name="star"
           aria-label={name}
           className="size-[20px] text-[#de6a07]"
         />
@@ -163,6 +162,7 @@ function AdditionalServiceItem({ name, price }: AdditionalServiceProps) {
 
 export default function Services() {
   const [showAllServicesMobile, setShowAllServicesMobile] = useState(false);
+  const [showAllServicesDesktop, setShowAllServicesDesktop] = useState(false);
 
   const services = [
     {
@@ -207,39 +207,29 @@ export default function Services() {
       ],
       isPopular: true,
     },
-    {
-      icon: (
-        <Icon
-          name="express-groom"
-          aria-label="Express Groom"
-          className="size-[32px] text-[#de6a07]"
-        />
-      ),
-      title: "Express Groom",
-      description: "Quick touch-up for pets who need a fast refresh",
-      duration: "1 hour",
-      price: "$75",
-      includes: [
-        "Quick wash & dry",
-        "Brush out",
-        "Nail trim",
-        "Sanitary trim",
-        "Face & feet groom",
-      ],
-    },
   ];
 
   const additionalServices = [
-    { name: "Nail Painting", price: "$15" },
-    { name: "Teeth Cleaning", price: "$25" },
-    { name: "Flea Treatment", price: "$30" },
-    { name: "De-shedding Treatment", price: "$35" },
-    { name: "Aromatherapy Add-on", price: "$20" },
-    { name: "Premium Cologne", price: "$10" },
+    { name: "Teeth brushing", price: "$10" },
+    { name: "Flea & Tick", price: "$30" },
+    { name: "De-shedding treatment", price: "$35" },
+    { name: "Anal Gland Expression", price: "$10" },
+    { name: "Paw balm", price: "$5" },
+    { name: "Cologne treatment", price: "$10" },
+    { name: "Medicated itch relief", price: "$10" },
+    { name: "Shea butter treatment", price: "$15" },
+    { name: "Breath spray", price: "$15" },
+    { name: "Odor removal", price: "$25" },
+    { name: "Whitening treatment", price: "$10" },
+    { name: "Nail grinding", price: "$10" },
   ];
 
   // Get services to display based on state
-  // Desktop: show all, Mobile: show based on toggle state
+  // Desktop: show 6 items by default (2 columns), all when expanded
+  const displayedServicesDesktop = showAllServicesDesktop
+    ? additionalServices
+    : additionalServices.slice(0, 6);
+  // Mobile: show 3 items by default, all when expanded
   const displayedServicesMobile = showAllServicesMobile
     ? additionalServices
     : additionalServices.slice(0, 3);
@@ -274,7 +264,7 @@ export default function Services() {
         </div>
 
         {/* Mobile View - Carousel */}
-        <div className="block sm:hidden w-full pb-6">
+        <div className="block sm:hidden w-full">
           <Carousel
             opts={{
               align: "start",
@@ -283,7 +273,15 @@ export default function Services() {
             className="w-full"
           >
             <CarouselContent className="items-stretch gap-6 ml-0 pl-4">
-              {services.map((service, index) => (
+              {(() => {
+                // Mobile: only show Bath & Brush and Full Grooming, with Full Grooming first
+                const fullGrooming = services.find(s => s.title === "Full Grooming");
+                const bathBrush = services.find(s => s.title === "Bath & Brush");
+                const mobileServices = [];
+                if (fullGrooming) mobileServices.push(fullGrooming);
+                if (bathBrush) mobileServices.push(bathBrush);
+                return mobileServices;
+              })().map((service, index) => (
                 <CarouselItem key={index} className="pl-0 basis-[280px]">
                   <ServiceCard {...service} isMobile={true} />
                 </CarouselItem>
@@ -295,9 +293,9 @@ export default function Services() {
         </div>
 
         {/* Additional Services - Full width, no margins */}
-        <div className="w-full">
-            <div className="bg-white relative w-full border border-[#de6a07] rounded-xl">
-            <div className="flex flex-col items-center w-full py-[24px] px-0 sm:px-[24px]">
+        <div className="w-full px-[20px]">
+            <div className="bg-white relative w-full border border-[#de6a07] rounded-xl max-w-[1067px] mx-auto">
+            <div className="flex flex-col items-center w-full py-[24px] px-[16px] sm:px-[24px]">
               <div className="flex flex-col gap-[28px] items-center w-full">
                 {/* Additional Services Title */}
                 <div className="flex flex-col gap-[7px] items-center text-center max-w-[493px] mx-auto px-4 sm:px-0">
@@ -310,9 +308,9 @@ export default function Services() {
                   </p>
                 </div>
 
-                {/* Additional Services Grid - Desktop: show all, 3 columns */}
-                <div className="hidden sm:grid grid-cols-3 gap-[20px] w-full max-w-7xl mx-auto px-[56px]">
-                  {additionalServices.map((service, index) => (
+                {/* Additional Services Grid - Desktop: show 6 items by default (2 columns), all when expanded */}
+                <div className="hidden sm:grid grid-cols-2 gap-[20px] w-full max-w-[1067px] mx-auto px-[56px]">
+                  {displayedServicesDesktop.map((service, index) => (
                     <AdditionalServiceItem key={index} {...service} />
                   ))}
                 </div>
@@ -324,20 +322,51 @@ export default function Services() {
                   ))}
                 </div>
 
-                {/* View All Button - Mobile only */}
-                <Button
-                  variant="outline"
-                  className="sm:hidden h-[28px] rounded-[32px] w-[209px] border-2 border-[#8b6357] hover:bg-[#8b6357]/5"
+                {/* View All Button - Desktop */}
+                <button
+                  className="hidden sm:inline-flex box-border content-stretch gap-[8px] items-center justify-center px-[12px] py-[4px] relative shrink-0 border border-[#8b6357] border-solid rounded-[12px]"
+                  onClick={() =>
+                    setShowAllServicesDesktop(!showAllServicesDesktop)
+                  }
+                >
+                  <div className="flex items-center justify-center relative shrink-0 size-[12px]">
+                    <div className={`flex-none ${showAllServicesDesktop ? "rotate-180" : ""}`}>
+                      <Icon
+                        name="chevron-down"
+                        aria-label="Arrow"
+                        className="size-[16px] text-[#8b6357]"
+                      />
+                    </div>
+                  </div>
+                  <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#8b6357] text-[12px]">
+                    {showAllServicesDesktop
+                      ? "Show less add-on services"
+                      : "Show all add-on services"}
+                  </p>
+                </button>
+
+                {/* View All Button - Mobile */}
+                <button
+                  className="inline-flex sm:hidden box-border content-stretch gap-[8px] items-center justify-center px-[12px] py-[4px] relative shrink-0 border border-[#8b6357] border-solid rounded-[12px]"
                   onClick={() =>
                     setShowAllServicesMobile(!showAllServicesMobile)
                   }
                 >
-                  <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] text-[#8b6357] text-[12px]">
+                  <div className="flex items-center justify-center relative shrink-0 size-[12px]">
+                    <div className={`flex-none ${showAllServicesMobile ? "rotate-180" : "rotate-[90deg]"}`}>
+                      <Icon
+                        name="chevron-down"
+                        aria-label="Arrow"
+                        className="size-[12px] text-[#8b6357]"
+                      />
+                    </div>
+                  </div>
+                  <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#8b6357] text-[12px]">
                     {showAllServicesMobile
-                      ? "Show Less"
-                      : "View All Services & Pricing"}
+                      ? "Show less add-on services"
+                      : "Show all add-on services"}
                   </p>
-                </Button>
+                </button>
               </div>
             </div>
           </div>
