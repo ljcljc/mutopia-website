@@ -324,7 +324,7 @@ export default function Services() {
 
                 {/* View All Button - Desktop */}
                 <button
-                  className="hidden sm:inline-flex box-border content-stretch gap-[8px] items-center justify-center px-[12px] py-[4px] relative shrink-0 border border-[#8b6357] border-solid rounded-[12px]"
+                  className="hidden sm:inline-flex box-border content-stretch gap-[8px] items-center justify-center px-[12px] py-[4px] relative shrink-0 border border-[#8b6357] border-solid rounded-[12px] cursor-pointer"
                   onClick={() =>
                     setShowAllServicesDesktop(!showAllServicesDesktop)
                   }
