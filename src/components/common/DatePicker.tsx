@@ -90,7 +90,7 @@ export function DatePicker({
           setCurrentYear(year);
           setCurrentMonth(month);
         }
-      } catch (e) {
+      } catch (_e) {
         // If parsing fails, keep current values
       }
     }
@@ -113,7 +113,7 @@ export function DatePicker({
             setCurrentYear(year);
             setCurrentMonth(month);
           }
-        } catch (e) {
+        } catch (_e) {
           // If parsing fails, use current values
         }
       }
@@ -171,7 +171,7 @@ export function DatePicker({
     if (!isOpen) {
       hasInitializedRef.current = false;
     }
-  }, [isOpen, maxDate, minDate, currentYear, currentMonth]);
+  }, [isOpen, maxDate, minDate, currentYear, currentMonth, value]);
 
   // Close picker when clicking outside
   useEffect(() => {
@@ -645,9 +645,9 @@ export function DatePicker({
           <div className="flex flex-col gap-[20px] w-full">
             {/* Month/Year Header - 根据 Figma 设计 */}
             {mode === "month" ? (
-              <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid justify-items-start leading-[0] relative shrink-0 w-full">
+              <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid justify-items-start leading-0 relative shrink-0 w-full">
                 {/* Year Section */}
-                <div className="col-[1] content-stretch flex gap-[8px] items-center ml-0 mt-0 relative row-[1]">
+                <div className="col-1 content-stretch flex gap-[8px] items-center ml-0 mt-0 relative row-1">
                   <button
                     onMouseDown={(e) => {
                       e.stopPropagation();
@@ -670,7 +670,7 @@ export function DatePicker({
                       e.stopPropagation();
                       handleNextYear();
                     }}
-                    className="h-[16px] relative shrink-0 w-[8.864px] hover:opacity-70 transition-opacity"
+                    className="h-[16px] relative shrink-0 w-[8.864px] hover:opacity-70 transition-opacity cursor-pointer"
                   >
                     <Icon
                       name="nav-next"
@@ -681,7 +681,7 @@ export function DatePicker({
                 </div>
 
                 {/* Month Section with Navigation */}
-                <div className="col-[1] content-stretch flex gap-[22px] items-center ml-[170.35px] mt-[3.5px] relative row-[1]">
+                <div className="col-1 content-stretch flex gap-[22px] items-center ml-[170.35px] mt-[3.5px] relative row-1">
                   {/* Previous Month Arrow */}
                   <button
                     onMouseDown={(e) => {
@@ -691,7 +691,7 @@ export function DatePicker({
                       e.stopPropagation();
                       handlePrevMonth();
                     }}
-                    className="flex items-center justify-center relative shrink-0 rotate-[180deg] hover:opacity-70 transition-opacity"
+                    className="flex items-center justify-center relative shrink-0 rotate-180 hover:opacity-70 transition-opacity cursor-pointer"
                   >
                     <div className="h-[16px] relative w-[8.864px]">
                       <Icon
@@ -719,7 +719,7 @@ export function DatePicker({
                       e.stopPropagation();
                       handleNextMonth();
                     }}
-                    className="flex items-center justify-center relative shrink-0 hover:opacity-70 transition-opacity"
+                    className="flex items-center justify-center relative shrink-0 hover:opacity-70 transition-opacity cursor-pointer"
                   >
                     <div className="h-[16px] relative w-[8.864px]">
                       <Icon
@@ -875,13 +875,13 @@ export function DatePicker({
                       <button
                         key={monthIndex}
                         onClick={() => handleMonthClick(monthIndex)}
-                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] ${
+                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] cursor-pointer ${
                           isSelected
                             ? "bg-[#de6a07]"
                             : "bg-transparent"
                         }`}
                       >
-                        <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-center whitespace-nowrap">
+                        <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-0 relative shrink-0 text-[14px] text-center whitespace-nowrap">
                           <p
                             className={`leading-[20px] transition-colors ${
                               isSelected
@@ -915,13 +915,13 @@ export function DatePicker({
                       <button
                         key={monthIndex}
                         onClick={() => handleMonthClick(monthIndex)}
-                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] ${
+                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] cursor-pointer ${
                           isSelected
                             ? "bg-[#de6a07]"
                             : "bg-transparent"
                         }`}
                       >
-                        <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-center whitespace-nowrap">
+                        <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-0 relative shrink-0 text-[14px] text-center whitespace-nowrap">
                           <p
                             className={`leading-[20px] transition-colors ${
                               isSelected
@@ -955,13 +955,13 @@ export function DatePicker({
                       <button
                         key={monthIndex}
                         onClick={() => handleMonthClick(monthIndex)}
-                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] ${
+                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] cursor-pointer ${
                           isSelected
                             ? "bg-[#de6a07]"
                             : "bg-transparent"
                         }`}
                       >
-                        <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-center whitespace-nowrap">
+                        <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-0 relative shrink-0 text-[14px] text-center whitespace-nowrap">
                           <p
                             className={`leading-[20px] transition-colors ${
                               isSelected
@@ -995,13 +995,13 @@ export function DatePicker({
                       <button
                         key={monthIndex}
                         onClick={() => handleMonthClick(monthIndex)}
-                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] ${
+                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] cursor-pointer ${
                           isSelected
                             ? "bg-[#de6a07]"
                             : "bg-transparent"
                         }`}
                       >
-                        <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-center whitespace-nowrap">
+                        <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-0 relative shrink-0 text-[14px] text-center whitespace-nowrap">
                           <p
                             className={`leading-[20px] transition-colors ${
                               isSelected
