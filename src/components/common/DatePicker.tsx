@@ -67,8 +67,9 @@ export function DatePicker({
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const pickerRef = useRef<HTMLDivElement>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
   const yearScrollRef = useRef<HTMLDivElement>(null);
-  const monthButtonRef = useRef<HTMLButtonElement>(null);
+  const monthButtonRef = useRef<HTMLDivElement>(null);
   const hasInitializedRef = useRef(false);
 
   // Parse date strings to get year and month limits
@@ -78,12 +79,45 @@ export function DatePicker({
   );
   const minDateObj = useMemo(() => new Date(minDate), [minDate]);
 
+  // Update current year and month when value changes (for month mode)
+  useEffect(() => {
+    if (value && mode === "month") {
+      try {
+        const [yearStr, monthStr] = value.split("-");
+        const year = parseInt(yearStr);
+        const month = parseInt(monthStr) - 1; // month is 0-indexed
+        if (!isNaN(year) && !isNaN(month) && month >= 0 && month <= 11) {
+          setCurrentYear(year);
+          setCurrentMonth(month);
+        }
+      } catch (e) {
+        // If parsing fails, keep current values
+      }
+    }
+  }, [value, mode]);
+
   // Set initial calendar view when opening
   useEffect(() => {
     if (isOpen && !hasInitializedRef.current) {
       hasInitializedRef.current = true;
 
       const today = new Date();
+      
+      // If value exists, use it to set current year and month
+      if (value) {
+        try {
+          const [yearStr, monthStr] = value.split("-");
+          const year = parseInt(yearStr);
+          const month = parseInt(monthStr) - 1; // month is 0-indexed
+          if (!isNaN(year) && !isNaN(month) && month >= 0 && month <= 11) {
+            setCurrentYear(year);
+            setCurrentMonth(month);
+          }
+        } catch (e) {
+          // If parsing fails, use current values
+        }
+      }
+      
       const currentDisplayDate = new Date(currentYear, currentMonth);
 
       // Parse date constraints
@@ -142,9 +176,14 @@ export function DatePicker({
   // Close picker when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node;
+      const isInsidePicker = pickerRef.current?.contains(target);
+      const isInsidePopup = popupRef.current?.contains(target);
+      
       if (
         pickerRef.current &&
-        !pickerRef.current.contains(event.target as Node)
+        !isInsidePicker &&
+        !isInsidePopup
       ) {
         const wasOpen = isOpen;
         setIsOpen(false);
@@ -162,7 +201,7 @@ export function DatePicker({
       return () =>
         document.removeEventListener("mousedown", handleClickOutside);
     }
-  }, [isOpen, onBlur]);
+  }, [isOpen, onBlur, value]);
 
   // Generate year range based on min and max dates
   const yearRange = useMemo(() => {
@@ -264,15 +303,31 @@ export function DatePicker({
   }
 
   function handlePrevMonth() {
+    let newMonth = currentMonth;
+    let newYear = currentYear;
+    
     if (currentMonth === 0) {
-      setCurrentMonth(11);
-      setCurrentYear(currentYear - 1);
+      newMonth = 11;
+      newYear = currentYear - 1;
     } else {
-      setCurrentMonth(currentMonth - 1);
+      newMonth = currentMonth - 1;
+    }
+    
+    setCurrentMonth(newMonth);
+    setCurrentYear(newYear);
+    
+    // 在月份模式下，同步更新 value 以反映选中状态变化
+    if (mode === "month") {
+      const month = String(newMonth + 1).padStart(2, "0");
+      const formattedMonth = `${newYear}-${month}`;
+      onChange(formattedMonth);
     }
   }
 
   function handleNextMonth() {
+    let newMonth = currentMonth;
+    let newYear = currentYear;
+    
     // Check if we can navigate to next month based on max date
     if (maxDateObj) {
       const maxYear = maxDateObj.getFullYear();
@@ -281,8 +336,10 @@ export function DatePicker({
       if (currentMonth === 11) {
         // Don't allow going to next year if we're at max year
         if (currentYear < maxYear) {
-          setCurrentMonth(0);
-          setCurrentYear(currentYear + 1);
+          newMonth = 0;
+          newYear = currentYear + 1;
+        } else {
+          return; // Can't navigate
         }
       } else {
         // Don't allow going to next month if we're at max year and max month
@@ -290,17 +347,38 @@ export function DatePicker({
           currentYear < maxYear ||
           (currentYear === maxYear && currentMonth < maxMonth)
         ) {
-          setCurrentMonth(currentMonth + 1);
+          newMonth = currentMonth + 1;
+        } else {
+          return; // Can't navigate
         }
       }
     } else {
       // No max date restriction, navigate normally
       if (currentMonth === 11) {
-        setCurrentMonth(0);
-        setCurrentYear(currentYear + 1);
+        newMonth = 0;
+        newYear = currentYear + 1;
       } else {
-        setCurrentMonth(currentMonth + 1);
+        newMonth = currentMonth + 1;
       }
+    }
+    
+    setCurrentMonth(newMonth);
+    setCurrentYear(newYear);
+    
+    // 在月份模式下，同步更新 value 以反映选中状态变化
+    if (mode === "month") {
+      const month = String(newMonth + 1).padStart(2, "0");
+      const formattedMonth = `${newYear}-${month}`;
+      onChange(formattedMonth);
+    }
+  }
+
+
+
+  function handleNextYear() {
+    const maxYear = maxDateObj ? maxDateObj.getFullYear() : new Date().getFullYear() + 10;
+    if (currentYear < maxYear) {
+      setCurrentYear(currentYear + 1);
     }
   }
 
@@ -310,20 +388,32 @@ export function DatePicker({
   }
 
   function handleMonthClick(monthIndex: number) {
-    setCurrentMonth(monthIndex);
-    setShowMonthPicker(false);
-
     // If in month mode, select the month and close the picker
     if (mode === "month") {
+      // 使用当前显示的年份和选中的月份
       const year = currentYear;
       const month = String(monthIndex + 1).padStart(2, "0");
       const formattedMonth = `${year}-${month}`;
+      
+      // 调用 onChange 更新值（同步到输入框）
       onChange(formattedMonth);
+      
+      // 更新当前月份显示
+      setCurrentMonth(monthIndex);
+      
+      // 关闭选择器
+      setShowMonthPicker(false);
+      setShowYearPicker(false);
       setIsOpen(false);
+      
       // Call onBlur when month is selected in month mode
       if (onBlur) {
         onBlur(formattedMonth);
       }
+    } else {
+      // In date mode, just change the displayed month
+      setCurrentMonth(monthIndex);
+      setShowMonthPicker(false);
     }
   }
 
@@ -408,7 +498,20 @@ export function DatePicker({
 
       {/* Calendar Popup */}
       {isOpen && (
-        <div className="absolute bg-white box-border flex flex-col gap-[20px] p-[24px] rounded-[16px] top-[calc(100%+8px)] left-0 z-50 shadow-lg w-full max-w-[373px] border border-[rgba(0,0,0,0.2)] border-solid">
+        <div 
+          ref={popupRef}
+          onMouseDown={(e) => {
+            // 阻止点击面板内部关闭面板
+            e.stopPropagation();
+          }}
+          onClick={(e) => {
+            // 阻止点击面板内部关闭面板
+            e.stopPropagation();
+          }}
+          className={`absolute bg-white box-border flex flex-col gap-[20px] p-[24px] rounded-[16px] top-[calc(100%+8px)] left-0 z-50 shadow-lg border border-[rgba(0,0,0,0.2)] border-solid ${
+            mode === "month" ? "w-auto min-w-[320px]" : "w-full max-w-[373px]"
+          }`}
+        >
           {/* Year Picker (Overlay) */}
           {showYearPicker && (
             <div
@@ -539,64 +642,148 @@ export function DatePicker({
           )}
 
           {/* Calendar Content */}
-          <div className="flex flex-col gap-[16px] w-full">
-            {/* Month/Year Header */}
-            <div className="flex items-center gap-[8px] relative">
-              {/* Year and Month - clickable to show pickers */}
-              <div className="flex items-center gap-[8px]">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowYearPicker(!showYearPicker);
-                    setShowMonthPicker(false);
-                  }}
-                  className="font-['Poppins:Bold',sans-serif] font-bold leading-[24px] not-italic text-[20px] text-black text-nowrap tracking-[0.38px] whitespace-pre hover:opacity-80 transition-opacity cursor-pointer"
-                >
-                  {currentYear}
-                </button>
-                <button
-                  ref={monthButtonRef}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowMonthPicker(!showMonthPicker);
-                    setShowYearPicker(false);
-                  }}
-                  className="font-['Poppins:Bold',sans-serif] font-bold leading-[24px] not-italic text-[20px] text-black text-nowrap tracking-[0.38px] whitespace-pre hover:opacity-80 transition-opacity cursor-pointer"
-                >
-                  {MONTH_ABBR[currentMonth]}
-                </button>
+          <div className="flex flex-col gap-[20px] w-full">
+            {/* Month/Year Header - 根据 Figma 设计 */}
+            {mode === "month" ? (
+              <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid justify-items-start leading-[0] relative shrink-0 w-full">
+                {/* Year Section */}
+                <div className="col-[1] content-stretch flex gap-[8px] items-center ml-0 mt-0 relative row-[1]">
+                  <button
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowYearPicker(!showYearPicker);
+                      setShowMonthPicker(false);
+                    }}
+                    className="font-['Poppins:Bold',sans-serif] font-bold leading-[24px] not-italic text-[20px] text-black tracking-[0.38px] hover:opacity-80 transition-opacity cursor-pointer"
+                  >
+                    {currentYear}
+                  </button>
+                  {/* Next Year Arrow */}
+                  <button
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNextYear();
+                    }}
+                    className="h-[16px] relative shrink-0 w-[8.864px] hover:opacity-70 transition-opacity"
+                  >
+                    <Icon
+                      name="nav-next"
+                      aria-label="Next year"
+                      className="block size-full text-[#de6a07]"
+                    />
+                  </button>
+                </div>
+
+                {/* Month Section with Navigation */}
+                <div className="col-[1] content-stretch flex gap-[22px] items-center ml-[170.35px] mt-[3.5px] relative row-[1]">
+                  {/* Previous Month Arrow */}
+                  <button
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePrevMonth();
+                    }}
+                    className="flex items-center justify-center relative shrink-0 rotate-[180deg] hover:opacity-70 transition-opacity"
+                  >
+                    <div className="h-[16px] relative w-[8.864px]">
+                      <Icon
+                        name="nav-next"
+                        aria-label="Previous month"
+                        className="block size-full text-[#de6a07]"
+                      />
+                    </div>
+                  </button>
+
+                  {/* Month Name - 不可点击，固定宽度 */}
+                  <div
+                    ref={monthButtonRef}
+                    className="font-['Poppins:Bold',sans-serif] font-bold leading-[24px] not-italic text-[20px] text-black tracking-[0.38px] w-[120px] text-center"
+                  >
+                    {MONTHS[currentMonth]}
+                  </div>
+
+                  {/* Next Month Arrow */}
+                  <button
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNextMonth();
+                    }}
+                    className="flex items-center justify-center relative shrink-0 hover:opacity-70 transition-opacity"
+                  >
+                    <div className="h-[16px] relative w-[8.864px]">
+                      <Icon
+                        name="nav-next"
+                        aria-label="Next month"
+                        className="block size-full text-[#de6a07]"
+                      />
+                    </div>
+                  </button>
+                </div>
               </div>
+            ) : (
+              <div className="flex items-center gap-[8px] relative">
+                {/* Year and Month - clickable to show pickers */}
+                <div className="flex items-center gap-[8px]">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowYearPicker(!showYearPicker);
+                      setShowMonthPicker(false);
+                    }}
+                    className="font-['Poppins:Bold',sans-serif] font-bold leading-[24px] not-italic text-[20px] text-black text-nowrap tracking-[0.38px] whitespace-pre hover:opacity-80 transition-opacity cursor-pointer"
+                  >
+                    {currentYear}
+                  </button>
+                  <div
+                    ref={monthButtonRef}
+                    className="font-['Poppins:Bold',sans-serif] font-bold leading-[24px] not-italic text-[20px] text-black text-nowrap tracking-[0.38px] whitespace-pre"
+                  >
+                    {MONTH_ABBR[currentMonth]}
+                  </div>
+                </div>
 
-              {/* Spacer */}
-              <div className="flex-1" />
+                {/* Spacer */}
+                <div className="flex-1" />
 
-              {/* Navigation Arrows */}
-              <div className="flex items-center gap-[8px]">
-                {/* Previous Month Arrow */}
-                <button
-                  onClick={handlePrevMonth}
-                  className="flex items-center justify-center h-[16px] w-[8.864px] hover:opacity-70 transition-opacity"
-                >
-                  <Icon
-                    name="nav-prev"
-                    aria-label="Previous month"
-                    className="block size-full text-[#DE6A07]"
-                  />
-                </button>
+                {/* Navigation Arrows */}
+                <div className="flex items-center gap-[8px]">
+                  {/* Previous Month Arrow */}
+                  <button
+                    onClick={handlePrevMonth}
+                    className="flex items-center justify-center h-[16px] w-[8.864px] hover:opacity-70 transition-opacity"
+                  >
+                    <Icon
+                      name="nav-prev"
+                      aria-label="Previous month"
+                      className="block size-full text-[#DE6A07]"
+                    />
+                  </button>
 
-                {/* Next Month Arrow */}
-                <button
-                  onClick={handleNextMonth}
-                  className="flex items-center justify-center h-[16px] w-[8.864px] hover:opacity-70 transition-opacity"
-                >
-                  <Icon
-                    name="nav-next"
-                    aria-label="Next month"
-                    className="block size-full text-[#DE6A07]"
-                  />
-                </button>
+                  {/* Next Month Arrow */}
+                  <button
+                    onClick={handleNextMonth}
+                    className="flex items-center justify-center h-[16px] w-[8.864px] hover:opacity-70 transition-opacity"
+                  >
+                    <Icon
+                      name="nav-next"
+                      aria-label="Next month"
+                      className="block size-full text-[#DE6A07]"
+                    />
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Days of Week - Only show in date mode */}
             {mode === "date" && (
@@ -666,12 +853,169 @@ export function DatePicker({
               </div>
             )}
 
-            {/* Month mode instruction - Show when in month mode and no pickers are open */}
-            {mode === "month" && !showYearPicker && !showMonthPicker && (
-              <div className="flex items-center justify-center py-[24px]">
-                <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] text-[#717182] text-center">
-                  Click year or month to select
-                </p>
+            {/* Month Grid - Show when in month mode (always show, year picker overlays on top) */}
+            {mode === "month" && !showMonthPicker && (
+              <div className="content-stretch flex flex-col gap-[8px] items-start p-[8px] relative shrink-0 w-full">
+                {/* Row 1: January, February, March */}
+                <div className="content-stretch flex gap-[8px] items-start relative shrink-0 w-full">
+                  {[0, 1, 2].map((monthIndex) => {
+                    // 检查是否选中：需要匹配 value 中的年份和月份
+                    let isSelected = false;
+                    if (value) {
+                      try {
+                        const [selectedYear, selectedMonth] = value.split("-");
+                        isSelected =
+                          parseInt(selectedYear) === currentYear &&
+                          parseInt(selectedMonth) === monthIndex + 1;
+                      } catch (_e) {
+                        // 如果解析失败，不选中
+                      }
+                    }
+                    return (
+                      <button
+                        key={monthIndex}
+                        onClick={() => handleMonthClick(monthIndex)}
+                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] ${
+                          isSelected
+                            ? "bg-[#de6a07]"
+                            : "bg-transparent"
+                        }`}
+                      >
+                        <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-center whitespace-nowrap">
+                          <p
+                            className={`leading-[20px] transition-colors ${
+                              isSelected
+                                ? "text-[#fafafa]"
+                                : "text-[#424242] group-hover:text-[#de6a07]"
+                            }`}
+                          >
+                            {MONTHS[monthIndex]}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Row 2: April, May, June */}
+                <div className="content-stretch flex gap-[8px] items-start relative shrink-0 w-full">
+                  {[3, 4, 5].map((monthIndex) => {
+                    let isSelected = false;
+                    if (value) {
+                      try {
+                        const [selectedYear, selectedMonth] = value.split("-");
+                        isSelected =
+                          parseInt(selectedYear) === currentYear &&
+                          parseInt(selectedMonth) === monthIndex + 1;
+                      } catch (_e) {
+                        // 如果解析失败，不选中
+                      }
+                    }
+                    return (
+                      <button
+                        key={monthIndex}
+                        onClick={() => handleMonthClick(monthIndex)}
+                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] ${
+                          isSelected
+                            ? "bg-[#de6a07]"
+                            : "bg-transparent"
+                        }`}
+                      >
+                        <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-center whitespace-nowrap">
+                          <p
+                            className={`leading-[20px] transition-colors ${
+                              isSelected
+                                ? "text-[#fafafa]"
+                                : "text-[#424242] group-hover:text-[#de6a07]"
+                            }`}
+                          >
+                            {MONTHS[monthIndex]}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Row 3: July, August, September */}
+                <div className="content-stretch flex gap-[8px] items-start relative shrink-0 w-full">
+                  {[6, 7, 8].map((monthIndex) => {
+                    let isSelected = false;
+                    if (value) {
+                      try {
+                        const [selectedYear, selectedMonth] = value.split("-");
+                        isSelected =
+                          parseInt(selectedYear) === currentYear &&
+                          parseInt(selectedMonth) === monthIndex + 1;
+                      } catch (_e) {
+                        // 如果解析失败，不选中
+                      }
+                    }
+                    return (
+                      <button
+                        key={monthIndex}
+                        onClick={() => handleMonthClick(monthIndex)}
+                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] ${
+                          isSelected
+                            ? "bg-[#de6a07]"
+                            : "bg-transparent"
+                        }`}
+                      >
+                        <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-center whitespace-nowrap">
+                          <p
+                            className={`leading-[20px] transition-colors ${
+                              isSelected
+                                ? "text-[#fafafa]"
+                                : "text-[#424242] group-hover:text-[#de6a07]"
+                            }`}
+                          >
+                            {MONTHS[monthIndex]}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Row 4: October, November, December */}
+                <div className="content-stretch flex gap-[8px] items-start relative shrink-0 w-full">
+                  {[9, 10, 11].map((monthIndex) => {
+                    let isSelected = false;
+                    if (value) {
+                      try {
+                        const [selectedYear, selectedMonth] = value.split("-");
+                        isSelected =
+                          parseInt(selectedYear) === currentYear &&
+                          parseInt(selectedMonth) === monthIndex + 1;
+                      } catch (_e) {
+                        // 如果解析失败，不选中
+                      }
+                    }
+                    return (
+                      <button
+                        key={monthIndex}
+                        onClick={() => handleMonthClick(monthIndex)}
+                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] ${
+                          isSelected
+                            ? "bg-[#de6a07]"
+                            : "bg-transparent"
+                        }`}
+                      >
+                        <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-center whitespace-nowrap">
+                          <p
+                            className={`leading-[20px] transition-colors ${
+                              isSelected
+                                ? "text-[#fafafa]"
+                                : "text-[#424242] group-hover:text-[#de6a07]"
+                            }`}
+                          >
+                            {MONTHS[monthIndex]}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
