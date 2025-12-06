@@ -90,7 +90,7 @@ export const CustomSelect = forwardRef<HTMLButtonElement, CustomSelectProps>(
               )}
             >
               <div className="flex flex-1 items-center min-h-px min-w-px relative shrink-0">
-                <div className="flex flex-1 gap-[4px] items-center min-h-px min-w-px relative shrink-0">
+                <div className="flex flex-1 gap-[8px] items-center min-h-px min-w-px relative shrink-0">
                   {leftElement}
                   <SelectValue placeholder={placeholder}>
                     <span className={cn(

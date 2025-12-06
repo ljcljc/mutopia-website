@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Icon } from "@/components/common/Icon";
 import { CustomInput, CustomSelect, CustomSelectItem, CustomRadio, OrangeButton, FileUpload } from "@/components/common";
 import { CustomTextarea } from "@/components/common/CustomTextarea";
@@ -7,77 +7,13 @@ import { Switch } from "@/components/ui/switch";
 import { useBookingStore } from "./bookingStore";
 import type { WeightUnit, Gender, PetType } from "./bookingStore";
 import { ReferenceStylesUpload } from "./ReferenceStylesUpload";
+import type { PetBreedOut } from "@/lib/api";
 
-
-// Breed options based on pet type
-const DOG_BREEDS = [
-  "Golden Retriever",
-  "Labrador Retriever",
-  "German Shepherd",
-  "French Bulldog",
-  "Bulldog",
-  "Beagle",
-  "Poodle",
-  "Rottweiler",
-  "Yorkshire Terrier",
-  "Dachshund",
-  "Siberian Husky",
-  "Great Dane",
-  "Boxer",
-  "Shih Tzu",
-  "Border Collie",
-  "Chihuahua",
-  "Australian Shepherd",
-  "Cocker Spaniel",
-  "Pomeranian",
-  "Maltese",
-];
-
-const CAT_BREEDS = [
-  "Persian",
-  "Maine Coon",
-  "British Shorthair",
-  "Ragdoll",
-  "Bengal",
-  "Siamese",
-  "American Shorthair",
-  "Scottish Fold",
-  "Sphynx",
-  "Russian Blue",
-  "Norwegian Forest Cat",
-  "Abyssinian",
-  "Exotic Shorthair",
-  "Oriental",
-  "Turkish Angora",
-  "Birman",
-  "Himalayan",
-  "Manx",
-  "Devon Rex",
-  "Cornish Rex",
-];
-
-const OTHER_PET_BREEDS = [
-  "Rabbit",
-  "Guinea Pig",
-  "Hamster",
-  "Ferret",
-  "Chinchilla",
-  "Hedgehog",
-  "Rat",
-  "Mouse",
-];
-
-function getBreedOptions(petType: PetType): string[] {
-  switch (petType) {
-    case "dog":
-      return DOG_BREEDS;
-    case "cat":
-      return CAT_BREEDS;
-    case "other":
-      return OTHER_PET_BREEDS;
-    default:
-      return [];
-  }
+function getBreedOptions(petType: PetType, breeds: PetBreedOut[]): string[] {
+  return breeds
+    .filter((breed) => breed.pet_type === petType)
+    .map((breed) => breed.breed)
+    .sort();
 }
 
 export function Step2() {
@@ -95,6 +31,8 @@ export function Step2() {
     behavior,
     groomingFrequency,
     specialNotes,
+    petBreeds,
+    isLoadingBreeds,
     setPetName,
     setPetType,
     setBreed,
@@ -108,11 +46,29 @@ export function Step2() {
     setBehavior,
     setGroomingFrequency,
     setSpecialNotes,
+    loadPetBreeds,
     previousStep,
     nextStep,
   } = useBookingStore();
 
+  // 计算日期限制：最多20年前的今天，不能超过今天
+  const today = new Date();
+  const maxDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
+  
+  const minDateObj = new Date(today);
+  minDateObj.setFullYear(today.getFullYear() - 20);
+  const minDate = `${minDateObj.getFullYear()}-${String(minDateObj.getMonth() + 1).padStart(2, "0")}`;
+
   const [, setPetPhoto] = useState<File | null>(null);
+  const hasLoadedBreeds = useRef(false);
+
+  // 获取 breeds 数据（只加载一次）
+  useEffect(() => {
+    if (!hasLoadedBreeds.current) {
+      hasLoadedBreeds.current = true;
+      loadPetBreeds();
+    }
+  }, [loadPetBreeds]);
 
   const handlePetPhotoChange = (files: File[]) => {
     if (files.length > 0) {
@@ -127,11 +83,11 @@ export function Step2() {
 
   // Clear breed when pet type changes and current breed is not in the new options
   useEffect(() => {
-    const breedOptions = getBreedOptions(petType);
+    const breedOptions = getBreedOptions(petType, petBreeds);
     if (breed && !breedOptions.includes(breed)) {
       setBreed("");
     }
-  }, [petType, breed, setBreed]);
+  }, [petType, breed, petBreeds, setBreed]);
 
   return (
     <div className="content-stretch flex flex-col gap-[24px] items-start relative w-full">
@@ -209,9 +165,10 @@ export function Step2() {
                 </div>
               </div>
               <CustomSelect
-                placeholder="Select or type breed"
+                placeholder={isLoadingBreeds ? "Loading breeds..." : "Select or type breed"}
                 value={breed}
                 onValueChange={setBreed}
+                disabled={isLoadingBreeds}
                 leftElement={
                   <Icon
                     name="search"
@@ -219,7 +176,7 @@ export function Step2() {
                   />
                 }
               >
-                {getBreedOptions(petType).map((breedOption) => (
+                {getBreedOptions(petType, petBreeds).map((breedOption) => (
                   <CustomSelectItem key={breedOption} value={breedOption}>
                     {breedOption}
                   </CustomSelectItem>
@@ -255,6 +212,8 @@ export function Step2() {
                   value={dateOfBirth}
                   onChange={setDateOfBirth}
                   mode="month"
+                  minDate={minDate}
+                  maxDate={maxDate}
                 />
               </div>
               <div className="flex flex-col items-start relative shrink-0 w-[140px]">
@@ -266,8 +225,7 @@ export function Step2() {
                 >
                   <CustomSelectItem value="male">Male</CustomSelectItem>
                   <CustomSelectItem value="female">Female</CustomSelectItem>
-                  <CustomSelectItem value="neutered">Neutered</CustomSelectItem>
-                  <CustomSelectItem value="spayed">Spayed</CustomSelectItem>
+                  <CustomSelectItem value="unknown">Unknown</CustomSelectItem>
                 </CustomSelect>
               </div>
             </div>
@@ -276,7 +234,7 @@ export function Step2() {
             <div className="flex flex-col gap-[8px] items-start relative shrink-0 w-full">
               <div className="flex gap-[7px] h-[12.25px] items-center relative shrink-0 w-full">
                 <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[14px]">
-                  Weight (lbs or kg)
+                  Weight (lb or kg)
                 </p>
               </div>
               <div className="flex items-start relative shrink-0 w-[200px] group">
@@ -304,8 +262,8 @@ export function Step2() {
                     className="w-auto"
                     noLeftRadius={true}
                   >
-                    <CustomSelectItem value="lbs">lbs</CustomSelectItem>
                     <CustomSelectItem value="kg">kg</CustomSelectItem>
+                    <CustomSelectItem value="lb">lb</CustomSelectItem>
                   </CustomSelect>
                 </div>
               </div>
@@ -322,8 +280,8 @@ export function Step2() {
                 <div className="flex gap-[8px] items-stretch relative shrink-0">
                   <CustomRadio
                     label="Not matted"
-                    isSelected={coatCondition === "not-matted"}
-                    onClick={() => setCoatCondition("not-matted")}
+                    isSelected={coatCondition === "not_matted"}
+                    onClick={() => setCoatCondition("not_matted")}
                     className="self-stretch h-[53px]"
                   />
                   <CustomRadio
@@ -334,8 +292,8 @@ export function Step2() {
                   />
                   <CustomRadio
                     label="Severely matted"
-                    isSelected={coatCondition === "severely-matted"}
-                    onClick={() => setCoatCondition("severely-matted")}
+                    isSelected={coatCondition === "severely_matted"}
+                    onClick={() => setCoatCondition("severely_matted")}
                     className="self-stretch h-[53px]"
                   />
                 </div>
@@ -363,14 +321,14 @@ export function Step2() {
                   />
                   <CustomRadio
                     label="Hard to handle"
-                    isSelected={behavior === "hard-to-handle"}
-                    onClick={() => setBehavior("hard-to-handle")}
+                    isSelected={behavior === "hard_to_handle"}
+                    onClick={() => setBehavior("hard_to_handle")}
                     className="self-stretch h-[53px]"
                   />
                   <CustomRadio
                     label="Senior pets"
-                    isSelected={behavior === "senior-pets"}
-                    onClick={() => setBehavior("senior-pets")}
+                    isSelected={behavior === "senior_pets"}
+                    onClick={() => setBehavior("senior_pets")}
                     className="self-stretch h-[53px]"
                   />
                 </div>
@@ -417,8 +375,8 @@ export function Step2() {
             <CustomRadio
               label="Bi-weekly"
               description="Every 2 weeks"
-              isSelected={groomingFrequency === "bi-weekly"}
-              onClick={() => setGroomingFrequency("bi-weekly")}
+              isSelected={groomingFrequency === "bi_weekly"}
+              onClick={() => setGroomingFrequency("bi_weekly")}
               variant="with-description"
             />
             <CustomRadio
@@ -448,11 +406,10 @@ export function Step2() {
             </p>
             <div className="flex flex-col gap-[12px] items-start overflow-clip relative shrink-0 w-full">
               <FileUpload
-                          accept="image/*"
+                accept="image/*"
                 multiple={false}
                 maxSizeMB={10}
-                          onChange={handlePetPhotoChange}
-                icon="image"
+                onChange={handlePetPhotoChange}
                 buttonText="Click to upload"
                 fileTypeHint="JPG, JPEG, PNG less than 10MB"
                 showDragHint={true}

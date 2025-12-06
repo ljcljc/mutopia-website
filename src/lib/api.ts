@@ -137,19 +137,59 @@ export interface AddOnOut {
 export interface PetOut {
   id: number;
   name: string;
+  pet_type: string;
   breed?: string | null;
-  weight_kg?: number | string | null;
-  age_years?: number | null;
-  hair_condition?: string | null;
+  mixed_breed?: boolean | null;
+  precise_type?: string | null;
+  birthday?: string | null;
+  gender?: string | null;
+  weight_value?: number | string | null;
+  weight_unit?: string | null;
+  coat_condition?: string | null;
+  behavior?: string | null;
+  grooming_frequency?: string | null;
+  photos: string[];
+  reference_photos: string[];
+  special_notes?: string | null;
+}
+
+export interface PetBreedOut {
+  id: number;
+  pet_type: string;
+  breed: string;
+}
+
+// PetPayload 用于提交预约时的宠物信息
+export interface PetPayload {
+  id?: number | null;
+  name: string;
+  pet_type: string;
+  breed?: string | null;
+  mixed_breed?: boolean;
+  precise_type?: string | null;
+  birthday?: string | null;
+  gender?: string | null;
+  weight_value?: number | string | null;
+  weight_unit?: string;
+  coat_condition?: string | null;
+  behavior?: string | null;
+  grooming_frequency?: string | null;
   special_notes?: string | null;
 }
 
 export interface CreatePetParams {
   name: string;
+  pet_type?: string;
   breed?: string;
-  weight_kg?: number | null;
-  age_years?: number | null;
-  hair_condition?: string;
+  mixed_breed?: boolean;
+  precise_type?: string;
+  birthday?: string | null;
+  gender?: string;
+  weight_value?: number | null;
+  weight_unit?: string;
+  coat_condition?: string;
+  behavior?: string;
+  grooming_frequency?: string;
   special_notes?: string;
 }
 
@@ -168,6 +208,36 @@ export interface CreateBookingParams {
   scheduled_time?: string | null;
   notes?: string;
   guest_id?: string | null;
+}
+
+// 地址相关类型
+export interface AddressOut {
+  id: number;
+  address: string;
+  city: string;
+  province: string;
+  postal_code: string;
+  service_type: string;
+  is_default: boolean;
+}
+
+export interface AddressIn {
+  id?: number | null;
+  address: string;
+  city: string;
+  province: string;
+  postal_code: string;
+  service_type: string;
+}
+
+// 门店相关类型
+export interface StoreLocationOut {
+  id: number;
+  name: string;
+  address: string;
+  city: string;
+  province: string;
+  postal_code: string;
 }
 
 // ==================== 认证相关 API ====================
@@ -436,7 +506,35 @@ export async function deletePet(petId: number): Promise<OkOut> {
   return response.data;
 }
 
+/**
+ * 获取宠物品种列表
+ */
+export async function getPetBreeds(): Promise<PetBreedOut[]> {
+  const response = await http.get<PetBreedOut[]>("/api/pets/breeds", {
+    skipAuth: true,
+  });
+  return response.data;
+}
+
 // ==================== 预约管理 API ====================
+
+/**
+ * 获取门店列表
+ */
+export async function getStores(): Promise<StoreLocationOut[]> {
+  const response = await http.get<StoreLocationOut[]>("/api/bookings/stores", {
+    skipAuth: true,
+  });
+  return response.data;
+}
+
+/**
+ * 获取地址列表（需要认证）
+ */
+export async function getAddresses(): Promise<AddressOut[]> {
+  const response = await http.get<AddressOut[]>("/api/bookings/addresses");
+  return response.data;
+}
 
 /**
  * 创建预约

@@ -1,13 +1,24 @@
 import { create } from "zustand";
-import { getCurrentUser, type MeOut } from "@/lib/api";
+import {
+  getCurrentUser,
+  getAddresses,
+  getStores,
+  getPetBreeds,
+  type MeOut,
+  type AddressOut,
+  type StoreLocationOut,
+  type PetPayload,
+  type PetBreedOut,
+} from "@/lib/api";
 
-export type ServiceType = "mobile" | "instore";
+// 与后端枚举保持一致
+export type ServiceType = "mobile" | "in_store";
 export type PetType = "dog" | "cat" | "other";
-export type CoatCondition = "not-matted" | "matted" | "severely-matted";
-export type Behavior = "friendly" | "anxious" | "hard-to-handle" | "senior-pets";
-export type GroomingFrequency = "weekly" | "bi-weekly" | "monthly" | "occasionally";
-export type WeightUnit = "lbs" | "kg";
-export type Gender = "male" | "female" | "neutered" | "spayed";
+export type CoatCondition = "not_matted" | "matted" | "severely_matted";
+export type Behavior = "friendly" | "anxious" | "hard_to_handle" | "senior_pets";
+export type GroomingFrequency = "weekly" | "bi_weekly" | "monthly" | "occasionally";
+export type WeightUnit = "kg" | "lb"; // 后端使用 "lb" 而不是 "lbs"
+export type Gender = "male" | "female" | "unknown"; // 与后端枚举一致
 export type ServicePackage = "premium-bath" | "full-grooming";
 
 interface BookingState {
@@ -23,23 +34,27 @@ interface BookingState {
   city: string;
   province: string;
   postCode: string;
+  selectedAddressId: number | null; // 选中的地址 ID
+  selectedStoreId: number | null; // 选中的门店 ID（用于 in_store 服务）
+  addresses: AddressOut[]; // 用户已保存的地址列表
+  stores: StoreLocationOut[]; // 门店列表
 
-  // Step 2: Pet information
-  petName: string;
-  petType: PetType;
-  breed: string;
-  isMixedBreed: boolean;
-  precisePetType: string; // For "other" pet type
-  dateOfBirth: string; // YYYY-MM format
-  gender: Gender | "";
-  weight: string;
-  weightUnit: WeightUnit;
-  coatCondition: CoatCondition | "";
-  behavior: Behavior | "";
-  groomingFrequency: GroomingFrequency | "";
-  petPhoto: File | null;
-  referenceStyles: File[];
-  specialNotes: string;
+  // Step 2: Pet information - 使用与 API 一致的字段名称
+  petName: string; // 对应 API: name
+  petType: PetType; // 对应 API: pet_type
+  breed: string; // 对应 API: breed
+  isMixedBreed: boolean; // 对应 API: mixed_breed
+  precisePetType: string; // 对应 API: precise_type
+  dateOfBirth: string; // 对应 API: birthday (YYYY-MM format)
+  gender: Gender | ""; // 对应 API: gender
+  weight: string; // 对应 API: weight_value (需要转换为 number)
+  weightUnit: WeightUnit; // 对应 API: weight_unit
+  coatCondition: CoatCondition | ""; // 对应 API: coat_condition
+  behavior: Behavior | ""; // 对应 API: behavior
+  groomingFrequency: GroomingFrequency | ""; // 对应 API: grooming_frequency
+  petPhoto: File | null; // 对应 API: photos (数组)
+  referenceStyles: File[]; // 对应 API: reference_photos (数组)
+  specialNotes: string; // 对应 API: special_notes
 
   // Step 3: Service package and add-ons
   servicePackage: ServicePackage | "";
@@ -51,12 +66,20 @@ interface BookingState {
   // User info (loaded from API)
   userInfo: MeOut | null;
 
+  // Pet breeds (loaded from API)
+  petBreeds: PetBreedOut[];
+  isLoadingBreeds: boolean;
+
   // Actions
   setAddress: (address: string) => void;
   setServiceType: (serviceType: ServiceType) => void;
   setCity: (city: string) => void;
   setProvince: (province: string) => void;
   setPostCode: (postCode: string) => void;
+  setSelectedAddressId: (id: number | null) => void;
+  setSelectedStoreId: (id: number | null) => void;
+  loadAddresses: () => Promise<void>;
+  loadStores: () => Promise<void>;
   setPetName: (name: string) => void;
   setPetType: (type: PetType) => void;
   setBreed: (breed: string) => void;
@@ -77,6 +100,8 @@ interface BookingState {
   toggleAddOn: (addOnId: string) => void;
   setIsLoginModalOpen: (isOpen: boolean) => void;
   loadUserInfo: () => Promise<void>;
+  loadPetBreeds: () => Promise<void>;
+  getPetPayload: () => PetPayload; // 转换为 PetPayload 格式
   reset: () => void;
 }
 
@@ -87,6 +112,10 @@ const initialState = {
   city: "",
   province: "BC",
   postCode: "",
+  selectedAddressId: null as number | null,
+  selectedStoreId: null as number | null,
+  addresses: [] as AddressOut[],
+  stores: [] as StoreLocationOut[],
   petName: "",
   petType: "dog" as PetType,
   breed: "",
@@ -95,7 +124,7 @@ const initialState = {
   dateOfBirth: "",
   gender: "" as Gender | "",
   weight: "",
-  weightUnit: "lbs" as WeightUnit,
+  weightUnit: "kg" as WeightUnit, // 后端默认使用 kg
   coatCondition: "" as CoatCondition | "",
   behavior: "" as Behavior | "",
   groomingFrequency: "" as GroomingFrequency | "",
@@ -106,6 +135,8 @@ const initialState = {
   addOns: [] as string[],
   isLoginModalOpen: false,
   userInfo: null as MeOut | null,
+  petBreeds: [] as PetBreedOut[],
+  isLoadingBreeds: false,
 };
 
 export const useBookingStore = create<BookingState>((set) => ({
@@ -126,6 +157,61 @@ export const useBookingStore = create<BookingState>((set) => ({
   setProvince: (province) => set({ province }),
 
   setPostCode: (postCode) => set({ postCode }),
+
+  setSelectedAddressId: (id) =>
+    set((state) => {
+      const selectedAddress = state.addresses.find((addr) => addr.id === id);
+      if (selectedAddress) {
+        return {
+          selectedAddressId: id,
+          address: selectedAddress.address,
+          city: selectedAddress.city,
+          province: selectedAddress.province,
+          postCode: selectedAddress.postal_code,
+        };
+      }
+      return { selectedAddressId: id };
+    }),
+
+  setSelectedStoreId: (id) =>
+    set((state) => {
+      const selectedStore = state.stores.find((store) => store.id === id);
+      if (selectedStore) {
+        return {
+          selectedStoreId: id,
+          address: selectedStore.address,
+          city: selectedStore.city,
+          province: selectedStore.province,
+          postCode: selectedStore.postal_code,
+        };
+      }
+      return { selectedStoreId: id };
+    }),
+
+  loadAddresses: async () => {
+    try {
+      const addresses = await getAddresses();
+      set({ addresses });
+      // 如果有默认地址，自动选择
+      const defaultAddress = addresses.find((addr) => addr.is_default);
+      if (defaultAddress) {
+        useBookingStore.getState().setSelectedAddressId(defaultAddress.id);
+      }
+    } catch (error) {
+      console.error("Failed to load addresses:", error);
+      set({ addresses: [] });
+    }
+  },
+
+  loadStores: async () => {
+    try {
+      const stores = await getStores();
+      set({ stores });
+    } catch (error) {
+      console.error("Failed to load stores:", error);
+      set({ stores: [] });
+    }
+  },
 
   setPetName: (name) => set({ petName: name }),
 
@@ -174,6 +260,28 @@ export const useBookingStore = create<BookingState>((set) => ({
 
   setIsLoginModalOpen: (isLoginModalOpen) => set({ isLoginModalOpen }),
 
+  // 将 bookingStore 中的宠物信息转换为 PetPayload（用于提交预约）
+  getPetPayload: (): PetPayload => {
+    const state = useBookingStore.getState();
+    const weightValue = state.weight ? parseFloat(state.weight) : null;
+    
+    return {
+      name: state.petName,
+      pet_type: state.petType,
+      breed: state.breed || null,
+      mixed_breed: state.isMixedBreed,
+      precise_type: state.precisePetType || null,
+      birthday: state.dateOfBirth || null,
+      gender: state.gender || null,
+      weight_value: weightValue,
+      weight_unit: state.weightUnit,
+      coat_condition: state.coatCondition || null,
+      behavior: state.behavior || null,
+      grooming_frequency: state.groomingFrequency || null,
+      special_notes: state.specialNotes || null,
+    };
+  },
+
   loadUserInfo: async () => {
     // This function should be called from the component with user context
     // We'll handle the user check in the component
@@ -189,6 +297,22 @@ export const useBookingStore = create<BookingState>((set) => ({
     } catch (error) {
       console.error("Failed to load user info:", error);
       set({ userInfo: null });
+    }
+  },
+
+  loadPetBreeds: async () => {
+    const state = useBookingStore.getState();
+    // 如果已经在加载中或已有数据，则不再请求
+    if (state.isLoadingBreeds || state.petBreeds.length > 0) {
+      return;
+    }
+    try {
+      set({ isLoadingBreeds: true });
+      const breeds = await getPetBreeds();
+      set({ petBreeds: breeds, isLoadingBreeds: false });
+    } catch (error) {
+      console.error("Failed to load pet breeds:", error);
+      set({ petBreeds: [], isLoadingBreeds: false });
     }
   },
 
