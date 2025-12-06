@@ -1,27 +1,8 @@
+import { useEffect, useRef } from "react";
 import { Icon } from "@/components/common/Icon";
 import { CommonCheckbox, OrangeButton, CustomRadio } from "@/components/common";
 import { useBookingStore } from "./bookingStore";
 import { cn } from "@/components/ui/utils";
-
-// Service package data
-const servicePackages = [
-  {
-    id: "premium-bath",
-    name: "Premium bath",
-    description: "Bath and dry, brush, and nail trim",
-    price: 50,
-    duration: "1 hour",
-    icon: "bath-brush",
-  },
-  {
-    id: "full-grooming",
-    name: "Full grooming",
-    description: "Basic bath, haircut & styling",
-    price: 100,
-    duration: "1.5-2 hours",
-    icon: "full-grooming",
-  },
-] as const;
 
 // Add-on data
 interface AddOn {
@@ -84,17 +65,33 @@ const categories = ["Most Popular", "Skin & Coat", "Treatments", "Facial", "Paws
 
 export function Step3() {
   const {
-    servicePackage,
+    serviceId,
+    services,
+    isLoadingServices,
     addOns: selectedAddOns,
-    setServicePackage,
+    setServiceId,
     toggleAddOn,
+    loadServices,
     previousStep,
     nextStep,
   } = useBookingStore();
 
+  const hasLoadedServices = useRef(false);
+
+  // 获取服务数据（只加载一次）
+  useEffect(() => {
+    if (!hasLoadedServices.current) {
+      hasLoadedServices.current = true;
+      loadServices();
+    }
+  }, [loadServices]);
+
   // Calculate total price
-  const packagePrice = servicePackage
-    ? servicePackages.find((pkg) => pkg.id === servicePackage)?.price || 0
+  const selectedService = services.find((s) => s.id === serviceId);
+  const packagePrice = selectedService
+    ? typeof selectedService.base_price === "string"
+      ? parseFloat(selectedService.base_price)
+      : selectedService.base_price
     : 0;
   const addOnsPrice = selectedAddOns.reduce((total, addOnId) => {
     const addOn = addOns.find((a) => a.id === addOnId);
@@ -120,18 +117,34 @@ export function Step3() {
               </div>
             </div>
             <div className="gap-[16px] grid grid-cols-2 grid-rows-1 relative shrink-0 w-full">
-              {servicePackages.map((pkg) => (
-                <CustomRadio
-                  key={pkg.id}
-                  variant="package"
-                  label={pkg.name}
-                  description={pkg.description}
-                  price={pkg.price}
-                  duration={pkg.duration}
-                  isSelected={servicePackage === pkg.id}
-                  onClick={() => setServicePackage(pkg.id as "premium-bath" | "full-grooming")}
-                />
-              ))}
+              {isLoadingServices ? (
+                <div className="col-span-2 text-center py-8 text-[#4a5565]">
+                  Loading services...
+                </div>
+              ) : services.length === 0 ? (
+                <div className="col-span-2 text-center py-8 text-[#4a5565]">
+                  No services available
+                </div>
+              ) : (
+                services.map((service) => {
+                  const price =
+                    typeof service.base_price === "string"
+                      ? parseFloat(service.base_price)
+                      : service.base_price;
+                  return (
+                    <CustomRadio
+                      key={service.id}
+                      variant="package"
+                      label={service.name}
+                      description={service.description || ""}
+                      price={price}
+                      duration="" // API 中没有 duration 字段，可以留空或根据 type 推断
+                      isSelected={serviceId === service.id}
+                      onClick={() => setServiceId(service.id)}
+                    />
+                  );
+                })
+              )}
             </div>
         </div>
       </div>

@@ -4,11 +4,13 @@ import {
   getAddresses,
   getStores,
   getPetBreeds,
+  getServices,
   type MeOut,
   type AddressOut,
   type StoreLocationOut,
   type PetPayload,
   type PetBreedOut,
+  type ServiceOut,
 } from "@/lib/api";
 
 // 与后端枚举保持一致
@@ -57,7 +59,8 @@ interface BookingState {
   specialNotes: string; // 对应 API: special_notes
 
   // Step 3: Service package and add-ons
-  servicePackage: ServicePackage | "";
+  servicePackage: ServicePackage | ""; // 保持向后兼容，但实际使用 serviceId
+  serviceId: number | null; // 实际的服务 ID（从 API 获取）
   addOns: string[]; // Array of add-on IDs
 
   // UI state
@@ -69,6 +72,10 @@ interface BookingState {
   // Pet breeds (loaded from API)
   petBreeds: PetBreedOut[];
   isLoadingBreeds: boolean;
+
+  // Services (loaded from API)
+  services: ServiceOut[];
+  isLoadingServices: boolean;
 
   // Actions
   setAddress: (address: string) => void;
@@ -101,6 +108,8 @@ interface BookingState {
   setIsLoginModalOpen: (isOpen: boolean) => void;
   loadUserInfo: () => Promise<void>;
   loadPetBreeds: () => Promise<void>;
+  loadServices: () => Promise<void>;
+  setServiceId: (id: number | null) => void;
   getPetPayload: () => PetPayload; // 转换为 PetPayload 格式
   reset: () => void;
 }
@@ -132,11 +141,14 @@ const initialState = {
   referenceStyles: [] as File[],
   specialNotes: "",
   servicePackage: "" as ServicePackage | "",
+  serviceId: null as number | null,
   addOns: [] as string[],
   isLoginModalOpen: false,
   userInfo: null as MeOut | null,
   petBreeds: [] as PetBreedOut[],
   isLoadingBreeds: false,
+  services: [] as ServiceOut[],
+  isLoadingServices: false,
 };
 
 export const useBookingStore = create<BookingState>((set) => ({
@@ -315,6 +327,24 @@ export const useBookingStore = create<BookingState>((set) => ({
       set({ petBreeds: [], isLoadingBreeds: false });
     }
   },
+
+  loadServices: async () => {
+    const state = useBookingStore.getState();
+    // 如果已经在加载中或已有数据，则不再请求
+    if (state.isLoadingServices || state.services.length > 0) {
+      return;
+    }
+    try {
+      set({ isLoadingServices: true });
+      const services = await getServices();
+      set({ services, isLoadingServices: false });
+    } catch (error) {
+      console.error("Failed to load services:", error);
+      set({ services: [], isLoadingServices: false });
+    }
+  },
+
+  setServiceId: (id) => set({ serviceId: id }),
 
   reset: () => set(initialState),
 }));
