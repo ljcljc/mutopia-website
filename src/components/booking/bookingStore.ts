@@ -5,6 +5,7 @@ import {
   getPetBreeds,
   getServices,
   getAddOns,
+  getMembershipPlans,
   type MeOut,
   type AddressOut,
   type StoreLocationOut,
@@ -12,6 +13,7 @@ import {
   type PetBreedOut,
   type ServiceOut,
   type AddOnOut,
+  type MembershipPlanOut,
 } from "@/lib/api";
 import { useAuthStore } from "@/components/auth/authStore";
 
@@ -86,6 +88,10 @@ interface BookingState {
   addOnsList: AddOnOut[];
   isLoadingAddOns: boolean;
 
+  // Membership plans (loaded from API)
+  membershipPlans: MembershipPlanOut[];
+  isLoadingMembershipPlans: boolean;
+
   // Actions
   setAddress: (address: string) => void;
   setServiceType: (serviceType: ServiceType) => void;
@@ -119,6 +125,7 @@ interface BookingState {
   loadPetBreeds: () => Promise<void>;
   loadServices: () => Promise<void>;
   loadAddOns: () => Promise<void>;
+  loadMembershipPlans: () => Promise<void>;
   setServiceId: (id: number | null) => void;
   getPetPayload: () => PetPayload; // 转换为 PetPayload 格式
   reset: () => void;
@@ -162,6 +169,8 @@ const initialState = {
   isLoadingServices: false,
   addOnsList: [] as AddOnOut[],
   isLoadingAddOns: false,
+  membershipPlans: [] as MembershipPlanOut[],
+  isLoadingMembershipPlans: false,
 };
 
 export const useBookingStore = create<BookingState>((set) => ({
@@ -380,6 +389,22 @@ export const useBookingStore = create<BookingState>((set) => ({
     } catch (error) {
       console.error("Failed to load add-ons:", error);
       set({ addOnsList: [], isLoadingAddOns: false });
+    }
+  },
+
+  loadMembershipPlans: async () => {
+    const state = useBookingStore.getState();
+    // 如果已经在加载中或已有数据，则不再请求
+    if (state.isLoadingMembershipPlans || state.membershipPlans.length > 0) {
+      return;
+    }
+    try {
+      set({ isLoadingMembershipPlans: true });
+      const plans = await getMembershipPlans();
+      set({ membershipPlans: plans, isLoadingMembershipPlans: false });
+    } catch (error) {
+      console.error("Failed to load membership plans:", error);
+      set({ membershipPlans: [], isLoadingMembershipPlans: false });
     }
   },
 

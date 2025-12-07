@@ -486,6 +486,40 @@ export async function getAddOns(): Promise<AddOnOut[]> {
   return response.data;
 }
 
+// ==================== Membership Plans ====================
+
+export interface MembershipBenefitOut {
+  content: string;
+  is_highlight: boolean;
+  display_order: number;
+}
+
+export interface MembershipPlanOut {
+  id: number;
+  name: string;
+  description?: string | null;
+  fee: number | string;
+  discount_rate: number | string;
+  coupon_count: number;
+  coupon_amount: number | string;
+  duration_days: number;
+  coupon_valid_days: number;
+  benefits?: MembershipBenefitOut[] | null;
+}
+
+/**
+ * 获取会员套餐列表
+ */
+export async function getMembershipPlans(): Promise<MembershipPlanOut[]> {
+  const response = await http.get<MembershipPlanOut[]>(
+    "/api/promotions/membership_plans",
+    {
+      skipAuth: true,
+    }
+  );
+  return response.data;
+}
+
 // ==================== 宠物管理 API ====================
 
 /**

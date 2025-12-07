@@ -1,8 +1,9 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Icon } from "@/components/common/Icon";
 import { OrangeButton, Checkbox, MembershipCard, type FeatureItem } from "@/components/common";
 import { useBookingStore } from "./bookingStore";
 import { cn } from "@/components/ui/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function Step4() {
   const {
@@ -10,6 +11,9 @@ export function Step4() {
     services,
     addOns: selectedAddOns,
     addOnsList,
+    membershipPlans,
+    isLoadingMembershipPlans,
+    loadMembershipPlans,
     useMembership,
     useMembershipDiscount,
     useCashCoupon,
@@ -20,6 +24,15 @@ export function Step4() {
     previousStep,
     nextStep,
   } = useBookingStore();
+
+  // Load membership plans on mount
+  const hasLoadedMembershipPlans = useRef(false);
+  useEffect(() => {
+    if (!hasLoadedMembershipPlans.current) {
+      loadMembershipPlans();
+      hasLoadedMembershipPlans.current = true;
+    }
+  }, [loadMembershipPlans]);
 
   const [isPackageExpanded, setIsPackageExpanded] = useState(false);
   const [isAddOnsExpanded, setIsAddOnsExpanded] = useState(false);
@@ -79,34 +92,109 @@ export function Step4() {
     nextStep();
   };
 
-  // Membership features
-  const membershipFeatures: FeatureItem[] = [
-    { text: "30$ instant cash coupons", isHighlight: true },
-    { text: "10% off additional services" },
-    { text: "Priority booking within 3 days" },
-    { text: "Free teeth brushing" },
-    { text: "Free anal gland expression" },
-    { text: "Grooming photo updates" },
-  ];
+  // Get the first membership plan (or use default if not loaded)
+  const membershipPlan = membershipPlans.length > 0 ? membershipPlans[0] : null;
+
+  // Convert membership plan benefits to FeatureItem format
+  const membershipFeatures: FeatureItem[] = useMemo(() => {
+    if (membershipPlan?.benefits) {
+      return membershipPlan.benefits
+        .sort((a, b) => a.display_order - b.display_order)
+        .map((benefit) => ({
+          text: benefit.content,
+          isHighlight: benefit.is_highlight,
+        }));
+    }
+    // Fallback to default features if no plan loaded
+    return [
+      { text: "30$ instant cash coupons", isHighlight: true },
+      { text: "10% off additional services" },
+      { text: "Priority booking within 3 days" },
+      { text: "Free teeth brushing" },
+      { text: "Free anal gland expression" },
+      { text: "Grooming photo updates" },
+    ];
+  }, [membershipPlan]);
+
+  // Format membership plan price
+  const membershipPrice = membershipPlan
+    ? typeof membershipPlan.fee === "string"
+      ? `$ ${membershipPlan.fee}`
+      : `$ ${membershipPlan.fee}`
+    : "$ 99";
+
+  // Format membership plan badge text
+  const membershipBadgeText = membershipPlan
+    ? `Save up to ${typeof membershipPlan.discount_rate === "string" ? membershipPlan.discount_rate : (Number(membershipPlan.discount_rate) * 100).toFixed(0)}%`
+    : "Save up to 50%";
 
   return (
     <div className="content-stretch flex flex-col gap-[32px] items-start relative w-full">
       {/* Main Content */}
       <div className="content-stretch flex gap-[32px] items-start relative shrink-0 w-full">
         {/* Left: VIP Membership Card */}
-        <MembershipCard
-          variant="wrapped"
-          title="Premium Plus"
-          price="$ 99"
-          priceUnit="/year"
-          badgeText="Save up to 50%"
-          description="Our most popular package for complete pet care"
-          features={membershipFeatures}
-          headerTitle="Upgrade to annual membership to save more"
-          headerSubtitle="Enjoy year-round savings on every visit"
-          showButton={false}
-          className="w-[440px]"
-        />
+        {isLoadingMembershipPlans ? (
+          <div className="content-stretch flex flex-col items-start relative shrink-0 w-[440px]">
+            <div className="bg-[#8760a0] content-stretch flex flex-col items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full">
+              <div className="content-stretch flex flex-col gap-[14px] items-center relative shrink-0 w-full">
+                {/* Header Title and Subtitle Skeleton */}
+                <div className="content-stretch flex flex-col gap-[3.5px] h-[45.5px] items-center relative shrink-0 w-full">
+                  <Skeleton className="h-[24.5px] w-[280px] bg-white/20" />
+                  <Skeleton className="h-[17.5px] w-[240px] bg-white/20" />
+                </div>
+                {/* Card Content Skeleton */}
+                <div className="bg-[rgba(255,255,255,0.96)] content-stretch flex flex-col items-center p-[32px] relative rounded-[16px] shrink-0 w-full">
+                  <div className="content-stretch flex flex-col gap-[24px] items-center relative shrink-0 w-full">
+                    <div className="content-stretch flex flex-col gap-[24px] items-start relative shrink-0 w-full">
+                      {/* Title and Price Skeleton */}
+                      <div className="content-stretch flex items-start justify-center relative shrink-0 w-full">
+                        <div className="content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-0 py-[16px] relative shrink-0 max-w-full">
+                          <div className="content-stretch flex flex-col gap-[16px] items-center justify-center relative shrink-0 w-full">
+                            <div className="content-stretch flex flex-col gap-[12px] items-center justify-center relative shrink-0 w-full">
+                              <div className="content-stretch flex gap-[12px] items-start justify-center relative shrink-0">
+                                <Skeleton className="h-[24px] w-[120px] bg-[#633479]/20" />
+                                <Skeleton className="h-[24px] w-[60px] bg-[#633479]/20" />
+                              </div>
+                              <Skeleton className="h-[24px] w-[140px] bg-green-100/50" />
+                            </div>
+                            <Skeleton className="h-[44px] w-[280px] bg-[rgba(74,60,42,0.1)]" />
+                          </div>
+                        </div>
+                      </div>
+                      {/* Features List Skeleton */}
+                      <div className="content-stretch flex flex-col gap-[12px] items-center relative shrink-0 w-full">
+                        <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0">
+                          {[1, 2, 3, 4, 5, 6].map((i) => (
+                            <div key={i} className="content-stretch flex items-start relative shrink-0">
+                              <div className="content-stretch flex gap-[12px] items-start relative shrink-0">
+                                <Skeleton className="size-[16.8px] rounded bg-[#00A63E]/20" />
+                                <Skeleton className="h-[17.5px] w-[180px] bg-[#364153]/20" />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <MembershipCard
+            variant="wrapped"
+            title={membershipPlan?.name || "Premium Plus"}
+            price={membershipPrice}
+            priceUnit="/year"
+            badgeText={membershipBadgeText}
+            description={membershipPlan?.description || "Our most popular package for complete pet care"}
+            features={membershipFeatures}
+            headerTitle="Upgrade to annual membership to save more"
+            headerSubtitle="Enjoy year-round savings on every visit"
+            showButton={false}
+            className="w-[440px]"
+          />
+        )}
 
         {/* Right: Service Price Summary */}
         <div className="bg-white content-stretch flex flex-[1_0_0] flex-col items-start justify-between min-h-px min-w-px p-[24px] relative rounded-[12px] self-stretch shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0">
