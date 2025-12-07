@@ -34,6 +34,12 @@ export function Step4() {
     }
   }, [loadMembershipPlans]);
 
+  // Set default checked state for membership discounts
+  useEffect(() => {
+    setUseMembershipDiscount(true);
+    setUseCashCoupon(true);
+  }, [setUseMembershipDiscount, setUseCashCoupon]);
+
   const [isPackageExpanded, setIsPackageExpanded] = useState(false);
   const [isAddOnsExpanded, setIsAddOnsExpanded] = useState(false);
 
@@ -46,12 +52,17 @@ export function Step4() {
     : 0;
 
   // Calculate add-ons price and get selected add-ons details
+  // In Step4, we assume user will be a member, so if included_in_membership is true, price should be 0
   const selectedAddOnsDetails = useMemo(() => {
     return selectedAddOns
       .map((addOnId) => {
         const addOn = addOnsList.find((a) => a.id === Number(addOnId));
         if (addOn) {
-          const price = typeof addOn.price === "string" ? parseFloat(addOn.price) : addOn.price;
+          let price = typeof addOn.price === "string" ? parseFloat(addOn.price) : addOn.price;
+          // In Step4, assume user will be a member, so if included_in_membership is true, price is 0
+          if (addOn.included_in_membership === true) {
+            price = 0;
+          }
           return { ...addOn, price };
         }
         return null;
@@ -59,20 +70,67 @@ export function Step4() {
       .filter((item): item is NonNullable<typeof item> => item !== null);
   }, [selectedAddOns, addOnsList]);
 
+  // Get the first membership plan (or use default if not loaded)
+  const membershipPlan = membershipPlans.length > 0 ? membershipPlans[0] : null;
+
+  // Get discount rate from membership plan
+  // discount_rate represents the retention rate (e.g., 0.9 means 90% = 9折)
+  const discountRate = useMemo(() => {
+    if (!membershipPlan || !useMembershipDiscount) {
+      return 1; // No discount, 100% of original price
+    }
+    const rate = typeof membershipPlan.discount_rate === "string"
+      ? parseFloat(membershipPlan.discount_rate)
+      : membershipPlan.discount_rate;
+    // discount_rate is the retention rate (e.g., 0.9 for 9折, 0.1 for 1折)
+    return rate;
+  }, [membershipPlan, useMembershipDiscount]);
+
+  // Calculate membership discount percentage for display
+  // If discount_rate = 0.9 (9折), display "10% off" (100% - 90% = 10%)
+  const membershipDiscountPercentage = useMemo(() => {
+    if (!membershipPlan) {
+      return "10";
+    }
+    const rate = typeof membershipPlan.discount_rate === "string"
+      ? parseFloat(membershipPlan.discount_rate)
+      : membershipPlan.discount_rate;
+    // Convert retention rate to discount percentage
+    // If rate = 0.9 (9折), discount = (1 - 0.9) * 100 = 10%
+    const percentage = (1 - rate) * 100;
+    return percentage.toFixed(0);
+  }, [membershipPlan]);
+
+  // Get cash coupon info from membership plan
+  const cashCouponInfo = useMemo(() => {
+    if (!membershipPlan) {
+      return { count: cashCouponCount || 5, amount: 5 };
+    }
+    const count = membershipPlan.coupon_count || 0;
+    const amount = typeof membershipPlan.coupon_amount === "string"
+      ? parseFloat(membershipPlan.coupon_amount)
+      : membershipPlan.coupon_amount;
+    return { count, amount };
+  }, [membershipPlan, cashCouponCount]);
+
   const addOnsPrice = selectedAddOnsDetails.reduce((total, addOn) => total + addOn.price, 0);
   const originalTotal = packagePrice + addOnsPrice;
 
   // Calculate discounts
-  const membershipDiscount = useMembershipDiscount ? originalTotal * 0.1 : 0;
-  const cashCouponDiscount = useCashCoupon ? 5 : 0; // $5 per coupon
+  // discount_rate is the retention rate, so discount amount = original * (1 - discount_rate)
+  const membershipDiscount = useMembershipDiscount && discountRate < 1
+    ? originalTotal * (1 - discountRate)
+    : 0;
+  const cashCouponDiscount = useCashCoupon ? cashCouponInfo.amount : 0;
   const totalDiscount = membershipDiscount + cashCouponDiscount;
 
   // Calculate final prices with membership discount
-  const packagePriceWithDiscount = useMembershipDiscount
-    ? packagePrice * 0.9
+  // discount_rate is the retention rate (e.g., 0.9 for 9折)
+  const packagePriceWithDiscount = useMembershipDiscount && discountRate < 1
+    ? packagePrice * discountRate
     : packagePrice;
-  const addOnsPriceWithDiscount = useMembershipDiscount
-    ? addOnsPrice * 0.9
+  const addOnsPriceWithDiscount = useMembershipDiscount && discountRate < 1
+    ? addOnsPrice * discountRate
     : addOnsPrice;
   const subtotalWithDiscount = packagePriceWithDiscount + addOnsPriceWithDiscount;
   const finalTotal = subtotalWithDiscount - cashCouponDiscount;
@@ -91,9 +149,6 @@ export function Step4() {
     setUseCashCoupon(false);
     nextStep();
   };
-
-  // Get the first membership plan (or use default if not loaded)
-  const membershipPlan = membershipPlans.length > 0 ? membershipPlans[0] : null;
 
   // Convert membership plan benefits to FeatureItem format
   const membershipFeatures: FeatureItem[] = useMemo(() => {
@@ -124,8 +179,15 @@ export function Step4() {
     : "$ 99";
 
   // Format membership plan badge text
+  // discount_rate is retention rate (e.g., 0.9 for 9折), so discount percentage = (1 - discount_rate) * 100
   const membershipBadgeText = membershipPlan
-    ? `Save up to ${typeof membershipPlan.discount_rate === "string" ? membershipPlan.discount_rate : (Number(membershipPlan.discount_rate) * 100).toFixed(0)}%`
+    ? (() => {
+        const rate = typeof membershipPlan.discount_rate === "string"
+          ? parseFloat(membershipPlan.discount_rate)
+          : membershipPlan.discount_rate;
+        const discountPercentage = (1 - rate) * 100;
+        return `Save up to ${discountPercentage.toFixed(0)}%`;
+      })()
     : "Save up to 50%";
 
   return (
@@ -256,7 +318,7 @@ export function Step4() {
                           {selectedService.name}
                         </p>
                         <p className="relative shrink-0">
-                          {useMembershipDiscount ? (
+                          {useMembershipDiscount && discountRate < 1 ? (
                             <>
                               <span className="line-through text-[#de6a07]">${packagePrice.toFixed(2)}</span>
                               <span> ${packagePriceWithDiscount.toFixed(2)}</span>
@@ -273,7 +335,7 @@ export function Step4() {
                             .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
                             .map((item) => {
                               const itemPrice = typeof item.price === "string" ? parseFloat(item.price) : item.price;
-                              const itemPriceWithDiscount = useMembershipDiscount ? itemPrice * 0.9 : itemPrice;
+                              const itemPriceWithDiscount = useMembershipDiscount && discountRate < 1 ? itemPrice * discountRate : itemPrice;
                               return (
                                 <div key={item.id} className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
                                   <p className="relative shrink-0">
@@ -303,7 +365,7 @@ export function Step4() {
                       Subtotal
                     </p>
                     <p className="leading-[22.75px] relative shrink-0 text-[12px]">
-                      {useMembershipDiscount ? (
+                      {useMembershipDiscount && discountRate < 1 ? (
                         <>
                           <span className="line-through text-[#de6a07]">${packagePrice.toFixed(2)}</span>
                           <span> ${packagePriceWithDiscount.toFixed(2)}</span>
@@ -343,23 +405,44 @@ export function Step4() {
                   {/* Add-ons list */}
                   {selectedAddOnsDetails.length > 0 && (
                     <>
-                      {selectedAddOnsDetails.map((addOn) => (
-                        <div key={addOn.id} className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
-                          <p className="relative shrink-0">
-                            {addOn.name}
-                          </p>
-                          <p className="relative shrink-0">
-                            {useMembershipDiscount ? (
-                              <>
-                                <span className="line-through text-[#de6a07]">${addOn.price.toFixed(2)}</span>
-                                <span> ${(addOn.price * 0.9).toFixed(2)}</span>
-                              </>
-                            ) : (
-                              `$${addOn.price.toFixed(2)}`
-                            )}
-                          </p>
-                        </div>
-                      ))}
+                      {selectedAddOnsDetails.map((addOn) => {
+                        // Get original price from addOnsList for display
+                        const originalAddOn = addOnsList.find((a) => a.id === addOn.id);
+                        const originalPrice = originalAddOn
+                          ? typeof originalAddOn.price === "string"
+                            ? parseFloat(originalAddOn.price)
+                            : originalAddOn.price
+                          : addOn.price;
+                        // If price is 0 (included in membership), show original price (strikethrough) and $0.00
+                        // Otherwise apply discount if membership discount is enabled
+                        const displayPrice = addOn.price === 0 
+                          ? 0 
+                          : (useMembershipDiscount && discountRate < 1 ? addOn.price * discountRate : addOn.price);
+                        const isIncludedInMembership = addOn.price === 0;
+                        return (
+                          <div key={addOn.id} className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
+                            <p className="relative shrink-0">
+                              {addOn.name}
+                            </p>
+                            <p className="relative shrink-0">
+                              {isIncludedInMembership ? (
+                                // If included in membership, show original price (strikethrough) and $0.00
+                                <>
+                                  <span className="line-through text-[#de6a07]">${originalPrice.toFixed(2)}</span>
+                                  <span> $0.00</span>
+                                </>
+                              ) : useMembershipDiscount && discountRate < 1 ? (
+                                <>
+                                  <span className="line-through text-[#de6a07]">${originalPrice.toFixed(2)}</span>
+                                  <span> ${displayPrice.toFixed(2)}</span>
+                                </>
+                              ) : (
+                                `$${displayPrice.toFixed(2)}`
+                              )}
+                            </p>
+                          </div>
+                        );
+                      })}
                       {/* Separator line */}
                       <div className="h-0 relative shrink-0 w-full border-t border-[#e0e0e0] my-[4px]" />
                     </>
@@ -369,7 +452,7 @@ export function Step4() {
                       Subtotal
                     </p>
                     <p className="leading-[22.75px] relative shrink-0 text-[12px]">
-                      {useMembershipDiscount ? (
+                      {useMembershipDiscount && discountRate < 1 ? (
                         <>
                           <span className="line-through text-[#de6a07]">${addOnsPrice.toFixed(2)}</span>
                           <span> ${addOnsPriceWithDiscount.toFixed(2)}</span>
@@ -396,7 +479,7 @@ export function Step4() {
                   <Checkbox
                     checked={useMembershipDiscount}
                     onCheckedChange={setUseMembershipDiscount}
-                    label="Membership 10% off *"
+                    label={`Membership ${membershipDiscountPercentage}% off *`}
                     containerClassName="relative shrink-0"
                   />
                 </div>
@@ -404,12 +487,12 @@ export function Step4() {
                   <Checkbox
                     checked={useCashCoupon}
                     onCheckedChange={setUseCashCoupon}
-                    label={`Cash coupon (${cashCouponCount}x$5 left)`}
+                    label={`Cash coupon (${cashCouponInfo.count}x$${cashCouponInfo.amount} left)`}
                     containerClassName="relative shrink-0"
                   />
                   {useCashCoupon && (
                     <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px]">
-                      -$5
+                      -${cashCouponInfo.amount.toFixed(0)}
                     </p>
                   )}
                 </div>
@@ -421,7 +504,7 @@ export function Step4() {
                     Total for this service
                   </p>
                   <p className="leading-[22.75px] relative shrink-0 text-[12px]">
-                    {useMembershipDiscount || useCashCoupon ? (
+                    {(useMembershipDiscount && discountRate < 1) || useCashCoupon ? (
                       <>
                         <span className="line-through text-[#de6a07]">${originalTotal.toFixed(2)}</span>
                         <span> ${finalTotal.toFixed(2)}</span>
@@ -433,7 +516,7 @@ export function Step4() {
                 </div>
                 <div className="content-stretch flex gap-[4px] items-center relative shrink-0 w-full">
                   <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
-                    If selected, $99 Membership fee will be added later.
+                    If selected, {membershipPrice} Membership fee will be added later.
                   </p>
                 </div>
               </div>

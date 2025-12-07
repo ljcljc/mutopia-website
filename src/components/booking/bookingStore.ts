@@ -92,6 +92,12 @@ interface BookingState {
   membershipPlans: MembershipPlanOut[];
   isLoadingMembershipPlans: boolean;
 
+  // Step 4: Membership and discount options
+  useMembership: boolean;
+  useMembershipDiscount: boolean;
+  useCashCoupon: boolean;
+  cashCouponCount: number;
+
   // Actions
   setAddress: (address: string) => void;
   setServiceType: (serviceType: ServiceType) => void;
@@ -126,6 +132,9 @@ interface BookingState {
   loadServices: () => Promise<void>;
   loadAddOns: () => Promise<void>;
   loadMembershipPlans: () => Promise<void>;
+  setUseMembership: (value: boolean) => void;
+  setUseMembershipDiscount: (value: boolean) => void;
+  setUseCashCoupon: (value: boolean) => void;
   setServiceId: (id: number | null) => void;
   getPetPayload: () => PetPayload; // 转换为 PetPayload 格式
   reset: () => void;
@@ -171,6 +180,10 @@ const initialState = {
   isLoadingAddOns: false,
   membershipPlans: [] as MembershipPlanOut[],
   isLoadingMembershipPlans: false,
+  useMembership: false,
+  useMembershipDiscount: false,
+  useCashCoupon: false,
+  cashCouponCount: 0,
 };
 
 export const useBookingStore = create<BookingState>((set) => ({
@@ -407,6 +420,10 @@ export const useBookingStore = create<BookingState>((set) => ({
       set({ membershipPlans: [], isLoadingMembershipPlans: false });
     }
   },
+
+  setUseMembership: (value) => set({ useMembership: value }),
+  setUseMembershipDiscount: (value) => set({ useMembershipDiscount: value }),
+  setUseCashCoupon: (value) => set({ useCashCoupon: value }),
 
   setServiceId: (id) => set({ serviceId: id }),
 

@@ -126,18 +126,24 @@ export function Step3() {
     : 0;
   
   // Calculate add-ons price and get selected add-ons details
+  // If included_in_membership is true and user is a member, price should be 0
   const selectedAddOnsDetails = useMemo(() => {
+    const isMember = userInfo?.is_member === true;
     return selectedAddOns
       .map((addOnId) => {
         const addOn = addOnsList.find((a) => a.id === Number(addOnId));
         if (addOn) {
-          const price = typeof addOn.price === "string" ? parseFloat(addOn.price) : addOn.price;
+          let price = typeof addOn.price === "string" ? parseFloat(addOn.price) : addOn.price;
+          // If included_in_membership is true and user is a member, price is 0
+          if (addOn.included_in_membership === true && isMember) {
+            price = 0;
+          }
           return { ...addOn, price };
         }
         return null;
       })
       .filter((item): item is NonNullable<typeof item> => item !== null);
-  }, [selectedAddOns, addOnsList]);
+  }, [selectedAddOns, addOnsList, userInfo]);
 
   const addOnsPrice = selectedAddOnsDetails.reduce((total, addOn) => total + addOn.price, 0);
   const totalPrice = packagePrice + addOnsPrice;
@@ -302,17 +308,22 @@ export function Step3() {
                 {selectedAddOns.map((addOnId) => {
                   const addOn = addOnsList.find((a) => a.id === Number(addOnId));
                   if (!addOn) return null;
-                  const price =
+                  const isMember = userInfo?.is_member === true;
+                  let price =
                     typeof addOn.price === "string"
                       ? parseFloat(addOn.price)
                       : addOn.price;
+                  // If included_in_membership is true and user is a member, price is 0
+                  if (addOn.included_in_membership === true && isMember) {
+                    price = 0;
+                  }
                   return (
                     <div
                       key={addOnId}
                       className="border border-[#4c4c4c] border-solid content-stretch flex gap-[4px] h-[24px] items-center justify-center overflow-clip px-[17px] py-[5px] relative rounded-[12px] shrink-0"
                     >
                       <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[14px] relative shrink-0 text-[#4c4c4c] text-[10px]">
-                        {addOn.name} ${price}
+                        {addOn.name} ${price.toFixed(2)}
                       </p>
                       <button
                         onClick={() => toggleAddOn(addOnId)}
