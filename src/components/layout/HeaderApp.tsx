@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { logout, getCurrentUser, type MeOut } from "@/lib/api";
+import { logout, type MeOut } from "@/lib/api";
 import { toast } from "sonner";
 
 function Logo() {
@@ -221,26 +221,10 @@ function UserInfo({ userInfo }: { userInfo: MeOut }) {
 
 export default function HeaderApp() {
   const user = useAuthStore((state) => state.user);
-  const [userInfo, setUserInfo] = useState<MeOut | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
-
-  // Load user info from API
-  useEffect(() => {
-    const loadUserInfo = async () => {
-      if (user) {
-        try {
-          const info = await getCurrentUser();
-          setUserInfo(info);
-        } catch (error) {
-          console.error("Failed to load user info:", error);
-        }
-      } else {
-        setUserInfo(null);
-      }
-    };
-
-    loadUserInfo();
-  }, [user]);
+  
+  // Get user info from authStore (set by LoginModalContent after login)
+  const userInfo = useAuthStore((state) => state.userInfo);
 
   // Scroll detection
   useEffect(() => {

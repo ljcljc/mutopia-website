@@ -1,17 +1,19 @@
 import { create } from "zustand";
 import {
-  getCurrentUser,
   getAddresses,
   getStores,
   getPetBreeds,
   getServices,
+  getAddOns,
   type MeOut,
   type AddressOut,
   type StoreLocationOut,
   type PetPayload,
   type PetBreedOut,
   type ServiceOut,
+  type AddOnOut,
 } from "@/lib/api";
+import { useAuthStore } from "@/components/auth/authStore";
 
 // 与后端枚举保持一致
 export type ServiceType = "mobile" | "in_store";
@@ -67,7 +69,10 @@ interface BookingState {
   isLoginModalOpen: boolean;
 
   // User info (loaded from API)
+  // userInfo is now managed by authStore, we keep this for backward compatibility
+  // but it will be synced from authStore
   userInfo: MeOut | null;
+  isLoadingUserInfo: boolean;
 
   // Pet breeds (loaded from API)
   petBreeds: PetBreedOut[];
@@ -76,6 +81,10 @@ interface BookingState {
   // Services (loaded from API)
   services: ServiceOut[];
   isLoadingServices: boolean;
+
+  // Add-ons (loaded from API)
+  addOnsList: AddOnOut[];
+  isLoadingAddOns: boolean;
 
   // Actions
   setAddress: (address: string) => void;
@@ -109,6 +118,7 @@ interface BookingState {
   loadUserInfo: () => Promise<void>;
   loadPetBreeds: () => Promise<void>;
   loadServices: () => Promise<void>;
+  loadAddOns: () => Promise<void>;
   setServiceId: (id: number | null) => void;
   getPetPayload: () => PetPayload; // 转换为 PetPayload 格式
   reset: () => void;
@@ -145,10 +155,13 @@ const initialState = {
   addOns: [] as string[],
   isLoginModalOpen: false,
   userInfo: null as MeOut | null,
+  isLoadingUserInfo: false,
   petBreeds: [] as PetBreedOut[],
   isLoadingBreeds: false,
   services: [] as ServiceOut[],
   isLoadingServices: false,
+  addOnsList: [] as AddOnOut[],
+  isLoadingAddOns: false,
 };
 
 export const useBookingStore = create<BookingState>((set) => ({
@@ -295,20 +308,30 @@ export const useBookingStore = create<BookingState>((set) => ({
   },
 
   loadUserInfo: async () => {
-    // This function should be called from the component with user context
-    // We'll handle the user check in the component
+    const state = useBookingStore.getState();
+    // 如果已经在加载中或已有数据，则不再请求（防止重复调用）
+    if (state.isLoadingUserInfo || state.userInfo !== null) {
+      return;
+    }
     try {
-      const info = await getCurrentUser();
-      set({ userInfo: info });
-      // Auto-fill address if available
-      if (info.address) {
-        set({ address: info.address });
-        // Auto-fill city and postcode based on address (mock data for now)
-        set({ city: "Vancouver", postCode: "E1N 2E5" });
+      set({ isLoadingUserInfo: true });
+      // Get user info from authStore (set by LoginModalContent after login)
+      const info = useAuthStore.getState().userInfo;
+      if (info) {
+        set({ userInfo: info, isLoadingUserInfo: false });
+        // Auto-fill address if available
+        if (info.address) {
+          set({ address: info.address });
+          // Auto-fill city and postcode based on address (mock data for now)
+          set({ city: "Vancouver", postCode: "E1N 2E5" });
+        }
+      } else {
+        // If userInfo is not in authStore, it means user hasn't logged in yet
+        set({ userInfo: null, isLoadingUserInfo: false });
       }
     } catch (error) {
       console.error("Failed to load user info:", error);
-      set({ userInfo: null });
+      set({ userInfo: null, isLoadingUserInfo: false });
     }
   },
 
@@ -341,6 +364,22 @@ export const useBookingStore = create<BookingState>((set) => ({
     } catch (error) {
       console.error("Failed to load services:", error);
       set({ services: [], isLoadingServices: false });
+    }
+  },
+
+  loadAddOns: async () => {
+    const state = useBookingStore.getState();
+    // 如果已经在加载中或已有数据，则不再请求
+    if (state.isLoadingAddOns || state.addOnsList.length > 0) {
+      return;
+    }
+    try {
+      set({ isLoadingAddOns: true });
+      const addOns = await getAddOns();
+      set({ addOnsList: addOns, isLoadingAddOns: false });
+    } catch (error) {
+      console.error("Failed to load add-ons:", error);
+      set({ addOnsList: [], isLoadingAddOns: false });
     }
   },
 

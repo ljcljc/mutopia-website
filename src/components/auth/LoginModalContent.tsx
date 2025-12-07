@@ -668,6 +668,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
 
       // Update auth store
       login(user);
+      useAuthStore.getState().setUserInfo(userInfo);
       toast.success("Login successful!");
 
       // Close modal after a short delay
@@ -912,6 +913,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
 
         // Update auth store
         login(user);
+        useAuthStore.getState().setUserInfo(backendUserInfo);
         toast.success("Login successful!");
 
         // Close modal after a short delay
@@ -1216,6 +1218,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
       };
 
       login(user);
+      useAuthStore.getState().setUserInfo(userInfo);
       toast.success("Sign up successful!");
 
       setTimeout(() => {
@@ -1256,6 +1259,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
       };
 
       login(user);
+      useAuthStore.getState().setUserInfo(userInfo);
       toast.success("Login successful!");
 
       // Save password if rememberMe is checked

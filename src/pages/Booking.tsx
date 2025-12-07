@@ -14,16 +14,14 @@ import { STEP_TITLES } from "@/components/booking/stepTitles";
 
 export default function Booking() {
   const user = useAuthStore((state) => state.user);
-  const { currentStep, loadUserInfo, nextStep } = useBookingStore();
+  const { currentStep, nextStep } = useBookingStore();
 
-  // Load user info from API when user changes
+  // 当用户登出时，清空 bookingStore 的 userInfo
+  // 注意：用户信息加载由 LoginModalContent 统一处理，这里不需要调用 API
   useEffect(() => {
-    if (user) {
-      loadUserInfo();
-    } else {
+    if (!user) {
       useBookingStore.setState({ userInfo: null });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   // Render step component based on current step

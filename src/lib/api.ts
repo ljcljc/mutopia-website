@@ -85,6 +85,8 @@ export interface MeOut {
   receive_marketing_message: boolean;
   role: string;
   is_email_verified: boolean;
+  invite_code?: string | null;
+  is_member?: boolean; // default: false
 }
 
 export interface SocialLoginIn {
@@ -117,12 +119,31 @@ export interface OkOut {
 }
 
 // 服务目录类型
+export interface ServiceItemOut {
+  id: number;
+  name: string;
+  description?: string | null;
+  price: number | string;
+  display_order?: number | null;
+}
+
+export interface ServiceWeightPriceOut {
+  id: number;
+  min_weight_kg: number | string;
+  max_weight_kg?: number | string | null;
+  price: number | string;
+  label?: string | null;
+}
+
 export interface ServiceOut {
   id: number;
   name: string;
   type: string;
   description?: string | null;
   base_price: number | string;
+  service_time?: string | null;
+  items?: ServiceItemOut[] | null;
+  weight_prices?: ServiceWeightPriceOut[] | null;
 }
 
 export interface AddOnOut {
@@ -131,6 +152,10 @@ export interface AddOnOut {
   description?: string | null;
   price: number | string;
   is_variable: boolean;
+  service_time?: string | null;
+  label?: string | null;
+  most_popular?: boolean | null;
+  included_in_membership?: boolean | null;
 }
 
 // 宠物管理类型
