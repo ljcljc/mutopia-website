@@ -23,5 +23,6 @@ export { default as ScrollToTop } from "./ScrollToTop";
 export * from "./CustomRadio";
 export * from "./Spinner";
 export * from "./TertiaryButton";
+export * from "./Icon";
 
 // 当添加新组件时，请在此文件中添加导出
