@@ -1,12 +1,4 @@
-import { PurpleButton } from "@/components/common";
-import { Icon } from "@/components/common/Icon";
-import { Badge } from "@/components/ui/badge";
-// import { Check } from "lucide-react";
-
-interface FeatureItem {
-  text: string;
-  isHighlight?: boolean;
-}
+import { MembershipCard, type FeatureItem } from "@/components/common/MembershipCard";
 
 export default function Packages() {
   const features: FeatureItem[] = [
@@ -66,100 +58,16 @@ export default function Packages() {
           </div>
 
           {/* Package Card */}
-          <div className="relative w-full max-w-[336px] md:max-w-[384px]">
-            {/* Most Popular Badge */}
-            <div className="absolute -top-[12px] left-1/2 -translate-x-1/2 z-20">
-              <div className="bg-[#633479] h-[24px] px-[22px] py-[4.5px] rounded-full flex items-center justify-center">
-                <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[14px] text-[10.5px] text-white whitespace-nowrap">
-                  Most Popular
-                </p>
-              </div>
-            </div>
-
-            {/* Card */}
-            <div className="bg-[rgba(255,255,255,0.96)] rounded-[16px] p-[32px] flex flex-col gap-[16px] items-center shadow-xl">
-              <div className="content-stretch flex flex-col gap-[24px] items-center w-full">
-                {/* Pricing Header */}
-                <div className="content-stretch flex flex-col gap-[16px] items-center py-[16px] w-full">
-                  <div className="content-stretch flex flex-col gap-[12px] items-center">
-                    {/* Title and Price */}
-                    <div className="flex flex-col md:flex-row gap-[12px] items-center justify-center">
-                      <p className="font-['Comfortaa:Bold',sans-serif] leading-[normal] text-[#633479] text-[24px] text-center whitespace-nowrap">
-                        Premium Plus
-                      </p>
-                      <div className="flex gap-[4px] items-center">
-                        <p className="font-['Comfortaa:Bold',sans-serif] leading-[normal] text-[#633479] text-[24px] text-center whitespace-nowrap">
-                          $ 99
-                        </p>
-                        <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] text-[#4a5565] text-[14px] text-center whitespace-nowrap">
-                          /year
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Badge */}
-                    <div className="flex gap-[12px] items-center">
-                      <Badge className="bg-green-100 text-[#016630] h-[24px] px-[16px] py-[4px] rounded-[12px] hover:bg-green-100">
-                        <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[14px] text-[10px] whitespace-nowrap">
-                          Save up to 100%
-                        </p>
-                      </Badge>
-                    </div>
-                  </div>
-
-                  {/* Description */}
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)] text-center">
-                    Our most popular package for
-                    <br />
-                    complete pet care
-                  </p>
-                </div>
-
-                {/* Features List */}
-                <div className="content-stretch flex flex-col gap-[12px] items-center relative shrink-0 w-full">
-                  <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0">
-                    {features.map((feature, index) => (
-                      <div
-                        key={index}
-                        className="content-stretch flex items-start relative shrink-0"
-                      >
-                        <div className="relative shrink-0">
-                          <div className="bg-clip-padding border-0 border-transparent border-solid content-stretch flex flex-col items-start justify-center relative">
-                            <div className="content-stretch flex gap-[12px] items-start relative shrink-0">
-                              <div className="relative shrink-0 size-[16.8px]">
-                                <Icon name="check-green" className="block size-full text-[#00A63E]" />
-                              </div>
-                              <p
-                                className={`font-['Comfortaa:Bold',sans-serif] font-bold leading-[17.5px] relative shrink-0 text-[12.25px] whitespace-nowrap ${
-                                  feature.isHighlight
-                                    ? "text-[#de6a07]"
-                                    : "text-[#364153]"
-                                }`}
-                              >
-                                {feature.text}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* CTA Button */}
-                <div className="w-full px-0 md:px-[24px] pt-[8px]">
-                  <PurpleButton size="medium" fullWidth>
-                    <div className="flex gap-[4px] items-center">
-                      <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] text-[14px] text-nowrap whitespace-pre">
-                        Go premium
-                      </p>
-                      <Icon name="button-arrow" size={14} className="text-white" />
-                    </div>
-                  </PurpleButton>
-                </div>
-              </div>
-            </div>
-          </div>
+          <MembershipCard
+            title="Premium Plus"
+            price="$ 99"
+            priceUnit="/year"
+            badgeText="Save up to 100%"
+            description="Our most popular package for complete pet care"
+            features={features}
+            buttonText="Go premium"
+            showMostPopular={true}
+          />
         </div>
       </div>
     </div>
