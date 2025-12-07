@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import { Icon } from "@/components/common/Icon";
-import { CommonCheckbox, OrangeButton, CustomRadio } from "@/components/common";
+import { CommonCheckbox, OrangeButton, CustomRadio, Spinner } from "@/components/common";
 import { useBookingStore } from "./bookingStore";
 import { useAuthStore } from "@/components/auth/authStore";
 import { LoginModal } from "@/components/auth/LoginModal";
@@ -161,8 +161,9 @@ export function Step3() {
             </div>
             <div className="gap-[16px] grid grid-cols-2 grid-rows-1 relative shrink-0 w-full">
               {isLoadingServices ? (
-                <div className="col-span-2 text-center py-8 text-[#4a5565]">
-                  Loading services...
+                <div className="col-span-2 flex items-center justify-center gap-2 py-8 text-[#4a5565]">
+                  <Spinner size="small" color="#4a5565" />
+                  <span>Loading services...</span>
                 </div>
               ) : services.length === 0 ? (
                 <div className="col-span-2 text-center py-8 text-[#4a5565]">
@@ -252,8 +253,9 @@ export function Step3() {
             {/* Add-ons Grid */}
             <div className="gap-[16px] grid grid-cols-2 relative shrink-0 w-full">
               {isLoadingAddOns ? (
-                <div className="col-span-2 text-center py-8 text-[#4a5565]">
-                  Loading add-ons...
+                <div className="col-span-2 flex items-center justify-center gap-2 py-8 text-[#4a5565]">
+                  <Spinner size="small" color="#4a5565" />
+                  <span>Loading add-ons...</span>
                 </div>
               ) : filteredAddOns.length === 0 ? (
                 <div className="col-span-2 text-center py-8 text-[#4a5565]">

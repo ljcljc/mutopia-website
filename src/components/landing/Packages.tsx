@@ -12,9 +12,9 @@ export default function Packages() {
   const features: FeatureItem[] = [
     { text: "30$ instant cash coupons", isHighlight: true },
     { text: "10% off additional services" },
-    { text: "Priority booking" },
-    { text: "Free de-shedding treatment" },
-    { text: "Premium products upgrade" },
+    { text: "Priority booking within 3 days" },
+    { text: "Free teeth brushing" },
+    { text: "Free anal gland expression" },
     { text: "Grooming photo updates" },
   ];
 
@@ -61,7 +61,7 @@ export default function Packages() {
             </h2>
             <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[28px] text-[16px] text-[rgba(255,255,255,0.8)] max-w-[588px] px-4 md:px-0">
               Save money and ensure your pet always looks their best with our
-              convenient monthly membership packages.
+              convenient annuel membership packages.
             </p>
           </div>
 
@@ -97,14 +97,11 @@ export default function Packages() {
                       </div>
                     </div>
 
-                    {/* Was Price and Badge */}
+                    {/* Badge */}
                     <div className="flex gap-[12px] items-center">
-                      <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[24.5px] line-through text-[#99a1af] text-[15.75px] text-center whitespace-nowrap">
-                        was $199
-                      </p>
                       <Badge className="bg-green-100 text-[#016630] h-[24px] px-[16px] py-[4px] rounded-[12px] hover:bg-green-100">
-                        <p className="font-['Comfortaa:Medium',_sans-serif] font-medium leading-[14px] text-[10px] whitespace-nowrap">
-                          Save up to 50%
+                        <p className="font-['Comfortaa:Bold',_sans-serif] font-bold leading-[14px] text-[10px] whitespace-nowrap">
+                          Save up to 100%
                         </p>
                       </Badge>
                     </div>

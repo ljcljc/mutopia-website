@@ -72,6 +72,7 @@ import IconTrashSvg from "@/assets/icons/icon-trash.svg?react";
 import IconCheckSvg from "@/assets/icons/icon-check.svg?react";
 import IconZoomOutSvg from "@/assets/icons/icon-zoom-out.svg?react";
 import IconZoomInSvg from "@/assets/icons/icon-zoom-in.svg?react";
+import IconStarSvg from "@/assets/icons/icon-star.svg?react";
 
 // 图标组件映射表
 const iconComponentMap = {
@@ -123,6 +124,7 @@ const iconComponentMap = {
   "check": IconCheckSvg,
   "zoom-out": IconZoomOutSvg,
   "zoom-in": IconZoomInSvg,
+  "star": IconStarSvg,
 } as const;
 
 export type IconName = keyof typeof iconComponentMap;
