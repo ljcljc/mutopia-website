@@ -14,7 +14,7 @@ export default function Hero() {
   };
   return (
     <div
-      className="relative w-full bg-gradient-to-b from-[#fdf8f3] to-[#f9f1e8] overflow-hidden"
+      className="relative w-full bg-linear-to-b from-[#fdf8f3] to-[#f9f1e8] overflow-hidden"
       data-name="Hero"
     >
       {/* Glow Effect */}
@@ -111,6 +111,8 @@ export default function Hero() {
                 alt="Pet grooming service"
                 className="inset-0 max-w-none object-50%-50% object-contain pointer-events-none size-full"
                 src={imgImageWithFallback}
+                {...({ fetchpriority: "high" } as React.ImgHTMLAttributes<HTMLImageElement>)}
+                loading="eager"
               />
             </div>
           </div>
