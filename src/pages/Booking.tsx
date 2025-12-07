@@ -14,7 +14,7 @@ import { STEP_TITLES } from "@/components/booking/stepTitles";
 
 export default function Booking() {
   const user = useAuthStore((state) => state.user);
-  const { currentStep, nextStep } = useBookingStore();
+  const { currentStep, nextStep, petName } = useBookingStore();
 
   // 当用户登出时，清空 bookingStore 的 userInfo
   // 注意：用户信息加载由 LoginModalContent 统一处理，这里不需要调用 API
@@ -52,7 +52,11 @@ export default function Booking() {
         <ProgressSteps
           currentStep={currentStep}
           totalSteps={6}
-          title={STEP_TITLES[currentStep] || "Address and service type"}
+          title={
+            currentStep === 3 && petName
+              ? `${petName} - package and add-on`
+              : STEP_TITLES[currentStep] || "Address and service type"
+          }
         />
 
         {/* Main Form */}

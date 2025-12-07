@@ -359,7 +359,7 @@ export function Step3() {
                   <div className={cn("flex-none", isEstimationExpanded ? "rotate-180" : "")}>
                     <div className={cn(
                       "content-stretch flex items-center justify-center relative rounded-[8px] size-[20px]",
-                      !isEstimationExpanded && "border border-[#8b6357] border-solid"
+                      "hover:border hover:border-[#8b6357] hover:border-solid transition-colors"
                     )}>
                       <Icon name="chevron-down" size={16} className="text-[#8b6357]" />
                     </div>
