@@ -69,6 +69,9 @@ import IconSearchSvg from "@/assets/icons/icon-search.svg?react";
 import IconImageSvg from "@/assets/icons/icon-image.svg?react";
 import IconAddSvg from "@/assets/icons/icon-add.svg?react";
 import IconTrashSvg from "@/assets/icons/icon-trash.svg?react";
+import IconCheckSvg from "@/assets/icons/icon-check.svg?react";
+import IconZoomOutSvg from "@/assets/icons/icon-zoom-out.svg?react";
+import IconZoomInSvg from "@/assets/icons/icon-zoom-in.svg?react";
 
 // 图标组件映射表
 const iconComponentMap = {
@@ -117,6 +120,9 @@ const iconComponentMap = {
   "image": IconImageSvg,
   "add": IconAddSvg,
   "trash": IconTrashSvg,
+  "check": IconCheckSvg,
+  "zoom-out": IconZoomOutSvg,
+  "zoom-in": IconZoomInSvg,
 } as const;
 
 export type IconName = keyof typeof iconComponentMap;

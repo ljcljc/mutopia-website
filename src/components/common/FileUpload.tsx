@@ -6,6 +6,14 @@ import { ImagePreview } from "./ImagePreview";
 
 export type FileUploadState = "default" | "uploaded" | "hover-to-delete" | "error-size" | "error-format";
 
+export interface FileUploadItem {
+  file: File;
+  previewUrl: string;
+  uploadProgress?: number;
+  uploadStatus?: "uploading" | "uploaded" | "error";
+  errorType?: "size" | "format" | null;
+}
+
 export interface FileUploadProps {
   /** 接受的文件类型，例如 "image/*" */
   accept?: string;
@@ -27,8 +35,10 @@ export interface FileUploadProps {
   className?: string;
   /** 是否禁用 */
   disabled?: boolean;
-  /** 上传进度（0-100），用于显示上传状态 */
-  uploadProgress?: number;
+  /** 上传项列表（包含上传状态） */
+  uploadItems?: FileUploadItem[];
+  /** 上传进度回调（按文件索引） */
+  onUploadProgress?: (index: number, progress: number) => void;
   /** 错误类型 */
   errorType?: "size" | "format" | null;
   /** 错误信息回调 */
@@ -46,10 +56,14 @@ export function FileUpload({
   showDragHint = true,
   className,
   disabled = false,
-  uploadProgress,
+  uploadItems,
+  onUploadProgress: _onUploadProgress,
   errorType,
   onError,
 }: FileUploadProps) {
+  // 计算当前文件数量（用于判断是否允许追加）
+  const currentFilesCount = uploadItems?.length || 0;
+
   const {
     fileInputRef,
     isDragging,
@@ -66,6 +80,7 @@ export function FileUpload({
     multiple,
     maxSizeMB,
     maxFiles,
+    append: !maxFiles || (maxFiles > 1 && currentFilesCount < maxFiles), // 如果没有 maxFiles 限制或未达到限制，允许追加
     onChange: (newFiles) => {
       // 验证文件并触发错误回调
       newFiles.forEach((file) => {
@@ -85,35 +100,49 @@ export function FileUpload({
     disabled,
   });
 
-  // 管理图片预览 URL
-  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  // 管理图片预览 URL 和上传状态
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
+  const [internalUploadItems, setInternalUploadItems] = useState<FileUploadItem[]>([]);
+
+  // 如果提供了 uploadItems，使用外部状态；否则使用内部状态
+  const displayItems = uploadItems || internalUploadItems;
 
   useEffect(() => {
     // 为每个文件创建预览 URL
     const urls = files.map((file) => URL.createObjectURL(file));
-    setPreviewUrls(urls);
+
+    // 如果没有提供 uploadItems，创建内部状态
+    if (!uploadItems) {
+      const items: FileUploadItem[] = files.map((file, index) => ({
+        file,
+        previewUrl: urls[index],
+        uploadStatus: "uploading",
+        uploadProgress: 0,
+      }));
+      setInternalUploadItems(items);
+    }
 
     // 清理函数：组件卸载或文件变化时释放 URL
     return () => {
       urls.forEach((url) => URL.revokeObjectURL(url));
     };
-  }, [files]);
+  }, [files, uploadItems]);
 
   // 确定当前状态
   const getState = (): FileUploadState => {
     if (errorType === "size") return "error-size";
     if (errorType === "format") return "error-format";
-    if (files.length > 0 && hoveredIndex !== null) return "hover-to-delete";
     if (files.length > 0) return "uploaded";
     return "default";
   };
 
   const state = getState();
   const hasFiles = files.length > 0;
+  // 是否可以添加更多文件，取决于 maxFiles 限制
   const canAddMore = !maxFiles || files.length < maxFiles;
+  // 当达到 maxFiles 限制时，禁用上传功能
+  const isUploadDisabled = maxFiles ? files.length >= maxFiles : false;
 
   return (
     <div className={cn("content-stretch flex flex-col items-start relative shadow-[0px_4px_10px_0px_rgba(0,0,0,0.15)] w-full", className)}>
@@ -121,71 +150,34 @@ export function FileUpload({
         className={cn(
           "bg-neutral-50 border-[#de6a07] border-[1.5px] border-dashed content-stretch flex flex-col items-center justify-center p-[24px] relative rounded-[16px] shrink-0 w-full transition-colors",
           isDragging && "border-[#de6a07] bg-[rgba(222,106,7,0.05)]",
-          disabled && "opacity-60 cursor-not-allowed",
+          (disabled || isUploadDisabled) && "opacity-60 cursor-not-allowed",
           (state === "error-size" || state === "error-format") && "gap-[12px]"
         )}
-        onDragEnter={handleDragEnter}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
+        onDragEnter={!isUploadDisabled ? handleDragEnter : undefined}
+        onDragOver={!isUploadDisabled ? handleDragOver : undefined}
+        onDragLeave={!isUploadDisabled ? handleDragLeave : undefined}
+        onDrop={!isUploadDisabled ? handleDrop : undefined}
       >
         <div className={cn(
           "content-stretch flex flex-col gap-[18px] items-center justify-center relative shrink-0",
           hasFiles && "w-full"
         )}>
-          {/* Default State: 显示上传图标和按钮 */}
-          {state === "default" && (
-            <div className="overflow-clip relative shrink-0 size-[48px]">
-              <Icon
-                name="image"
-                className="block size-full text-[#A3A3A3]"
-              />
-            </div>
-          )}
-
-          {/* Text Group: 上传按钮和提示文字 */}
-          <div className="content-stretch flex flex-col gap-[3px] items-center justify-center relative shrink-0">
-            <div className="content-stretch flex gap-[9px] items-center justify-center relative shrink-0">
-              <div className="border-2 border-(--mutopia-logo,#8b6357) border-solid content-stretch flex h-[28px] items-center justify-center px-[26px] relative rounded-[32px] shrink-0">
-                <div className="bg-clip-padding border-0 border-transparent border-solid content-stretch flex gap-[5px] items-center relative">
-                  <button
-                    type="button"
-                    onClick={handleClick}
-                    disabled={disabled}
-                    className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[17.5px] relative shrink-0 text-[12px] text-(--mutopia-logo,#8b6357) cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-                  >
-                    {buttonText}
-                  </button>
-                </div>
-              </div>
-              {showDragHint && (
-                <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[20px] relative shrink-0 text-[14px] text-neutral-600">
-                  or drag and drop
-                </p>
-              )}
-            </div>
-            <p className="font-['Inter:Regular',sans-serif] font-normal leading-[24px] not-italic relative shrink-0 text-[16.5px] text-neutral-400">
-              {fileTypeHint}
-            </p>
-          </div>
-
-          {/* Uploaded State: 显示图片预览 */}
+          {/* 文件列表：显示在按钮和文字上方 */}
           {hasFiles && (
             <div className="content-stretch flex gap-[12px] items-center relative shrink-0 w-full">
-              {/* 已上传的图片预览 */}
-              {files.map((file, index) => {
-                const previewUrl = previewUrls[index];
-                const isHovered = hoveredIndex === index;
-                const isUploading = uploadProgress !== undefined && uploadProgress < 100;
+              {/* 已上传的图片缩略图列表 */}
+              {displayItems.map((item, index) => {
+                const file = item.file;
+                const previewUrl = item.previewUrl;
+                const isUploading = item.uploadStatus === "uploading" && (item.uploadProgress !== undefined && item.uploadProgress < 100);
+
+                const isUploaded = item.uploadStatus === "uploaded";
 
                 return (
                   <div
                     key={`${file.name}-${index}`}
-                    className="h-[80px] overflow-clip relative rounded-[8px] shrink-0 w-[96px] group"
-                    onMouseEnter={() => setHoveredIndex(index)}
-                    onMouseLeave={() => setHoveredIndex(null)}
+                    className="h-[80px] overflow-visible relative rounded-[8px] shrink-0 w-[96px]"
                   >
-                    {/* 图片预览 */}
                     {previewUrl && (
                       <>
                         <div
@@ -201,10 +193,11 @@ export function FileUpload({
                             src={previewUrl}
                           />
                         </div>
-                        {/* 上传进度遮罩 */}
+
+                        {/* 上传进度遮罩（上传中时显示） */}
                         {isUploading && (
                           <>
-                            <div className="absolute backdrop-blur-[2px] backdrop-filter bg-[rgba(0,0,0,0.2)] inset-0" />
+                            <div className="absolute backdrop-blur-[2px] backdrop-filter bg-[rgba(0,0,0,0.2)] inset-0 rounded-[8px]" />
                             <div className="absolute content-stretch flex flex-col gap-[8px] items-center left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
                               <p className="font-['Inter:Medium',sans-serif] font-medium leading-[16px] not-italic relative shrink-0 text-[11px] text-center text-white">
                                 Uploading
@@ -212,32 +205,33 @@ export function FileUpload({
                               <div className="bg-white h-[4px] overflow-clip relative rounded-[16px] shrink-0 w-[80px]">
                                 <div
                                   className="absolute bg-green-500 h-[4px] left-0 rounded-[16px] top-0 transition-all duration-300"
-                                  style={{ width: `${uploadProgress}%` }}
+                                  style={{ width: `${item.uploadProgress || 0}%` }}
                                 />
                               </div>
                             </div>
                           </>
                         )}
-                        {/* 删除按钮 */}
-                        <div
-                          className={cn(
-                            "absolute bg-red-50 content-stretch flex items-center justify-center overflow-clip p-[6px] rounded-[6px] shadow-[0px_2px_6px_0px_rgba(0,0,0,0.04),0px_1px_2px_0px_rgba(0,0,0,0.08)] left-1/2 top-[calc(50%+64px)] -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-opacity",
-                            isUploading ? "opacity-0 pointer-events-none" : "opacity-100",
-                            isHovered ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                          )}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            removeFile(index);
-                            setHoveredIndex(null);
-                          }}
-                        >
-                          <div className="relative shrink-0 size-[20px]">
-                            <Icon
-                              name="trash"
-                              className="block size-full text-[#EF4444]"
-                            />
+
+                        {/* 删除按钮（位于缩略图右上角，上传成功后显示） */}
+                        {isUploaded && !isUploading && (
+                          <div
+                            className="absolute bg-neutral-100 border border-[#4c4c4c] border-solid overflow-clip rounded-[8px] size-[20px] top-[-6px] right-[-6px] cursor-pointer flex items-center justify-center z-20 shadow-[0px_2px_4px_0px_rgba(0,0,0,0.1)]"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // 清理预览 URL
+                              if (displayItems[index]?.previewUrl) {
+                                URL.revokeObjectURL(displayItems[index].previewUrl);
+                              }
+                              removeFile(index);
+                            }}
+                          >
+                            {/* X 图标：两条交叉的线 */}
+                            <div className="relative shrink-0 size-[10px] flex items-center justify-center">
+                              <div className="absolute bg-[#4c4c4c] h-[1.5px] w-full rotate-45" />
+                              <div className="absolute bg-[#4c4c4c] h-[1.5px] w-full rotate-135" />
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </>
                     )}
                   </div>
@@ -261,6 +255,42 @@ export function FileUpload({
               )}
             </div>
           )}
+
+          {/* Default State: 显示上传图标（仅在没有文件时显示） */}
+          {state === "default" && (
+            <div className="overflow-clip relative shrink-0 size-[48px]">
+              <Icon
+                name="image"
+                className="block size-full text-[#A3A3A3]"
+              />
+            </div>
+          )}
+
+          {/* Text Group: 上传按钮和提示文字 */}
+          <div className="content-stretch flex flex-col gap-[3px] items-center justify-center relative shrink-0">
+            <div className="content-stretch flex gap-[9px] items-center justify-center relative shrink-0">
+              <div className="border-2 border-[#8b6357] border-solid content-stretch flex h-[28px] items-center justify-center px-[26px] relative rounded-[32px] shrink-0">
+                <div className="bg-clip-padding border-0 border-transparent border-solid content-stretch flex gap-[5px] items-center relative">
+                  <button
+                    type="button"
+                    onClick={handleClick}
+                    disabled={disabled || isUploadDisabled}
+                    className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[17.5px] relative shrink-0 text-[12px] text-[#8b6357] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {buttonText}
+                  </button>
+                </div>
+              </div>
+              {showDragHint && (
+                <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[20px] relative shrink-0 text-[14px] text-neutral-600">
+                  or drag and drop
+                </p>
+              )}
+            </div>
+            <p className="font-['Inter:Regular',sans-serif] font-normal leading-[24px] not-italic relative shrink-0 text-[16.5px] text-neutral-400">
+              {fileTypeHint}
+            </p>
+          </div>
         </div>
 
         {/* 错误提示 */}
@@ -289,17 +319,17 @@ export function FileUpload({
         multiple={multiple}
         onChange={handleFileChange}
         className="hidden"
-        disabled={disabled}
+        disabled={disabled || isUploadDisabled}
       />
 
       {/* 图片预览对话框 */}
-      {previewUrls.length > 0 && (
+      {displayItems.length > 0 && displayItems.some((item) => item.previewUrl) && (
         <ImagePreview
-          images={previewUrls}
+          images={displayItems.map((item) => item.previewUrl).filter((url) => url)}
           currentIndex={previewIndex}
           open={previewOpen}
           onClose={() => setPreviewOpen(false)}
-          fileNames={files.map((f) => f.name)}
+          fileNames={displayItems.map((item) => item.file.name)}
         />
       )}
     </div>

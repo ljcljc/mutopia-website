@@ -3,6 +3,8 @@ import {
   Dialog,
   DialogContent,
   DialogClose,
+  DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Icon } from "./Icon";
 import { cn } from "@/components/ui/utils";
@@ -46,6 +48,18 @@ export function ImagePreview({
     }
   }, [open, initialIndex, images.length]);
 
+  // 确保 currentIndex 在有效范围内（仅在 images 变化时检查）
+  useEffect(() => {
+    if (images.length > 0) {
+      setCurrentIndex((prev) => {
+        if (prev < 0 || prev >= images.length) {
+          return 0;
+        }
+        return prev;
+      });
+    }
+  }, [images.length]);
+
   // 当对话框关闭时重置缩放
   useEffect(() => {
     if (!open) {
@@ -53,8 +67,8 @@ export function ImagePreview({
     }
   }, [open, initialZoom]);
 
-  const currentImage = images[currentIndex];
-  const currentFileName = fileNames?.[currentIndex] || `image_${currentIndex + 1}`;
+  const currentImage = images[currentIndex] || images[0] || "";
+  const currentFileName = fileNames?.[currentIndex] || fileNames?.[0] || `image_${currentIndex + 1}`;
   const totalImages = images.length;
 
   // 导航到上一张图片
@@ -103,8 +117,16 @@ export function ImagePreview({
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose?.()}>
       <DialogContent
-        className="bg-white border border-[rgba(0,0,0,0.2)] border-solid content-stretch flex flex-col gap-[16px] items-start px-0 py-[12px] relative rounded-[20px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] w-[684px] max-w-[calc(100vw-2rem)] max-h-[calc(100vh-2rem)] overflow-hidden"
+        className="bg-white border border-[rgba(0,0,0,0.2)] border-solid flex flex-col gap-[16px] items-start px-0 py-[12px] rounded-[20px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] w-[80vw]! h-[80vh]! max-w-[80vw]! max-h-[80vh]! overflow-visible [&>button]:hidden"
       >
+        {/* 屏幕阅读器可访问的标题和描述（视觉上隐藏） */}
+        <DialogTitle className="sr-only">
+          Image Preview: {currentFileName}
+        </DialogTitle>
+        <DialogDescription className="sr-only">
+          Viewing image {currentIndex + 1} of {totalImages}. Use arrow keys to navigate, + and - to zoom, and Escape to close.
+        </DialogDescription>
+        
         {/* Header: 关闭按钮、文件名、索引 */}
         <div className="h-[32px] relative shrink-0 w-full">
           <div className="absolute content-stretch flex flex-col gap-[8px] items-start left-0 top-0 w-full">
@@ -117,13 +139,18 @@ export function ImagePreview({
                 >
                   <div className="absolute left-0 overflow-clip size-[16px] top-[0.5px]">
                     <div className="absolute bottom-0 flex items-center justify-center left-[22.3%] right-[22.3%] top-0">
-                      <div className="flex-none h-[16px] rotate-180 w-[8.864px]">
+                      <div className="flex-none h-[16px] rotate-180 w-[16px]">
                         <Icon
-                          name="nav-next"
+                          name="close-arrow"
                           className="block size-full text-[#4a3c2a]"
                         />
                       </div>
                     </div>
+                  </div>
+                  <div className="absolute -left-px overflow-clip size-px top-[13px]">
+                    <p className="absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[21px] left-0 text-[#4a3c2a] text-[14px] top-[0.5px] sr-only">
+                      Close
+                    </p>
                   </div>
                 </button>
               </DialogClose>
@@ -148,19 +175,26 @@ export function ImagePreview({
         </div>
 
         {/* 主图片显示区域 */}
-        <div className="h-[268.797px] overflow-clip relative shrink-0 w-full flex items-center justify-center bg-neutral-100">
-          {currentImage && (
+        <div className="flex-1 overflow-visible relative shrink-0 w-full flex items-center justify-center bg-neutral-100 min-h-0">
+          {currentImage ? (
             <>
               {/* 图片 */}
-              <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                <div className="absolute bg-[rgba(255,255,255,0)] inset-0" />
+              <div className="absolute inset-0 flex items-center justify-center overflow-visible">
                 <img
                   alt={currentFileName}
-                  className="max-w-none object-contain size-full"
+                  className="object-50%-50% object-contain"
                   src={currentImage}
                   style={{
                     transform: `scale(${zoom / 100})`,
                     transition: "transform 0.2s ease-in-out",
+                    maxWidth: "100%",
+                    maxHeight: "100%",
+                    width: "auto",
+                    height: "auto",
+                  }}
+                  onError={(e) => {
+                    console.error("Failed to load image:", currentImage);
+                    e.currentTarget.style.display = "none";
                   }}
                 />
               </div>
@@ -169,17 +203,13 @@ export function ImagePreview({
               {images.length > 1 && (
                 <button
                   onClick={handlePrev}
-                  className="absolute bg-white border border-gray-200 border-solid content-stretch flex flex-col items-start left-[21px] pb-px pt-[11.5px] px-[11.5px] rounded-[16777200px] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] size-[44px] top-1/2 -translate-y-1/2 hover:bg-neutral-50 transition-colors cursor-pointer z-10"
+                  className="absolute bg-white border border-gray-200 border-solid flex items-center justify-center left-[5%] rounded-[16777200px] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] size-[44px] top-1/2 -translate-y-1/2 hover:bg-neutral-50 transition-colors cursor-pointer z-10"
                   aria-label="Previous image"
                 >
-                  <div className="h-[21px] overflow-clip relative shrink-0 w-full">
-                    <div className="absolute bottom-1/4 left-[37.5%] right-[37.5%] top-1/4">
-                      <Icon
-                        name="nav-prev"
-                        className="block size-full text-[#4a3c2a]"
-                      />
-                    </div>
-                  </div>
+                  <Icon
+                    name="nav-prev"
+                    className="block size-4 text-[#4a3c2a]"
+                  />
                 </button>
               )}
 
@@ -187,22 +217,18 @@ export function ImagePreview({
               {images.length > 1 && (
                 <button
                   onClick={handleNext}
-                  className="absolute bg-white border border-gray-200 border-solid content-stretch flex flex-col items-start left-[620px] pb-px pt-[11.5px] px-[11.5px] rounded-[16777200px] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] size-[44px] top-1/2 -translate-y-1/2 hover:bg-neutral-50 transition-colors cursor-pointer z-10"
+                  className="absolute bg-white border border-gray-200 border-solid flex items-center justify-center right-[5%] rounded-[16777200px] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] size-[44px] top-1/2 -translate-y-1/2 hover:bg-neutral-50 transition-colors cursor-pointer z-10"
                   aria-label="Next image"
                 >
-                  <div className="h-[21px] overflow-clip relative shrink-0 w-full">
-                    <div className="absolute bottom-1/4 left-[37.5%] right-[37.5%] top-1/4">
-                      <Icon
-                        name="nav-next"
-                        className="block size-full text-[#4a3c2a]"
-                      />
-                    </div>
-                  </div>
+                  <Icon
+                    name="nav-next"
+                    className="block size-4 text-[#4a3c2a]"
+                  />
                 </button>
               )}
 
-              {/* 缩放控制（右下角） */}
-              <div className="absolute bg-[rgba(255,255,255,0.9)] border border-gray-200 border-solid content-stretch flex gap-[7px] h-[44px] items-center left-[510px] px-[15px] py-px rounded-[16777200px] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] top-[216px] w-[160px]">
+              {/* 缩放控制（右下角，距离右下角10%） */}
+              <div className="absolute bg-[rgba(255,255,255,0.9)] border border-gray-200 border-solid flex gap-[7px] h-[44px] items-center px-[15px] py-px rounded-[16777200px] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] right-[5%] bottom-[10%]">
                 {/* 缩小按钮 */}
                 <button
                   onClick={handleZoomOut}
@@ -210,14 +236,10 @@ export function ImagePreview({
                   className="relative rounded-[16777200px] shrink-0 size-[28px] flex items-center justify-center hover:bg-neutral-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   aria-label="Zoom out"
                 >
-                  <div className="bg-clip-padding border-0 border-transparent border-solid content-stretch flex flex-col items-start pb-0 pt-[7px] px-[7px] relative size-[28px]">
-                    <div className="h-[14px] overflow-clip relative shrink-0 w-full">
-                      <Icon
-                        name="nav-prev"
-                        className="block size-full text-[#364153]"
-                      />
-                    </div>
-                  </div>
+                  <Icon
+                    name="zoom-out"
+                    className="block size-[14px] text-[#364153]"
+                  />
                 </button>
 
                 {/* 缩放百分比显示 */}
@@ -234,27 +256,27 @@ export function ImagePreview({
                   className="relative rounded-[16777200px] shrink-0 size-[28px] flex items-center justify-center hover:bg-neutral-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   aria-label="Zoom in"
                 >
-                  <div className="bg-clip-padding border-0 border-transparent border-solid content-stretch flex flex-col items-start pb-0 pt-[7px] px-[7px] relative size-[28px]">
-                    <div className="h-[14px] overflow-clip relative shrink-0 w-full">
-                      <Icon
-                        name="nav-next"
-                        className="block size-full text-[#364153]"
-                      />
-                    </div>
-                  </div>
+                  <Icon
+                    name="zoom-in"
+                    className="block size-[14px] text-[#364153]"
+                  />
                 </button>
               </div>
             </>
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-neutral-400 text-sm">No image to display</p>
+            </div>
           )}
         </div>
 
         {/* 底部缩略图轮播 */}
         {images.length > 1 && (
-          <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0 w-full">
+          <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0 w-full h-[100px]">
             {/* 分隔线 */}
             <div className="bg-[rgba(0,0,0,0.1)] h-px shrink-0 w-full" />
             {/* 缩略图列表 */}
-            <div className="content-stretch flex gap-[16px] items-start justify-center relative shrink-0 w-full overflow-x-auto pb-2">
+            <div className="content-stretch flex gap-[16px] items-start justify-center relative shrink-0 w-full overflow-x-auto overflow-y-visible pb-2 py-2">
               {images.map((image, index) => {
                 const isSelected = index === currentIndex;
                 return (
@@ -262,17 +284,17 @@ export function ImagePreview({
                     key={index}
                     onClick={() => setCurrentIndex(index)}
                     className={cn(
-                      "content-stretch flex flex-col items-start overflow-clip p-[2.2px] relative rounded-[14px] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] shrink-0 size-[61.6px] transition-all",
+                      "content-stretch flex flex-col items-start overflow-visible relative rounded-[14px] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] shrink-0 transition-all size-[61.6px]",
                       isSelected
-                        ? "bg-[rgba(255,255,255,0)] border-2 border-[#de6a07] border-solid"
-                        : "border-2 border-[#d1d5dc] border-solid opacity-70 hover:opacity-100"
+                        ? "bg-[rgba(255,255,255,0)] border-2 border-[#de6a07] border-solid p-[2.2px] scale-110 z-10"
+                        : "border-2 border-[#d1d5dc] border-solid opacity-70 p-[2.2px] scale-100"
                     )}
                     aria-label={`View image ${index + 1}`}
                   >
-                    <div className="h-[57.2px] relative shrink-0 w-full">
+                    <div className="relative shrink-0 w-full h-[57.2px]">
                       <img
                         alt={`Thumbnail ${index + 1}`}
-                        className="absolute inset-0 max-w-none object-cover pointer-events-none size-full rounded-[10px]"
+                        className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full rounded-[10px]"
                         src={image}
                       />
                     </div>

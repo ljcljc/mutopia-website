@@ -1,15 +1,18 @@
-import { FileUpload } from "@/components/common";
+import { FileUpload, type FileUploadItem } from "@/components/common";
 
 export interface ReferenceStylesUploadProps {
   /** 文件变化回调 */
   onChange?: (files: File[]) => void;
   /** 是否禁用 */
   disabled?: boolean;
+  /** 上传项列表（包含上传状态） */
+  uploadItems?: FileUploadItem[];
 }
 
 export function ReferenceStylesUpload({
   onChange,
   disabled = false,
+  uploadItems,
 }: ReferenceStylesUploadProps) {
   return (
     <div className="bg-white box-border flex flex-col gap-[20px] items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
@@ -28,8 +31,8 @@ export function ReferenceStylesUpload({
               accept="image/*"
               multiple={true}
               maxSizeMB={1}
-              maxFiles={2}
               onChange={onChange}
+              uploadItems={uploadItems}
               buttonText="Click to upload"
               fileTypeHint="JPG, JPEG, PNG less than 1MB"
               showDragHint={true}

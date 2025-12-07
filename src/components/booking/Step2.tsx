@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Icon } from "@/components/common/Icon";
-import { CustomInput, CustomSelect, CustomSelectItem, CustomRadio, OrangeButton, FileUpload } from "@/components/common";
+import { CustomInput, CustomSelect, CustomSelectItem, CustomRadio, OrangeButton, FileUpload, type FileUploadItem } from "@/components/common";
 import { CustomTextarea } from "@/components/common/CustomTextarea";
 import { DatePicker } from "@/components/common/DatePicker";
 import { Switch } from "@/components/ui/switch";
@@ -59,7 +59,10 @@ export function Step2() {
   minDateObj.setFullYear(today.getFullYear() - 20);
   const minDate = `${minDateObj.getFullYear()}-${String(minDateObj.getMonth() + 1).padStart(2, "0")}`;
 
-  const [, setPetPhoto] = useState<File | null>(null);
+  const [petPhotoItems, setPetPhotoItems] = useState<FileUploadItem[]>([]);
+  const [referenceStyleItems, setReferenceStyleItems] = useState<FileUploadItem[]>([]);
+  const [petPhotoFiles, setPetPhotoFiles] = useState<File[]>([]);
+  const [referenceStyleFiles, setReferenceStyleFiles] = useState<File[]>([]);
   const hasLoadedBreeds = useRef(false);
 
   // 获取 breeds 数据（只加载一次）
@@ -70,16 +73,211 @@ export function Step2() {
     }
   }, [loadPetBreeds]);
 
-  const handlePetPhotoChange = (files: File[]) => {
+  // 模拟上传函数
+  const simulateUpload = async (
+    file: File,
+    index: number,
+    setItems: React.Dispatch<React.SetStateAction<FileUploadItem[]>>,
+    items: FileUploadItem[]
+  ) => {
+    // 创建预览 URL
+    const previewUrl = URL.createObjectURL(file);
+    
+    // 初始化上传项
+    const newItem: FileUploadItem = {
+      file,
+      previewUrl,
+      uploadStatus: "uploading",
+      uploadProgress: 0,
+    };
+    
+    // 更新状态
+    const updatedItems = [...items];
+    updatedItems[index] = newItem;
+    setItems(updatedItems);
+
+    // 模拟上传进度
+    const uploadInterval = setInterval(() => {
+      setItems((prevItems) => {
+        const currentItems = [...prevItems];
+        if (currentItems[index]) {
+          const currentProgress = currentItems[index].uploadProgress || 0;
+          const newProgress = Math.min(currentProgress + Math.random() * 15, 100);
+          
+          currentItems[index] = {
+            ...currentItems[index],
+            uploadProgress: newProgress,
+          };
+
+          // 上传完成
+          if (newProgress >= 100) {
+            currentItems[index] = {
+              ...currentItems[index],
+              uploadStatus: "uploaded",
+              uploadProgress: 100,
+            };
+            clearInterval(uploadInterval);
+          }
+        }
+        return currentItems;
+      });
+    }, 200);
+
+    // 清理函数
+    return () => {
+      clearInterval(uploadInterval);
+      URL.revokeObjectURL(previewUrl);
+    };
+  };
+
+  const handlePetPhotoChange = async (files: File[]) => {
+    setPetPhotoFiles(files);
+    
     if (files.length > 0) {
-      setPetPhoto(files[0]);
+      // 区分新文件和已存在的文件（支持追加模式）
+      const newFiles: File[] = [];
+      const existingItems: FileUploadItem[] = [];
+      
+      files.forEach((file) => {
+        const existingItem = petPhotoItems.find((item) => item.file === file);
+        if (existingItem) {
+          // 保留已存在的文件状态
+          existingItems.push(existingItem);
+        } else {
+          // 新文件
+          newFiles.push(file);
+        }
+      });
+      
+      // 清理被删除的文件预览 URL
+      petPhotoItems.forEach((item) => {
+        if (!files.includes(item.file)) {
+          URL.revokeObjectURL(item.previewUrl);
+        }
+      });
+
+      // 只为新文件创建 items
+      const newItems: FileUploadItem[] = newFiles.map((file) => {
+        const previewUrl = URL.createObjectURL(file);
+        
+        // 验证文件
+        const fileSizeMB = file.size / (1024 * 1024);
+        const fileType = file.type.toLowerCase();
+        const isValidType = fileType.startsWith("image/") && 
+          (fileType.includes("jpeg") || fileType.includes("jpg") || fileType.includes("png"));
+
+        if (fileSizeMB > 10) {
+          return {
+            file,
+            previewUrl,
+            uploadStatus: "error" as const,
+            errorType: "size" as const,
+          };
+        }
+
+        if (!isValidType) {
+          return {
+            file,
+            previewUrl,
+            uploadStatus: "error" as const,
+            errorType: "format" as const,
+          };
+        }
+
+        // 开始上传
+        return {
+          file,
+          previewUrl,
+          uploadStatus: "uploading" as const,
+          uploadProgress: 0,
+        };
+      });
+      
+      // 合并已存在的 items 和新 items，保持文件顺序
+      const updatedItems: FileUploadItem[] = [];
+      let newIndex = 0;
+      
+      files.forEach((file) => {
+        const existingItem = existingItems.find((item) => item.file === file);
+        if (existingItem) {
+          updatedItems.push(existingItem);
+        } else {
+          updatedItems.push(newItems[newIndex]);
+          newIndex++;
+        }
+      });
+      
+      setPetPhotoItems(updatedItems);
+
+      // 只为新文件启动上传模拟
+      newFiles.forEach((file) => {
+        const globalIndex = updatedItems.findIndex((item) => item.file === file);
+        const item = updatedItems[globalIndex];
+        if (item && item.uploadStatus === "uploading") {
+          simulateUpload(file, globalIndex, setPetPhotoItems, updatedItems);
+        }
+      });
+    } else {
+      // 清理预览 URL
+      petPhotoItems.forEach((item) => {
+        URL.revokeObjectURL(item.previewUrl);
+      });
+      setPetPhotoItems([]);
     }
   };
 
-  const handleReferenceStylesChange = (files: File[]) => {
-    // 可以在这里添加额外的处理逻辑
-    console.log("Reference styles changed:", files);
+  const handleReferenceStylesChange = async (files: File[]) => {
+    setReferenceStyleFiles(files);
+    
+    if (files.length > 0) {
+      // 清理之前的预览 URL
+      referenceStyleItems.forEach((item) => {
+        URL.revokeObjectURL(item.previewUrl);
+      });
+
+      const newItems: FileUploadItem[] = files.map((file) => {
+        const previewUrl = URL.createObjectURL(file);
+        return {
+          file,
+          previewUrl,
+          uploadStatus: "uploading" as const,
+          uploadProgress: 0,
+        };
+      });
+      
+      setReferenceStyleItems(newItems);
+
+      // 为每个文件模拟上传
+      files.forEach((file, index) => {
+        simulateUpload(file, index, setReferenceStyleItems, newItems);
+      });
+    } else {
+      // 清理预览 URL
+      referenceStyleItems.forEach((item) => {
+        URL.revokeObjectURL(item.previewUrl);
+      });
+      setReferenceStyleItems([]);
+    }
   };
+
+  // 同步文件删除到 uploadItems
+  useEffect(() => {
+    if (petPhotoFiles.length === 0 && petPhotoItems.length > 0) {
+      petPhotoItems.forEach((item) => {
+        URL.revokeObjectURL(item.previewUrl);
+      });
+      setPetPhotoItems([]);
+    }
+  }, [petPhotoFiles, petPhotoItems]);
+
+  useEffect(() => {
+    if (referenceStyleFiles.length === 0 && referenceStyleItems.length > 0) {
+      referenceStyleItems.forEach((item) => {
+        URL.revokeObjectURL(item.previewUrl);
+      });
+      setReferenceStyleItems([]);
+    }
+  }, [referenceStyleFiles, referenceStyleItems]);
 
   // Clear breed when pet type changes and current breed is not in the new options
   useEffect(() => {
@@ -407,9 +605,10 @@ export function Step2() {
             <div className="flex flex-col gap-[12px] items-start overflow-clip relative shrink-0 w-full">
               <FileUpload
                 accept="image/*"
-                multiple={false}
+                multiple={true}
                 maxSizeMB={10}
                 onChange={handlePetPhotoChange}
+                uploadItems={petPhotoItems}
                 buttonText="Click to upload"
                 fileTypeHint="JPG, JPEG, PNG less than 10MB"
                 showDragHint={true}
@@ -421,7 +620,10 @@ export function Step2() {
       </div>
 
       {/* Upload Reference Styles Card */}
-      <ReferenceStylesUpload onChange={handleReferenceStylesChange} />
+      <ReferenceStylesUpload 
+        onChange={handleReferenceStylesChange}
+        uploadItems={referenceStyleItems}
+      />
 
       {/* Special Notes Card */}
       <div className="bg-white box-border flex flex-col gap-[20px] items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
