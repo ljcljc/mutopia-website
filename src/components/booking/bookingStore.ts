@@ -98,6 +98,13 @@ interface BookingState {
   useCashCoupon: boolean;
   cashCouponCount: number;
 
+  // Step 5: Date and time slots
+  selectedTimeSlots: Array<{
+    id: string;
+    date: Date;
+    periodId: string;
+  }>;
+
   // Actions
   setAddress: (address: string) => void;
   setServiceType: (serviceType: ServiceType) => void;
@@ -136,6 +143,7 @@ interface BookingState {
   setUseMembershipDiscount: (value: boolean) => void;
   setUseCashCoupon: (value: boolean) => void;
   setServiceId: (id: number | null) => void;
+  setSelectedTimeSlots: (slots: Array<{ id: string; date: Date; periodId: string }>) => void;
   getPetPayload: () => PetPayload; // 转换为 PetPayload 格式
   reset: () => void;
 }
@@ -184,6 +192,7 @@ const initialState = {
   useMembershipDiscount: false,
   useCashCoupon: false,
   cashCouponCount: 0,
+  selectedTimeSlots: [],
 };
 
 export const useBookingStore = create<BookingState>((set) => ({
@@ -426,6 +435,8 @@ export const useBookingStore = create<BookingState>((set) => ({
   setUseCashCoupon: (value) => set({ useCashCoupon: value }),
 
   setServiceId: (id) => set({ serviceId: id }),
+
+  setSelectedTimeSlots: (slots) => set({ selectedTimeSlots: slots }),
 
   reset: () => set(initialState),
 }));
