@@ -8,12 +8,15 @@ import {
   getMembershipPlans,
   type MeOut,
   type AddressOut,
+  type AddressIn,
   type StoreLocationOut,
   type PetPayload,
   type PetBreedOut,
   type ServiceOut,
   type AddOnOut,
   type MembershipPlanOut,
+  type BookingSubmitIn,
+  type TimeSlotIn,
 } from "@/lib/api";
 import { useAuthStore } from "@/components/auth/authStore";
 
@@ -65,7 +68,7 @@ interface BookingState {
   // Step 3: Service package and add-ons
   servicePackage: ServicePackage | ""; // 保持向后兼容，但实际使用 serviceId
   serviceId: number | null; // 实际的服务 ID（从 API 获取）
-  addOns: string[]; // Array of add-on IDs
+  addOns: number[]; // Array of add-on IDs (changed from string[] to number[])
 
   // UI state
   isLoginModalOpen: boolean;
@@ -93,17 +96,17 @@ interface BookingState {
   isLoadingMembershipPlans: boolean;
 
   // Step 4: Membership and discount options
-  useMembership: boolean;
-  useMembershipDiscount: boolean;
-  useCashCoupon: boolean;
+  useMembership: boolean; // Maps to open_membership in API
+  membershipPlanId: number | null; // Maps to membership_plan_id in API
+  useMembershipDiscount: boolean; // Maps to use_special_coupon or use_official_coupon
+  useCashCoupon: boolean; // Maps to use_official_coupon
   cashCouponCount: number;
 
   // Step 5: Date and time slots
-  selectedTimeSlots: Array<{
-    id: string;
-    date: Date;
-    periodId: string;
-  }>;
+  selectedTimeSlots: TimeSlotIn[]; // Changed to match API format
+
+  // Additional fields
+  notes: string; // Additional notes for booking
 
   // Actions
   setAddress: (address: string) => void;
@@ -131,8 +134,8 @@ interface BookingState {
   setReferenceStyles: (files: File[]) => void;
   setSpecialNotes: (notes: string) => void;
   setServicePackage: (pkg: ServicePackage | "") => void;
-  setAddOns: (addOns: string[]) => void;
-  toggleAddOn: (addOnId: string) => void;
+  setAddOns: (addOns: number[]) => void;
+  toggleAddOn: (addOnId: number) => void;
   setIsLoginModalOpen: (isOpen: boolean) => void;
   loadUserInfo: () => Promise<void>;
   loadPetBreeds: () => Promise<void>;
@@ -140,11 +143,15 @@ interface BookingState {
   loadAddOns: () => Promise<void>;
   loadMembershipPlans: () => Promise<void>;
   setUseMembership: (value: boolean) => void;
+  setMembershipPlanId: (id: number | null) => void;
   setUseMembershipDiscount: (value: boolean) => void;
   setUseCashCoupon: (value: boolean) => void;
   setServiceId: (id: number | null) => void;
-  setSelectedTimeSlots: (slots: Array<{ id: string; date: Date; periodId: string }>) => void;
+  setSelectedTimeSlots: (slots: TimeSlotIn[]) => void;
+  setNotes: (notes: string) => void;
   getPetPayload: () => PetPayload; // 转换为 PetPayload 格式
+  getAddressPayload: () => AddressIn; // 转换为 AddressIn 格式
+  getBookingSubmitPayload: () => BookingSubmitIn; // 转换为 BookingSubmitIn 格式
   reset: () => void;
 }
 
@@ -176,7 +183,7 @@ const initialState = {
   specialNotes: "",
   servicePackage: "" as ServicePackage | "",
   serviceId: null as number | null,
-  addOns: [] as string[],
+  addOns: [] as number[],
   isLoginModalOpen: false,
   userInfo: null as MeOut | null,
   isLoadingUserInfo: false,
@@ -189,10 +196,12 @@ const initialState = {
   membershipPlans: [] as MembershipPlanOut[],
   isLoadingMembershipPlans: false,
   useMembership: false,
+  membershipPlanId: null as number | null,
   useMembershipDiscount: false,
   useCashCoupon: false,
   cashCouponCount: 0,
-  selectedTimeSlots: [],
+  selectedTimeSlots: [] as TimeSlotIn[],
+  notes: "",
 };
 
 export const useBookingStore = create<BookingState>((set) => ({
@@ -314,6 +323,10 @@ export const useBookingStore = create<BookingState>((set) => ({
       };
     }),
 
+  setNotes: (notes) => set({ notes }),
+
+  setMembershipPlanId: (id) => set({ membershipPlanId: id }),
+
   setIsLoginModalOpen: (isLoginModalOpen) => set({ isLoginModalOpen }),
 
   // 将 bookingStore 中的宠物信息转换为 PetPayload（用于提交预约）
@@ -335,6 +348,76 @@ export const useBookingStore = create<BookingState>((set) => ({
       behavior: state.behavior || null,
       grooming_frequency: state.groomingFrequency || null,
       special_notes: state.specialNotes || null,
+      // TODO: photo_ids and reference_photo_ids need to be uploaded first
+      photo_ids: [],
+      reference_photo_ids: [],
+    };
+  },
+
+  // 将 bookingStore 中的地址信息转换为 AddressIn（用于提交预约）
+  getAddressPayload: (): AddressIn => {
+    const state = useBookingStore.getState();
+    
+    // 如果选择了已保存的地址，使用该地址
+    if (state.selectedAddressId) {
+      const selectedAddress = state.addresses.find((addr) => addr.id === state.selectedAddressId);
+      if (selectedAddress) {
+        return {
+          id: selectedAddress.id,
+          address: selectedAddress.address,
+          city: selectedAddress.city,
+          province: selectedAddress.province,
+          postal_code: selectedAddress.postal_code,
+          service_type: selectedAddress.service_type,
+        };
+      }
+    }
+    
+    // 如果选择了门店，使用门店地址
+    if (state.selectedStoreId) {
+      const selectedStore = state.stores.find((store) => store.id === state.selectedStoreId);
+      if (selectedStore) {
+        return {
+          id: null,
+          address: selectedStore.address,
+          city: selectedStore.city,
+          province: selectedStore.province,
+          postal_code: selectedStore.postal_code,
+          service_type: state.serviceType,
+        };
+      }
+    }
+    
+    // 否则使用手动输入的地址
+    return {
+      id: null,
+      address: state.address,
+      city: state.city,
+      province: state.province,
+      postal_code: state.postCode,
+      service_type: state.serviceType,
+    };
+  },
+
+  // 将 bookingStore 中的所有信息转换为 BookingSubmitIn（用于提交预约）
+  getBookingSubmitPayload: (): BookingSubmitIn => {
+    const state = useBookingStore.getState();
+    const weightValue = state.weight ? parseFloat(state.weight) : null;
+    
+    return {
+      service_id: state.serviceId!,
+      add_on_ids: state.addOns,
+      weight_value: weightValue,
+      weight_unit: state.weightUnit,
+      membership_plan_id: state.membershipPlanId,
+      open_membership: state.useMembership,
+      use_special_coupon: state.useMembershipDiscount,
+      use_official_coupon: state.useCashCoupon,
+      address: useBookingStore.getState().getAddressPayload(),
+      pet: useBookingStore.getState().getPetPayload(),
+      preferred_time_slots: state.selectedTimeSlots,
+      notes: state.notes,
+      store_id: state.serviceType === "in_store" ? state.selectedStoreId : null,
     };
   },
 

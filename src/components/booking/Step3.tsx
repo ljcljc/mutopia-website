@@ -69,7 +69,7 @@ export function Step3() {
     ) {
       const membershipAddOns = addOnsList
         .filter((addOn) => addOn.included_in_membership === true)
-        .map((addOn) => String(addOn.id));
+        .map((addOn) => addOn.id);
       
       if (membershipAddOns.length > 0) {
         hasAutoSelectedMembership.current = true;
@@ -131,7 +131,7 @@ export function Step3() {
     const isMember = userInfo?.is_member === true;
     return selectedAddOns
       .map((addOnId) => {
-        const addOn = addOnsList.find((a) => a.id === Number(addOnId));
+        const addOn = addOnsList.find((a) => a.id === addOnId);
         if (addOn) {
           let price = typeof addOn.price === "string" ? parseFloat(addOn.price) : addOn.price;
           // If included_in_membership is true and user is a member, price is 0
@@ -306,7 +306,7 @@ export function Step3() {
             {selectedAddOns.length > 0 && (
               <div className="content-stretch flex flex-wrap gap-[14px] items-start relative shrink-0 w-full">
                 {selectedAddOns.map((addOnId) => {
-                  const addOn = addOnsList.find((a) => a.id === Number(addOnId));
+                  const addOn = addOnsList.find((a) => a.id === addOnId);
                   if (!addOn) return null;
                   const isMember = userInfo?.is_member === true;
                   let price =

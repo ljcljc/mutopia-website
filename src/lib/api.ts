@@ -200,6 +200,8 @@ export interface PetPayload {
   behavior?: string | null;
   grooming_frequency?: string | null;
   special_notes?: string | null;
+  photo_ids?: number[];
+  reference_photo_ids?: number[];
 }
 
 export interface CreatePetParams {
@@ -253,6 +255,28 @@ export interface AddressIn {
   province: string;
   postal_code: string;
   service_type: string;
+}
+
+// Booking submit types
+export interface TimeSlotIn {
+  date: string; // ISO date string (YYYY-MM-DD)
+  slot: string; // Time slot identifier (e.g., "morning", "afternoon")
+}
+
+export interface BookingSubmitIn {
+  service_id: number;
+  add_on_ids?: number[];
+  weight_value?: number | string | null;
+  weight_unit?: string; // default: "kg"
+  membership_plan_id?: number | null;
+  open_membership?: boolean; // default: false
+  use_special_coupon?: boolean; // default: false
+  use_official_coupon?: boolean; // default: false
+  address: AddressIn;
+  pet: PetPayload;
+  preferred_time_slots?: TimeSlotIn[];
+  notes?: string; // default: ""
+  store_id?: number | null;
 }
 
 // 门店相关类型

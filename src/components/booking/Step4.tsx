@@ -14,11 +14,11 @@ export function Step4() {
     membershipPlans,
     isLoadingMembershipPlans,
     loadMembershipPlans,
-    useMembership,
     useMembershipDiscount,
     useCashCoupon,
     cashCouponCount,
     setUseMembership,
+    setMembershipPlanId,
     setUseMembershipDiscount,
     setUseCashCoupon,
     previousStep,
@@ -56,7 +56,7 @@ export function Step4() {
   const selectedAddOnsDetails = useMemo(() => {
     return selectedAddOns
       .map((addOnId) => {
-        const addOn = addOnsList.find((a) => a.id === Number(addOnId));
+        const addOn = addOnsList.find((a) => a.id === addOnId);
         if (addOn) {
           let price = typeof addOn.price === "string" ? parseFloat(addOn.price) : addOn.price;
           // In Step4, assume user will be a member, so if included_in_membership is true, price is 0
@@ -122,7 +122,6 @@ export function Step4() {
     ? originalTotal * (1 - discountRate)
     : 0;
   const cashCouponDiscount = useCashCoupon ? cashCouponInfo.amount : 0;
-  const totalDiscount = membershipDiscount + cashCouponDiscount;
 
   // Calculate final prices with membership discount
   // discount_rate is the retention rate (e.g., 0.9 for 9折)
@@ -140,6 +139,10 @@ export function Step4() {
 
   const handleContinueWithMembership = () => {
     setUseMembership(true);
+    // Set membership plan ID if a plan is available
+    if (membershipPlan) {
+      setMembershipPlanId(membershipPlan.id);
+    }
     nextStep();
   };
 

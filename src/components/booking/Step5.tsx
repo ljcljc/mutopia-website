@@ -5,25 +5,8 @@ import { Icon } from "@/components/common/Icon";
 import { Calendar } from "@/components/common/Calendar";
 import { useBookingStore } from "./bookingStore";
 import { cn } from "@/components/ui/utils";
-
-const TIME_PERIODS = [
-  {
-    id: "morning",
-    label: "Morning AM",
-    timeRange: "8:00 AM - 12:00 PM",
-  },
-  {
-    id: "afternoon",
-    label: "Afternoon PM",
-    timeRange: "12:00 PM - 5:00 PM",
-  },
-];
-
-interface TimeSlot {
-  id: string;
-  date: Date;
-  periodId: string;
-}
+import { TIME_PERIODS } from "@/constants/calendar";
+import type { TimeSlotIn } from "@/lib/api";
 
 export function Step5() {
   const { previousStep, nextStep, selectedTimeSlots, setSelectedTimeSlots } = useBookingStore();
@@ -56,6 +39,19 @@ export function Step5() {
     return { min: currentYear, max: maxYear };
   }, [maxDate]);
 
+  // Format date to ISO string (YYYY-MM-DD)
+  const formatDateToISO = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  // Parse ISO date string to Date
+  const parseISODate = (dateString: string): Date => {
+    return new Date(dateString + "T00:00:00");
+  };
+
   // Handle date change from Calendar component (with toggle support)
   const handleDateChange = (date: Date) => {
     // Toggle: if clicking the same date, deselect it
@@ -65,12 +61,9 @@ export function Step5() {
         date.getFullYear() === selectedDate.getFullYear()) {
       setSelectedDate(null);
       // Also remove all time slots for this date
+      const dateISO = formatDateToISO(date);
       setSelectedTimeSlots(selectedTimeSlots.filter(
-        (slot) => !(
-          slot.date.getDate() === date.getDate() &&
-          slot.date.getMonth() === date.getMonth() &&
-          slot.date.getFullYear() === date.getFullYear()
-        )
+        (slot) => slot.date !== dateISO
       ));
     } else {
       setSelectedDate(date);
@@ -81,32 +74,33 @@ export function Step5() {
   const toggleTimePeriod = (periodId: string) => {
     if (!selectedDate) return; // Should be disabled, but double check
     
+    const dateISO = formatDateToISO(selectedDate);
+    
     // Check if this time slot already exists
     const existingSlot = selectedTimeSlots.find(
-      (slot) =>
-        slot.date.getDate() === selectedDate.getDate() &&
-        slot.date.getMonth() === selectedDate.getMonth() &&
-        slot.date.getFullYear() === selectedDate.getFullYear() &&
-        slot.periodId === periodId
+      (slot) => slot.date === dateISO && slot.slot === periodId
     );
 
     if (existingSlot) {
       // Remove the time slot
-      setSelectedTimeSlots(selectedTimeSlots.filter((slot) => slot.id !== existingSlot.id));
+      setSelectedTimeSlots(selectedTimeSlots.filter(
+        (slot) => !(slot.date === dateISO && slot.slot === periodId)
+      ));
     } else {
       // Add new time slot
-      const newSlot: TimeSlot = {
-        id: `${selectedDate.getTime()}-${periodId}`,
-        date: new Date(selectedDate),
-        periodId,
+      const newSlot: TimeSlotIn = {
+        date: dateISO,
+        slot: periodId,
       };
       setSelectedTimeSlots([...selectedTimeSlots, newSlot]);
     }
   };
 
   // Remove time slot
-  const removeTimeSlot = (slotId: string) => {
-    setSelectedTimeSlots(selectedTimeSlots.filter((slot) => slot.id !== slotId));
+  const removeTimeSlot = (dateISO: string, slot: string) => {
+    setSelectedTimeSlots(selectedTimeSlots.filter(
+      (s) => !(s.date === dateISO && s.slot === slot)
+    ));
   };
 
   // Format date for display in tag (YYYY.MM.DD format)
@@ -120,12 +114,9 @@ export function Step5() {
   // Check if a time period is selected for the current selected date
   const isTimePeriodSelected = (periodId: string): boolean => {
     if (!selectedDate) return false;
+    const dateISO = formatDateToISO(selectedDate);
     return selectedTimeSlots.some(
-      (slot) =>
-        slot.date.getDate() === selectedDate.getDate() &&
-        slot.date.getMonth() === selectedDate.getMonth() &&
-        slot.date.getFullYear() === selectedDate.getFullYear() &&
-        slot.periodId === periodId
+      (slot) => slot.date === dateISO && slot.slot === periodId
     );
   };
 
@@ -249,28 +240,31 @@ export function Step5() {
               {/* Selected Time Slots List */}
               {selectedTimeSlots.length > 0 && (
                 <div className="content-stretch flex flex-wrap gap-[14px] items-start relative shrink-0 w-[343px]">
-                  {selectedTimeSlots.map((slot) => {
-                    const period = TIME_PERIODS.find((p) => p.id === slot.periodId);
+                  {selectedTimeSlots.map((slot, index) => {
+                    const period = TIME_PERIODS.find((p) => p.id === slot.slot);
                     if (!period) return null;
+                    
+                    // Parse date string to Date for formatting
+                    const slotDate = parseISODate(slot.date);
                     
                     // Get AM/PM from period label
                     const periodSuffix = period.label.includes("AM") ? "AM" : "PM";
                     
                     return (
                       <div
-                        key={slot.id}
+                        key={`${slot.date}-${slot.slot}-${index}`}
                         className="border border-[#4c4c4c] border-solid content-stretch flex gap-[4px] h-[24px] items-center justify-center overflow-clip px-[17px] py-[5px] relative rounded-[12px] shrink-0 w-[103px]"
                       >
                         <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[14px] relative shrink-0 text-[#4c4c4c] text-[10px]">
-                          {formatDateForTag(slot.date)} {periodSuffix}
+                          {formatDateForTag(slotDate)} {periodSuffix}
                         </p>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            removeTimeSlot(slot.id);
+                            removeTimeSlot(slot.date, slot.slot);
                           }}
                           className="flex items-center justify-center relative shrink-0 cursor-pointer hover:opacity-70 transition-opacity"
-                          aria-label={`Remove ${formatDateForTag(slot.date)} ${periodSuffix}`}
+                          aria-label={`Remove ${formatDateForTag(slotDate)} ${periodSuffix}`}
                         >
                           <Icon
                             name="close-arrow"
