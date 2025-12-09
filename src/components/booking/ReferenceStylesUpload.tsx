@@ -30,11 +30,11 @@ export function ReferenceStylesUpload({
             <FileUpload
               accept="image/*"
               multiple={true}
-              maxSizeMB={1}
+              maxSizeMB={10}
               onChange={onChange}
               uploadItems={uploadItems}
               buttonText="Click to upload"
-              fileTypeHint="JPG, JPEG, PNG less than 1MB"
+              fileTypeHint="JPG, JPEG, PNG less than 10MB"
               showDragHint={true}
               className="w-full"
               disabled={disabled}

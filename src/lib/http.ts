@@ -185,9 +185,18 @@ const request = async <T = unknown>(
 
   // 构建请求头
   const requestHeaders: Record<string, string> = {
-    "Content-Type": "application/json",
     ...(headers as Record<string, string>),
   };
+
+  // 如果不是 FormData，默认设置 Content-Type 为 application/json
+  if (!(fetchConfig.body instanceof FormData)) {
+    if (!requestHeaders["Content-Type"]) {
+      requestHeaders["Content-Type"] = "application/json";
+    }
+  } else {
+    // FormData 会自动设置 Content-Type 和 boundary，不要手动设置
+    delete requestHeaders["Content-Type"];
+  }
 
   // 添加认证 token（如果需要）
   if (!skipAuth) {
@@ -393,10 +402,12 @@ export const http = {
     data?: unknown,
     config?: RequestConfig
   ): Promise<HttpResponse<T>> => {
+    // 如果是 FormData，直接使用；否则序列化为 JSON
+    const body = data instanceof FormData ? data : (data ? JSON.stringify(data) : undefined);
     return request<T>(url, {
       ...config,
       method: "POST",
-      body: data ? JSON.stringify(data) : undefined,
+      body,
     });
   },
 

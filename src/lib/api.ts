@@ -173,9 +173,11 @@ export interface PetOut {
   coat_condition?: string | null;
   behavior?: string | null;
   grooming_frequency?: string | null;
-  photos: string[];
-  reference_photos: string[];
+  photos: string[]; // 照片 URL 数组
+  reference_photos: string[]; // 参考照片 URL 数组
   special_notes?: string | null;
+  photo_ids: number[]; // 照片 ID 数组
+  reference_photo_ids: number[]; // 参考照片 ID 数组
 }
 
 export interface PetBreedOut {
@@ -558,20 +560,25 @@ export async function getPets(): Promise<PetOut[]> {
  * 创建宠物
  */
 export async function createPet(params: CreatePetParams): Promise<PetOut> {
-  // 构建查询参数
+  // 构建查询参数（根据 openapi.json，所有参数都是查询参数）
   const queryParams = new URLSearchParams();
   queryParams.append("name", params.name);
+  if (params.pet_type) queryParams.append("pet_type", params.pet_type);
   if (params.breed) queryParams.append("breed", params.breed);
-  if (params.weight_kg !== undefined && params.weight_kg !== null) {
-    queryParams.append("weight_kg", String(params.weight_kg));
+  if (params.mixed_breed !== undefined) {
+    queryParams.append("mixed_breed", String(params.mixed_breed));
   }
-  if (params.age_years !== undefined && params.age_years !== null) {
-    queryParams.append("age_years", String(params.age_years));
+  if (params.precise_type) queryParams.append("precise_type", params.precise_type);
+  if (params.birthday) queryParams.append("birthday", params.birthday);
+  if (params.gender) queryParams.append("gender", params.gender);
+  if (params.weight_value !== undefined && params.weight_value !== null) {
+    queryParams.append("weight_value", String(params.weight_value));
   }
-  if (params.hair_condition)
-    queryParams.append("hair_condition", params.hair_condition);
-  if (params.special_notes)
-    queryParams.append("special_notes", params.special_notes);
+  if (params.weight_unit) queryParams.append("weight_unit", params.weight_unit);
+  if (params.coat_condition) queryParams.append("coat_condition", params.coat_condition);
+  if (params.behavior) queryParams.append("behavior", params.behavior);
+  if (params.grooming_frequency) queryParams.append("grooming_frequency", params.grooming_frequency);
+  if (params.special_notes) queryParams.append("special_notes", params.special_notes);
 
   const response = await http.post<PetOut>(
     `/api/pets/pets?${queryParams.toString()}`,
@@ -597,6 +604,128 @@ export async function getPetBreeds(): Promise<PetBreedOut[]> {
     skipAuth: true,
   });
   return response.data;
+}
+
+/**
+ * 上传宠物照片
+ * @param file 图片文件
+ * @param onProgress 上传进度回调 (0-100)
+ * @returns 返回照片信息（包含 ID 和 URL）
+ */
+export interface PhotoUploadResponse {
+  id: number;
+  url: string; // 相对路径，例如 "/media/pets/anonymous/temp/photos/dog-2.jpg"
+}
+
+/**
+ * 构建图片的完整 URL
+ * @param relativeUrl 相对路径（例如 "/media/pets/anonymous/temp/photos/dog-2.jpg"）
+ * @returns 完整的图片 URL
+ */
+export function buildImageUrl(relativeUrl: string): string {
+  if (!relativeUrl) return "";
+  // 如果已经是完整 URL，直接返回
+  if (relativeUrl.startsWith("http://") || relativeUrl.startsWith("https://")) {
+    return relativeUrl;
+  }
+  // 使用环境变量配置的基础域名，默认使用 https://api.mutopia.ca
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || "https://api.mutopia.ca";
+  // 确保 relativeUrl 以 / 开头
+  const path = relativeUrl.startsWith("/") ? relativeUrl : `/${relativeUrl}`;
+  return `${baseUrl}${path}`;
+}
+
+export async function uploadPetPhoto(
+  file: File,
+  onProgress?: (progress: number) => void
+): Promise<PhotoUploadResponse> {
+  return uploadFileWithProgress("/api/pets/photos", file, onProgress);
+}
+
+/**
+ * 上传参考照片
+ * @param file 图片文件
+ * @param onProgress 上传进度回调 (0-100)
+ * @returns 返回照片信息（包含 ID 和 URL）
+ */
+export async function uploadReferencePhoto(
+  file: File,
+  onProgress?: (progress: number) => void
+): Promise<PhotoUploadResponse> {
+  return uploadFileWithProgress("/api/pets/reference_photos", file, onProgress);
+}
+
+/**
+ * 使用 XMLHttpRequest 上传文件，支持进度回调
+ */
+async function uploadFileWithProgress(
+  url: string,
+  file: File,
+  onProgress?: (progress: number) => void
+): Promise<PhotoUploadResponse> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const formData = new FormData();
+    formData.append("file", file);
+
+    // 获取 API base URL
+    const API_BASE_URL = import.meta.env.DEV
+      ? "" // 开发环境使用相对路径，通过 Vite 代理
+      : import.meta.env.VITE_API_BASE_URL || ""; // 生产环境默认使用相对路径
+    const fullUrl = url.startsWith("http") ? url : `${API_BASE_URL}${url}`;
+
+    // 上传进度事件
+    xhr.upload.addEventListener("progress", (event) => {
+      if (event.lengthComputable && onProgress) {
+        const progress = Math.round((event.loaded / event.total) * 100);
+        onProgress(progress);
+      }
+    });
+
+    // 请求完成事件
+    xhr.addEventListener("load", () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const response = JSON.parse(xhr.responseText) as PhotoUploadResponse;
+          resolve(response);
+        } catch {
+          reject(new Error("Failed to parse response"));
+        }
+      } else {
+        reject(new Error(`Upload failed with status ${xhr.status}`));
+      }
+    });
+
+    // 请求错误事件
+    xhr.addEventListener("error", () => {
+      reject(new Error("Network error during upload"));
+    });
+
+    // 请求中止事件
+    xhr.addEventListener("abort", () => {
+      reject(new Error("Upload was aborted"));
+    });
+
+    // 设置请求头（包括认证 token）
+    xhr.open("POST", fullUrl);
+    
+        // 获取并设置认证 token
+    (async () => {
+      try {
+        // 动态导入以避免循环依赖
+        const { getEncryptedItem } = await import("./encryption");
+        const { STORAGE_KEYS } = await import("./storageKeys");
+        const token = await getEncryptedItem(STORAGE_KEYS.ACCESS_TOKEN);
+        if (token) {
+          xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+        }
+        // 发送请求（FormData 会自动设置 Content-Type）
+        xhr.send(formData);
+      } catch (err) {
+        reject(err);
+      }
+    })();
+  });
 }
 
 // ==================== 预约管理 API ====================

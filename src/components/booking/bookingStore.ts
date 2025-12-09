@@ -61,8 +61,12 @@ interface BookingState {
   coatCondition: CoatCondition | ""; // 对应 API: coat_condition
   behavior: Behavior | ""; // 对应 API: behavior
   groomingFrequency: GroomingFrequency | ""; // 对应 API: grooming_frequency
-  petPhoto: File | null; // 对应 API: photos (数组)
-  referenceStyles: File[]; // 对应 API: reference_photos (数组)
+  petPhoto: File | null; // 对应 API: photos (数组) - 保留用于 UI 显示
+  referenceStyles: File[]; // 对应 API: reference_photos (数组) - 保留用于 UI 显示
+  photoIds: number[]; // 上传后的宠物照片 ID 列表
+  referencePhotoIds: number[]; // 上传后的参考照片 ID 列表
+  photoUrls: string[]; // 上传后的宠物照片 URL 列表（相对路径）
+  referencePhotoUrls: string[]; // 上传后的参考照片 URL 列表（相对路径）
   specialNotes: string; // 对应 API: special_notes
 
   // Step 3: Service package and add-ons
@@ -132,6 +136,10 @@ interface BookingState {
   setGroomingFrequency: (frequency: GroomingFrequency | "") => void;
   setPetPhoto: (file: File | null) => void;
   setReferenceStyles: (files: File[]) => void;
+  setPhotoIds: (ids: number[]) => void;
+  setReferencePhotoIds: (ids: number[]) => void;
+  setPhotoUrls: (urls: string[]) => void;
+  setReferencePhotoUrls: (urls: string[]) => void;
   setSpecialNotes: (notes: string) => void;
   setServicePackage: (pkg: ServicePackage | "") => void;
   setAddOns: (addOns: number[]) => void;
@@ -180,6 +188,10 @@ const initialState = {
   groomingFrequency: "" as GroomingFrequency | "",
   petPhoto: null as File | null,
   referenceStyles: [] as File[],
+  photoIds: [] as number[],
+  referencePhotoIds: [] as number[],
+  photoUrls: [] as string[],
+  referencePhotoUrls: [] as string[],
   specialNotes: "",
   servicePackage: "" as ServicePackage | "",
   serviceId: null as number | null,
@@ -306,6 +318,14 @@ export const useBookingStore = create<BookingState>((set) => ({
 
   setReferenceStyles: (files) => set({ referenceStyles: files }),
 
+  setPhotoIds: (ids) => set({ photoIds: ids }),
+
+  setReferencePhotoIds: (ids) => set({ referencePhotoIds: ids }),
+
+  setPhotoUrls: (urls) => set({ photoUrls: urls }),
+
+  setReferencePhotoUrls: (urls) => set({ referencePhotoUrls: urls }),
+
   setSpecialNotes: (notes) => set({ specialNotes: notes }),
 
   setServicePackage: (pkg) => set({ servicePackage: pkg }),
@@ -348,9 +368,8 @@ export const useBookingStore = create<BookingState>((set) => ({
       behavior: state.behavior || null,
       grooming_frequency: state.groomingFrequency || null,
       special_notes: state.specialNotes || null,
-      // TODO: photo_ids and reference_photo_ids need to be uploaded first
-      photo_ids: [],
-      reference_photo_ids: [],
+      photo_ids: state.photoIds.length > 0 ? state.photoIds : undefined,
+      reference_photo_ids: state.referencePhotoIds.length > 0 ? state.referencePhotoIds : undefined,
     };
   },
 

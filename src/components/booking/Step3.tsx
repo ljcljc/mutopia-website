@@ -269,7 +269,7 @@ export function Step3() {
                 </div>
               ) : (
                 filteredAddOns.map((addOn) => {
-                  const isSelected = selectedAddOns.includes(String(addOn.id));
+                  const isSelected = selectedAddOns.includes(addOn.id);
                   const price =
                     typeof addOn.price === "string"
                       ? parseFloat(addOn.price)
@@ -282,7 +282,7 @@ export function Step3() {
                       price={price}
                       duration={addOn.service_time || undefined}
                       checked={isSelected}
-                      onCheckedChange={() => toggleAddOn(String(addOn.id))}
+                      onCheckedChange={() => toggleAddOn(addOn.id)}
                     />
                   );
                 })
@@ -364,7 +364,7 @@ export function Step3() {
               </div>
               <div className="content-stretch flex gap-[8px] items-center relative shrink-0">
                 <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] relative shrink-0 text-[16px] text-[#de6a07]">
-                  ${totalPrice}
+                  ${totalPrice.toFixed(2)}
                 </p>
                 <div className="flex items-center justify-center relative shrink-0 size-[20px]">
                   <div className={cn("flex-none", isEstimationExpanded ? "rotate-180" : "")}>
@@ -396,7 +396,7 @@ export function Step3() {
                         {selectedService.name}
                       </p>
                       <p className="relative shrink-0">
-                        ${packagePrice}
+                        ${packagePrice.toFixed(2)}
                       </p>
                     </div>
                     {/* Service items list */}
@@ -412,7 +412,7 @@ export function Step3() {
                                   {item.name}
                                 </p>
                                 <p className="relative shrink-0">
-                                  ${itemPrice}
+                                  ${itemPrice.toFixed(2)}
                                 </p>
                               </div>
                             );
@@ -426,7 +426,7 @@ export function Step3() {
                         Subtotal
                       </p>
                       <p className="relative shrink-0">
-                        ${packagePrice}
+                        ${packagePrice.toFixed(2)}
                       </p>
                     </div>
                   </div>
@@ -446,7 +446,7 @@ export function Step3() {
                           {addOn.name}
                         </p>
                         <p className="relative shrink-0">
-                          ${addOn.price}
+                          ${addOn.price.toFixed(2)}
                         </p>
                       </div>
                     ))}
@@ -457,7 +457,7 @@ export function Step3() {
                         Subtotal
                       </p>
                       <p className="relative shrink-0">
-                        ${addOnsPrice}
+                        ${addOnsPrice.toFixed(2)}
                       </p>
                     </div>
                   </div>

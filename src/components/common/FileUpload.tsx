@@ -8,10 +8,12 @@ export type FileUploadState = "default" | "uploaded" | "hover-to-delete" | "erro
 
 export interface FileUploadItem {
   file: File;
-  previewUrl: string;
+  previewUrl: string; // blob URL 或服务器 URL
   uploadProgress?: number;
   uploadStatus?: "uploading" | "uploaded" | "error";
-  errorType?: "size" | "format" | null;
+  errorType?: "size" | "format" | "upload" | null;
+  photoId?: number; // 上传成功后的照片 ID
+  serverUrl?: string; // 上传成功后服务器返回的 URL（相对路径）
 }
 
 export interface FileUploadProps {
@@ -40,7 +42,7 @@ export interface FileUploadProps {
   /** 上传进度回调（按文件索引） */
   onUploadProgress?: (index: number, progress: number) => void;
   /** 错误类型 */
-  errorType?: "size" | "format" | null;
+  errorType?: "size" | "format" | "upload" | null;
   /** 错误信息回调 */
   onError?: (error: { type: "size" | "format"; message: string }) => void;
 }
@@ -133,16 +135,18 @@ export function FileUpload({
   const getState = (): FileUploadState => {
     if (errorType === "size") return "error-size";
     if (errorType === "format") return "error-format";
-    if (files.length > 0) return "uploaded";
+    // 使用 displayItems 而不是 files，因为可能从外部传入 uploadItems
+    if (displayItems.length > 0) return "uploaded";
     return "default";
   };
 
   const state = getState();
-  const hasFiles = files.length > 0;
+  // 使用 displayItems 而不是 files，因为可能从外部传入 uploadItems
+  const hasFiles = displayItems.length > 0;
   // 是否可以添加更多文件，取决于 maxFiles 限制
-  const canAddMore = !maxFiles || files.length < maxFiles;
+  const canAddMore = !maxFiles || displayItems.length < maxFiles;
   // 当达到 maxFiles 限制时，禁用上传功能
-  const isUploadDisabled = maxFiles ? files.length >= maxFiles : false;
+  const isUploadDisabled = maxFiles ? displayItems.length >= maxFiles : false;
 
   return (
     <div className={cn("content-stretch flex flex-col items-start relative shadow-[0px_4px_10px_0px_rgba(0,0,0,0.15)] w-full", className)}>
@@ -218,11 +222,18 @@ export function FileUpload({
                             className="absolute bg-neutral-100 border border-[#4c4c4c] border-solid overflow-clip rounded-[8px] size-[20px] top-[-6px] right-[-6px] cursor-pointer flex items-center justify-center z-20 shadow-[0px_2px_4px_0px_rgba(0,0,0,0.1)]"
                             onClick={(e) => {
                               e.stopPropagation();
-                              // 清理预览 URL
-                              if (displayItems[index]?.previewUrl) {
+                              // 清理预览 URL（只清理 blob URL，不清理服务器 URL）
+                              if (displayItems[index]?.previewUrl && displayItems[index].previewUrl.startsWith("blob:")) {
                                 URL.revokeObjectURL(displayItems[index].previewUrl);
                               }
-                              removeFile(index);
+                              // 如果是从外部传入的 uploadItems，需要通过 onChange 回调通知父组件
+                              if (uploadItems) {
+                                // 通知父组件删除文件
+                                const remainingFiles = files.filter((_, i) => i !== index);
+                                onChange?.(remainingFiles);
+                              } else {
+                                removeFile(index);
+                              }
                             }}
                           >
                             {/* X 图标：两条交叉的线 */}

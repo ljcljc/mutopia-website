@@ -8,6 +8,7 @@ import { useBookingStore } from "./bookingStore";
 import type { WeightUnit, Gender, PetType } from "./bookingStore";
 import { ReferenceStylesUpload } from "./ReferenceStylesUpload";
 import type { PetBreedOut } from "@/lib/api";
+import { uploadPetPhoto, uploadReferencePhoto, buildImageUrl } from "@/lib/api";
 
 function getBreedOptions(petType: PetType, breeds: PetBreedOut[]): string[] {
   return breeds
@@ -46,6 +47,10 @@ export function Step2() {
     setBehavior,
     setGroomingFrequency,
     setSpecialNotes,
+    setPhotoIds,
+    setReferencePhotoIds,
+    setPhotoUrls,
+    setReferencePhotoUrls,
     loadPetBreeds,
     previousStep,
     nextStep,
@@ -59,10 +64,99 @@ export function Step2() {
   minDateObj.setFullYear(today.getFullYear() - 20);
   const minDate = `${minDateObj.getFullYear()}-${String(minDateObj.getMonth() + 1).padStart(2, "0")}`;
 
-  const [petPhotoItems, setPetPhotoItems] = useState<FileUploadItem[]>([]);
-  const [referenceStyleItems, setReferenceStyleItems] = useState<FileUploadItem[]>([]);
-  const [petPhotoFiles, setPetPhotoFiles] = useState<File[]>([]);
-  const [referenceStyleFiles, setReferenceStyleFiles] = useState<File[]>([]);
+  // 初始化图片状态（从 bookingStore 恢复，使用函数式初始化确保每次挂载都读取最新值）
+  const [petPhotoItems, setPetPhotoItems] = useState<FileUploadItem[]>(() => {
+    const { petPhoto: initialPetPhoto, photoIds: initialPhotoIds, photoUrls: initialPhotoUrls } = useBookingStore.getState();
+    
+    // 如果图片已上传（有 photoId 和 photoUrl），即使 petPhoto 为 null 也要恢复显示
+    if (initialPhotoIds.length > 0 && initialPhotoUrls.length > 0) {
+      // 创建一个占位符 File 对象（因为 FileUploadItem 接口要求 file: File）
+      // 这个 File 对象不会被使用，因为预览会使用服务器 URL
+      const placeholderFile = initialPetPhoto || new File([], "placeholder.jpg", { type: "image/jpeg" });
+      const previewUrl = buildImageUrl(initialPhotoUrls[0]);
+      
+      const item: FileUploadItem = {
+        file: placeholderFile,
+        previewUrl,
+        uploadStatus: "uploaded",
+        uploadProgress: 100,
+        photoId: initialPhotoIds[0],
+        serverUrl: initialPhotoUrls[0],
+      };
+      return [item];
+    }
+    
+    // 如果只有 petPhoto 但没有上传，使用 File 对象的 blob URL
+    if (initialPetPhoto) {
+      const previewUrl = URL.createObjectURL(initialPetPhoto);
+      const item: FileUploadItem = {
+        file: initialPetPhoto,
+        previewUrl,
+        uploadStatus: "uploading",
+        uploadProgress: 0,
+      };
+      return [item];
+    }
+    
+    return [];
+  });
+
+  const [referenceStyleItems, setReferenceStyleItems] = useState<FileUploadItem[]>(() => {
+    const { referenceStyles: initialReferenceStyles, referencePhotoIds: initialReferencePhotoIds, referencePhotoUrls: initialReferencePhotoUrls } = useBookingStore.getState();
+    
+    // 优先使用已上传的图片（即使 referenceStyles 为空）
+    const maxLength = Math.max(initialReferenceStyles.length, initialReferencePhotoIds.length, initialReferencePhotoUrls.length);
+    if (maxLength === 0) return [];
+    
+    return Array.from({ length: maxLength }, (_, index): FileUploadItem => {
+      // 如果图片已上传（有 photoId 和 photoUrl），使用服务器 URL
+      if (initialReferencePhotoIds[index] !== undefined && initialReferencePhotoUrls[index]) {
+        // 创建一个占位符 File 对象（因为 FileUploadItem 接口要求 file: File）
+        const placeholderFile = initialReferenceStyles[index] || new File([], `placeholder-${index}.jpg`, { type: "image/jpeg" });
+        const previewUrl = buildImageUrl(initialReferencePhotoUrls[index]);
+        
+        return {
+          file: placeholderFile,
+          previewUrl,
+          uploadStatus: "uploaded",
+          uploadProgress: 100,
+          photoId: initialReferencePhotoIds[index],
+          serverUrl: initialReferencePhotoUrls[index],
+        };
+      }
+      
+      // 如果只有 File 对象但没有上传，使用 File 对象的 blob URL
+      if (initialReferenceStyles[index]) {
+        const previewUrl = URL.createObjectURL(initialReferenceStyles[index]);
+        return {
+          file: initialReferenceStyles[index],
+          previewUrl,
+          uploadStatus: "uploading",
+          uploadProgress: 0,
+        };
+      }
+      
+      // 理论上不应该到这里，但为了类型安全返回一个占位符
+      const placeholderFile = new File([], `placeholder-${index}.jpg`, { type: "image/jpeg" });
+      return {
+        file: placeholderFile,
+        previewUrl: "",
+        uploadStatus: "uploading",
+        uploadProgress: 0,
+      };
+    });
+  });
+
+  const [petPhotoFiles, setPetPhotoFiles] = useState<File[]>(() => {
+    const { petPhoto: initialPetPhoto } = useBookingStore.getState();
+    return initialPetPhoto ? [initialPetPhoto] : [];
+  });
+
+  const [referenceStyleFiles, setReferenceStyleFiles] = useState<File[]>(() => {
+    const { referenceStyles: initialReferenceStyles } = useBookingStore.getState();
+    return initialReferenceStyles;
+  });
+
   const hasLoadedBreeds = useRef(false);
 
   // 获取 breeds 数据（只加载一次）
@@ -73,65 +167,252 @@ export function Step2() {
     }
   }, [loadPetBreeds]);
 
-  // 模拟上传函数
-  const simulateUpload = async (
+  // 从 bookingStore 恢复图片状态（在组件挂载时检查并恢复）
+  // 这个 useEffect 作为 useState 初始化函数的补充，确保即使初始化函数执行时状态还未更新，也能恢复图片
+  useEffect(() => {
+    const storeState = useBookingStore.getState();
+    const { photoIds, photoUrls, referencePhotoIds, referencePhotoUrls } = storeState;
+    
+    // 恢复宠物照片：如果 bookingStore 中有数据，但 petPhotoItems 为空或不匹配
+    if (photoIds.length > 0 && photoUrls.length > 0) {
+      const currentPhotoId = petPhotoItems[0]?.photoId;
+      if (currentPhotoId !== photoIds[0]) {
+        const placeholderFile = new File([], "placeholder.jpg", { type: "image/jpeg" });
+        const previewUrl = buildImageUrl(photoUrls[0]);
+        
+        setPetPhotoItems([{
+          file: placeholderFile,
+          previewUrl,
+          uploadStatus: "uploaded",
+          uploadProgress: 100,
+          photoId: photoIds[0],
+          serverUrl: photoUrls[0],
+        }]);
+      }
+    } else if (photoIds.length === 0 && photoUrls.length === 0 && petPhotoItems.length > 0) {
+      // 如果 bookingStore 中没有数据，但 petPhotoItems 有数据，清空（可能是状态不一致）
+      // 但只清空未上传的项，保留已上传的（以防万一）
+      const uploadedItems = petPhotoItems.filter(item => item.photoId !== undefined);
+      if (uploadedItems.length !== petPhotoItems.length) {
+        setPetPhotoItems(uploadedItems);
+      }
+    }
+    
+    // 恢复参考照片：如果 bookingStore 中有数据，但 referenceStyleItems 为空或不匹配
+    if (referencePhotoIds.length > 0 && referencePhotoUrls.length > 0) {
+      const currentReferenceIds = referenceStyleItems.map(item => item.photoId).filter((id): id is number => id !== undefined);
+      const storeReferenceIds = referencePhotoIds;
+      const needsRestore = storeReferenceIds.length !== currentReferenceIds.length || 
+        storeReferenceIds.some(id => !currentReferenceIds.includes(id));
+      
+      if (needsRestore) {
+        const restoredItems = referencePhotoIds.map((photoId, index): FileUploadItem => {
+          const placeholderFile = new File([], `placeholder-${index}.jpg`, { type: "image/jpeg" });
+          const previewUrl = buildImageUrl(referencePhotoUrls[index]);
+          
+          return {
+            file: placeholderFile,
+            previewUrl,
+            uploadStatus: "uploaded",
+            uploadProgress: 100,
+            photoId,
+            serverUrl: referencePhotoUrls[index],
+          };
+        });
+        
+        setReferenceStyleItems(restoredItems);
+      }
+    } else if (referencePhotoIds.length === 0 && referencePhotoUrls.length === 0 && referenceStyleItems.length > 0) {
+      // 如果 bookingStore 中没有数据，但 referenceStyleItems 有数据，清空（可能是状态不一致）
+      // 但只清空未上传的项，保留已上传的（以防万一）
+      const uploadedItems = referenceStyleItems.filter(item => item.photoId !== undefined);
+      if (uploadedItems.length !== referenceStyleItems.length) {
+        setReferenceStyleItems(uploadedItems);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // 只在组件挂载时执行一次
+
+  // 真实上传函数 - 上传宠物照片
+  const uploadPetPhotoFile = async (
     file: File,
     index: number,
     setItems: React.Dispatch<React.SetStateAction<FileUploadItem[]>>,
     items: FileUploadItem[]
   ) => {
-    // 创建预览 URL
-    const previewUrl = URL.createObjectURL(file);
-    
-    // 初始化上传项
-    const newItem: FileUploadItem = {
-      file,
-      previewUrl,
-      uploadStatus: "uploading",
-      uploadProgress: 0,
-    };
-    
-    // 更新状态
-    const updatedItems = [...items];
-    updatedItems[index] = newItem;
-    setItems(updatedItems);
+    // 使用已存在的 item（包含 previewUrl），只更新上传状态
+    const existingItem = items[index];
+    if (!existingItem) {
+      console.error("Item not found at index", index);
+      return;
+    }
 
-    // 模拟上传进度
-    const uploadInterval = setInterval(() => {
+    // 确保上传状态为 uploading
+    setItems((prevItems) => {
+      const currentItems = [...prevItems];
+      if (currentItems[index]) {
+        currentItems[index] = {
+          ...currentItems[index],
+          uploadStatus: "uploading",
+          uploadProgress: 0,
+        };
+      }
+      return currentItems;
+    });
+
+    try {
+      // 调用真实 API 上传，传入进度回调
+      const response = await uploadPetPhoto(file, (progress) => {
+        // 更新上传进度
+        setItems((prevItems) => {
+          const currentItems = [...prevItems];
+          if (currentItems[index]) {
+            currentItems[index] = {
+              ...currentItems[index],
+              uploadProgress: progress,
+            };
+          }
+          return currentItems;
+        });
+      });
+      
+      // 上传成功
       setItems((prevItems) => {
         const currentItems = [...prevItems];
         if (currentItems[index]) {
-          const currentProgress = currentItems[index].uploadProgress || 0;
-          const newProgress = Math.min(currentProgress + Math.random() * 15, 100);
+          // 构建完整的服务器 URL（使用 https://api.mutopia.ca/ 域名）
+          const fullServerUrl = buildImageUrl(response.url);
           
           currentItems[index] = {
             ...currentItems[index],
-            uploadProgress: newProgress,
+            uploadStatus: "uploaded",
+            uploadProgress: 100,
+            photoId: response.id, // 保存照片 ID
+            serverUrl: response.url, // 保存服务器返回的相对路径 URL
+            previewUrl: fullServerUrl, // 使用服务器 URL 作为预览 URL
           };
-
-          // 上传完成
-          if (newProgress >= 100) {
-            currentItems[index] = {
-              ...currentItems[index],
-              uploadStatus: "uploaded",
-              uploadProgress: 100,
-            };
-            clearInterval(uploadInterval);
-          }
         }
         return currentItems;
       });
-    }, 200);
 
-    // 清理函数
-    return () => {
-      clearInterval(uploadInterval);
-      URL.revokeObjectURL(previewUrl);
-    };
+      // 更新 bookingStore 中的 photoIds 和 photoUrls
+      const currentPhotoIds = useBookingStore.getState().photoIds;
+      const currentPhotoUrls = useBookingStore.getState().photoUrls;
+      if (response.id && !currentPhotoIds.includes(response.id)) {
+        setPhotoIds([...currentPhotoIds, response.id]);
+        setPhotoUrls([...currentPhotoUrls, response.url]);
+      }
+    } catch (error) {
+      console.error("Failed to upload pet photo:", error);
+      // 上传失败
+      setItems((prevItems) => {
+        const currentItems = [...prevItems];
+        if (currentItems[index]) {
+          currentItems[index] = {
+            ...currentItems[index],
+            uploadStatus: "error",
+            errorType: "upload",
+          };
+        }
+        return currentItems;
+      });
+    }
+    // 注意：不在这里清理 previewUrl，因为上传成功后还需要显示预览
+    // previewUrl 会在文件被删除时通过 handlePetPhotoChange 清理
+  };
+
+  // 真实上传函数 - 上传参考照片
+  const uploadReferencePhotoFile = async (
+    file: File,
+    index: number,
+    setItems: React.Dispatch<React.SetStateAction<FileUploadItem[]>>,
+    items: FileUploadItem[]
+  ) => {
+    // 使用已存在的 item（包含 previewUrl），只更新上传状态
+    const existingItem = items[index];
+    if (!existingItem) {
+      console.error("Item not found at index", index);
+      return;
+    }
+
+    // 确保上传状态为 uploading
+    setItems((prevItems) => {
+      const currentItems = [...prevItems];
+      if (currentItems[index]) {
+        currentItems[index] = {
+          ...currentItems[index],
+          uploadStatus: "uploading",
+          uploadProgress: 0,
+        };
+      }
+      return currentItems;
+    });
+
+    try {
+      // 调用真实 API 上传，传入进度回调
+      const response = await uploadReferencePhoto(file, (progress) => {
+        // 更新上传进度
+        setItems((prevItems) => {
+          const currentItems = [...prevItems];
+          if (currentItems[index]) {
+            currentItems[index] = {
+              ...currentItems[index],
+              uploadProgress: progress,
+            };
+          }
+          return currentItems;
+        });
+      });
+      
+      // 上传成功
+      setItems((prevItems) => {
+        const currentItems = [...prevItems];
+        if (currentItems[index]) {
+          // 构建完整的服务器 URL（使用 https://api.mutopia.ca/ 域名）
+          const fullServerUrl = buildImageUrl(response.url);
+          
+          currentItems[index] = {
+            ...currentItems[index],
+            uploadStatus: "uploaded",
+            uploadProgress: 100,
+            photoId: response.id, // 保存照片 ID
+            serverUrl: response.url, // 保存服务器返回的相对路径 URL
+            previewUrl: fullServerUrl, // 使用服务器 URL 作为预览 URL
+          };
+        }
+        return currentItems;
+      });
+
+      // 更新 bookingStore 中的 referencePhotoIds 和 referencePhotoUrls
+      const currentReferencePhotoIds = useBookingStore.getState().referencePhotoIds;
+      const currentReferencePhotoUrls = useBookingStore.getState().referencePhotoUrls;
+      if (response.id && !currentReferencePhotoIds.includes(response.id)) {
+        setReferencePhotoIds([...currentReferencePhotoIds, response.id]);
+        setReferencePhotoUrls([...currentReferencePhotoUrls, response.url]);
+      }
+    } catch (error) {
+      console.error("Failed to upload reference photo:", error);
+      // 上传失败
+      setItems((prevItems) => {
+        const currentItems = [...prevItems];
+        if (currentItems[index]) {
+          currentItems[index] = {
+            ...currentItems[index],
+            uploadStatus: "error",
+            errorType: "upload",
+          };
+        }
+        return currentItems;
+      });
+    }
+    // 注意：不在这里清理 previewUrl，因为上传成功后还需要显示预览
+    // previewUrl 会在文件被删除时通过 handleReferenceStylesChange 清理
   };
 
   const handlePetPhotoChange = async (files: File[]) => {
     setPetPhotoFiles(files);
+    // 同步到 bookingStore
+    useBookingStore.getState().setPetPhoto(files.length > 0 ? files[0] : null);
     
     if (files.length > 0) {
       // 区分新文件和已存在的文件（支持追加模式）
@@ -149,10 +430,20 @@ export function Step2() {
         }
       });
       
-      // 清理被删除的文件预览 URL
+      // 清理被删除的文件预览 URL 和对应的 photo ID
       petPhotoItems.forEach((item) => {
         if (!files.includes(item.file)) {
           URL.revokeObjectURL(item.previewUrl);
+          // 如果文件已上传，从 photoIds 和 photoUrls 中移除
+          if (item.uploadStatus === "uploaded" && item.photoId) {
+            const currentPhotoIds = useBookingStore.getState().photoIds;
+            const currentPhotoUrls = useBookingStore.getState().photoUrls;
+            const photoIndex = currentPhotoIds.indexOf(item.photoId);
+            setPhotoIds(currentPhotoIds.filter((id) => id !== item.photoId));
+            if (photoIndex >= 0) {
+              setPhotoUrls(currentPhotoUrls.filter((_, idx) => idx !== photoIndex));
+            }
+          }
         }
       });
 
@@ -209,12 +500,12 @@ export function Step2() {
       
       setPetPhotoItems(updatedItems);
 
-      // 只为新文件启动上传模拟
+      // 只为新文件启动真实上传
       newFiles.forEach((file) => {
         const globalIndex = updatedItems.findIndex((item) => item.file === file);
         const item = updatedItems[globalIndex];
         if (item && item.uploadStatus === "uploading") {
-          simulateUpload(file, globalIndex, setPetPhotoItems, updatedItems);
+          uploadPetPhotoFile(file, globalIndex, setPetPhotoItems, updatedItems);
         }
       });
     } else {
@@ -223,20 +514,81 @@ export function Step2() {
         URL.revokeObjectURL(item.previewUrl);
       });
       setPetPhotoItems([]);
+      // 清空宠物照片 ID 和 URL
+      setPhotoIds([]);
+      setPhotoUrls([]);
+      // 同步到 bookingStore
+      useBookingStore.getState().setPetPhoto(null);
     }
   };
 
   const handleReferenceStylesChange = async (files: File[]) => {
     setReferenceStyleFiles(files);
+    // 同步到 bookingStore
+    useBookingStore.getState().setReferenceStyles(files);
     
     if (files.length > 0) {
-      // 清理之前的预览 URL
+      // 区分新文件和已存在的文件（支持追加模式）
+      const newFiles: File[] = [];
+      const existingItems: FileUploadItem[] = [];
+      
+      files.forEach((file) => {
+        const existingItem = referenceStyleItems.find((item) => item.file === file);
+        if (existingItem) {
+          // 保留已存在的文件状态（包括已上传的文件）
+          existingItems.push(existingItem);
+        } else {
+          // 新文件
+          newFiles.push(file);
+        }
+      });
+      
+      // 清理被删除的文件预览 URL 和对应的 photo ID
       referenceStyleItems.forEach((item) => {
-        URL.revokeObjectURL(item.previewUrl);
+        if (!files.includes(item.file)) {
+          URL.revokeObjectURL(item.previewUrl);
+          // 如果文件已上传，从 referencePhotoIds 和 referencePhotoUrls 中移除
+          if (item.uploadStatus === "uploaded" && item.photoId) {
+            const currentReferencePhotoIds = useBookingStore.getState().referencePhotoIds;
+            const currentReferencePhotoUrls = useBookingStore.getState().referencePhotoUrls;
+            const photoIndex = currentReferencePhotoIds.indexOf(item.photoId);
+            setReferencePhotoIds(currentReferencePhotoIds.filter((id) => id !== item.photoId));
+            if (photoIndex >= 0) {
+              setReferencePhotoUrls(currentReferencePhotoUrls.filter((_, idx) => idx !== photoIndex));
+            }
+          }
+        }
       });
 
-      const newItems: FileUploadItem[] = files.map((file) => {
+      // 只为新文件创建 items
+      const newItems: FileUploadItem[] = newFiles.map((file) => {
         const previewUrl = URL.createObjectURL(file);
+        
+        // 验证文件
+        const fileSizeMB = file.size / (1024 * 1024);
+        const fileType = file.type.toLowerCase();
+        const isValidType = fileType.startsWith("image/") && 
+          (fileType.includes("jpeg") || fileType.includes("jpg") || fileType.includes("png"));
+
+        if (fileSizeMB > 10) {
+          return {
+            file,
+            previewUrl,
+            uploadStatus: "error" as const,
+            errorType: "size" as const,
+          };
+        }
+
+        if (!isValidType) {
+          return {
+            file,
+            previewUrl,
+            uploadStatus: "error" as const,
+            errorType: "format" as const,
+          };
+        }
+
+        // 开始上传
         return {
           file,
           previewUrl,
@@ -245,11 +597,29 @@ export function Step2() {
         };
       });
       
-      setReferenceStyleItems(newItems);
+      // 合并已存在的 items 和新 items，保持文件顺序
+      const updatedItems: FileUploadItem[] = [];
+      let newIndex = 0;
+      
+      files.forEach((file) => {
+        const existingItem = existingItems.find((item) => item.file === file);
+        if (existingItem) {
+          updatedItems.push(existingItem);
+        } else {
+          updatedItems.push(newItems[newIndex]);
+          newIndex++;
+        }
+      });
+      
+      setReferenceStyleItems(updatedItems);
 
-      // 为每个文件模拟上传
-      files.forEach((file, index) => {
-        simulateUpload(file, index, setReferenceStyleItems, newItems);
+      // 只为新文件启动真实上传
+      newFiles.forEach((file) => {
+        const globalIndex = updatedItems.findIndex((item) => item.file === file);
+        const item = updatedItems[globalIndex];
+        if (item && item.uploadStatus === "uploading") {
+          uploadReferencePhotoFile(file, globalIndex, setReferenceStyleItems, updatedItems);
+        }
       });
     } else {
       // 清理预览 URL
@@ -257,27 +627,57 @@ export function Step2() {
         URL.revokeObjectURL(item.previewUrl);
       });
       setReferenceStyleItems([]);
+      // 清空参考照片 ID 和 URL
+      setReferencePhotoIds([]);
+      setReferencePhotoUrls([]);
+      // 同步到 bookingStore
+      useBookingStore.getState().setReferenceStyles([]);
     }
   };
 
   // 同步文件删除到 uploadItems
+  // 当组件挂载时，如果从 bookingStore 恢复了图片项，同步更新 petPhotoFiles 和 referenceStyleFiles
+  // 注意：对于已上传的图片（使用占位符 File），不需要同步到 petPhotoFiles，因为预览使用服务器 URL
+
+  // 清理逻辑：当文件被删除时，清理对应的图片项
+  // 注意：只清理未上传的图片（使用 blob URL），保留已上传的图片（使用服务器 URL）
   useEffect(() => {
-    if (petPhotoFiles.length === 0 && petPhotoItems.length > 0) {
-      petPhotoItems.forEach((item) => {
-        URL.revokeObjectURL(item.previewUrl);
+    if (petPhotoFiles.length === 0) {
+      setPetPhotoItems((prevItems) => {
+        const uploadedItems = prevItems.filter((item) => {
+          // 保留已上传的图片（有 photoId）
+          if (item.photoId !== undefined) {
+            return true;
+          }
+          // 清理未上传的图片的 blob URL
+          if (item.previewUrl.startsWith("blob:")) {
+            URL.revokeObjectURL(item.previewUrl);
+          }
+          return false;
+        });
+        return uploadedItems;
       });
-      setPetPhotoItems([]);
     }
-  }, [petPhotoFiles, petPhotoItems]);
+  }, [petPhotoFiles]);
 
   useEffect(() => {
-    if (referenceStyleFiles.length === 0 && referenceStyleItems.length > 0) {
-      referenceStyleItems.forEach((item) => {
-        URL.revokeObjectURL(item.previewUrl);
+    if (referenceStyleFiles.length === 0) {
+      setReferenceStyleItems((prevItems) => {
+        const uploadedItems = prevItems.filter((item) => {
+          // 保留已上传的图片（有 photoId）
+          if (item.photoId !== undefined) {
+            return true;
+          }
+          // 清理未上传的图片的 blob URL
+          if (item.previewUrl.startsWith("blob:")) {
+            URL.revokeObjectURL(item.previewUrl);
+          }
+          return false;
+        });
+        return uploadedItems;
       });
-      setReferenceStyleItems([]);
     }
-  }, [referenceStyleFiles, referenceStyleItems]);
+  }, [referenceStyleFiles]);
 
   // Clear breed when pet type changes and current breed is not in the new options
   useEffect(() => {

@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Icon } from "@/components/common/Icon";
-import { OrangeButton, TertiaryButton } from "@/components/common";
+import { OrangeButton } from "@/components/common";
 import { useBookingStore } from "./bookingStore";
 import { cn } from "@/components/ui/utils";
 import { TIME_PERIODS } from "@/constants/calendar";
@@ -190,7 +190,7 @@ export function Step6() {
     <div className="content-stretch flex flex-col gap-[24px] items-start relative w-full">
       {/* Address and service type card */}
       <div className="bg-white content-stretch flex flex-col gap-[8px] items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full">
-        <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] min-w-full relative shrink-0 text-[#4a3c2a] text-[16px] w-min whitespace-pre-wrap">
+        <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] min-w-full relative shrink-0 text-[#4a3c2a] text-[16px] w-full whitespace-pre-wrap">
           Address and service type
         </p>
         <div className="content-stretch flex gap-[8px] items-start relative shrink-0 w-full">
@@ -230,7 +230,7 @@ export function Step6() {
       {/* Pet Information card */}
       <div className="bg-white content-stretch flex flex-col items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full">
         <div className="content-stretch flex flex-col gap-[8px] items-start relative shrink-0 w-full">
-          <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] relative shrink-0 text-[#4a3c2a] text-[16px] w-min whitespace-pre-wrap">
+          <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] relative shrink-0 text-[#4a3c2a] text-[16px] w-full whitespace-pre-wrap">
             Pet Information
           </p>
           {/* Five fields in a row */}
@@ -349,7 +349,7 @@ export function Step6() {
       <div className="bg-white content-stretch flex flex-col items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full">
         <div className="content-stretch flex flex-col gap-[8px] items-start relative shrink-0 w-full">
           {/* Title */}
-          <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] relative shrink-0 text-[#4a3c2a] text-[16px] w-min whitespace-pre-wrap">
+          <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] relative shrink-0 text-[#4a3c2a] text-[16px] w-full whitespace-pre-wrap">
             Package and add-on
           </p>
           
@@ -420,12 +420,12 @@ export function Step6() {
                 </>
               )}
               
-              {/* Separator line */}
-              <div className="h-0 relative shrink-0 w-full">
-                <div className="absolute bottom-0 left-0 right-0 top-[-1px]">
-                  <div className="bg-[rgba(0,0,0,0.1)] h-px w-full" />
+                {/* Separator line */}
+                <div className="h-0 relative shrink-0 w-full">
+                  <div className="absolute bottom-0 left-0 right-0 -top-px">
+                    <div className="bg-[rgba(0,0,0,0.1)] h-px w-full" />
+                  </div>
                 </div>
-              </div>
               
               {/* Package subtotal */}
               <div className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
@@ -455,24 +455,16 @@ export function Step6() {
                         ? parseFloat(originalAddOn.price)
                         : originalAddOn.price
                       : addOn.price;
-                    const isIncludedInMembership = addOn.price === 0;
                     return (
                       <div
                         key={addOn.id}
-                        className="content-stretch flex font-['Comfortaa:Regular',sans-serif] font-normal items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full"
+                        className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full"
                       >
                         <p className="relative shrink-0">
                           {addOn.name}
                         </p>
                         <p className="relative shrink-0">
-                          {isIncludedInMembership ? (
-                            <>
-                              <span className="line-through text-[#de6a07]">${originalPrice.toFixed(2)}</span>
-                              <span> $0.00</span>
-                            </>
-                          ) : (
-                            `$${addOn.price.toFixed(2)}`
-                          )}
+                          ${originalPrice.toFixed(2)}
                         </p>
                       </div>
                     );
@@ -480,7 +472,7 @@ export function Step6() {
                   
                   {/* Separator line */}
                   <div className="h-0 relative shrink-0 w-full">
-                    <div className="absolute bottom-0 left-0 right-0 top-[-1px]">
+                    <div className="absolute bottom-0 left-0 right-0 -top-px">
                       <div className="bg-[rgba(0,0,0,0.1)] h-px w-full" />
                     </div>
                   </div>
@@ -491,7 +483,7 @@ export function Step6() {
                       Subtotal
                     </p>
                     <p className="relative shrink-0">
-                      ${addOnsPriceWithDiscount.toFixed(2)}
+                      ${addOnsPrice.toFixed(2)}
                     </p>
                   </div>
                 </>
@@ -515,25 +507,40 @@ export function Step6() {
 
       {/* Annual membership card */}
       {useMembership && membershipPlan && (
-        <div className="bg-[#8760a0] content-stretch flex flex-col gap-[20px] items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full">
-          <div className="content-stretch flex items-start justify-between relative shrink-0 w-full">
-            <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0">
-              <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] relative shrink-0 text-white text-[16px]">
-                Annual membership
-              </p>
+        <div className="bg-[#6e3d81] content-stretch flex flex-col items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full overflow-hidden">
+          {/* Decorative background circles */}
+          <div className="absolute bg-[rgba(255,255,255,0.15)] opacity-30 rounded-full size-[74px] left-1/2 top-[43px]" style={{ transform: 'translateX(calc(-50% - 30px))' }} />
+          <div className="absolute bg-[rgba(255,255,255,0.35)] opacity-30 rounded-full size-[42px] left-1/2 top-[13px]" style={{ transform: 'translateX(calc(-50% + 30px))' }} />
+          
+          <div className="content-stretch flex flex-col gap-[8px] items-center relative shrink-0 w-full z-10">
+            <div className="content-stretch flex items-start relative shrink-0 w-full">
+              <div className="content-stretch flex flex-[1_0_0] flex-col items-start min-h-px min-w-px relative shrink-0">
+                <div className="content-stretch flex items-center justify-between relative shrink-0 w-full">
+                  <p className="flex-[1_0_0] font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] min-h-px min-w-px relative shrink-0 text-[16px] text-white whitespace-pre-wrap">
+                    Annuel membership
+                  </p>
+                </div>
+              </div>
+              <div className="content-stretch flex flex-[1_0_0] items-center justify-end min-h-px min-w-px relative shrink-0">
+                <div className="content-stretch flex items-center justify-end relative shrink-0">
+                  <div className="border border-solid border-white content-stretch flex h-[24px] items-center justify-center overflow-clip px-[17px] py-[5px] relative rounded-[12px] shrink-0">
+                    <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[14px] relative shrink-0 text-[10px] text-white">
+                      Selected $ {membershipPrice} / year
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="content-stretch flex gap-[12px] items-center relative shrink-0">
-              <TertiaryButton
-                variant="orange"
-                onClick={() => handleModify(4)}
-                className="border-white text-white hover:border-white"
-              >
-                Remove
-              </TertiaryButton>
-              <div className="bg-white border border-white border-solid content-stretch flex h-[28px] items-center justify-center overflow-clip px-[12px] py-[4px] relative rounded-[12px] shrink-0">
-                <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#633479] text-[12px]">
-                  Selected ${membershipPrice} / year
-                </p>
+            <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
+              <div className="border-2 border-solid border-white content-stretch flex h-[28px] items-center justify-center px-[22px] relative rounded-[32px] shrink-0">
+                <button
+                  onClick={() => handleModify(4)}
+                  className="bg-clip-padding border-0 border-transparent border-solid content-stretch flex gap-[5px] items-center relative cursor-pointer hover:opacity-80 transition-opacity"
+                >
+                  <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[12px] text-white">
+                    Remove
+                  </p>
+                </button>
               </div>
             </div>
           </div>
@@ -543,7 +550,7 @@ export function Step6() {
       {/* Date and time period card */}
       <div className="bg-white content-stretch flex flex-col items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full">
         <div className="content-stretch flex flex-col gap-[8px] items-start relative shrink-0 w-full">
-          <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] relative shrink-0 text-[#4a3c2a] text-[16px] w-min whitespace-pre-wrap">
+          <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] relative shrink-0 text-[#4a3c2a] text-[16px] w-full whitespace-pre-wrap">
             Date and time period
           </p>
           <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 text-[#4a3c2a] w-full">
