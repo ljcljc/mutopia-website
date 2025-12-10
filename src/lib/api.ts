@@ -620,7 +620,7 @@ export interface PhotoUploadResponse {
 /**
  * 构建图片的完整 URL
  * @param relativeUrl 相对路径（例如 "/media/pets/anonymous/temp/photos/dog-2.jpg"）
- * @returns 完整的图片 URL
+ * @returns 图片 URL（开发环境使用 Vite 代理，生产环境使用 Cloudflare Pages Function 代理）
  */
 export function buildImageUrl(relativeUrl: string): string {
   if (!relativeUrl) return "";
@@ -628,11 +628,14 @@ export function buildImageUrl(relativeUrl: string): string {
   if (relativeUrl.startsWith("http://") || relativeUrl.startsWith("https://")) {
     return relativeUrl;
   }
-  // 使用环境变量配置的基础域名，默认使用 https://api.mutopia.ca
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || "https://api.mutopia.ca";
+  
   // 确保 relativeUrl 以 / 开头
   const path = relativeUrl.startsWith("/") ? relativeUrl : `/${relativeUrl}`;
-  return `${baseUrl}${path}`;
+  
+  // 开发环境和生产环境都使用相对路径，通过代理转发
+  // - 开发环境：通过 Vite 代理（vite.config.ts）
+  // - 生产环境：通过 Cloudflare Pages Function（functions/media/[[path]].ts）
+  return path;
 }
 
 export async function uploadPetPhoto(

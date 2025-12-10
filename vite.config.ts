@@ -57,6 +57,12 @@ export default defineConfig(({ mode }) => {
           // 可选：重写路径（如果需要）
           // rewrite: (path) => path.replace(/^\/api/, ''),
         },
+        // 代理图片资源请求，解决 CORS 和缓存问题
+        '/media': {
+          target: apiBaseUrl,
+          changeOrigin: true,
+          secure: true,
+        },
       },
     },
   };

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Icon } from "./Icon";
 import { cn } from "@/components/ui/utils";
 import { useFileUpload } from "@/hooks/useFileUpload";
@@ -109,6 +109,16 @@ export function FileUpload({
 
   // 如果提供了 uploadItems，使用外部状态；否则使用内部状态
   const displayItems = uploadItems || internalUploadItems;
+
+  // 使用 useMemo 稳定 images 和 fileNames 数组，避免不必要的重新渲染
+  const previewImages = useMemo(
+    () => displayItems.map((item) => item.previewUrl).filter((url) => url),
+    [displayItems]
+  );
+  const previewFileNames = useMemo(
+    () => displayItems.map((item) => item.file.name),
+    [displayItems]
+  );
 
   useEffect(() => {
     // 为每个文件创建预览 URL
@@ -336,11 +346,11 @@ export function FileUpload({
       {/* 图片预览对话框 */}
       {displayItems.length > 0 && displayItems.some((item) => item.previewUrl) && (
         <ImagePreview
-          images={displayItems.map((item) => item.previewUrl).filter((url) => url)}
+          images={previewImages}
           currentIndex={previewIndex}
           open={previewOpen}
           onClose={() => setPreviewOpen(false)}
-          fileNames={displayItems.map((item) => item.file.name)}
+          fileNames={previewFileNames}
         />
       )}
     </div>

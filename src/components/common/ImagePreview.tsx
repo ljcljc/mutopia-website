@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -67,7 +67,12 @@ export function ImagePreview({
     }
   }, [open, initialZoom]);
 
-  const currentImage = images[currentIndex] || images[0] || "";
+
+  // 使用 useMemo 稳定 currentImage，避免不必要的重新渲染
+  const currentImage = useMemo(() => {
+    return images[currentIndex] || images[0] || "";
+  }, [images, currentIndex]);
+  
   const currentFileName = fileNames?.[currentIndex] || fileNames?.[0] || `image_${currentIndex + 1}`;
   const totalImages = images.length;
 
@@ -184,6 +189,8 @@ export function ImagePreview({
                   alt={currentFileName}
                   className="object-50%-50% object-contain"
                   src={currentImage}
+                  loading="eager"
+                  decoding="async"
                   style={{
                     transform: `scale(${zoom / 100})`,
                     transition: "transform 0.2s ease-in-out",
