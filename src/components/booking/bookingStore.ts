@@ -26,7 +26,7 @@ export type PetType = "dog" | "cat" | "other";
 export type CoatCondition = "not_matted" | "matted" | "severely_matted";
 export type Behavior = "friendly" | "anxious" | "hard_to_handle" | "senior_pets";
 export type GroomingFrequency = "weekly" | "bi_weekly" | "monthly" | "occasionally";
-export type WeightUnit = "kg" | "lb"; // 后端使用 "lb" 而不是 "lbs"
+export type WeightUnit = "kg" | "lbs"; // 后端使用 "lb" 而不是 "lbs"
 export type Gender = "male" | "female" | "unknown"; // 与后端枚举一致
 export type ServicePackage = "premium-bath" | "full-grooming";
 
@@ -105,6 +105,7 @@ interface BookingState {
   useMembershipDiscount: boolean; // Maps to use_special_coupon or use_official_coupon
   useCashCoupon: boolean; // Maps to use_official_coupon
   cashCouponCount: number;
+  couponType: "cash" | "invite" | null; // Type of coupon to use: cash credit or invite credit
 
   // Step 5: Date and time slots
   selectedTimeSlots: TimeSlotIn[]; // Changed to match API format
@@ -154,6 +155,7 @@ interface BookingState {
   setMembershipPlanId: (id: number | null) => void;
   setUseMembershipDiscount: (value: boolean) => void;
   setUseCashCoupon: (value: boolean) => void;
+  setCouponType: (type: "cash" | "invite" | null) => void;
   setServiceId: (id: number | null) => void;
   setSelectedTimeSlots: (slots: TimeSlotIn[]) => void;
   setNotes: (notes: string) => void;
@@ -165,11 +167,11 @@ interface BookingState {
 
 const initialState = {
   currentStep: 1,
-  address: "",
+  address: "100 Vancouver Crescent",
   serviceType: "mobile" as ServiceType,
-  city: "",
-  province: "BC",
-  postCode: "",
+  city: "Miramichi",
+  province: "NB",
+  postCode: "E1N 2E6",
   selectedAddressId: null as number | null,
   selectedStoreId: null as number | null,
   addresses: [] as AddressOut[],
@@ -182,7 +184,7 @@ const initialState = {
   dateOfBirth: "",
   gender: "" as Gender | "",
   weight: "",
-  weightUnit: "kg" as WeightUnit, // 后端默认使用 kg
+  weightUnit: "lbs" as WeightUnit, // 后端默认使用 kg
   coatCondition: "" as CoatCondition | "",
   behavior: "" as Behavior | "",
   groomingFrequency: "" as GroomingFrequency | "",
@@ -212,6 +214,7 @@ const initialState = {
   useMembershipDiscount: false,
   useCashCoupon: false,
   cashCouponCount: 0,
+  couponType: null as "cash" | "invite" | null,
   selectedTimeSlots: [] as TimeSlotIn[],
   notes: "",
 };
@@ -535,6 +538,9 @@ export const useBookingStore = create<BookingState>((set) => ({
   setUseMembership: (value) => set({ useMembership: value }),
   setUseMembershipDiscount: (value) => set({ useMembershipDiscount: value }),
   setUseCashCoupon: (value) => set({ useCashCoupon: value }),
+  setCouponType: (type) => {
+    set({ couponType: type, useCashCoupon: type !== null });
+  },
 
   setServiceId: (id) => set({ serviceId: id }),
 

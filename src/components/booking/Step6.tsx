@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Icon } from "@/components/common/Icon";
-import { OrangeButton } from "@/components/common";
+import { OrangeButton, MembershipCard, type FeatureItem } from "@/components/common";
 import { useBookingStore } from "./bookingStore";
 import { cn } from "@/components/ui/utils";
 import { TIME_PERIODS } from "@/constants/calendar";
@@ -69,6 +69,9 @@ export function Step6() {
     stores,
     selectedAddressId,
     selectedStoreId,
+    setUseMembership,
+    setMembershipPlanId,
+    userInfo,
   } = useBookingStore();
 
   const [isTotalExpanded, setIsTotalExpanded] = useState(true);
@@ -108,6 +111,45 @@ export function Step6() {
       ? parseFloat(membershipPlan.fee)
       : membershipPlan.fee
     : 99;
+
+  // Format membership plan price for display
+  const membershipPriceDisplay = membershipPlan
+    ? typeof membershipPlan.fee === "string"
+      ? `$ ${membershipPlan.fee}`
+      : `$ ${membershipPlan.fee}`
+    : "$ 99";
+
+  // Format membership plan badge text
+  const membershipBadgeText = membershipPlan
+    ? (() => {
+        const rate = typeof membershipPlan.discount_rate === "string"
+          ? parseFloat(membershipPlan.discount_rate)
+          : membershipPlan.discount_rate;
+        const discountPercentage = (1 - rate) * 100;
+        return `Save up to ${discountPercentage.toFixed(0)}%`;
+      })()
+    : "Save up to 50%";
+
+  // Convert membership plan benefits to FeatureItem format
+  const membershipFeatures: FeatureItem[] = useMemo(() => {
+    if (membershipPlan?.benefits) {
+      return membershipPlan.benefits
+        .sort((a, b) => a.display_order - b.display_order)
+        .map((benefit) => ({
+          text: benefit.content,
+          isHighlight: benefit.is_highlight,
+        }));
+    }
+    // Fallback to default features if no plan loaded
+    return [
+      { text: "30$ instant cash coupons", isHighlight: true },
+      { text: "10% off additional services" },
+      { text: "Priority booking within 3 days" },
+      { text: "Free teeth brushing" },
+      { text: "Free anal gland expression" },
+      { text: "Grooming photo updates" },
+    ];
+  }, [membershipPlan]);
 
   // Get discount rate
   const discountRate = useMemo(() => {
@@ -153,6 +195,9 @@ export function Step6() {
   const totalSavings = originalTotal - serviceTotal;
   const savingsPercentage = originalTotal > 0 ? Math.round((totalSavings / originalTotal) * 100) : 0;
 
+  // Check if user is a member or purchasing membership
+  const isMemberOrPurchasing = useMembership || userInfo?.is_member === true;
+
   // Get current address or store for display
   const currentAddress = selectedAddressId
     ? addresses.find((addr) => addr.id === selectedAddressId)
@@ -175,6 +220,21 @@ export function Step6() {
   // Handle modify buttons
   const handleModify = (step: number) => {
     setCurrentStep(step);
+  };
+
+  // Handle add membership button
+  const handleAddMembership = () => {
+    if (membershipPlan) {
+      setMembershipPlanId(membershipPlan.id);
+    }
+    setUseMembership(true);
+    // Stay on current page and show membership as selected
+  };
+
+  // Handle remove membership button
+  const handleRemoveMembership = () => {
+    setUseMembership(false);
+    setMembershipPlanId(null);
   };
 
   // Handle proceed to payment
@@ -566,7 +626,7 @@ export function Step6() {
             <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
               <div className="border-2 border-solid border-white content-stretch flex h-[28px] items-center justify-center px-[22px] relative rounded-[32px] shrink-0">
                 <button
-                  onClick={() => handleModify(4)}
+                  onClick={handleRemoveMembership}
                   className="bg-clip-padding border-0 border-transparent border-solid content-stretch flex gap-[5px] items-center relative cursor-pointer hover:opacity-80 transition-opacity"
                 >
                   <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[12px] text-white">
@@ -575,6 +635,43 @@ export function Step6() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Annual membership promotion card - shown when user hasn't selected membership */}
+      {!useMembership && membershipPlan && (
+        <div className="bg-[#6e3d81] content-stretch flex flex-col items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full overflow-hidden">
+          {/* Decorative background circles */}
+          <div className="absolute bg-[rgba(255,255,255,0.15)] opacity-30 rounded-full size-[74px] left-[46px] top-[116px]" />
+          <div className="absolute bg-[rgba(255,255,255,0.35)] opacity-30 rounded-full size-[42px] left-[108px] top-[86px]" />
+          <div className="absolute bg-[rgba(255,255,255,0.15)] opacity-30 rounded-full size-[60px] right-[15px] bottom-[130px]" />
+          <div className="absolute bg-[rgba(255,255,255,0.15)] opacity-30 rounded-full size-[118px] right-[143px] bottom-[-10px]" />
+          
+          {/* Title */}
+          <div className="content-stretch flex items-start relative shrink-0 w-full mb-[16px] z-10">
+            <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] relative shrink-0 text-[16px] text-white whitespace-pre-wrap">
+              Annuel membership
+            </p>
+          </div>
+          {/* Membership Card - using wrapped variant with transparent background to show outer background */}
+          <div className="w-full flex justify-center relative z-10">
+            <MembershipCard
+              variant="wrapped"
+              title={membershipPlan?.name || "Premium Plus"}
+              price={membershipPriceDisplay}
+              priceUnit="/year"
+              badgeText={membershipBadgeText}
+              description={membershipPlan?.description || "Our most popular package for complete pet care"}
+              features={membershipFeatures}
+              buttonText="Add membership"
+              showButton={true}
+              onButtonClick={handleAddMembership}
+              className="w-[364px]"
+              headerTitle={undefined}
+              headerSubtitle={undefined}
+              backgroundColor="transparent"
+            />
           </div>
         </div>
       )}
@@ -623,102 +720,138 @@ export function Step6() {
       </div>
 
       {/* Total estimation card */}
-      <div className="bg-white border-2 border-[#de6a07] border-solid content-stretch flex flex-col gap-[20px] items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full">
-        <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0 w-full">
+      <div className="bg-white border-2 border-[#de6a07] border-solid content-stretch flex items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full">
+        {/* Left side: Title and subtitle */}
+        <div className="content-stretch flex flex-[1_0_0] flex-col gap-[4px] items-start min-h-px min-w-px relative shrink-0">
           <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] relative shrink-0 text-[#4a3c2a] text-[16px]">
             Total estimation for the service
           </p>
-          <div className="content-stretch flex items-start justify-between relative shrink-0 w-full">
-            <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12.25px]">
-              Our groomer will evaluate the final price
-            </p>
-            <div className="content-stretch flex flex-col gap-[4px] items-end relative shrink-0">
-              {/* Price row with original price, current price, and arrow */}
-              <div className="content-stretch flex items-center gap-[8px] relative shrink-0">
-                {originalTotal > finalTotal && (
-                  <span className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12.25px] line-through">
-                    was ${originalTotal.toFixed(2)}
-                  </span>
-                )}
-                <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[24.5px] relative shrink-0 text-[#de6a07] text-[16px]">
-                  ${finalTotal.toFixed(2)}
-                </p>
-                <button
-                  onClick={() => setIsTotalExpanded(!isTotalExpanded)}
-                  className="flex items-center justify-center relative shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
-                >
-                  <Icon
-                    name="chevron-down"
-                    className={cn(
-                      "size-[16px] text-[#4a3c2a] transition-transform",
-                      isTotalExpanded && "rotate-180"
-                    )}
-                  />
-                </button>
-              </div>
-              {/* Save percentage badge */}
-              {totalSavings > 0 && (
-                <div className="bg-green-100 content-stretch flex h-[24px] items-center justify-center overflow-clip px-[16px] py-[4px] relative rounded-[12px] shrink-0">
-                  <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[14px] relative shrink-0 text-[#016630] text-[10px]">
-                    Save {savingsPercentage}%
+          <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12.25px]">
+            Our groomer will evaluate the final price
+          </p>
+        </div>
+
+        {/* Right side: Price and coupon options */}
+        <div className="content-stretch flex flex-[1_0_0] items-start gap-[8px] min-h-px min-w-px relative shrink-0">
+          {/* Left: All content rows */}
+          <div className="content-stretch flex flex-col gap-[4px] items-end relative shrink-0 flex-1">
+            {/* First row: Price with original price (no strikethrough for members) */}
+            <div className="content-stretch flex items-center relative shrink-0">
+              {isMemberOrPurchasing && originalTotal > 0 && (
+                <span className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[#4A5565] text-[12.25px] mr-[8px]">
+                  was ${originalTotal.toFixed(2)}
+                </span>
+              )}
+              {!isMemberOrPurchasing && originalTotal > finalTotal && (
+                <span className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12.25px] line-through mr-[8px]">
+                  was ${originalTotal.toFixed(2)}
+                </span>
+              )}
+              <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[24.5px] relative shrink-0 text-[#de6a07] text-[16px]">
+                ${finalTotal.toFixed(2)}
+              </p>
+            </div>
+            
+            {/* Second row: Save badge + Price breakdown (only for members) */}
+            {isMemberOrPurchasing && isTotalExpanded && (
+              <div className="content-stretch flex flex-col gap-0 items-end relative shrink-0">
+                <div className="content-stretch flex items-center gap-[8px] relative shrink-0">
+                  {/* Save percentage badge */}
+                  {totalSavings > 0 && (
+                    <div className="bg-green-100 content-stretch flex h-[24px] items-center justify-center overflow-clip px-[16px] py-[4px] relative rounded-[12px] shrink-0">
+                      <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[14px] relative shrink-0 text-[#016630] text-[10px]">
+                        Save {savingsPercentage}%
+                      </p>
+                    </div>
+                  )}
+                  {/* Price breakdown */}
+                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[#DE6A07] text-[12.25px]">
+                    (${serviceTotal.toFixed(2)}{useMembership && ` + $${membershipPrice}`})
                   </p>
                 </div>
-              )}
-              {/* Price breakdown */}
-              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
-                (${serviceTotal.toFixed(2)}{useMembership && ` + $${membershipPrice}`})
-              </p>
-              {/* Tax included */}
-              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
+                {/* Tax included - no gap between price breakdown and tax included */}
+                <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a5565] text-[10px]">
+                  tax included
+                </p>
+              </div>
+            )}
+            
+            {/* Tax included - for non-members */}
+            {!isMemberOrPurchasing && isTotalExpanded && (
+              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a5565] text-[10px]">
                 tax included
               </p>
-              {/* Coupon selection - Vertical layout */}
-              {cashCouponInfo.count > 0 && (
-                <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full mt-[8px]">
-                  {/* Cash credit option */}
-                  <label className="content-stretch flex items-center gap-[4px] relative shrink-0 cursor-pointer w-full">
+            )}
+          
+            {/* Third row and below: Coupon selection - Vertical layout */}
+            {cashCouponInfo.count > 0 && isTotalExpanded && (
+              <div className="content-stretch flex flex-col gap-[4px] items-end relative shrink-0 w-full mt-[8px]">
+              {/* Cash credit option */}
+              <label className="content-stretch flex items-center gap-[8px] relative shrink-0 cursor-pointer">
+                {/* Custom radio button */}
+                <div className="relative shrink-0 size-[16px]">
+                  <input
+                    type="radio"
+                    name="couponType"
+                    value="cash"
+                    checked={couponType === "cash"}
+                    onChange={() => setCouponType("cash")}
+                    className="appearance-none absolute inset-0 size-[16px] rounded-full border border-[#D1D5DB] border-solid cursor-pointer checked:border-[#DE6A07] checked:bg-[#DE6A07] checked:after:content-[''] checked:after:absolute checked:after:top-1/2 checked:after:left-1/2 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 checked:after:size-[6px] checked:after:bg-white checked:after:rounded-full"
+                  />
+                </div>
+                <span className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
+                  Cash credit
+                </span>
+                <span className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
+                  -${cashCouponInfo.amount}
+                </span>
+              </label>
+              
+              {/* Invite credit option with expired tag on the left */}
+              <div className="content-stretch flex items-center gap-[8px] relative shrink-0">
+                {/* Expired tag - shown to the left of Invite credit */}
+                <div className="bg-white border border-[#D1D5DB] border-solid content-stretch flex h-[20px] items-center justify-center overflow-clip px-[8px] py-[2px] relative rounded-[10px] shrink-0">
+                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#9CA3AF] text-[10px]">
+                    Expired In 1 month
+                  </p>
+                </div>
+                <label className="content-stretch flex items-center gap-[8px] relative shrink-0 cursor-pointer">
+                  {/* Custom radio button */}
+                  <div className="relative shrink-0 size-[16px]">
                     <input
                       type="radio"
                       name="couponType"
-                      value="cash"
-                      checked={couponType === "cash"}
-                      onChange={() => setCouponType("cash")}
-                      className="appearance-none size-[16px] rounded-full border-2 border-[#de6a07] border-solid relative cursor-pointer checked:bg-[#de6a07] checked:after:content-[''] checked:after:absolute checked:after:top-1/2 checked:after:left-1/2 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 checked:after:size-[6px] checked:after:bg-white checked:after:rounded-full shrink-0"
+                      value="invite"
+                      checked={couponType === "invite"}
+                      onChange={() => setCouponType("invite")}
+                      className="appearance-none absolute inset-0 size-[16px] rounded-full border border-[#D1D5DB] border-solid cursor-pointer checked:border-[#DE6A07] checked:bg-[#DE6A07] checked:after:content-[''] checked:after:absolute checked:after:top-1/2 checked:after:left-1/2 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 checked:after:size-[6px] checked:after:bg-white checked:after:rounded-full"
                     />
-                    <div className="bg-white border border-[#de6a07] border-solid content-stretch flex h-[20px] items-center justify-center overflow-clip px-[8px] py-[2px] relative rounded-[10px] shrink-0">
-                      <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
-                        Cash credit -${cashCouponInfo.amount}
-                      </p>
-                    </div>
-                  </label>
-                  {/* Invite credit option with expired tag on the left */}
-                  <div className="content-stretch flex items-center gap-[8px] relative shrink-0 w-full">
-                    {/* Expired tag - always shown to the left of Invite credit */}
-                    <div className="bg-gray-200 border border-gray-300 border-solid content-stretch flex h-[20px] items-center justify-center overflow-clip px-[8px] py-[2px] relative rounded-[10px] shrink-0">
-                      <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
-                        Expired in 1 month
-                      </p>
-                    </div>
-                    <label className="content-stretch flex items-center gap-[4px] relative shrink-0 cursor-pointer flex-1">
-                      <input
-                        type="radio"
-                        name="couponType"
-                        value="invite"
-                        checked={couponType === "invite"}
-                        onChange={() => setCouponType("invite")}
-                        className="appearance-none size-[16px] rounded-full border-2 border-[#de6a07] border-solid relative cursor-pointer checked:bg-[#de6a07] checked:after:content-[''] checked:after:absolute checked:after:top-1/2 checked:after:left-1/2 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 checked:after:size-[6px] checked:after:bg-white checked:after:rounded-full shrink-0"
-                      />
-                      <div className="bg-white border border-[#de6a07] border-solid content-stretch flex h-[20px] items-center justify-center overflow-clip px-[8px] py-[2px] relative rounded-[10px] shrink-0">
-                        <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
-                          Invite credit -${cashCouponInfo.amount}
-                        </p>
-                      </div>
-                    </label>
                   </div>
-                </div>
-              )}
+                  <span className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
+                    Invite credit
+                  </span>
+                  <span className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
+                    -${cashCouponInfo.amount}
+                  </span>
+                </label>
+              </div>
             </div>
+            )}
           </div>
+          
+          {/* Right: Arrow button */}
+          <button
+            onClick={() => setIsTotalExpanded(!isTotalExpanded)}
+            className="flex items-center justify-center relative shrink-0 size-[20px] cursor-pointer hover:border hover:border-[#8b6357] hover:border-solid transition-colors rounded-[8px] self-start"
+          >
+            <Icon
+              name="chevron-down"
+              className={cn(
+                "size-[20px] text-[#4a3c2a] transition-transform",
+                isTotalExpanded ? "rotate-180" : ""
+              )}
+            />
+          </button>
         </div>
       </div>
 

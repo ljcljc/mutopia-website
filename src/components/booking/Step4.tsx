@@ -23,6 +23,7 @@ export function Step4() {
     setUseCashCoupon,
     previousStep,
     nextStep,
+    userInfo,
   } = useBookingStore();
 
   // Load membership plans on mount
@@ -34,11 +35,19 @@ export function Step4() {
     }
   }, [loadMembershipPlans]);
 
-  // Set default checked state for membership discounts
+  // Check if user is a member
+  const isMember = userInfo?.is_member === true;
+
+  // Track if user has declined membership
+  const [hasDeclinedMembership, setHasDeclinedMembership] = useState(false);
+
+  // Set default checked state for membership discounts (only for non-members)
   useEffect(() => {
-    setUseMembershipDiscount(true);
-    setUseCashCoupon(true);
-  }, [setUseMembershipDiscount, setUseCashCoupon]);
+    if (!isMember && !hasDeclinedMembership) {
+      setUseMembershipDiscount(true);
+      setUseCashCoupon(true);
+    }
+  }, [isMember, hasDeclinedMembership, setUseMembershipDiscount, setUseCashCoupon]);
 
   const [isPackageExpanded, setIsPackageExpanded] = useState(false);
   const [isAddOnsExpanded, setIsAddOnsExpanded] = useState(false);
@@ -53,14 +62,16 @@ export function Step4() {
 
   // Calculate add-ons price and get selected add-ons details
   // In Step4, we assume user will be a member, so if included_in_membership is true, price should be 0
+  // However, if user has declined membership, restore original prices for included items
   const selectedAddOnsDetails = useMemo(() => {
     return selectedAddOns
       .map((addOnId) => {
         const addOn = addOnsList.find((a) => a.id === addOnId);
         if (addOn) {
           let price = typeof addOn.price === "string" ? parseFloat(addOn.price) : addOn.price;
-          // In Step4, assume user will be a member, so if included_in_membership is true, price is 0
-          if (addOn.included_in_membership === true) {
+          // If user has declined membership, don't apply free pricing for included items
+          // Otherwise, assume user will be a member, so if included_in_membership is true, price is 0
+          if (addOn.included_in_membership === true && !hasDeclinedMembership) {
             price = 0;
           }
           return { ...addOn, price };
@@ -68,7 +79,7 @@ export function Step4() {
         return null;
       })
       .filter((item): item is NonNullable<typeof item> => item !== null);
-  }, [selectedAddOns, addOnsList]);
+  }, [selectedAddOns, addOnsList, hasDeclinedMembership]);
 
   // Get the first membership plan (or use default if not loaded)
   const membershipPlan = membershipPlans.length > 0 ? membershipPlans[0] : null;
@@ -138,19 +149,24 @@ export function Step4() {
   const totalSavings = originalTotal - finalTotal;
 
   const handleContinueWithMembership = () => {
-    setUseMembership(true);
-    // Set membership plan ID if a plan is available
-    if (membershipPlan) {
-      setMembershipPlanId(membershipPlan.id);
+    // If user has declined membership, don't set useMembership to true
+    if (hasDeclinedMembership) {
+      setUseMembership(false);
+    } else {
+      setUseMembership(true);
+      // Set membership plan ID if a plan is available
+      if (membershipPlan) {
+        setMembershipPlanId(membershipPlan.id);
+      }
     }
     nextStep();
   };
 
   const handleNoThanks = () => {
+    setHasDeclinedMembership(true);
     setUseMembership(false);
     setUseMembershipDiscount(false);
     setUseCashCoupon(false);
-    nextStep();
   };
 
   // Convert membership plan benefits to FeatureItem format
@@ -283,7 +299,10 @@ export function Step4() {
                     )}
                   </div>
                   <div className="h-[17.5px] relative shrink-0 w-full">
-                    <p className="absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] left-0 text-[#633479] text-[12.25px] top-[-0.5px]">
+                    <p className={cn(
+                      "absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] left-0 text-[12.25px] top-[-0.5px]",
+                      hasDeclinedMembership ? "text-[#4A5565]" : "text-[#633479]"
+                    )}>
                       Estimation for members
                     </p>
                   </div>
@@ -416,30 +435,34 @@ export function Step4() {
                             ? parseFloat(originalAddOn.price)
                             : originalAddOn.price
                           : addOn.price;
-                        // If price is 0 (included in membership), show original price (strikethrough) and $0.00
-                        // Otherwise apply discount if membership discount is enabled
-                        const displayPrice = addOn.price === 0 
+                        // Check if this add-on is included in membership
+                        const isIncludedInMembership = addOn.included_in_membership === true;
+                        // If user has declined membership, show original price (no free benefit)
+                        // Otherwise, if included in membership and price is 0, show as free
+                        // Apply discount if membership discount is enabled
+                        const displayPrice = addOn.price === 0 && !hasDeclinedMembership
                           ? 0 
                           : (useMembershipDiscount && discountRate < 1 ? addOn.price * discountRate : addOn.price);
-                        const isIncludedInMembership = addOn.price === 0;
                         return (
                           <div key={addOn.id} className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
                             <p className="relative shrink-0">
                               {addOn.name}
                             </p>
                             <p className="relative shrink-0">
-                              {isIncludedInMembership ? (
-                                // If included in membership, show original price (strikethrough) and $0.00
+                              {isIncludedInMembership && !hasDeclinedMembership && addOn.price === 0 ? (
+                                // If included in membership and user hasn't declined, show original price (strikethrough) and $0.00
                                 <>
                                   <span className="line-through text-[#de6a07]">${originalPrice.toFixed(2)}</span>
                                   <span> $0.00</span>
                                 </>
-                              ) : useMembershipDiscount && discountRate < 1 ? (
+                              ) : useMembershipDiscount && discountRate < 1 && !hasDeclinedMembership ? (
+                                // If membership discount is enabled and user hasn't declined, show discount price
                                 <>
                                   <span className="line-through text-[#de6a07]">${originalPrice.toFixed(2)}</span>
                                   <span> ${displayPrice.toFixed(2)}</span>
                                 </>
                               ) : (
+                                // Otherwise show original price (no discount)
                                 `$${displayPrice.toFixed(2)}`
                               )}
                             </p>
@@ -486,19 +509,21 @@ export function Step4() {
                     containerClassName="relative shrink-0"
                   />
                 </div>
-                <div className="content-stretch flex items-start justify-between relative shrink-0 w-full">
-                  <Checkbox
-                    checked={useCashCoupon}
-                    onCheckedChange={setUseCashCoupon}
-                    label={`Cash coupon (${cashCouponInfo.count}x$${cashCouponInfo.amount} left)`}
-                    containerClassName="relative shrink-0"
-                  />
-                  {useCashCoupon && (
-                    <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px]">
-                      -${cashCouponInfo.amount.toFixed(0)}
-                    </p>
-                  )}
-                </div>
+                {!hasDeclinedMembership && (
+                  <div className="content-stretch flex items-start justify-between relative shrink-0 w-full">
+                    <Checkbox
+                      checked={useCashCoupon}
+                      onCheckedChange={setUseCashCoupon}
+                      label={`Cash coupon (${cashCouponInfo.count}x$${cashCouponInfo.amount} left)`}
+                      containerClassName="relative shrink-0"
+                    />
+                    {useCashCoupon && (
+                      <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px]">
+                        -${cashCouponInfo.amount.toFixed(0)}
+                      </p>
+                    )}
+                  </div>
+                )}
                 <div className="h-0 relative shrink-0 w-full border-t border-[#e0e0e0] my-[4px]" />
               </div>
               <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full">
@@ -537,7 +562,7 @@ export function Step4() {
             showArrow={true}
             onClick={handleContinueWithMembership}
           >
-            Continue with membership
+            {hasDeclinedMembership ? "Continue without membership" : "Continue with membership"}
           </OrangeButton>
           <OrangeButton
             size="medium"
@@ -547,13 +572,15 @@ export function Step4() {
             Back
           </OrangeButton>
         </div>
-        <OrangeButton
-          size="medium"
-          variant="outline"
-          onClick={handleNoThanks}
-        >
-          No, thanks
-        </OrangeButton>
+        {!hasDeclinedMembership && (
+          <OrangeButton
+            size="medium"
+            variant="outline"
+            onClick={handleNoThanks}
+          >
+            No, thanks
+          </OrangeButton>
+        )}
       </div>
     </div>
   );

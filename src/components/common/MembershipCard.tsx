@@ -23,6 +23,7 @@ export interface MembershipCardProps {
   headerSubtitle?: string;
   showButton?: boolean;
   className?: string;
+  backgroundColor?: string; // Custom background color for wrapped variant
 }
 
 export function MembershipCard({
@@ -40,6 +41,7 @@ export function MembershipCard({
   headerSubtitle,
   showButton = true,
   className,
+  backgroundColor,
 }: MembershipCardProps) {
   // 特性列表组件（共享）
   const featuresList = (
@@ -150,9 +152,16 @@ export function MembershipCard({
   }
 
   // Wrapped 变体（Step4 使用）
+  const wrappedBackgroundColor = backgroundColor || "#8760a0";
+  const isTransparent = backgroundColor === "transparent";
   return (
     <div className={`content-stretch flex flex-col items-start relative shrink-0 ${className || ""}`}>
-      <div className="bg-[#8760a0] content-stretch flex flex-col items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full">
+      <div 
+        className={`content-stretch flex flex-col items-start relative rounded-[12px] shrink-0 w-full ${
+          isTransparent ? "" : "p-[24px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)]"
+        }`}
+        style={{ backgroundColor: isTransparent ? "transparent" : wrappedBackgroundColor }}
+      >
         <div className="content-stretch flex flex-col gap-[14px] items-center relative shrink-0 w-full">
           {/* Header Title and Subtitle */}
           {(headerTitle || headerSubtitle) && (
@@ -224,6 +233,19 @@ export function MembershipCard({
                 {/* Features List */}
                 {featuresList}
               </div>
+              {/* CTA Button for wrapped variant */}
+              {showButton && onButtonClick && (
+                <div className="w-full pt-[8px]">
+                  <PurpleButton size="medium" fullWidth onClick={onButtonClick}>
+                    <div className="flex gap-[4px] items-center">
+                      <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] text-[14px] text-nowrap whitespace-pre">
+                        {buttonText}
+                      </p>
+                      <Icon name="button-arrow" size={14} className="text-white" />
+                    </div>
+                  </PurpleButton>
+                </div>
+              )}
             </div>
           </div>
         </div>
