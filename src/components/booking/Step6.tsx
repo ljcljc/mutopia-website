@@ -4,6 +4,7 @@ import { OrangeButton } from "@/components/common";
 import { useBookingStore } from "./bookingStore";
 import { cn } from "@/components/ui/utils";
 import { TIME_PERIODS } from "@/constants/calendar";
+import { buildImageUrl } from "@/lib/api";
 
 // Format date to "Friday, 2025.10.31" format
 const formatDateWithWeekday = (date: Date | string): string => {
@@ -51,6 +52,7 @@ export function Step6() {
     coatCondition,
     behavior,
     referenceStyles,
+    photoUrls,
     specialNotes,
     serviceId,
     services,
@@ -59,16 +61,17 @@ export function Step6() {
     membershipPlans,
     useMembership,
     useMembershipDiscount,
-    useCashCoupon,
+    couponType,
     selectedTimeSlots,
     setCurrentStep,
+    setCouponType,
     addresses,
     stores,
     selectedAddressId,
     selectedStoreId,
   } = useBookingStore();
 
-  const [isTotalExpanded, setIsTotalExpanded] = useState(false);
+  const [isTotalExpanded, setIsTotalExpanded] = useState(true);
 
   // Get selected service
   const selectedService = services.find((s) => s.id === serviceId);
@@ -141,7 +144,7 @@ export function Step6() {
     return { count, amount };
   }, [membershipPlan]);
 
-  const cashCouponDiscount = useCashCoupon ? cashCouponInfo.amount : 0;
+  const cashCouponDiscount = couponType !== null ? cashCouponInfo.amount : 0;
   const serviceTotal = subtotalWithDiscount - cashCouponDiscount;
   const finalTotal = useMembership ? serviceTotal + membershipPrice : serviceTotal;
   const totalPriceWithDiscount = serviceTotal;
@@ -276,46 +279,75 @@ export function Step6() {
               </p>
             </div>
           </div>
-          {/* Separator line */}
-          <div className="h-0 relative shrink-0 w-full">
-            <div className="absolute bottom-0 left-0 right-0 -top-px">
-              <div className="bg-[rgba(0,0,0,0.1)] h-px w-full" />
-            </div>
-          </div>
-          {/* Reference photos */}
-          <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
-            Reference photos
-          </p>
-          <div className="content-stretch flex gap-[12px] items-start relative shrink-0 w-full">
-            {referenceStyles.length > 0 ? (
-              referenceStyles.slice(0, 3).map((file, index) => {
-                const previewUrl = URL.createObjectURL(file);
-                return (
-                  <div
-                    key={index}
-                    className="bg-white h-[120px] overflow-clip relative rounded-[8px] shrink-0 w-[144px]"
-                  >
-                    <img
-                      src={previewUrl}
-                      alt={`Reference ${index + 1}`}
-                      className="size-full object-cover"
-                      onLoad={() => URL.revokeObjectURL(previewUrl)}
-                    />
-                  </div>
-                );
-              })
-            ) : (
-              <>
-                <div className="bg-white h-[120px] overflow-clip relative rounded-[8px] shrink-0 w-[144px]">
-                  <div className="absolute bg-[rgba(222,106,7,0.5)] inset-0 rounded-[8px]" />
+          {/* Pet photos - Only show if photos exist */}
+          {photoUrls.length > 0 && (
+            <>
+              {/* Separator line */}
+              <div className="h-0 relative shrink-0 w-full">
+                <div className="absolute bottom-0 left-0 right-0 -top-px">
+                  <div className="bg-[rgba(0,0,0,0.1)] h-px w-full" />
                 </div>
-                <div className="bg-white h-[120px] overflow-clip relative rounded-[8px] shrink-0 w-[144px]">
-                  <div className="absolute bg-[rgba(222,106,7,0.5)] inset-0 rounded-[8px]" />
+              </div>
+              {/* Pet photos */}
+              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
+                Pet photos
+              </p>
+              <div className="content-stretch flex gap-[12px] items-start relative shrink-0 w-full">
+                {photoUrls.slice(0, 3).map((url, index) => {
+                  const fullUrl = buildImageUrl(url);
+                  return (
+                    <div
+                      key={index}
+                      className="bg-white h-[120px] overflow-clip relative rounded-[8px] shrink-0 w-[144px]"
+                    >
+                      <img
+                        src={fullUrl}
+                        alt={`Pet photo ${index + 1}`}
+                        className="size-full object-cover"
+                        onError={(e) => {
+                          console.error("Failed to load pet photo:", fullUrl);
+                          e.currentTarget.style.display = "none";
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+          {/* Reference photos - Only show if photos exist */}
+          {referenceStyles.length > 0 && (
+            <>
+              {/* Separator line */}
+              <div className="h-0 relative shrink-0 w-full">
+                <div className="absolute bottom-0 left-0 right-0 -top-px">
+                  <div className="bg-[rgba(0,0,0,0.1)] h-px w-full" />
                 </div>
-                <div className="bg-white h-[120px] overflow-clip rounded-[8px] shrink-0 w-[144px]" />
-              </>
-            )}
-          </div>
+              </div>
+              {/* Reference photos */}
+              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
+                Reference photos
+              </p>
+              <div className="content-stretch flex gap-[12px] items-start relative shrink-0 w-full">
+                {referenceStyles.slice(0, 3).map((file, index) => {
+                  const previewUrl = URL.createObjectURL(file);
+                  return (
+                    <div
+                      key={index}
+                      className="bg-white h-[120px] overflow-clip relative rounded-[8px] shrink-0 w-[144px]"
+                    >
+                      <img
+                        src={previewUrl}
+                        alt={`Reference ${index + 1}`}
+                        className="size-full object-cover"
+                        onLoad={() => URL.revokeObjectURL(previewUrl)}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
           {/* Separator line */}
           <div className="h-0 relative shrink-0 w-full">
             <div className="absolute bottom-0 left-0 right-0 -top-px">
@@ -601,18 +633,19 @@ export function Step6() {
               Our groomer will evaluate the final price
             </p>
             <div className="content-stretch flex flex-col gap-[4px] items-end relative shrink-0">
+              {/* Price row with original price, current price, and arrow */}
               <div className="content-stretch flex items-center gap-[8px] relative shrink-0">
                 {originalTotal > finalTotal && (
                   <span className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12.25px] line-through">
                     was ${originalTotal.toFixed(2)}
                   </span>
                 )}
-                <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[24.5px] relative shrink-0 text-[#4a3c2a] text-[16px]">
+                <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[24.5px] relative shrink-0 text-[#de6a07] text-[16px]">
                   ${finalTotal.toFixed(2)}
                 </p>
                 <button
                   onClick={() => setIsTotalExpanded(!isTotalExpanded)}
-                  className="flex items-center justify-center relative shrink-0 cursor-pointer"
+                  className="flex items-center justify-center relative shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
                 >
                   <Icon
                     name="chevron-down"
@@ -623,6 +656,7 @@ export function Step6() {
                   />
                 </button>
               </div>
+              {/* Save percentage badge */}
               {totalSavings > 0 && (
                 <div className="bg-green-100 content-stretch flex h-[24px] items-center justify-center overflow-clip px-[16px] py-[4px] relative rounded-[12px] shrink-0">
                   <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[14px] relative shrink-0 text-[#016630] text-[10px]">
@@ -630,30 +664,56 @@ export function Step6() {
                   </p>
                 </div>
               )}
+              {/* Price breakdown */}
               <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
                 (${serviceTotal.toFixed(2)}{useMembership && ` + $${membershipPrice}`})
               </p>
+              {/* Tax included */}
               <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
                 tax included
               </p>
-              {useCashCoupon && (
+              {/* Coupon selection - Vertical layout */}
+              {cashCouponInfo.count > 0 && (
                 <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full mt-[8px]">
-                  <div className="content-stretch flex items-center gap-[8px] relative shrink-0">
+                  {/* Cash credit option */}
+                  <label className="content-stretch flex items-center gap-[4px] relative shrink-0 cursor-pointer w-full">
+                    <input
+                      type="radio"
+                      name="couponType"
+                      value="cash"
+                      checked={couponType === "cash"}
+                      onChange={() => setCouponType("cash")}
+                      className="appearance-none size-[16px] rounded-full border-2 border-[#de6a07] border-solid relative cursor-pointer checked:bg-[#de6a07] checked:after:content-[''] checked:after:absolute checked:after:top-1/2 checked:after:left-1/2 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 checked:after:size-[6px] checked:after:bg-white checked:after:rounded-full shrink-0"
+                    />
                     <div className="bg-white border border-[#de6a07] border-solid content-stretch flex h-[20px] items-center justify-center overflow-clip px-[8px] py-[2px] relative rounded-[10px] shrink-0">
                       <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
                         Cash credit -${cashCouponInfo.amount}
                       </p>
                     </div>
-                    <div className="bg-white border border-[#de6a07] border-solid content-stretch flex h-[20px] items-center justify-center overflow-clip px-[8px] py-[2px] relative rounded-[10px] shrink-0">
+                  </label>
+                  {/* Invite credit option with expired tag on the left */}
+                  <div className="content-stretch flex items-center gap-[8px] relative shrink-0 w-full">
+                    {/* Expired tag - always shown to the left of Invite credit */}
+                    <div className="bg-gray-200 border border-gray-300 border-solid content-stretch flex h-[20px] items-center justify-center overflow-clip px-[8px] py-[2px] relative rounded-[10px] shrink-0">
                       <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
-                        Invite credit -${cashCouponInfo.amount}
+                        Expired in 1 month
                       </p>
                     </div>
-                  </div>
-                  <div className="bg-gray-200 content-stretch flex h-[20px] items-center justify-center overflow-clip px-[8px] py-[2px] relative rounded-[10px] shrink-0">
-                    <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
-                      Expired in 1 month
-                    </p>
+                    <label className="content-stretch flex items-center gap-[4px] relative shrink-0 cursor-pointer flex-1">
+                      <input
+                        type="radio"
+                        name="couponType"
+                        value="invite"
+                        checked={couponType === "invite"}
+                        onChange={() => setCouponType("invite")}
+                        className="appearance-none size-[16px] rounded-full border-2 border-[#de6a07] border-solid relative cursor-pointer checked:bg-[#de6a07] checked:after:content-[''] checked:after:absolute checked:after:top-1/2 checked:after:left-1/2 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 checked:after:size-[6px] checked:after:bg-white checked:after:rounded-full shrink-0"
+                      />
+                      <div className="bg-white border border-[#de6a07] border-solid content-stretch flex h-[20px] items-center justify-center overflow-clip px-[8px] py-[2px] relative rounded-[10px] shrink-0">
+                        <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
+                          Invite credit -${cashCouponInfo.amount}
+                        </p>
+                      </div>
+                    </label>
                   </div>
                 </div>
               )}
