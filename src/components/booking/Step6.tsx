@@ -6,6 +6,19 @@ import { cn } from "@/components/ui/utils";
 import { TIME_PERIODS } from "@/constants/calendar";
 import { buildImageUrl } from "@/lib/api";
 
+// Radio button component matching CustomRadio.tsx
+function RadioButton({ isChecked, className }: { isChecked: boolean; className?: string }) {
+  return (
+    <div className={cn("relative shrink-0 size-[16px] mt-[2.5px]", className)}>
+      <div className="size-[16px] rounded-full border border-solid transition-colors border-[#717182] bg-white">
+        {isChecked && (
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[8px] rounded-full bg-[#de6a07]" />
+        )}
+      </div>
+    </div>
+  );
+}
+
 // Format date to "Friday, 2025.10.31" format
 const formatDateWithWeekday = (date: Date | string): string => {
   const dateObj = typeof date === "string" ? new Date(date + "T00:00:00") : date;
@@ -786,56 +799,52 @@ export function Step6() {
             {/* Third row and below: Coupon selection - Vertical layout */}
             {cashCouponInfo.count > 0 && isTotalExpanded && (
               <div className="content-stretch flex flex-col gap-[4px] items-end relative shrink-0 w-full mt-[8px]">
-              {/* Cash credit option */}
-              <label className="content-stretch flex items-center gap-[8px] relative shrink-0 cursor-pointer">
-                {/* Custom radio button */}
-                <div className="relative shrink-0 size-[16px]">
+                {/* Cash credit option */}
+                <label className="content-stretch flex items-center gap-[8px] relative shrink-0 cursor-pointer">
                   <input
                     type="radio"
                     name="couponType"
                     value="cash"
                     checked={couponType === "cash"}
                     onChange={() => setCouponType("cash")}
-                    className="appearance-none absolute inset-0 size-[16px] rounded-full border border-[#D1D5DB] border-solid cursor-pointer checked:border-[#DE6A07] checked:bg-[#DE6A07] checked:after:content-[''] checked:after:absolute checked:after:top-1/2 checked:after:left-1/2 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 checked:after:size-[6px] checked:after:bg-white checked:after:rounded-full"
+                    className="sr-only"
                   />
-                </div>
-                <span className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
-                  Cash credit
-                </span>
-                <span className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
-                  -${cashCouponInfo.amount}
-                </span>
-              </label>
+                  <RadioButton isChecked={couponType === "cash"} />
+                  <span className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
+                    Cash credit
+                  </span>
+                  <span className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
+                    -${cashCouponInfo.amount}
+                  </span>
+                </label>
               
-              {/* Invite credit option with expired tag on the left */}
-              <div className="content-stretch flex items-center gap-[8px] relative shrink-0">
-                {/* Expired tag - shown to the left of Invite credit */}
-                <div className="bg-white border border-[#D1D5DB] border-solid content-stretch flex h-[20px] items-center justify-center overflow-clip px-[8px] py-[2px] relative rounded-[10px] shrink-0">
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#9CA3AF] text-[10px]">
-                    Expired In 1 month
-                  </p>
-                </div>
-                <label className="content-stretch flex items-center gap-[8px] relative shrink-0 cursor-pointer">
-                  {/* Custom radio button */}
-                  <div className="relative shrink-0 size-[16px]">
+                {/* Invite credit option with expired tag on the left */}
+                <div className="content-stretch flex items-center gap-[8px] relative shrink-0">
+                  {/* Expired tag - shown to the left of Invite credit */}
+                  <div className="bg-white border border-[#4C4C4C] border-solid content-stretch flex h-[20px] items-center justify-center overflow-clip px-[8px] py-[2px] relative rounded-[12px] shrink-0">
+                    <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4C4C4C] text-[10px]">
+                      Expired In 1 month
+                    </p>
+                  </div>
+                  <label className="content-stretch flex items-center gap-[8px] relative shrink-0 cursor-pointer">
                     <input
                       type="radio"
                       name="couponType"
                       value="invite"
                       checked={couponType === "invite"}
                       onChange={() => setCouponType("invite")}
-                      className="appearance-none absolute inset-0 size-[16px] rounded-full border border-[#D1D5DB] border-solid cursor-pointer checked:border-[#DE6A07] checked:bg-[#DE6A07] checked:after:content-[''] checked:after:absolute checked:after:top-1/2 checked:after:left-1/2 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 checked:after:size-[6px] checked:after:bg-white checked:after:rounded-full"
+                      className="sr-only"
                     />
-                  </div>
-                  <span className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
-                    Invite credit
-                  </span>
-                  <span className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
-                    -${cashCouponInfo.amount}
-                  </span>
-                </label>
+                    <RadioButton isChecked={couponType === "invite"} />
+                    <span className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
+                      Invite credit
+                    </span>
+                    <span className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
+                      -${cashCouponInfo.amount}
+                    </span>
+                  </label>
+                </div>
               </div>
-            </div>
             )}
           </div>
           
