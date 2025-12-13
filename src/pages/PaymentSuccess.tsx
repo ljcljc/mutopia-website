@@ -1,37 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@/components/common/Icon";
-import { OrangeButton, PurpleButton } from "@/components/common";
+import { OrangeButton, PurpleButton, type FeatureItem } from "@/components/common";
+import { useBookingStore } from "@/components/booking/bookingStore";
 import { useMemo } from "react";
-
-// 定义 FeatureItem 类型
-interface FeatureItem {
-  text: string;
-  isHighlight?: boolean;
-}
-
-// 定义时间段的简单映射
-const TIME_PERIODS = [
-  { id: "morning", label: "Morning AM" },
-  { id: "afternoon", label: "Afternoon PM" },
-  { id: "evening", label: "Evening PM" },
-] as const;
-
-// 定义时间槽类型
-interface TimeSlot {
-  date: string;
-  slot: string;
-}
-
-// 定义服务类型
-interface Service {
-  id: number;
-  name: string;
-}
-
-// 定义会员计划类型
-interface MembershipPlan {
-  fee: number | string;
-}
+import { TIME_PERIODS } from "@/constants/calendar";
 
 // Format date to "Friday, 2025.10.31" format
 const formatDateWithWeekday = (date: Date | string): string => {
@@ -47,24 +19,26 @@ const formatDateWithWeekday = (date: Date | string): string => {
 export default function PaymentSuccess() {
   const navigate = useNavigate();
   
-  // TODO: Get booking data from URL params or API using bookingId
-  // For now, use placeholder data
-  const address = "";
-  const city = "";
-  const province = "";
-  const postCode = "";
-  const selectedTimeSlots = useMemo<TimeSlot[]>(() => [], []);
-  const services: Service[] = [];
-  const serviceId: number | null = null;
-  const membershipPlans: MembershipPlan[] = [];
+  // Get booking data from store (or could fetch from API using bookingId)
+  const {
+    address,
+    city,
+    province,
+    postCode,
+    selectedTimeSlots,
+    services,
+    serviceId,
+    membershipPlans,
+    useMembership,
+  } = useBookingStore();
 
   // Get selected service
-  const selectedService = services.find((s: Service) => s.id === serviceId);
+  const selectedService = services.find((s) => s.id === serviceId);
   const serviceName = selectedService?.name || "Full grooming + Teeth brushing";
 
   // Format date and time slots
   const formattedTimeSlots = useMemo(() => {
-    return selectedTimeSlots.map((slot: TimeSlot) => {
+    return selectedTimeSlots.map((slot) => {
       const date = new Date(slot.date);
       const formattedDate = formatDateWithWeekday(date);
       const timePeriod = TIME_PERIODS.find((p) => p.id === slot.slot);
@@ -115,7 +89,7 @@ export default function PaymentSuccess() {
         {/* Confirmation Header */}
         <div className="flex flex-col items-center mb-8 w-full">
           <div className="w-20 h-20 bg-[#6AA31C] rounded-full flex items-center justify-center mb-4">
-            <Icon name="alert-success" className="size-12 text-white" />
+            <Icon name="check" className="size-12 text-white" />
           </div>
           <h1 className="text-2xl font-['Comfortaa:Bold',sans-serif] font-bold text-[#4a3c2a]">Appointment confirmed</h1>
         </div>
@@ -146,7 +120,7 @@ export default function PaymentSuccess() {
             <div className="flex-1">
               <p className="text-sm font-['Comfortaa:Regular',sans-serif] font-normal text-[#6B7280] mb-2">Date and time selected</p>
               <div className="text-[#4A3C2A] font-['Comfortaa:Regular',sans-serif] font-normal text-base space-y-1">
-                {formattedTimeSlots.map((slot: string, index: number) => (
+                {formattedTimeSlots.map((slot, index) => (
                   <p key={index}>{slot}</p>
                 ))}
               </div>
@@ -197,7 +171,7 @@ export default function PaymentSuccess() {
                   <div className="flex flex-col gap-3">
                     {membershipFeatures.map((feature, index) => (
                       <div key={index} className="flex items-start gap-3">
-                        <Icon name="star" className="size-4 text-[#00A63E] mt-0.5 shrink-0" />
+                        <Icon name="check-green" className="size-4 text-[#00A63E] mt-0.5 shrink-0" />
                         <p className={`font-['Comfortaa:Bold',sans-serif] font-bold text-sm leading-[17.5px] ${
                           feature.isHighlight ? "text-[#de6a07]" : "text-[#364153]"
                         }`}>

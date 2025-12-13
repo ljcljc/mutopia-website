@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Icon } from "./Icon";
+import { Calendar } from "./Calendar";
+import { MONTHS } from "@/constants/calendar";
 
 interface DatePickerProps {
   value: string;
@@ -13,38 +15,6 @@ interface DatePickerProps {
   mode?: "date" | "month"; // 'date' for full date picker, 'month' for year-month only
   onBlur?: (value?: string) => void;
 }
-
-const MONTHS = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
-
-const MONTH_ABBR = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
-
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 export function DatePicker({
   value,
@@ -67,8 +37,9 @@ export function DatePicker({
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const pickerRef = useRef<HTMLDivElement>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
   const yearScrollRef = useRef<HTMLDivElement>(null);
-  const monthButtonRef = useRef<HTMLButtonElement>(null);
+  const monthButtonRef = useRef<HTMLDivElement>(null);
   const hasInitializedRef = useRef(false);
 
   // Parse date strings to get year and month limits
@@ -78,12 +49,70 @@ export function DatePicker({
   );
   const minDateObj = useMemo(() => new Date(minDate), [minDate]);
 
+  // Parse selected date
+  const selectedDateObj = useMemo(() => {
+    if (!value || mode !== "date") return null;
+    try {
+      return new Date(value);
+    } catch {
+      return null;
+    }
+  }, [value, mode]);
+
+  // Current date for calendar
+  const currentDateObj = useMemo(() => {
+    if (value && mode === "date") {
+      try {
+        const date = new Date(value);
+        if (!isNaN(date.getTime())) {
+          return date;
+        }
+      } catch {
+        // Fall through to default
+      }
+    }
+    return new Date(currentYear, currentMonth, 1);
+  }, [value, mode, currentYear, currentMonth]);
+
+  // Update current year and month when value changes (for month mode)
+  useEffect(() => {
+    if (value && mode === "month") {
+      try {
+        const [yearStr, monthStr] = value.split("-");
+        const year = parseInt(yearStr);
+        const month = parseInt(monthStr) - 1; // month is 0-indexed
+        if (!isNaN(year) && !isNaN(month) && month >= 0 && month <= 11) {
+          setCurrentYear(year);
+          setCurrentMonth(month);
+        }
+      } catch (_e) {
+        // If parsing fails, keep current values
+      }
+    }
+  }, [value, mode]);
+
   // Set initial calendar view when opening
   useEffect(() => {
     if (isOpen && !hasInitializedRef.current) {
       hasInitializedRef.current = true;
 
       const today = new Date();
+      
+      // If value exists, use it to set current year and month
+      if (value) {
+        try {
+          const [yearStr, monthStr] = value.split("-");
+          const year = parseInt(yearStr);
+          const month = parseInt(monthStr) - 1; // month is 0-indexed
+          if (!isNaN(year) && !isNaN(month) && month >= 0 && month <= 11) {
+            setCurrentYear(year);
+            setCurrentMonth(month);
+          }
+        } catch (_e) {
+          // If parsing fails, use current values
+        }
+      }
+      
       const currentDisplayDate = new Date(currentYear, currentMonth);
 
       // Parse date constraints
@@ -137,14 +166,19 @@ export function DatePicker({
     if (!isOpen) {
       hasInitializedRef.current = false;
     }
-  }, [isOpen, maxDate, minDate, currentYear, currentMonth]);
+  }, [isOpen, maxDate, minDate, currentYear, currentMonth, value]);
 
   // Close picker when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node;
+      const isInsidePicker = pickerRef.current?.contains(target);
+      const isInsidePopup = popupRef.current?.contains(target);
+      
       if (
         pickerRef.current &&
-        !pickerRef.current.contains(event.target as Node)
+        !isInsidePicker &&
+        !isInsidePopup
       ) {
         const wasOpen = isOpen;
         setIsOpen(false);
@@ -162,7 +196,7 @@ export function DatePicker({
       return () =>
         document.removeEventListener("mousedown", handleClickOutside);
     }
-  }, [isOpen, onBlur]);
+  }, [isOpen, onBlur, value]);
 
   // Generate year range based on min and max dates
   const yearRange = useMemo(() => {
@@ -186,93 +220,59 @@ export function DatePicker({
     }
   }, [showYearPicker, currentYear, yearRange]);
 
-  // Get days in month
-  function getDaysInMonth(year: number, month: number) {
-    return new Date(year, month + 1, 0).getDate();
-  }
-
-  // Get first day of month (0 = Sunday, 1 = Monday, etc.)
-  function getFirstDayOfMonth(year: number, month: number) {
-    const day = new Date(year, month, 1).getDay();
-    // Convert Sunday (0) to 7, so Monday (1) becomes 0
-    return day === 0 ? 6 : day - 1;
-  }
-
-  // Generate calendar days
-  function getCalendarDays() {
-    const daysInMonth = getDaysInMonth(currentYear, currentMonth);
-    const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
-    const daysInPrevMonth = getDaysInMonth(currentYear, currentMonth - 1);
-
-    const days: {
-      day: number;
-      isCurrentMonth: boolean;
-      date: Date;
-    }[] = [];
-
-    // Previous month days
-    for (let i = firstDay - 1; i >= 0; i--) {
-      const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-      const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-      days.push({
-        day: daysInPrevMonth - i,
-        isCurrentMonth: false,
-        date: new Date(prevYear, prevMonth, daysInPrevMonth - i),
-      });
-    }
-
-    // Current month days
-    for (let i = 1; i <= daysInMonth; i++) {
-      days.push({
-        day: i,
-        isCurrentMonth: true,
-        date: new Date(currentYear, currentMonth, i),
-      });
-    }
-
-    // Next month days to fill the grid
-    const remainingDays = 42 - days.length; // 6 rows × 7 days
-    const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
-    const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
-    for (let i = 1; i <= remainingDays; i++) {
-      days.push({
-        day: i,
-        isCurrentMonth: false,
-        date: new Date(nextYear, nextMonth, i),
-      });
-    }
-
-    return days;
-  }
-
-  function handleDateClick(date: Date) {
-    // Don't allow selecting disabled dates
-    if (isDateDisabled(date)) return;
-
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const formattedDate = `${year}-${month}-${day}`;
-    onChange(formattedDate);
-    setIsOpen(false);
-    setShowYearPicker(false);
-    setShowMonthPicker(false);
-    // Call onBlur when date is selected
-    if (onBlur) {
-      onBlur(formattedDate);
-    }
-  }
-
   function handlePrevMonth() {
-    if (currentMonth === 0) {
-      setCurrentMonth(11);
-      setCurrentYear(currentYear - 1);
+    let newMonth = currentMonth;
+    let newYear = currentYear;
+    
+    // Check if we can navigate to previous month based on min date
+    if (minDateObj) {
+      const minYear = minDateObj.getFullYear();
+      const minMonth = minDateObj.getMonth();
+      
+      if (currentMonth === 0) {
+        // Don't allow going to previous year if we're at min year
+        if (currentYear > minYear) {
+          newMonth = 11;
+          newYear = currentYear - 1;
+        } else {
+          return; // Can't navigate
+        }
+      } else {
+        // Don't allow going to previous month if we're at min year and min month
+        if (
+          currentYear > minYear ||
+          (currentYear === minYear && currentMonth > minMonth)
+        ) {
+          newMonth = currentMonth - 1;
+        } else {
+          return; // Can't navigate
+        }
+      }
     } else {
-      setCurrentMonth(currentMonth - 1);
+      // No min date restriction, navigate normally
+      if (currentMonth === 0) {
+        newMonth = 11;
+        newYear = currentYear - 1;
+      } else {
+        newMonth = currentMonth - 1;
+      }
+    }
+    
+    setCurrentMonth(newMonth);
+    setCurrentYear(newYear);
+    
+    // 在月份模式下，同步更新 value 以反映选中状态变化
+    if (mode === "month") {
+      const month = String(newMonth + 1).padStart(2, "0");
+      const formattedMonth = `${newYear}-${month}`;
+      onChange(formattedMonth);
     }
   }
 
   function handleNextMonth() {
+    let newMonth = currentMonth;
+    let newYear = currentYear;
+    
     // Check if we can navigate to next month based on max date
     if (maxDateObj) {
       const maxYear = maxDateObj.getFullYear();
@@ -281,8 +281,10 @@ export function DatePicker({
       if (currentMonth === 11) {
         // Don't allow going to next year if we're at max year
         if (currentYear < maxYear) {
-          setCurrentMonth(0);
-          setCurrentYear(currentYear + 1);
+          newMonth = 0;
+          newYear = currentYear + 1;
+        } else {
+          return; // Can't navigate
         }
       } else {
         // Don't allow going to next month if we're at max year and max month
@@ -290,17 +292,38 @@ export function DatePicker({
           currentYear < maxYear ||
           (currentYear === maxYear && currentMonth < maxMonth)
         ) {
-          setCurrentMonth(currentMonth + 1);
+          newMonth = currentMonth + 1;
+        } else {
+          return; // Can't navigate
         }
       }
     } else {
       // No max date restriction, navigate normally
       if (currentMonth === 11) {
-        setCurrentMonth(0);
-        setCurrentYear(currentYear + 1);
+        newMonth = 0;
+        newYear = currentYear + 1;
       } else {
-        setCurrentMonth(currentMonth + 1);
+        newMonth = currentMonth + 1;
       }
+    }
+    
+    setCurrentMonth(newMonth);
+    setCurrentYear(newYear);
+    
+    // 在月份模式下，同步更新 value 以反映选中状态变化
+    if (mode === "month") {
+      const month = String(newMonth + 1).padStart(2, "0");
+      const formattedMonth = `${newYear}-${month}`;
+      onChange(formattedMonth);
+    }
+  }
+
+
+
+  function handleNextYear() {
+    const maxYear = maxDateObj ? maxDateObj.getFullYear() : new Date().getFullYear() + 10;
+    if (currentYear < maxYear) {
+      setCurrentYear(currentYear + 1);
     }
   }
 
@@ -310,54 +333,41 @@ export function DatePicker({
   }
 
   function handleMonthClick(monthIndex: number) {
-    setCurrentMonth(monthIndex);
-    setShowMonthPicker(false);
-
     // If in month mode, select the month and close the picker
     if (mode === "month") {
+      // 使用当前显示的年份和选中的月份
       const year = currentYear;
       const month = String(monthIndex + 1).padStart(2, "0");
       const formattedMonth = `${year}-${month}`;
+      
+      // 调用 onChange 更新值（同步到输入框）
       onChange(formattedMonth);
+      
+      // 更新当前月份显示
+      setCurrentMonth(monthIndex);
+      
+      // 关闭选择器
+      setShowMonthPicker(false);
+      setShowYearPicker(false);
       setIsOpen(false);
+      
       // Call onBlur when month is selected in month mode
       if (onBlur) {
         onBlur(formattedMonth);
       }
+    } else {
+      // In date mode, just change the displayed month
+      setCurrentMonth(monthIndex);
+      setShowMonthPicker(false);
     }
   }
 
-  const calendarDays = getCalendarDays();
-
-  // Parse min and max dates for comparison
-  const minDateTime = minDate ? new Date(minDate).setHours(0, 0, 0, 0) : null;
-  const maxDateTime = maxDate ? new Date(maxDate).setHours(0, 0, 0, 0) : null;
-
-  // Check if a date is selected
-  const selectedDate = value ? new Date(value) : null;
-  const isDateSelected = (date: Date) => {
-    if (!selectedDate) return false;
-    return (
-      date.getFullYear() === selectedDate.getFullYear() &&
-      date.getMonth() === selectedDate.getMonth() &&
-      date.getDate() === selectedDate.getDate()
-    );
-  };
-
-  // Check if a date is disabled (outside min/max range)
-  const isDateDisabled = (date: Date) => {
-    const dateTime = date.setHours(0, 0, 0, 0);
-    if (minDateTime && dateTime < minDateTime) return true;
-    if (maxDateTime && dateTime > maxDateTime) return true;
-    return false;
-  };
-
   return (
-    <div className="relative w-full" ref={pickerRef}>
+    <div className="content-stretch flex flex-col gap-[8px] items-start relative w-full">
       {/* Label */}
       {label && (
         <div
-          className="content-stretch flex gap-[7px] items-center relative shrink-0 w-full"
+          className="content-stretch flex gap-[7px] h-[12.25px] items-center relative shrink-0 w-full"
           data-name="Primitive.label"
         >
           <p
@@ -369,7 +379,7 @@ export function DatePicker({
       )}
 
       {/* Input */}
-      <div className="relative">
+      <div className="relative w-full" ref={pickerRef}>
         <div
           onClick={() => {
             setIsOpen(!isOpen);
@@ -408,7 +418,20 @@ export function DatePicker({
 
       {/* Calendar Popup */}
       {isOpen && (
-        <div className="absolute bg-white box-border flex flex-col gap-[20px] p-[24px] rounded-[16px] top-[calc(100%+8px)] left-0 z-50 shadow-lg w-full max-w-[373px] border border-[rgba(0,0,0,0.2)] border-solid">
+        <div 
+          ref={popupRef}
+          onMouseDown={(e) => {
+            // 阻止点击面板内部关闭面板
+            e.stopPropagation();
+          }}
+          onClick={(e) => {
+            // 阻止点击面板内部关闭面板
+            e.stopPropagation();
+          }}
+          className={`absolute bg-white box-border flex flex-col gap-[20px] p-[24px] rounded-[16px] top-[calc(100%+8px)] left-0 z-50 shadow-lg border border-[rgba(0,0,0,0.2)] border-solid ${
+            mode === "month" ? "w-auto min-w-[320px]" : "w-full max-w-[373px]"
+          }`}
+        >
           {/* Year Picker (Overlay) */}
           {showYearPicker && (
             <div
@@ -538,140 +561,298 @@ export function DatePicker({
             </div>
           )}
 
-          {/* Calendar Content */}
-          <div className="flex flex-col gap-[16px] w-full">
-            {/* Month/Year Header */}
-            <div className="flex items-center gap-[8px] relative">
-              {/* Year and Month - clickable to show pickers */}
-              <div className="flex items-center gap-[8px]">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowYearPicker(!showYearPicker);
-                    setShowMonthPicker(false);
-                  }}
-                  className="font-['Poppins:Bold',sans-serif] font-bold leading-[24px] not-italic text-[20px] text-black text-nowrap tracking-[0.38px] whitespace-pre hover:opacity-80 transition-opacity cursor-pointer"
-                >
-                  {currentYear}
-                </button>
-                <button
-                  ref={monthButtonRef}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowMonthPicker(!showMonthPicker);
-                    setShowYearPicker(false);
-                  }}
-                  className="font-['Poppins:Bold',sans-serif] font-bold leading-[24px] not-italic text-[20px] text-black text-nowrap tracking-[0.38px] whitespace-pre hover:opacity-80 transition-opacity cursor-pointer"
-                >
-                  {MONTH_ABBR[currentMonth]}
-                </button>
-              </div>
-
-              {/* Spacer */}
-              <div className="flex-1" />
-
-              {/* Navigation Arrows */}
-              <div className="flex items-center gap-[8px]">
-                {/* Previous Month Arrow */}
-                <button
-                  onClick={handlePrevMonth}
-                  className="flex items-center justify-center h-[16px] w-[8.864px] hover:opacity-70 transition-opacity"
-                >
-                  <Icon
-                    name="nav-prev"
-                    aria-label="Previous month"
-                    className="block size-full text-[#DE6A07]"
-                  />
-                </button>
-
-                {/* Next Month Arrow */}
-                <button
-                  onClick={handleNextMonth}
-                  className="flex items-center justify-center h-[16px] w-[8.864px] hover:opacity-70 transition-opacity"
-                >
-                  <Icon
-                    name="nav-next"
-                    aria-label="Next month"
-                    className="block size-full text-[#DE6A07]"
-                  />
-                </button>
-              </div>
-            </div>
-
-            {/* Days of Week - Only show in date mode */}
-            {mode === "date" && (
-              <div className="content-stretch flex font-['Comfortaa:Medium',sans-serif] font-medium items-center leading-0 relative shrink-0 text-[12px] text-[rgba(60,60,67,0.6)] text-center whitespace-nowrap">
-                {DAYS.map((day) => (
-                  <div
-                    key={day}
-                    className="flex flex-col h-[38.286px] justify-center relative shrink-0 w-[46.429px]"
+            {/* Calendar Content */}
+          <div className="flex flex-col gap-[20px] w-full">
+            {/* Use Calendar component for date mode */}
+            {mode === "date" ? (
+              <Calendar
+                currentDate={currentDateObj}
+                onDateChange={(date: Date) => {
+                  const year = date.getFullYear();
+                  const month = String(date.getMonth() + 1).padStart(2, "0");
+                  const day = String(date.getDate()).padStart(2, "0");
+                  const formattedDate = `${year}-${month}-${day}`;
+                  onChange(formattedDate);
+                  setIsOpen(false);
+                  setShowYearPicker(false);
+                  setShowMonthPicker(false);
+                  if (onBlur) {
+                    onBlur(formattedDate);
+                  }
+                }}
+                selectedDate={selectedDateObj}
+                minDate={minDateObj}
+                maxDate={maxDateObj || undefined}
+                showYearPicker={showYearPicker}
+                showMonthPicker={showMonthPicker}
+                onShowYearPickerChange={setShowYearPicker}
+                onShowMonthPickerChange={setShowMonthPicker}
+                className="p-0 gap-[20px]"
+              />
+            ) : mode === "month" ? (
+              <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid justify-items-start leading-0 relative shrink-0 w-full">
+                {/* Year Section */}
+                <div className="col-1 content-stretch flex gap-[8px] items-center ml-0 mt-0 relative row-1">
+                  <button
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowYearPicker(!showYearPicker);
+                      setShowMonthPicker(false);
+                    }}
+                    className="font-['Poppins:Bold',sans-serif] font-bold leading-[24px] not-italic text-[20px] text-black tracking-[0.38px] hover:opacity-80 transition-opacity cursor-pointer"
                   >
-                    <p className="leading-[17.5px]">{day}</p>
+                    {currentYear}
+                  </button>
+                  {/* Next Year Arrow */}
+                  <button
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNextYear();
+                    }}
+                    className="h-[16px] relative shrink-0 w-[8.864px] hover:opacity-70 transition-opacity cursor-pointer"
+                  >
+                    <Icon
+                      name="nav-next"
+                      aria-label="Next year"
+                      className="block size-full text-[#de6a07]"
+                    />
+                  </button>
+                </div>
+
+                {/* Month Section with Navigation */}
+                <div className="col-1 content-stretch flex gap-[22px] items-center ml-[170.35px] mt-[3.5px] relative row-1">
+                  {/* Previous Month Arrow */}
+                  <button
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePrevMonth();
+                    }}
+                    disabled={
+                      minDateObj
+                        ? (currentMonth === 0 && currentYear <= minDateObj.getFullYear()) ||
+                          (currentYear === minDateObj.getFullYear() && currentMonth <= minDateObj.getMonth())
+                        : false
+                    }
+                    className="flex items-center justify-center relative shrink-0 rotate-180 hover:opacity-70 transition-opacity cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <div className="h-[16px] relative w-[8.864px]">
+                      <Icon
+                        name="nav-next"
+                        aria-label="Previous month"
+                        className="block size-full text-[#de6a07]"
+                      />
+                    </div>
+                  </button>
+
+                  {/* Month Name - 不可点击，固定宽度 */}
+                  <div
+                    ref={monthButtonRef}
+                    className="font-['Poppins:Bold',sans-serif] font-bold leading-[24px] not-italic text-[20px] text-black tracking-[0.38px] w-[120px] text-center"
+                  >
+                    {MONTHS[currentMonth]}
                   </div>
-                ))}
-              </div>
-            )}
 
-            {/* Calendar Grid - Only show in date mode */}
-            {mode === "date" && (
-              <div className="content-stretch flex flex-col items-start relative shrink-0">
-                {Array.from({ length: 6 }).map((_, weekIndex) => (
-                  <div
-                    key={weekIndex}
-                    className="content-stretch flex font-['Comfortaa:Regular',sans-serif] font-normal items-center leading-0 overflow-clip relative shrink-0 text-[16px] text-center w-full justify-start"
+                  {/* Next Month Arrow */}
+                  <button
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNextMonth();
+                    }}
+                    disabled={
+                      maxDateObj
+                        ? (currentMonth === 11 && currentYear >= maxDateObj.getFullYear()) ||
+                          (currentYear === maxDateObj.getFullYear() && currentMonth >= maxDateObj.getMonth())
+                        : false
+                    }
+                    className="flex items-center justify-center relative shrink-0 hover:opacity-70 transition-opacity cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                   >
-                    {calendarDays
-                      .slice(weekIndex * 7, (weekIndex + 1) * 7)
-                      .map((dayInfo, dayIndex) => {
-                        const selected = isDateSelected(dayInfo.date);
-                        const disabled = isDateDisabled(dayInfo.date);
-                        const isCurrentMonth = dayInfo.isCurrentMonth;
-                        return (
-                          <div
-                            key={`${weekIndex}-${dayIndex}`}
-                            className={`flex flex-col h-[38.286px] justify-center relative shrink-0 w-[46.429px] ${
-                              selected
-                                ? "bg-[#de6a07] rounded-[8px] gap-[10px] items-center justify-center"
-                                : ""
+                    <div className="h-[16px] relative w-[8.864px]">
+                      <Icon
+                        name="nav-next"
+                        aria-label="Next month"
+                        className="block size-full text-[#de6a07]"
+                      />
+                    </div>
+                  </button>
+                </div>
+              </div>
+            ) : null}
+
+            {/* Month Grid - Show when in month mode (always show, year picker overlays on top) */}
+            {mode === "month" && !showMonthPicker && (
+              <div className="content-stretch flex flex-col gap-[8px] items-start p-[8px] relative shrink-0 w-full">
+                {/* Row 1: January, February, March */}
+                <div className="content-stretch flex gap-[8px] items-start relative shrink-0 w-full">
+                  {[0, 1, 2].map((monthIndex) => {
+                    // 检查是否选中：需要匹配 value 中的年份和月份
+                    let isSelected = false;
+                    if (value) {
+                      try {
+                        const [selectedYear, selectedMonth] = value.split("-");
+                        isSelected =
+                          parseInt(selectedYear) === currentYear &&
+                          parseInt(selectedMonth) === monthIndex + 1;
+                      } catch (_e) {
+                        // 如果解析失败，不选中
+                      }
+                    }
+                    return (
+                      <button
+                        key={monthIndex}
+                        onClick={() => handleMonthClick(monthIndex)}
+                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] cursor-pointer ${
+                          isSelected
+                            ? "bg-[#de6a07]"
+                            : "bg-transparent"
+                        }`}
+                      >
+                        <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-0 relative shrink-0 text-[14px] text-center whitespace-nowrap">
+                          <p
+                            className={`leading-[20px] transition-colors ${
+                              isSelected
+                                ? "text-[#fafafa]"
+                                : "text-[#424242] group-hover:text-[#de6a07]"
                             }`}
                           >
-                            <button
-                              onClick={() =>
-                                !disabled && handleDateClick(dayInfo.date)
-                              }
-                              disabled={disabled}
-                              className={`flex flex-col h-full justify-center relative shrink-0 w-full ${
-                                disabled
-                                  ? "text-[#d0d0d0] cursor-not-allowed"
-                                  : selected
-                                    ? "text-white"
-                                    : isCurrentMonth
-                                      ? "text-black"
-                                      : "text-[grey]"
-                              }`}
-                            >
-                              <p
-                                className={`font-['Comfortaa:${selected ? "Bold" : "Regular"}',sans-serif] ${
-                                  selected ? "font-bold" : "font-normal"
-                                } leading-[28px] whitespace-pre-wrap`}
-                              >
-                                {dayInfo.day}
-                              </p>
-                            </button>
-                          </div>
-                        );
-                      })}
-                  </div>
-                ))}
-              </div>
-            )}
+                            {MONTHS[monthIndex]}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
 
-            {/* Month mode instruction - Show when in month mode and no pickers are open */}
-            {mode === "month" && !showYearPicker && !showMonthPicker && (
-              <div className="flex items-center justify-center py-[24px]">
-                <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] text-[#717182] text-center">
-                  Click year or month to select
-                </p>
+                {/* Row 2: April, May, June */}
+                <div className="content-stretch flex gap-[8px] items-start relative shrink-0 w-full">
+                  {[3, 4, 5].map((monthIndex) => {
+                    let isSelected = false;
+                    if (value) {
+                      try {
+                        const [selectedYear, selectedMonth] = value.split("-");
+                        isSelected =
+                          parseInt(selectedYear) === currentYear &&
+                          parseInt(selectedMonth) === monthIndex + 1;
+                      } catch (_e) {
+                        // 如果解析失败，不选中
+                      }
+                    }
+                    return (
+                      <button
+                        key={monthIndex}
+                        onClick={() => handleMonthClick(monthIndex)}
+                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] cursor-pointer ${
+                          isSelected
+                            ? "bg-[#de6a07]"
+                            : "bg-transparent"
+                        }`}
+                      >
+                        <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-0 relative shrink-0 text-[14px] text-center whitespace-nowrap">
+                          <p
+                            className={`leading-[20px] transition-colors ${
+                              isSelected
+                                ? "text-[#fafafa]"
+                                : "text-[#424242] group-hover:text-[#de6a07]"
+                            }`}
+                          >
+                            {MONTHS[monthIndex]}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Row 3: July, August, September */}
+                <div className="content-stretch flex gap-[8px] items-start relative shrink-0 w-full">
+                  {[6, 7, 8].map((monthIndex) => {
+                    let isSelected = false;
+                    if (value) {
+                      try {
+                        const [selectedYear, selectedMonth] = value.split("-");
+                        isSelected =
+                          parseInt(selectedYear) === currentYear &&
+                          parseInt(selectedMonth) === monthIndex + 1;
+                      } catch (_e) {
+                        // 如果解析失败，不选中
+                      }
+                    }
+                    return (
+                      <button
+                        key={monthIndex}
+                        onClick={() => handleMonthClick(monthIndex)}
+                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] cursor-pointer ${
+                          isSelected
+                            ? "bg-[#de6a07]"
+                            : "bg-transparent"
+                        }`}
+                      >
+                        <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-0 relative shrink-0 text-[14px] text-center whitespace-nowrap">
+                          <p
+                            className={`leading-[20px] transition-colors ${
+                              isSelected
+                                ? "text-[#fafafa]"
+                                : "text-[#424242] group-hover:text-[#de6a07]"
+                            }`}
+                          >
+                            {MONTHS[monthIndex]}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Row 4: October, November, December */}
+                <div className="content-stretch flex gap-[8px] items-start relative shrink-0 w-full">
+                  {[9, 10, 11].map((monthIndex) => {
+                    let isSelected = false;
+                    if (value) {
+                      try {
+                        const [selectedYear, selectedMonth] = value.split("-");
+                        isSelected =
+                          parseInt(selectedYear) === currentYear &&
+                          parseInt(selectedMonth) === monthIndex + 1;
+                      } catch (_e) {
+                        // 如果解析失败，不选中
+                      }
+                    }
+                    return (
+                      <button
+                        key={monthIndex}
+                        onClick={() => handleMonthClick(monthIndex)}
+                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] cursor-pointer ${
+                          isSelected
+                            ? "bg-[#de6a07]"
+                            : "bg-transparent"
+                        }`}
+                      >
+                        <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-0 relative shrink-0 text-[14px] text-center whitespace-nowrap">
+                          <p
+                            className={`leading-[20px] transition-colors ${
+                              isSelected
+                                ? "text-[#fafafa]"
+                                : "text-[#424242] group-hover:text-[#de6a07]"
+                            }`}
+                          >
+                            {MONTHS[monthIndex]}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>

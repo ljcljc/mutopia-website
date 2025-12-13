@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 const imgIcon = "/images/logo.png";
 import { Icon } from "@/components/common/Icon";
+import { OrangeButton, BrownOutlineButton } from "@/components/common";
 import { useAuthStore } from "@/components/auth/authStore";
 import {
   DropdownMenu,
@@ -9,8 +10,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { logout, getCurrentUser, type MeOut } from "@/lib/api";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { logout, type MeOut } from "@/lib/api";
 import { toast } from "sonner";
+import { useBookingStore } from "@/components/booking/bookingStore";
 
 function Logo() {
   return (
@@ -37,29 +47,91 @@ function Logo() {
 }
 
 function BackToHomeButton() {
+  const navigate = useNavigate();
+  const hasFormData = useBookingStore((state) => state.hasFormData);
+  const reset = useBookingStore((state) => state.reset);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    // 检查是否在 booking 页面
+    const isBookingPage = window.location.pathname.includes("/booking");
+    
+    if (isBookingPage && hasFormData()) {
+      e.preventDefault();
+      setIsDialogOpen(true);
+    }
+    // 如果不在 booking 页面或没有表单数据，正常跳转
+  };
+
+  const handleCancel = () => {
+    setIsDialogOpen(false);
+  };
+
+  const handleLeave = () => {
+    setIsDialogOpen(false);
+    reset();
+    navigate("/");
+  };
+
   return (
-    <Link
-      to="/"
-      className="relative shrink-0 w-[134px] cursor-pointer hover:opacity-80 transition-opacity"
-      data-name="Button tertiary"
-    >
-      <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[8px] items-center px-[12px] py-[4px] relative w-[134px]">
-        <div className="content-stretch flex gap-[10px] items-center justify-center relative shrink-0 size-[20px]" data-name="Icons">
-          {/* <div className="absolute content-stretch flex items-center justify-center left-[3px] top-[4px]"> */}
-            {/* <div className="absolute flex h-[12px] items-center justify-center left-0 top-0 w-[13.8px]"> */}
-              <div className="flex-none">
-                <div className="size-4 rotate-180">
-                  <Icon name="button-arrow" className="block max-w-none size-full text-[#8b6357]" />
-                </div>
+    <>
+      <Link
+        to="/"
+        onClick={handleClick}
+        className="relative shrink-0 w-[134px] cursor-pointer hover:opacity-80 transition-opacity"
+        data-name="Button tertiary"
+      >
+        <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[8px] items-center px-[12px] py-[4px] relative w-[134px]">
+          <div className="content-stretch flex gap-[10px] items-center justify-center relative shrink-0 size-[20px]" data-name="Icons">
+            <div className="flex-none">
+              <div className="size-4 rotate-180">
+                <Icon name="button-arrow" className="block max-w-none size-full text-[#8b6357]" />
               </div>
-            {/* </div> */}
-          {/* </div> */}
+            </div>
           </div>
-        <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#8b6357] text-[12px]">
-          Back to home
-        </p>
-      </div>
-    </Link>
+          <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#8b6357] text-[12px]">
+            Back to home
+          </p>
+        </div>
+      </Link>
+
+      <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <AlertDialogContent className="bg-white rounded-[12px] border border-[#E0E0E0] p-0 max-w-[90%] sm:max-w-[700px]">
+          <AlertDialogHeader className="px-6 h-[44px] flex items-center justify-center border-b border-[#E0E0E0]">
+            <AlertDialogTitle className="font-['Comfortaa:Regular',sans-serif] font-normal text-[16px] text-[#4C4C4C] text-center">
+              Leave the page without saving
+            </AlertDialogTitle>
+          </AlertDialogHeader>
+          <div className="px-5 py-4">
+            <AlertDialogDescription className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] text-[#4C4C4C] leading-relaxed">
+              <p className="mb-2 text-left">
+                You have entered information in this form. If you leave this page, your changes will be lost.
+              </p>
+              <p className="text-center font-['Comfortaa',sans-serif] font-semibold text-[16px] text-black leading-[28px]">
+                Are you sure you want to continue?
+              </p>
+            </AlertDialogDescription>
+          </div>
+          <AlertDialogFooter className="px-6 pb-6 pt-0 flex flex-row items-center gap-3 [&]:justify-center sm:[&]:justify-center">
+            <BrownOutlineButton
+              size="medium"
+              onClick={handleCancel}
+              className="w-[120px]"
+            >
+              Cancel
+            </BrownOutlineButton>
+            <OrangeButton
+              variant="primary"
+              size="medium"
+              onClick={handleLeave}
+              className="w-[120px]"
+            >
+              Leave
+            </OrangeButton>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 
@@ -221,26 +293,10 @@ function UserInfo({ userInfo }: { userInfo: MeOut }) {
 
 export default function HeaderApp() {
   const user = useAuthStore((state) => state.user);
-  const [userInfo, setUserInfo] = useState<MeOut | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
-
-  // Load user info from API
-  useEffect(() => {
-    const loadUserInfo = async () => {
-      if (user) {
-        try {
-          const info = await getCurrentUser();
-          setUserInfo(info);
-        } catch (error) {
-          console.error("Failed to load user info:", error);
-        }
-      } else {
-        setUserInfo(null);
-      }
-    };
-
-    loadUserInfo();
-  }, [user]);
+  
+  // Get user info from authStore (set by LoginModalContent after login)
+  const userInfo = useAuthStore((state) => state.userInfo);
 
   // Scroll detection
   useEffect(() => {

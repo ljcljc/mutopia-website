@@ -213,9 +213,14 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
         console.log("Email is registered, proceeding to password step");
         setStep("password");
       } else {
-        // Email is not registered - navigate to sign up
-        console.log("Email is not registered, navigating to sign up");
-        setStep("signup");
+      // Email is not registered - navigate to sign up
+      console.log("Email is not registered, navigating to sign up");
+      // Clear password fields when switching to signup to prevent auto-fill from login
+      setPassword("");
+      setConfirmPassword("");
+      setPasswordError("");
+      setConfirmPasswordError("");
+      setStep("signup");
       }
     } catch (err) {
       // Handle different types of errors
@@ -668,6 +673,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
 
       // Update auth store
       login(user);
+      useAuthStore.getState().setUserInfo(userInfo);
       toast.success("Login successful!");
 
       // Close modal after a short delay
@@ -912,6 +918,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
 
         // Update auth store
         login(user);
+        useAuthStore.getState().setUserInfo(backendUserInfo);
         toast.success("Login successful!");
 
         // Close modal after a short delay
@@ -1115,6 +1122,11 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
       } else if (verificationMode === "forgot-password") {
         setStep("forgot-password");
       } else {
+        // Clear password fields when going back to signup from verify-email
+        setPassword("");
+        setConfirmPassword("");
+        setPasswordError("");
+        setConfirmPasswordError("");
         setStep("signup");
       }
       // Don't clear verification code when going back, keep user input
@@ -1170,6 +1182,11 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
       } else if (verificationMode === "forgot-password") {
         setStep("forgot-password");
       } else {
+        // Clear password fields when going back to signup from verify-email
+        setPassword("");
+        setConfirmPassword("");
+        setPasswordError("");
+        setConfirmPasswordError("");
         setStep("signup");
       }
     } else if (step === "password") {
@@ -1216,6 +1233,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
       };
 
       login(user);
+      useAuthStore.getState().setUserInfo(userInfo);
       toast.success("Sign up successful!");
 
       setTimeout(() => {
@@ -1256,6 +1274,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
       };
 
       login(user);
+      useAuthStore.getState().setUserInfo(userInfo);
       toast.success("Login successful!");
 
       // Save password if rememberMe is checked
@@ -1308,6 +1327,11 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
     } else if (verificationMode === "forgot-password") {
       setStep("change-email");
     } else {
+      // Clear password fields when switching to signup to prevent auto-fill from login
+      setPassword("");
+      setConfirmPassword("");
+      setPasswordError("");
+      setConfirmPasswordError("");
       setStep("signup");
     }
     // Don't clear verification code when changing email, keep user input
@@ -1329,6 +1353,11 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
       setStep("password");
     } else {
       // Email is not registered - navigate to sign up
+      // Clear password fields when switching to signup to prevent auto-fill from login
+      setPassword("");
+      setConfirmPassword("");
+      setPasswordError("");
+      setConfirmPasswordError("");
       setStep("signup");
     }
   };

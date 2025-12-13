@@ -1,14 +1,20 @@
 // 使用占位图片替换 figma:asset 导入
 const imgImageWithFallback = "/images/grooming-hero.png";
+import { useNavigate } from "react-router-dom";
 import { OrangeButton } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
 import heroWave from "@/assets/icons/hero-wave.svg";
 import heroEllipse from "@/assets/icons/hero-ellipse.svg";
 
 export default function Hero() {
+  const navigate = useNavigate();
+
+  const handleBookAppointment = () => {
+    navigate("/booking");
+  };
   return (
     <div
-      className="relative w-full bg-gradient-to-b from-[#fdf8f3] to-[#f9f1e8] overflow-hidden"
+      className="relative w-full bg-linear-to-b from-[#fdf8f3] to-[#f9f1e8] overflow-hidden"
       data-name="Hero"
     >
       {/* Glow Effect */}
@@ -87,7 +93,7 @@ export default function Hero() {
 
             {/* Buttons */}
             <div className="flex gap-[14px] items-start">
-              <OrangeButton className="w-[209px]">
+              <OrangeButton className="w-[209px]" onClick={handleBookAppointment}>
                 Book Appointment
               </OrangeButton>
 
@@ -105,6 +111,8 @@ export default function Hero() {
                 alt="Pet grooming service"
                 className="inset-0 max-w-none object-50%-50% object-contain pointer-events-none size-full"
                 src={imgImageWithFallback}
+                {...({ fetchpriority: "high" } as React.ImgHTMLAttributes<HTMLImageElement>)}
+                loading="eager"
               />
             </div>
           </div>
@@ -183,7 +191,7 @@ export default function Hero() {
 
           {/* Buttons */}
           <div className="flex flex-col gap-[14px] w-full">
-            <OrangeButton fullWidth>
+            <OrangeButton fullWidth onClick={handleBookAppointment}>
               Book Appointment
             </OrangeButton>
 

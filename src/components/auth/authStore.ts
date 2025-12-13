@@ -7,6 +7,7 @@ import {
   removeEncryptedItem,
 } from "@/lib/encryption";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
+import { type MeOut } from "@/lib/api";
 
 export type LoginStep = "email" | "password" | "signup" | "verify-email" | "forgot-password" | "change-email" | "reset-password";
 export type VerificationMode = "signup" | "login" | "forgot-password";
@@ -96,6 +97,10 @@ interface AuthState {
   setUser: (user: User | null) => void;
   login: (user: User) => void;
   logout: () => Promise<void>;
+  
+  // User info from API (MeOut)
+  userInfo: MeOut | null;
+  setUserInfo: (userInfo: MeOut | null) => void;
 
   // Reset function
   reset: () => void;
@@ -139,6 +144,7 @@ const initialState = {
   addressError: "",
   isLoading: false,
   user: loadUserFromStorage(),
+  userInfo: null as MeOut | null,
 };
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -263,7 +269,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: async () => {
     await clearAuthTokens();
-    set({ user: null });
+    set({ user: null, userInfo: null });
     // Clear user info from localStorage when user logs out
     try {
       removeEncryptedItem(STORAGE_KEYS.USER_INFO);
@@ -271,6 +277,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       console.warn("Failed to remove user info from localStorage:", e);
     }
   },
+
+  setUserInfo: (userInfo) => set({ userInfo }),
 
   reset: () =>
     set((state) => ({

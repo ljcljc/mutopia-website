@@ -1,5 +1,6 @@
 import { useState } from "react";
 // import svgPaths from "@/assets/icons/svg-aj6ul1v84s";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { OrangeButton } from "@/components/common";
@@ -32,6 +33,11 @@ function ServiceCard({
   isPopular = false,
   isMobile = false,
 }: ServiceCardProps) {
+  const navigate = useNavigate();
+
+  const handleBookNow = () => {
+    navigate("/booking");
+  };
   return (
     <div className="relative pt-4 h-full">
       {isPopular && (
@@ -110,6 +116,7 @@ function ServiceCard({
             variant={isPopular ? "primary" : "outline"}
             size="medium"
             fullWidth
+            onClick={handleBookNow}
           >
             <div className="flex gap-[4px] items-center">
               <p

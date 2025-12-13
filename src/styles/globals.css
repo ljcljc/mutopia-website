@@ -47,6 +47,97 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* CustomSelect styles - ensure text is visible */
+[data-slot="select-content"] {
+  color: #6b6b6b !important;
+  background-color: white !important;
+}
+
+[data-slot="select-content"] * {
+  color: #6b6b6b !important;
+}
+
+[data-slot="select-content"] [data-slot="select-item"] {
+  color: #6b6b6b !important;
+  min-height: 36px !important;
+  height: 36px !important;
+}
+
+/* Target SelectPrimitive.ItemText - it's a span that wraps our content */
+[data-slot="select-content"] [data-slot="select-item"] > span:not([class*="absolute"]) {
+  color: #6b6b6b !important;
+  display: flex !important;
+  gap: 12px !important;
+  align-items: center !important;
+  flex: 1 !important;
+  min-height: auto !important;
+}
+
+[data-slot="select-content"] [data-slot="select-item"] span span {
+  color: #6b6b6b !important;
+  display: block !important;
+}
+
+/* Check indicator - make it relative instead of absolute, and match text color */
+[data-slot="select-content"] [data-slot="select-item"] > span[class*="absolute"] {
+  position: relative !important;
+  right: 0 !important;
+  order: 2 !important; /* Ensure it appears on the right */
+}
+
+[data-slot="select-content"] [data-slot="select-item"] > span[class*="absolute"] svg,
+[data-slot="select-content"] [data-slot="select-item"] > span[class*="absolute"] * {
+  color: #6b6b6b !important;
+}
+
+[data-slot="select-content"] [data-slot="select-item"][data-state="checked"] {
+  color: #de6a07 !important;
+}
+
+[data-slot="select-content"] [data-slot="select-item"][data-state="checked"] > span:not([class*="absolute"]) {
+  color: #de6a07 !important;
+}
+
+[data-slot="select-content"] [data-slot="select-item"][data-state="checked"] span span {
+  color: #de6a07 !important;
+}
+
+/* Check indicator in selected state - match text color */
+[data-slot="select-content"] [data-slot="select-item"][data-state="checked"] > span[class*="absolute"] svg,
+[data-slot="select-content"] [data-slot="select-item"][data-state="checked"] > span[class*="absolute"] * {
+  color: #de6a07 !important;
+}
+
+[data-slot="select-content"] [data-slot="select-item"][data-highlighted] {
+  background-color: #fef3c7 !important;
+  color: #6b6b6b !important;
+}
+
+[data-slot="select-content"] [data-slot="select-item"][data-highlighted] > span:not([class*="absolute"]) {
+  color: #6b6b6b !important;
+}
+
+[data-slot="select-content"] [data-slot="select-item"][data-highlighted] span span {
+  color: #6b6b6b !important;
+}
+
+[data-slot="select-content"] [data-slot="select-item"][data-disabled] {
+  color: #808080 !important;
+  opacity: 0.6 !important;
+}
+
+[data-slot="select-content"] [data-slot="select-item"][data-disabled] > span:not([class*="absolute"]) {
+  color: #808080 !important;
+}
+
+[data-slot="select-content"] [data-slot="select-item"][data-disabled] span span {
+  color: #808080 !important;
+}
+
+[data-slot="select-content"] [data-slot="select-item"][data-disabled] > span[class*="absolute"] svg {
+  color: #808080 !important;
+}
+
 /* Ensure Comfortaa font is applied to all text elements */
 h1,
 h2,

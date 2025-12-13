@@ -36,6 +36,7 @@ import IconCalendarSvg from "@/assets/icons/icon-calendar.svg?react";
 import IconAlertErrorSvg from "@/assets/icons/icon-alert-error.svg?react";
 import IconAlertSuccessSvg from "@/assets/icons/icon-alert-success.svg?react";
 import IconAlertWarningSvg from "@/assets/icons/icon-alert-warning.svg?react";
+import IconAlertInfoSvg from "@/assets/icons/icon-alert-info.svg?react";
 import IconEyeVisibleSvg from "@/assets/icons/icon-eye-visible.svg?react";
 import IconEyeInvisibleSvg from "@/assets/icons/icon-eye-invisible.svg?react";
 import IconFacebookSvg from "@/assets/icons/icon-facebook.svg?react";
@@ -59,6 +60,19 @@ import IconPremiumQualitySvg from "@/assets/icons/icon-premium-quality.svg?react
 import IconStressFreeExperienceSvg from "@/assets/icons/icon-stress-free-experience.svg?react";
 import IconRealTimeUpdatesSvg from "@/assets/icons/icon-real-time-updates.svg?react";
 import IconCloseArrowSvg from "@/assets/icons/icon-close-arrow.svg?react";
+import IconVanSvg from "@/assets/icons/icon-van.svg?react";
+import IconShopSvg from "@/assets/icons/icon-shop.svg?react";
+import IconDogSvg from "@/assets/icons/icon-dog.svg?react";
+import IconCatSvg from "@/assets/icons/icon-cat.svg?react";
+import IconPetSvg from "@/assets/icons/icon-pet.svg?react";
+import IconSearchSvg from "@/assets/icons/icon-search.svg?react";
+import IconImageSvg from "@/assets/icons/icon-image.svg?react";
+import IconAddSvg from "@/assets/icons/icon-add.svg?react";
+import IconTrashSvg from "@/assets/icons/icon-trash.svg?react";
+import IconCheckSvg from "@/assets/icons/icon-check.svg?react";
+import IconCheckGreenSvg from "@/assets/icons/icon-check-green.svg?react";
+import IconZoomOutSvg from "@/assets/icons/icon-zoom-out.svg?react";
+import IconZoomInSvg from "@/assets/icons/icon-zoom-in.svg?react";
 import IconStarSvg from "@/assets/icons/icon-star.svg?react";
 
 // 图标组件映射表
@@ -75,6 +89,7 @@ const iconComponentMap = {
   "alert-error": IconAlertErrorSvg,
   "alert-success": IconAlertSuccessSvg,
   "alert-warning": IconAlertWarningSvg,
+  "alert-info": IconAlertInfoSvg,
   "eye-visible": IconEyeVisibleSvg,
   "eye-invisible": IconEyeInvisibleSvg,
   "facebook": IconFacebookSvg,
@@ -98,6 +113,19 @@ const iconComponentMap = {
   "stress-free-experience": IconStressFreeExperienceSvg,
   "real-time-updates": IconRealTimeUpdatesSvg,
   "close-arrow": IconCloseArrowSvg,
+  "van": IconVanSvg,
+  "shop": IconShopSvg,
+  "dog": IconDogSvg,
+  "cat": IconCatSvg,
+  "pet": IconPetSvg,
+  "search": IconSearchSvg,
+  "image": IconImageSvg,
+  "add": IconAddSvg,
+  "trash": IconTrashSvg,
+  "check": IconCheckSvg,
+  "check-green": IconCheckGreenSvg,
+  "zoom-out": IconZoomOutSvg,
+  "zoom-in": IconZoomInSvg,
   "star": IconStarSvg,
 } as const;
 

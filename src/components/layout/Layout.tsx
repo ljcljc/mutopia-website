@@ -15,7 +15,7 @@ export default function Layout() {
       <main className="flex-1">
         <Outlet />
       </main>
-      {isHomePage && <Footer />}
+      <Footer />
       <ScrollToTop />
       <Toaster />
     </div>

@@ -1,132 +1,87 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { getMyBookings, type BookingOut } from "@/lib/api";
+import { useEffect } from "react";
+import { ProgressSteps } from "@/components/booking/ProgressSteps";
+import { OrangeButton } from "@/components/common/OrangeButton";
+import { Icon } from "@/components/common/Icon";
 import { useAuthStore } from "@/components/auth/authStore";
-import { toast } from "sonner";
-import { HttpError } from "@/lib/http";
+import { useBookingStore } from "@/components/booking/bookingStore";
+import { Step1AddressAndServiceType } from "@/components/booking/Step1AddressAndServiceType";
+import { Step2 } from "@/components/booking/Step2";
+import { Step3 } from "@/components/booking/Step3";
+import { Step4 } from "@/components/booking/Step4";
+import { Step5 } from "@/components/booking/Step5";
+import { Step6 } from "@/components/booking/Step6";
+import { STEP_TITLES } from "@/components/booking/stepTitles";
 
 export default function Booking() {
   const user = useAuthStore((state) => state.user);
-  const [bookings, setBookings] = useState<BookingOut[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { currentStep, nextStep, petName } = useBookingStore();
 
+  // 当用户登出时，清空 bookingStore 的 userInfo
+  // 注意：用户信息加载由 LoginModalContent 统一处理，这里不需要调用 API
   useEffect(() => {
-    const loadData = async () => {
-      if (!user) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        const bookingsData = await getMyBookings();
-        setBookings(bookingsData);
-      } catch (err) {
-        console.error("Failed to load booking data:", err);
-        if (err instanceof HttpError) {
-          toast.error(err.message || "Failed to load booking data.");
-        } else {
-          toast.error("Failed to load booking data. Please try again.");
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
+    if (!user) {
+      useBookingStore.setState({ userInfo: null });
+    }
   }, [user]);
 
-  if (!user) {
-    return (
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-2xl mx-auto text-center">
-          <h1 className="text-3xl font-bold text-[#633479] mb-4">Please Log In</h1>
-          <p className="text-gray-600">You need to be logged in to view your bookings.</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#633479]"></div>
-            <p className="mt-4 text-gray-600">Loading bookings...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Render step component based on current step
+  const renderStepComponent = () => {
+    switch (currentStep) {
+      case 1:
+        return <Step1AddressAndServiceType />;
+      case 2:
+        return <Step2 />;
+      case 3:
+        return <Step3 />;
+      case 4:
+        return <Step4 />;
+      case 5:
+        return <Step5 />;
+      case 6:
+        return <Step6 />;
+      default:
+        return <Step1AddressAndServiceType />;
+    }
+  };
 
   return (
-    <div className="container mx-auto px-4 py-16">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-[#633479] mb-8">My Bookings</h1>
+    <div className="box-border content-stretch flex flex-col gap-[60px] items-center pb-[100px] pt-[60px] px-0 w-full min-h-full relative bg-[#f9f1e8]">
+      {/* Content */}
+      <div className="content-stretch flex flex-col gap-[16px] items-start relative shrink-0 w-[780px] max-w-[780px]">
+        {/* Progress Steps */}
+        <ProgressSteps
+          currentStep={currentStep}
+          totalSteps={6}
+          title={
+            currentStep === 3 && petName
+              ? `${petName} - package and add-on`
+              : STEP_TITLES[currentStep] || "Address and service type"
+          }
+        />
 
-        {bookings.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-            <p className="text-gray-600 mb-4">You don't have any bookings yet.</p>
-            <Link
-              to="/"
-              className="inline-block px-6 py-2 bg-[#de6a07] text-white rounded-full hover:bg-[#c55f06] transition-colors"
-            >
-              Book a Service
-            </Link>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {bookings.map((booking) => {
-              return (
-                <div
-                  key={booking.id}
-                  className="bg-white rounded-lg shadow-sm p-6 border border-gray-200"
-                >
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="text-xl font-semibold text-[#633479] mb-2">
-                        Booking #{booking.id}
-                      </h3>
-                      {booking.scheduled_time && (
-                        <p className="text-gray-600">
-                          Scheduled: {new Date(booking.scheduled_time).toLocaleString()}
-                        </p>
-                      )}
-                    </div>
-                    <span
-                      className={`px-3 py-1 rounded-full text-sm font-medium capitalize ${
-                        booking.status === "confirmed"
-                          ? "bg-green-100 text-green-800"
-                          : booking.status === "pending"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {booking.status}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-                    <div>
-                      <p className="text-sm text-gray-600">Deposit</p>
-                      <p className="text-lg font-semibold text-[#633479]">
-                        ${typeof booking.deposit_amount === "string" ? booking.deposit_amount : booking.deposit_amount.toFixed(2)}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-gray-600">Final Amount</p>
-                      <p className="text-lg font-semibold text-[#633479]">
-                        ${typeof booking.final_amount === "string" ? booking.final_amount : booking.final_amount.toFixed(2)}
-                      </p>
-                    </div>
-                  </div>
+        {/* Main Form */}
+        <div className="content-stretch flex flex-col gap-[32px] items-start relative shrink-0 w-full">
+          {renderStepComponent()}
+
+          {/* Continue Button - Only show for Step 1 */}
+          {currentStep === 1 && (
+            <div className="content-stretch flex gap-[20px] items-start relative shrink-0 w-full">
+              <OrangeButton size="medium" onClick={nextStep}>
+                <div className="flex gap-[4px] items-center">
+                  <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] text-[14px] text-white">
+                    Continue
+                  </p>
+                  <Icon
+                    name="button-arrow"
+                    aria-label="Arrow"
+                    className="size-[14px] text-white"
+                  />
                 </div>
-              );
-            })}
-          </div>
-        )}
+              </OrangeButton>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 }
-
