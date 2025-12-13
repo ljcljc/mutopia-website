@@ -27,6 +27,8 @@ export interface FileUploadProps {
   maxFiles?: number;
   /** 文件变化回调 */
   onChange?: (files: File[]) => void;
+  /** 删除项回调（用于已上传的图片） */
+  onRemove?: (index: number) => void;
   /** 上传按钮文字 */
   buttonText?: string;
   /** 文件类型提示文字 */
@@ -53,6 +55,7 @@ export function FileUpload({
   maxSizeMB = 10,
   maxFiles,
   onChange,
+  onRemove,
   buttonText = "Click to upload",
   fileTypeHint = "JPG, JPEG, PNG less than 10MB",
   showDragHint = true,
@@ -187,9 +190,15 @@ export function FileUpload({
 
                 const isUploaded = item.uploadStatus === "uploaded";
 
+                // 使用稳定的 key：优先使用 photoId（已上传的图片），否则使用 file 的唯一标识
+                // 这样可以避免在删除时因索引变化导致重新渲染
+                const stableKey = item.photoId !== undefined 
+                  ? `photo-${item.photoId}` 
+                  : `file-${file.name}-${file.size}-${file.lastModified}`;
+
                 return (
                   <div
-                    key={`${file.name}-${index}`}
+                    key={stableKey}
                     className="h-[80px] overflow-visible relative rounded-[8px] shrink-0 w-[96px]"
                   >
                     {previewUrl && (
@@ -205,6 +214,8 @@ export function FileUpload({
                             className="absolute inset-0 max-w-none object-cover pointer-events-none rounded-[8px] size-full"
                             alt={file.name}
                             src={previewUrl}
+                            loading="lazy"
+                            decoding="async"
                           />
                         </div>
 
@@ -236,11 +247,16 @@ export function FileUpload({
                               if (displayItems[index]?.previewUrl && displayItems[index].previewUrl.startsWith("blob:")) {
                                 URL.revokeObjectURL(displayItems[index].previewUrl);
                               }
-                              // 如果是从外部传入的 uploadItems，需要通过 onChange 回调通知父组件
+                              // 如果是从外部传入的 uploadItems，需要通过回调通知父组件
                               if (uploadItems) {
-                                // 通知父组件删除文件
-                                const remainingFiles = files.filter((_, i) => i !== index);
-                                onChange?.(remainingFiles);
+                                // 如果是已上传的图片（有 photoId），使用 onRemove 回调
+                                if (displayItems[index]?.uploadStatus === "uploaded" && displayItems[index]?.photoId !== undefined) {
+                                  onRemove?.(index);
+                                } else {
+                                  // 未上传的文件，使用 onChange 回调
+                                  const remainingFiles = files.filter((_, i) => i !== index);
+                                  onChange?.(remainingFiles);
+                                }
                               } else {
                                 removeFile(index);
                               }
