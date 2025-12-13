@@ -46,7 +46,30 @@ functions/
 
 ## 部署
 
-Functions 会在部署到 Cloudflare Pages 时自动识别和部署。无需额外配置。
+### 自动识别（推荐）
+
+如果使用 **Git 集成**方式部署到 Cloudflare Pages：
+- Functions 会自动从源代码仓库中识别 `functions/` 目录
+- 无需额外配置，Cloudflare Pages 会自动部署 Functions
+
+### 手动配置
+
+如果使用 **直接上传**方式部署：
+
+1. **确保 functions 目录被包含**：
+   - 构建脚本会自动将 `functions/` 复制到 `dist/` 目录
+   - 或者手动将 `functions/` 目录包含在部署包中
+
+2. **在 Cloudflare Dashboard 中配置**：
+   - 进入 Cloudflare Dashboard
+   - 选择你的 Pages 项目
+   - 进入 Settings → Builds & deployments
+   - 确认 Build output directory 设置为 `dist`
+   - 确认 Root directory 设置为项目根目录（包含 `functions/` 目录）
+
+3. **使用 wrangler.toml**（可选）：
+   - 项目根目录已包含 `wrangler.toml` 配置文件
+   - 指定了 `pages_build_output_dir = "dist"`
 
 ## 调试
 
