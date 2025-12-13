@@ -773,6 +773,19 @@ export async function createBooking(
 }
 
 /**
+ * 提交订单（使用完整的 BookingSubmitIn 格式）
+ */
+export async function submitBooking(
+  params: BookingSubmitIn
+): Promise<BookingOut> {
+  const response = await http.post<BookingOut>(
+    "/api/bookings/bookings/submit",
+    params
+  );
+  return response.data;
+}
+
+/**
  * 获取我的预约列表
  */
 export async function getMyBookings(): Promise<BookingOut[]> {

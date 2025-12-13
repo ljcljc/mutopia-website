@@ -1,10 +1,12 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Icon } from "@/components/common/Icon";
 import { OrangeButton, MembershipCard, type FeatureItem } from "@/components/common";
 import { useBookingStore } from "./bookingStore";
 import { cn } from "@/components/ui/utils";
 import { TIME_PERIODS } from "@/constants/calendar";
-import { buildImageUrl } from "@/lib/api";
+import { buildImageUrl, submitBooking, createDepositIntent } from "@/lib/api";
+import { toast } from "sonner";
 
 // Radio button component matching CustomRadio.tsx
 function RadioButton({ isChecked, className }: { isChecked: boolean; className?: string }) {
@@ -85,9 +87,12 @@ export function Step6() {
     setUseMembership,
     setMembershipPlanId,
     userInfo,
+    getBookingSubmitPayload,
   } = useBookingStore();
 
   const [isTotalExpanded, setIsTotalExpanded] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   // Get selected service
   const selectedService = services.find((s) => s.id === serviceId);
@@ -251,9 +256,39 @@ export function Step6() {
   };
 
   // Handle proceed to payment
-  const handleProceedToPayment = () => {
-    // TODO: Implement payment flow
-    console.log("Proceed to payment");
+  const handleProceedToPayment = async () => {
+    if (isSubmitting) return;
+    
+    try {
+      setIsSubmitting(true);
+      
+      // Get the booking submit payload
+      const submitData = getBookingSubmitPayload();
+      
+      // Print the data to console for debugging
+      console.log("=== Booking Submit Data ===");
+      console.log(JSON.stringify(submitData, null, 2));
+      console.log("===========================");
+      
+      // Submit the booking
+      const booking = await submitBooking(submitData);
+      console.log("Booking created:", booking);
+      
+      // Create deposit payment intent
+      const paymentIntent = await createDepositIntent(booking.id);
+      console.log("Payment intent created:", paymentIntent);
+      
+      // Navigate to payment page with booking ID and payment intent
+      // After payment, user will be redirected to /success
+      navigate(`/payment?booking_id=${booking.id}&payment_id=${paymentIntent.payment_id}&client_secret=${paymentIntent.client_secret}`);
+      
+      toast.success("Booking submitted successfully");
+    } catch (error) {
+      console.error("Failed to submit booking:", error);
+      toast.error("Failed to submit booking. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Handle keep for later
@@ -866,7 +901,7 @@ export function Step6() {
 
       {/* Bottom buttons */}
       <div className="content-stretch flex items-center justify-between relative shrink-0 w-full">
-        <OrangeButton size="medium" onClick={handleProceedToPayment}>
+        <OrangeButton size="medium" onClick={handleProceedToPayment} disabled={isSubmitting} loading={isSubmitting}>
           <div className="flex gap-[4px] items-center">
             <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] text-[14px] text-white">
               Proceed to payment
