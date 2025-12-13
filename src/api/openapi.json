@@ -1098,10 +1098,10 @@
         "security": [{ "JWTAuth": [] }]
       }
     },
-    "/api/payments/payments/create_deposit_intent": {
+    "/api/payments/payments/create_deposit_session": {
       "post": {
-        "operationId": "api_payments_create_deposit_intent",
-        "summary": "Create Deposit Intent",
+        "operationId": "api_payments_create_deposit_session",
+        "summary": "Create Deposit Session",
         "parameters": [
           {
             "in": "query",
@@ -1115,7 +1115,7 @@
             "description": "OK",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PaymentIntentOut" }
+                "schema": { "$ref": "#/components/schemas/PaymentSessionOut" }
               }
             }
           }
@@ -1124,10 +1124,10 @@
         "security": [{ "JWTAuth": [] }]
       }
     },
-    "/api/payments/payments/create_final_intent": {
+    "/api/payments/payments/create_final_session": {
       "post": {
-        "operationId": "api_payments_create_final_intent",
-        "summary": "Create Final Intent",
+        "operationId": "api_payments_create_final_session",
+        "summary": "Create Final Session",
         "parameters": [
           {
             "in": "query",
@@ -1141,7 +1141,7 @@
             "description": "OK",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PaymentIntentOut" }
+                "schema": { "$ref": "#/components/schemas/PaymentSessionOut" }
               }
             }
           }
@@ -2274,13 +2274,14 @@
         "title": "CheckOutOut",
         "type": "object"
       },
-      "PaymentIntentOut": {
+      "PaymentSessionOut": {
         "properties": {
-          "client_secret": { "title": "Client Secret", "type": "string" },
+          "url": { "title": "Url", "type": "string" },
+          "session_id": { "title": "Session Id", "type": "string" },
           "payment_id": { "title": "Payment Id", "type": "integer" }
         },
-        "required": ["client_secret", "payment_id"],
-        "title": "PaymentIntentOut",
+        "required": ["url", "session_id", "payment_id"],
+        "title": "PaymentSessionOut",
         "type": "object"
       },
       "FeedbackOut": {
