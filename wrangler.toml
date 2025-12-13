@@ -2,7 +2,7 @@
 # 此文件用于配置 Cloudflare Pages Functions 的部署
 
 name = "mutopia-pet"
-compatibility_date = "2025-12-14"
+compatibility_date = "2024-01-01"
 
 # Pages 配置
 pages_build_output_dir = "dist"
