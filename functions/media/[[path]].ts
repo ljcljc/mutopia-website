@@ -13,22 +13,44 @@ interface Env {
 
 export async function onRequest(context: {
   request: Request;
-  params: { path?: string };
+  params: { path?: string[] };
   env: Env;
 }): Promise<Response> {
   const { request, params, env } = context;
+  
+  // 处理 OPTIONS 请求（CORS preflight）
+  if (request.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+        "Access-Control-Max-Age": "86400",
+      },
+    });
+  }
   
   // 获取 API 基础 URL（优先使用环境变量）
   const apiBaseUrl = env.API_BASE_URL || DEFAULT_API_BASE_URL;
   
   // 构建目标 URL
-  const path = params.path || "";
-  const targetUrl = `${apiBaseUrl}/media/${path}`;
+  // 对于 catch-all 路由 [[path]]，params.path 是一个字符串数组
+  const pathSegments = params.path || [];
+  const path = pathSegments.length > 0 ? pathSegments.join("/") : "";
+  
+  // 构建完整的目标 URL
+  // 如果 path 为空，则只使用 /media，否则使用 /media/{path}
+  const mediaPath = path ? `/media/${path}` : "/media";
+  const targetUrl = `${apiBaseUrl}${mediaPath}`;
   
   // 获取原始请求的查询参数
   const url = new URL(request.url);
   const searchParams = url.search;
   const fullTargetUrl = searchParams ? `${targetUrl}${searchParams}` : targetUrl;
+  
+  // 调试日志（仅在开发环境或需要时启用）
+  // console.log(`[Media Proxy] Proxying ${request.method} ${request.url} -> ${fullTargetUrl}`);
   
   // 创建新的请求，保留原始请求的方法和头部
   const requestHeaders = new Headers();
