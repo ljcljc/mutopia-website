@@ -1,12 +1,12 @@
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import { Icon } from "@/components/common/Icon";
 import { OrangeButton, MembershipCard, type FeatureItem } from "@/components/common";
 import { useBookingStore } from "./bookingStore";
 import { cn } from "@/components/ui/utils";
 import { TIME_PERIODS } from "@/constants/calendar";
-import { buildImageUrl, submitBooking, createDepositIntent } from "@/lib/api";
+import { buildImageUrl, submitBooking, createDepositSession } from "@/lib/api";
 import { toast } from "sonner";
+import { HttpError } from "@/lib/http";
 
 // Radio button component matching CustomRadio.tsx
 function RadioButton({ isChecked, className }: { isChecked: boolean; className?: string }) {
@@ -92,7 +92,6 @@ export function Step6() {
 
   const [isTotalExpanded, setIsTotalExpanded] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate();
 
   // Get selected service
   const selectedService = services.find((s) => s.id === serviceId);
@@ -274,18 +273,38 @@ export function Step6() {
       const booking = await submitBooking(submitData);
       console.log("Booking created:", booking);
       
-      // Create deposit payment intent
-      const paymentIntent = await createDepositIntent(booking.id);
-      console.log("Payment intent created:", paymentIntent);
+      // Create deposit payment session (Stripe Checkout)
+      const paymentSession = await createDepositSession(booking.id);
+      console.log("Payment session created:", paymentSession);
       
-      // Navigate to payment page with booking ID and payment intent
-      // After payment, user will be redirected to /success
-      navigate(`/payment?booking_id=${booking.id}&payment_id=${paymentIntent.payment_id}&client_secret=${paymentIntent.client_secret}`);
+      // Redirect to Stripe Checkout page
+      // Stripe will handle the payment and redirect back to success page
+      window.location.href = paymentSession.url;
       
-      toast.success("Booking submitted successfully");
+      toast.success("Redirecting to payment...");
     } catch (error) {
       console.error("Failed to submit booking:", error);
-      toast.error("Failed to submit booking. Please try again.");
+      
+      // Handle 401 Unauthorized error with detailed logging
+      if (error instanceof HttpError && error.status === 401) {
+        console.error("401 Unauthorized - Token may be expired or invalid");
+        console.error("Error details:", {
+          status: error.status,
+          message: error.message,
+          data: error.data,
+        });
+        
+        // Check if token refresh was attempted (http.ts should handle this automatically)
+        // If we reach here, it means token refresh also failed
+        toast.error("Session expired. Please login again and try submitting the booking.");
+        return;
+      }
+      
+      // Handle other errors
+      const errorMessage = error instanceof HttpError 
+        ? error.message 
+        : "Failed to submit booking. Please try again.";
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

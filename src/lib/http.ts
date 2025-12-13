@@ -183,47 +183,50 @@ const request = async <T = unknown>(
   // 构建完整 URL
   const fullUrl = url.startsWith("http") ? url : `${API_BASE_URL}${url}`;
 
-  // 构建请求头
-  const requestHeaders: Record<string, string> = {
+  // 构建基础请求头（不包含 token，token 在 makeRequest 中动态获取）
+  const baseHeaders: Record<string, string> = {
     ...(headers as Record<string, string>),
   };
 
   // 如果不是 FormData，默认设置 Content-Type 为 application/json
   if (!(fetchConfig.body instanceof FormData)) {
-    if (!requestHeaders["Content-Type"]) {
-      requestHeaders["Content-Type"] = "application/json";
+    if (!baseHeaders["Content-Type"]) {
+      baseHeaders["Content-Type"] = "application/json";
     }
   } else {
     // FormData 会自动设置 Content-Type 和 boundary，不要手动设置
-    delete requestHeaders["Content-Type"];
-  }
-
-  // 添加认证 token（如果需要）
-  if (!skipAuth) {
-    const token = await getAuthToken();
-    if (token) {
-      requestHeaders["Authorization"] = `Bearer ${token}`;
-    }
-  }
-
-  debugLog("Request:", {
-    method: config.method || "GET",
-    url: fullUrl,
-    headers: requestHeaders,
-    body: fetchConfig.body,
-  });
-
-  // 在生产环境也记录关键请求信息（用于调试连接问题）
-  if (import.meta.env.PROD && url.includes("/api/auth/social/login")) {
-    console.log("[HTTP] Social login request:", {
-      method: config.method || "GET",
-      url: fullUrl,
-      hasBody: !!fetchConfig.body,
-    });
+    delete baseHeaders["Content-Type"];
   }
 
   // 请求函数
   const makeRequest = async (): Promise<Response> => {
+    // 动态构建请求头，每次都获取最新的 token
+    const requestHeaders: Record<string, string> = { ...baseHeaders };
+    
+    // 动态添加认证 token（如果需要）
+    if (!skipAuth) {
+      const token = await getAuthToken();
+      if (token) {
+        requestHeaders["Authorization"] = `Bearer ${token}`;
+      }
+    }
+
+    debugLog("Request:", {
+      method: config.method || "GET",
+      url: fullUrl,
+      headers: requestHeaders,
+      body: fetchConfig.body,
+    });
+
+    // 在生产环境也记录关键请求信息（用于调试连接问题）
+    if (import.meta.env.PROD && url.includes("/api/auth/social/login")) {
+      console.log("[HTTP] Social login request:", {
+        method: config.method || "GET",
+        url: fullUrl,
+        hasBody: !!fetchConfig.body,
+      });
+    }
+
     const controller = new AbortController();
     const timeoutId =
       timeout > 0 ? setTimeout(() => controller.abort(), timeout) : null;
@@ -509,8 +512,8 @@ const refreshAccessToken = async (): Promise<boolean> => {
       const data = (await response.json()) as TokenRefreshResponse;
 
       if (data.access && data.refresh) {
-        setAuthToken(data.access);
-        setRefreshToken(data.refresh);
+        await setAuthToken(data.access);
+        await setRefreshToken(data.refresh);
         debugLog("Token refreshed successfully");
         return true;
       }

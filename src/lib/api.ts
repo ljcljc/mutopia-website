@@ -884,7 +884,7 @@ export async function submitBooking(
   params: BookingSubmitIn
 ): Promise<BookingOut> {
   const response = await http.post<BookingOut>(
-    "/api/bookings/bookings/submit",
+    "/api/bookings/submit",
     params
   );
   return response.data;
@@ -1037,6 +1037,12 @@ export interface PaymentIntentOut {
   payment_id: number;
 }
 
+export interface PaymentSessionOut {
+  url: string;
+  session_id: string;
+  payment_id: number;
+}
+
 /**
  * 创建押金支付意图
  */
@@ -1051,6 +1057,19 @@ export async function createDepositIntent(
 }
 
 /**
+ * 创建押金支付会话（Stripe Checkout）
+ */
+export async function createDepositSession(
+  bookingId: number
+): Promise<PaymentSessionOut> {
+  const response = await http.post<PaymentSessionOut>(
+    `/api/payments/payments/create_deposit_session?booking_id=${bookingId}`,
+    undefined
+  );
+  return response.data;
+}
+
+/**
  * 创建最终支付意图
  */
 export async function createFinalIntent(
@@ -1058,6 +1077,19 @@ export async function createFinalIntent(
 ): Promise<PaymentIntentOut> {
   const response = await http.post<PaymentIntentOut>(
     `/api/payments/payments/create_final_intent?booking_id=${bookingId}`,
+    undefined
+  );
+  return response.data;
+}
+
+/**
+ * 创建最终支付会话（Stripe Checkout）
+ */
+export async function createFinalSession(
+  bookingId: number
+): Promise<PaymentSessionOut> {
+  const response = await http.post<PaymentSessionOut>(
+    `/api/payments/payments/create_final_session?booking_id=${bookingId}`,
     undefined
   );
   return response.data;
