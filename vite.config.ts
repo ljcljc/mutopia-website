@@ -45,6 +45,28 @@ export default defineConfig(({ mode }) => {
         "@": resolve(fileURLToPath(new URL(".", import.meta.url)), "src"),
       },
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: (id) => {
+            // 将 node_modules 中的大型依赖单独打包
+            if (id.includes('node_modules')) {
+              // React 相关库
+              if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+                return 'react-vendor';
+              }
+              // UI 组件库
+              if (id.includes('sonner') || id.includes('@radix-ui')) {
+                return 'ui-vendor';
+              }
+              // 其他第三方库
+              return 'vendor';
+            }
+          },
+        },
+      },
+      chunkSizeWarningLimit: 600, // 提高警告阈值到 600 KB
+    },
     server: {
       proxy: {
         // 代理所有 /api 请求到后端服务器，解决 CORS 问题

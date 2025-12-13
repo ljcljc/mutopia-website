@@ -6,12 +6,13 @@ import "./styles/globals.css";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { useAuthStore } from "@/components/auth/authStore";
-import { getEncryptedItem } from "@/lib/encryption";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
 
 // Load user info from encrypted localStorage on app start
 const loadUserInfo = async () => {
   try {
+    // Use dynamic import to avoid mixing static and dynamic imports
+    const { getEncryptedItem } = await import("@/lib/encryption");
     const userInfoStr = await getEncryptedItem(STORAGE_KEYS.USER_INFO);
     if (userInfoStr) {
       const userInfo = JSON.parse(userInfoStr);
