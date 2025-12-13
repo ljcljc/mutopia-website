@@ -46,6 +46,7 @@ interface BookingState {
   selectedAddressId: number | null; // 选中的地址 ID
   selectedStoreId: number | null; // 选中的门店 ID（用于 in_store 服务）
   addresses: AddressOut[]; // 用户已保存的地址列表
+  isLoadingAddresses: boolean; // 是否正在加载地址列表
   stores: StoreLocationOut[]; // 门店列表
 
   // Step 2: Pet information - 使用与 API 一致的字段名称
@@ -168,14 +169,15 @@ interface BookingState {
 
 const initialState = {
   currentStep: 1,
-  address: "100 Vancouver Crescent",
+  address: "",
   serviceType: "mobile" as ServiceType,
-  city: "Miramichi",
-  province: "NB",
-  postCode: "E1N 2E6",
+  city: "",
+  province: "",
+  postCode: "",
   selectedAddressId: null as number | null,
   selectedStoreId: null as number | null,
   addresses: [] as AddressOut[],
+  isLoadingAddresses: false,
   stores: [] as StoreLocationOut[],
   petName: "",
   petType: "dog" as PetType,
@@ -270,9 +272,15 @@ export const useBookingStore = create<BookingState>((set) => ({
     }),
 
   loadAddresses: async () => {
+    const state = useBookingStore.getState();
+    // 如果已经在加载中，则不再请求（防止重复调用）
+    if (state.isLoadingAddresses) {
+      return;
+    }
     try {
+      set({ isLoadingAddresses: true });
       const addresses = await getAddresses();
-      set({ addresses });
+      set({ addresses, isLoadingAddresses: false });
       // 如果有默认地址，自动选择
       const defaultAddress = addresses.find((addr) => addr.is_default);
       if (defaultAddress) {
@@ -280,7 +288,7 @@ export const useBookingStore = create<BookingState>((set) => ({
       }
     } catch (error) {
       console.error("Failed to load addresses:", error);
-      set({ addresses: [] });
+      set({ addresses: [], isLoadingAddresses: false });
     }
   },
 
