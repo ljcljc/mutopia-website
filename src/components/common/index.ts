@@ -18,6 +18,7 @@ export * from "./FileUpload";
 export * from "./DatePicker";
 export * from "./OrangeButton";
 export * from "./PurpleButton";
+export * from "./BrownOutlineButton";
 export * from "./Radio";
 export { default as ScrollToTop } from "./ScrollToTop";
 export * from "./CustomRadio";

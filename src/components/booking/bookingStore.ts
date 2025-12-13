@@ -163,6 +163,7 @@ interface BookingState {
   getAddressPayload: () => AddressIn; // 转换为 AddressIn 格式
   getBookingSubmitPayload: () => BookingSubmitIn; // 转换为 BookingSubmitIn 格式
   reset: () => void;
+  hasFormData: () => boolean; // 检查表单是否有内容
 }
 
 const initialState = {
@@ -547,4 +548,45 @@ export const useBookingStore = create<BookingState>((set) => ({
   setSelectedTimeSlots: (slots) => set({ selectedTimeSlots: slots }),
 
   reset: () => set(initialState),
+
+  hasFormData: (): boolean => {
+    const state = useBookingStore.getState();
+    // 检查关键字段是否有内容（排除初始默认值）
+    const hasAddressData: boolean = state.address !== initialState.address || 
+      state.city !== initialState.city || 
+      state.province !== initialState.province || 
+      state.postCode !== initialState.postCode ||
+      state.selectedAddressId !== null ||
+      state.selectedStoreId !== null;
+    
+    const hasPetData: boolean = state.petName !== "" ||
+      state.breed !== "" ||
+      state.dateOfBirth !== "" ||
+      state.gender !== "" ||
+      state.weight !== "" ||
+      state.coatCondition !== "" ||
+      state.behavior !== "" ||
+      state.groomingFrequency !== "" ||
+      state.petPhoto !== null ||
+      state.referenceStyles.length > 0 ||
+      state.photoIds.length > 0 ||
+      state.referencePhotoIds.length > 0 ||
+      state.specialNotes !== "";
+    
+    const hasServiceData: boolean = state.serviceId !== null ||
+      state.addOns.length > 0 ||
+      state.selectedTimeSlots.length > 0 ||
+      state.notes !== "";
+    
+    const hasMembershipData: boolean = state.useMembership ||
+      state.membershipPlanId !== null ||
+      state.useMembershipDiscount ||
+      state.useCashCoupon ||
+      state.couponType !== null;
+    
+    // 如果当前步骤大于1，也认为有数据（用户至少进入了Step2）
+    const hasProgress: boolean = state.currentStep > 1;
+    
+    return hasAddressData || hasPetData || hasServiceData || hasMembershipData || hasProgress;
+  },
 }));
