@@ -4,6 +4,7 @@ import { OrangeButton, Checkbox, MembershipCard, type FeatureItem } from "@/comp
 import { useBookingStore } from "./bookingStore";
 import { cn } from "@/components/ui/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getServicePrice } from "@/lib/pricing";
 
 export function Step4() {
   const {
@@ -24,6 +25,8 @@ export function Step4() {
     previousStep,
     nextStep,
     userInfo,
+    weight,
+    weightUnit,
   } = useBookingStore();
 
   // Load membership plans on mount
@@ -54,11 +57,7 @@ export function Step4() {
 
   // Calculate prices
   const selectedService = services.find((s) => s.id === serviceId);
-  const packagePrice = selectedService
-    ? typeof selectedService.base_price === "string"
-      ? parseFloat(selectedService.base_price)
-      : selectedService.base_price
-    : 0;
+  const packagePrice = getServicePrice(selectedService, weight, weightUnit);
 
   // Calculate add-ons price and get selected add-ons details
   // In Step4, we assume user will be a member, so if included_in_membership is true, price should be 0
@@ -129,9 +128,6 @@ export function Step4() {
 
   // Calculate discounts
   // discount_rate is the retention rate, so discount amount = original * (1 - discount_rate)
-  const membershipDiscount = useMembershipDiscount && discountRate < 1
-    ? originalTotal * (1 - discountRate)
-    : 0;
   const cashCouponDiscount = useCashCoupon ? cashCouponInfo.amount : 0;
 
   // Calculate final prices with membership discount

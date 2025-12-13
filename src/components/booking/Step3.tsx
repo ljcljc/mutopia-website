@@ -5,6 +5,7 @@ import { useBookingStore } from "./bookingStore";
 import { useAuthStore } from "@/components/auth/authStore";
 import { LoginModal } from "@/components/auth/LoginModal";
 import { cn } from "@/components/ui/utils";
+import { getServicePrice } from "@/lib/pricing";
 
 export function Step3() {
   const {
@@ -21,6 +22,8 @@ export function Step3() {
     loadAddOns,
     previousStep,
     nextStep,
+    weight,
+    weightUnit,
   } = useBookingStore();
 
   const user = useAuthStore((state) => state.user);
@@ -119,11 +122,7 @@ export function Step3() {
 
   // Calculate prices
   const selectedService = services.find((s) => s.id === serviceId);
-  const packagePrice = selectedService
-    ? typeof selectedService.base_price === "string"
-      ? parseFloat(selectedService.base_price)
-      : selectedService.base_price
-    : 0;
+  const packagePrice = getServicePrice(selectedService, weight, weightUnit);
   
   // Calculate add-ons price and get selected add-ons details
   // If included_in_membership is true and user is a member, price should be 0
@@ -177,10 +176,7 @@ export function Step3() {
                 </div>
               ) : (
                 services.map((service) => {
-                  const price =
-                    typeof service.base_price === "string"
-                      ? parseFloat(service.base_price)
-                      : service.base_price;
+                  const price = getServicePrice(service, weight, weightUnit);
                   return (
                     <CustomRadio
                       key={service.id}

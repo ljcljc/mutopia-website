@@ -6,7 +6,7 @@ import { cn } from "@/components/ui/utils";
 import { TIME_PERIODS } from "@/constants/calendar";
 import { buildImageUrl, submitBooking, createDepositSession } from "@/lib/api";
 import { toast } from "sonner";
-import { HttpError } from "@/lib/http";
+import { getServicePrice } from "@/lib/pricing";
 
 // Radio button component matching CustomRadio.tsx
 function RadioButton({ isChecked, className }: { isChecked: boolean; className?: string }) {
@@ -97,11 +97,7 @@ export function Step6() {
   const selectedService = services.find((s) => s.id === serviceId);
 
   // Calculate prices
-  const packagePrice = selectedService
-    ? typeof selectedService.base_price === "string"
-      ? parseFloat(selectedService.base_price)
-      : selectedService.base_price
-    : 0;
+  const packagePrice = getServicePrice(selectedService, weight, weightUnit);
 
   // Calculate add-ons price
   const selectedAddOnsDetails = useMemo(() => {
@@ -284,27 +280,7 @@ export function Step6() {
       toast.success("Redirecting to payment...");
     } catch (error) {
       console.error("Failed to submit booking:", error);
-      
-      // Handle 401 Unauthorized error with detailed logging
-      if (error instanceof HttpError && error.status === 401) {
-        console.error("401 Unauthorized - Token may be expired or invalid");
-        console.error("Error details:", {
-          status: error.status,
-          message: error.message,
-          data: error.data,
-        });
-        
-        // Check if token refresh was attempted (http.ts should handle this automatically)
-        // If we reach here, it means token refresh also failed
-        toast.error("Session expired. Please login again and try submitting the booking.");
-        return;
-      }
-      
-      // Handle other errors
-      const errorMessage = error instanceof HttpError 
-        ? error.message 
-        : "Failed to submit booking. Please try again.";
-      toast.error(errorMessage);
+      toast.error("Failed to submit booking. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
