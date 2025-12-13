@@ -169,7 +169,7 @@ export function ImagePreview({
 
               {/* 当前索引 */}
               <div className="h-[17.5px] relative shrink-0 w-[50px]">
-                <p className="absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] left-0 text-[#101828] text-[12.25px] top-[-0.5px] w-[28px] whitespace-pre-wrap">
+                <p className="absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] left-0 text-[#101828] text-[12.25px] top-[-0.5px] w-full whitespace-pre-wrap">
                   {currentIndex + 1} / {totalImages}
                 </p>
               </div>
