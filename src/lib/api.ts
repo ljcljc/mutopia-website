@@ -281,6 +281,30 @@ export interface BookingSubmitIn {
   store_id?: number | null;
 }
 
+// Booking quote types
+export interface BookingQuoteIn {
+  service_id: number;
+  add_on_ids?: number[]; // default: []
+  weight_value?: number | string | null;
+  weight_unit?: string; // default: "kg"
+  membership_plan_id?: number | null;
+  open_membership?: boolean; // default: false
+  use_special_coupon?: boolean; // default: false
+  use_official_coupon?: boolean; // default: false
+}
+
+export interface BookingPriceBreakdown {
+  package_amount: number | string;
+  addons_amount: number | string;
+  membership_fee: number | string;
+  discount_rate: number | string;
+  discount_amount: number | string;
+  coupon_amount: number | string;
+  payable_amount: number | string;
+  used_coupon_ids?: number[]; // default: []
+  currency?: string; // default: "usd"
+}
+
 // 门店相关类型
 export interface StoreLocationOut {
   id: number;
@@ -533,6 +557,29 @@ export interface MembershipPlanOut {
   benefits?: MembershipBenefitOut[] | null;
 }
 
+// 促销相关类型
+export interface CouponOut {
+  id: number;
+  template_id: number;
+  type: string;
+  amount: number | string;
+  expires_at: string;
+  status: string;
+  notes?: string | null;
+}
+
+export interface InviteBindIn {
+  invite_code: string;
+}
+
+export interface RedeemCodeIn {
+  code: string;
+}
+
+export interface BirthdayClaimIn {
+  pet_id: number;
+}
+
 /**
  * 获取会员套餐列表
  */
@@ -542,6 +589,51 @@ export async function getMembershipPlans(): Promise<MembershipPlanOut[]> {
     {
       skipAuth: true,
     }
+  );
+  return response.data;
+}
+
+/**
+ * 获取我的优惠券列表
+ */
+export async function getMyCoupons(): Promise<CouponOut[]> {
+  const response = await http.get<CouponOut[]>("/api/promotions/coupons");
+  return response.data;
+}
+
+/**
+ * 兑换优惠券代码
+ */
+export async function redeemCouponCode(
+  data: RedeemCodeIn
+): Promise<CouponOut> {
+  const response = await http.post<CouponOut>(
+    "/api/promotions/coupons/redeem",
+    data
+  );
+  return response.data;
+}
+
+/**
+ * 绑定邀请码
+ */
+export async function bindInvitation(data: InviteBindIn): Promise<OkOut> {
+  const response = await http.post<OkOut>(
+    "/api/promotions/invite/bind",
+    data
+  );
+  return response.data;
+}
+
+/**
+ * 生日领取优惠券
+ */
+export async function claimBirthdayCoupon(
+  data: BirthdayClaimIn
+): Promise<CouponOut> {
+  const response = await http.post<CouponOut>(
+    "/api/promotions/coupons/birthday_claim",
+    data
   );
   return response.data;
 }
@@ -768,6 +860,19 @@ export async function createBooking(
   const response = await http.post<BookingOut>(
     `/api/bookings/bookings?${queryParams.toString()}`,
     undefined
+  );
+  return response.data;
+}
+
+/**
+ * 获取预约报价（价格明细）
+ */
+export async function getBookingQuote(
+  params: BookingQuoteIn
+): Promise<BookingPriceBreakdown> {
+  const response = await http.post<BookingPriceBreakdown>(
+    "/api/bookings/quote",
+    params
   );
   return response.data;
 }
