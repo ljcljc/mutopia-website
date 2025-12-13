@@ -29,7 +29,6 @@ export default function PaymentSuccess() {
     services,
     serviceId,
     membershipPlans,
-    useMembership,
   } = useBookingStore();
 
   // Get selected service

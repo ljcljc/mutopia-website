@@ -1,6 +1,6 @@
 // Progress step components for the booking flow
 
-export function ProgressStepCompleted({ number }: { number: number }) {
+export function ProgressStepCompleted() {
     return (
       <div className="relative shrink-0 size-[36px]">
         <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 36 36">
@@ -99,7 +99,6 @@ export function ProgressStepCompleted({ number }: { number: number }) {
             const step = index + 1;
             const isCompleted = step < currentStep;
             const isActive = step === currentStep;
-            const isLast = step === totalSteps;
             
             return (
               <div 
@@ -107,7 +106,7 @@ export function ProgressStepCompleted({ number }: { number: number }) {
                 className="basis-0 content-stretch flex grow items-center min-h-px min-w-px relative shrink-0"
               >
                 {isCompleted ? (
-                  <ProgressStepCompleted number={step} />
+                  <ProgressStepCompleted />
                 ) : isActive ? (
                   <ProgressStepActive number={step} />
                 ) : (

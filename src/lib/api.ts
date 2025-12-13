@@ -1,5 +1,7 @@
 // API utility functions
 import { http, setAuthToken, setRefreshToken, clearAuthTokens } from "./http";
+import { getEncryptedItem } from "./encryption";
+import { STORAGE_KEYS } from "./storageKeys";
 
 // ==================== 类型定义 ====================
 
@@ -804,12 +806,9 @@ async function uploadFileWithProgress(
     // 设置请求头（包括认证 token）
     xhr.open("POST", fullUrl);
     
-        // 获取并设置认证 token
+    // 获取并设置认证 token
     (async () => {
       try {
-        // 动态导入以避免循环依赖
-        const { getEncryptedItem } = await import("./encryption");
-        const { STORAGE_KEYS } = await import("./storageKeys");
         const token = await getEncryptedItem(STORAGE_KEYS.ACCESS_TOKEN);
         if (token) {
           xhr.setRequestHeader("Authorization", `Bearer ${token}`);
