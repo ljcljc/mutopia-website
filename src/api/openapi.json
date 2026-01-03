@@ -1265,60 +1265,6 @@
         },
         "security": [{ "JWTAuth": [] }]
       }
-    },
-    "/api/promotions/coupons/redeem": {
-      "post": {
-        "operationId": "api_promotions_redeem_coupon_code",
-        "summary": "Redeem Coupon Code",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/CouponOut" }
-              }
-            }
-          }
-        },
-        "tags": ["promotions"],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/RedeemCodeIn" }
-            }
-          },
-          "required": true
-        },
-        "security": [{ "JWTAuth": [] }]
-      }
-    },
-    "/api/promotions/coupons/birthday_claim": {
-      "post": {
-        "operationId": "api_promotions_birthday_claim",
-        "summary": "Birthday Claim",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/CouponOut" }
-              }
-            }
-          }
-        },
-        "tags": ["promotions"],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/BirthdayClaimIn" }
-            }
-          },
-          "required": true
-        },
-        "security": [{ "JWTAuth": [] }]
-      }
     }
   },
   "components": {
@@ -2028,14 +1974,19 @@
             "title": "Open Membership",
             "type": "boolean"
           },
-          "use_special_coupon": {
+          "use_gift_coupon": {
             "default": false,
-            "title": "Use Special Coupon",
+            "title": "Use Gift Coupon",
             "type": "boolean"
           },
-          "use_official_coupon": {
+          "use_birthday_coupon": {
             "default": false,
-            "title": "Use Official Coupon",
+            "title": "Use Birthday Coupon",
+            "type": "boolean"
+          },
+          "use_custom_coupon": {
+            "default": false,
+            "title": "Use Custom Coupon",
             "type": "boolean"
           }
         },
@@ -2132,14 +2083,19 @@
             "title": "Open Membership",
             "type": "boolean"
           },
-          "use_special_coupon": {
+          "use_gift_coupon": {
             "default": false,
-            "title": "Use Special Coupon",
+            "title": "Use Gift Coupon",
             "type": "boolean"
           },
-          "use_official_coupon": {
+          "use_birthday_coupon": {
             "default": false,
-            "title": "Use Official Coupon",
+            "title": "Use Birthday Coupon",
+            "type": "boolean"
+          },
+          "use_custom_coupon": {
+            "default": false,
+            "title": "Use Custom Coupon",
             "type": "boolean"
           },
           "address": { "$ref": "#/components/schemas/AddressIn" },
@@ -2395,6 +2351,8 @@
           "id": { "title": "Id", "type": "integer" },
           "template_id": { "title": "Template Id", "type": "integer" },
           "type": { "title": "Type", "type": "string" },
+          "category": { "title": "Category", "type": "string" },
+          "apply_scope": { "title": "Apply Scope", "type": "string" },
           "amount": {
             "anyOf": [
               { "type": "number" },
@@ -2405,7 +2363,14 @@
             ],
             "title": "Amount"
           },
-          "expires_at": { "title": "Expires At", "type": "string" },
+          "valid_from": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Valid From"
+          },
+          "expires_at": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Expires At"
+          },
           "status": { "title": "Status", "type": "string" },
           "notes": {
             "anyOf": [{ "type": "string" }, { "type": "null" }],
@@ -2416,8 +2381,9 @@
           "id",
           "template_id",
           "type",
+          "category",
+          "apply_scope",
           "amount",
-          "expires_at",
           "status"
         ],
         "title": "CouponOut",
@@ -2429,18 +2395,6 @@
         },
         "required": ["invite_code"],
         "title": "InviteBindIn",
-        "type": "object"
-      },
-      "RedeemCodeIn": {
-        "properties": { "code": { "title": "Code", "type": "string" } },
-        "required": ["code"],
-        "title": "RedeemCodeIn",
-        "type": "object"
-      },
-      "BirthdayClaimIn": {
-        "properties": { "pet_id": { "title": "Pet Id", "type": "integer" } },
-        "required": ["pet_id"],
-        "title": "BirthdayClaimIn",
         "type": "object"
       }
     },

@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { Icon } from "@/components/common/Icon";
-import { OrangeButton, Checkbox, MembershipCard, type FeatureItem } from "@/components/common";
+import { OrangeButton, TertiaryButton, Checkbox, MembershipCard, type FeatureItem } from "@/components/common";
 import { useBookingStore } from "./bookingStore";
 import { cn } from "@/components/ui/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -569,13 +569,15 @@ export function Step4() {
           </OrangeButton>
         </div>
         {!hasDeclinedMembership && (
-          <OrangeButton
-            size="medium"
-            variant="outline"
+          <TertiaryButton
+            variant="orange"
             onClick={handleNoThanks}
+            className="h-[36px] rounded-[32px]"
+            fontSize={16}
+            borderWidth={2}
           >
-            No, thanks
-          </OrangeButton>
+            No, continue at regular price
+          </TertiaryButton>
         )}
       </div>
     </div>

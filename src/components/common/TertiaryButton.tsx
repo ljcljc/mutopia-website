@@ -9,6 +9,8 @@ interface TertiaryButtonProps {
   type?: "button" | "submit" | "reset";
   loading?: boolean;
   disabled?: boolean;
+  fontSize?: number; // Font size in pixels
+  borderWidth?: number; // Border width in pixels (default: 1)
 }
 
 export function TertiaryButton({
@@ -19,6 +21,8 @@ export function TertiaryButton({
   type = "button",
   loading = false,
   disabled,
+  fontSize = 12,
+  borderWidth = 1,
 }: TertiaryButtonProps) {
   const textColor = variant === "orange" ? "text-[#de6a07]" : "text-[#8b6357]";
   const spinnerColor = variant === "orange" ? "#de6a07" : "#8b6357";
@@ -33,7 +37,7 @@ export function TertiaryButton({
       disabled={isDisabled}
       className={`
         relative rounded-[12px] h-[28px] 
-        border border-transparent
+        border-transparent
         ${hoverBorderColor}
         focus:border-[#2374ff] 
         active:border-[#2374ff]
@@ -41,6 +45,7 @@ export function TertiaryButton({
         ${isDisabled ? "opacity-60 cursor-not-allowed" : ""}
         ${className}
       `}
+      style={{ borderWidth: `${borderWidth}px`, borderStyle: "solid" }}
       data-name="Button tertiary"
     >
       <div className="flex flex-row items-center justify-center size-full relative">
@@ -55,7 +60,8 @@ export function TertiaryButton({
           className={`box-border content-stretch flex gap-[12px] items-center justify-center px-[12px] py-[4px] relative size-full ${loading ? "invisible" : ""}`}
         >
           <p
-            className={`font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] relative shrink-0 ${textColor} text-[12px] text-nowrap whitespace-pre`}
+            className={`font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] relative shrink-0 ${textColor} text-nowrap whitespace-pre`}
+            style={{ fontSize: `${fontSize}px` }}
           >
             {children}
           </p>
