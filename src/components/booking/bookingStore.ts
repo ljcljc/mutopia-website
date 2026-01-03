@@ -6,6 +6,7 @@ import {
   getServices,
   getAddOns,
   getMembershipPlans,
+  getMyCoupons,
   type MeOut,
   type AddressOut,
   type AddressIn,
@@ -15,6 +16,7 @@ import {
   type ServiceOut,
   type AddOnOut,
   type MembershipPlanOut,
+  type CouponOut,
   type BookingSubmitIn,
   type TimeSlotIn,
 } from "@/lib/api";
@@ -100,6 +102,11 @@ interface BookingState {
   membershipPlans: MembershipPlanOut[];
   isLoadingMembershipPlans: boolean;
 
+  // Coupons (loaded from API)
+  coupons: CouponOut[];
+  isLoadingCoupons: boolean;
+  selectedCouponIds: number[]; // Array of selected coupon IDs
+
   // Step 4: Membership and discount options
   useMembership: boolean; // Maps to open_membership in API
   membershipPlanId: number | null; // Maps to membership_plan_id in API
@@ -152,6 +159,9 @@ interface BookingState {
   loadServices: () => Promise<void>;
   loadAddOns: () => Promise<void>;
   loadMembershipPlans: () => Promise<void>;
+  loadCoupons: () => Promise<void>;
+  setSelectedCouponIds: (ids: number[]) => void;
+  toggleCoupon: (couponId: number) => void;
   setUseMembership: (value: boolean) => void;
   setMembershipPlanId: (id: number | null) => void;
   setUseMembershipDiscount: (value: boolean) => void;
@@ -212,6 +222,9 @@ const initialState = {
   isLoadingAddOns: false,
   membershipPlans: [] as MembershipPlanOut[],
   isLoadingMembershipPlans: false,
+  coupons: [] as CouponOut[],
+  isLoadingCoupons: false,
+  selectedCouponIds: [] as number[],
   useMembership: false,
   membershipPlanId: null as number | null,
   useMembershipDiscount: false,
@@ -435,6 +448,35 @@ export const useBookingStore = create<BookingState>((set) => ({
     const state = useBookingStore.getState();
     const weightValue = state.weight ? parseFloat(state.weight) : null;
     
+    // Determine coupon usage based on selected coupons
+    // Only check real coupons (positive IDs), ignore virtual coupons (negative IDs)
+    const selectedRealCoupons = state.coupons.filter(
+      (c) => state.selectedCouponIds.includes(c.id) && c.id > 0 && c.status === "active"
+    );
+    
+    // Check if any special gift coupons are selected (category: "gift" or type: "gift")
+    const useGiftCoupon = selectedRealCoupons.some(
+      (c) => c.category === "gift" || c.type === "gift" || c.type === "membership_gift"
+    );
+    
+    // Check if any birthday coupons are selected (category: "birthday" or type: "birthday")
+    const useBirthdayCoupon = selectedRealCoupons.some(
+      (c) => c.category === "birthday" || c.type === "birthday"
+    );
+    
+    // Check if any custom coupons are selected (category: "custom" or type: "custom")
+    const useCustomCoupon = selectedRealCoupons.some(
+      (c) => c.category === "custom" || c.type === "custom"
+    );
+    
+    console.log('[Booking Submit] Coupon flags:', {
+      selectedCouponIds: state.selectedCouponIds,
+      selectedRealCoupons: selectedRealCoupons.map(c => ({ id: c.id, category: c.category, type: c.type })),
+      useGiftCoupon,
+      useBirthdayCoupon,
+      useCustomCoupon,
+    });
+    
     return {
       service_id: state.serviceId!,
       add_on_ids: state.addOns,
@@ -442,8 +484,9 @@ export const useBookingStore = create<BookingState>((set) => ({
       weight_unit: state.weightUnit,
       membership_plan_id: state.membershipPlanId,
       open_membership: state.useMembership,
-      use_special_coupon: state.useMembershipDiscount,
-      use_official_coupon: state.useCashCoupon,
+      use_gift_coupon: useGiftCoupon,
+      use_birthday_coupon: useBirthdayCoupon,
+      use_custom_coupon: useCustomCoupon,
       address: useBookingStore.getState().getAddressPayload(),
       pet: useBookingStore.getState().getPetPayload(),
       preferred_time_slots: state.selectedTimeSlots,
@@ -543,6 +586,43 @@ export const useBookingStore = create<BookingState>((set) => ({
       set({ membershipPlans: [], isLoadingMembershipPlans: false });
     }
   },
+
+  loadCoupons: async () => {
+    const state = useBookingStore.getState();
+    // 如果已经在加载中，则不再请求
+    if (state.isLoadingCoupons) {
+      return;
+    }
+    // 如果已经有优惠券数据，不再请求（除非需要刷新）
+    if (state.coupons.length > 0) {
+      return;
+    }
+    try {
+      set({ isLoadingCoupons: true });
+      const coupons = await getMyCoupons();
+      console.log("Loaded coupons:", coupons);
+      set({ coupons, isLoadingCoupons: false });
+    } catch (error) {
+      console.error("Failed to load coupons:", error);
+      set({ coupons: [], isLoadingCoupons: false });
+    }
+  },
+
+  setSelectedCouponIds: (ids) => set({ selectedCouponIds: ids }),
+
+  toggleCoupon: (couponId) =>
+    set((state) => {
+      const isSelected = state.selectedCouponIds.includes(couponId);
+      if (isSelected) {
+        return {
+          selectedCouponIds: state.selectedCouponIds.filter((id) => id !== couponId),
+        };
+      } else {
+        return {
+          selectedCouponIds: [...state.selectedCouponIds, couponId],
+        };
+      }
+    }),
 
   setUseMembership: (value) => set({ useMembership: value }),
   setUseMembershipDiscount: (value) => set({ useMembershipDiscount: value }),

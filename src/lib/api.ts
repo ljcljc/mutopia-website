@@ -274,8 +274,9 @@ export interface BookingSubmitIn {
   weight_unit?: string; // default: "kg"
   membership_plan_id?: number | null;
   open_membership?: boolean; // default: false
-  use_special_coupon?: boolean; // default: false
-  use_official_coupon?: boolean; // default: false
+  use_gift_coupon?: boolean; // default: false
+  use_birthday_coupon?: boolean; // default: false
+  use_custom_coupon?: boolean; // default: false
   address: AddressIn;
   pet: PetPayload;
   preferred_time_slots?: TimeSlotIn[];
@@ -291,8 +292,9 @@ export interface BookingQuoteIn {
   weight_unit?: string; // default: "kg"
   membership_plan_id?: number | null;
   open_membership?: boolean; // default: false
-  use_special_coupon?: boolean; // default: false
-  use_official_coupon?: boolean; // default: false
+  use_gift_coupon?: boolean; // default: false
+  use_birthday_coupon?: boolean; // default: false
+  use_custom_coupon?: boolean; // default: false
 }
 
 export interface BookingPriceBreakdown {
@@ -564,8 +566,11 @@ export interface CouponOut {
   id: number;
   template_id: number;
   type: string;
+  category: string;
+  apply_scope: string;
   amount: number | string;
-  expires_at: string;
+  valid_from?: string | null;
+  expires_at?: string | null;
   status: string;
   notes?: string | null;
 }
