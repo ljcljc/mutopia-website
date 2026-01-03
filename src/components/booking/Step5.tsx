@@ -16,7 +16,8 @@ export function Step5() {
   const [showYearPicker, setShowYearPicker] = useState(false);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
 
-  // Date range: today to 1 year from today
+  // Date range: today to exactly 1 year from today (365 days)
+  // This ensures users can only book appointments within one year
   const minDate = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -24,18 +25,23 @@ export function Step5() {
   }, []);
 
   const maxDate = useMemo(() => {
+    // Calculate exactly one year from today
     const oneYearLater = new Date();
     oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+    // Set to end of day to include the entire last day
     oneYearLater.setHours(23, 59, 59, 999);
     return oneYearLater;
   }, []);
 
   // Date disabled logic is now handled by Calendar component
+  // The Calendar component will disable dates outside the minDate-maxDate range
 
-  // Generate year range (current year to current year + 1)
+  // Generate year range for year picker (current year to current year + 1)
+  // This limits the year picker to only show years within the booking range
   const yearRange = useMemo(() => {
     const currentYear = new Date().getFullYear();
     const maxYear = maxDate.getFullYear();
+    // Ensure we only show years within the one-year booking window
     return { min: currentYear, max: maxYear };
   }, [maxDate]);
 

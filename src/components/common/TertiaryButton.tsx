@@ -42,7 +42,7 @@ export function TertiaryButton({
         focus:border-[#2374ff] 
         active:border-[#2374ff]
         transition-colors duration-200
-        ${isDisabled ? "opacity-60 cursor-not-allowed" : ""}
+        ${isDisabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}
         ${className}
       `}
       style={{ borderWidth: `${borderWidth}px`, borderStyle: "solid" }}
