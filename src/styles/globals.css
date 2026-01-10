@@ -198,6 +198,72 @@ label {
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  
+  /* Account Sidebar 自定义颜色（待从 Figma 精确测量后更新） */
+  --account-sidebar-bg: #FFFFFF;
+  --account-sidebar-text: #8B6357; /* 默认文字颜色，与图标颜色一致 */
+  --account-sidebar-active-bg: #FAE7D5;
+  --account-sidebar-active-text: #DE6A07; /* 激活状态文字颜色 */
+  --account-sidebar-border: rgba(0, 0, 0, 0.1);
+  --account-sidebar-danger: #DE1507;
+}
+
+/* Account Sidebar 自定义样式 */
+/* 默认状态下文字和图标颜色 */
+[data-sidebar="menu-button"] {
+  color: var(--account-sidebar-text) !important;
+}
+
+/* 默认颜色，但不包括辅助链接的特殊类 */
+[data-sidebar="menu-button"] svg:not(.sidebar-icon-danger):not(.sidebar-icon-default),
+[data-sidebar="menu-button"] span:not(.sidebar-text-danger):not(.sidebar-text-default) {
+  color: #8B6357 !important;
+}
+
+/* 激活状态 */
+[data-sidebar="menu-button"][data-active="true"] {
+  background-color: var(--account-sidebar-active-bg) !important;
+  color: var(--account-sidebar-active-text) !important;
+  border-radius: 8px;
+  font-weight: 500; /* font-medium */
+  /* 注意：根据 Figma 截图，激活状态没有左侧边框，只有背景色 */
+}
+
+/* 激活状态下图标和文字颜色 */
+[data-sidebar="menu-button"][data-active="true"] svg,
+[data-sidebar="menu-button"][data-active="true"] span {
+  color: #DE6A07 !important;
+}
+
+/* hover 状态背景 */
+[data-sidebar="menu-button"]:hover:not([data-active="true"]) {
+  background-color: var(--account-sidebar-active-bg);
+}
+
+/* hover 状态下图标和文字颜色 */
+[data-sidebar="menu-button"]:hover:not([data-active="true"]) svg,
+[data-sidebar="menu-button"]:hover:not([data-active="true"]) span {
+  color: #DE6A07 !important;
+}
+
+/* 辅助链接区域 - Logout 默认颜色（提高优先级） */
+[data-sidebar="menu-button"] .sidebar-icon-danger,
+[data-sidebar="menu-button"] .sidebar-text-danger {
+  color: #E7000B !important;
+}
+
+/* 辅助链接区域 - How It Works 默认颜色（提高优先级） */
+[data-sidebar="menu-button"] .sidebar-icon-default,
+[data-sidebar="menu-button"] .sidebar-text-default {
+  color: #364153 !important;
+}
+
+/* 辅助链接区域 - 激活和 hover 状态 */
+[data-sidebar="menu-button"][data-active="true"] .sidebar-icon-active,
+[data-sidebar="menu-button"][data-active="true"] .sidebar-text-active,
+[data-sidebar="menu-button"]:hover:not([data-active="true"]) .sidebar-icon-default,
+[data-sidebar="menu-button"]:hover:not([data-active="true"]) .sidebar-text-default {
+  color: #DE6A07 !important;
 }
 
 .dark {

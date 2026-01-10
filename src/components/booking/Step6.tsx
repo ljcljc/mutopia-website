@@ -1294,9 +1294,9 @@ export function Step6() {
                   )}
                   {/* Price breakdown */}
                   {isMemberOrPurchasing && (
-                    <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[#DE6A07] text-[12.25px]">
-                      (${serviceTotal.toFixed(2)}{useMembership && ` + $${membershipPrice}`})
-                    </p>
+                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[#DE6A07] text-[12.25px]">
+                    (${serviceTotal.toFixed(2)}{useMembership && ` + $${membershipPrice}`})
+                  </p>
                   )}
                 </div>
                 {/* Tax included */}
@@ -1305,7 +1305,7 @@ export function Step6() {
                 </p>
               </div>
             )}
-          
+            
             {/* Third row and below: Coupon selection - Grouped by type */}
             {isTotalExpanded && (couponGroups.general.length > 0 || couponGroups.special.length > 0) && (
               <div className="content-stretch flex flex-col gap-[4px] items-end relative shrink-0 w-full mt-[8px]">
@@ -1593,22 +1593,22 @@ export function Step6() {
                                         </p>
                                       </div>
                                     )}
-                                    <label className="content-stretch flex items-center gap-[8px] relative shrink-0 cursor-pointer">
-                                      <input
-                                        type="radio"
+                <label className="content-stretch flex items-center gap-[8px] relative shrink-0 cursor-pointer">
+                  <input
+                    type="radio"
                                         name={`special-coupon-${filteredGroup.groupKey}`}
                                         checked={isSelected}
                                         onChange={() => handleSpecialCouponSelect(coupon.id, filteredGroup.groupKey)}
-                                        className="sr-only"
-                                      />
+                    className="sr-only"
+                  />
                                       <RadioButton isChecked={isSelected} />
-                                      <span className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
+                  <span className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
                                         {displayName}
-                                      </span>
-                                      <span className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
+                  </span>
+                  <span className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
                                         -${couponAmount.toFixed(2)}
-                                      </span>
-                                    </label>
+                  </span>
+                </label>
                                   </div>
                                 );
                               })}
@@ -1649,29 +1649,29 @@ export function Step6() {
                               <div key={coupon.id} className="content-stretch flex items-center gap-[8px] relative shrink-0">
                                 {/* Expiration tag */}
                                 {expirationText && expirationText !== "Expired" && (
-                                  <div className="bg-white border border-[#4C4C4C] border-solid content-stretch flex h-[20px] items-center justify-center overflow-clip px-[8px] py-[2px] relative rounded-[12px] shrink-0">
-                                    <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4C4C4C] text-[10px]">
+                  <div className="bg-white border border-[#4C4C4C] border-solid content-stretch flex h-[20px] items-center justify-center overflow-clip px-[8px] py-[2px] relative rounded-[12px] shrink-0">
+                    <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4C4C4C] text-[10px]">
                                       {expirationText}
-                                    </p>
-                                  </div>
+                    </p>
+                  </div>
                                 )}
-                                <label className="content-stretch flex items-center gap-[8px] relative shrink-0 cursor-pointer">
-                                    <input
-                                      type="radio"
+                  <label className="content-stretch flex items-center gap-[8px] relative shrink-0 cursor-pointer">
+                    <input
+                      type="radio"
                                       name={`special-coupon-${filteredGroup.groupKey}`}
                                       checked={isSelected}
                                       onChange={() => handleSpecialCouponSelect(coupon.id, filteredGroup.groupKey)}
-                                      className="sr-only"
-                                    />
+                      className="sr-only"
+                    />
                                   <RadioButton isChecked={isSelected} />
-                                  <span className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
+                    <span className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
                                     {displayName}
-                                  </span>
-                                  <span className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
+                    </span>
+                    <span className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
                                     -${couponAmount.toFixed(2)}
-                                  </span>
-                                </label>
-                              </div>
+                    </span>
+                  </label>
+                </div>
                             );
                           })}
                         </div>

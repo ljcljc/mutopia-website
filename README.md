@@ -431,20 +431,54 @@ function App() {
 
 ### 连接真实 API
 
-修改 `components/LoginModal.tsx` 中的模拟函数：
+项目已集成完整的 API 客户端，位于 `src/lib/api.ts`。所有 API 端点定义在 `src/api/openapi.json`（OpenAPI 3.1.0 规范）。
+
+**主要 API 模块：**
+
+1. **认证模块** (`/api/auth/*`)
+   - 邮箱验证、发送验证码、登录、注册
+   - 社交登录、密码重置
+   - JWT Token 管理（自动加密存储）
+
+2. **服务目录** (`/api/catalog/*`)
+   - 获取服务列表和附加服务
+
+3. **宠物管理** (`/api/pets/*`)
+   - 宠物 CRUD 操作
+   - 照片上传（支持进度回调）
+
+4. **预约管理** (`/api/bookings/*`)
+   - 预约创建、查询、取消
+   - 价格报价、地址管理
+   - 签到/签退、评价
+
+5. **支付管理** (`/api/payments/*`)
+   - Stripe Checkout 集成
+   - 押金和最终支付会话
+
+6. **促销相关** (`/api/promotions/*`)
+   - 会员套餐、优惠券管理
+
+**使用示例：**
 
 ```typescript
-// 将 checkEmailRegistered 改为真实 API 调用
-async function checkEmailRegistered(
-  email: string,
-): Promise<boolean> {
-  const response = await fetch("your-api-endpoint", {
-    method: "POST",
-    body: JSON.stringify({ email }),
-  });
-  return response.json();
-}
+import { checkEmailRegistered, login, getCurrentUser } from "@/lib/api";
+
+// 检查邮箱是否已注册
+const result = await checkEmailRegistered("user@example.com");
+
+// 用户登录（自动保存 token）
+const tokens = await login({
+  email: "user@example.com",
+  password: "password",
+  code: "123456"
+});
+
+// 获取当前用户信息（自动使用保存的 token）
+const user = await getCurrentUser();
 ```
+
+**详细 API 文档：** 查看 `src/api/openapi.json` 或项目记忆文件 `mutopia-api-structure.md`
 
 ## 部署
 

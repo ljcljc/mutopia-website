@@ -38,3 +38,12 @@ if (existsSync(srcDir)) {
 } else {
   console.warn(`Warning: ${srcDir} directory not found. Skipping copy.`);
 }
+
+
+
+
+
+
+
+
+
