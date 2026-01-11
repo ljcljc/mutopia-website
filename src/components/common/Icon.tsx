@@ -79,6 +79,11 @@ import IconPetsSvg from "@/assets/icons/icon-pets.svg?react";
 import IconHelpCircleSvg from "@/assets/icons/icon-help-circle.svg?react";
 import IconLogoutSvg from "@/assets/icons/icon-logout.svg?react";
 import IconDownloadSvg from "@/assets/icons/icon-download.svg?react";
+import IconBirthdaySvg from "@/assets/icons/icon-birthday.svg?react";
+import IconLockSvg from "@/assets/icons/icon-lock.svg?react";
+import IconPencilSvg from "@/assets/icons/icon-pencil.svg?react";
+import IconGiftSvg from "@/assets/icons/icon-gift.svg?react";
+import IconPhoneSvg from "@/assets/icons/icon-phone.svg?react";
 
 // 图标组件映射表
 const iconComponentMap = {
@@ -137,6 +142,11 @@ const iconComponentMap = {
   "help-circle": IconHelpCircleSvg,
   "logout": IconLogoutSvg,
   "download": IconDownloadSvg,
+  "birthday": IconBirthdaySvg,
+  "lock": IconLockSvg,
+  "pencil": IconPencilSvg,
+  "gift": IconGiftSvg,
+  "phone": IconPhoneSvg,
 } as const;
 
 export type IconName = keyof typeof iconComponentMap;
