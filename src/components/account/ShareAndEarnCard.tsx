@@ -31,7 +31,7 @@ export default function ShareAndEarnCard() {
   // 如果 userInfo 还未加载，显示加载状态
   if (!userInfo) {
     return (
-      <div className="bg-white rounded-lg border-2 border-[#DE6A07] p-6">
+      <div className="bg-white rounded-[12px] border-2 border-[#DE6A07] shadow-[0_8px_12px_0_rgba(0,0,0,0.10)] p-7">
         <div className="text-[#4A3C2A] text-sm">Loading...</div>
       </div>
     );
@@ -40,22 +40,22 @@ export default function ShareAndEarnCard() {
   // 如果没有推荐码，仍然显示卡片但显示提示信息
   if (!referralCode) {
     return (
-      <div className="bg-white rounded-lg border-2 border-[#DE6A07] p-6">
+      <div className="bg-white rounded-[12px] border-2 border-[#DE6A07] shadow-[0_8px_12px_0_rgba(0,0,0,0.10)] p-7">
         {/* Header */}
         <div className="flex items-center gap-2 mb-4">
           <Icon name="gift" className="w-5 h-5 text-[#DE6A07] shrink-0" />
-          <h2 className="font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-lg">
+          <h2 className="font-['Comfortaa',sans-serif] font-medium text-base text-[#4A3C2A]">
             Share & Earn
           </h2>
         </div>
 
         {/* Description */}
-        <div className="mb-6 space-y-2">
-          <p className="font-['Comfortaa',sans-serif] font-normal text-[#4A3C2A] text-sm">
+        <div className="p-7 space-y-6">
+          <p className="font-['Comfortaa',sans-serif] font-normal text-sm text-[#4A5565]">
             Invite a friend to book our service and you'll both get{" "}
-            <span className="font-semibold text-[#DE6A07]">$10.00 (2x$5.00) Credit</span>.
+            <span className="font-bold text-[#DE6A07]">$10.00 (2x$5.00) Credit</span>.
           </p>
-          <p className="font-['Comfortaa',sans-serif] font-normal text-[#4A3C2A] text-sm">
+          <p className="font-['Comfortaa',sans-serif] font-normal text-sm text-[#4A5565]">
             Your referral code will be available soon.
           </p>
         </div>
@@ -64,30 +64,32 @@ export default function ShareAndEarnCard() {
   }
 
   return (
-    <div className="bg-white rounded-lg border-2 border-[#DE6A07] p-6">
-      {/* Header */}
-      <div className="flex items-center gap-2 mb-4">
-        <Icon name="gift" className="w-5 h-5 text-[#DE6A07] shrink-0" />
-        <h2 className="font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-lg">
-          Share & Earn
-        </h2>
-      </div>
+    <div className="bg-white rounded-[12px] border-2 border-[#DE6A07] shadow-[0_8px_12px_0_rgba(0,0,0,0.10)] p-7 flex flex-col justify-between">
+      <div>
+        {/* Header */}
+        <div className="flex items-center gap-2">
+          <Icon name="gift" className="w-6 h-6 text-[#DE6A07] shrink-0" />
+          <h2 className="font-['Comfortaa',sans-serif] font-medium text-base text-[#4A3C2A]">
+            Share & Earn
+          </h2>
+        </div>
 
-      {/* Description */}
-      <div className="mb-6 space-y-2">
-        <p className="font-['Comfortaa',sans-serif] font-normal text-[#4A3C2A] text-sm">
-          Invite a friend to book our service and you'll both get{" "}
-          <span className="font-semibold text-[#DE6A07]">$10.00 (2x$5.00) Credit</span>.
-        </p>
-        <p className="font-['Comfortaa',sans-serif] font-normal text-[#4A3C2A] text-sm">
-          Copy your unique code below to your friend and enjoy the credit in 3 months.
-        </p>
+        {/* Description */}
+        <div className="p-7 space-y-6">
+          <p className="font-['Comfortaa',sans-serif] font-normal text-sm text-[#4A5565]">
+            Invite a friend to book our service and you'll both get{" "}
+            <span className="font-bold text-[#DE6A07]">$10.00 (2x$5.00) Credit</span>.
+          </p>
+          <p className="font-['Comfortaa',sans-serif] font-normal text-sm text-[#4A5565]">
+            Copy your unique code below to your friend and enjoy the credit in 3 months.
+          </p>
+        </div>
       </div>
 
       {/* Referral Code */}
-      <div className="bg-white rounded-lg border border-[rgba(0,0,0,0.1)] p-3 flex items-center justify-between">
+      <div className="bg-white rounded-[12px] border border-[#4A3C2A] p-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Icon name="gift" className="w-4 h-4 text-[#DE6A07] shrink-0" />
+          <Icon name="gift" className="w-5 h-5 text-[#DE6A07] shrink-0" />
           <span className="font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-base">
             {referralCode}
           </span>
@@ -95,10 +97,10 @@ export default function ShareAndEarnCard() {
         <button
           onClick={handleCopy}
           className={cn(
-            "font-['Comfortaa',sans-serif] font-medium text-sm px-4 py-2 rounded-lg transition-colors",
+            "font-['Comfortaa',sans-serif] font-medium text-sm transition-colors cursor-pointer",
             copied
-              ? "bg-green-500 text-white"
-              : "bg-[#DE6A07] text-white hover:bg-[#DE6A07]/90"
+              ? "text-green-500"
+              : "text-[#DE6A07] hover:text-[#DE6A07]/80"
           )}
         >
           {copied ? "Copied!" : "Copy"}
