@@ -1,0 +1,324 @@
+/**
+ * ModifyPersonalInfoModal 组件 - 修改个人信息弹窗
+ * 
+ * 根据 Figma 设计图 1:1 还原
+ * Figma: https://www.figma.com/design/uPtOY1EQwpnZkgAb8YhWMN/Landing_page?node-id=2584-25488&m=dev
+ */
+
+import { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Icon } from "@/components/common/Icon";
+import { DatePicker } from "@/components/common/DatePicker";
+import { CustomInput } from "@/components/common/CustomInput";
+import { useAuthStore } from "@/components/auth/authStore";
+import { updateUserInfo, type MeOut } from "@/lib/api";
+import { toast } from "sonner";
+
+interface ModifyPersonalInfoModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  userInfo: MeOut | null;
+  onSuccess?: () => void;
+}
+
+/**
+ * 检查生日是否在12个月内被修改过
+ * 这里需要从后端获取生日修改历史
+ * 如果后端有 birthday_modified_at 字段，可以使用它
+ * 
+ * TODO: 从后端 API 获取生日修改历史
+ * 目前 MeOut 接口可能不包含 birthday_modified_at 字段
+ * 需要后端支持或使用其他方式获取
+ */
+function isBirthdayModifiedWithin12Months(_userInfo: MeOut | null): {
+  isModified: boolean;
+  modifiedDate?: string;
+} {
+  // TODO: 从后端获取生日修改历史
+  // 示例：如果 userInfo 有 birthday_modified_at 字段
+  // if (userInfo?.birthday_modified_at) {
+  //   const modifiedDate = new Date(userInfo.birthday_modified_at);
+  //   const now = new Date();
+  //   const monthsDiff = (now.getTime() - modifiedDate.getTime()) / (1000 * 60 * 60 * 24 * 30);
+  //   if (monthsDiff < 12) {
+  //     return {
+  //       isModified: true,
+  //       modifiedDate: modifiedDate.toISOString().split("T")[0],
+  //     };
+  //   }
+  // }
+  // 暂时返回 false，等待后端支持
+  return { isModified: false };
+}
+
+export default function ModifyPersonalInfoModal({
+  open,
+  onOpenChange,
+  userInfo,
+  onSuccess,
+}: ModifyPersonalInfoModalProps) {
+  const setUserInfo = useAuthStore((state) => state.setUserInfo);
+  
+  // 表单状态
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [birthday, setBirthday] = useState("");
+  const [phone, setPhone] = useState("");
+  const [originalBirthday, setOriginalBirthday] = useState("");
+  
+  // 生日修改提示状态
+  const [showBirthdayWarning, setShowBirthdayWarning] = useState(false);
+  const [isBirthdayModified, setIsBirthdayModified] = useState(false);
+  const [birthdayModifiedDate, setBirthdayModifiedDate] = useState<string | undefined>();
+  
+  // 加载状态
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // 初始化表单数据
+  useEffect(() => {
+    if (open && userInfo) {
+      setFirstName(userInfo.first_name || "");
+      setLastName(userInfo.last_name || "");
+      setBirthday(userInfo.birthday || "");
+      setOriginalBirthday(userInfo.birthday || "");
+      // TODO: 从 userInfo 获取 phone，目前 API 可能不包含
+      setPhone("");
+      
+      // 检查生日是否在12个月内被修改过
+      const birthdayStatus = isBirthdayModifiedWithin12Months(userInfo);
+      setIsBirthdayModified(birthdayStatus.isModified);
+      setBirthdayModifiedDate(birthdayStatus.modifiedDate);
+      setShowBirthdayWarning(false);
+    }
+  }, [open, userInfo]);
+
+  // 监听生日变化，显示提示
+  useEffect(() => {
+    if (birthday && birthday !== originalBirthday && originalBirthday) {
+      setShowBirthdayWarning(true);
+    } else {
+      setShowBirthdayWarning(false);
+    }
+  }, [birthday, originalBirthday]);
+
+  const handleCancel = () => {
+    onOpenChange(false);
+    // 重置表单
+    if (userInfo) {
+      setFirstName(userInfo.first_name || "");
+      setLastName(userInfo.last_name || "");
+      setBirthday(userInfo.birthday || "");
+      setPhone("");
+      setShowBirthdayWarning(false);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!userInfo) return;
+
+    // 基本验证
+    if (!firstName.trim()) {
+      toast.error("First name is required");
+      return;
+    }
+    if (!lastName.trim()) {
+      toast.error("Last name is required");
+      return;
+    }
+    if (!birthday) {
+      toast.error("Date of birth is required");
+      return;
+    }
+
+    // 验证年龄（至少18岁）
+    const birthDate = new Date(birthday);
+    const today = new Date();
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (age < 18 || (age === 18 && monthDiff < 0) || (age === 18 && monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      toast.error("You must be at least 18 years old");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // 准备更新数据
+      const updateData = {
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
+        birthday: birthday,
+        // phone 字段需要确认 API 是否支持
+        // phone: phone ? parsePhoneNumber(phone) : null,
+      };
+
+      // 调用 API 更新用户信息
+      const updatedUserInfo = await updateUserInfo(updateData);
+      
+      // 更新本地状态
+      setUserInfo(updatedUserInfo);
+      toast.success("Personal information updated successfully");
+      
+      // 调用成功回调
+      onSuccess?.();
+      
+      // 关闭弹窗
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Error updating personal information:", error);
+      if (error instanceof Error) {
+        toast.error(error.message || "Failed to update personal information");
+      } else {
+        toast.error("Failed to update personal information. Please try again.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!userInfo) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="bg-white rounded-[12px] border border-[rgba(0,0,0,0.1)] px-6 pt-3 pb-6 shadow-[0_8px_12px_0_rgba(0,0,0,0.10)] max-w-[400px] [&>button]:hidden">
+        <DialogTitle className="sr-only">Modify personal information</DialogTitle>
+        <DialogDescription className="sr-only">
+          Update your personal information including name, birthday, and phone number
+        </DialogDescription>
+
+        {/* Header */}
+        <div className="flex items-center justify-center relative mb-3">
+          <button
+            onClick={handleCancel}
+            className="absolute left-0 top-0 w-5 h-5 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
+            aria-label="Close"
+          >
+            <Icon name="close-arrow" className="w-5 h-5 text-[#4A3C2A]" />
+          </button>
+          <h2 className="font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-lg">
+            Modify personal information
+          </h2>
+        </div>
+
+        {/* Divider */}
+        <div className="h-px bg-[rgba(0,0,0,0.1)] mb-4" />
+
+        {/* Form Fields */}
+        <div className="flex flex-col gap-4">
+          {/* First name */}
+          <CustomInput
+            label="First name"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            placeholder="Enter first name"
+          />
+
+          {/* Last name */}
+          <CustomInput
+            label="Last name"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            placeholder="Enter last name"
+          />
+
+          {/* Birthday Warning (显示在修改生日时) */}
+          {showBirthdayWarning && (
+            <div className="flex items-start gap-2 p-3 bg-[#FFF9E6] border border-[#FFD700] rounded-lg">
+              <Icon name="alert-warning" className="w-5 h-5 shrink-0 mt-0.5" style={{ color: "#FFD700" }} />
+              <p className="font-['Comfortaa',sans-serif] font-normal text-[#4A3C2A] text-sm">
+                <span className="font-semibold">Past and scheduled rewards won't change.</span> Your new birthday applies to future rewards only.
+              </p>
+            </div>
+          )}
+
+          {/* Date of birth */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <label className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#4a3c2a] text-[14px]">
+                Date of birth
+              </label>
+              {/* 12个月内修改过生日的标签 */}
+              {isBirthdayModified && birthdayModifiedDate && (
+                <span className="px-2 py-0.5 bg-white border border-gray-200 rounded-full text-[#4A3C2A] text-xs font-['Comfortaa',sans-serif]">
+                  Modified on {birthdayModifiedDate}
+                </span>
+              )}
+            </div>
+            <div className={isBirthdayModified ? "opacity-60" : ""}>
+              <DatePicker
+                value={birthday}
+                onChange={setBirthday}
+                placeholder="yyyy-mm-dd"
+                label="" // 移除默认的 "Date" 标签
+                minDate="1900-01-01"
+                maxDate={(() => {
+                  // 最大日期是18年前的今天（和注册时保持一致）
+                  const today = new Date();
+                  const maxDate = new Date(
+                    today.getFullYear() - 18,
+                    today.getMonth(),
+                    today.getDate()
+                  );
+                  return maxDate.toISOString().split("T")[0];
+                })()}
+                mode="date"
+                helperText="At least 18 years old. Your birthday won't be shared."
+              />
+            </div>
+          </div>
+
+          {/* Email (不可编辑) */}
+          <div className="flex flex-col gap-2">
+            <label className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#4a3c2a] text-[14px]">
+              Email
+            </label>
+            <div className="bg-gray-100 h-[36px] rounded-[12px] border border-gray-200 flex items-center px-4">
+              <span className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#717182] text-[12.25px]">
+                {userInfo.email}
+              </span>
+            </div>
+            <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#717182] text-xs">
+              Please contact us to modify your email.
+            </p>
+          </div>
+
+          {/* Phone number (Optional) */}
+          <CustomInput
+            label="Phone number (Optional)"
+            value={phone}
+            onChange={(e) => {
+              const value = e.target.value;
+              // 只允许数字、空格、括号、破折号
+              const cleaned = value.replace(/[^\d\s()]/g, "");
+              setPhone(cleaned);
+            }}
+            placeholder="(XXX) XXX - XXXX"
+          />
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex items-center justify-end gap-[10px] mt-6">
+          <button
+            onClick={handleCancel}
+            disabled={isSubmitting}
+            className="w-[120px] h-[36px] rounded-lg border border-[#DE6A07] bg-white text-[#DE6A07] font-['Comfortaa:Medium',sans-serif] font-medium text-sm hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="w-[120px] h-[36px] rounded-lg bg-[#DE6A07] text-white font-['Comfortaa:Medium',sans-serif] font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? "Saving..." : "Modify"}
+          </button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

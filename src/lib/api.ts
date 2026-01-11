@@ -433,6 +433,21 @@ export async function getCurrentUser(): Promise<MeOut> {
 }
 
 /**
+ * 更新用户个人信息
+ */
+export interface UpdateUserInfoIn {
+  first_name?: string;
+  last_name?: string;
+  birthday?: string;
+  phone?: string | null;
+}
+
+export async function updateUserInfo(data: UpdateUserInfoIn): Promise<MeOut> {
+  const response = await http.patch<MeOut>("/api/auth/me", data);
+  return response.data;
+}
+
+/**
  * 发送密码重置验证码
  */
 export async function sendPasswordResetCode(

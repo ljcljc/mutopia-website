@@ -432,15 +432,17 @@ export function DatePicker({
             mode === "month" ? "w-auto min-w-[320px]" : "w-full max-w-[373px]"
           }`}
         >
-          {/* Year Picker (Overlay) */}
-          {showYearPicker && (
+          {/* Year Picker (Overlay) - Only show for month mode, date mode uses Calendar component's year picker */}
+          {showYearPicker && mode === "month" && (
             <div
               ref={yearScrollRef}
-              className="absolute bg-white h-[400px] rounded-[8px] top-[16px] left-[16px] w-[68px] z-60 overflow-y-auto shadow-[0px_30px_84px_0px_rgba(19,10,46,0.08),0px_8px_32px_0px_rgba(19,10,46,0.07),0px_3px_14px_0px_rgba(19,10,46,0.03),0px_1px_3px_0px_rgba(19,10,46,0.13)]"
+              className="absolute bg-white h-[400px] rounded-[8px] top-[16px] left-[16px] w-[68px] z-[70] overflow-y-auto shadow-[0px_30px_84px_0px_rgba(19,10,46,0.08),0px_8px_32px_0px_rgba(19,10,46,0.07),0px_3px_14px_0px_rgba(19,10,46,0.03),0px_1px_3px_0px_rgba(19,10,46,0.13)]"
               style={{
                 scrollbarWidth: "thin",
                 scrollbarColor: "#d1d5db transparent",
               }}
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
             >
               <div
                 aria-hidden="true"
@@ -493,8 +495,8 @@ export function DatePicker({
             </div>
           )}
 
-          {/* Month Picker (Overlay) */}
-          {showMonthPicker && (
+          {/* Month Picker (Overlay) - Only show for month mode */}
+          {showMonthPicker && mode === "month" && (
             <div className="absolute bg-white rounded-[8px] top-[44px] left-[80px] w-[140px] z-60 shadow-[0px_30px_84px_0px_rgba(19,10,46,0.08),0px_8px_32px_0px_rgba(19,10,46,0.07),0px_3px_14px_0px_rgba(19,10,46,0.03),0px_1px_3px_0px_rgba(19,10,46,0.13)]">
               <div
                 aria-hidden="true"

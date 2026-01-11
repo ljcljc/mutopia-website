@@ -8,10 +8,10 @@
 import { useState, useEffect } from "react";
 import { useAuthStore } from "@/components/auth/authStore";
 import { Icon } from "@/components/common/Icon";
-import { useAccountStore } from "./accountStore";
 import ChangePasswordModal from "./ChangePasswordModal";
+import ModifyPersonalInfoModal from "./ModifyPersonalInfoModal";
 import { LoginModal } from "@/components/auth/LoginModal";
-import { sendPasswordResetCode } from "@/lib/api";
+import { sendPasswordResetCode, getCurrentUser } from "@/lib/api";
 import { getSendCountFromError } from "@/components/auth/forgotPasswordUtils";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
@@ -40,8 +40,9 @@ function formatDate(dateString?: string | null): string {
 
 export default function PersonalInfoCard() {
   const userInfo = useAuthStore((state) => state.userInfo);
-  const { showComingSoonMessage } = useAccountStore();
+  const setUserInfo = useAuthStore((state) => state.setUserInfo);
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
+  const [isModifyPersonalInfoModalOpen, setIsModifyPersonalInfoModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [shouldRestoreChangePassword, setShouldRestoreChangePassword] = useState(false);
   
@@ -98,8 +99,17 @@ export default function PersonalInfoCard() {
   const fullName = [userInfo.first_name, userInfo.last_name].filter(Boolean).join(" ") || userInfo.email.split("@")[0];
 
   const handleModify = () => {
-    showComingSoonMessage("修改个人信息");
-    // TODO: 显示 toast 提示 "功能开发中"
+    setIsModifyPersonalInfoModalOpen(true);
+  };
+
+  const handleModifySuccess = async () => {
+    // 重新获取用户信息以更新显示
+    try {
+      const updatedUserInfo = await getCurrentUser();
+      setUserInfo(updatedUserInfo);
+    } catch (error) {
+      console.error("Failed to refresh user info:", error);
+    }
   };
 
   const handleChangePassword = () => {
@@ -177,6 +187,14 @@ export default function PersonalInfoCard() {
           </div>
         </div>
       </div>
+
+      {/* Modify Personal Info Modal */}
+      <ModifyPersonalInfoModal
+        open={isModifyPersonalInfoModalOpen}
+        onOpenChange={setIsModifyPersonalInfoModalOpen}
+        userInfo={userInfo}
+        onSuccess={handleModifySuccess}
+      />
 
       {/* Change Password Modal */}
       <ChangePasswordModal
