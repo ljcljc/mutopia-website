@@ -85,6 +85,7 @@ import IconLockSvg from "@/assets/icons/icon-lock.svg?react";
 import IconPencilSvg from "@/assets/icons/icon-pencil.svg?react";
 import IconGiftSvg from "@/assets/icons/icon-gift.svg?react";
 import IconPhoneSvg from "@/assets/icons/icon-phone.svg?react";
+import IconLogoSvg from "@/assets/icons/icon-logo.svg?react";
 
 // 图标组件映射表
 const iconComponentMap = {
@@ -149,6 +150,7 @@ const iconComponentMap = {
   "pencil": IconPencilSvg,
   "gift": IconGiftSvg,
   "phone": IconPhoneSvg,
+  "logo": IconLogoSvg,
 } as const;
 
 export type IconName = keyof typeof iconComponentMap;

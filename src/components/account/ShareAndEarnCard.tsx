@@ -64,7 +64,7 @@ export default function ShareAndEarnCard() {
   }
 
   return (
-    <div className="bg-white rounded-[12px] border-2 border-[#DE6A07] shadow-[0_8px_12px_0_rgba(0,0,0,0.10)] p-7 flex flex-col justify-between">
+    <div className="bg-white rounded-[12px] border-2 border-[#DE6A07] shadow-[0_8px_12px_0_rgba(0,0,0,0.10)] p-5 flex flex-col justify-between">
       <div>
         {/* Header */}
         <div className="flex items-center gap-2">
