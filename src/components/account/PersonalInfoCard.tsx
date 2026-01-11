@@ -5,10 +5,12 @@
  * Figma: https://www.figma.com/design/uPtOY1EQwpnZkgAb8YhWMN/Landing_page?node-id=2584-25315&m=dev
  */
 
+import { useState, useEffect, useRef } from "react";
 import { useAuthStore } from "@/components/auth/authStore";
 import { Icon } from "@/components/common/Icon";
-import { useNavigate } from "react-router-dom";
 import { useAccountStore } from "./accountStore";
+import ChangePasswordModal from "./ChangePasswordModal";
+import { LoginModal } from "@/components/auth/LoginModal";
 
 /**
  * 获取用户 initials（姓名首字母）
@@ -35,7 +37,59 @@ function formatDate(dateString?: string | null): string {
 export default function PersonalInfoCard() {
   const userInfo = useAuthStore((state) => state.userInfo);
   const { showComingSoonMessage } = useAccountStore();
-  const navigate = useNavigate();
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [shouldRestoreChangePassword, setShouldRestoreChangePassword] = useState(false);
+  const previousStepRef = useRef<string | null>(null);
+  
+  const { step, setStep, setEmail } = useAuthStore();
+
+  // 初始化 previousStepRef
+  useEffect(() => {
+    if (previousStepRef.current === null) {
+      previousStepRef.current = step;
+    }
+  }, [step]);
+
+  // 监听 step 变化，如果从 forgot-password 返回到 password，且需要恢复 Change password
+  useEffect(() => {
+    const previousStep = previousStepRef.current;
+    if (previousStep !== step) {
+      // 如果从 forgot-password 返回到 password，且需要恢复 Change password
+      if (
+        shouldRestoreChangePassword && 
+        previousStep === "forgot-password" && 
+        step === "password" && 
+        isLoginModalOpen
+      ) {
+        // 从 forgot-password 返回到了 password 步骤
+        // 关闭 LoginModal，然后打开 ChangePasswordModal
+        setIsLoginModalOpen(false);
+        // 使用 requestAnimationFrame 确保在下一帧打开，避免闪烁
+        requestAnimationFrame(() => {
+          setIsChangePasswordModalOpen(true);
+          setShouldRestoreChangePassword(false);
+        });
+      }
+      // 更新 previousStepRef
+      previousStepRef.current = step;
+    }
+  }, [step, shouldRestoreChangePassword, isLoginModalOpen]);
+
+  // 当 LoginModal 打开时，设置到 forgot-password 步骤
+  // 参考 auth 模块的做法：直接设置 step，不需要延迟
+  useEffect(() => {
+    if (isLoginModalOpen && shouldRestoreChangePassword) {
+      // 设置邮箱为用户邮箱
+      if (userInfo?.email) {
+        setEmail(userInfo.email);
+      }
+      // 更新 previousStepRef 为当前 step
+      previousStepRef.current = step;
+      // 直接设置 step，不需要延迟（参考 auth 模块的做法）
+      setStep("forgot-password");
+    }
+  }, [isLoginModalOpen, shouldRestoreChangePassword, userInfo?.email, setEmail, setStep, step]);
 
   if (!userInfo) {
     return (
@@ -54,8 +108,7 @@ export default function PersonalInfoCard() {
   };
 
   const handleChangePassword = () => {
-    // TODO: 跳转到密码重置流程或打开密码重置模态框
-    navigate("/account/change-password");
+    setIsChangePasswordModalOpen(true);
   };
 
   return (
@@ -121,7 +174,6 @@ export default function PersonalInfoCard() {
               onClick={handleChangePassword}
               className="flex items-center gap-4 text-[#8B6357] hover:text-[#DE6A07]/80 cursor-pointer self-start"
             >
-              {/* TODO: 使用锁图标，暂时使用 help-circle 占位 */}
               <Icon name="lock" className="w-5 h-5 text-[#8B6357] shrink-0" />
               <span className="font-['Comfortaa',sans-serif] font-medium text-sm">
                 Change password
@@ -130,6 +182,32 @@ export default function PersonalInfoCard() {
           </div>
         </div>
       </div>
+
+      {/* Change Password Modal */}
+      <ChangePasswordModal
+        open={isChangePasswordModalOpen}
+        onOpenChange={setIsChangePasswordModalOpen}
+        onOpenForgotPassword={() => {
+          // 保存当前 step 到 previousStepRef
+          previousStepRef.current = step;
+          setShouldRestoreChangePassword(true);
+          // 先准备好状态（邮箱），这样在打开 LoginModal 时状态已经就绪
+          if (userInfo?.email) {
+            setEmail(userInfo.email);
+          }
+          // 关闭 ChangePasswordModal
+          setIsChangePasswordModalOpen(false);
+          // 使用 requestAnimationFrame 确保在下一帧打开 LoginModal，避免闪烁
+          requestAnimationFrame(() => {
+            setIsLoginModalOpen(true);
+          });
+        }}
+      />
+
+      {/* Login Modal (for Forgot Password) */}
+      <LoginModal open={isLoginModalOpen} onOpenChange={setIsLoginModalOpen}>
+        <div style={{ display: "none" }} />
+      </LoginModal>
     </div>
   );
 }

@@ -48,6 +48,7 @@ export function PasswordInput({
   showValidation = false,
   label,
   showLabel = true,
+  placeholder,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -60,6 +61,7 @@ export function PasswordInput({
   showValidation?: boolean;
   label?: string;
   showLabel?: boolean;
+  placeholder?: string;
 }) {
   const [isFocused, setIsFocused] = React.useState(false);
 
@@ -115,7 +117,7 @@ export function PasswordInput({
                   onKeyDown={handleKeyDown}
                   onBlur={handleBlur}
                   onFocus={handleFocus}
-                  placeholder="Enter your password"
+                  placeholder={placeholder || "Enter your password"}
                   className="basis-0 font-['Comfortaa:Regular',sans-serif] font-normal grow leading-[normal] min-h-px min-w-px relative shrink-0 text-[#717182] text-[12.25px] placeholder:text-[#717182] bg-transparent border-none outline-none w-full"
                 />
                 <VisibleIcon
