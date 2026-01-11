@@ -18,8 +18,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { logout, type MeOut } from "@/lib/api";
-import { toast } from "sonner";
+import { type MeOut } from "@/lib/api";
+import { useLogout } from "@/hooks/useLogout";
 import { useBookingStore } from "@/components/booking/bookingStore";
 
 function Logo() {
@@ -224,20 +224,8 @@ function CreditsBadge() {
 }
 
 function UserInfo({ userInfo }: { userInfo: MeOut }) {
-  const logoutUser = useAuthStore((state) => state.logout);
   const userName = userInfo.first_name || userInfo.email.split("@")[0] || "User";
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      await logoutUser();
-      toast.success("Logged out successfully");
-    } catch (error) {
-      console.error("Logout error:", error);
-      await logoutUser();
-      toast.success("Logged out successfully");
-    }
-  };
+  const { handleLogout } = useLogout();
 
   return (
     <div className="content-stretch flex gap-[10.5px] h-[28px] items-center relative w-[281.008px]" data-name="Buttons">

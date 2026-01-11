@@ -10,9 +10,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Icon, type IconName } from "@/components/common/Icon";
 import { OrangeButton } from "@/components/common";
-import { useAuthStore } from "@/components/auth/authStore";
-import { logout } from "@/lib/api";
-import { toast } from "sonner";
+import { useLogout } from "@/hooks/useLogout";
 import { cn } from "@/components/ui/utils";
 
 interface NavItem {
@@ -68,17 +66,7 @@ const auxiliaryLinks: NavItem[] = [
     path: "#",
     iconName: "logout",
     variant: "danger",
-    onClick: async () => {
-      try {
-        await logout();
-        useAuthStore.getState().logout();
-        toast.success("Logged out successfully");
-      } catch (error) {
-        console.error("Logout error:", error);
-        useAuthStore.getState().logout(); // 无论 API 是否成功，都清理本地状态
-        toast.success("Logged out successfully");
-      }
-    },
+    onClick: undefined, // 将在组件内部处理
   },
 ];
 
@@ -89,6 +77,7 @@ interface AccountSidebarProps {
 export function AccountSidebar({ className }: AccountSidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { handleLogout } = useLogout();
 
   // 判断当前激活项（支持嵌套路由）
   const isActive = (path: string): boolean => {
@@ -210,13 +199,15 @@ export function AccountSidebar({ className }: AccountSidebarProps) {
           <SidebarMenu>
             {auxiliaryLinks.map((item) => {
               const active = isActive(item.path);
+              // 对于 logout，使用 handleLogout 而不是默认的 onClick
+              const itemOnClick = item.id === "logout" ? handleLogout : item.onClick;
               const isDanger = item.variant === "danger";
               return (
                 <SidebarMenuItem key={item.id}>
-                  {item.onClick ? (
+                  {itemOnClick ? (
                     <SidebarMenuButton
                       isActive={active}
-                      onClick={item.onClick}
+                      onClick={itemOnClick}
                       className={cn(
                         "font-['Comfortaa',sans-serif] font-normal text-[14px]",
                         isDanger

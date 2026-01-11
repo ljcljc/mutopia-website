@@ -13,8 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { logout } from "@/lib/api";
-import { toast } from "sonner";
+import { useLogout } from "@/hooks/useLogout";
 
 // Helper function to handle smooth scroll to anchor with header offset
 const scrollToAnchor = (href: string) => {
@@ -225,22 +224,9 @@ function ButtonCompactPrincipalOrange() {
 // User info component for logged-in users
 function UserInfo() {
   const user = useAuthStore((state) => state.user);
-  const logoutUser = useAuthStore((state) => state.logout);
+  const { handleLogout } = useLogout();
 
   if (!user) return null;
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      await logoutUser();
-      toast.success("Logged out successfully");
-    } catch (error) {
-      console.error("Logout error:", error);
-      // Even if API logout fails, clear local state
-      await logoutUser();
-      toast.success("Logged out successfully");
-    }
-  };
 
   return (
     <div className="content-stretch flex gap-[10.5px] items-center">
@@ -362,21 +348,8 @@ function MobileButton1() {
 
 function MobileButton2() {
   const user = useAuthStore((state) => state.user);
-  const logoutUser = useAuthStore((state) => state.logout);
+  const { handleLogout } = useLogout();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      await logoutUser();
-      toast.success("Logged out successfully");
-    } catch (error) {
-      console.error("Logout error:", error);
-      // Even if API logout fails, clear local state
-      await logoutUser();
-      toast.success("Logged out successfully");
-    }
-  };
 
   if (user) {
     return (
