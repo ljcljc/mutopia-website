@@ -92,7 +92,7 @@ export default function PersonalInfoCard() {
           <div className="flex flex-col gap-2">
             {/* 生日 */}
             {userInfo.birthday && (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 <Icon name="birthday" className="w-5 h-5 text-[#8B6357] shrink-0" />
                 <span className="font-['Comfortaa',sans-serif] font-normal text-[#4A5565] text-sm">
                   {formatDate(userInfo.birthday)}
@@ -101,7 +101,7 @@ export default function PersonalInfoCard() {
             )}
 
             {/* 邮箱 */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <Icon name="email" className="w-5 h-5 text-[#8B6357] shrink-0" />
               <span className="font-['Comfortaa',sans-serif] font-normal text-[#4A5565] text-sm">
                 {userInfo.email}
@@ -109,17 +109,17 @@ export default function PersonalInfoCard() {
             </div>
 
             {/* 电话 - TODO: 从 userInfo 获取，目前 API 可能不包含 */}
-            {/* <div className="flex items-center gap-3">
-              <Icon name="phone" className="w-5 h-5 text-[#4A3C2A] shrink-0" />
+            <div className="flex items-center gap-4">
+              <Icon name="phone" className="w-5 h-5 text-[#8B6357] shrink-0" />
               <span className="font-['Comfortaa',sans-serif] font-normal text-[#4A3C2A] text-sm">
-                (514) 660 - 8141
+                -
               </span>
-            </div> */}
+            </div>
 
             {/* Change Password 链接 */}
             <button
               onClick={handleChangePassword}
-              className="flex items-center gap-3 text-[#DE6A07] hover:text-[#DE6A07]/80 cursor-pointer self-start"
+              className="flex items-center gap-4 text-[#8B6357] hover:text-[#DE6A07]/80 cursor-pointer self-start"
             >
               {/* TODO: 使用锁图标，暂时使用 help-circle 占位 */}
               <Icon name="lock" className="w-5 h-5 text-[#8B6357] shrink-0" />
