@@ -213,14 +213,14 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
         console.log("Email is registered, proceeding to password step");
         setStep("password");
       } else {
-      // Email is not registered - navigate to sign up
-      console.log("Email is not registered, navigating to sign up");
-      // Clear password fields when switching to signup to prevent auto-fill from login
-      setPassword("");
-      setConfirmPassword("");
-      setPasswordError("");
-      setConfirmPasswordError("");
-      setStep("signup");
+        // Email is not registered - navigate to sign up
+        console.log("Email is not registered, navigating to sign up");
+        // Clear password fields when switching to signup to prevent auto-fill from login
+        setPassword("");
+        setConfirmPassword("");
+        setPasswordError("");
+        setConfirmPasswordError("");
+        setStep("signup");
       }
     } catch (err) {
       // Handle different types of errors
@@ -1172,7 +1172,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
       setStep("forgot-password");
     } else if (step === "forgot-password") {
       // From forgot-password, return to password step (log in) and keep all state
-      // This handles the case when user came from login step
+      // If user came from change-password, PersonalInfoCard will intercept and set step to change-password
       setStep("password");
     } else if (step === "reset-password") {
       setStep("forgot-password");

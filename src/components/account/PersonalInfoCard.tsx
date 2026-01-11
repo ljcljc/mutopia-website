@@ -5,12 +5,16 @@
  * Figma: https://www.figma.com/design/uPtOY1EQwpnZkgAb8YhWMN/Landing_page?node-id=2584-25315&m=dev
  */
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useAuthStore } from "@/components/auth/authStore";
 import { Icon } from "@/components/common/Icon";
 import { useAccountStore } from "./accountStore";
 import ChangePasswordModal from "./ChangePasswordModal";
 import { LoginModal } from "@/components/auth/LoginModal";
+import { sendPasswordResetCode } from "@/lib/api";
+import { getSendCountFromError } from "@/components/auth/forgotPasswordUtils";
+import { HttpError } from "@/lib/http";
+import { toast } from "sonner";
 
 /**
  * 获取用户 initials（姓名首字母）
@@ -40,56 +44,47 @@ export default function PersonalInfoCard() {
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [shouldRestoreChangePassword, setShouldRestoreChangePassword] = useState(false);
-  const previousStepRef = useRef<string | null>(null);
   
-  const { step, setStep, setEmail } = useAuthStore();
+  const { 
+    step, 
+    setStep, 
+    setEmail,
+    codeSendCount,
+    setCodeSendCount,
+    setForgotPasswordEmail,
+    setVerificationMode,
+    setCodeVerifyFailCount,
+    setResetPasswordToken,
+    setVerificationCode,
+  } = useAuthStore();
+  
+  const MAX_SEND_COUNT = 5;
 
-  // 初始化 previousStepRef
+  // 参考 auth 模块的逻辑：监听 step 变化，如果从 forgot-password 返回到 password，且需要恢复 change-password
+  // 则拦截并设置 step 为 change-password
   useEffect(() => {
-    if (previousStepRef.current === null) {
-      previousStepRef.current = step;
+    if (step === "password" && shouldRestoreChangePassword && isLoginModalOpen) {
+      // 从 forgot-password 返回到 password，但需要返回 change-password
+      // 设置 step 为 change-password，触发打开 ChangePasswordModal
+      setStep("change-password");
     }
-  }, [step]);
+  }, [step, shouldRestoreChangePassword, isLoginModalOpen, setStep]);
 
-  // 监听 step 变化，如果从 forgot-password 返回到 password，且需要恢复 Change password
+  // 监听 step 变化，如果 step 变为 change-password，则打开 ChangePasswordModal
   useEffect(() => {
-    const previousStep = previousStepRef.current;
-    if (previousStep !== step) {
-      // 如果从 forgot-password 返回到 password，且需要恢复 Change password
-      if (
-        shouldRestoreChangePassword && 
-        previousStep === "forgot-password" && 
-        step === "password" && 
-        isLoginModalOpen
-      ) {
-        // 从 forgot-password 返回到了 password 步骤
-        // 关闭 LoginModal，然后打开 ChangePasswordModal
-        setIsLoginModalOpen(false);
-        // 使用 requestAnimationFrame 确保在下一帧打开，避免闪烁
-        requestAnimationFrame(() => {
-          setIsChangePasswordModalOpen(true);
-          setShouldRestoreChangePassword(false);
-        });
-      }
-      // 更新 previousStepRef
-      previousStepRef.current = step;
+    if (step === "change-password" && shouldRestoreChangePassword) {
+      // 关闭 LoginModal，然后打开 ChangePasswordModal
+      setIsLoginModalOpen(false);
+      requestAnimationFrame(() => {
+        setIsChangePasswordModalOpen(true);
+        setShouldRestoreChangePassword(false);
+      });
     }
-  }, [step, shouldRestoreChangePassword, isLoginModalOpen]);
+  }, [step, shouldRestoreChangePassword]);
 
-  // 当 LoginModal 打开时，设置到 forgot-password 步骤
-  // 参考 auth 模块的做法：直接设置 step，不需要延迟
-  useEffect(() => {
-    if (isLoginModalOpen && shouldRestoreChangePassword) {
-      // 设置邮箱为用户邮箱
-      if (userInfo?.email) {
-        setEmail(userInfo.email);
-      }
-      // 更新 previousStepRef 为当前 step
-      previousStepRef.current = step;
-      // 直接设置 step，不需要延迟（参考 auth 模块的做法）
-      setStep("forgot-password");
-    }
-  }, [isLoginModalOpen, shouldRestoreChangePassword, userInfo?.email, setEmail, setStep, step]);
+
+  // 注意：step 的设置现在在 onOpenForgotPassword 回调中完成（发送验证码后）
+  // 这个 useEffect 不再需要，因为所有逻辑都在 onOpenForgotPassword 中处理
 
   if (!userInfo) {
     return (
@@ -187,25 +182,107 @@ export default function PersonalInfoCard() {
       <ChangePasswordModal
         open={isChangePasswordModalOpen}
         onOpenChange={setIsChangePasswordModalOpen}
-        onOpenForgotPassword={() => {
-          // 保存当前 step 到 previousStepRef
-          previousStepRef.current = step;
+        onOpenForgotPassword={async () => {
+          // 设置标志，表示从 ChangePasswordModal 进入 forgot-password
           setShouldRestoreChangePassword(true);
-          // 先准备好状态（邮箱），这样在打开 LoginModal 时状态已经就绪
-          if (userInfo?.email) {
-            setEmail(userInfo.email);
+          
+          // 获取用户邮箱
+          const userEmail = userInfo?.email;
+          if (!userEmail) {
+            toast.error("Email not found. Please try again.");
+            return;
           }
-          // 关闭 ChangePasswordModal
-          setIsChangePasswordModalOpen(false);
-          // 使用 requestAnimationFrame 确保在下一帧打开 LoginModal，避免闪烁
-          requestAnimationFrame(() => {
-            setIsLoginModalOpen(true);
-          });
+          
+          // 设置邮箱
+          setEmail(userEmail);
+          
+          // 参考 auth 模块的 handleForgotPassword 逻辑
+          // 检查 codeSendCount 是否已经达到 MAX_SEND_COUNT
+          if (codeSendCount >= MAX_SEND_COUNT) {
+            // 已经达到最大发送次数，直接导航到 forgot-password 步骤
+            setStep("forgot-password");
+            setVerificationMode("forgot-password");
+            setForgotPasswordEmail(userEmail);
+            setCodeVerifyFailCount(0);
+            setResetPasswordToken(null);
+            setVerificationCode(["", "", "", "", "", ""]);
+            
+            // 关闭 ChangePasswordModal
+            setIsChangePasswordModalOpen(false);
+            // 打开 LoginModal
+            requestAnimationFrame(() => {
+              setIsLoginModalOpen(true);
+            });
+            return;
+          }
+          
+          // 发送验证码
+          try {
+            const response = await sendPasswordResetCode(userEmail);
+            // 使用后端返回的 send_count
+            setCodeSendCount(response.send_count);
+            setForgotPasswordEmail(userEmail);
+            setVerificationMode("forgot-password");
+            setCodeVerifyFailCount(0);
+            setResetPasswordToken(null);
+            setVerificationCode(["", "", "", "", "", ""]);
+            // 设置 step 为 forgot-password，确保打开 LoginModal 时显示正确的步骤
+            setStep("forgot-password");
+            
+            // 检查是否达到最大发送次数
+            if (response.send_count >= MAX_SEND_COUNT) {
+              // 不显示成功 toast，因为已经达到限制
+            } else {
+              toast.success("Verification code sent to your email.");
+            }
+            
+            // 关闭 ChangePasswordModal
+            setIsChangePasswordModalOpen(false);
+            // 打开 LoginModal（step 已经设置为 forgot-password）
+            requestAnimationFrame(() => {
+              setIsLoginModalOpen(true);
+            });
+          } catch (err) {
+            console.error("Error sending password reset code:", err);
+            
+            // 从错误中提取 send_count（如果有）
+            const sendCountFromError = getSendCountFromError(err);
+            if (sendCountFromError !== null) {
+              setCodeSendCount(sendCountFromError);
+            }
+            
+            // 显示错误消息
+            if (err instanceof HttpError) {
+              toast.error(err.message || "Failed to send verification code.");
+            } else {
+              toast.error("Failed to send verification code. Please try again.");
+            }
+            
+            // 出错时停留在 ChangePasswordModal，不打开 LoginModal
+            // 清除 shouldRestoreChangePassword 标志，因为发送失败
+            setShouldRestoreChangePassword(false);
+            // ChangePasswordModal 保持打开状态，用户可以重试或取消
+          }
         }}
       />
 
       {/* Login Modal (for Forgot Password) */}
-      <LoginModal open={isLoginModalOpen} onOpenChange={setIsLoginModalOpen}>
+      <LoginModal 
+        open={isLoginModalOpen} 
+        onOpenChange={(open) => {
+          setIsLoginModalOpen(open);
+          
+          // 如果正在关闭 LoginModal，且需要恢复 ChangePasswordModal
+          // 参考 auth 模块：如果 step 是 forgot-password 或 password，且需要恢复 change-password
+          // 则设置 step 为 change-password，由 useEffect 处理打开 ChangePasswordModal
+          if (!open && shouldRestoreChangePassword) {
+            const currentStep = useAuthStore.getState().step;
+            if (currentStep === "forgot-password" || currentStep === "password") {
+              setStep("change-password");
+            }
+          }
+        }}
+      >
         <div style={{ display: "none" }} />
       </LoginModal>
     </div>

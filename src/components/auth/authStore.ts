@@ -9,7 +9,7 @@ import {
 import { STORAGE_KEYS } from "@/lib/storageKeys";
 import { type MeOut } from "@/lib/api";
 
-export type LoginStep = "email" | "password" | "signup" | "verify-email" | "forgot-password" | "change-email" | "reset-password";
+export type LoginStep = "email" | "password" | "signup" | "verify-email" | "forgot-password" | "change-email" | "reset-password" | "change-password";
 export type VerificationMode = "signup" | "login" | "forgot-password";
 
 export interface User {

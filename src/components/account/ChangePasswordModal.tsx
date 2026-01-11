@@ -10,6 +10,7 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { PasswordInput } from "@/components/auth/LoginModalContainers";
 import { validateResetPasswordForm } from "@/components/auth/authStore";
@@ -236,6 +237,9 @@ export default function ChangePasswordModal({
         className="bg-white rounded-[12px] border border-[rgba(0,0,0,0.1)] px-6 pt-3 pb-6 shadow-[0_8px_12px_0_rgba(0,0,0,0.10)] max-w-[400px] [&>button]:hidden"
       >
         <DialogTitle className="sr-only">Change password</DialogTitle>
+        <DialogDescription className="sr-only">
+          Enter your current password and set a new password
+        </DialogDescription>
         
         {/* Header */}
         <div className="mb-6">
