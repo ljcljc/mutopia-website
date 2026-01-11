@@ -199,11 +199,13 @@ export function DatePicker({
   }, [isOpen, onBlur, value]);
 
   // Generate year range based on min and max dates
+  // For birthday/date of birth, maxYear should be current year (no future dates)
+  // For other use cases, if no maxDate is provided, use current year as default
   const yearRange = useMemo(() => {
     const minYear = minDateObj.getFullYear();
     const maxYear = maxDateObj
       ? maxDateObj.getFullYear()
-      : new Date().getFullYear() + 10;
+      : new Date().getFullYear(); // Default to current year, not future
     const yearCount = maxYear - minYear + 1;
     return Array.from({ length: yearCount }, (_, i) => minYear + i);
   }, [minDateObj, maxDateObj]);
@@ -321,15 +323,21 @@ export function DatePicker({
 
 
   function handleNextYear() {
-    const maxYear = maxDateObj ? maxDateObj.getFullYear() : new Date().getFullYear() + 10;
+    const maxYear = maxDateObj ? maxDateObj.getFullYear() : new Date().getFullYear();
     if (currentYear < maxYear) {
       setCurrentYear(currentYear + 1);
     }
   }
 
   function handleYearClick(year: number) {
-    setCurrentYear(year);
-    setShowYearPicker(false);
+    // Validate year is within range before setting
+    const minYear = minDateObj.getFullYear();
+    const maxYear = maxDateObj ? maxDateObj.getFullYear() : new Date().getFullYear();
+    
+    if (year >= minYear && year <= maxYear) {
+      setCurrentYear(year);
+      setShowYearPicker(false);
+    }
   }
 
   function handleMonthClick(monthIndex: number) {
@@ -432,8 +440,8 @@ export function DatePicker({
             mode === "month" ? "w-auto min-w-[320px]" : "w-full max-w-[373px]"
           }`}
         >
-          {/* Year Picker (Overlay) */}
-          {showYearPicker && (
+          {/* Year Picker (Overlay) - Only show in month mode, not in date mode (Calendar handles it) */}
+          {showYearPicker && mode === "month" && (
             <div
               ref={yearScrollRef}
               className="absolute bg-white h-[400px] rounded-[8px] top-[16px] left-[16px] w-[68px] z-60 overflow-y-auto shadow-[0px_30px_84px_0px_rgba(19,10,46,0.08),0px_8px_32px_0px_rgba(19,10,46,0.07),0px_3px_14px_0px_rgba(19,10,46,0.03),0px_1px_3px_0px_rgba(19,10,46,0.13)]"
@@ -453,7 +461,7 @@ export function DatePicker({
                   const minYear = minDateObj.getFullYear();
                   const maxYear = maxDateObj
                     ? maxDateObj.getFullYear()
-                    : new Date().getFullYear() + 10;
+                    : new Date().getFullYear(); // Default to current year, not future
                   const isDisabled = year < minYear || year > maxYear;
 
                   return (
@@ -493,8 +501,8 @@ export function DatePicker({
             </div>
           )}
 
-          {/* Month Picker (Overlay) */}
-          {showMonthPicker && (
+          {/* Month Picker (Overlay) - Only show in month mode, not in date mode (Calendar handles it) */}
+          {showMonthPicker && mode === "month" && (
             <div className="absolute bg-white rounded-[8px] top-[44px] left-[80px] w-[140px] z-60 shadow-[0px_30px_84px_0px_rgba(19,10,46,0.08),0px_8px_32px_0px_rgba(19,10,46,0.07),0px_3px_14px_0px_rgba(19,10,46,0.03),0px_1px_3px_0px_rgba(19,10,46,0.13)]">
               <div
                 aria-hidden="true"
@@ -583,6 +591,12 @@ export function DatePicker({
                 selectedDate={selectedDateObj}
                 minDate={minDateObj}
                 maxDate={maxDateObj || undefined}
+                // Pass yearRange to Calendar to ensure correct year selection range
+                // This only affects date mode, month mode uses its own year picker
+                yearRange={{
+                  min: minDateObj.getFullYear(),
+                  max: maxDateObj ? maxDateObj.getFullYear() : new Date().getFullYear()
+                }}
                 showYearPicker={showYearPicker}
                 showMonthPicker={showMonthPicker}
                 onShowYearPickerChange={setShowYearPicker}
