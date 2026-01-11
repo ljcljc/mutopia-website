@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef, useEffect } from "react";
+import { useMemo, useState, useRef } from "react";
 import { MONTHS, DAYS } from "@/constants/calendar";
 
 export interface UseCalendarOptions {
@@ -113,16 +113,8 @@ export function useCalendar(options: UseCalendarOptions = {}) {
     return years;
   }, [yearRange]);
 
-  // Scroll to current year when year picker opens
-  useEffect(() => {
-    if (showYearPicker && yearScrollRef.current) {
-      const currentYearIndex = yearRangeList.indexOf(currentYear);
-      if (currentYearIndex !== -1) {
-        const scrollTop = currentYearIndex * 32 - 184;
-        yearScrollRef.current.scrollTop = Math.max(0, scrollTop);
-      }
-    }
-  }, [showYearPicker, currentYear, yearRangeList]);
+  // Note: Year picker scrolling is now handled in Calendar component using scrollIntoView
+  // This ensures the selected year button is scrolled into view when the picker opens
 
   // Check if a date is disabled (outside min/max range)
   const isDateDisabled = (date: Date): boolean => {

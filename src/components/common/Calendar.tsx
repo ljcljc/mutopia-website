@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { Icon } from "./Icon";
 import { useCalendar, CalendarDay } from "@/hooks/useCalendar";
 import { cn } from "@/components/ui/utils";
@@ -62,21 +62,52 @@ export function Calendar({
     ? controlledShowMonthPicker 
     : calendar.showMonthPicker;
 
-  const setShowYearPicker = (show: boolean) => {
+  const setShowYearPicker = useCallback((show: boolean) => {
     if (onShowYearPickerChange) {
       onShowYearPickerChange(show);
     } else {
       calendar.setShowYearPicker(show);
     }
-  };
+  }, [onShowYearPickerChange, calendar]);
 
-  const setShowMonthPicker = (show: boolean) => {
+  const setShowMonthPicker = useCallback((show: boolean) => {
     if (onShowMonthPickerChange) {
       onShowMonthPickerChange(show);
     } else {
       calendar.setShowMonthPicker(show);
     }
-  };
+  }, [onShowMonthPickerChange, calendar]);
+
+  // Store refs for year buttons to enable scrolling
+  const yearButtonRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
+
+  // Scroll to selected year when year picker opens
+  useEffect(() => {
+    if (showYearPicker && calendar.yearScrollRef.current) {
+      // Determine which year to scroll to: prefer selectedDate, fallback to currentYear
+      const yearToScroll = selectedDate ? selectedDate.getFullYear() : calendar.currentYear;
+      const yearButton = yearButtonRefs.current.get(yearToScroll);
+      
+      if (yearButton && calendar.yearScrollRef.current) {
+        // Calculate scroll position manually
+        const container = calendar.yearScrollRef.current;
+        const buttonTop = yearButton.offsetTop;
+        const buttonHeight = yearButton.offsetHeight;
+        const containerHeight = container.clientHeight;
+        
+        // Calculate scroll position to center the button
+        const scrollPosition = buttonTop - (containerHeight / 2) + (buttonHeight / 2);
+        
+        // Use requestAnimationFrame to ensure DOM is ready
+        requestAnimationFrame(() => {
+          if (container) {
+            container.scrollTop = Math.max(0, scrollPosition);
+          }
+        });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showYearPicker, selectedDate, calendar.currentYear]);
 
   // Close pickers when clicking outside
   useEffect(() => {
@@ -94,7 +125,7 @@ export function Calendar({
       document.addEventListener("mousedown", handleClickOutside);
       return () => document.removeEventListener("mousedown", handleClickOutside);
     }
-  }, [showYearPicker, showMonthPicker, calendar.calendarRef]);
+  }, [showYearPicker, showMonthPicker, calendar.calendarRef, setShowYearPicker, setShowMonthPicker]);
 
   const handleDateClick = (dayInfo: CalendarDay) => {
     if (!dayInfo.isCurrentMonth) return;
@@ -211,9 +242,18 @@ export function Calendar({
             {calendar.yearRangeList.map((year) => {
               const isSelected = year === calendar.currentYear;
               const isDisabled = calendar.isYearDisabled(year);
+              
               return (
                 <button
                   key={year}
+                  ref={(el) => {
+                    // Store ref for all year buttons
+                    if (el) {
+                      yearButtonRefs.current.set(year, el);
+                    } else {
+                      yearButtonRefs.current.delete(year);
+                    }
+                  }}
                   onClick={() => {
                     if (!isDisabled) {
                       calendar.handleYearClick(year);
