@@ -68,6 +68,7 @@ import IconPetSvg from "@/assets/icons/icon-pet.svg?react";
 import IconSearchSvg from "@/assets/icons/icon-search.svg?react";
 import IconImageSvg from "@/assets/icons/icon-image.svg?react";
 import IconAddSvg from "@/assets/icons/icon-add.svg?react";
+import IconAdd2Svg from "@/assets/icons/icon-add-2.svg?react";
 import IconTrashSvg from "@/assets/icons/icon-trash.svg?react";
 import IconCheckSvg from "@/assets/icons/icon-check.svg?react";
 import IconCheckGreenSvg from "@/assets/icons/icon-check-green.svg?react";
@@ -131,6 +132,7 @@ const iconComponentMap = {
   "search": IconSearchSvg,
   "image": IconImageSvg,
   "add": IconAddSvg,
+  "add-2": IconAdd2Svg,
   "trash": IconTrashSvg,
   "check": IconCheckSvg,
   "check-green": IconCheckGreenSvg,

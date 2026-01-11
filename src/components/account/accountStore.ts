@@ -42,6 +42,18 @@ export const useAccountStore = create<AccountState>((set) => ({
       cardType: "VISA",
       isDefault: true,
     },
+    {
+      id: 2,
+      cardNumber: "4532 **** **** 5678",
+      cardType: "MASTERCARD",
+      isDefault: false,
+    },
+    {
+      id: 3,
+      cardNumber: "6011 **** **** 9012",
+      cardType: "AMEX",
+      isDefault: false,
+    },
   ],
   
   fetchAddresses: async () => {
