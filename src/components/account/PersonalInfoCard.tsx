@@ -7,7 +7,6 @@
 
 import { useAuthStore } from "@/components/auth/authStore";
 import { Icon } from "@/components/common/Icon";
-import { cn } from "@/components/ui/utils";
 import { useNavigate } from "react-router-dom";
 import { useAccountStore } from "./accountStore";
 
@@ -80,7 +79,7 @@ export default function PersonalInfoCard() {
             {/* Modify 按钮 */}
             <button
               onClick={handleModify}
-              className="flex items-center gap-2 text-[#DE6A07] hover:text-[#DE6A07]/80 cursor-pointer"
+              className="flex items-center gap-2 text-[#8B6357] hover:text-[#DE6A07]/80 cursor-pointer"
             >
               <Icon name="pencil" className="w-4 h-4" />
               <span className="font-['Comfortaa',sans-serif] font-medium text-sm">
@@ -90,12 +89,12 @@ export default function PersonalInfoCard() {
           </div>
 
           {/* 信息行 */}
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
             {/* 生日 */}
             {userInfo.birthday && (
               <div className="flex items-center gap-3">
-                <Icon name="birthday" className="w-5 h-5 text-[#4A3C2A] shrink-0" />
-                <span className="font-['Comfortaa',sans-serif] font-normal text-[#4A3C2A] text-sm">
+                <Icon name="birthday" className="w-5 h-5 text-[#8B6357] shrink-0" />
+                <span className="font-['Comfortaa',sans-serif] font-normal text-[#4A5565] text-sm">
                   {formatDate(userInfo.birthday)}
                 </span>
               </div>
@@ -103,8 +102,8 @@ export default function PersonalInfoCard() {
 
             {/* 邮箱 */}
             <div className="flex items-center gap-3">
-              <Icon name="email" className="w-5 h-5 text-[#4A3C2A] shrink-0" />
-              <span className="font-['Comfortaa',sans-serif] font-normal text-[#4A3C2A] text-sm">
+              <Icon name="email" className="w-5 h-5 text-[#8B6357] shrink-0" />
+              <span className="font-['Comfortaa',sans-serif] font-normal text-[#4A5565] text-sm">
                 {userInfo.email}
               </span>
             </div>
@@ -123,7 +122,7 @@ export default function PersonalInfoCard() {
               className="flex items-center gap-3 text-[#DE6A07] hover:text-[#DE6A07]/80 cursor-pointer self-start"
             >
               {/* TODO: 使用锁图标，暂时使用 help-circle 占位 */}
-              <Icon name="help-circle" className="w-5 h-5 shrink-0" />
+              <Icon name="lock" className="w-5 h-5 text-[#8B6357] shrink-0" />
               <span className="font-['Comfortaa',sans-serif] font-medium text-sm">
                 Change password
               </span>
