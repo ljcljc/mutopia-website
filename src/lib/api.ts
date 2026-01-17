@@ -201,6 +201,7 @@ export interface PetPayload {
   weight_value?: number | string | null;
   weight_unit?: string;
   coat_condition?: string | null;
+  approve_shave?: boolean | null;
   behavior?: string | null;
   grooming_frequency?: string | null;
   special_notes?: string | null;
@@ -219,6 +220,7 @@ export interface CreatePetParams {
   weight_value?: number | null;
   weight_unit?: string;
   coat_condition?: string;
+  approve_shave?: boolean | null;
   behavior?: string;
   grooming_frequency?: string;
   special_notes?: string;
