@@ -240,9 +240,23 @@ export const useBookingStore = create<BookingState>((set) => ({
 
   setCurrentStep: (step) => set({ currentStep: step }),
 
-  nextStep: () => set((state) => ({ currentStep: Math.min(state.currentStep + 1, 6) })),
+  nextStep: () =>
+    set((state) => {
+      const nextStep = Math.min(state.currentStep + 1, 6);
+      if (nextStep !== state.currentStep) {
+        window.scrollTo({ top: 0, behavior: "instant" });
+      }
+      return { currentStep: nextStep };
+    }),
 
-  previousStep: () => set((state) => ({ currentStep: Math.max(state.currentStep - 1, 1) })),
+  previousStep: () =>
+    set((state) => {
+      const previousStep = Math.max(state.currentStep - 1, 1);
+      if (previousStep !== state.currentStep) {
+        window.scrollTo({ top: 0, behavior: "instant" });
+      }
+      return { currentStep: previousStep };
+    }),
 
   setAddress: (address) => set({ address }),
 
