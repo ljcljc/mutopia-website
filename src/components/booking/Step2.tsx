@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Icon } from "@/components/common/Icon";
 import { CustomInput, CustomSelect, CustomSelectItem, CustomRadio, OrangeButton, FileUpload, type FileUploadItem } from "@/components/common";
+import { AutoComplete } from "@/components/common/AutoComplete";
 import { CustomTextarea } from "@/components/common/CustomTextarea";
 import { DatePicker } from "@/components/common/DatePicker";
 import { Switch } from "@/components/ui/switch";
@@ -150,6 +151,7 @@ export function Step2() {
       };
     });
   });
+  const previousPetTypeRef = useRef(petType);
 
   const [petPhotoFiles, setPetPhotoFiles] = useState<File[]>(() => {
     const { petPhoto: initialPetPhoto } = useBookingStore.getState();
@@ -878,9 +880,12 @@ export function Step2() {
 
   // Clear breed when pet type changes and current breed is not in the new options
   useEffect(() => {
-    const breedOptions = getBreedOptions(petType, petBreeds);
-    if (breed && !breedOptions.includes(breed)) {
-      setBreed("");
+    if (previousPetTypeRef.current !== petType) {
+      const breedOptions = getBreedOptions(petType, petBreeds);
+      if (breed && !breedOptions.includes(breed)) {
+        setBreed("");
+      }
+      previousPetTypeRef.current = petType;
     }
   }, [petType, breed, petBreeds, setBreed]);
 
@@ -906,7 +911,7 @@ export function Step2() {
                 <CustomInput
                   label="Pet name"
                   type="text"
-                  placeholder="Duke"
+                  placeholder="Enter pet name"
                   value={petName}
                   onChange={(e) => setPetName(e.target.value)}
                 />
@@ -959,10 +964,11 @@ export function Step2() {
                   </p>
                 </div>
               </div>
-              <CustomSelect
+              <AutoComplete
                 placeholder={isLoadingBreeds ? "Loading breeds..." : "Select or type breed"}
                 value={breed}
                 onValueChange={setBreed}
+                options={getBreedOptions(petType, petBreeds)}
                 disabled={isLoadingBreeds}
                 leftElement={
                   <Icon
@@ -970,13 +976,7 @@ export function Step2() {
                     className="relative shrink-0 w-[20px] h-[20px] text-[#717182]"
                   />
                 }
-              >
-                {getBreedOptions(petType, petBreeds).map((breedOption) => (
-                  <CustomSelectItem key={breedOption} value={breedOption}>
-                    {breedOption}
-                  </CustomSelectItem>
-                ))}
-              </CustomSelect>
+              />
             </div>
             )}
 
