@@ -8,6 +8,7 @@ import {
   removeEncryptedItem,
 } from "./encryption";
 import { STORAGE_KEYS } from "./storageKeys";
+import { useAuthStore } from "@/components/auth/authStore";
 
 // 在开发环境使用代理路径，生产环境使用相对路径（通过 Cloudflare Workers 代理）
 // 如果部署在 Cloudflare Pages，默认使用相对路径，通过 Worker 代理解决 CORS
@@ -337,11 +338,20 @@ const request = async <T = unknown>(
                 statusText: retryResponse.statusText,
                 headers: retryResponse.headers,
               };
+            } else {
+              // 没有 refresh token 或刷新失败，主动退出登录
+              debugLog("No refresh token or refresh failed, logging out...");
+              await performLogout();
+              throw new HttpError(
+                "Session expired. Please login again.",
+                401,
+                "Unauthorized"
+              );
             }
           } catch (refreshError) {
             debugLog("Token refresh failed:", refreshError);
-            // Token 刷新失败，清除所有 token
-            await clearAuthTokens();
+            // Token 刷新失败，主动退出登录
+            await performLogout();
             throw new HttpError(
               "Session expired. Please login again.",
               401,
@@ -465,6 +475,29 @@ export const http = {
   },
 };
 
+// 执行退出登录操作
+const performLogout = async (): Promise<void> => {
+  try {
+    // 清除所有 token
+    await clearAuthTokens();
+    
+    // 清除用户状态（通过 Zustand store，可以在非 React 组件中使用）
+    await useAuthStore.getState().logout();
+    
+    // 导航到首页（使用 window.location 强制刷新页面）
+    if (typeof window !== "undefined") {
+      window.location.href = "/";
+    }
+  } catch (error) {
+    debugLog("Error during logout:", error);
+    // 即使出错也尝试清除 token 和跳转
+    await clearAuthTokens();
+    if (typeof window !== "undefined") {
+      window.location.href = "/";
+    }
+  }
+};
+
 // Token 刷新函数
 let isRefreshing = false;
 let refreshPromise: Promise<boolean> | null = null;
@@ -482,6 +515,7 @@ const refreshAccessToken = async (): Promise<boolean> => {
   const refreshToken = await getRefreshToken();
   if (!refreshToken) {
     debugLog("No refresh token available");
+    // 没有 refresh token，直接返回 false，由调用方处理退出登录
     return false;
   }
 
