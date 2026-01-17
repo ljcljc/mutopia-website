@@ -952,10 +952,11 @@ export function Step2() {
             <div className="flex flex-col gap-[8px] items-start relative shrink-0 w-full">
               <div className="flex h-[12.25px] items-center justify-between relative shrink-0 w-full">
                 <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[14px]">
-                  Breed
+                  {isMixedBreed ? "Primary breed" : "Breed"}
                 </p>
                 <div className="flex gap-[4px] items-center justify-end relative shrink-0">
                   <Switch 
+                    className="cursor-pointer"
                     checked={isMixedBreed} 
                     onCheckedChange={setIsMixedBreed}
                   />
@@ -1013,11 +1014,16 @@ export function Step2() {
               </div>
               <div className="flex flex-col items-start relative shrink-0 w-[140px]">
                 <CustomSelect
+                  className="cursor-pointer"
                   label="Gender"
                   placeholder="Select"
                   value={gender}
-                  onValueChange={(value) => setGender(value as Gender)}
+                  displayValue={gender ? `${gender[0].toUpperCase()}${gender.slice(1)}` : ""}
+                  onValueChange={(value) => setGender(value === "unknown" ? "" : (value as Gender))}
                 >
+                  {gender === "" ? (
+                    <CustomSelectItem value="unknown">Select</CustomSelectItem>
+                  ) : null}
                   <CustomSelectItem value="male">Male</CustomSelectItem>
                   <CustomSelectItem value="female">Female</CustomSelectItem>
                   <CustomSelectItem value="unknown">Unknown</CustomSelectItem>

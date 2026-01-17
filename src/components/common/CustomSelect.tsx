@@ -13,6 +13,7 @@ export interface CustomSelectProps {
   label?: string;
   placeholder?: string;
   value?: string;
+  displayValue?: string;
   onValueChange?: (value: string) => void;
   error?: string;
   disabled?: boolean;
@@ -29,6 +30,7 @@ export const CustomSelect = forwardRef<HTMLButtonElement, CustomSelectProps>(
       label,
       placeholder = "Select...",
       value,
+      displayValue,
       onValueChange,
       error,
       disabled,
@@ -93,11 +95,13 @@ export const CustomSelect = forwardRef<HTMLButtonElement, CustomSelectProps>(
                 <div className="flex flex-1 gap-[8px] items-center min-h-px min-w-px relative shrink-0">
                   {leftElement}
                   <SelectValue placeholder={placeholder}>
-                    <span className={cn(
-                      "font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] text-[12.25px]",
-                      value ? "text-[#4a3c2a]" : "text-[#717182]"
-                    )}>
-                      {value || placeholder}
+                    <span
+                      className={cn(
+                        "font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] text-[12.25px]",
+                        value ? "text-[#4a3c2a]" : "text-[#717182]"
+                      )}
+                    >
+                      {value ? (displayValue ?? value) : placeholder}
                     </span>
                   </SelectValue>
                 </div>
@@ -232,4 +236,3 @@ export function CustomSelectItem({
     </SelectItem>
   );
 }
-
