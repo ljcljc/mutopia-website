@@ -243,28 +243,14 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setUser: (user) => {
     set({ user });
-    // Save to localStorage when user is set (encrypted)
-    if (user) {
-      // Use async save but don't await (fire and forget)
-      saveEncryptedItem(STORAGE_KEYS.USER_INFO, JSON.stringify(user)).catch((e: unknown) => {
-        console.warn("Failed to save user info to localStorage:", e);
-      });
-    } else {
-      try {
-        removeEncryptedItem(STORAGE_KEYS.USER_INFO);
-      } catch (e) {
-        console.warn("Failed to remove user info from localStorage:", e);
-      }
-    }
+    // Note: user is derived from userInfo, so we don't persist it separately
+    // userInfo is the source of truth and is persisted in setUserInfo
   },
 
   login: (user) => {
     set({ user });
-    // Save to localStorage when user logs in (encrypted)
-    // Use async save but don't await (fire and forget)
-    saveEncryptedItem(STORAGE_KEYS.USER_INFO, JSON.stringify(user)).catch((e: unknown) => {
-      console.warn("Failed to save user info to localStorage:", e);
-    });
+    // Note: user is derived from userInfo, so we don't persist it separately
+    // userInfo is the source of truth and is persisted in setUserInfo
   },
 
   logout: async () => {
@@ -276,9 +262,33 @@ export const useAuthStore = create<AuthState>((set) => ({
     } catch (e) {
       console.warn("Failed to remove user info from localStorage:", e);
     }
+    // Note: setUserInfo will also clear localStorage, but we do it here explicitly for clarity
   },
 
-  setUserInfo: (userInfo) => set({ userInfo }),
+  setUserInfo: (userInfo) => {
+    set({ userInfo });
+    // Persist userInfo to localStorage when set (this is the source of truth)
+    if (userInfo) {
+      // Use async save but don't await (fire and forget)
+      saveEncryptedItem(STORAGE_KEYS.USER_INFO, JSON.stringify(userInfo)).catch((e: unknown) => {
+        console.warn("Failed to save userInfo to localStorage:", e);
+      });
+      // Also update user derived from userInfo
+      const user = {
+        name: `${userInfo.first_name || ""} ${userInfo.last_name || ""}`.trim() || userInfo.email.split("@")[0],
+        email: userInfo.email,
+      };
+      set({ user });
+    } else {
+      try {
+        removeEncryptedItem(STORAGE_KEYS.USER_INFO);
+      } catch (e) {
+        console.warn("Failed to remove userInfo from localStorage:", e);
+      }
+      // Also clear user when userInfo is cleared
+      set({ user: null });
+    }
+  },
 
   reset: () =>
     set((state) => ({

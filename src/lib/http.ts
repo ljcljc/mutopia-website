@@ -62,7 +62,7 @@ export class HttpError extends Error {
 }
 
 // 获取认证 token（从 localStorage 或其他存储，已加密）
-const getAuthToken = async (): Promise<string | null> => {
+export const getAuthToken = async (): Promise<string | null> => {
   try {
     return await getEncryptedItem(STORAGE_KEYS.ACCESS_TOKEN);
   } catch {
