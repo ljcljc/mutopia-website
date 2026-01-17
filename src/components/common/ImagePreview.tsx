@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import type { MouseEvent as ReactMouseEvent } from "react";
 import {
   Dialog,
   DialogContent,
@@ -40,6 +41,13 @@ export function ImagePreview({
 }: ImagePreviewProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [zoom, setZoom] = useState(initialZoom);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const panStartRef = useRef({ x: 0, y: 0 });
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const imageRef = useRef<HTMLImageElement | null>(null);
+  const imageNaturalSizeRef = useRef({ width: 0, height: 0 });
 
   // 当外部传入的 currentIndex 变化时更新内部状态
   useEffect(() => {
@@ -64,6 +72,7 @@ export function ImagePreview({
   useEffect(() => {
     if (!open) {
       setZoom(initialZoom);
+      setPan({ x: 0, y: 0 });
     }
   }, [open, initialZoom]);
 
@@ -94,6 +103,99 @@ export function ImagePreview({
   const handleZoomOut = useCallback(() => {
     setZoom((prev) => Math.max(prev - 10, minZoom));
   }, [minZoom]);
+
+  const clampPan = useCallback(
+    (nextPan: { x: number; y: number }, nextZoom: number) => {
+      const container = containerRef.current;
+      const natural = imageNaturalSizeRef.current;
+      if (!container || !natural.width || !natural.height) {
+        return { x: 0, y: 0 };
+      }
+
+      const containerWidth = container.clientWidth;
+      const containerHeight = container.clientHeight;
+      const imageAspect = natural.width / natural.height;
+      const containerAspect = containerWidth / containerHeight;
+
+      const baseWidth =
+        containerAspect > imageAspect
+          ? containerHeight * imageAspect
+          : containerWidth;
+      const baseHeight =
+        containerAspect > imageAspect
+          ? containerHeight
+          : containerWidth / imageAspect;
+
+      const scale = nextZoom / 100;
+      const scaledWidth = baseWidth * scale;
+      const scaledHeight = baseHeight * scale;
+
+      const maxX = Math.max(0, (scaledWidth - containerWidth) / 2);
+      const maxY = Math.max(0, (scaledHeight - containerHeight) / 2);
+
+      return {
+        x: Math.min(maxX, Math.max(-maxX, nextPan.x)),
+        y: Math.min(maxY, Math.max(-maxY, nextPan.y)),
+      };
+    },
+    []
+  );
+
+  useEffect(() => {
+    setPan((prev) => clampPan(prev, zoom));
+  }, [zoom, clampPan]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setPan((prev) => clampPan(prev, zoom));
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [zoom, clampPan]);
+
+  const handleWheel = useCallback(
+    (e: globalThis.WheelEvent) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -10 : 10;
+      setZoom((prev) => Math.min(Math.max(prev + delta, minZoom), maxZoom));
+    },
+    [minZoom, maxZoom]
+  );
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const wheelHandler = (event: WheelEvent) => handleWheel(event);
+    container.addEventListener("wheel", wheelHandler, { passive: false });
+    return () => {
+      container.removeEventListener("wheel", wheelHandler);
+    };
+  }, [handleWheel]);
+
+  const handleDragStart = useCallback((e: ReactMouseEvent) => {
+    if (e.button !== 0 || zoom <= 100) return;
+    setIsDragging(true);
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
+    panStartRef.current = { ...pan };
+  }, [zoom, pan]);
+
+  const handleDragMove = useCallback(
+    (e: ReactMouseEvent) => {
+      if (!isDragging) return;
+      const dx = e.clientX - dragStartRef.current.x;
+      const dy = e.clientY - dragStartRef.current.y;
+      const nextPan = {
+        x: panStartRef.current.x + dx,
+        y: panStartRef.current.y + dy,
+      };
+      setPan(clampPan(nextPan, zoom));
+    },
+    [isDragging, clampPan, zoom]
+  );
+
+  const handleDragEnd = useCallback(() => {
+    setIsDragging(false);
+  }, []);
 
   // 键盘快捷键支持
   useEffect(() => {
@@ -180,24 +282,44 @@ export function ImagePreview({
         </div>
 
         {/* 主图片显示区域 */}
-        <div className="flex-1 overflow-visible relative shrink-0 w-full flex items-center justify-center bg-neutral-100 min-h-0">
+        <div
+          ref={containerRef}
+          className="flex-1 overflow-hidden relative shrink-0 w-full flex items-center justify-center bg-neutral-100 min-h-0"
+          onMouseDown={handleDragStart}
+          onMouseMove={handleDragMove}
+          onMouseUp={handleDragEnd}
+          onMouseLeave={handleDragEnd}
+        >
           {currentImage ? (
             <>
               {/* 图片 */}
-              <div className="absolute inset-0 flex items-center justify-center overflow-visible">
+              <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
                 <img
+                  ref={imageRef}
                   alt={currentFileName}
-                  className="object-50%-50% object-contain"
+                  className={cn(
+                    "object-50%-50% object-contain select-none",
+                    zoom > 100 ? "cursor-grab" : "cursor-default",
+                    isDragging && "cursor-grabbing"
+                  )}
                   src={currentImage}
                   loading="eager"
                   decoding="async"
                   style={{
-                    transform: `scale(${zoom / 100})`,
-                    transition: "transform 0.2s ease-in-out",
+                    transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom / 100})`,
+                    transition: isDragging ? "none" : "transform 0.2s ease-in-out",
                     maxWidth: "100%",
                     maxHeight: "100%",
                     width: "auto",
                     height: "auto",
+                  }}
+                  draggable={false}
+                  onLoad={(e) => {
+                    imageNaturalSizeRef.current = {
+                      width: e.currentTarget.naturalWidth,
+                      height: e.currentTarget.naturalHeight,
+                    };
+                    setPan((prev) => clampPan(prev, zoom));
                   }}
                   onError={(e) => {
                     console.error("Failed to load image:", currentImage);
