@@ -178,7 +178,7 @@ export function CustomRadio({
               {label}
             </p>
             {description && (
-              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative text-[#4a5565] text-[12.25px]">
+              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative text-[#4a5565] text-[12.25px] whitespace-nowrap">
                 {description}
               </p>
             )}
@@ -343,7 +343,7 @@ export const CustomRadioItem = React.forwardRef<
                 {label}
               </p>
               {description && (
-                <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] text-[#4a5565] text-[12.25px]">
+                <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] text-[#4a5565] text-[12.25px] whitespace-nowrap">
                   {description}
                 </p>
               )}

@@ -169,6 +169,7 @@ export function Step2() {
   const handleBehaviorSelect = (nextBehavior: Behavior) => {
     setBehavior(nextBehavior);
     if (nextBehavior === "hard_to_handle" || nextBehavior === "senior_pets") {
+      (document.activeElement as HTMLElement)?.blur?.();
       setBehaviorModal(nextBehavior);
     }
   };
@@ -176,6 +177,7 @@ export function Step2() {
   const handleCoatConditionSelect = (nextCondition: CoatCondition) => {
     setCoatCondition(nextCondition);
     if (nextCondition === "matted" || nextCondition === "severely_matted") {
+      (document.activeElement as HTMLElement)?.blur?.();
       setMattingModalOpen(true);
     } else {
       setApproveShave(null);
@@ -931,284 +933,298 @@ export function Step2() {
   }, [petType, breed, petBreeds, setBreed]);
 
   return (
-    <div className="content-stretch flex flex-col gap-[24px] items-start relative w-full">
-      {/* Pet Information Card */}
-      <div className="bg-white box-border flex flex-col gap-[20px] items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
-        <div className="flex flex-col gap-[14px] items-start relative w-full">
-          {/* Section Header */}
-          <div className="flex flex-col gap-[4px] items-start relative shrink-0">
-            <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] relative shrink-0 text-[#4a3c2a] text-[16px]">
-              Tell us about your furry friend
-            </p>
-            <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[#4a5565] text-[12.25px]">
-              This helps groomers prepare and provide the best care possible
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-[16px] items-start relative shrink-0 w-[330px]">
-            {/* Pet Name */}
-            <div className="flex gap-[20px] items-start relative shrink-0 w-full">
-              <div className="flex flex-[1_0_0] flex-col items-start min-h-px min-w-px relative shrink-0">
-                <CustomInput
-                  label="Pet name"
-                  type="text"
-                  placeholder="Enter pet name"
-                  value={petName}
-                  onChange={(e) => setPetName(e.target.value)}
-                />
-              </div>
+    <div className="content-stretch flex flex-col gap-[calc(16*var(--px393))] sm:gap-[24px] items-start relative w-full px-[calc(20*var(--px393))] sm:px-0">
+      {/* Mobile Step Header */}
+      <div className="content-stretch flex flex-col gap-[calc(12*var(--px393))] sm:gap-[12px] items-start relative shrink-0 w-full sm:hidden">
+        <p className="font-['Comfortaa:Bold',sans-serif] font-bold h-[calc(19*var(--px393))] sm:h-[19px] leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[calc(12*var(--px393))] sm:text-[12px] text-black w-full whitespace-pre-wrap">
+          Book your appointment
+        </p>
+        <div className="border border-[#4c4c4c] border-solid content-stretch flex h-[calc(24*var(--px393))] sm:h-[24px] items-center justify-center overflow-clip px-[calc(9*var(--px393))] py-[calc(5*var(--px393))] sm:px-[9px] sm:py-[5px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shrink-0">
+          <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[calc(14*var(--px393))] sm:leading-[14px] relative shrink-0 text-[#4c4c4c] text-[calc(10*var(--px393))] sm:text-[10px]">
+            Step 2 of 6
+          </p>
+        </div>
+        <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] min-w-full relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px] w-[min-content] whitespace-pre-wrap">
+          Pet information
+        </p>
+      </div>
+      <div className="flex flex-col gap-[calc(32*var(--px393))] sm:gap-[32px] items-start relative w-full">
+        {/* Pet Information Card */}
+        <div className="bg-white box-border flex flex-col gap-[calc(16*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
+          <div className="flex flex-col gap-[calc(16*var(--px393))] sm:gap-[16px] items-start relative w-full">
+            {/* Section Header */}
+            <div className="flex flex-col gap-[calc(4*var(--px393))] sm:gap-[4px] items-start relative shrink-0 w-full">
+              <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px]">
+                Tell us about your furry friend
+              </p>
+              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[#4a5565] text-[calc(12.25*var(--px393))] sm:text-[12.25px]">
+                This helps groomers prepare and provide the best care possible
+              </p>
             </div>
 
-            {/* Pet Type */}
-            <div className="flex flex-col gap-[8px] items-start relative shrink-0 w-full">
-              <div className="flex gap-[7px] h-[12.25px] items-center relative shrink-0 w-full">
-                <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[14px]">
-                  Pet type
-                </p>
-              </div>
-              <div className="flex gap-[8px] items-start relative shrink-0">
-                <CustomRadio
-                  label="Dog"
-                  icon="dog"
-                  isSelected={petType === "dog"}
-                  onClick={() => setPetType("dog")}
-                />
-                <CustomRadio
-                  label="Cat"
-                  icon="cat"
-                  isSelected={petType === "cat"}
-                  onClick={() => setPetType("cat")}
-                />
-                <CustomRadio
-                  label="Other"
-                  icon="pet"
-                  isSelected={petType === "other"}
-                  onClick={() => setPetType("other")}
-                />
-              </div>
-            </div>
-
-            {/* Breed - Hidden when pet type is cat or other */}
-            {petType !== "cat" && petType !== "other" && (
-            <div className="flex flex-col gap-[8px] items-start relative shrink-0 w-full">
-              <div className="flex h-[12.25px] items-center justify-between relative shrink-0 w-full">
-                <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[14px]">
-                  {isMixedBreed ? "Primary breed" : "Breed"}
-                </p>
-                <div className="flex gap-[4px] items-center justify-end relative shrink-0">
-                  <Switch 
-                    className="cursor-pointer"
-                    checked={isMixedBreed} 
-                    onCheckedChange={setIsMixedBreed}
+            <div className="flex flex-col gap-[calc(16*var(--px393))] sm:gap-[16px] items-start relative shrink-0 w-full sm:w-[330px]">
+              {/* Pet Name */}
+              <div className="flex gap-[calc(20*var(--px393))] sm:gap-[20px] items-start relative shrink-0 w-full">
+                <div className="flex flex-[1_0_0] flex-col items-start min-h-px min-w-px relative shrink-0">
+                  <CustomInput
+                    label="Pet name"
+                    type="text"
+                    placeholder="Enter pet name"
+                    value={petName}
+                    onChange={(e) => setPetName(e.target.value)}
                   />
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[14px]">
-                    Mixed breed
-                  </p>
                 </div>
               </div>
-              <AutoComplete
-                placeholder={isLoadingBreeds ? "Loading breeds..." : "Select or type breed"}
-                value={breed}
-                onValueChange={setBreed}
-                options={getBreedOptions(petType, petBreeds)}
-                disabled={isLoadingBreeds}
-                leftElement={
-                  <Icon
-                    name="search"
-                    className="relative shrink-0 w-[20px] h-[20px] text-[#717182]"
-                  />
-                }
-              />
-            </div>
-            )}
 
-            {/* Precise pet type - Only shown when pet type is other */}
-            {petType === "other" && (
-              <div className="flex flex-col gap-[8px] items-start relative shrink-0 w-full">
-                <div className="flex gap-[7px] h-[12.25px] items-center relative shrink-0 w-full">
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[14px]">
-                    Precise pet type
+              {/* Pet Type */}
+              <div className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full">
+                <div className="flex gap-[7px] h-[calc(12.25*var(--px393))] sm:h-[12.25px] items-center relative shrink-0 w-full">
+                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
+                    Pet type
                   </p>
                 </div>
-                <CustomInput
-                  label=""
-                  type="text"
-                  placeholder="Enter pet type"
-                  value={precisePetType}
-                  onChange={(e) => setPrecisePetType(e.target.value)}
-                />
+                <div className="flex flex-nowrap gap-[8px] items-start relative shrink-0 w-full *:flex-none">
+                  <CustomRadio
+                    label="Dog"
+                    icon="dog"
+                    isSelected={petType === "dog"}
+                    onClick={() => setPetType("dog")}
+                  />
+                  <CustomRadio
+                    label="Cat"
+                    icon="cat"
+                    isSelected={petType === "cat"}
+                    onClick={() => setPetType("cat")}
+                  />
+                  <CustomRadio
+                    label="Other"
+                    icon="pet"
+                    isSelected={petType === "other"}
+                    onClick={() => setPetType("other")}
+                  />
+                </div>
               </div>
-            )}
 
-            {/* Date of Birth and Gender */}
-            <div className="flex gap-[16px] items-start relative shrink-0 w-full">
-              <div className="flex flex-col items-start relative shrink-0 w-[140px]">
-                <DatePicker
-                  label="Date of birth"
-                  placeholder="YYYY-MM"
-                  value={dateOfBirth}
-                  onChange={setDateOfBirth}
-                  mode="month"
-                  minDate={minDate}
-                  maxDate={maxDate}
-                />
-              </div>
-              <div className="flex flex-col items-start relative shrink-0 w-[140px]">
-                <CustomSelect
-                  className="cursor-pointer"
-                  label="Gender"
-                  placeholder="Select"
-                  value={gender}
-                  displayValue={gender ? `${gender[0].toUpperCase()}${gender.slice(1)}` : ""}
-                  onValueChange={(value) => setGender(value === "unknown" ? "" : (value as Gender))}
-                >
-                  {gender === "" ? (
-                    <CustomSelectItem value="unknown">Select</CustomSelectItem>
-                  ) : null}
-                  <CustomSelectItem value="male">Male</CustomSelectItem>
-                  <CustomSelectItem value="female">Female</CustomSelectItem>
-                  <CustomSelectItem value="unknown">Unknown</CustomSelectItem>
-                </CustomSelect>
-              </div>
-            </div>
-
-            {/* Weight */}
-            <div className="flex flex-col gap-[8px] items-start relative shrink-0 w-full">
-              <div className="flex gap-[7px] h-[12.25px] items-center relative shrink-0 w-full">
-                <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[14px]">
-                  Weight (lb or kg)
-                </p>
-              </div>
-              <div className="flex items-start relative shrink-0 w-[200px] group">
-                <div className="bg-white flex-1 h-[36px] relative rounded-bl-[12px] rounded-tl-[12px] shrink-0">
-                  <div className="box-border flex h-[36px] items-center overflow-clip px-[16px] py-[4px] relative rounded-[inherit] w-full">
-                    <input
-                      type="text"
-                      placeholder="Enter weight"
-                      value={weight}
-                      onChange={(e) => setWeight(e.target.value)}
-                      className="flex-1 font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] relative shrink-0 text-[#717182] text-[12.25px] bg-transparent border-none outline-none placeholder:text-[#717182]"
-                    />
+              {/* Breed - Hidden when pet type is cat or other */}
+              {petType !== "cat" && petType !== "other" && (
+                <div className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full">
+                  <div className="flex h-[calc(12.25*var(--px393))] sm:h-[12.25px] items-center justify-between relative shrink-0 w-full">
+                    <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
+                      {isMixedBreed ? "Primary breed" : "Breed"}
+                    </p>
+                    <div className="flex gap-[calc(4*var(--px393))] sm:gap-[4px] items-center justify-end relative shrink-0">
+                      <Switch 
+                        className="cursor-pointer"
+                        checked={isMixedBreed} 
+                        onCheckedChange={setIsMixedBreed}
+                      />
+                      <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
+                        Mixed breed
+                      </p>
+                    </div>
                   </div>
-                  {/* Border with states */}
-                  <div
-                    aria-hidden="true"
-                    className="absolute border border-solid inset-0 pointer-events-none rounded-bl-[12px] rounded-tl-[12px] transition-colors duration-200 border-gray-200 group-hover:border-[#717182] group-focus-within:border-[#2374ff]!"
+                  <AutoComplete
+                    placeholder={isLoadingBreeds ? "Loading breeds..." : "Select or type breed"}
+                    value={breed}
+                    onValueChange={setBreed}
+                    options={getBreedOptions(petType, petBreeds)}
+                    disabled={isLoadingBreeds}
+                    leftElement={
+                      <Icon
+                        name="search"
+                        className="relative shrink-0 w-[calc(20*var(--px393))] h-[calc(20*var(--px393))] sm:w-[20px] sm:h-[20px] text-[#717182]"
+                      />
+                    }
                   />
                 </div>
-                <div className="relative shrink-0 opacity-80">
+              )}
+
+              {/* Precise pet type - Only shown when pet type is other */}
+              {petType === "other" && (
+                <div className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full">
+                  <div className="flex gap-[7px] h-[calc(12.25*var(--px393))] sm:h-[12.25px] items-center relative shrink-0 w-full">
+                    <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
+                      Precise pet type
+                    </p>
+                  </div>
+                  <CustomInput
+                    label=""
+                    type="text"
+                    placeholder="Enter pet type"
+                    value={precisePetType}
+                    onChange={(e) => setPrecisePetType(e.target.value)}
+                  />
+                </div>
+              )}
+
+              {/* Date of Birth and Gender */}
+              <div className="flex flex-col sm:flex-row gap-[calc(16*var(--px393))] sm:gap-[16px] items-start relative shrink-0 w-full">
+                <div className="flex flex-col items-start relative shrink-0 w-full sm:w-[140px]">
+                  <DatePicker
+                    label="Date of birth"
+                    placeholder="YYYY-MM"
+                    value={dateOfBirth}
+                    onChange={setDateOfBirth}
+                    mode="month"
+                    minDate={minDate}
+                    maxDate={maxDate}
+                  />
+                </div>
+                <div className="flex flex-col items-start relative shrink-0 w-full sm:w-[140px]">
                   <CustomSelect
+                    className="cursor-pointer"
+                    label="Gender"
                     placeholder="Select"
-                    value={weightUnit}
-                    onValueChange={(value) => setWeightUnit(value as WeightUnit)}
-                    className="w-auto"
-                    noLeftRadius={true}
+                    value={gender}
+                    displayValue={gender ? `${gender[0].toUpperCase()}${gender.slice(1)}` : ""}
+                    onValueChange={(value) => setGender(value === "unknown" ? "" : (value as Gender))}
                   >
-                    <CustomSelectItem value="kg">kg</CustomSelectItem>
-                    <CustomSelectItem value="lb">lb</CustomSelectItem>
+                    {gender === "" ? (
+                      <CustomSelectItem value="unknown">Select</CustomSelectItem>
+                    ) : null}
+                    <CustomSelectItem value="male">Male</CustomSelectItem>
+                    <CustomSelectItem value="female">Female</CustomSelectItem>
+                    <CustomSelectItem value="unknown">Unknown</CustomSelectItem>
                   </CustomSelect>
                 </div>
               </div>
-            </div>
 
-            {/* Coat Condition and Behavior - Same Row */}
+              {/* Weight */}
+              <div className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full">
+                <div className="flex gap-[7px] h-[calc(12.25*var(--px393))] sm:h-[12.25px] items-center relative shrink-0 w-full">
+                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
+                    Weight (lb or kg)
+                  </p>
+                </div>
+                <div className="flex items-start relative shrink-0 w-full sm:w-[200px] group">
+                  <div className="bg-white flex-1 h-[calc(36*var(--px393))] sm:h-[36px] relative rounded-bl-[calc(12*var(--px393))] rounded-tl-[calc(12*var(--px393))] sm:rounded-bl-[12px] sm:rounded-tl-[12px] shrink-0">
+                    <div className="box-border flex h-[calc(36*var(--px393))] sm:h-[36px] items-center overflow-clip px-[calc(16*var(--px393))] py-[calc(4*var(--px393))] sm:px-[16px] sm:py-[4px] relative rounded-[inherit] w-full">
+                      <input
+                        type="text"
+                        placeholder="Enter weight"
+                        value={weight}
+                        onChange={(e) => setWeight(e.target.value)}
+                        className="flex-1 font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] relative shrink-0 text-[#717182] text-[calc(12.25*var(--px393))] sm:text-[12.25px] bg-transparent border-none outline-none placeholder:text-[#717182]"
+                      />
+                    </div>
+                    {/* Border with states */}
+                    <div
+                      aria-hidden="true"
+                      className="absolute border border-solid inset-0 pointer-events-none rounded-bl-[calc(12*var(--px393))] rounded-tl-[calc(12*var(--px393))] sm:rounded-bl-[12px] sm:rounded-tl-[12px] transition-colors duration-200 border-gray-200 group-hover:border-[#717182] group-focus-within:border-[#2374ff]!"
+                    />
+                  </div>
+                  <div className="relative shrink-0 opacity-80">
+                    <CustomSelect
+                      placeholder="Select"
+                      value={weightUnit}
+                      onValueChange={(value) => setWeightUnit(value as WeightUnit)}
+                      className="w-auto"
+                      noLeftRadius={true}
+                    >
+                      <CustomSelectItem value="kg">kg</CustomSelectItem>
+                      <CustomSelectItem value="lb">lb</CustomSelectItem>
+                    </CustomSelect>
+                  </div>
+                </div>
+              </div>
+
               {/* Coat Condition */}
-              <div className="flex flex-col gap-[8px] items-start relative shrink-0">
-                <div className="flex gap-[7px] h-[12.25px] items-center relative shrink-0">
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[14px]">
+              <div className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0">
+                <div className="flex gap-[7px] h-[calc(12.25*var(--px393))] sm:h-[12.25px] items-center relative shrink-0">
+                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
                     Coat condition
                   </p>
                 </div>
-                <div className="flex gap-[8px] items-stretch relative shrink-0">
+                <div className="flex flex-row flex-wrap gap-[calc(8*var(--px393))] sm:gap-[8px] items-stretch relative shrink-0 w-full">
                   <CustomRadio
                     label="Not matted"
                     isSelected={coatCondition === "not_matted"}
                     onClick={() => handleCoatConditionSelect("not_matted")}
-                    className="self-stretch h-[53px]"
+                    className="w-auto flex-none self-stretch h-[calc(53*var(--px393))] sm:h-[53px]"
                   />
                   <CustomRadio
                     label="Matted"
                     isSelected={coatCondition === "matted"}
                     onClick={() => handleCoatConditionSelect("matted")}
-                    className="self-stretch h-[53px]"
+                    className="w-auto flex-none self-stretch h-[calc(53*var(--px393))] sm:h-[53px]"
                   />
                   <CustomRadio
                     label="Severely matted"
                     isSelected={coatCondition === "severely_matted"}
                     onClick={() => handleCoatConditionSelect("severely_matted")}
-                    className="self-stretch h-[53px]"
+                    className="w-auto flex-none self-stretch h-[calc(53*var(--px393))] sm:h-[53px]"
                   />
                 </div>
               </div>
 
               {/* Behavior */}
-              <div className="flex flex-col gap-[8px] items-start relative shrink-0">
-                <div className="flex gap-[7px] h-[12.25px] items-center relative shrink-0">
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[14px]">
+              <div className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0">
+                <div className="flex gap-[7px] h-[calc(12.25*var(--px393))] sm:h-[12.25px] items-center relative shrink-0">
+                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
                     Behavior
                   </p>
                 </div>
-                <div className="flex gap-[8px] items-stretch relative shrink-0">
+                <div className="flex flex-row flex-wrap gap-[calc(8*var(--px393))] sm:gap-[8px] items-stretch relative shrink-0 w-full">
                   <CustomRadio
                     label="Friendly"
                     isSelected={behavior === "friendly"}
                     onClick={() => handleBehaviorSelect("friendly")}
-                    className="self-stretch h-[53px]"
+                    className="w-auto flex-none self-stretch h-[calc(53*var(--px393))] sm:h-[53px]"
                   />
                   <CustomRadio
                     label="Anxious"
                     isSelected={behavior === "anxious"}
                     onClick={() => handleBehaviorSelect("anxious")}
-                    className="self-stretch h-[53px]"
+                    className="w-auto flex-none self-stretch h-[calc(53*var(--px393))] sm:h-[53px]"
                   />
                   <CustomRadio
                     label="Hard to handle"
                     isSelected={behavior === "hard_to_handle"}
                     onClick={() => handleBehaviorSelect("hard_to_handle")}
-                    className="self-stretch h-[53px]"
+                    className="w-auto flex-none self-stretch h-[calc(53*var(--px393))] sm:h-[53px]"
                   />
                   <CustomRadio
                     label="Senior pets"
                     isSelected={behavior === "senior_pets"}
                     onClick={() => handleBehaviorSelect("senior_pets")}
-                    className="self-stretch h-[53px]"
+                    className="w-auto flex-none self-stretch h-[calc(53*var(--px393))] sm:h-[53px]"
                   />
                 </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
       <AlertDialog
         open={behaviorModal === "hard_to_handle"}
         onOpenChange={(open) => setBehaviorModal(open ? "hard_to_handle" : null)}
       >
-        <AlertDialogContent className="bg-white rounded-[20px] border border-[rgba(0,0,0,0.2)] p-0 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] max-w-[90%] sm:max-w-[400px]">
-          <div className="flex flex-col gap-[32px] items-start pb-[32px] pt-[12px] w-full">
-            <AlertDialogHeader className="px-[12px] w-full">
-              <AlertDialogTitle className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] text-[#4C4C4C] text-center">
+        <AlertDialogContent className="bg-white rounded-[calc(20*var(--px393))] sm:rounded-[20px] border border-[rgba(0,0,0,0.2)] p-0 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] max-w-[90%] sm:max-w-[400px]">
+          <div className="flex flex-col gap-[calc(32*var(--px393))] sm:gap-[32px] items-start pb-[calc(32*var(--px393))] pt-[calc(12*var(--px393))] sm:pb-[32px] sm:pt-[12px] w-full">
+            <AlertDialogHeader className="px-[calc(12*var(--px393))] sm:px-[12px] w-full">
+              <AlertDialogTitle className="font-['Comfortaa:Regular',sans-serif] font-normal text-[calc(14*var(--px393))] sm:text-[14px] text-[#4C4C4C] text-center">
                 Hard to handle notice
               </AlertDialogTitle>
-              <div className="bg-[rgba(0,0,0,0.1)] h-px w-full mt-[8px]" />
+              <div className="bg-[rgba(0,0,0,0.1)] h-px w-full mt-[calc(8*var(--px393))] sm:mt-[8px]" />
             </AlertDialogHeader>
-            <div className="px-[24px] w-full">
+            <div className="px-[calc(20*var(--px393))] sm:px-[24px] w-full">
               <AlertDialogDescription asChild>
-                <div className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#4C4C4C] leading-[22.75px]">
-                  <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] text-[16px] mb-0 text-black">
+                <div className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#4C4C4C] leading-[calc(22.75*var(--px393))] sm:leading-[22.75px]">
+                  <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] text-[calc(16*var(--px393))] sm:text-[16px] mb-0 text-black">
                     Hard to Handle
                   </p>
-                  <p className="text-[14px] text-[#4C4C4C]">
+                  <p className="text-[calc(14*var(--px393))] sm:text-[14px] text-[#4C4C4C]">
                     Some pets may become too anxious or aggressive during grooming. If extra care is needed, a handling fee may apply. If a pet shows signs of aggression, it may fall under our Non-Groomable Policy (see cancellation policy).
                   </p>
                 </div>
               </AlertDialogDescription>
             </div>
-            <AlertDialogFooter className="px-[24px] pt-0 flex flex-row items-center justify-center sm:justify-center w-full">
+            <AlertDialogFooter className="px-[calc(20*var(--px393))] sm:px-[24px] pt-0 flex flex-row items-center justify-center sm:justify-center w-full">
               <OrangeButton
                 variant="primary"
                 size="medium"
                 onClick={() => setBehaviorModal(null)}
-                className="w-[151px]"
+                className="w-[calc(151*var(--px393))] sm:w-[151px]"
               >
                 I understand
               </OrangeButton>
@@ -1221,32 +1237,32 @@ export function Step2() {
         open={behaviorModal === "senior_pets"}
         onOpenChange={(open) => setBehaviorModal(open ? "senior_pets" : null)}
       >
-        <AlertDialogContent className="bg-white rounded-[20px] border border-[rgba(0,0,0,0.2)] p-0 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] max-w-[90%] sm:max-w-[400px]">
-          <div className="flex flex-col gap-[32px] items-start pb-[32px] pt-[12px] w-full">
-            <AlertDialogHeader className="px-[12px] w-full">
-              <AlertDialogTitle className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] text-[#4C4C4C] text-center">
+        <AlertDialogContent className="bg-white rounded-[calc(20*var(--px393))] sm:rounded-[20px] border border-[rgba(0,0,0,0.2)] p-0 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] max-w-[90%] sm:max-w-[400px]">
+          <div className="flex flex-col gap-[calc(32*var(--px393))] sm:gap-[32px] items-start pb-[calc(32*var(--px393))] pt-[calc(12*var(--px393))] sm:pb-[32px] sm:pt-[12px] w-full">
+            <AlertDialogHeader className="px-[calc(12*var(--px393))] sm:px-[12px] w-full">
+              <AlertDialogTitle className="font-['Comfortaa:Regular',sans-serif] font-normal text-[calc(14*var(--px393))] sm:text-[14px] text-[#4C4C4C] text-center">
                 Senior pets notice
               </AlertDialogTitle>
-              <div className="bg-[rgba(0,0,0,0.1)] h-px w-full mt-[8px]" />
+              <div className="bg-[rgba(0,0,0,0.1)] h-px w-full mt-[calc(8*var(--px393))] sm:mt-[8px]" />
             </AlertDialogHeader>
-            <div className="px-[24px] w-full">
+            <div className="px-[calc(20*var(--px393))] sm:px-[24px] w-full">
               <AlertDialogDescription asChild>
-                <div className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#4C4C4C] leading-[22.75px]">
-                  <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] text-[16px] mb-0 text-black">
+                <div className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#4C4C4C] leading-[calc(22.75*var(--px393))] sm:leading-[22.75px]">
+                  <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] text-[calc(16*var(--px393))] sm:text-[16px] mb-0 text-black">
                     Senior pets
                   </p>
-                  <p className="text-[14px] text-[#4C4C4C]">
+                  <p className="text-[calc(14*var(--px393))] sm:text-[14px] text-[#4C4C4C]">
                     Older pets often need more time and gentle handling. A handling fee may be added to ensure their comfort and safety during the service.
                   </p>
                 </div>
               </AlertDialogDescription>
             </div>
-            <AlertDialogFooter className="px-[24px] pt-0 flex flex-row items-center justify-center sm:justify-center w-full">
+            <AlertDialogFooter className="px-[calc(20*var(--px393))] sm:px-[24px] pt-0 flex flex-row items-center justify-center sm:justify-center w-full">
               <OrangeButton
                 variant="primary"
                 size="medium"
                 onClick={() => setBehaviorModal(null)}
-                className="w-[151px]"
+                className="w-[calc(151*var(--px393))] sm:w-[151px]"
               >
                 I understand
               </OrangeButton>
@@ -1256,47 +1272,47 @@ export function Step2() {
       </AlertDialog>
 
       <AlertDialog open={mattingModalOpen} onOpenChange={setMattingModalOpen}>
-        <AlertDialogContent className="bg-white rounded-[20px] border border-[rgba(0,0,0,0.2)] p-0 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] max-w-[90%] sm:max-w-[400px]">
-          <div className="flex flex-col gap-[32px] items-start pb-[32px] pt-[12px] w-full">
-            <AlertDialogHeader className="px-[12px] w-full">
-              <AlertDialogTitle className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] text-[#4C4C4C] text-center">
-                Matting removal notice
-              </AlertDialogTitle>
-              <div className="bg-[rgba(0,0,0,0.1)] h-px w-full mt-[8px]" />
-            </AlertDialogHeader>
-            <div className="px-[24px] w-full">
+        <AlertDialogContent className="flex flex-col bg-white rounded-[calc(20*var(--px393))] sm:rounded-[20px] border border-[rgba(0,0,0,0.2)] p-0 pt-[calc(12*var(--px393))] sm:pt-[12px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] max-w-[90%] sm:max-w-[400px] max-h-[80vh] overflow-hidden sm:max-h-none sm:overflow-visible gap-[calc(32*var(--px393))] sm:gap-[32px]">
+          <AlertDialogHeader className="shrink-0 px-[calc(12*var(--px393))] sm:px-[12px] w-full">
+            <AlertDialogTitle className="font-['Comfortaa:Regular',sans-serif] font-normal text-[calc(14*var(--px393))] sm:text-[14px] text-[#4C4C4C] text-center">
+              Matting removal notice
+            </AlertDialogTitle>
+            <div className="bg-[rgba(0,0,0,0.1)] h-px w-full mt-[calc(8*var(--px393))] sm:mt-[8px]" />
+          </AlertDialogHeader>
+          <div className="flex flex-col flex-1 min-h-0 overflow-y-auto gap-[calc(32*var(--px393))] sm:gap-[32px] items-start pb-[calc(32*var(--px393))] sm:pb-[32px] w-full">
+            <div className="px-[calc(20*var(--px393))] sm:px-[24px] w-full">
               <AlertDialogDescription asChild>
-                <div className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#4C4C4C] leading-[22.75px]">
-                  <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] text-[16px] mb-0 text-black">
+                <div className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#4C4C4C] leading-[calc(22.75*var(--px393))] sm:leading-[22.75px]">
+                  <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] text-[calc(16*var(--px393))] sm:text-[16px] mb-0 text-black">
                     Matting removal notice
                   </p>
-                  <p className="text-[14px] text-[#4C4C4C] mb-0">
+                  <p className="text-[calc(14*var(--px393))] sm:text-[14px] text-[#4C4C4C] mb-0">
                     Mat removal is often painful and time-consuming, an additional fee may apply.
                   </p>
-                  <p className="text-[14px] text-[#4C4C4C] mb-0">
+                  <p className="text-[calc(14*var(--px393))] sm:text-[14px] text-[#4C4C4C] mb-0">
                     A shave-down may be the safest option, potentially revealing skin issues like irritations or parasites.
                   </p>
-                  <p className="text-[14px] text-[#4C4C4C]">
+                  <p className="text-[calc(14*var(--px393))] sm:text-[14px] text-[#4C4C4C]">
                     If shaving isn't approved, mats may be left if removal causes too much distress, and the full charge will still apply.
                   </p>
                 </div>
               </AlertDialogDescription>
             </div>
-            <div className="px-[24px] w-full">
-              <div className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[16px] text-[#4a3c2a] leading-[28px] mb-[14px]">
+            <div className="px-[calc(20*var(--px393))] sm:px-[24px] w-full">
+              <div className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[calc(16*var(--px393))] sm:text-[16px] text-[#4a3c2a] leading-[calc(28*var(--px393))] sm:leading-[28px] mb-[calc(14*var(--px393))] sm:mb-[14px]">
                 Select one option
               </div>
-              <div className="flex flex-col gap-[14px]">
+              <div className="flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px]">
                 <button
                   type="button"
                   onClick={() => setApproveShaveSelection(true)}
-                  className={`border-2 rounded-[14px] p-[16px] w-full text-left transition-colors ${
+                  className={`border-2 rounded-[calc(14*var(--px393))] p-[calc(16*var(--px393))] sm:rounded-[14px] sm:p-[16px] w-full text-left transition-colors ${
                     approveShaveSelection === true
                       ? "border-[#de6a07] bg-[#fff3e9]"
                       : "border-[#e5e7eb] bg-white"
                   }`}
                 >
-                  <div className="flex gap-[8px] items-start">
+                  <div className="flex gap-[calc(8*var(--px393))] sm:gap-[8px] items-start">
                     <div className="relative shrink-0 size-[16px] mt-[2.5px]">
                       <div className="size-[16px] rounded-full border border-solid border-[#717182] bg-white">
                         {approveShaveSelection === true ? (
@@ -1304,16 +1320,12 @@ export function Step2() {
                         ) : null}
                       </div>
                     </div>
-                    <div className="text-[14px] leading-[21px] text-[#8b6357]">
+                    <div className="text-[calc(14*var(--px393))] sm:text-[14px] leading-[calc(21*var(--px393))] sm:leading-[21px] text-[#8b6357]">
                       <span className="font-['Comfortaa:Bold',sans-serif] font-bold">
                         I approve{" "}
                       </span>
                       <span className="font-['Comfortaa:Regular',sans-serif] font-normal">
-                        the groomer to shave my pet
-                      </span>
-                      <br />
-                      <span className="font-['Comfortaa:Regular',sans-serif] font-normal">
-                        if needed.
+                        the groomer to shave my pet if needed.
                       </span>
                     </div>
                   </div>
@@ -1321,13 +1333,13 @@ export function Step2() {
                 <button
                   type="button"
                   onClick={() => setApproveShaveSelection(false)}
-                  className={`border-2 rounded-[14px] p-[16px] w-full text-left transition-colors ${
+                  className={`border-2 rounded-[calc(14*var(--px393))] p-[calc(16*var(--px393))] sm:rounded-[14px] sm:p-[16px] w-full text-left transition-colors ${
                     approveShaveSelection === false
                       ? "border-[#de6a07] bg-[#fff3e9]"
                       : "border-[#e5e7eb] bg-white"
                   }`}
                 >
-                  <div className="flex gap-[8px] items-start">
+                  <div className="flex gap-[calc(8*var(--px393))] sm:gap-[8px] items-start">
                     <div className="relative shrink-0 size-[16px] mt-[2.5px]">
                       <div className="size-[16px] rounded-full border border-solid border-[#717182] bg-white">
                         {approveShaveSelection === false ? (
@@ -1335,33 +1347,25 @@ export function Step2() {
                         ) : null}
                       </div>
                     </div>
-                    <div className="text-[14px] leading-[21px] text-[#8b6357]">
+                    <div className="text-[calc(14*var(--px393))] sm:text-[14px] leading-[calc(21*var(--px393))] sm:leading-[21px] text-[#8b6357]">
                       <span className="font-['Comfortaa:Bold',sans-serif] font-bold">
                         I do not approve{" "}
                       </span>
                       <span className="font-['Comfortaa:Regular',sans-serif] font-normal">
-                        a shave-down and
-                      </span>
-                      <br />
-                      <span className="font-['Comfortaa:Regular',sans-serif] font-normal">
-                        understand that the full charge will
-                      </span>
-                      <br />
-                      <span className="font-['Comfortaa:Regular',sans-serif] font-normal">
-                        apply even if mats remain.
+                        a shave-down and understand that the full charge will apply even if mats remain.
                       </span>
                     </div>
                   </div>
                 </button>
               </div>
             </div>
-            <AlertDialogFooter className="px-[24px] pt-0 flex flex-row items-center justify-center sm:justify-center w-full">
+            <AlertDialogFooter className="px-[calc(20*var(--px393))] sm:px-[24px] pt-0 flex flex-row items-center justify-center sm:justify-center w-full">
               <OrangeButton
                 variant="primary"
                 size="medium"
                 onClick={handleMattingSubmit}
                 disabled={approveShaveSelection === null}
-                className="w-[120px]"
+                className="w-[calc(120*var(--px393))] sm:w-[120px]"
               >
                 Submit
               </OrangeButton>
@@ -1370,22 +1374,22 @@ export function Step2() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Grooming Frequency Card */}
-      <div className="bg-white box-border flex flex-col gap-[20px] items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
-        <div className="flex flex-col gap-[14px] items-start relative shrink-0 w-full">
-          <div className="flex flex-col gap-[3.5px] items-start relative shrink-0">
-            <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] relative shrink-0 text-[#4a3c2a] text-[16px]">
+        {/* Grooming Frequency Card */}
+        <div className="bg-white box-border flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
+        <div className="flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full">
+          <div className="flex flex-col gap-[calc(3.5*var(--px393))] sm:gap-[3.5px] items-start relative shrink-0">
+            <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px]">
               How often would you like grooming?
             </p>
             {/* Info Alert */}
-            <div className="bg-blue-50 border border-[#bedbff] border-solid relative rounded-[8px] shrink-0 w-full">
-              <div className="box-border flex items-center overflow-clip px-[16px] py-[8px] relative rounded-[inherit]">
-                <div className="flex gap-[8px] items-start relative shrink-0">
+            <div className="bg-blue-50 border border-[#bedbff] border-solid relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] shrink-0 w-full">
+              <div className="box-border flex items-center overflow-clip px-[calc(16*var(--px393))] py-[calc(8*var(--px393))] sm:px-[16px] sm:py-[8px] relative rounded-[inherit]">
+                <div className="flex gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full min-w-0">
                   <Icon
                     name="alert-info"
                     className="relative shrink-0 size-[12px] text-[#ffffff]"
                   />
-                  <div className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[14px] relative shrink-0 text-[#193cb8] text-[10px] whitespace-nowrap">
+                  <div className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(14*var(--px393))] sm:leading-[14px] relative text-[#193cb8] text-[calc(10*var(--px393))] sm:text-[10px] whitespace-normal break-words min-w-0">
                     <p className="font-['Comfortaa:Bold',sans-serif] font-bold mb-0">
                       Professional Tip:
                     </p>
@@ -1397,7 +1401,7 @@ export function Step2() {
               </div>
             </div>
           </div>
-          <div className="gap-[16px] grid grid-cols-2 grid-rows-2 h-[166px] relative shrink-0 w-full">
+          <div className="flex flex-row flex-wrap gap-[calc(8*var(--px393))] sm:gap-[16px] relative sm:h-[166px] *:flex-[1_1_calc(50%-4px)] *:min-w-0 *:sm:flex-[1_1_calc(50%-8px)]">
             <CustomRadio
               label="Weekly"
               description="Once a week"
@@ -1428,98 +1432,103 @@ export function Step2() {
             />
           </div>
         </div>
-      </div>
+        </div>
 
-      {/* Upload Pet Photo Card */}
-      <div className="bg-white box-border flex flex-col gap-[20px] items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
-        <div className="flex flex-col gap-[14px] items-start relative shrink-0 w-full">
-          <div className="flex flex-col gap-[8px] items-start relative shrink-0 w-full">
-            <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] relative shrink-0 text-[16px] text-black whitespace-pre-wrap">
-              Upload pet photo (optional but helpful)
-            </p>
-            <div className="flex flex-col gap-[12px] items-start overflow-clip relative shrink-0 w-full">
-              <FileUpload
-                accept="image/*"
-                multiple={true}
-                maxSizeMB={10}
-                onChange={handlePetPhotoChange}
-                onRemove={(index) => {
-                  // 删除已上传的图片
-                  // 使用函数式更新，确保基于最新状态
-                  setPetPhotoItems((prevItems) => {
-                    const item = prevItems[index];
-                    if (item && item.uploadStatus === "uploaded" && item.photoId !== undefined) {
-                      // 从 bookingStore 中移除对应的 photoId 和 photoUrl
-                      const currentPhotoIds = useBookingStore.getState().photoIds;
-                      const currentPhotoUrls = useBookingStore.getState().photoUrls;
-                      const photoIndex = currentPhotoIds.indexOf(item.photoId);
-                      
-                      setPhotoIds(currentPhotoIds.filter((id) => id !== item.photoId));
-                      if (photoIndex >= 0 && photoIndex < currentPhotoUrls.length) {
-                        setPhotoUrls(currentPhotoUrls.filter((_, idx) => idx !== photoIndex));
+        {/* Upload Pet Photo Card */}
+        <div className="bg-white box-border flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
+          <div className="flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full">
+            <div className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full">
+              <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[calc(16*var(--px393))] sm:text-[16px] text-black whitespace-pre-wrap">
+                Upload pet photo (optional but helpful)
+              </p>
+              <div className="flex flex-col gap-[calc(12*var(--px393))] sm:gap-[12px] items-start overflow-clip relative shrink-0 w-full">
+                <FileUpload
+                  accept="image/*"
+                  multiple={true}
+                  maxSizeMB={10}
+                  onChange={handlePetPhotoChange}
+                  onRemove={(index) => {
+                    // 删除已上传的图片
+                    // 使用函数式更新，确保基于最新状态
+                    setPetPhotoItems((prevItems) => {
+                      const item = prevItems[index];
+                      if (item && item.uploadStatus === "uploaded" && item.photoId !== undefined) {
+                        // 从 bookingStore 中移除对应的 photoId 和 photoUrl
+                        const currentPhotoIds = useBookingStore.getState().photoIds;
+                        const currentPhotoUrls = useBookingStore.getState().photoUrls;
+                        const photoIndex = currentPhotoIds.indexOf(item.photoId);
+                        
+                        setPhotoIds(currentPhotoIds.filter((id) => id !== item.photoId));
+                        if (photoIndex >= 0 && photoIndex < currentPhotoUrls.length) {
+                          setPhotoUrls(currentPhotoUrls.filter((_, idx) => idx !== photoIndex));
+                        }
+                        
+                        // 从 petPhotoItems 中移除（使用函数式更新，避免闭包问题）
+                        return prevItems.filter((_, i) => i !== index);
                       }
-                      
-                      // 从 petPhotoItems 中移除（使用函数式更新，避免闭包问题）
-                      return prevItems.filter((_, i) => i !== index);
-                    }
-                    return prevItems;
-                  });
-                }}
-                uploadItems={petPhotoItems}
-                buttonText="Click to upload"
-                fileTypeHint="JPG, JPEG, PNG less than 10MB"
-                showDragHint={true}
-                className="w-full"
-              />
+                      return prevItems;
+                    });
+                  }}
+                  uploadItems={petPhotoItems}
+                  buttonText="Click to upload"
+                  fileTypeHint="JPG, JPEG, PNG less than 10MB"
+                  showDragHint={true}
+                  className="w-full"
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Upload Reference Styles Card */}
-      <ReferenceStylesUpload 
-        onChange={handleReferenceStylesChange}
-        uploadItems={referenceStyleItems}
-      />
+        {/* Upload Reference Styles Card */}
+        <ReferenceStylesUpload 
+          onChange={handleReferenceStylesChange}
+          uploadItems={referenceStyleItems}
+        />
 
-      {/* Special Notes Card */}
-      <div className="bg-white box-border flex flex-col gap-[20px] items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
-        <div className="flex flex-col gap-[12px] items-start relative shrink-0 w-full">
-            <CustomTextarea
-              label="Special instruments or notes (optional)"
-              placeholder="e.g., 'My dog is nervous around clippers', 'Has sensitive skin', 'I have 2 pets and prefer to groom together..."
-              value={specialNotes}
-              onChange={(e) => setSpecialNotes(e.target.value)}
-              helperText="Include any health conditions, behavioral notes, or grooming preferences"
-            labelClassName="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] text-[16px]"
-            />
-        </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex gap-[20px] items-start relative shrink-0 w-full">
-        <div className="flex gap-[20px] items-center relative shrink-0">
-          <OrangeButton size="medium" onClick={nextStep}>
-            <div className="flex gap-[4px] items-center">
-              <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] text-[14px] text-white">
-                Continue
-              </p>
-              <Icon
-                name="button-arrow"
-                aria-label="Arrow"
-                className="size-[14px] text-white"
-              />
-            </div>
-          </OrangeButton>
-          <button
-            type="button"
-            onClick={previousStep}
-            className="border-2 border-[#de6a07] border-solid box-border flex gap-[8px] h-[36px] items-center justify-center px-[30px] relative rounded-[32px] shrink-0 cursor-pointer hover:bg-[rgba(222,106,7,0.1)] transition-colors"
-          >
-            <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[14px] text-[#de6a07]">
-              Back
+        {/* Special Notes Card */}
+        <div className="bg-white box-border flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
+          <div className="flex flex-col gap-[calc(12*var(--px393))] sm:gap-[12px] items-start relative shrink-0 w-full">
+            <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] text-[calc(16*var(--px393))] sm:text-[16px] text-[#4a3c2a] w-full whitespace-pre-wrap">
+              Special instruments or notes{"\n"}(optional)
             </p>
-          </button>
+              <CustomTextarea
+                label=""
+                placeholder="e.g., 'My dog is nervous around clippers', 'Has sensitive skin', 'I have 2 pets and prefer to groom together..."
+                value={specialNotes}
+                onChange={(e) => setSpecialNotes(e.target.value)}
+                helperText="Include any health conditions, behavioral notes, or grooming preferences"
+                aria-label="Special instruments or notes (optional)"
+                labelClassName="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] text-[calc(16*var(--px393))] sm:text-[16px]"
+              />
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col gap-[calc(12*var(--px393))] sm:flex-row sm:gap-[20px] items-start relative shrink-0 w-full">
+          <div className="flex flex-col gap-[calc(12*var(--px393))] sm:flex-row sm:gap-[20px] items-center relative shrink-0 w-full sm:w-auto">
+            <OrangeButton size="medium" onClick={nextStep} className="w-full sm:w-auto">
+              <div className="flex gap-[calc(4*var(--px393))] sm:gap-[4px] items-center">
+                <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] text-[calc(14*var(--px393))] sm:text-[14px] text-white">
+                  Continue
+                </p>
+                <Icon
+                  name="button-arrow"
+                  aria-label="Arrow"
+                  className="size-[14px] text-white"
+                />
+              </div>
+            </OrangeButton>
+            <button
+              type="button"
+              onClick={previousStep}
+              className="border-2 border-[#de6a07] border-solid box-border flex gap-[calc(8*var(--px393))] sm:gap-[8px] h-[calc(36*var(--px393))] sm:h-[36px] items-center justify-center px-[calc(30*var(--px393))] sm:px-[30px] relative rounded-[calc(32*var(--px393))] sm:rounded-[32px] shrink-0 cursor-pointer hover:bg-[rgba(222,106,7,0.1)] transition-colors w-full sm:w-auto"
+            >
+              <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[calc(14*var(--px393))] sm:text-[14px] text-[#de6a07]">
+                Back
+              </p>
+            </button>
+          </div>
         </div>
       </div>
     </div>
