@@ -1244,7 +1244,13 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
       let errorMessage = "Something went wrong. Please try again.";
 
       if (err instanceof HttpError) {
-        if (err.status === 400) {
+        const errorData = err.data;
+        if (errorData && typeof errorData === "object" && "error" in errorData) {
+          const errorText = (errorData as { error?: unknown }).error;
+          if (typeof errorText === "string" && errorText.trim()) {
+            errorMessage = errorText;
+          }
+        } else if (err.status === 400) {
           errorMessage = err.message || "Invalid input. Please check your information.";
         } else if (err.status >= 400 && err.status < 500) {
           errorMessage = err.message || "Invalid request. Please check your information.";
@@ -1257,6 +1263,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
 
       toast.error(errorMessage);
       console.error(`Error during ${verificationMode}:`, err);
+      throw err instanceof Error ? err : new Error(errorMessage);
     } finally {
       setIsLoading(false);
     }
