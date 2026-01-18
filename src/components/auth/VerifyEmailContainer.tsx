@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { VerificationCodeInput } from "./VerificationCodeInput";
 import { ButtonMediumPrincipalOrange } from "./LoginModalUI";
-import { sendCode, verifyCode, login as loginAPI } from "@/lib/api";
+import { sendCode, login as loginAPI } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
 import { Icon } from "@/components/common/Icon";
@@ -119,27 +119,29 @@ export function VerifyEmailContainer({
         // Also call onVerify with empty string to maintain compatibility
         onVerify("");
       } else {
-        // For signup mode, verify code first to get vs_token
-        const result = await verifyCode({
-          email,
-          code: codeString,
-          purpose: "register",
-        });
-
-        if (!result.ok || !result.vs_token) {
-          setError("Invalid verification code. Please try again.");
-          setIsSubmitting(false);
-          return;
-        }
-        onVerify(result.vs_token);
+        // For signup mode, complete registration directly (no verify step)
+        await onVerify("");
       }
     } catch (err) {
       if (err instanceof HttpError) {
+        const errorData = err.data;
+        if (errorData && typeof errorData === "object" && "error" in errorData) {
+          const errorText = (errorData as { error?: unknown }).error;
+          if (typeof errorText === "string" && errorText.trim()) {
+            setError(errorText);
+          } else {
+            setError(err.message || "Invalid verification code.");
+          }
+        } else {
+          setError(err.message || "Invalid verification code.");
+        }
+      } else if (err instanceof Error) {
         setError(err.message || "Invalid verification code.");
       } else {
         setError("Invalid verification code. Please try again.");
       }
       setIsSubmitting(false);
+      return;
     }
     // Note: Don't set isSubmitting to false on success, as the modal will close
   };
@@ -246,4 +248,3 @@ export function VerifyEmailContainer({
     </div>
   );
 }
-
