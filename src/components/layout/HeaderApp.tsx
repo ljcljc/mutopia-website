@@ -59,6 +59,7 @@ function BackToHomeButton() {
     
     if (isBookingPage && hasFormData()) {
       e.preventDefault();
+      e.currentTarget.blur();
       setIsDialogOpen(true);
     }
   };
@@ -103,13 +104,15 @@ function BackToHomeButton() {
             </AlertDialogTitle>
           </AlertDialogHeader>
           <div className="px-5 py-4">
-            <AlertDialogDescription className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] text-[#4C4C4C] leading-relaxed">
-              <p className="mb-2 text-left">
-                You have entered information in this form. If you leave this page, your changes will be lost.
-              </p>
-              <p className="text-center font-['Comfortaa',sans-serif] font-semibold text-[16px] text-black leading-[28px]">
-                Are you sure you want to continue?
-              </p>
+            <AlertDialogDescription asChild>
+              <div className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] text-[#4C4C4C] leading-relaxed">
+                <p className="mb-2 text-left">
+                  You have entered information in this form. If you leave this page, your changes will be lost.
+                </p>
+                <p className="text-center font-['Comfortaa',sans-serif] font-semibold text-[16px] text-black leading-[28px]">
+                  Are you sure you want to continue?
+                </p>
+              </div>
             </AlertDialogDescription>
           </div>
           <AlertDialogFooter className="px-6 pb-6 pt-0 flex flex-row items-center gap-3 [&]:justify-center sm:[&]:justify-center">

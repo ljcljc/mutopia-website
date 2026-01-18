@@ -163,6 +163,7 @@ export function ImagePreview({
   );
 
   useEffect(() => {
+    if (!open) return;
     const container = containerRef.current;
     if (!container) return;
     const wheelHandler = (event: WheelEvent) => handleWheel(event);
@@ -170,7 +171,7 @@ export function ImagePreview({
     return () => {
       container.removeEventListener("wheel", wheelHandler);
     };
-  }, [handleWheel]);
+  }, [open, handleWheel]);
 
   const handleDragStart = useCallback((e: ReactMouseEvent) => {
     if (e.button !== 0 || zoom <= 100) return;

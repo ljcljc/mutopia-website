@@ -1192,13 +1192,15 @@ export function Step2() {
               <div className="bg-[rgba(0,0,0,0.1)] h-px w-full mt-[8px]" />
             </AlertDialogHeader>
             <div className="px-[24px] w-full">
-              <AlertDialogDescription className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#4C4C4C] leading-[22.75px]">
-                <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] text-[16px] mb-0 text-black">
-                  Hard to Handle
-                </p>
-                <p className="text-[14px] text-[#4C4C4C]">
-                  Some pets may become too anxious or aggressive during grooming. If extra care is needed, a handling fee may apply. If a pet shows signs of aggression, it may fall under our Non-Groomable Policy (see cancellation policy).
-                </p>
+              <AlertDialogDescription asChild>
+                <div className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#4C4C4C] leading-[22.75px]">
+                  <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] text-[16px] mb-0 text-black">
+                    Hard to Handle
+                  </p>
+                  <p className="text-[14px] text-[#4C4C4C]">
+                    Some pets may become too anxious or aggressive during grooming. If extra care is needed, a handling fee may apply. If a pet shows signs of aggression, it may fall under our Non-Groomable Policy (see cancellation policy).
+                  </p>
+                </div>
               </AlertDialogDescription>
             </div>
             <AlertDialogFooter className="px-[24px] pt-0 flex flex-row items-center justify-center sm:justify-center w-full">
@@ -1228,13 +1230,15 @@ export function Step2() {
               <div className="bg-[rgba(0,0,0,0.1)] h-px w-full mt-[8px]" />
             </AlertDialogHeader>
             <div className="px-[24px] w-full">
-              <AlertDialogDescription className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#4C4C4C] leading-[22.75px]">
-                <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] text-[16px] mb-0 text-black">
-                  Senior pets
-                </p>
-                <p className="text-[14px] text-[#4C4C4C]">
-                  Older pets often need more time and gentle handling. A handling fee may be added to ensure their comfort and safety during the service.
-                </p>
+              <AlertDialogDescription asChild>
+                <div className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#4C4C4C] leading-[22.75px]">
+                  <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] text-[16px] mb-0 text-black">
+                    Senior pets
+                  </p>
+                  <p className="text-[14px] text-[#4C4C4C]">
+                    Older pets often need more time and gentle handling. A handling fee may be added to ensure their comfort and safety during the service.
+                  </p>
+                </div>
               </AlertDialogDescription>
             </div>
             <AlertDialogFooter className="px-[24px] pt-0 flex flex-row items-center justify-center sm:justify-center w-full">
@@ -1261,19 +1265,21 @@ export function Step2() {
               <div className="bg-[rgba(0,0,0,0.1)] h-px w-full mt-[8px]" />
             </AlertDialogHeader>
             <div className="px-[24px] w-full">
-              <AlertDialogDescription className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#4C4C4C] leading-[22.75px]">
-                <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] text-[16px] mb-0 text-black">
-                  Matting removal notice
-                </p>
-                <p className="text-[14px] text-[#4C4C4C] mb-0">
-                  Mat removal is often painful and time-consuming, an additional fee may apply.
-                </p>
-                <p className="text-[14px] text-[#4C4C4C] mb-0">
-                  A shave-down may be the safest option, potentially revealing skin issues like irritations or parasites.
-                </p>
-                <p className="text-[14px] text-[#4C4C4C]">
-                  If shaving isn't approved, mats may be left if removal causes too much distress, and the full charge will still apply.
-                </p>
+              <AlertDialogDescription asChild>
+                <div className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#4C4C4C] leading-[22.75px]">
+                  <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] text-[16px] mb-0 text-black">
+                    Matting removal notice
+                  </p>
+                  <p className="text-[14px] text-[#4C4C4C] mb-0">
+                    Mat removal is often painful and time-consuming, an additional fee may apply.
+                  </p>
+                  <p className="text-[14px] text-[#4C4C4C] mb-0">
+                    A shave-down may be the safest option, potentially revealing skin issues like irritations or parasites.
+                  </p>
+                  <p className="text-[14px] text-[#4C4C4C]">
+                    If shaving isn't approved, mats may be left if removal causes too much distress, and the full charge will still apply.
+                  </p>
+                </div>
               </AlertDialogDescription>
             </div>
             <div className="px-[24px] w-full">
