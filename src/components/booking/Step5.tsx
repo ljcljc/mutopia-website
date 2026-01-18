@@ -145,7 +145,7 @@ export function Step5() {
             </div>
             <div className="h-[17.5px] relative shrink-0 w-full">
               <p className="absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] left-0 text-[#4a5565] text-[12.25px] top-[-0.5px]">
-                Choose multiple dates and time periods to secure your appointment
+                Choose multiple dates and time periods to secure your appointment (Max.6)
               </p>
             </div>
           </div>
