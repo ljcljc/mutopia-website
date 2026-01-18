@@ -237,14 +237,16 @@ export function Step5() {
 
               {/* Alert - Selected Time Slots Count */}
               {selectedTimeSlots.length > 0 && (
-                <div className="bg-[#f4ffde] border border-[#6aa31c] border-solid content-stretch flex h-[36px] items-center overflow-clip px-[16px] py-[4px] relative rounded-[8px] shrink-0">
-                  <div className="content-stretch flex gap-[8px] items-center relative shrink-0">
+                <div className="bg-[#f4ffde] border border-[#6aa31c] border-solid content-stretch flex max-w-[343px] h-[36px] items-center overflow-clip px-[16px] py-[4px] relative rounded-[8px] shrink-0">
+                  <div className="content-stretch flex gap-[8px] items-center relative w-full min-w-0">
                     <Icon
                       name="alert-success"
                       className="relative shrink-0 size-[12px] text-[#6aa31c]"
                     />
-                    <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#467900] text-[10px]">
-                      {selectedTimeSlots.length} period{selectedTimeSlots.length > 1 ? "s" : ""} selected. You can choose {remainingSlots} more available time{remainingSlots === 1 ? "" : "s"}.
+                    <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative text-[#467900] text-[10px] whitespace-normal break-words w-full min-w-0">
+                      {isMaxSlotsReached
+                        ? "Maximum of 6 periods selected, our groomer will confirm by email."
+                        : `${selectedTimeSlots.length} period${selectedTimeSlots.length > 1 ? "s" : ""} selected. You can choose ${remainingSlots} more available time${remainingSlots === 1 ? "" : "s"}.`}
                     </p>
                   </div>
                 </div>
