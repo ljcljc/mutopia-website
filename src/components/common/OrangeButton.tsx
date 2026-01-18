@@ -8,6 +8,7 @@ interface OrangeButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   fullWidth?: boolean;
   showArrow?: boolean;
   loading?: boolean;
+  textSize?: number;
 }
 
 export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
@@ -19,6 +20,7 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
       fullWidth = false,
       showArrow = false,
       loading = false,
+      textSize,
       disabled,
       className = "",
       ...props
@@ -28,6 +30,8 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
     const baseStyles =
       "relative rounded-[32px] transition-all duration-200 cursor-pointer group";
     const isDisabled = disabled || loading;
+
+    const textStyle = textSize ? { fontSize: `${textSize}px` } : undefined;
 
     // Compact variant has special styling
     if (size === "compact") {
@@ -60,6 +64,7 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
                       <p
                         className={`bg-clip-text font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[12px] text-nowrap whitespace-pre ${loading ? "invisible" : ""}`}
                         style={{
+                          ...textStyle,
                           backgroundImage:
                             "linear-gradient(180deg, #FFF7ED 0%, #FFFBEB 100%)",
                           WebkitTextFillColor: "transparent",
@@ -159,6 +164,7 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
                     {typeof children === "string" ? (
                       <p
                         className={`font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#8b6357] text-[12px] text-nowrap whitespace-pre ${loading ? "invisible" : ""}`}
+                        style={textStyle}
                       >
                         {children}
                       </p>
@@ -246,6 +252,7 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
             {typeof children === "string" ? (
               <p
                 className={`font-['Comfortaa:Bold',sans-serif] leading-[24.5px] text-[16px] whitespace-nowrap ${loading ? "invisible" : ""}`}
+                style={textStyle}
               >
                 {children}
               </p>
@@ -276,6 +283,7 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
           {typeof children === "string" ? (
             <p
               className={`font-['Comfortaa:Bold',sans-serif] leading-[24.5px] text-[#de6a07] text-[16px] whitespace-nowrap ${loading ? "invisible" : ""}`}
+              style={textStyle}
             >
               {children}
             </p>

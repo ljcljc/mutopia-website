@@ -556,6 +556,7 @@ export function Step4() {
             size="medium"
             variant="primary"
             showArrow={true}
+            textSize={14}
             onClick={handleContinueWithMembership}
           >
             {hasDeclinedMembership ? "Continue without membership" : "Continue with membership"}
@@ -563,6 +564,7 @@ export function Step4() {
           <OrangeButton
             size="medium"
             variant="outline"
+            textSize={14}
             onClick={previousStep}
           >
             Back
@@ -572,9 +574,9 @@ export function Step4() {
           <TertiaryButton
             variant="orange"
             onClick={handleNoThanks}
-            className="h-[36px] rounded-[32px]"
-            fontSize={16}
-            borderWidth={2}
+            className="h-[36px] rounded-[12px]"
+            fontSize={12}
+            borderWidth={1}
           >
             No, continue at regular price
           </TertiaryButton>
