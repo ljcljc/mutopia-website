@@ -10,6 +10,9 @@ import type { TimeSlotIn } from "@/lib/api";
 
 export function Step5() {
   const { previousStep, nextStep, selectedTimeSlots, setSelectedTimeSlots } = useBookingStore();
+  const maxTimeSlots = 6;
+  const remainingSlots = Math.max(0, maxTimeSlots - selectedTimeSlots.length);
+  const isMaxSlotsReached = selectedTimeSlots.length >= maxTimeSlots;
   
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -60,6 +63,7 @@ export function Step5() {
 
   // Handle date change from Calendar component (with toggle support)
   const handleDateChange = (date: Date) => {
+    if (isMaxSlotsReached) return;
     // Toggle: if clicking the same date, deselect it
     if (selectedDate &&
         date.getDate() === selectedDate.getDate() &&
@@ -93,6 +97,7 @@ export function Step5() {
         (slot) => !(slot.date === dateISO && slot.slot === periodId)
       ));
     } else {
+      if (selectedTimeSlots.length >= maxTimeSlots) return;
       // Add new time slot
       const newSlot: TimeSlotIn = {
         date: dateISO,
@@ -160,6 +165,8 @@ export function Step5() {
               minDate={minDate}
               maxDate={maxDate}
               yearRange={yearRange}
+              disabled={isMaxSlotsReached}
+              className={isMaxSlotsReached ? "cursor-not-allowed" : undefined}
               onMonthChange={(year, month) => {
                 setCurrentDate(new Date(year, month, 1));
               }}
@@ -175,7 +182,7 @@ export function Step5() {
               <div className="gap-[14px] grid grid-cols-1 grid-rows-2 h-[186px] pb-0 pt-[24px] px-0 relative shrink-0 w-[343px]">
                 {TIME_PERIODS.map((period) => {
                   const isSelected = isTimePeriodSelected(period.id);
-                  const isDisabled = !selectedDate;
+                  const isDisabled = !selectedDate || isMaxSlotsReached;
                   
                   return (
                     <div
@@ -237,7 +244,7 @@ export function Step5() {
                       className="relative shrink-0 size-[12px] text-[#6aa31c]"
                     />
                     <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#467900] text-[10px]">
-                      {selectedTimeSlots.length} period{selectedTimeSlots.length > 1 ? "s" : ""} selected, our groomer will confirm by email.
+                      {selectedTimeSlots.length} period{selectedTimeSlots.length > 1 ? "s" : ""} selected. You can choose {remainingSlots} more available time{remainingSlots === 1 ? "" : "s"}.
                     </p>
                   </div>
                 </div>
@@ -259,7 +266,10 @@ export function Step5() {
                     return (
                       <div
                         key={`${slot.date}-${slot.slot}-${index}`}
-                        className="border border-[#4c4c4c] border-solid content-stretch flex gap-[4px] h-[24px] items-center justify-center overflow-clip px-[17px] py-[5px] relative rounded-[12px] shrink-0 w-[103px]"
+                        className={cn(
+                          "border border-[#4c4c4c] border-solid content-stretch flex gap-[4px] h-[24px] items-center justify-center overflow-clip px-[17px] py-[5px] relative rounded-[12px] shrink-0 w-[103px]",
+                          isMaxSlotsReached && "cursor-not-allowed"
+                        )}
                       >
                         <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[14px] relative shrink-0 text-[#4c4c4c] text-[10px]">
                           {formatDateForTag(slotDate)} {periodSuffix}
