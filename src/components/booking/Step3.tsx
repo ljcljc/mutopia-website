@@ -16,6 +16,7 @@ export function Step3() {
     isLoadingAddOns,
     addOns: selectedAddOns,
     userInfo,
+    petName,
     setServiceId,
     toggleAddOn,
     loadServices,
@@ -35,6 +36,8 @@ export function Step3() {
   const hasAutoSelectedMembership = useRef(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>("Most Popular");
   const [isEstimationExpanded, setIsEstimationExpanded] = useState(false);
+  const [isAddOnFloating, setIsAddOnFloating] = useState(false);
+  const addOnSectionRef = useRef<HTMLDivElement | null>(null);
 
   // 监听登录状态，登录成功后关闭弹窗
   // 注意：用户信息加载由 Booking.tsx 统一处理，这里不需要重复调用 loadUserInfo
@@ -60,6 +63,33 @@ export function Step3() {
       loadAddOns();
     }
   }, [loadAddOns]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!addOnSectionRef.current) return;
+      if (window.innerWidth >= 640) {
+        setIsAddOnFloating(false);
+        return;
+      }
+      const header = document.querySelector('[data-name="HeaderApp"]');
+      const headerBottom = header ? header.getBoundingClientRect().bottom : 0;
+      const sectionRect = addOnSectionRef.current.getBoundingClientRect();
+      const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+      const tolerance = 1;
+      const isSectionTopAboveHeader = sectionRect.top <= headerBottom + tolerance;
+      const isSectionBottomInView = sectionRect.bottom <= viewportHeight + tolerance;
+
+      setIsAddOnFloating(isSectionTopAboveHeader && !isSectionBottomInView);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
+  }, []);
 
   // 当 add-ons 加载完成后，自动选中 included_in_membership 为 true 的项（只执行一次）
   // 前提条件：用户已登录且是会员
@@ -147,31 +177,120 @@ export function Step3() {
   const addOnsPrice = selectedAddOnsDetails.reduce((total, addOn) => total + addOn.price, 0);
   const totalPrice = packagePrice + addOnsPrice;
 
+  const renderSelectedAddOnsPanel = (isFloating: boolean) => (
+    <div
+      className={cn(
+        "content-stretch flex flex-col gap-[calc(12*var(--px393))] sm:gap-[14px] items-start w-full bg-white sm:px-0 sm:py-0",
+        isFloating
+          ? "fixed bottom-0 left-0 right-0 z-50 sm:hidden"
+          : "relative"
+      )}
+      style={
+        isFloating
+          ? {
+              boxShadow:
+                "0 -4px 4px -1px rgba(12,12,13,0.1), 0 4px 4px -1px rgba(12,12,13,0.05)",
+            }
+          : undefined
+      }
+    >
+      <div
+        className={cn(
+          "w-full",
+          isFloating
+            ? "overflow-y-auto max-h-[calc(160*var(--px393))]"
+            : "overflow-visible max-h-none"
+        )}
+      >
+        <div className={cn(isFloating ? "px-[24px] py-[12px]" : "px-0 py-0")}>
+        <div className="bg-[#f4ffde] border border-[#6aa31c] border-solid content-stretch flex h-[calc(36*var(--px393))] sm:h-[36px] items-center overflow-clip px-[calc(16*var(--px393))] py-[calc(4*var(--px393))] sm:px-[16px] sm:py-[4px] relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] shrink-0 ">
+          <div className="content-stretch flex gap-[calc(8*var(--px393))] sm:gap-[8px] items-center relative shrink-0">
+            <Icon
+              name="alert-success"
+              className="relative shrink-0 size-[calc(12*var(--px393))] sm:size-[12px] text-[#6aa31c]"
+            />
+            <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] relative shrink-0 text-[#467900] text-[calc(10*var(--px393))] sm:text-[12px] sm:leading-[16px] sm:font-bold sm:font-['Comfortaa:Bold',sans-serif]">
+              {selectedAddOns.length} add-on{selectedAddOns.length > 1 ? "s" : ""} selected
+            </p>
+          </div>
+        </div>
+        <div className="content-stretch flex flex-wrap gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full mt-[calc(12*var(--px393))] sm:mt-[14px]">
+          {selectedAddOns.map((addOnId) => {
+            const addOn = addOnsList.find((a) => a.id === addOnId);
+            if (!addOn) return null;
+            const isMember = userInfo?.is_member === true;
+            let price =
+              typeof addOn.price === "string"
+                ? parseFloat(addOn.price)
+                : addOn.price;
+            if (addOn.included_in_membership === true && isMember) {
+              price = 0;
+            }
+            return (
+              <div
+                key={addOnId}
+                className="border border-[#4c4c4c] border-solid content-stretch flex gap-[calc(4*var(--px393))] sm:gap-[4px] h-[calc(24*var(--px393))] sm:h-[24px] items-center justify-center overflow-clip px-[calc(10*var(--px393))] py-[calc(5*var(--px393))] sm:px-[17px] sm:py-[5px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shrink-0"
+              >
+                <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[calc(14*var(--px393))] sm:leading-[14px] relative shrink-0 text-[#4c4c4c] text-[calc(10*var(--px393))] sm:text-[10px]">
+                  {addOn.name} ${price.toFixed(2)}
+                </p>
+                <button
+                  onClick={() => toggleAddOn(addOnId)}
+                  className="flex items-center justify-center relative shrink-0 cursor-pointer hover:opacity-70 transition-opacity"
+                  aria-label={`Remove ${addOn.name}`}
+                >
+                  <Icon
+                    name="close-arrow"
+                    className="h-[calc(16*var(--px393))] sm:h-[16px] relative w-[calc(16*var(--px393))] sm:w-[16px] text-[#4c4c4c]"
+                  />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="content-stretch flex flex-col gap-[32px] items-start relative w-full">
+    <div className="content-stretch flex flex-col gap-[calc(16*var(--px393))] sm:gap-[32px] items-start relative w-full px-[calc(20*var(--px393))] sm:px-0">
+      {/* Mobile Step Header */}
+      <div className="content-stretch flex flex-col gap-[calc(12*var(--px393))] sm:gap-[12px] items-start relative shrink-0 w-full sm:hidden">
+        <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[calc(12*var(--px393))] sm:text-[12px] text-black w-full whitespace-pre-wrap">
+          Book your appointment
+        </p>
+        <div className="border border-[#4c4c4c] border-solid content-stretch flex h-[calc(24*var(--px393))] sm:h-[24px] items-center justify-center overflow-clip px-[calc(9*var(--px393))] py-[calc(5*var(--px393))] sm:px-[9px] sm:py-[5px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shrink-0">
+          <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[calc(14*var(--px393))] sm:leading-[14px] relative shrink-0 text-[#4c4c4c] text-[calc(10*var(--px393))] sm:text-[10px]">
+            Step 3 of 6
+          </p>
+        </div>
+        <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] min-w-full relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px] whitespace-pre-wrap">
+          {petName ? `${petName} - package and add-on` : "Package and add-on"}
+        </p>
+      </div>
+      <div className="flex flex-col gap-[calc(32*var(--px393))] sm:gap-[32px] items-start relative w-full">
       {/* Service Package Selection */}
-      <div className="bg-white box-border flex flex-col gap-[20px] items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
-          <div className="content-stretch flex flex-col gap-[14px] items-start relative shrink-0 w-full">
-            <div className="content-stretch flex flex-col gap-[4px] h-[45.5px] items-start relative shrink-0 w-full">
-              <div className="content-stretch flex gap-[7px] h-[24.5px] items-center relative shrink-0 w-full">
-                <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] relative shrink-0 text-[#4a3c2a] text-[16px]">
+      <div className="bg-white box-border flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
+          <div className="content-stretch flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full">
+            <div className="content-stretch flex flex-col gap-[calc(4*var(--px393))] sm:gap-[4px] items-start relative shrink-0 w-full">
+              <div className="content-stretch flex gap-[7px] items-center relative shrink-0 w-full">
+                <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px]">
                   Select your service package
                 </p>
               </div>
-              <div className="h-[17.5px] relative shrink-0 w-full">
-                <p className="absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] left-0 text-[#4a5565] text-[12.25px] top-[-0.5px]">
-                  Choose the package that best fits your pet's needs
-                </p>
-              </div>
+              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[#4a5565] text-[calc(12.25*var(--px393))] sm:text-[12.25px]">
+                Choose the package that best fits your pet's needs
+              </p>
             </div>
-            <div className="gap-[16px] grid grid-cols-2 grid-rows-1 relative shrink-0 w-full">
+            <div className="gap-[calc(16*var(--px393))] sm:gap-[16px] grid grid-cols-1 relative shrink-0 w-full">
               {isLoadingServices ? (
-                <div className="col-span-2 flex items-center justify-center gap-2 py-8 text-[#4a5565]">
+                <div className="flex items-center justify-center gap-2 py-8 text-[#4a5565]">
                   <Spinner size="small" color="#4a5565" />
                   <span>Loading services...</span>
                 </div>
               ) : services.length === 0 ? (
-                <div className="col-span-2 text-center py-8 text-[#4a5565]">
+                <div className="text-center py-8 text-[#4a5565]">
                   No services available
                 </div>
               ) : (
@@ -196,22 +315,21 @@ export function Step3() {
       </div>
 
       {/* Add-ons Selection */}
-      <div className="bg-white box-border flex flex-col gap-[20px] items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full">
-          <div className="content-stretch flex flex-col gap-[14px] items-start relative shrink-0 w-full">
-            <div className="content-stretch flex flex-col gap-[4px] h-[45.5px] items-start relative shrink-0 w-full">
-              <div className="content-stretch flex gap-[7px] h-[24.5px] items-center relative shrink-0 w-full">
-                <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] relative shrink-0 text-[#4a3c2a] text-[16px]">
-                  Enhance your service with add-on (Optional)
-                </p>
-              </div>
-              <div className="h-[17.5px] relative shrink-0 w-full">
-                <p className="absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] left-0 text-[#4a5565] text-[12.25px] top-[-0.5px]">
-                  Add extra pampering for your furry friend
-                </p>
-              </div>
+      <div
+        ref={addOnSectionRef}
+        className="bg-white box-border flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full"
+      >
+          <div className="content-stretch flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full">
+            <div className="content-stretch flex flex-col gap-[calc(4*var(--px393))] sm:gap-[4px] items-start relative shrink-0 w-full">
+              <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px]">
+                Enhance your service with add-on (Optional)
+              </p>
+              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[#4a5565] text-[calc(12.25*var(--px393))] sm:text-[12.25px]">
+                Add extra pampering for your furry friend
+              </p>
             </div>
             {/* Category Badges */}
-            <div className="content-stretch flex gap-[8px] items-center relative shrink-0">
+            <div className="content-stretch flex flex-wrap gap-[calc(8*var(--px393))] sm:gap-[8px] items-center relative shrink-0">
               {categories.map((category) => {
                 const isSelected = selectedCategory === category;
                 return (
@@ -219,26 +337,26 @@ export function Step3() {
                     key={category}
                     onClick={() => setSelectedCategory(category)}
                     className={cn(
-                      "border border-solid h-[24px] relative rounded-[12px] shrink-0 cursor-pointer transition-colors",
+                      "border border-solid h-[calc(24*var(--px393))] sm:h-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shrink-0 cursor-pointer transition-colors",
                       isSelected
                         ? "bg-white border-[#de6a07]"
                         : "border-[#4c4c4c]"
                     )}
                   >
-                    <div className="box-border content-stretch flex gap-[4px] h-[24px] items-center justify-center overflow-clip px-[17px] py-[5px] relative rounded-[inherit]">
+                    <div className="box-border content-stretch flex gap-[calc(4*var(--px393))] sm:gap-[4px] h-[calc(24*var(--px393))] sm:h-[24px] items-center justify-center overflow-clip px-[calc(17*var(--px393))] py-[calc(5*var(--px393))] sm:px-[17px] sm:py-[5px] relative rounded-[inherit]">
                       <p
                         className={cn(
-                          "font-['Comfortaa:Bold',sans-serif] font-bold leading-[14px] relative shrink-0 text-[10px]",
+                          "font-['Comfortaa:Bold',sans-serif] font-bold leading-[calc(14*var(--px393))] sm:leading-[14px] relative shrink-0 text-[calc(10*var(--px393))] sm:text-[10px]",
                           isSelected ? "text-[#de6a07]" : "text-[#4c4c4c]"
                         )}
                       >
                         {category}
                       </p>
                       {isSelected && (
-                        <div className="h-[6px] relative shrink-0 w-[9px] flex items-center justify-center">
+                        <div className="h-[calc(6*var(--px393))] sm:h-[6px] relative shrink-0 w-[calc(9*var(--px393))] sm:w-[9px] flex items-center justify-center">
                           <Icon
                             name="check"
-                            className="relative shrink-0 h-[6px] w-[9px] text-[#de6a07]"
+                            className="relative shrink-0 h-[calc(6*var(--px393))] sm:h-[6px] w-[calc(9*var(--px393))] sm:w-[9px] text-[#de6a07]"
                           />
                         </div>
                       )}
@@ -247,13 +365,11 @@ export function Step3() {
                 );
               })}
             </div>
-            <div className="h-[17.5px] relative shrink-0 w-full">
-              <p className="absolute font-['Comfortaa:Bold',sans-serif] font-bold leading-[20px] left-0 text-[14px] text-[#de6a07] top-[-0.5px]">
-                Most popular add-ons
-              </p>
-            </div>
-            {/* Add-ons Grid */}
-            <div className="gap-[16px] grid grid-cols-2 relative shrink-0 w-full">
+            <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[calc(20*var(--px393))] sm:leading-[20px] relative shrink-0 text-[calc(14*var(--px393))] sm:text-[14px] text-[#de6a07]">
+              {selectedCategory === "Most Popular" ? "Most popular add-ons" : `${selectedCategory || ""} add-ons`}
+            </p>
+            {/* Add-ons Grid - 1 col on mobile, 2 on PC per Figma */}
+            <div className="gap-[calc(16*var(--px393))] sm:gap-[16px] grid grid-cols-1 sm:grid-cols-2 relative shrink-0 w-full">
               {isLoadingAddOns ? (
                 <div className="col-span-2 flex items-center justify-center gap-2 py-8 text-[#4a5565]">
                   <Spinner size="small" color="#4a5565" />
@@ -284,85 +400,31 @@ export function Step3() {
                 })
               )}
             </div>
-            {/* Selected Add-ons Count Alert */}
-            {selectedAddOns.length > 0 && (
-              <div className="bg-[#f4ffde] border border-[#6aa31c] border-solid content-stretch flex h-[36px] items-center overflow-clip px-[16px] py-[4px] relative rounded-[8px] shrink-0">
-                <div className="content-stretch flex gap-[8px] items-center relative shrink-0">
-                  <Icon
-                    name="alert-success"
-                    className="relative shrink-0 size-[12px] text-[#6aa31c]"
-                  />
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] relative shrink-0 text-[#467900] text-[10px]">
-                    {selectedAddOns.length} add-on{selectedAddOns.length > 1 ? "s" : ""} selected
-                  </p>
-                </div>
-              </div>
-            )}
-            {/* Selected Add-ons Tags */}
-            {selectedAddOns.length > 0 && (
-              <div className="content-stretch flex flex-wrap gap-[14px] items-start relative shrink-0 w-full">
-                {selectedAddOns.map((addOnId) => {
-                  const addOn = addOnsList.find((a) => a.id === addOnId);
-                  if (!addOn) return null;
-                  const isMember = userInfo?.is_member === true;
-                  let price =
-                    typeof addOn.price === "string"
-                      ? parseFloat(addOn.price)
-                      : addOn.price;
-                  // If included_in_membership is true and user is a member, price is 0
-                  if (addOn.included_in_membership === true && isMember) {
-                    price = 0;
-                  }
-                  return (
-                    <div
-                      key={addOnId}
-                      className="border border-[#4c4c4c] border-solid content-stretch flex gap-[4px] h-[24px] items-center justify-center overflow-clip px-[17px] py-[5px] relative rounded-[12px] shrink-0"
-                    >
-                      <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[14px] relative shrink-0 text-[#4c4c4c] text-[10px]">
-                        {addOn.name} ${price.toFixed(2)}
-                      </p>
-                      <button
-                        onClick={() => toggleAddOn(addOnId)}
-                        className="flex items-center justify-center relative shrink-0 cursor-pointer hover:opacity-70 transition-opacity"
-                        aria-label={`Remove ${addOn.name}`}
-                      >
-                        <Icon
-                          name="close-arrow"
-                          className="h-[16px] relative w-[16px] text-[#4c4c4c]"
-                        />
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+            {selectedAddOns.length > 0 && renderSelectedAddOnsPanel(false)}
         </div>
       </div>
+      {selectedAddOns.length > 0 && isAddOnFloating && renderSelectedAddOnsPanel(true)}
 
       {/* Total Estimation - Collapsible */}
-      <div className="bg-white box-border flex flex-col gap-[20px] items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full">
-          <div className="content-stretch flex flex-col gap-[14px] items-start relative shrink-0 w-full">
+      <div className="bg-white box-border flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full">
+          <div className="content-stretch flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full">
             <div 
-              className="content-stretch flex gap-[14px] items-start relative shrink-0 w-full cursor-pointer"
+              className="content-stretch flex gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full cursor-pointer"
               onClick={() => setIsEstimationExpanded(!isEstimationExpanded)}
             >
-              <div className="content-stretch flex flex-[1_0_0] flex-col gap-[4px] h-[45.5px] items-start min-h-px min-w-px relative shrink-0">
-                <div className="content-stretch flex gap-[7px] h-[24.5px] items-center relative shrink-0 w-full">
-                  <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] relative shrink-0 text-[#4a3c2a] text-[16px]">
-                    {isEstimationExpanded ? "Total estimation for the service" : "Subtotal estimation for the service"}
-                  </p>
-                </div>
-                <div className="h-[17.5px] relative shrink-0 w-full">
-                  <p className="absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] left-0 text-[#4a5565] text-[12.25px] top-[-0.5px]">
-                    Our groomer will evaluate the final price
-                  </p>
-                </div>
+              <div className="content-stretch flex flex-[1_0_0] flex-col gap-[calc(4*var(--px393))] sm:gap-[4px] items-start min-h-px min-w-px relative shrink-0">
+                <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px]">
+                  {isEstimationExpanded ? "Total estimation for the service" : "Subtotal estimation for the service"}
+                </p>
+                <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[#4a5565] text-[calc(12.25*var(--px393))] sm:text-[12.25px]">
+                  Our groomer will evaluate the final price
+                </p>
               </div>
-              <div className="content-stretch flex gap-[8px] items-center relative shrink-0">
-                <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] relative shrink-0 text-[16px] text-[#de6a07]">
+              <div className="content-stretch flex gap-[calc(8*var(--px393))] sm:gap-[8px] items-center relative shrink-0">
+                <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[calc(16*var(--px393))] sm:text-[16px] text-[#de6a07]">
                   ${totalPrice.toFixed(2)}
                 </p>
-                <div className="flex items-center justify-center relative shrink-0 size-[20px]">
+                <div className="flex items-center justify-center relative shrink-0 size-[calc(20*var(--px393))] sm:size-[20px]">
                   <div className={cn("flex-none", isEstimationExpanded ? "rotate-180" : "")}>
                     <div className={cn(
                       "content-stretch flex items-center justify-center relative rounded-[8px] size-[20px]",
@@ -377,7 +439,7 @@ export function Step3() {
             
             {/* Expanded Details */}
             {isEstimationExpanded && (
-              <div className="content-stretch flex flex-col gap-[14px] items-start relative shrink-0 w-full">
+              <div className="content-stretch flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full">
                 {/* Full rooming package section */}
                 {selectedService && (
                   <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full">
@@ -464,14 +526,15 @@ export function Step3() {
       </div>
 
       {/* Buttons */}
-      <div className="content-stretch flex gap-[20px] items-start relative shrink-0 w-full">
-          <div className="content-stretch flex gap-[20px] items-center relative shrink-0">
+      <div className="content-stretch flex flex-col sm:flex-row gap-[calc(12*var(--px393))] sm:gap-[20px] items-stretch sm:items-start relative shrink-0 w-full">
+          <div className="content-stretch flex flex-col sm:flex-row gap-[calc(12*var(--px393))] sm:gap-[20px] items-stretch sm:items-center relative shrink-0 w-full sm:w-auto">
             {isLoggedIn ? (
               <OrangeButton
                 size="medium"
                 variant="primary"
                 showArrow={true}
                 onClick={nextStep}
+                className="w-full sm:w-auto"
               >
                 Continue
               </OrangeButton>
@@ -482,6 +545,7 @@ export function Step3() {
                   variant="primary"
                   showArrow={true}
                   onClick={() => setIsLoginModalOpen(true)}
+                  className="w-full sm:w-auto"
                 >
                   Log in or sign up to continue
                 </OrangeButton>
@@ -491,10 +555,12 @@ export function Step3() {
               size="medium"
               variant="outline"
               onClick={previousStep}
+              className="w-full sm:w-auto"
             >
               Back
             </OrangeButton>
         </div>
+      </div>
       </div>
     </div>
   );

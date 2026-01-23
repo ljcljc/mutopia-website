@@ -54,39 +54,33 @@ export function CommonCheckbox({
         className
       )}
     >
-      <div className="content-stretch flex items-start justify-between relative shrink-0 w-full">
-        <div className="relative shrink-0">
-          <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[8px] items-start relative">
-            <div 
-              className="content-stretch flex gap-[10px] h-[21px] items-center relative shrink-0"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Checkbox
-                checked={checked}
-                onCheckedChange={onCheckedChange}
-                disabled={disabled}
-                containerClassName="cursor-pointer"
-              />
-            </div>
-            <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0">
-              <div className="h-[21px] relative shrink-0">
-                <p
-                  className={cn(
-                    "absolute font-['Comfortaa:Medium',sans-serif] font-medium leading-[21px] left-0 text-[14px] top-[0.5px] whitespace-nowrap",
-                    isSelected ? "text-[#de6a07]" : "text-[#8b6357]"
-                  )}
-                >
-                  {name}
-                </p>
-              </div>
-              {description && (
-                <div className="content-stretch flex gap-[10px] items-center justify-center relative shrink-0 w-full">
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[#4a5565] text-[12.25px]">
-                  {description}
-                </p>
-                </div>
+      <div className="content-stretch flex items-start justify-between gap-[10px] relative shrink-0 w-full">
+        <div className="flex gap-[8px] items-start flex-1 min-w-0">
+          <div
+            className="flex items-center shrink-0"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Checkbox
+              checked={checked}
+              onCheckedChange={onCheckedChange}
+              disabled={disabled}
+              containerClassName="cursor-pointer"
+            />
+          </div>
+          <div className="flex flex-col gap-[4px] items-start flex-1 min-w-0">
+            <p
+              className={cn(
+                "font-['Comfortaa:Medium',sans-serif] font-medium leading-[21px] text-[14px]",
+                isSelected ? "text-[#de6a07]" : "text-[#8b6357]"
               )}
-            </div>
+            >
+              {name}
+            </p>
+            {description && (
+              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] text-[#4a5565] text-[12.25px] break-words text-left">
+                {description}
+              </p>
+            )}
           </div>
         </div>
         {(priceText || duration) && (
