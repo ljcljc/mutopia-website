@@ -188,8 +188,7 @@ export function Step5() {
 
       {/* Mobile Layout */}
       <div className={cn(
-        "content-stretch flex flex-col gap-[calc(20*var(--px393))] items-start relative shrink-0 w-full sm:hidden",
-        selectedTimeSlots.length > 0 && "pb-[200px]"
+        "content-stretch flex flex-col gap-[calc(20*var(--px393))] items-start relative shrink-0 w-full sm:hidden"
       )}>
         <div className="bg-white content-stretch flex flex-col items-start px-[calc(20*var(--px393))] py-[calc(24*var(--px393))] relative rounded-[calc(12*var(--px393))] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] shrink-0 w-full">
           <div className="content-stretch flex flex-col gap-[calc(14*var(--px393))] items-start relative shrink-0 w-full">
