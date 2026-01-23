@@ -329,6 +329,13 @@ export function DatePicker({
     }
   }
 
+  function handlePrevYear() {
+    const minYear = minDateObj.getFullYear();
+    if (currentYear > minYear) {
+      setCurrentYear(currentYear - 1);
+    }
+  }
+
   function handleYearClick(year: number) {
     // Validate year is within range before setting
     const minYear = minDateObj.getFullYear();
@@ -339,6 +346,24 @@ export function DatePicker({
       setShowYearPicker(false);
     }
   }
+
+  const isMonthDisabled = (monthIndex: number) => {
+    if (maxDateObj) {
+      const maxYear = maxDateObj.getFullYear();
+      const maxMonth = maxDateObj.getMonth();
+      if (currentYear === maxYear && monthIndex > maxMonth) {
+        return true;
+      }
+    }
+    if (minDateObj) {
+      const minYear = minDateObj.getFullYear();
+      const minMonth = minDateObj.getMonth();
+      if (currentYear === minYear && monthIndex < minMonth) {
+        return true;
+      }
+    }
+    return false;
+  };
 
   function handleMonthClick(monthIndex: number) {
     // If in month mode, select the month and close the picker
@@ -613,6 +638,25 @@ export function DatePicker({
                     }}
                     onClick={(e) => {
                       e.stopPropagation();
+                      handlePrevYear();
+                    }}
+                    disabled={currentYear <= minDateObj.getFullYear()}
+                    className="flex items-center justify-center relative shrink-0 rotate-180 hover:opacity-70 transition-opacity cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <div className="h-[16px] relative w-[8.864px]">
+                      <Icon
+                        name="nav-next"
+                        aria-label="Previous year"
+                        className="block size-full text-[#de6a07]"
+                      />
+                    </div>
+                  </button>
+                  <button
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setShowYearPicker(!showYearPicker);
                       setShowMonthPicker(false);
                     }}
@@ -629,7 +673,8 @@ export function DatePicker({
                       e.stopPropagation();
                       handleNextYear();
                     }}
-                    className="h-[16px] relative shrink-0 w-[8.864px] hover:opacity-70 transition-opacity cursor-pointer"
+                    className="h-[16px] relative shrink-0 w-[8.864px] hover:opacity-70 transition-opacity cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                    disabled={currentYear >= (maxDateObj ? maxDateObj.getFullYear() : new Date().getFullYear())}
                   >
                     <Icon
                       name="nav-next"
@@ -722,22 +767,26 @@ export function DatePicker({
                         // 如果解析失败，不选中
                       }
                     }
+                    const isDisabled = isMonthDisabled(monthIndex);
                     return (
                       <button
                         key={monthIndex}
-                        onClick={() => handleMonthClick(monthIndex)}
-                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] cursor-pointer ${
-                          isSelected
-                            ? "bg-[#de6a07]"
-                            : "bg-transparent"
-                        }`}
+                        onClick={() => !isDisabled && handleMonthClick(monthIndex)}
+                        disabled={isDisabled}
+                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] ${
+                          isDisabled
+                            ? "cursor-not-allowed opacity-30"
+                            : "cursor-pointer"
+                        } ${isSelected ? "bg-[#de6a07]" : "bg-transparent"}`}
                       >
                         <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-0 relative shrink-0 text-[14px] text-center whitespace-nowrap">
                           <p
                             className={`leading-[20px] transition-colors ${
                               isSelected
                                 ? "text-[#fafafa]"
-                                : "text-[#424242] group-hover:text-[#de6a07]"
+                                : isDisabled
+                                  ? "text-[#424242]"
+                                  : "text-[#424242] group-hover:text-[#de6a07]"
                             }`}
                           >
                             {MONTHS[monthIndex]}
@@ -762,22 +811,26 @@ export function DatePicker({
                         // 如果解析失败，不选中
                       }
                     }
+                    const isDisabled = isMonthDisabled(monthIndex);
                     return (
                       <button
                         key={monthIndex}
-                        onClick={() => handleMonthClick(monthIndex)}
-                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] cursor-pointer ${
-                          isSelected
-                            ? "bg-[#de6a07]"
-                            : "bg-transparent"
-                        }`}
+                        onClick={() => !isDisabled && handleMonthClick(monthIndex)}
+                        disabled={isDisabled}
+                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] ${
+                          isDisabled
+                            ? "cursor-not-allowed opacity-30"
+                            : "cursor-pointer"
+                        } ${isSelected ? "bg-[#de6a07]" : "bg-transparent"}`}
                       >
                         <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-0 relative shrink-0 text-[14px] text-center whitespace-nowrap">
                           <p
                             className={`leading-[20px] transition-colors ${
                               isSelected
                                 ? "text-[#fafafa]"
-                                : "text-[#424242] group-hover:text-[#de6a07]"
+                                : isDisabled
+                                  ? "text-[#424242]"
+                                  : "text-[#424242] group-hover:text-[#de6a07]"
                             }`}
                           >
                             {MONTHS[monthIndex]}
@@ -802,22 +855,26 @@ export function DatePicker({
                         // 如果解析失败，不选中
                       }
                     }
+                    const isDisabled = isMonthDisabled(monthIndex);
                     return (
                       <button
                         key={monthIndex}
-                        onClick={() => handleMonthClick(monthIndex)}
-                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] cursor-pointer ${
-                          isSelected
-                            ? "bg-[#de6a07]"
-                            : "bg-transparent"
-                        }`}
+                        onClick={() => !isDisabled && handleMonthClick(monthIndex)}
+                        disabled={isDisabled}
+                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] ${
+                          isDisabled
+                            ? "cursor-not-allowed opacity-30"
+                            : "cursor-pointer"
+                        } ${isSelected ? "bg-[#de6a07]" : "bg-transparent"}`}
                       >
                         <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-0 relative shrink-0 text-[14px] text-center whitespace-nowrap">
                           <p
                             className={`leading-[20px] transition-colors ${
                               isSelected
                                 ? "text-[#fafafa]"
-                                : "text-[#424242] group-hover:text-[#de6a07]"
+                                : isDisabled
+                                  ? "text-[#424242]"
+                                  : "text-[#424242] group-hover:text-[#de6a07]"
                             }`}
                           >
                             {MONTHS[monthIndex]}
@@ -842,22 +899,26 @@ export function DatePicker({
                         // 如果解析失败，不选中
                       }
                     }
+                    const isDisabled = isMonthDisabled(monthIndex);
                     return (
                       <button
                         key={monthIndex}
-                        onClick={() => handleMonthClick(monthIndex)}
-                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] cursor-pointer ${
-                          isSelected
-                            ? "bg-[#de6a07]"
-                            : "bg-transparent"
-                        }`}
+                        onClick={() => !isDisabled && handleMonthClick(monthIndex)}
+                        disabled={isDisabled}
+                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] ${
+                          isDisabled
+                            ? "cursor-not-allowed opacity-30"
+                            : "cursor-pointer"
+                        } ${isSelected ? "bg-[#de6a07]" : "bg-transparent"}`}
                       >
                         <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-0 relative shrink-0 text-[14px] text-center whitespace-nowrap">
                           <p
                             className={`leading-[20px] transition-colors ${
                               isSelected
                                 ? "text-[#fafafa]"
-                                : "text-[#424242] group-hover:text-[#de6a07]"
+                                : isDisabled
+                                  ? "text-[#424242]"
+                                  : "text-[#424242] group-hover:text-[#de6a07]"
                             }`}
                           >
                             {MONTHS[monthIndex]}
