@@ -18,6 +18,7 @@ import { CustomInput } from "@/components/common/CustomInput";
 import { useAuthStore } from "@/components/auth/authStore";
 import { updateUserInfo, type MeOut } from "@/lib/api";
 import { toast } from "sonner";
+import { HttpError } from "@/lib/http";
 
 interface ModifyPersonalInfoModalProps {
   open: boolean;
@@ -27,32 +28,40 @@ interface ModifyPersonalInfoModalProps {
 }
 
 /**
- * 检查生日是否在12个月内被修改过
- * 这里需要从后端获取生日修改历史
- * 如果后端有 birthday_modified_at 字段，可以使用它
- * 
- * TODO: 从后端 API 获取生日修改历史
- * 目前 MeOut 接口可能不包含 birthday_modified_at 字段
- * 需要后端支持或使用其他方式获取
+ * 检查生日是否在1年内被修改过
+ * 使用 birthday_updated_at 字段判断
  */
-function isBirthdayModifiedWithin12Months(_userInfo: MeOut | null): {
+function isBirthdayModifiedWithin1Year(userInfo: MeOut | null): {
   isModified: boolean;
   modifiedDate?: string;
+  formattedDate?: string;
 } {
-  // TODO: 从后端获取生日修改历史
-  // 示例：如果 userInfo 有 birthday_modified_at 字段
-  // if (userInfo?.birthday_modified_at) {
-  //   const modifiedDate = new Date(userInfo.birthday_modified_at);
-  //   const now = new Date();
-  //   const monthsDiff = (now.getTime() - modifiedDate.getTime()) / (1000 * 60 * 60 * 24 * 30);
-  //   if (monthsDiff < 12) {
-  //     return {
-  //       isModified: true,
-  //       modifiedDate: modifiedDate.toISOString().split("T")[0],
-  //     };
-  //   }
-  // }
-  // 暂时返回 false，等待后端支持
+  if (!userInfo?.birthday_updated_at) {
+    return { isModified: false };
+  }
+
+  const modifiedDate = new Date(userInfo.birthday_updated_at);
+  const now = new Date();
+  
+  // 计算时间差（毫秒）
+  const diffMs = now.getTime() - modifiedDate.getTime();
+  // 转换为年（365.25 天/年，考虑闰年）
+  const diffYears = diffMs / (1000 * 60 * 60 * 24 * 365.25);
+  
+  // 如果在1年内
+  if (diffYears < 1) {
+    // 格式化日期：YYYY-MM-DD
+    const formattedDate = modifiedDate.toISOString().split("T")[0];
+    // 格式化显示日期：MM/DD/YYYY
+    const displayDate = `${String(modifiedDate.getMonth() + 1).padStart(2, "0")}/${String(modifiedDate.getDate()).padStart(2, "0")}/${modifiedDate.getFullYear()}`;
+    
+    return {
+      isModified: true,
+      modifiedDate: formattedDate,
+      formattedDate: displayDate,
+    };
+  }
+  
   return { isModified: false };
 }
 
@@ -86,13 +95,12 @@ export default function ModifyPersonalInfoModal({
       setLastName(userInfo.last_name || "");
       setBirthday(userInfo.birthday || "");
       setOriginalBirthday(userInfo.birthday || "");
-      // TODO: 从 userInfo 获取 phone，目前 API 可能不包含
-      setPhone("");
+      setPhone(userInfo.phone || "");
       
-      // 检查生日是否在12个月内被修改过
-      const birthdayStatus = isBirthdayModifiedWithin12Months(userInfo);
+      // 检查生日是否在1年内被修改过
+      const birthdayStatus = isBirthdayModifiedWithin1Year(userInfo);
       setIsBirthdayModified(birthdayStatus.isModified);
-      setBirthdayModifiedDate(birthdayStatus.modifiedDate);
+      setBirthdayModifiedDate(birthdayStatus.formattedDate);
       setShowBirthdayWarning(false);
     }
   }, [open, userInfo]);
@@ -113,7 +121,7 @@ export default function ModifyPersonalInfoModal({
       setFirstName(userInfo.first_name || "");
       setLastName(userInfo.last_name || "");
       setBirthday(userInfo.birthday || "");
-      setPhone("");
+      setPhone(userInfo.phone || "");
       setShowBirthdayWarning(false);
     }
   };
@@ -153,8 +161,8 @@ export default function ModifyPersonalInfoModal({
         first_name: firstName.trim(),
         last_name: lastName.trim(),
         birthday: birthday,
-        // phone 字段需要确认 API 是否支持
-        // phone: phone ? parsePhoneNumber(phone) : null,
+        // phone 字段：如果用户输入了电话号码，则包含在更新数据中
+        ...(phone.trim() ? { phone: phone.trim() } : {}),
       };
 
       // 调用 API 更新用户信息
@@ -171,11 +179,15 @@ export default function ModifyPersonalInfoModal({
       onOpenChange(false);
     } catch (error) {
       console.error("Error updating personal information:", error);
-      if (error instanceof Error) {
-        toast.error(error.message || "Failed to update personal information");
-      } else {
-        toast.error("Failed to update personal information. Please try again.");
-      }
+      
+      // 优先使用后端返回的错误信息
+      const errorMessage = error instanceof HttpError 
+        ? error.message 
+        : error instanceof Error 
+        ? error.message 
+        : "Failed to update personal information. Please try again.";
+      
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -238,38 +250,37 @@ export default function ModifyPersonalInfoModal({
 
           {/* Date of birth */}
           <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between">
               <label className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#4a3c2a] text-[14px]">
                 Date of birth
               </label>
-              {/* 12个月内修改过生日的标签 */}
+              {/* 1年内修改过生日的标签 */}
               {isBirthdayModified && birthdayModifiedDate && (
                 <span className="px-2 py-0.5 bg-white border border-gray-200 rounded-full text-[#4A3C2A] text-xs font-['Comfortaa',sans-serif]">
                   Modified on {birthdayModifiedDate}
                 </span>
               )}
             </div>
-            <div className={isBirthdayModified ? "opacity-60" : ""}>
-              <DatePicker
-                value={birthday}
-                onChange={setBirthday}
-                placeholder="yyyy-mm-dd"
-                label="" // 移除默认的 "Date" 标签
-                minDate="1900-01-01"
-                maxDate={(() => {
-                  // 最大日期是18年前的今天（和注册时保持一致）
-                  const today = new Date();
-                  const maxDate = new Date(
-                    today.getFullYear() - 18,
-                    today.getMonth(),
-                    today.getDate()
-                  );
-                  return maxDate.toISOString().split("T")[0];
-                })()}
-                mode="date"
-                helperText="At least 18 years old. Your birthday won't be shared."
-              />
-            </div>
+            <DatePicker
+              value={birthday}
+              onChange={setBirthday}
+              placeholder="yyyy-mm-dd"
+              label="" // 移除默认的 "Date" 标签
+              minDate="1900-01-01"
+              maxDate={(() => {
+                // 最大日期是18年前的今天（和注册时保持一致）
+                const today = new Date();
+                const maxDate = new Date(
+                  today.getFullYear() - 18,
+                  today.getMonth(),
+                  today.getDate()
+                );
+                return maxDate.toISOString().split("T")[0];
+              })()}
+              mode="date"
+              helperText="At least 18 years old. Your birthday won't be shared."
+              disabled={isBirthdayModified} // 如果1年内修改过，禁用选择器
+            />
           </div>
 
           {/* Email (不可编辑) */}

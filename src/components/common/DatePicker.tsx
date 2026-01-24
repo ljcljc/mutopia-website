@@ -14,6 +14,7 @@ interface DatePickerProps {
   maxDate?: string; // Format: YYYY-MM-DD or YYYY-MM
   mode?: "date" | "month"; // 'date' for full date picker, 'month' for year-month only
   onBlur?: (value?: string) => void;
+  disabled?: boolean; // Disable the date picker
 }
 
 export function DatePicker({
@@ -27,6 +28,7 @@ export function DatePicker({
   maxDate,
   mode = "date",
   onBlur,
+  disabled = false,
 }: DatePickerProps) {
   // Set default placeholder based on mode
   const defaultPlaceholder = mode === "month" ? "yyyy-mm" : "yyyy-mm-dd";
@@ -197,6 +199,15 @@ export function DatePicker({
         document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [isOpen, onBlur, value]);
+
+  // Close calendar when disabled
+  useEffect(() => {
+    if (disabled && isOpen) {
+      setIsOpen(false);
+      setShowYearPicker(false);
+      setShowMonthPicker(false);
+    }
+  }, [disabled, isOpen]);
 
   // Generate year range based on min and max dates
   // For birthday/date of birth, maxYear should be current year (no future dates)
@@ -415,11 +426,15 @@ export function DatePicker({
       <div className="relative w-full" ref={pickerRef}>
         <div
           onClick={() => {
-            setIsOpen(!isOpen);
-            setShowYearPicker(false);
-            setShowMonthPicker(false);
+            if (!disabled) {
+              setIsOpen(!isOpen);
+              setShowYearPicker(false);
+              setShowMonthPicker(false);
+            }
           }}
-          className="bg-white h-[36px] relative rounded-[12px] shrink-0 w-full cursor-pointer"
+          className={`bg-white h-[36px] relative rounded-[12px] shrink-0 w-full ${
+            disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
+          }`}
         >
           <div className="flex flex-row items-center overflow-clip rounded-[inherit] size-full">
             <div className="box-border content-stretch flex h-[36px] items-center px-[16px] py-[4px] relative w-full">
