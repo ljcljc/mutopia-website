@@ -309,7 +309,8 @@ export const useBookingStore = create<BookingState>((set) => ({
     }
     try {
       set({ isLoadingAddresses: true });
-      const addresses = await getAddresses();
+      const response = await getAddresses();
+      const addresses = response.items;
       set({ addresses, isLoadingAddresses: false });
       // 如果有默认地址，自动选择
       const defaultAddress = addresses.find((addr) => addr.is_default);
@@ -619,7 +620,8 @@ export const useBookingStore = create<BookingState>((set) => ({
     }
     try {
       set({ isLoadingCoupons: true });
-      const coupons = await getMyCoupons();
+      const response = await getMyCoupons();
+      const coupons = response.items;
       console.log("Loaded coupons:", coupons);
       set({ coupons, isLoadingCoupons: false });
     } catch (error) {

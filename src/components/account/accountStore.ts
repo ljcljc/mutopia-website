@@ -73,10 +73,7 @@ export const useAccountStore = create<AccountState>((set, get: () => AccountStat
     set({ isLoadingAddresses: true });
     try {
       const response = await getAddresses();
-      // Handle paginated response: {total, page, page_size, items: [...]}
-      const addresses = Array.isArray(response) 
-        ? response 
-        : (response as any)?.items || [];
+      const addresses = response.items;
       set({ addresses, isLoadingAddresses: false });
     } catch (error) {
       console.error("Failed to load addresses:", error);
@@ -99,10 +96,7 @@ export const useAccountStore = create<AccountState>((set, get: () => AccountStat
     set({ isLoadingCoupons: true });
     try {
       const response = await getMyCoupons();
-      // Handle paginated response: {total, page, page_size, items: [...]}
-      const coupons = Array.isArray(response) 
-        ? response 
-        : (response as any)?.items || [];
+      const coupons = response.items;
       set({ coupons, isLoadingCoupons: false });
     } catch (error) {
       console.error("Failed to load coupons:", error);

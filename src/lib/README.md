@@ -282,27 +282,36 @@ async function getCurrentUser() {
 
 ### 宠物管理
 
-- `getPets()` - 获取宠物列表
-- `createPet()` - 创建宠物
-- `deletePet()` - 删除宠物
+- `getPets(params?)` - 获取宠物列表（分页）
+- `getPet(petId)` - 获取单个宠物信息
+- `createPet(params, body?)` - 创建宠物
+- `updatePet(petId, params, body?)` - 更新宠物信息
+- `deletePet(petId)` - 删除宠物
 
 ### 预约管理
 
-- `createBooking()` - 创建预约
-- `getMyBookings()` - 获取我的预约列表
-- `getGuestBookings()` - 获取访客预约列表
-- `groomerConfirmBooking()` - 美容师确认预约
-- `checkInBooking()` - 签到
-- `checkOutBooking()` - 签退
-- `createAddOnRequest()` - 创建附加服务请求
-- `clientDecideAddOn()` - 客户决定附加服务
-- `createReview()` - 创建评价
-- `cancelBooking()` - 取消预约
+- `submitBooking(params)` - 提交预约（使用完整的 BookingSubmitIn 格式）
+- `getBookingDetail(bookingId)` - 获取预约详情
+- `getMyBookings(params?)` - 获取我的预约列表（分页）
+- `getBookingQuote(params)` - 获取预约报价
+- `createAddress(data)` - 创建地址
+- `getAddresses(params?)` - 获取地址列表（分页）
+- `updateAddress(addressId, data)` - 更新地址
+- `deleteAddress(addressId)` - 删除地址
+- `setDefaultAddress(addressId)` - 设置默认地址
+- `groomerConfirmBooking(bookingId, confirm?)` - 美容师确认预约
+- `checkInBooking(bookingId)` - 签到
+- `checkOutBooking(bookingId)` - 签退
+- `createAddOnRequest(bookingId, amount, description?)` - 创建附加服务请求
+- `clientDecideAddOn(bookingId, requestId, approve?)` - 客户决定附加服务
+- `createReview(bookingId, rating, comment?)` - 创建评价
+- `cancelBooking(bookingId, reason?)` - 取消预约
 
 ### 支付管理
 
-- `createDepositIntent()` - 创建押金支付意图
-- `createFinalIntent()` - 创建最终支付意图
+- `createDepositSession(bookingId)` - 创建押金支付会话（Stripe Checkout）
+- `createFinalSession(bookingId)` - 创建最终支付会话（Stripe Checkout）
+- `getPaymentMethods(params?)` - 获取支付方式列表（分页）
 
 ### 使用示例
 
@@ -310,26 +319,58 @@ async function getCurrentUser() {
 import {
   login,
   getCurrentUser,
-  createBooking,
+  submitBooking,
   getPets,
   getServices,
+  getAddresses,
+  getMyCoupons,
 } from "@/lib/api";
 
 // 登录（自动保存 token）
-const tokens = await login({ email: "user@example.com", password: "password" });
+const tokens = await login({ 
+  email: "user@example.com", 
+  password: "password",
+  code: "123456"
+});
 
 // 获取用户信息
 const user = await getCurrentUser();
 
-// 获取宠物和服务列表
-const pets = await getPets();
+// 获取宠物和服务列表（分页）
+const petsPage = await getPets({ page: 1, page_size: 10 });
+const pets = petsPage.items;
 const services = await getServices();
 
-// 创建预约
-const booking = await createBooking({
-  pet_id: pets[0].id,
+// 获取地址列表（分页）
+const addressesPage = await getAddresses({ page: 1, page_size: 10 });
+const addresses = addressesPage.items;
+
+// 获取优惠券列表（分页）
+const couponsPage = await getMyCoupons({ page: 1, page_size: 10 });
+const coupons = couponsPage.items;
+
+// 提交预约（使用完整的 BookingSubmitIn 格式）
+const booking = await submitBooking({
   service_id: services[0].id,
-  scheduled_time: "2024-01-01T10:00:00Z",
+  add_on_ids: [],
+  weight_value: 10,
+  weight_unit: "kg",
+  address: {
+    address: "123 Main St",
+    city: "Vancouver",
+    province: "BC",
+    postal_code: "V6B 1A1",
+    service_type: "mobile"
+  },
+  pet: {
+    name: "Fluffy",
+    pet_type: "dog",
+    // ... 其他宠物信息
+  },
+  preferred_time_slots: [
+    { date: "2024-01-01", slot: "morning" }
+  ],
+  notes: "Please be gentle"
 });
 ```
 

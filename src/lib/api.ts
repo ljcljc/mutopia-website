@@ -83,6 +83,9 @@ export interface MeOut {
   first_name?: string | null;
   last_name?: string | null;
   birthday?: string | null;
+  birthday_updated_at?: string | null;
+  phone?: string | null;
+  avatar_url?: string | null;
   address?: string | null;
   receive_marketing_message: boolean;
   role: string;
@@ -173,13 +176,22 @@ export interface PetOut {
   weight_value?: number | string | null;
   weight_unit?: string | null;
   coat_condition?: string | null;
+  approve_shave?: boolean; // default: false
   behavior?: string | null;
   grooming_frequency?: string | null;
+  primary_photo?: string | null; // 主照片 URL
   photos: string[]; // 照片 URL 数组
   reference_photos: string[]; // 参考照片 URL 数组
   special_notes?: string | null;
   photo_ids: number[]; // 照片 ID 数组
   reference_photo_ids: number[]; // 参考照片 ID 数组
+}
+
+export interface PetPageOut {
+  total: number;
+  page: number;
+  page_size: number;
+  items: PetOut[];
 }
 
 export interface PetBreedOut {
@@ -252,6 +264,7 @@ export interface AddressOut {
   postal_code: string;
   service_type: string;
   is_default: boolean;
+  label?: string | null;
 }
 
 export interface AddressIn {
@@ -261,6 +274,33 @@ export interface AddressIn {
   province: string;
   postal_code: string;
   service_type: string;
+}
+
+export interface AddressManageIn {
+  address: string;
+  city: string;
+  province: string;
+  postal_code: string;
+  service_type: string;
+  label?: string | null;
+  is_default?: boolean; // default: false
+}
+
+export interface AddressUpdateIn {
+  address?: string | null;
+  city?: string | null;
+  province?: string | null;
+  postal_code?: string | null;
+  service_type?: string | null;
+  label?: string | null;
+  is_default?: boolean | null;
+}
+
+export interface AddressPageOut {
+  total: number;
+  page: number;
+  page_size: number;
+  items: AddressOut[];
 }
 
 // Booking submit types
@@ -309,6 +349,56 @@ export interface BookingPriceBreakdown {
   payable_amount: number | string;
   used_coupon_ids?: number[]; // default: []
   currency?: string; // default: "usd"
+}
+
+export interface BookingListOut {
+  id: number;
+  status: string;
+  pet_name?: string | null;
+  service_name?: string | null;
+  address?: string | null;
+  service_type?: string | null;
+  scheduled_time?: string | null;
+}
+
+export interface BookingPageOut {
+  total: number;
+  page: number;
+  page_size: number;
+  items: BookingListOut[];
+}
+
+export interface BookingPaymentOut {
+  id: number;
+  kind: string;
+  amount: number | string;
+  currency: string;
+  status: string;
+  payment_method?: PaymentMethodOut | null;
+}
+
+export interface BookingDetailOut {
+  id: number;
+  status: string;
+  scheduled_time?: string | null;
+  notes?: string | null;
+  preferred_time_slots: Record<string, unknown>[];
+  address_snapshot: Record<string, unknown>;
+  pet_snapshot: Record<string, unknown>;
+  package_snapshot: Record<string, unknown>;
+  addons_snapshot: Record<string, unknown>[];
+  membership_snapshot: Record<string, unknown>;
+  coupon_snapshot: Record<string, unknown>;
+  package_amount: number | string;
+  addons_amount: number | string;
+  membership_fee: number | string;
+  discount_rate: number | string;
+  discount_amount: number | string;
+  coupon_amount: number | string;
+  payable_amount: number | string;
+  deposit_amount: number | string;
+  final_amount: number | string;
+  payments: BookingPaymentOut[];
 }
 
 // 门店相关类型
@@ -438,14 +528,43 @@ export async function getCurrentUser(): Promise<MeOut> {
  * 更新用户个人信息
  */
 export interface UpdateUserInfoIn {
-  first_name?: string;
-  last_name?: string;
-  birthday?: string;
+  first_name?: string | null;
+  last_name?: string | null;
+  birthday?: string | null;
   phone?: string | null;
+  receive_marketing_message?: boolean | null;
+}
+
+export interface AvatarOut {
+  url: string;
+}
+
+export interface PasswordChangeIn {
+  old_password: string;
+  password1: string;
+  password2: string;
 }
 
 export async function updateUserInfo(data: UpdateUserInfoIn): Promise<MeOut> {
   const response = await http.patch<MeOut>("/api/auth/me", data);
+  return response.data;
+}
+
+/**
+ * 上传用户头像
+ */
+export async function uploadAvatar(
+  file: File,
+  onProgress?: (progress: number) => void
+): Promise<AvatarOut> {
+  return uploadFileWithProgress("/api/auth/avatar", file, onProgress) as Promise<AvatarOut>;
+}
+
+/**
+ * 修改密码
+ */
+export async function changePassword(data: PasswordChangeIn): Promise<OkOut> {
+  const response = await http.post<OkOut>("/api/auth/password/change", data);
   return response.data;
 }
 
@@ -582,6 +701,7 @@ export interface MembershipPlanOut {
 export interface CouponOut {
   id: number;
   template_id: number;
+  template_name?: string | null;
   type: string;
   category: string;
   apply_scope: string;
@@ -590,19 +710,21 @@ export interface CouponOut {
   expires_at?: string | null;
   status: string;
   notes?: string | null;
+  activated_at?: string | null;
+}
+
+export interface CouponPageOut {
+  total: number;
+  page: number;
+  page_size: number;
+  items: CouponOut[];
 }
 
 export interface InviteBindIn {
   invite_code: string;
 }
 
-export interface RedeemCodeIn {
-  code: string;
-}
-
-export interface BirthdayClaimIn {
-  pet_id: number;
-}
+// 已废弃：redeemCouponCode 和 claimBirthdayCoupon 端点已从 API 中移除
 
 /**
  * 获取会员套餐列表
@@ -618,23 +740,22 @@ export async function getMembershipPlans(): Promise<MembershipPlanOut[]> {
 }
 
 /**
- * 获取我的优惠券列表
+ * 获取我的优惠券列表（分页）
  */
-export async function getMyCoupons(): Promise<CouponOut[]> {
-  const response = await http.get<CouponOut[]>("/api/promotions/coupons");
-  return response.data;
-}
+export async function getMyCoupons(params?: {
+  page?: number;
+  page_size?: number;
+  category?: string | null;
+}): Promise<CouponPageOut> {
+  const queryParams = new URLSearchParams();
+  if (params?.page) queryParams.append("page", String(params.page));
+  if (params?.page_size) queryParams.append("page_size", String(params.page_size));
+  if (params?.category !== undefined) {
+    queryParams.append("category", params.category || "");
+  }
 
-/**
- * 兑换优惠券代码
- */
-export async function redeemCouponCode(
-  data: RedeemCodeIn
-): Promise<CouponOut> {
-  const response = await http.post<CouponOut>(
-    "/api/promotions/coupons/redeem",
-    data
-  );
+  const url = `/api/promotions/coupons${queryParams.toString() ? "?" + queryParams.toString() : ""}`;
+  const response = await http.get<CouponPageOut>(url);
   return response.data;
 }
 
@@ -649,33 +770,39 @@ export async function bindInvitation(data: InviteBindIn): Promise<OkOut> {
   return response.data;
 }
 
-/**
- * 生日领取优惠券
- */
-export async function claimBirthdayCoupon(
-  data: BirthdayClaimIn
-): Promise<CouponOut> {
-  const response = await http.post<CouponOut>(
-    "/api/promotions/coupons/birthday_claim",
-    data
-  );
-  return response.data;
-}
-
 // ==================== 宠物管理 API ====================
 
 /**
- * 获取宠物列表
+ * 获取宠物列表（分页）
  */
-export async function getPets(): Promise<PetOut[]> {
-  const response = await http.get<PetOut[]>("/api/pets/pets");
+export async function getPets(params?: {
+  page?: number;
+  page_size?: number;
+}): Promise<PetPageOut> {
+  const queryParams = new URLSearchParams();
+  if (params?.page) queryParams.append("page", String(params.page));
+  if (params?.page_size) queryParams.append("page_size", String(params.page_size));
+
+  const url = `/api/pets/pets${queryParams.toString() ? "?" + queryParams.toString() : ""}`;
+  const response = await http.get<PetPageOut>(url);
+  return response.data;
+}
+
+/**
+ * 获取单个宠物信息
+ */
+export async function getPet(petId: number): Promise<PetOut> {
+  const response = await http.get<PetOut>(`/api/pets/pets/${petId}`);
   return response.data;
 }
 
 /**
  * 创建宠物
  */
-export async function createPet(params: CreatePetParams): Promise<PetOut> {
+export async function createPet(
+  params: CreatePetParams,
+  body?: { photo_ids?: number[] | null; reference_photo_ids?: number[] | null }
+): Promise<PetOut> {
   // 构建查询参数（根据 openapi.json，所有参数都是查询参数）
   const queryParams = new URLSearchParams();
   queryParams.append("name", params.name);
@@ -698,8 +825,84 @@ export async function createPet(params: CreatePetParams): Promise<PetOut> {
 
   const response = await http.post<PetOut>(
     `/api/pets/pets?${queryParams.toString()}`,
-    undefined,
-    { headers: {} } // POST 请求但使用查询参数，不需要 body
+    body || { photo_ids: null, reference_photo_ids: null }
+  );
+  return response.data;
+}
+
+/**
+ * 更新宠物信息
+ */
+export interface UpdatePetParams {
+  name?: string | null;
+  pet_type?: string | null;
+  breed?: string | null;
+  mixed_breed?: boolean | null;
+  precise_type?: string | null;
+  birthday?: string | null;
+  gender?: string | null;
+  weight_value?: number | null;
+  weight_unit?: string | null;
+  coat_condition?: string | null;
+  approve_shave?: boolean | null;
+  behavior?: string | null;
+  grooming_frequency?: string | null;
+  special_notes?: string | null;
+}
+
+export async function updatePet(
+  petId: number,
+  params: UpdatePetParams,
+  body?: { photo_ids?: number[] | null; reference_photo_ids?: number[] | null }
+): Promise<PetOut> {
+  // 构建查询参数
+  const queryParams = new URLSearchParams();
+  if (params.name !== undefined) {
+    queryParams.append("name", params.name || "");
+  }
+  if (params.pet_type !== undefined) {
+    queryParams.append("pet_type", params.pet_type || "");
+  }
+  if (params.breed !== undefined) {
+    queryParams.append("breed", params.breed || "");
+  }
+  if (params.mixed_breed !== undefined) {
+    queryParams.append("mixed_breed", String(params.mixed_breed));
+  }
+  if (params.precise_type !== undefined) {
+    queryParams.append("precise_type", params.precise_type || "");
+  }
+  if (params.birthday !== undefined) {
+    queryParams.append("birthday", params.birthday || "");
+  }
+  if (params.gender !== undefined) {
+    queryParams.append("gender", params.gender || "");
+  }
+  if (params.weight_value !== undefined && params.weight_value !== null) {
+    queryParams.append("weight_value", String(params.weight_value));
+  }
+  if (params.weight_unit !== undefined) {
+    queryParams.append("weight_unit", params.weight_unit || "");
+  }
+  if (params.coat_condition !== undefined) {
+    queryParams.append("coat_condition", params.coat_condition || "");
+  }
+  if (params.approve_shave !== undefined) {
+    queryParams.append("approve_shave", String(params.approve_shave));
+  }
+  if (params.behavior !== undefined) {
+    queryParams.append("behavior", params.behavior || "");
+  }
+  if (params.grooming_frequency !== undefined) {
+    queryParams.append("grooming_frequency", params.grooming_frequency || "");
+  }
+  if (params.special_notes !== undefined) {
+    queryParams.append("special_notes", params.special_notes || "");
+  }
+
+  const response = await http.put<PetOut>(
+    `/api/pets/pets/${petId}?${queryParams.toString()}`,
+    body || { photo_ids: null, reference_photo_ids: null }
   );
   return response.data;
 }
@@ -777,11 +980,11 @@ export async function uploadReferencePhoto(
 /**
  * 使用 XMLHttpRequest 上传文件，支持进度回调
  */
-async function uploadFileWithProgress(
+async function uploadFileWithProgress<T = PhotoUploadResponse>(
   url: string,
   file: File,
   onProgress?: (progress: number) => void
-): Promise<PhotoUploadResponse> {
+): Promise<T> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     const formData = new FormData();
@@ -805,7 +1008,7 @@ async function uploadFileWithProgress(
     xhr.addEventListener("load", () => {
       if (xhr.status >= 200 && xhr.status < 300) {
         try {
-          const response = JSON.parse(xhr.responseText) as PhotoUploadResponse;
+          const response = JSON.parse(xhr.responseText) as T;
           resolve(response);
         } catch {
           reject(new Error("Failed to parse response"));
@@ -857,32 +1060,78 @@ export async function getStores(): Promise<StoreLocationOut[]> {
 }
 
 /**
- * 获取地址列表（需要认证）
+ * 获取地址列表（需要认证，分页）
  */
-export async function getAddresses(): Promise<AddressOut[]> {
-  const response = await http.get<AddressOut[]>("/api/bookings/addresses");
+export async function getAddresses(params?: {
+  page?: number;
+  page_size?: number;
+}): Promise<AddressPageOut> {
+  const queryParams = new URLSearchParams();
+  if (params?.page) queryParams.append("page", String(params.page));
+  if (params?.page_size) queryParams.append("page_size", String(params.page_size));
+
+  const url = `/api/bookings/addresses${queryParams.toString() ? "?" + queryParams.toString() : ""}`;
+  const response = await http.get<AddressPageOut>(url);
   return response.data;
 }
 
 /**
- * 创建预约
+ * 创建地址
  */
-export async function createBooking(
-  params: CreateBookingParams
-): Promise<BookingOut> {
-  const queryParams = new URLSearchParams();
-  queryParams.append("pet_id", String(params.pet_id));
-  queryParams.append("service_id", String(params.service_id));
-  if (params.scheduled_time)
-    queryParams.append("scheduled_time", params.scheduled_time);
-  if (params.notes) queryParams.append("notes", params.notes);
-  if (params.guest_id) queryParams.append("guest_id", params.guest_id);
+export async function createAddress(data: AddressManageIn): Promise<AddressOut> {
+  const response = await http.post<AddressOut>("/api/bookings/addresses", data);
+  return response.data;
+}
 
-  const response = await http.post<BookingOut>(
-    `/api/bookings/bookings?${queryParams.toString()}`,
+/**
+ * 更新地址
+ */
+export async function updateAddress(
+  addressId: number,
+  data: AddressUpdateIn
+): Promise<AddressOut> {
+  const response = await http.patch<AddressOut>(
+    `/api/bookings/addresses/${addressId}`,
+    data
+  );
+  return response.data;
+}
+
+/**
+ * 删除地址
+ */
+export async function deleteAddress(addressId: number): Promise<OkOut> {
+  const response = await http.delete<OkOut>(`/api/bookings/addresses/${addressId}`);
+  return response.data;
+}
+
+/**
+ * 设置默认地址
+ */
+export async function setDefaultAddress(addressId: number): Promise<OkOut> {
+  const response = await http.post<OkOut>(
+    `/api/bookings/addresses/${addressId}/default`,
     undefined
   );
   return response.data;
+}
+
+/**
+ * 创建预约（已废弃，请使用 submitBooking）
+ * @deprecated 此函数使用已废弃的端点，请使用 submitBooking 代替
+ */
+export async function createBooking(
+  _params: CreateBookingParams
+): Promise<BookingOut> {
+  // 注意：旧的 /api/bookings/bookings 端点已从 API 中移除
+  // 请使用 submitBooking 函数代替
+  console.warn(
+    "createBooking is deprecated. The /api/bookings/bookings endpoint has been removed. " +
+    "Please use submitBooking with BookingSubmitIn format instead."
+  );
+  throw new Error(
+    "createBooking is deprecated. Please use submitBooking with BookingSubmitIn format instead."
+  );
 }
 
 /**
@@ -912,21 +1161,28 @@ export async function submitBooking(
 }
 
 /**
- * 获取我的预约列表
+ * 获取我的预约列表（分页）
  */
-export async function getMyBookings(): Promise<BookingOut[]> {
-  const response = await http.get<BookingOut[]>("/api/bookings/bookings");
+export async function getMyBookings(params?: {
+  group?: string;
+  page?: number;
+  page_size?: number;
+}): Promise<BookingPageOut> {
+  const queryParams = new URLSearchParams();
+  if (params?.group) queryParams.append("group", params.group);
+  if (params?.page) queryParams.append("page", String(params.page));
+  if (params?.page_size) queryParams.append("page_size", String(params.page_size));
+
+  const url = `/api/bookings/${queryParams.toString() ? "?" + queryParams.toString() : ""}`;
+  const response = await http.get<BookingPageOut>(url);
   return response.data;
 }
 
 /**
- * 获取访客预约列表
+ * 获取预约详情
  */
-export async function getGuestBookings(guestId: string): Promise<BookingOut[]> {
-  const response = await http.get<BookingOut[]>(
-    `/api/bookings/bookings/guest?guest_id=${guestId}`,
-    { skipAuth: true }
-  );
+export async function getBookingDetail(bookingId: number): Promise<BookingDetailOut> {
+  const response = await http.get<BookingDetailOut>(`/api/bookings/${bookingId}`);
   return response.data;
 }
 
@@ -1064,6 +1320,26 @@ export interface PaymentSessionOut {
   payment_id: number;
 }
 
+export interface PaymentMethodOut {
+  id: number;
+  method_type?: string | null;
+  brand?: string | null;
+  last4?: string | null;
+  exp_month?: number | null;
+  exp_year?: number | null;
+  funding?: string | null;
+  country?: string | null;
+  billing_name?: string | null;
+  created_at: string;
+}
+
+export interface PaymentMethodPageOut {
+  total: number;
+  page: number;
+  page_size: number;
+  items: PaymentMethodOut[];
+}
+
 /**
  * 创建押金支付意图
  */
@@ -1113,6 +1389,22 @@ export async function createFinalSession(
     `/api/payments/payments/create_final_session?booking_id=${bookingId}`,
     undefined
   );
+  return response.data;
+}
+
+/**
+ * 获取支付方式列表（分页）
+ */
+export async function getPaymentMethods(params?: {
+  page?: number;
+  page_size?: number;
+}): Promise<PaymentMethodPageOut> {
+  const queryParams = new URLSearchParams();
+  if (params?.page) queryParams.append("page", String(params.page));
+  if (params?.page_size) queryParams.append("page_size", String(params.page_size));
+
+  const url = `/api/payments/payment_methods${queryParams.toString() ? "?" + queryParams.toString() : ""}`;
+  const response = await http.get<PaymentMethodPageOut>(url);
   return response.data;
 }
 

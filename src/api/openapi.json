@@ -310,6 +310,96 @@
         },
         "tags": ["auth"],
         "security": [{ "JWTAuth": [] }]
+      },
+      "patch": {
+        "operationId": "api_auth_update_profile",
+        "summary": "Update Profile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MeOut" }
+              }
+            }
+          }
+        },
+        "tags": ["auth"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ProfileUpdateIn" }
+            }
+          },
+          "required": true
+        },
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/auth/avatar": {
+      "post": {
+        "operationId": "api_auth_upload_avatar",
+        "summary": "Upload Avatar",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AvatarOut" }
+              }
+            }
+          }
+        },
+        "tags": ["auth"],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "format": "binary",
+                    "title": "File",
+                    "type": "string"
+                  }
+                },
+                "required": ["file"],
+                "title": "FileParams",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/auth/password/change": {
+      "post": {
+        "operationId": "api_auth_change_password",
+        "summary": "Change Password",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OkOut" }
+              }
+            }
+          }
+        },
+        "tags": ["auth"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PasswordChangeIn" }
+            }
+          },
+          "required": true
+        },
+        "security": [{ "JWTAuth": [] }]
       }
     },
     "/api/auth/password/forgot/send": {
@@ -440,17 +530,30 @@
       "get": {
         "operationId": "api_pets_list_pets",
         "summary": "List Pets",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": { "default": 1, "title": "Page", "type": "integer" },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "schema": {
+              "default": 10,
+              "title": "Page Size",
+              "type": "integer"
+            },
+            "required": false
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "application/json": {
-                "schema": {
-                  "items": { "$ref": "#/components/schemas/PetOut" },
-                  "title": "Response",
-                  "type": "array"
-                }
+                "schema": { "$ref": "#/components/schemas/PetPageOut" }
               }
             }
           }
@@ -554,6 +657,16 @@
           },
           {
             "in": "query",
+            "name": "approve_shave",
+            "schema": {
+              "default": false,
+              "title": "Approve Shave",
+              "type": "boolean"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
             "name": "behavior",
             "schema": {
               "default": "friendly",
@@ -625,6 +738,207 @@
       }
     },
     "/api/pets/pets/{pet_id}": {
+      "get": {
+        "operationId": "api_pets_get_pet",
+        "summary": "Get Pet",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pet_id",
+            "schema": { "title": "Pet Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PetOut" }
+              }
+            }
+          }
+        },
+        "tags": ["pets"],
+        "security": [{ "JWTAuth": [] }]
+      },
+      "put": {
+        "operationId": "api_pets_update_pet",
+        "summary": "Update Pet",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pet_id",
+            "schema": { "title": "Pet Id", "type": "integer" },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Name"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "pet_type",
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Pet Type"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "breed",
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Breed"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "mixed_breed",
+            "schema": {
+              "anyOf": [{ "type": "boolean" }, { "type": "null" }],
+              "title": "Mixed Breed"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "precise_type",
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Precise Type"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "birthday",
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Birthday"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "gender",
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Gender"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "weight_value",
+            "schema": {
+              "anyOf": [{ "type": "number" }, { "type": "null" }],
+              "title": "Weight Value"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "weight_unit",
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Weight Unit"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "coat_condition",
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Coat Condition"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "approve_shave",
+            "schema": {
+              "anyOf": [{ "type": "boolean" }, { "type": "null" }],
+              "title": "Approve Shave"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "behavior",
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Behavior"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "grooming_frequency",
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Grooming Frequency"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "special_notes",
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Special Notes"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PetOut" }
+              }
+            }
+          }
+        },
+        "tags": ["pets"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "photo_ids": {
+                    "anyOf": [
+                      { "items": { "type": "integer" }, "type": "array" },
+                      { "type": "null" }
+                    ],
+                    "title": "Photo Ids"
+                  },
+                  "reference_photo_ids": {
+                    "anyOf": [
+                      { "items": { "type": "integer" }, "type": "array" },
+                      { "type": "null" }
+                    ],
+                    "title": "Reference Photo Ids"
+                  }
+                },
+                "title": "BodyParams",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [{ "JWTAuth": [] }]
+      },
       "delete": {
         "operationId": "api_pets_delete_pet",
         "summary": "Delete Pet",
@@ -754,17 +1068,139 @@
       "get": {
         "operationId": "api_bookings_list_addresses",
         "summary": "List Addresses",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": { "default": 1, "title": "Page", "type": "integer" },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "schema": {
+              "default": 10,
+              "title": "Page Size",
+              "type": "integer"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AddressPageOut" }
+              }
+            }
+          }
+        },
+        "tags": ["bookings"],
+        "security": [{ "JWTAuth": [] }]
+      },
+      "post": {
+        "operationId": "api_bookings_create_address",
+        "summary": "Create Address",
         "parameters": [],
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "application/json": {
-                "schema": {
-                  "items": { "$ref": "#/components/schemas/AddressOut" },
-                  "title": "Response",
-                  "type": "array"
-                }
+                "schema": { "$ref": "#/components/schemas/AddressOut" }
+              }
+            }
+          }
+        },
+        "tags": ["bookings"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AddressManageIn" }
+            }
+          },
+          "required": true
+        },
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/bookings/addresses/{address_id}": {
+      "patch": {
+        "operationId": "api_bookings_update_address",
+        "summary": "Update Address",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "address_id",
+            "schema": { "title": "Address Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AddressOut" }
+              }
+            }
+          }
+        },
+        "tags": ["bookings"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AddressUpdateIn" }
+            }
+          },
+          "required": true
+        },
+        "security": [{ "JWTAuth": [] }]
+      },
+      "delete": {
+        "operationId": "api_bookings_delete_address",
+        "summary": "Delete Address",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "address_id",
+            "schema": { "title": "Address Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OkOut" }
+              }
+            }
+          }
+        },
+        "tags": ["bookings"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/bookings/addresses/{address_id}/default": {
+      "post": {
+        "operationId": "api_bookings_set_default_address",
+        "summary": "Set Default Address",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "address_id",
+            "schema": { "title": "Address Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OkOut" }
               }
             }
           }
@@ -837,17 +1273,62 @@
       "get": {
         "operationId": "api_bookings_my_bookings",
         "summary": "My Bookings",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "group",
+            "schema": { "default": "all", "title": "Group", "type": "string" },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": { "default": 1, "title": "Page", "type": "integer" },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "schema": {
+              "default": 10,
+              "title": "Page Size",
+              "type": "integer"
+            },
+            "required": false
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "application/json": {
-                "schema": {
-                  "items": { "$ref": "#/components/schemas/BookingOut" },
-                  "title": "Response",
-                  "type": "array"
-                }
+                "schema": { "$ref": "#/components/schemas/BookingPageOut" }
+              }
+            }
+          }
+        },
+        "tags": ["bookings"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/bookings/{booking_id}": {
+      "get": {
+        "operationId": "api_bookings_booking_detail",
+        "summary": "Booking Detail",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "schema": { "title": "Booking Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BookingDetailOut" }
               }
             }
           }
@@ -1150,6 +1631,44 @@
         "security": [{ "JWTAuth": [] }]
       }
     },
+    "/api/payments/payment_methods": {
+      "get": {
+        "operationId": "api_payments_list_payment_methods",
+        "summary": "List Payment Methods",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": { "default": 1, "title": "Page", "type": "integer" },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "schema": {
+              "default": 10,
+              "title": "Page Size",
+              "type": "integer"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentMethodPageOut"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["payments"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
     "/api/payments/webhooks/stripe": {
       "post": {
         "operationId": "api_payments_stripe_webhook",
@@ -1220,17 +1739,39 @@
       "get": {
         "operationId": "api_promotions_my_coupons",
         "summary": "My Coupons",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": { "default": 1, "title": "Page", "type": "integer" },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "schema": {
+              "default": 10,
+              "title": "Page Size",
+              "type": "integer"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "category",
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Category"
+            },
+            "required": false
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "application/json": {
-                "schema": {
-                  "items": { "$ref": "#/components/schemas/CouponOut" },
-                  "title": "Response",
-                  "type": "array"
-                }
+                "schema": { "$ref": "#/components/schemas/CouponPageOut" }
               }
             }
           }
@@ -1489,6 +2030,18 @@
             "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Birthday"
           },
+          "birthday_updated_at": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Birthday Updated At"
+          },
+          "phone": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Phone"
+          },
+          "avatar_url": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Avatar Url"
+          },
           "address": {
             "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Address"
@@ -1520,6 +2073,48 @@
           "is_email_verified"
         ],
         "title": "MeOut",
+        "type": "object"
+      },
+      "ProfileUpdateIn": {
+        "properties": {
+          "first_name": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "First Name"
+          },
+          "last_name": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Last Name"
+          },
+          "birthday": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Birthday"
+          },
+          "phone": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Phone"
+          },
+          "receive_marketing_message": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }],
+            "title": "Receive Marketing Message"
+          }
+        },
+        "title": "ProfileUpdateIn",
+        "type": "object"
+      },
+      "AvatarOut": {
+        "properties": { "url": { "title": "Url", "type": "string" } },
+        "required": ["url"],
+        "title": "AvatarOut",
+        "type": "object"
+      },
+      "PasswordChangeIn": {
+        "properties": {
+          "old_password": { "title": "Old Password", "type": "string" },
+          "password1": { "title": "Password1", "type": "string" },
+          "password2": { "title": "Password2", "type": "string" }
+        },
+        "required": ["old_password", "password1", "password2"],
+        "title": "PasswordChangeIn",
         "type": "object"
       },
       "ForgotPasswordSendOut": {
@@ -1751,6 +2346,11 @@
             "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Coat Condition"
           },
+          "approve_shave": {
+            "default": false,
+            "title": "Approve Shave",
+            "type": "boolean"
+          },
           "behavior": {
             "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Behavior"
@@ -1758,6 +2358,10 @@
           "grooming_frequency": {
             "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Grooming Frequency"
+          },
+          "primary_photo": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Primary Photo"
           },
           "photos": {
             "default": [],
@@ -1790,6 +2394,21 @@
         },
         "required": ["id", "name", "pet_type"],
         "title": "PetOut",
+        "type": "object"
+      },
+      "PetPageOut": {
+        "properties": {
+          "total": { "title": "Total", "type": "integer" },
+          "page": { "title": "Page", "type": "integer" },
+          "page_size": { "title": "Page Size", "type": "integer" },
+          "items": {
+            "items": { "$ref": "#/components/schemas/PetOut" },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": ["total", "page", "page_size", "items"],
+        "title": "PetPageOut",
         "type": "object"
       },
       "PetBreedOut": {
@@ -1830,7 +2449,11 @@
           "province": { "title": "Province", "type": "string" },
           "postal_code": { "title": "Postal Code", "type": "string" },
           "service_type": { "title": "Service Type", "type": "string" },
-          "is_default": { "title": "Is Default", "type": "boolean" }
+          "is_default": { "title": "Is Default", "type": "boolean" },
+          "label": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Label"
+          }
         },
         "required": [
           "id",
@@ -1842,6 +2465,82 @@
           "is_default"
         ],
         "title": "AddressOut",
+        "type": "object"
+      },
+      "AddressPageOut": {
+        "properties": {
+          "total": { "title": "Total", "type": "integer" },
+          "page": { "title": "Page", "type": "integer" },
+          "page_size": { "title": "Page Size", "type": "integer" },
+          "items": {
+            "items": { "$ref": "#/components/schemas/AddressOut" },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": ["total", "page", "page_size", "items"],
+        "title": "AddressPageOut",
+        "type": "object"
+      },
+      "AddressManageIn": {
+        "properties": {
+          "address": { "title": "Address", "type": "string" },
+          "city": { "title": "City", "type": "string" },
+          "province": { "title": "Province", "type": "string" },
+          "postal_code": { "title": "Postal Code", "type": "string" },
+          "service_type": { "title": "Service Type", "type": "string" },
+          "label": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Label"
+          },
+          "is_default": {
+            "default": false,
+            "title": "Is Default",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "address",
+          "city",
+          "province",
+          "postal_code",
+          "service_type"
+        ],
+        "title": "AddressManageIn",
+        "type": "object"
+      },
+      "AddressUpdateIn": {
+        "properties": {
+          "address": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Address"
+          },
+          "city": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "City"
+          },
+          "province": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Province"
+          },
+          "postal_code": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Postal Code"
+          },
+          "service_type": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Service Type"
+          },
+          "label": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Label"
+          },
+          "is_default": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }],
+            "title": "Is Default"
+          }
+        },
+        "title": "AddressUpdateIn",
         "type": "object"
       },
       "BookingPriceBreakdown": {
@@ -2165,6 +2864,11 @@
             "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Coat Condition"
           },
+          "approve_shave": {
+            "default": false,
+            "title": "Approve Shave",
+            "type": "boolean"
+          },
           "behavior": {
             "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Behavior"
@@ -2203,6 +2907,289 @@
         "title": "TimeSlotIn",
         "type": "object"
       },
+      "BookingListOut": {
+        "properties": {
+          "id": { "title": "Id", "type": "integer" },
+          "status": { "title": "Status", "type": "string" },
+          "pet_name": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Pet Name"
+          },
+          "service_name": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Service Name"
+          },
+          "address": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Address"
+          },
+          "service_type": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Service Type"
+          },
+          "scheduled_time": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Scheduled Time"
+          }
+        },
+        "required": ["id", "status"],
+        "title": "BookingListOut",
+        "type": "object"
+      },
+      "BookingPageOut": {
+        "properties": {
+          "total": { "title": "Total", "type": "integer" },
+          "page": { "title": "Page", "type": "integer" },
+          "page_size": { "title": "Page Size", "type": "integer" },
+          "items": {
+            "items": { "$ref": "#/components/schemas/BookingListOut" },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": ["total", "page", "page_size", "items"],
+        "title": "BookingPageOut",
+        "type": "object"
+      },
+      "BookingDetailOut": {
+        "properties": {
+          "id": { "title": "Id", "type": "integer" },
+          "status": { "title": "Status", "type": "string" },
+          "scheduled_time": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Scheduled Time"
+          },
+          "notes": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Notes"
+          },
+          "preferred_time_slots": {
+            "default": [],
+            "items": { "additionalProperties": true, "type": "object" },
+            "title": "Preferred Time Slots",
+            "type": "array"
+          },
+          "address_snapshot": {
+            "additionalProperties": true,
+            "default": {},
+            "title": "Address Snapshot",
+            "type": "object"
+          },
+          "pet_snapshot": {
+            "additionalProperties": true,
+            "default": {},
+            "title": "Pet Snapshot",
+            "type": "object"
+          },
+          "package_snapshot": {
+            "additionalProperties": true,
+            "default": {},
+            "title": "Package Snapshot",
+            "type": "object"
+          },
+          "addons_snapshot": {
+            "default": [],
+            "items": { "additionalProperties": true, "type": "object" },
+            "title": "Addons Snapshot",
+            "type": "array"
+          },
+          "membership_snapshot": {
+            "additionalProperties": true,
+            "default": {},
+            "title": "Membership Snapshot",
+            "type": "object"
+          },
+          "coupon_snapshot": {
+            "additionalProperties": true,
+            "default": {},
+            "title": "Coupon Snapshot",
+            "type": "object"
+          },
+          "package_amount": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "title": "Package Amount"
+          },
+          "addons_amount": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "title": "Addons Amount"
+          },
+          "membership_fee": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "title": "Membership Fee"
+          },
+          "discount_rate": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "title": "Discount Rate"
+          },
+          "discount_amount": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "title": "Discount Amount"
+          },
+          "coupon_amount": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "title": "Coupon Amount"
+          },
+          "payable_amount": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "title": "Payable Amount"
+          },
+          "deposit_amount": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "title": "Deposit Amount"
+          },
+          "final_amount": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "title": "Final Amount"
+          },
+          "payments": {
+            "default": [],
+            "items": { "$ref": "#/components/schemas/BookingPaymentOut" },
+            "title": "Payments",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "package_amount",
+          "addons_amount",
+          "membership_fee",
+          "discount_rate",
+          "discount_amount",
+          "coupon_amount",
+          "payable_amount",
+          "deposit_amount",
+          "final_amount"
+        ],
+        "title": "BookingDetailOut",
+        "type": "object"
+      },
+      "BookingPaymentOut": {
+        "properties": {
+          "id": { "title": "Id", "type": "integer" },
+          "kind": { "title": "Kind", "type": "string" },
+          "amount": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "title": "Amount"
+          },
+          "currency": { "title": "Currency", "type": "string" },
+          "status": { "title": "Status", "type": "string" },
+          "payment_method": {
+            "anyOf": [
+              { "$ref": "#/components/schemas/PaymentMethodOut" },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["id", "kind", "amount", "currency", "status"],
+        "title": "BookingPaymentOut",
+        "type": "object"
+      },
+      "PaymentMethodOut": {
+        "properties": {
+          "id": { "title": "Id", "type": "integer" },
+          "method_type": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Method Type"
+          },
+          "brand": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Brand"
+          },
+          "last4": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Last4"
+          },
+          "exp_month": {
+            "anyOf": [{ "type": "integer" }, { "type": "null" }],
+            "title": "Exp Month"
+          },
+          "exp_year": {
+            "anyOf": [{ "type": "integer" }, { "type": "null" }],
+            "title": "Exp Year"
+          },
+          "funding": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Funding"
+          },
+          "country": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Country"
+          },
+          "billing_name": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Billing Name"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          }
+        },
+        "required": ["id", "created_at"],
+        "title": "PaymentMethodOut",
+        "type": "object"
+      },
       "AddOnRequestOut": {
         "properties": {
           "id": { "title": "Id", "type": "integer" },
@@ -2238,6 +3225,21 @@
         },
         "required": ["url", "session_id", "payment_id"],
         "title": "PaymentSessionOut",
+        "type": "object"
+      },
+      "PaymentMethodPageOut": {
+        "properties": {
+          "total": { "title": "Total", "type": "integer" },
+          "page": { "title": "Page", "type": "integer" },
+          "page_size": { "title": "Page Size", "type": "integer" },
+          "items": {
+            "items": { "$ref": "#/components/schemas/PaymentMethodOut" },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": ["total", "page", "page_size", "items"],
+        "title": "PaymentMethodPageOut",
         "type": "object"
       },
       "FeedbackOut": {
@@ -2350,6 +3352,10 @@
         "properties": {
           "id": { "title": "Id", "type": "integer" },
           "template_id": { "title": "Template Id", "type": "integer" },
+          "template_name": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Template Name"
+          },
           "type": { "title": "Type", "type": "string" },
           "category": { "title": "Category", "type": "string" },
           "apply_scope": { "title": "Apply Scope", "type": "string" },
@@ -2375,6 +3381,10 @@
           "notes": {
             "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Notes"
+          },
+          "activated_at": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Activated At"
           }
         },
         "required": [
@@ -2387,6 +3397,21 @@
           "status"
         ],
         "title": "CouponOut",
+        "type": "object"
+      },
+      "CouponPageOut": {
+        "properties": {
+          "total": { "title": "Total", "type": "integer" },
+          "page": { "title": "Page", "type": "integer" },
+          "page_size": { "title": "Page Size", "type": "integer" },
+          "items": {
+            "items": { "$ref": "#/components/schemas/CouponOut" },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": ["total", "page", "page_size", "items"],
+        "title": "CouponPageOut",
         "type": "object"
       },
       "InviteBindIn": {
