@@ -461,8 +461,8 @@ export function DatePicker({
             // 阻止点击面板内部关闭面板
             e.stopPropagation();
           }}
-          className={`absolute bg-white box-border flex flex-col gap-[20px] p-[24px] rounded-[16px] top-[calc(100%+8px)] left-0 z-50 shadow-lg border border-[rgba(0,0,0,0.2)] border-solid ${
-            mode === "month" ? "w-auto min-w-[320px]" : "w-full max-w-[373px]"
+          className={`absolute bg-white box-border flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] p-[calc(16*var(--px393))] sm:p-[24px] rounded-[calc(16*var(--px393))] sm:rounded-[16px] top-[calc(100%+8px)] left-1/2 -translate-x-1/2 sm:left-0 sm:translate-x-0 z-50 shadow-lg border border-[rgba(0,0,0,0.2)] border-solid ${
+            mode === "month" ? "w-[calc(100vw-40px)] sm:w-auto sm:min-w-[320px]" : "w-[calc(100vw-40px)] sm:w-full sm:max-w-[373px]"
           }`}
         >
           {/* Year Picker (Overlay) - Only show in month mode, not in date mode (Calendar handles it) */}
@@ -595,7 +595,7 @@ export function DatePicker({
           )}
 
             {/* Calendar Content */}
-          <div className="flex flex-col gap-[20px] w-full">
+          <div className="flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] w-full">
             {/* Use Calendar component for date mode */}
             {mode === "date" ? (
               <Calendar
@@ -629,9 +629,9 @@ export function DatePicker({
                 className="p-0 gap-[20px]"
               />
             ) : mode === "month" ? (
-              <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid justify-items-start leading-0 relative shrink-0 w-full">
+              <div className="flex flex-row flex-nowrap justify-between leading-0 relative shrink-0 w-full gap-[calc(12*var(--px393))] sm:gap-0">
                 {/* Year Section */}
-                <div className="col-1 content-stretch flex gap-[8px] items-center ml-0 mt-0 relative row-1">
+                <div className="content-stretch flex gap-[calc(8*var(--px393))] sm:gap-[8px] items-center relative flex-nowrap shrink-0">
                   <button
                     onMouseDown={(e) => {
                       e.stopPropagation();
@@ -643,7 +643,7 @@ export function DatePicker({
                     disabled={currentYear <= minDateObj.getFullYear()}
                     className="flex items-center justify-center relative shrink-0 rotate-180 hover:opacity-70 transition-opacity cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                   >
-                    <div className="h-[16px] relative w-[8.864px]">
+                    <div className="h-[calc(16*var(--px393))] sm:h-[16px] relative w-[calc(8.864*var(--px393))] sm:w-[8.864px]">
                       <Icon
                         name="nav-next"
                         aria-label="Previous year"
@@ -660,7 +660,7 @@ export function DatePicker({
                       setShowYearPicker(!showYearPicker);
                       setShowMonthPicker(false);
                     }}
-                    className="font-['Poppins:Bold',sans-serif] font-bold leading-[24px] not-italic text-[20px] text-black tracking-[0.38px] hover:opacity-80 transition-opacity cursor-pointer"
+                    className="font-['Poppins:Bold',sans-serif] font-bold leading-[calc(24*var(--px393))] sm:leading-[24px] not-italic text-[calc(20*var(--px393))] sm:text-[20px] text-black tracking-[calc(0.38*var(--px393))] sm:tracking-[0.38px] hover:opacity-80 transition-opacity cursor-pointer whitespace-nowrap shrink-0"
                   >
                     {currentYear}
                   </button>
@@ -673,7 +673,7 @@ export function DatePicker({
                       e.stopPropagation();
                       handleNextYear();
                     }}
-                    className="h-[16px] relative shrink-0 w-[8.864px] hover:opacity-70 transition-opacity cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="h-[calc(16*var(--px393))] sm:h-[16px] relative shrink-0 w-[calc(8.864*var(--px393))] sm:w-[8.864px] hover:opacity-70 transition-opacity cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                     disabled={currentYear >= (maxDateObj ? maxDateObj.getFullYear() : new Date().getFullYear())}
                   >
                     <Icon
@@ -685,7 +685,7 @@ export function DatePicker({
                 </div>
 
                 {/* Month Section with Navigation */}
-                <div className="col-1 content-stretch flex gap-[22px] items-center ml-[170.35px] mt-[3.5px] relative row-1">
+                <div className="content-stretch flex gap-[calc(22*var(--px393))] sm:gap-[22px] items-center relative flex-nowrap shrink-0">
                   {/* Previous Month Arrow */}
                   <button
                     onMouseDown={(e) => {
@@ -703,7 +703,7 @@ export function DatePicker({
                     }
                     className="flex items-center justify-center relative shrink-0 rotate-180 hover:opacity-70 transition-opacity cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                   >
-                    <div className="h-[16px] relative w-[8.864px]">
+                    <div className="h-[calc(16*var(--px393))] sm:h-[16px] relative w-[calc(8.864*var(--px393))] sm:w-[8.864px]">
                       <Icon
                         name="nav-next"
                         aria-label="Previous month"
@@ -715,7 +715,7 @@ export function DatePicker({
                   {/* Month Name - 不可点击，固定宽度 */}
                   <div
                     ref={monthButtonRef}
-                    className="font-['Poppins:Bold',sans-serif] font-bold leading-[24px] not-italic text-[20px] text-black tracking-[0.38px] w-[120px] text-center"
+                    className="font-['Poppins:Bold',sans-serif] font-bold leading-[calc(24*var(--px393))] sm:leading-[24px] not-italic text-[calc(20*var(--px393))] sm:text-[20px] text-black tracking-[calc(0.38*var(--px393))] sm:tracking-[0.38px] w-[calc(120*var(--px393))] sm:w-[120px] text-center whitespace-nowrap shrink-0"
                   >
                     {MONTHS[currentMonth]}
                   </div>
@@ -737,7 +737,7 @@ export function DatePicker({
                     }
                     className="flex items-center justify-center relative shrink-0 hover:opacity-70 transition-opacity cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                   >
-                    <div className="h-[16px] relative w-[8.864px]">
+                    <div className="h-[calc(16*var(--px393))] sm:h-[16px] relative w-[calc(8.864*var(--px393))] sm:w-[8.864px]">
                       <Icon
                         name="nav-next"
                         aria-label="Next month"
@@ -751,9 +751,9 @@ export function DatePicker({
 
             {/* Month Grid - Show when in month mode (always show, year picker overlays on top) */}
             {mode === "month" && !showMonthPicker && (
-              <div className="content-stretch flex flex-col gap-[8px] items-start p-[8px] relative shrink-0 w-full">
+              <div className="content-stretch flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start p-[calc(8*var(--px393))] sm:p-[8px] relative shrink-0 w-full">
                 {/* Row 1: January, February, March */}
-                <div className="content-stretch flex gap-[8px] items-start relative shrink-0 w-full">
+                <div className="content-stretch flex gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full">
                   {[0, 1, 2].map((monthIndex) => {
                     // 检查是否选中：需要匹配 value 中的年份和月份
                     let isSelected = false;
@@ -773,15 +773,15 @@ export function DatePicker({
                         key={monthIndex}
                         onClick={() => !isDisabled && handleMonthClick(monthIndex)}
                         disabled={isDisabled}
-                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] ${
+                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[calc(12*var(--px393))] sm:px-[24px] py-[calc(8*var(--px393))] sm:py-[12px] relative shrink-0 transition-all duration-200 rounded-[calc(8*var(--px393))] sm:rounded-[8px] ${
                           isDisabled
                             ? "cursor-not-allowed opacity-30"
                             : "cursor-pointer"
                         } ${isSelected ? "bg-[#de6a07]" : "bg-transparent"}`}
                       >
-                        <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-0 relative shrink-0 text-[14px] text-center whitespace-nowrap">
+                        <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-0 relative shrink-0 text-[calc(12*var(--px393))] sm:text-[14px] text-center whitespace-nowrap">
                           <p
-                            className={`leading-[20px] transition-colors ${
+                            className={`leading-[calc(16*var(--px393))] sm:leading-[20px] transition-colors ${
                               isSelected
                                 ? "text-[#fafafa]"
                                 : isDisabled
@@ -798,7 +798,7 @@ export function DatePicker({
                 </div>
 
                 {/* Row 2: April, May, June */}
-                <div className="content-stretch flex gap-[8px] items-start relative shrink-0 w-full">
+                <div className="content-stretch flex gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full">
                   {[3, 4, 5].map((monthIndex) => {
                     let isSelected = false;
                     if (value) {
@@ -817,15 +817,15 @@ export function DatePicker({
                         key={monthIndex}
                         onClick={() => !isDisabled && handleMonthClick(monthIndex)}
                         disabled={isDisabled}
-                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] ${
+                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[calc(12*var(--px393))] sm:px-[24px] py-[calc(8*var(--px393))] sm:py-[12px] relative shrink-0 transition-all duration-200 rounded-[calc(8*var(--px393))] sm:rounded-[8px] ${
                           isDisabled
                             ? "cursor-not-allowed opacity-30"
                             : "cursor-pointer"
                         } ${isSelected ? "bg-[#de6a07]" : "bg-transparent"}`}
                       >
-                        <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-0 relative shrink-0 text-[14px] text-center whitespace-nowrap">
+                        <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-0 relative shrink-0 text-[calc(12*var(--px393))] sm:text-[14px] text-center whitespace-nowrap">
                           <p
-                            className={`leading-[20px] transition-colors ${
+                            className={`leading-[calc(16*var(--px393))] sm:leading-[20px] transition-colors ${
                               isSelected
                                 ? "text-[#fafafa]"
                                 : isDisabled
@@ -842,7 +842,7 @@ export function DatePicker({
                 </div>
 
                 {/* Row 3: July, August, September */}
-                <div className="content-stretch flex gap-[8px] items-start relative shrink-0 w-full">
+                <div className="content-stretch flex gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full">
                   {[6, 7, 8].map((monthIndex) => {
                     let isSelected = false;
                     if (value) {
@@ -861,15 +861,15 @@ export function DatePicker({
                         key={monthIndex}
                         onClick={() => !isDisabled && handleMonthClick(monthIndex)}
                         disabled={isDisabled}
-                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] ${
+                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[calc(12*var(--px393))] sm:px-[24px] py-[calc(8*var(--px393))] sm:py-[12px] relative shrink-0 transition-all duration-200 rounded-[calc(8*var(--px393))] sm:rounded-[8px] ${
                           isDisabled
                             ? "cursor-not-allowed opacity-30"
                             : "cursor-pointer"
                         } ${isSelected ? "bg-[#de6a07]" : "bg-transparent"}`}
                       >
-                        <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-0 relative shrink-0 text-[14px] text-center whitespace-nowrap">
+                        <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-0 relative shrink-0 text-[calc(12*var(--px393))] sm:text-[14px] text-center whitespace-nowrap">
                           <p
-                            className={`leading-[20px] transition-colors ${
+                            className={`leading-[calc(16*var(--px393))] sm:leading-[20px] transition-colors ${
                               isSelected
                                 ? "text-[#fafafa]"
                                 : isDisabled
@@ -886,7 +886,7 @@ export function DatePicker({
                 </div>
 
                 {/* Row 4: October, November, December */}
-                <div className="content-stretch flex gap-[8px] items-start relative shrink-0 w-full">
+                <div className="content-stretch flex gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full">
                   {[9, 10, 11].map((monthIndex) => {
                     let isSelected = false;
                     if (value) {
@@ -905,15 +905,15 @@ export function DatePicker({
                         key={monthIndex}
                         onClick={() => !isDisabled && handleMonthClick(monthIndex)}
                         disabled={isDisabled}
-                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[24px] py-[12px] relative shrink-0 transition-all duration-200 rounded-[8px] ${
+                        className={`group content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-[calc(12*var(--px393))] sm:px-[24px] py-[calc(8*var(--px393))] sm:py-[12px] relative shrink-0 transition-all duration-200 rounded-[calc(8*var(--px393))] sm:rounded-[8px] ${
                           isDisabled
                             ? "cursor-not-allowed opacity-30"
                             : "cursor-pointer"
                         } ${isSelected ? "bg-[#de6a07]" : "bg-transparent"}`}
                       >
-                        <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-0 relative shrink-0 text-[14px] text-center whitespace-nowrap">
+                        <div className="flex flex-col font-['Comfortaa:Bold',sans-serif] font-bold justify-center leading-0 relative shrink-0 text-[calc(12*var(--px393))] sm:text-[14px] text-center whitespace-nowrap">
                           <p
-                            className={`leading-[20px] transition-colors ${
+                            className={`leading-[calc(16*var(--px393))] sm:leading-[20px] transition-colors ${
                               isSelected
                                 ? "text-[#fafafa]"
                                 : isDisabled
