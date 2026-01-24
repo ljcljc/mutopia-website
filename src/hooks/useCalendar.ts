@@ -240,6 +240,19 @@ export function useCalendar(options: UseCalendarOptions = {}) {
     onMonthChange?.(newDate.getFullYear(), newDate.getMonth());
   };
 
+  const goToPreviousYear = () => {
+    const newDate = new Date(currentYear - 1, currentMonth, 1);
+    if (minDate) {
+      const minDisplayDate = new Date(minDate.getFullYear(), minDate.getMonth());
+      const newDisplayDate = new Date(newDate.getFullYear(), newDate.getMonth());
+      if (newDisplayDate < minDisplayDate) {
+        return; // Don't navigate if out of range
+      }
+    }
+    setCurrentDate(newDate);
+    onMonthChange?.(newDate.getFullYear(), newDate.getMonth());
+  };
+
   // Handle date click
   const handleDateClick = (date: Date) => {
     if (isDateDisabled(date)) return;
@@ -281,6 +294,8 @@ export function useCalendar(options: UseCalendarOptions = {}) {
     if (!maxDate) return true;
     return currentYear < maxDate.getFullYear();
   }, [maxDate, currentYear]);
+
+  const canGoToPreviousYear = !minDate || currentYear > minDate.getFullYear();
 
   // Check if month should be disabled
   const isMonthDisabled = (monthIndex: number): boolean => {
@@ -340,6 +355,7 @@ export function useCalendar(options: UseCalendarOptions = {}) {
     setShowMonthPicker,
     goToPreviousMonth,
     goToNextMonth,
+    goToPreviousYear,
     goToNextYear,
     handleDateClick,
     handleYearClick,
@@ -350,6 +366,7 @@ export function useCalendar(options: UseCalendarOptions = {}) {
     isDateSelected,
     canGoToPreviousMonth,
     canGoToNextMonth,
+    canGoToPreviousYear,
     canGoToNextYear,
     isMonthDisabled,
     isYearDisabled,
@@ -359,4 +376,3 @@ export function useCalendar(options: UseCalendarOptions = {}) {
     DAYS,
   };
 }
-

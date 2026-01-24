@@ -45,6 +45,8 @@ export function ImagePreview({
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
   const panStartRef = useRef({ x: 0, y: 0 });
+  const pinchStartDistanceRef = useRef<number | null>(null);
+  const zoomStartRef = useRef(initialZoom);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
   const imageNaturalSizeRef = useRef({ width: 0, height: 0 });
@@ -75,6 +77,11 @@ export function ImagePreview({
       setPan({ x: 0, y: 0 });
     }
   }, [open, initialZoom]);
+
+  useEffect(() => {
+    setZoom(initialZoom);
+    setPan({ x: 0, y: 0 });
+  }, [currentIndex, initialZoom]);
 
 
   // 使用 useMemo 稳定 currentImage，避免不必要的重新渲染
@@ -198,6 +205,69 @@ export function ImagePreview({
     setIsDragging(false);
   }, []);
 
+  const getTouchDistance = (touches: React.TouchList) => {
+    if (touches.length < 2) return 0;
+    const [first, second] = [touches[0], touches[1]];
+    const dx = first.clientX - second.clientX;
+    const dy = first.clientY - second.clientY;
+    return Math.hypot(dx, dy);
+  };
+
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (e.touches.length === 2) {
+        pinchStartDistanceRef.current = getTouchDistance(e.touches);
+        zoomStartRef.current = zoom;
+        return;
+      }
+
+      if (e.touches.length === 1 && zoom > 100) {
+        const touch = e.touches[0];
+        setIsDragging(true);
+        dragStartRef.current = { x: touch.clientX, y: touch.clientY };
+        panStartRef.current = { ...pan };
+      }
+    },
+    [zoom, pan]
+  );
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (e.touches.length === 2 && pinchStartDistanceRef.current !== null) {
+        e.preventDefault();
+        const nextDistance = getTouchDistance(e.touches);
+        if (!nextDistance) return;
+        const scale = nextDistance / pinchStartDistanceRef.current;
+        const nextZoom = Math.min(Math.max(zoomStartRef.current * scale, minZoom), maxZoom);
+        setZoom(nextZoom);
+        setPan((prev) => clampPan(prev, nextZoom));
+        return;
+      }
+
+      if (e.touches.length === 1 && isDragging) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const dx = touch.clientX - dragStartRef.current.x;
+        const dy = touch.clientY - dragStartRef.current.y;
+        const nextPan = {
+          x: panStartRef.current.x + dx,
+          y: panStartRef.current.y + dy,
+        };
+        setPan(clampPan(nextPan, zoom));
+      }
+    },
+    [isDragging, clampPan, zoom, minZoom, maxZoom]
+  );
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length < 2) {
+      pinchStartDistanceRef.current = null;
+    }
+    if (e.touches.length === 0) {
+      setIsDragging(false);
+    }
+  }, []);
+
   // 键盘快捷键支持
   useEffect(() => {
     if (!open) return;
@@ -225,7 +295,7 @@ export function ImagePreview({
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose?.()}>
       <DialogContent
-        className="bg-white border border-[rgba(0,0,0,0.2)] border-solid flex flex-col gap-[16px] items-start px-0 py-[12px] rounded-[20px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] w-[80vw]! h-[80vh]! max-w-[80vw]! max-h-[80vh]! overflow-visible [&>button]:hidden"
+        className="image-preview-dialog bg-white border border-[rgba(0,0,0,0.2)] border-solid flex flex-col gap-[16px] items-start px-0 py-[12px] rounded-none sm:rounded-[20px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] w-screen h-screen max-w-none max-h-none sm:w-[80vw]! sm:h-[80vh]! sm:max-w-[80vw]! sm:max-h-[80vh]! overflow-visible [&>button]:hidden left-0 top-0 translate-x-0 translate-y-0 sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%]"
       >
         {/* 屏幕阅读器可访问的标题和描述（视觉上隐藏） */}
         <DialogTitle className="sr-only">
@@ -285,11 +355,15 @@ export function ImagePreview({
         {/* 主图片显示区域 */}
         <div
           ref={containerRef}
-          className="flex-1 overflow-hidden relative shrink-0 w-full flex items-center justify-center bg-neutral-100 min-h-0"
+          className="flex-1 overflow-hidden relative shrink-0 w-full flex items-center justify-center bg-neutral-100 min-h-0 touch-none"
           onMouseDown={handleDragStart}
           onMouseMove={handleDragMove}
           onMouseUp={handleDragEnd}
           onMouseLeave={handleDragEnd}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchEnd}
         >
           {currentImage ? (
             <>

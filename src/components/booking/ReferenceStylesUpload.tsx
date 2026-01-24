@@ -15,7 +15,7 @@ export function ReferenceStylesUpload({
   uploadItems,
 }: ReferenceStylesUploadProps) {
   return (
-    <div className="bg-white box-border flex flex-col gap-[20px] items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
+    <div className="bg-white box-border flex flex-col gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
       <div className="flex flex-col gap-[14px] items-start relative shrink-0 w-full">
         <div className="flex flex-col gap-[8px] items-start relative shrink-0 w-full">
           <div className="flex flex-col items-start relative shrink-0">

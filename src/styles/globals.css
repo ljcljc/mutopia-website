@@ -47,6 +47,34 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+@keyframes image-preview-slide-in {
+  from {
+    transform: translate3d(0, 100%, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes image-preview-slide-out {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 100%, 0);
+  }
+}
+
+@media (max-width: 639px) {
+  .image-preview-dialog[data-state="open"] {
+    animation: image-preview-slide-in 280ms ease-out;
+  }
+
+  .image-preview-dialog[data-state="closed"] {
+    animation: image-preview-slide-out 240ms ease-in;
+  }
+}
+
 /* CustomSelect styles - ensure text is visible */
 [data-slot="select-content"] {
   color: #6b6b6b !important;
@@ -264,6 +292,19 @@ label {
 [data-sidebar="menu-button"]:hover:not([data-active="true"]) .sidebar-icon-default,
 [data-sidebar="menu-button"]:hover:not([data-active="true"]) .sidebar-text-default {
   color: #DE6A07 !important;
+}
+
+/**
+ * 移动端 393px 设计稿等比例适配（方案 B）
+ * 仅在 viewport < 640px 生效，与 Tailwind sm 断点一致。
+ * 用法：calc(N * var(--px393))，其中 N 为设计稿上的 px 值。
+ * Tailwind 任意值示例：p-[calc(24*var(--px393))] sm:p-6
+ * 建议：仅对 padding、margin、gap、width、height、border-radius 等使用；字体、line-height 保持 px。
+ */
+@media (max-width: 639px) {
+  :root {
+    --px393: calc(100vw / 393);
+  }
 }
 
 .dark {

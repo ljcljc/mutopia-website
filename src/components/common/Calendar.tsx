@@ -14,6 +14,7 @@ export interface CalendarProps {
   allowToggle?: boolean; // 是否允许取消选择（Step5需要，DatePicker不需要）
   disabled?: boolean;
   className?: string;
+  variant?: "default" | "mobile";
   showYearPicker?: boolean;
   showMonthPicker?: boolean;
   onShowYearPickerChange?: (show: boolean) => void;
@@ -31,11 +32,13 @@ export function Calendar({
   allowToggle = false,
   disabled = false,
   className,
+  variant = "default",
   showYearPicker: controlledShowYearPicker,
   showMonthPicker: controlledShowMonthPicker,
   onShowYearPickerChange,
   onShowMonthPickerChange,
 }: CalendarProps) {
+  const isMobileVariant = variant === "mobile";
   const calendar = useCalendar({
     initialDate: currentDate,
     minDate,
@@ -146,15 +149,39 @@ export function Calendar({
     <div
       ref={calendar.calendarRef}
       className={cn(
-        "bg-white content-stretch flex flex-col gap-[20px] items-start p-[24px] relative rounded-[16px] shrink-0",
+        "bg-white content-stretch flex flex-col items-start relative shrink-0",
+        isMobileVariant
+          ? "gap-[calc(20*var(--px393))] p-0 rounded-[calc(16*var(--px393))] w-full"
+          : "gap-[20px] p-[24px] rounded-[16px]",
         disabled && "opacity-60 cursor-not-allowed",
         className
       )}
     >
       {/* Calendar Header */}
-      <div className="flex items-center gap-[8px] w-full">
+      <div className={cn("flex items-center w-full", isMobileVariant ? "gap-[calc(8*var(--px393))]" : "gap-[8px]")}>
         {/* Year Section - clickable to show picker, with next year arrow */}
-        <div className="flex items-center gap-[8px] w-full">
+        <div className={cn("flex items-center w-full", isMobileVariant ? "gap-[calc(8*var(--px393))]" : "gap-[8px]")}>
+          <button
+            onClick={(e) => {
+              if (disabled) return;
+              e.stopPropagation();
+              calendar.goToPreviousYear();
+            }}
+            disabled={disabled || !calendar.canGoToPreviousYear}
+            className={cn(
+              "flex items-center justify-center hover:opacity-70 transition-opacity cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed rotate-180",
+              isMobileVariant
+                ? "h-[calc(16*var(--px393))] w-[calc(8.864*var(--px393))]"
+                : "h-[16px] w-[8.864px]"
+            )}
+            aria-label="Previous year"
+          >
+            <Icon
+              name="nav-next"
+              aria-label="Previous year"
+              className="block size-full text-[#DE6A07]"
+            />
+          </button>
           <button
             onClick={(e) => {
               if (disabled) return;
@@ -163,7 +190,12 @@ export function Calendar({
               setShowMonthPicker(false);
             }}
             disabled={disabled}
-            className="font-['Poppins:Bold',sans-serif] font-bold leading-[24px] not-italic text-[20px] text-black text-nowrap tracking-[0.38px] whitespace-pre hover:opacity-80 transition-opacity cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+            className={cn(
+              "font-['Poppins:Bold',sans-serif] font-bold not-italic text-black text-nowrap whitespace-pre hover:opacity-80 transition-opacity cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed",
+              isMobileVariant
+                ? "leading-[calc(24*var(--px393))] text-[calc(20*var(--px393))] tracking-[calc(0.38*var(--px393))]"
+                : "leading-[24px] text-[20px] tracking-[0.38px]"
+            )}
           >
             {calendar.currentYear}
           </button>
@@ -174,7 +206,12 @@ export function Calendar({
               calendar.goToNextYear();
             }}
             disabled={disabled || !calendar.canGoToNextYear}
-            className="flex items-center justify-center h-[16px] w-[8.864px] hover:opacity-70 transition-opacity cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+            className={cn(
+              "flex items-center justify-center hover:opacity-70 transition-opacity cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed",
+              isMobileVariant
+                ? "h-[calc(16*var(--px393))] w-[calc(8.864*var(--px393))]"
+                : "h-[16px] w-[8.864px]"
+            )}
             aria-label="Next year"
           >
             <Icon
@@ -189,7 +226,7 @@ export function Calendar({
         <div className="flex-1" />
 
         {/* Month Section - with navigation arrows and clickable to show picker */}
-        <div className="flex items-center gap-[8px]">
+        <div className={cn("flex items-center", isMobileVariant ? "gap-[calc(8*var(--px393))]" : "gap-[8px]")}>
           {/* Previous Month Arrow */}
           <button
             onClick={(e) => {
@@ -198,7 +235,12 @@ export function Calendar({
               calendar.goToPreviousMonth();
             }}
             disabled={disabled || !calendar.canGoToPreviousMonth}
-            className="flex items-center justify-center h-[16px] w-[8.864px] hover:opacity-70 transition-opacity cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+            className={cn(
+              "flex items-center justify-center hover:opacity-70 transition-opacity cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed",
+              isMobileVariant
+                ? "h-[calc(16*var(--px393))] w-[calc(8.864*var(--px393))]"
+                : "h-[16px] w-[8.864px]"
+            )}
             aria-label="Previous month"
           >
             <Icon
@@ -218,7 +260,12 @@ export function Calendar({
               setShowYearPicker(false);
             }}
             disabled={disabled}
-            className="font-['Poppins:Bold',sans-serif] font-bold leading-[24px] not-italic text-[20px] text-black text-nowrap tracking-[0.38px] whitespace-pre hover:opacity-80 transition-opacity cursor-pointer w-[120px] text-center disabled:opacity-60 disabled:cursor-not-allowed"
+            className={cn(
+              "font-['Poppins:Bold',sans-serif] font-bold not-italic text-black text-nowrap tracking-[0.38px] whitespace-pre hover:opacity-80 transition-opacity cursor-pointer w-[120px] text-center disabled:opacity-60 disabled:cursor-not-allowed",
+              isMobileVariant
+                ? "leading-[calc(24*var(--px393))] text-[calc(20*var(--px393))] tracking-[calc(0.38*var(--px393))]"
+                : "leading-[24px] text-[20px] tracking-[0.38px]"
+            )}
           >
             {calendar.MONTHS[calendar.currentMonth]}
           </button>
@@ -231,7 +278,12 @@ export function Calendar({
               calendar.goToNextMonth();
             }}
             disabled={disabled || !calendar.canGoToNextMonth}
-            className="flex items-center justify-center h-[16px] w-[8.864px] hover:opacity-70 transition-opacity cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+            className={cn(
+              "flex items-center justify-center hover:opacity-70 transition-opacity cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed",
+              isMobileVariant
+                ? "h-[calc(16*var(--px393))] w-[calc(8.864*var(--px393))]"
+                : "h-[16px] w-[8.864px]"
+            )}
             aria-label="Next month"
           >
             <Icon
@@ -368,16 +420,31 @@ export function Calendar({
       )}
 
       {/* Days of Week */}
-      <div className="content-stretch flex font-['Comfortaa:Medium',sans-serif] font-medium items-center leading-0 relative shrink-0 text-[12px] text-[rgba(60,60,67,0.6)] text-center whitespace-nowrap">
+      <div
+        className={cn(
+          "content-stretch flex items-center leading-0 relative shrink-0 text-[rgba(60,60,67,0.6)] text-center whitespace-nowrap w-full",
+          isMobileVariant
+            ? "font-['Comfortaa:Bold',sans-serif] font-bold text-[calc(12*var(--px393))]"
+            : "font-['Comfortaa:Medium',sans-serif] font-medium text-[12px]"
+        )}
+      >
         {calendar.DAYS.map((day) => (
-          <div key={day} className="flex flex-col h-[38.286px] justify-center relative shrink-0 w-[46.429px]">
-            <p className="leading-[17.5px]">{day}</p>
+          <div
+            key={day}
+            className={cn(
+              "flex flex-col justify-center relative shrink-0 flex-1",
+              isMobileVariant
+                ? "h-[calc(38.286*var(--px393))]"
+                : "h-[38.286px]"
+            )}
+          >
+            <p className={cn(isMobileVariant ? "leading-[calc(17.5*var(--px393))]" : "leading-[17.5px]")}>{day}</p>
           </div>
         ))}
       </div>
 
       {/* Calendar Grid */}
-      <div className="content-stretch flex flex-col items-start relative shrink-0">
+      <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
         {/* Generate 6 rows of 7 days each */}
         {Array.from({ length: 6 }, (_, rowIndex) => {
           const startIndex = rowIndex * 7;
@@ -387,7 +454,8 @@ export function Calendar({
             <div
               key={`row-${rowIndex}`}
               className={cn(
-                "content-stretch flex font-['Comfortaa:Regular',sans-serif] font-normal items-center leading-0 overflow-clip relative shrink-0 text-[16px] text-center w-full",
+                "content-stretch flex font-['Comfortaa:Regular',sans-serif] font-normal items-center leading-0 overflow-clip relative shrink-0 text-center w-full",
+                isMobileVariant ? "text-[calc(16*var(--px393))]" : "text-[16px]",
                 rowDays[0]?.isCurrentMonth ? "text-black" : "text-[grey]"
               )}
             >
@@ -399,16 +467,24 @@ export function Calendar({
                   <div
                     key={`${dayInfo.isCurrentMonth ? "current" : dayInfo.isNextMonth ? "next" : "prev"}-${dayInfo.day}`}
                     className={cn(
-                      "flex flex-col h-[38.286px] justify-center leading-0 relative shrink-0 text-[16px] text-center w-[46.429px]",
+                      "flex flex-col justify-center leading-0 relative shrink-0 text-center flex-1",
+                      isMobileVariant
+                        ? "h-[calc(38.286*var(--px393))] text-[calc(16*var(--px393))]"
+                        : "h-[38.286px] text-[16px]",
                       dayInfo.isCurrentMonth && !isDisabled && "cursor-pointer",
                       isDisabled && "cursor-not-allowed",
-                      isSelected && "bg-[#de6a07] rounded-[8px] text-white",
+                      isSelected && (isMobileVariant ? "bg-[#de6a07] rounded-[calc(8*var(--px393))] text-white" : "bg-[#de6a07] rounded-[8px] text-white"),
                       !dayInfo.isCurrentMonth && "text-[grey]",
                       isDisabled && "text-[grey] opacity-50"
                     )}
                     onClick={() => handleDateClick(dayInfo)}
                   >
-                    <p className="leading-[28px] whitespace-pre-wrap font-['Comfortaa:Regular',sans-serif] font-normal">
+                    <p
+                      className={cn(
+                        "whitespace-pre-wrap font-['Comfortaa:Regular',sans-serif] font-normal",
+                        isMobileVariant ? "leading-[calc(28*var(--px393))]" : "leading-[28px]"
+                      )}
+                    >
                       {dayInfo.day}
                     </p>
                   </div>
