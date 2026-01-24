@@ -138,6 +138,7 @@ const parseResponse = async (response: Response): Promise<ParsedResponse> => {
 interface ErrorResponseData {
   detail?: string;
   message?: string;
+  error?: string;
   [key: string]: unknown;
 }
 
@@ -151,8 +152,9 @@ const handleErrorResponse = async (response: Response): Promise<HttpError> => {
     if (parsed && typeof parsed === "object") {
       errorData = parsed;
       const errorObj = parsed as ErrorResponseData;
-      if (errorObj.detail || errorObj.message) {
-        errorMessage = errorObj.detail || errorObj.message || errorMessage;
+      // 优先使用 error 字段，然后是 detail，最后是 message
+      if (errorObj.error || errorObj.detail || errorObj.message) {
+        errorMessage = errorObj.error || errorObj.detail || errorObj.message || errorMessage;
       }
     }
   } catch {

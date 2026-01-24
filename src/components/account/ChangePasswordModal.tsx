@@ -17,6 +17,7 @@ import { validateResetPasswordForm } from "@/components/auth/authStore";
 import { Icon } from "@/components/common/Icon";
 import { toast } from "sonner";
 import { HttpError } from "@/lib/http";
+import { changePassword } from "@/lib/api";
 
 interface ChangePasswordModalProps {
   open: boolean;
@@ -169,6 +170,11 @@ export default function ChangePasswordModal({
   };
 
   const handleChange = async () => {
+    // 防止重复提交
+    if (isSubmitting) {
+      return;
+    }
+
     // 验证当前密码
     if (!currentPassword) {
       setCurrentPasswordError("Current password is required");
@@ -195,14 +201,13 @@ export default function ChangePasswordModal({
 
     setIsSubmitting(true);
     try {
-      // TODO: 调用修改密码 API
-      // await changePassword({
-      //   current_password: currentPassword,
-      //   new_password: newPassword,
-      //   confirm_password: confirmPassword,
-      // });
+      // 调用修改密码 API
+      await changePassword({
+        old_password: currentPassword,
+        password1: newPassword,
+        password2: confirmPassword,
+      });
       
-      // 临时提示
       toast.success("Password changed successfully");
       // 清除保存的状态
       savedState = null;
@@ -210,23 +215,34 @@ export default function ChangePasswordModal({
     } catch (error) {
       console.error("Failed to change password:", error);
       
-      // 处理原密码错误的情况
-      if (error instanceof HttpError) {
-        const errorMessage = error.message || "";
-        if (error.status === 400 || errorMessage.toLowerCase().includes("current password") || errorMessage.toLowerCase().includes("incorrect")) {
-          setCurrentPasswordError("Current password incorrect, please verify");
-        } else {
-          toast.error(errorMessage || "Failed to change password. Please try again.");
-        }
+      // 优先使用后端返回的错误信息
+      const errorMessage = error instanceof HttpError 
+        ? error.message 
+        : error instanceof Error 
+        ? error.message 
+        : "Failed to change password. Please try again.";
+      
+      // 检查是否是密码相关的错误
+      const lowerMessage = errorMessage.toLowerCase();
+      const isPasswordError = lowerMessage.includes("invalid password") || 
+          lowerMessage.includes("incorrect") || 
+          lowerMessage.includes("old password") ||
+          lowerMessage.includes("current password");
+      
+      if (isPasswordError) {
+        // 优先使用后端返回的错误消息，如果后端没有返回具体错误则使用默认提示
+        const defaultPasswordError = "Current password incorrect, please verify";
+        const hasBackendError = errorMessage && 
+          !errorMessage.startsWith("API error:") && 
+          errorMessage !== "Failed to change password. Please try again.";
+        
+        setCurrentPasswordError(hasBackendError ? errorMessage : defaultPasswordError);
       } else {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        if (errorMessage.toLowerCase().includes("current password") || errorMessage.toLowerCase().includes("incorrect")) {
-          setCurrentPasswordError("Current password incorrect, please verify");
-        } else {
-          toast.error("Failed to change password. Please try again.");
-        }
+        // 其他错误直接显示后端返回的消息
+        toast.error(errorMessage);
       }
     } finally {
+      // 确保状态总是被重置
       setIsSubmitting(false);
     }
   };
