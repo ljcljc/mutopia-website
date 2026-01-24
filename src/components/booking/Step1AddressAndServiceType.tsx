@@ -75,7 +75,7 @@ export function Step1AddressAndServiceType() {
 
   // 当服务类型改变时，重置选择
   useEffect(() => {
-    if (serviceType === "mobile") {
+    if (serviceType === "mobile" || serviceType === "in_home") {
       setSelectedStoreId(null);
     } else if (serviceType === "in_store") {
       setSelectedAddressId(null);
@@ -84,13 +84,13 @@ export function Step1AddressAndServiceType() {
 
   // 根据服务类型显示不同的信息文本
   const infoText =
-    serviceType === "mobile"
-      ? "We currently provide mobile grooming services throughout Vancouver and surrounding areas."
+    serviceType === "mobile" || serviceType === "in_home"
+      ? "We currently provide mobile grooming services throughout Grand Vancouver and surrounding areas."
       : "Please select a store location for in-store grooming services.";
 
   // 获取当前显示的地址或门店
   const currentAddress =
-    serviceType === "mobile" && selectedAddressId
+    (serviceType === "mobile" || serviceType === "in_home") && selectedAddressId
       ? addresses.find((addr) => addr.id === selectedAddressId)
       : null;
   const currentStore =
@@ -103,10 +103,24 @@ export function Step1AddressAndServiceType() {
 
   return (
     <>
-      <div className="content-stretch flex flex-col gap-[24px] items-start relative w-full">
+      <div className="content-stretch flex flex-col gap-[16px] items-start relative w-full px-[20px] sm:px-0">
+        {/* Mobile Step Header */}
+        <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0 w-full sm:hidden">
+          <p className="font-['Comfortaa:Bold',sans-serif] font-bold h-[19px] leading-[17.5px] relative shrink-0 text-[12px] text-black w-full whitespace-pre-wrap">
+            Book your appointment
+          </p>
+          <div className="border border-[#4c4c4c] border-solid content-stretch flex h-[24px] items-center justify-center overflow-clip px-[9px] py-[5px] relative rounded-[12px] shrink-0">
+            <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[14px] relative shrink-0 text-[#4c4c4c] text-[10px]">
+              Step 1 of 6
+            </p>
+          </div>
+          <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] min-w-full relative shrink-0 text-[#4a3c2a] text-[16px] w-[min-content] whitespace-pre-wrap">
+            Address and service type
+          </p>
+        </div>
         {/* Form Card */}
-        <div className="bg-white box-border flex flex-col gap-[20px] items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
-          <div className="flex flex-col gap-[20px] items-start relative w-full">
+        <div className="bg-white box-border flex flex-col gap-[16px] items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
+          <div className="flex flex-col gap-[16px] items-start relative w-full">
             {/* Section Header */}
             <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
               <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] min-w-full relative shrink-0 text-[#4a3c2a] text-[16px] w-min whitespace-pre-wrap">
@@ -127,7 +141,7 @@ export function Step1AddressAndServiceType() {
                 </div>
                 <LoginModal open={isLoginModalOpen} onOpenChange={setIsLoginModalOpen}>
                   <button
-                    className="bg-neutral-100 border-2 border-[#633479] border-solid box-border content-stretch flex gap-[8px] w-[191px] h-[36px] items-center justify-center px-[30px] py-[16px] relative rounded-[32px] shrink-0 cursor-pointer hover:bg-[#f2dfcf] active:bg-[#f2dfcf] focus-visible:bg-[#f2dfcf] transition-colors"
+                    className="bg-neutral-100 border-2 border-[#633479] border-solid box-border content-stretch flex gap-[8px] w-full sm:w-[191px] h-[36px] items-center justify-center px-[30px] py-[16px] relative rounded-[32px] shrink-0 cursor-pointer hover:bg-[#f2dfcf] active:bg-[#f2dfcf] focus-visible:bg-[#f2dfcf] transition-colors"
                     onClick={() => setIsLoginModalOpen(true)}
                   >
                     <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[20px] text-[#633479] text-[14px]">
@@ -139,9 +153,9 @@ export function Step1AddressAndServiceType() {
             )}
 
             {/* Info Alert */}
-            <div className="bg-blue-50 border border-[#bedbff] border-solid h-[36px] relative rounded-[8px] shrink-0 w-fit">
-              <div className="box-border content-stretch flex h-[36px] items-center overflow-clip px-[16px] py-[4px] relative rounded-[inherit]">
-                <div className="content-stretch flex gap-[8px] items-center relative shrink-0">
+            <div className="bg-[#eff6ff] border border-[#bedbff] border-solid relative rounded-[8px]">
+              <div className="box-border content-stretch flex items-center overflow-clip px-[16px] py-[8px] relative rounded-[inherit]">
+                <div className="content-stretch flex gap-[8px] items-start relative w-full min-w-0">
                   {/* Info Icon */}
                   <div className="relative shrink-0 size-[12px]">
                     <Icon
@@ -150,7 +164,7 @@ export function Step1AddressAndServiceType() {
                       className="block size-full text-[#ffffff]"
                     />
                   </div>
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] relative shrink-0 text-[#193cb8] text-[10px] whitespace-nowrap">
+                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative text-[#193cb8] text-[10px] whitespace-normal break-words min-w-0">
                     {infoText}
                   </p>
                 </div>
@@ -158,15 +172,15 @@ export function Step1AddressAndServiceType() {
             </div>
 
             {/* Address/Store Selection */}
-            {serviceType === "mobile" && user && addresses.length > 0 ? (
+            {(serviceType === "mobile" || serviceType === "in_home") && user && addresses.length > 0 ? (
               // 已登录用户选择地址（mobile 服务）- 支持下拉选择和手动输入
-              <div className="flex flex-col items-start relative w-[320px]">
+              <div className="flex flex-col items-start relative w-full sm:w-[320px]">
                 <div className="flex gap-[7px] items-center relative mb-2">
                   <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative text-[#4a3c2a] text-[14px]">
                     Address
                   </p>
                 </div>
-                <div className="relative w-[320px]" ref={addressDropdownRef}>
+                <div className="relative w-full sm:w-[320px]" ref={addressDropdownRef}>
                   <div className="bg-white border border-gray-200 border-solid h-[36px] relative rounded-[8px] w-full hover:border-[#633479] transition-colors">
                     <div className="box-border flex h-[36px] items-center overflow-clip px-[12px] py-[4px] relative rounded-[inherit] w-full">
                       <div className="flex flex-1 items-center relative">
@@ -237,13 +251,13 @@ export function Step1AddressAndServiceType() {
               </div>
             ) : serviceType === "in_store" && stores.length > 0 ? (
               // 选择门店（in_store 服务）
-              <div className="flex flex-col items-start relative w-[320px]">
+              <div className="flex flex-col items-start relative w-full sm:w-[320px]">
                 <div className="flex gap-[7px] items-center relative mb-2">
                   <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative text-[#4a3c2a] text-[14px]">
                     Store Location
                   </p>
                 </div>
-                <div className="relative w-[320px]" ref={storeDropdownRef}>
+                <div className="relative w-full sm:w-[320px]" ref={storeDropdownRef}>
                   <div
                     className="bg-white border border-gray-200 border-solid h-[36px] relative rounded-[8px] w-full cursor-pointer hover:border-[#633479] transition-colors"
                     onClick={() => setIsStoreDropdownOpen(!isStoreDropdownOpen)}
@@ -301,7 +315,7 @@ export function Step1AddressAndServiceType() {
               </div>
             ) : (
               // 手动输入地址（未登录用户或没有保存的地址）
-              <div className="w-[320px]">
+              <div className="w-full sm:w-[320px]">
                 <CustomInput
                   label={serviceType === "in_store" ? "Store Location" : "Address"}
                   type="text"
@@ -329,36 +343,45 @@ export function Step1AddressAndServiceType() {
             )}
 
             {/* City and Province */}
-            <div className="content-stretch flex gap-[20px] items-start relative shrink-0 w-full">
-              <div className="content-stretch flex flex-col items-start relative shrink-0 w-[200px]">
+            <div className="content-stretch flex flex-col sm:flex-row gap-[12px] sm:gap-[20px] items-start relative shrink-0 w-full">
+              <div className="content-stretch flex flex-col items-start relative shrink-0 w-full sm:w-[192px]">
                 <CustomInput
                   label="City"
                   type="text"
-                  placeholder="Enter city"
+                  placeholder="Autofilled"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
+                  containerClassName="bg-[#e5e7eb] sm:bg-white"
+                  borderClassName="border-[#e5e7eb] sm:border-gray-200"
+                  inputClassName="text-[#717182] sm:text-[#4a3c2a]"
                 />
               </div>
-              <div className="content-stretch flex flex-col items-start relative shrink-0 w-[100px]">
+              <div className="content-stretch flex flex-col items-start relative shrink-0 w-full sm:w-[95px]">
                 <CustomInput
                   label="Province"
                   type="text"
-                  placeholder="Enter province"
+                  placeholder="Autofilled"
                   value={province}
                   onChange={(e) => setProvince(e.target.value)}
+                  containerClassName="bg-[#e5e7eb] sm:bg-white"
+                  borderClassName="border-[#e5e7eb] sm:border-gray-200"
+                  inputClassName="text-[#717182] sm:text-[#4a3c2a]"
                 />
               </div>
             </div>
 
             {/* Post Code */}
             <div className="content-stretch flex gap-[20px] items-start relative shrink-0 w-full">
-              <div className="content-stretch flex flex-col items-start relative shrink-0 w-[200px]">
+              <div className="content-stretch flex flex-col items-start relative shrink-0 w-full sm:w-[192px]">
                 <CustomInput
                   label="Post code"
                   type="text"
-                  placeholder="Enter post code"
+                  placeholder="Autofilled"
                   value={postCode}
                   onChange={(e) => setPostCode(e.target.value)}
+                  containerClassName="bg-[#e5e7eb] sm:bg-white"
+                  borderClassName="border-[#e5e7eb] sm:border-gray-200"
+                  inputClassName="text-[#717182] sm:text-[#4a3c2a]"
                 />
               </div>
             </div>
@@ -371,18 +394,27 @@ export function Step1AddressAndServiceType() {
                     Service type
                   </p>
                 </div>
-                <div className="flex gap-[16px] items-stretch relative w-full">
+                <div className="grid grid-cols-2 gap-[16px] items-stretch relative w-full sm:flex sm:gap-[16px]">
                   <CustomRadio
                     label="Mobile"
                     icon="van"
                     isSelected={serviceType === "mobile"}
                     onClick={() => setServiceType("mobile")}
+                    className="w-full"
                   />
                   <CustomRadio
                     label="In store"
                     icon="shop"
                     isSelected={serviceType === "in_store"}
                     onClick={() => setServiceType("in_store")}
+                    className="w-full"
+                  />
+                  <CustomRadio
+                    label="In home"
+                    icon="home"
+                    isSelected={serviceType === "in_home"}
+                    onClick={() => setServiceType("in_home")}
+                    className="w-full"
                   />
                 </div>
               </div>
@@ -393,4 +425,3 @@ export function Step1AddressAndServiceType() {
     </>
   );
 }
-

@@ -298,19 +298,43 @@ export default function HeaderApp() {
     >
       {/* 移除 max-w-7xl 限制，使用 padding 控制内容区域 */}
       <div className="w-full">
-        <div className="box-border content-stretch flex h-[63px] items-center justify-between relative shrink-0 w-full px-4 sm:px-8 md:px-12 lg:px-[57.5px] xl:px-[80px] 2xl:px-[120px]" data-name="Container">
+        <div className="box-border content-stretch flex h-[63px] items-center justify-between relative shrink-0 w-full px-[20px] sm:px-8 md:px-12 lg:px-[57.5px] xl:px-[80px] 2xl:px-[120px]" data-name="Container">
           {/* Left side: Logo + Back to home */}
           <div className="content-stretch flex gap-[24px] items-center relative shrink-0">
-            <Logo />
-            <BackToHomeButton />
+            <Link to="/" className="cursor-pointer" aria-label="Go to home">
+              <Logo />
+            </Link>
+            {!user && <BackToHomeButton />}
           </div>
 
           {/* Right side: User info (only if logged in) */}
           {user && (
-            <UserInfo 
-              userInfo={userInfo ?? undefined} 
-              fallbackName={user.name || user.email.split("@")[0]}
-            />
+            <>
+              <div className="flex items-center gap-[10.5px] sm:hidden">
+                <CreditsBadge />
+                <button
+                  className="relative shrink-0 size-[24px] cursor-pointer hover:opacity-80 transition-opacity"
+                  aria-label="Notifications"
+                  data-name="notifications"
+                >
+                  <div className="bg-clip-padding border-0 border-transparent border-solid box-border overflow-clip relative rounded-[inherit] size-[24px]">
+                    <div className="absolute inset-[8.33%_16.67%]" data-name="icon">
+                      <Icon
+                        name="notify"
+                        aria-label="Notifications"
+                        className="block max-w-none size-full text-[#8b6357]"
+                      />
+                    </div>
+                  </div>
+                </button>
+              </div>
+              <div className="hidden sm:flex">
+                <UserInfo 
+                  userInfo={userInfo ?? undefined} 
+                  fallbackName={user.name || user.email.split("@")[0]}
+                />
+              </div>
+            </>
           )}
         </div>
       </div>

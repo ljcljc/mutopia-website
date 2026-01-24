@@ -5,7 +5,7 @@ import { cn } from "@/components/ui/utils";
 
 export interface CustomRadioProps {
   label: string;
-  icon?: "dog" | "cat" | "pet" | "van" | "shop";
+  icon?: "dog" | "cat" | "pet" | "van" | "shop" | "home";
   description?: string; // For tiles with description (like GroomingFrequencyTile)
   variant?: "simple" | "with-description" | "package"; // Layout variant
   isSelected?: boolean;

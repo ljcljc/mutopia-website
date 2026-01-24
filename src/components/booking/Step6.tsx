@@ -718,7 +718,12 @@ export function Step6() {
     : `${city} ${province} ${postCode}`.trim();
 
   // Format service type
-  const serviceTypeDisplay = serviceType === "mobile" ? "Mobile" : "In Store";
+  const serviceTypeDisplay =
+    serviceType === "mobile"
+      ? "Mobile"
+      : serviceType === "in_home"
+        ? "In home"
+        : "In Store";
 
   // Handle modify buttons
   const handleModify = (step: number) => {

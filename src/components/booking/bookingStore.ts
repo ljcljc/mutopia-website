@@ -23,7 +23,7 @@ import {
 import { useAuthStore } from "@/components/auth/authStore";
 
 // 与后端枚举保持一致
-export type ServiceType = "mobile" | "in_store";
+export type ServiceType = "mobile" | "in_store" | "in_home";
 export type PetType = "dog" | "cat" | "other";
 export type CoatCondition = "not_matted" | "matted" | "severely_matted";
 export type Behavior = "friendly" | "anxious" | "hard_to_handle" | "senior_pets";
