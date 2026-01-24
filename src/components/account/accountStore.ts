@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import { getAddresses, getMembershipPlans, getMyCoupons } from "@/lib/api";
-import type { AddressOut, MembershipPlanOut, CouponOut } from "@/lib/api";
+import { getAddresses, getMembershipPlans, getMyCoupons, getPets, getMyBookings } from "@/lib/api";
+import type { AddressOut, MembershipPlanOut, CouponOut, PetOut, BookingListOut } from "@/lib/api";
 
 interface AccountState {
   // 地址列表（✅ 已实现接口）
@@ -15,6 +15,15 @@ interface AccountState {
   coupons: CouponOut[];
   isLoadingCoupons: boolean;
   
+  // 宠物列表（✅ 已实现接口）
+  pets: PetOut[];
+  isLoadingPets: boolean;
+  
+  // 预约列表（✅ 已实现接口）
+  upcomingBookings: BookingListOut[];
+  historyBookings: BookingListOut[];
+  isLoadingBookings: boolean;
+  
   // 支付方式列表（❌ 仅 UI，使用模拟数据）
   paymentMethods: Array<{
     id: number;
@@ -27,6 +36,9 @@ interface AccountState {
   fetchAddresses: () => Promise<void>;
   fetchMembershipPlans: () => Promise<void>;
   fetchCoupons: () => Promise<void>;
+  fetchPets: () => Promise<void>;
+  fetchUpcomingBookings: () => Promise<void>;
+  fetchHistoryBookings: () => Promise<void>;
   
   // 会员相关计算函数
   isCashCoupon: (coupon: CouponOut) => boolean;
@@ -48,6 +60,11 @@ export const useAccountStore = create<AccountState>((set, get: () => AccountStat
   isLoadingMembershipPlans: false,
   coupons: [],
   isLoadingCoupons: false,
+  pets: [],
+  isLoadingPets: false,
+  upcomingBookings: [],
+  historyBookings: [],
+  isLoadingBookings: false,
   paymentMethods: [
     {
       id: 1,
@@ -101,6 +118,55 @@ export const useAccountStore = create<AccountState>((set, get: () => AccountStat
     } catch (error) {
       console.error("Failed to load coupons:", error);
       set({ coupons: [], isLoadingCoupons: false });
+    }
+  },
+  
+  fetchPets: async () => {
+    set({ isLoadingPets: true });
+    try {
+      const response = await getPets({ page: 1, page_size: 50 });
+      const pets = response.items;
+      set({ pets, isLoadingPets: false });
+    } catch (error) {
+      console.error("Failed to load pets:", error);
+      set({ pets: [], isLoadingPets: false });
+    }
+  },
+  
+  /**
+   * 获取 upcoming 预约列表
+   * API: GET /api/bookings?group=upcoming&page=1&page_size=50
+   * 
+   * upcoming 包含除 history 以外的所有状态（即非 canceled/completed/refunded 的预约）
+   */
+  fetchUpcomingBookings: async () => {
+    set({ isLoadingBookings: true });
+    try {
+      const response = await getMyBookings({ group: "upcoming", page: 1, page_size: 50 });
+      const bookings = response.items || [];
+      console.log("[fetchUpcomingBookings] Loaded", bookings.length, "upcoming bookings:", bookings);
+      set({ upcomingBookings: bookings, isLoadingBookings: false });
+    } catch (error) {
+      console.error("Failed to load upcoming bookings:", error);
+      set({ upcomingBookings: [], isLoadingBookings: false });
+    }
+  },
+  
+  /**
+   * 获取 history 预约列表
+   * API: GET /api/bookings?group=history&page=1&page_size=50
+   * 
+   * history 包含以下状态的预约：canceled/completed/refunded
+   */
+  fetchHistoryBookings: async () => {
+    set({ isLoadingBookings: true });
+    try {
+      const response = await getMyBookings({ group: "history", page: 1, page_size: 50 });
+      const bookings = response.items;
+      set({ historyBookings: bookings, isLoadingBookings: false });
+    } catch (error) {
+      console.error("Failed to load history bookings:", error);
+      set({ historyBookings: [], isLoadingBookings: false });
     }
   },
   
