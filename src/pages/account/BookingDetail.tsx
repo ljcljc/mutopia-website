@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { OrangeButton } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
-import { getBookingDetail, type BookingDetailOut } from "@/lib/api";
+import { getBookingDetail, cancelBooking, type BookingDetailOut } from "@/lib/api";
+import { toast } from "sonner";
 
 function formatDateTime(dateString?: string | null): string {
   if (!dateString) return "";
@@ -34,30 +35,33 @@ function getStatusLabel(status?: string | null) {
   return "Pending";
 }
 
-function getProgressPercent(status?: string | null) {
-  const statusLower = status?.toLowerCase() ?? "";
-  if (statusLower.includes("ready") || statusLower.includes("checked_in")) return 70;
-  if (statusLower.includes("cancel")) return 0;
-  return 45;
-}
 
 export default function BookingDetail() {
   const { bookingId } = useParams();
+  const navigate = useNavigate();
   const [detail, setDetail] = useState<BookingDetailOut | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isPackageExpanded, setIsPackageExpanded] = useState(true);
+  const [isCanceling, setIsCanceling] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const id = Number(bookingId);
-    if (!id || Number.isNaN(id)) return;
+    if (!id || Number.isNaN(id)) {
+      setError("Invalid booking ID");
+      return;
+    }
 
     setIsLoading(true);
+    setError(null);
     getBookingDetail(id)
       .then((data) => {
         setDetail(data);
       })
       .catch((error) => {
         console.error("Failed to load booking detail:", error);
+        setError("Failed to load booking detail. Please try again.");
+        toast.error("Failed to load booking detail");
       })
       .finally(() => {
         setIsLoading(false);
@@ -89,28 +93,122 @@ export default function BookingDetail() {
       .join(" ") || "MIRAMICHI NB E1N 2E5";
 
   const statusLabel = getStatusLabel(detail?.status);
-  const progressPercent = getProgressPercent(detail?.status);
+  const statusLower = detail?.status?.toLowerCase() ?? "";
+  const progressVariant =
+    statusLower.includes("confirm") || statusLower.includes("proposed")
+      ? "confirm"
+      : statusLower.includes("ready") || statusLower.includes("checked_in")
+      ? "ready"
+      : "waiting";
 
-  const packageItems = useMemo(
-    () => [
-      { label: "Full grooming", amount: "$58.50" },
-      { label: "Mobile van service", amount: "$27.00" },
-      { label: "Safety insurance", amount: "$11.00" },
-    ],
-    []
-  );
+  const progressConfig = {
+    waiting: {
+      barColor: "#DE6A07",
+      barWidth: 40,
+      badgeText: "Waiting for groomer match",
+      badgeBg: "#DE6A07",
+      badgeTextColor: "#FFFFFF",
+      nextStep: "Waiting for groomer response",
+    },
+    confirm: {
+      barColor: "#DE6A07",
+      barWidth: 40,
+      badgeText: "Waiting for your confirmation",
+      badgeBg: "#DE6A07",
+      badgeTextColor: "#FFFFFF",
+      nextStep: "Confirm for new time proposed",
+    },
+    ready: {
+      barColor: "#388B5E",
+      barWidth: 70,
+      badgeText: statusLabel,
+      badgeBg: "#DCFCE7",
+      badgeTextColor: "#016630",
+      nextStep: `Upcoming booking ${scheduledDisplay}`,
+    },
+  } as const;
 
-  const addOnItems = useMemo(
-    () => [
-      { label: "Teeth brushing", amount: "$13.50" },
-      { label: "Ear cleaning", amount: "$11.70" },
-    ],
-    []
-  );
+  const activeProgress = progressConfig[progressVariant];
+  const proposedTimeDisplay = "2026-04-03 at 11H";
+  
+  // 价格信息（需要在 useMemo 之前定义）
+  const totalEstimation = formatAmount(detail?.final_amount, "$0.00");
+  const packageSubtotal = formatAmount(detail?.package_amount, "$0.00");
+  const addOnSubtotal = formatAmount(detail?.addons_amount, "$0.00");
+  
+  // 从 package_snapshot 中提取套餐详情
+  const packageItems = useMemo(() => {
+    if (!detail?.package_snapshot) return [];
+    
+    const pkg = detail.package_snapshot as Record<string, unknown>;
+    const items: Array<{ label: string; amount: string }> = [];
+    
+    // 套餐名称
+    if (pkg.name) {
+      const packagePrice = formatAmount(pkg.price as number | string | undefined, "$0.00");
+      items.push({ label: pkg.name as string, amount: packagePrice });
+    }
+    
+    // 服务类型（如果是 mobile，可能需要显示额外的费用）
+    const pkgServiceType = (pkg.service_type as string | undefined) ?? (pkg.type as string | undefined);
+    if (pkgServiceType && pkgServiceType.toLowerCase() === "mobile") {
+      // 如果有 mobile 服务费用，可以在这里添加
+      // 注意：实际费用可能已经在 package_amount 中包含了
+    }
+    
+    return items.length > 0 ? items : [{ label: serviceName, amount: packageSubtotal }];
+  }, [detail?.package_snapshot, serviceName, packageSubtotal]);
 
-  const totalEstimation = formatAmount(detail?.final_amount, "$121.70");
-  const packageSubtotal = formatAmount(detail?.package_amount, "$96.50");
-  const addOnSubtotal = formatAmount(detail?.addons_amount, "$25.20");
+  // 从 addons_snapshot 中提取附加服务列表
+  const addOnItems = useMemo(() => {
+    if (!detail?.addons_snapshot || !Array.isArray(detail.addons_snapshot)) return [];
+    
+    return detail.addons_snapshot.map((addon) => {
+      const addonObj = addon as Record<string, unknown>;
+      const name = (addonObj.name as string | undefined) ?? "Add-on service";
+      const price = formatAmount(addonObj.price as number | string | undefined, "$0.00");
+      return { label: name, amount: price };
+    });
+  }, [detail?.addons_snapshot]);
+  
+  // 计算折扣信息
+  const discountRate = detail?.discount_rate 
+    ? (typeof detail.discount_rate === "number" ? detail.discount_rate : parseFloat(String(detail.discount_rate)) || 0)
+    : 0;
+  const discountAmount = formatAmount(detail?.discount_amount, "$0.00");
+  const couponAmount = formatAmount(detail?.coupon_amount, "$0.00");
+  const membershipFee = formatAmount(detail?.membership_fee, "$0.00");
+  
+  // 会员和优惠券信息
+  const membershipSnapshot = (detail?.membership_snapshot as Record<string, unknown> | undefined) ?? {};
+  const couponSnapshot = (detail?.coupon_snapshot as Record<string, unknown> | undefined) ?? {};
+  const hasMembership = Object.keys(membershipSnapshot).length > 0;
+  const hasCoupon = Object.keys(couponSnapshot).length > 0;
+  
+  // 判断是否可以取消预约
+  const statusLowerForCancel = detail?.status?.toLowerCase() ?? "";
+  const canCancel = !statusLowerForCancel.includes("cancel") && !statusLowerForCancel.includes("completed") && !statusLowerForCancel.includes("refunded");
+  
+  // 处理取消预约
+  const handleCancelBooking = async () => {
+    if (!detail?.id) return;
+    
+    const confirmed = window.confirm("Are you sure you want to cancel this booking?");
+    if (!confirmed) return;
+    
+    setIsCanceling(true);
+    try {
+      await cancelBooking(detail.id);
+      toast.success("Booking canceled successfully");
+      // 刷新数据或跳转回 dashboard
+      navigate("/account/dashboard");
+    } catch (error) {
+      console.error("Failed to cancel booking:", error);
+      toast.error("Failed to cancel booking. Please try again.");
+    } finally {
+      setIsCanceling(false);
+    }
+  };
 
   return (
     <div className="w-full min-h-full flex flex-col">
@@ -149,15 +247,29 @@ export default function BookingDetail() {
                 <div className="flex flex-col gap-[8px]">
                   <div className="relative h-[8px] w-full rounded-[8px] bg-[#D9D9D9]">
                     <div
-                      className="absolute left-0 top-0 h-full rounded-[8px] bg-[#388B5E] transition-all duration-300"
-                      style={{ width: `${progressPercent}%` }}
+                      className="absolute left-0 top-0 h-full rounded-[8px] transition-all duration-300"
+                      style={{
+                        width: `${activeProgress.barWidth}%`,
+                        backgroundColor: activeProgress.barColor,
+                      }}
                     />
                   </div>
-                  <div className="bg-[#DCFCE7] h-[24px] w-fit px-[16px] py-[4px] rounded-[12px] flex items-center">
-                    <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-[#016630]">
-                      {statusLabel}
-                    </span>
-                  </div>
+                  {progressVariant === "ready" ? (
+                    <div className="bg-[#DCFCE7] h-[24px] w-fit px-[16px] py-[4px] rounded-[12px] flex items-center">
+                      <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-[#016630]">
+                        {activeProgress.badgeText}
+                      </span>
+                    </div>
+                  ) : (
+                    <OrangeButton
+                      size="compact"
+                      variant="primary"
+                      showArrow={false}
+                      className="cursor-default w-[190px] h-[24px] px-[16px] py-[4px] gap-[4px] bg-[#DE6A07] hover:bg-[#DE6A07] active:bg-[#DE6A07] focus-visible:bg-[#DE6A07]"
+                    >
+                      {activeProgress.badgeText}
+                    </OrangeButton>
+                  )}
                 </div>
               </div>
             </div>
@@ -167,12 +279,33 @@ export default function BookingDetail() {
                 Next step
               </p>
               <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                Check in {scheduledDisplay}
+                {activeProgress.nextStep}
               </p>
             </div>
 
             {isLoading ? (
               <p className="mt-[12px] text-[10px] text-[#8B6357]">Loading booking detail...</p>
+            ) : error ? (
+              <p className="mt-[12px] text-[10px] text-red-600">{error}</p>
+            ) : null}
+
+            {progressVariant === "confirm" ? (
+              <div className="mt-[16px] flex flex-wrap items-center gap-[8px]">
+                <div className="flex flex-1 min-w-[200px] flex-col gap-[4px] text-[#4A3C2A]">
+                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[10px] leading-[12px]">
+                    New time proposed by groomer
+                  </p>
+                  <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px]">
+                    {proposedTimeDisplay}
+                  </p>
+                </div>
+                <OrangeButton variant="secondary" size="compact" className="w-[209px]">
+                  Cancel booking
+                </OrangeButton>
+                <OrangeButton variant="primary" size="compact" showArrow>
+                  Confirm
+                </OrangeButton>
+              </div>
             ) : null}
           </div>
 
@@ -236,59 +369,63 @@ export default function BookingDetail() {
 
               {isPackageExpanded ? (
                 <>
-                  <div className="flex flex-col gap-[4px]">
-                    <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
-                      Full grooming package
-                    </p>
+                  {packageItems.length > 0 && (
                     <div className="flex flex-col gap-[4px]">
-                      {packageItems.map((item) => (
-                        <div key={item.label} className="flex items-center justify-between">
-                          <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                            {item.label}
-                          </p>
-                          <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                            {item.amount}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="border-t border-[#E5E7EB] my-[4px]" />
-                    <div className="flex items-center justify-between">
-                      <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                        Subtotal
+                      <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
+                        {serviceName} package
                       </p>
-                      <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                        {packageSubtotal}
-                      </p>
+                      <div className="flex flex-col gap-[4px]">
+                        {packageItems.map((item, index) => (
+                          <div key={`package-${index}`} className="flex items-center justify-between">
+                            <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                              {item.label}
+                            </p>
+                            <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                              {item.amount}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="border-t border-[#E5E7EB] my-[4px]" />
+                      <div className="flex items-center justify-between">
+                        <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                          Subtotal
+                        </p>
+                        <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                          {packageSubtotal}
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
-                  <div className="flex flex-col gap-[4px]">
-                    <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
-                      Add-on
-                    </p>
+                  {addOnItems.length > 0 && (
                     <div className="flex flex-col gap-[4px]">
-                      {addOnItems.map((item) => (
-                        <div key={item.label} className="flex items-center justify-between">
-                          <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                            {item.label}
-                          </p>
-                          <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                            {item.amount}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="border-t border-[#E5E7EB] my-[4px]" />
-                    <div className="flex items-center justify-between">
-                      <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                        Subtotal
+                      <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
+                        Add-on
                       </p>
-                      <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                        {addOnSubtotal}
-                      </p>
+                      <div className="flex flex-col gap-[4px]">
+                        {addOnItems.map((item, index) => (
+                          <div key={`addon-${index}`} className="flex items-center justify-between">
+                            <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                              {item.label}
+                            </p>
+                            <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                              {item.amount}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="border-t border-[#E5E7EB] my-[4px]" />
+                      <div className="flex items-center justify-between">
+                        <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                          Subtotal
+                        </p>
+                        <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                          {addOnSubtotal}
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </>
               ) : null}
             </div>
@@ -306,56 +443,78 @@ export default function BookingDetail() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] leading-[22.75px] text-[#4A5565]">
-                    was $133 <span className="text-[#DE6A07] font-semibold">$209.70</span>
+                  <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[16px] leading-[28px] text-[#DE6A07]">
+                    {totalEstimation}
                   </p>
-                  <div className="flex items-center justify-end gap-[8px]">
-                    <span className="bg-[#DCFCE7] h-[24px] px-[16px] py-[4px] rounded-[12px] text-[10px] leading-[14px] font-['Comfortaa:Bold',sans-serif] font-bold text-[#016630]">
-                      10% OFF
-                    </span>
-                    <span className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] leading-[22.75px] text-[#DE6A07]">
-                      ($110.70 + $99)
-                    </span>
-                  </div>
-                  <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-[#4A5565]">
+                  {discountRate > 0 && (
+                    <div className="flex items-center justify-end gap-[8px] mt-[4px]">
+                      <span className="bg-[#DCFCE7] h-[24px] px-[16px] py-[4px] rounded-[12px] text-[10px] leading-[14px] font-['Comfortaa:Bold',sans-serif] font-bold text-[#016630]">
+                        {discountRate}% OFF
+                      </span>
+                    </div>
+                  )}
+                  <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-[#4A5565] mt-[4px]">
                     tax included
                   </p>
                 </div>
               </div>
 
-              <div className="border-t border-[#E5E7EB]" />
+              {(hasMembership || hasCoupon || couponAmount !== "$0.00" || discountAmount !== "$0.00") && (
+                <>
+                  <div className="border-t border-[#E5E7EB]" />
 
-              <div className="flex flex-col gap-[12px]">
-                <div className="flex items-center justify-between">
-                  <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[17.5px] text-[#4A3C2A]">
-                    Cash credit (3 left)
-                  </p>
-                  <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                    -$5
-                  </p>
-                </div>
+                  <div className="flex flex-col gap-[12px]">
+                    {hasMembership && membershipFee !== "$0.00" && (
+                      <div className="flex items-center justify-between">
+                        <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[17.5px] text-[#4A3C2A]">
+                          Membership discount
+                        </p>
+                        <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                          -{membershipFee}
+                        </p>
+                      </div>
+                    )}
 
-                <div className="flex flex-col gap-[8px]">
-                  <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[17.5px] text-[#4A3C2A]">
-                    Special gift
-                  </p>
-                  <div className="flex items-center justify-between pl-[24px]">
-                    <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[17.5px] text-[#4A3C2A]">
-                      - Birthday
-                    </p>
-                    <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                      -$10
-                    </p>
+                    {hasCoupon && couponAmount !== "$0.00" && (
+                      <div className="flex items-center justify-between">
+                        <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[17.5px] text-[#4A3C2A]">
+                          Coupon discount
+                        </p>
+                        <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                          -{couponAmount}
+                        </p>
+                      </div>
+                    )}
+
+                    {discountAmount !== "$0.00" && (
+                      <div className="flex items-center justify-between">
+                        <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[17.5px] text-[#4A3C2A]">
+                          Discount
+                        </p>
+                        <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                          -{discountAmount}
+                        </p>
+                      </div>
+                    )}
                   </div>
-                </div>
-              </div>
+                </>
+              )}
             </div>
           </div>
 
-          <button type="button" className="flex items-center justify-center gap-[8px] text-[#8B6357] text-[12px] leading-[17.5px] font-['Comfortaa:Bold',sans-serif]">
-            <Icon name="trash" size={16} className="text-[#8B6357]" />
-            Cancel booking
-          </button>
+          {canCancel && (
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={handleCancelBooking}
+                disabled={isCanceling}
+                className="flex items-center justify-center gap-[8px] text-[#8B6357] text-[12px] leading-[17.5px] font-['Comfortaa:Bold',sans-serif] disabled:opacity-50 disabled:cursor-not-allowed hover:text-[#DE6A07] transition-colors cursor-pointer"
+              >
+                <Icon name="trash" size={16} className="text-current" />
+                {isCanceling ? "Canceling..." : "Cancel booking"}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
