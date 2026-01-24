@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Icon } from "@/components/common/Icon";
 import { useAccountStore } from "../accountStore";
 import type { BookingListOut } from "@/lib/api";
@@ -87,6 +88,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 function BookingItem({ booking }: { booking: BookingListOut }) {
+  const navigate = useNavigate();
   const petName = booking.pet_name || "-";
   const serviceName = booking.service_name || "-";
   const serviceType = booking.service_type || "";
@@ -95,7 +97,18 @@ function BookingItem({ booking }: { booking: BookingListOut }) {
   const address = parseAddress(booking.address);
 
   return (
-    <div className="border border-[#E5E7EB] rounded-[14px] p-[13px] flex items-center justify-between transition-colors duration-200 hover:bg-[#F9FAFB] cursor-pointer">
+    <div
+      className="border border-[#E5E7EB] rounded-[14px] p-[13px] flex items-center justify-between transition-colors duration-200 hover:bg-[#F9FAFB] cursor-pointer"
+      role="button"
+      tabIndex={0}
+      onClick={() => navigate(`/account/bookings/${booking.id}`)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          navigate(`/account/bookings/${booking.id}`);
+        }
+      }}
+    >
       <div className="flex flex-col gap-[12px]">
         <div className="flex flex-col gap-[8px] pr-[30px]">
           <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[16px] leading-[28px] text-[#DE6A07]">
