@@ -161,7 +161,7 @@ export function Step1AddressAndServiceType() {
                     <Icon
                       name="alert-info"
                       aria-label="Info"
-                      className="block size-full text-[#ffffff]"
+                      className="block size-full text-[#2374FF]"
                     />
                   </div>
                   <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative text-[#193cb8] text-[10px] whitespace-normal break-words min-w-0">

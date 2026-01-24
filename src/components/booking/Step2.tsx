@@ -1387,7 +1387,7 @@ export function Step2() {
                 <div className="flex gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full min-w-0">
                   <Icon
                     name="alert-info"
-                    className="relative shrink-0 size-[12px] text-[#ffffff]"
+                    className="relative shrink-0 size-[12px] text-[#2374FF]"
                   />
                   <div className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(14*var(--px393))] sm:leading-[14px] relative text-[#193cb8] text-[calc(10*var(--px393))] sm:text-[10px] whitespace-normal break-words min-w-0">
                     <p className="font-['Comfortaa:Bold',sans-serif] font-bold mb-0">
