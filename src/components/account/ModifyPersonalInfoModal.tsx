@@ -15,6 +15,7 @@ import {
 import { Icon } from "@/components/common/Icon";
 import { DatePicker } from "@/components/common/DatePicker";
 import { CustomInput } from "@/components/common/CustomInput";
+import { Spinner } from "@/components/common/Spinner";
 import { useAuthStore } from "@/components/auth/authStore";
 import { updateUserInfo, type MeOut } from "@/lib/api";
 import { toast } from "sonner";
@@ -52,13 +53,11 @@ function isBirthdayModifiedWithin1Year(userInfo: MeOut | null): {
   if (diffYears < 1) {
     // 格式化日期：YYYY-MM-DD
     const formattedDate = modifiedDate.toISOString().split("T")[0];
-    // 格式化显示日期：MM/DD/YYYY
-    const displayDate = `${String(modifiedDate.getMonth() + 1).padStart(2, "0")}/${String(modifiedDate.getDate()).padStart(2, "0")}/${modifiedDate.getFullYear()}`;
     
     return {
       isModified: true,
       modifiedDate: formattedDate,
-      formattedDate: displayDate,
+      formattedDate: formattedDate, // 使用 yyyy-mm-dd 格式
     };
   }
   
@@ -317,16 +316,25 @@ export default function ModifyPersonalInfoModal({
           <button
             onClick={handleCancel}
             disabled={isSubmitting}
-            className="w-[120px] h-[36px] rounded-lg border border-[#DE6A07] bg-white text-[#DE6A07] font-['Comfortaa:Medium',sans-serif] font-medium text-sm hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-[120px] h-[36px] rounded-lg border border-[#DE6A07] bg-white text-[#DE6A07] font-['Comfortaa:Medium',sans-serif] font-medium text-sm hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="w-[120px] h-[36px] rounded-lg bg-[#DE6A07] text-white font-['Comfortaa:Medium',sans-serif] font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-[120px] h-[36px] rounded-lg bg-[#DE6A07] text-white font-['Comfortaa:Medium',sans-serif] font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer relative"
           >
-            {isSubmitting ? "Saving..." : "Modify"}
+            {/* Loading Spinner */}
+            {isSubmitting && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Spinner size="small" color="white" />
+              </div>
+            )}
+            {/* Button Text - invisible when loading */}
+            <span className={isSubmitting ? "invisible" : ""}>
+              Modify
+            </span>
           </button>
         </div>
       </DialogContent>

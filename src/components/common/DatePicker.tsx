@@ -432,15 +432,23 @@ export function DatePicker({
               setShowMonthPicker(false);
             }
           }}
-          className={`bg-white h-[36px] relative rounded-[12px] shrink-0 w-full ${
-            disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
+          className={`h-[36px] relative rounded-[12px] shrink-0 w-full ${
+            disabled 
+              ? "bg-gray-100 cursor-not-allowed" 
+              : "bg-white cursor-pointer"
           }`}
         >
           <div className="flex flex-row items-center overflow-clip rounded-[inherit] size-full">
             <div className="box-border content-stretch flex h-[36px] items-center px-[16px] py-[4px] relative w-full">
               <div className="basis-0 content-stretch flex grow items-center min-h-px min-w-px relative shrink-0">
                 <p
-                  className={`basis-0 font-['Comfortaa:Regular',sans-serif] font-normal grow leading-[normal] min-h-px min-w-px relative shrink-0 text-[12.25px] ${value ? "text-black" : "text-[#717182]"}`}
+                  className={`basis-0 font-['Comfortaa:Regular',sans-serif] font-normal grow leading-[normal] min-h-px min-w-px relative shrink-0 text-[12.25px] ${
+                    disabled 
+                      ? "text-gray-400" 
+                      : value 
+                        ? "text-black" 
+                        : "text-[#717182]"
+                  }`}
                 >
                   {value || displayPlaceholder}
                 </p>
@@ -449,7 +457,9 @@ export function DatePicker({
                   <Icon
                     name="calendar"
                     aria-label="Calendar"
-                    className="block size-full"
+                    className={`block size-full ${
+                      disabled ? "opacity-40" : ""
+                    }`}
                   />
                 </div>
               </div>
@@ -458,7 +468,11 @@ export function DatePicker({
           <div
             aria-hidden="true"
             className={`absolute border border-solid inset-0 pointer-events-none rounded-[12px] ${
-              error ? "border-[#de1507]" : "border-gray-200"
+              error 
+                ? "border-[#de1507]" 
+                : disabled 
+                  ? "border-gray-300" 
+                  : "border-gray-200"
             }`}
           />
         </div>
