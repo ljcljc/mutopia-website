@@ -63,7 +63,7 @@ function Mutopia() {
 function Logo() {
   return (
     <div
-      className="basis-0 grow h-[35px] min-h-px min-w-px relative shrink-0 lg:basis-0 lg:grow"
+      className="h-[35px] relative shrink-0"
       data-name="Logo"
     >
       <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[10.5px] h-[35px] items-center relative w-full">
@@ -74,129 +74,39 @@ function Logo() {
   );
 }
 
-function Link() {
+function NavigationLink({ href, children }: { href: string; children: string }) {
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    scrollToAnchor("#why-us");
+    scrollToAnchor(href);
   };
 
   return (
-    <div className="h-[21px] relative shrink-0 w-[53.398px]" data-name="Link">
-      <div className="bg-clip-padding border-0 border-transparent border-solid box-border h-[21px] relative w-[53.398px]">
         <a
-          href="#why-us"
+      href={href}
           onClick={handleClick}
-          className="absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[21px] left-0 text-[#4a3c2a] text-[14px] text-nowrap top-[0.5px] whitespace-pre hover:text-[#8b6357] transition-colors no-underline cursor-pointer"
+      className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[21px] text-[#4a3c2a] text-[14px] hover:text-[#8b6357] transition-colors no-underline cursor-pointer whitespace-nowrap"
         >
-          Why Us
-        </a>
-      </div>
-    </div>
-  );
-}
-
-function Link1() {
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    scrollToAnchor("#services");
-  };
-
-  return (
-    <div className="h-[21px] relative shrink-0 w-[60.539px]" data-name="Link">
-      <div className="bg-clip-padding border-0 border-transparent border-solid box-border h-[21px] relative w-[60.539px]">
-        <a
-          href="#services"
-          onClick={handleClick}
-          className="absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[21px] left-0 text-[#4a3c2a] text-[14px] text-nowrap top-[0.5px] whitespace-pre hover:text-[#8b6357] transition-colors no-underline cursor-pointer"
-        >
-          Services
-        </a>
-      </div>
-    </div>
-  );
-}
-
-function Link2() {
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    scrollToAnchor("#packages");
-  };
-
-  return (
-    <div className="relative shrink-0 w-[68.508px]" data-name="Link">
-      <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[10px] items-center justify-center relative w-[68.508px]">
-        <a
-          href="#packages"
-          onClick={handleClick}
-          className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[21px] relative shrink-0 text-[#4a3c2a] text-[14px] w-[92px] hover:text-[#8b6357] transition-colors no-underline cursor-pointer"
-        >
-          Membership
-        </a>
-      </div>
-    </div>
-  );
-}
-
-function Link3() {
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    scrollToAnchor("#faq");
-  };
-
-  return (
-    <div className="h-[21px] relative shrink-0 w-[29.531px]" data-name="Link">
-      <div className="bg-clip-padding border-0 border-transparent border-solid box-border h-[21px] relative w-[29.531px]">
-        <a
-          href="#faq"
-          onClick={handleClick}
-          className="absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[21px] left-0 text-[#4a3c2a] text-[14px] text-nowrap top-[0.5px] whitespace-pre hover:text-[#8b6357] transition-colors no-underline cursor-pointer"
-        >
-          FAQ
-        </a>
-      </div>
-    </div>
-  );
-}
-
-function Link4() {
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    scrollToAnchor("#contact");
-  };
-
-  return (
-    <div className="h-[21px] relative shrink-0 w-[58.219px]" data-name="Link">
-      <div className="bg-clip-padding border-0 border-transparent border-solid box-border h-[21px] relative w-[58.219px]">
-        <a
-          href="#contact"
-          onClick={handleClick}
-          className="absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[21px] left-0 text-[#4a3c2a] text-[14px] text-nowrap top-[0.5px] whitespace-pre hover:text-[#8b6357] transition-colors no-underline cursor-pointer"
-        >
-          Contact
-        </a>
-      </div>
-    </div>
+      {children}
+    </a>
   );
 }
 
 function Navigation() {
   return (
     <div
-      className="h-[21px] relative shrink-0 hidden lg:block"
+      className="h-[21px] relative shrink-0 hidden lg:flex items-center gap-[28px]"
       data-name="Navigation"
     >
-      <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[28px] h-[21px] items-center relative">
-        <Link />
-        <Link1 />
-        <Link2 />
-        <Link3 />
-        <Link4 />
-      </div>
+      <NavigationLink href="#why-us">Why Us</NavigationLink>
+      <NavigationLink href="#services">Services</NavigationLink>
+      <NavigationLink href="#packages">Membership</NavigationLink>
+      <NavigationLink href="#faq">FAQ</NavigationLink>
+      <NavigationLink href="#contact">Contact</NavigationLink>
     </div>
   );
 }
 
-function ButtonCompactSecondaryOrange() {
+function ApplyAsGroomerButton() {
   return (
     <OrangeButton
       variant="secondary"
@@ -209,7 +119,7 @@ function ButtonCompactSecondaryOrange() {
   );
 }
 
-function ButtonCompactPrincipalOrange() {
+function LoginSignUpButton() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   return (
@@ -273,23 +183,21 @@ function UserInfo() {
   );
 }
 
-function Buttons() {
+function DesktopActions() {
   const user = useAuthStore((state) => state.user);
 
   return (
     <div
-      className="basis-0 grow h-[28px] min-h-px min-w-px relative shrink-0 hidden lg:block lg:basis-0 lg:grow"
+      className="h-[28px] relative shrink-0 hidden lg:flex items-center gap-[10.5px]"
       data-name="Buttons"
     >
-      <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[10.5px] h-[28px] items-center justify-end relative w-full">
-        <ButtonCompactSecondaryOrange />
-        {user ? <UserInfo /> : <ButtonCompactPrincipalOrange />}
-      </div>
+      <ApplyAsGroomerButton />
+      {user ? <UserInfo /> : <LoginSignUpButton />}
     </div>
   );
 }
 
-// Mobile menu link component matching Figma design
+// Mobile menu link component
 function MobileLink({
   children,
   href,
@@ -301,11 +209,7 @@ function MobileLink({
 }) {
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-
-    // Close the menu first
     onClick();
-
-    // Wait for menu to close, then scroll
     setTimeout(() => {
       scrollToAnchor(href);
     }, 300);
@@ -324,7 +228,7 @@ function MobileLink({
   );
 }
 
-// Mobile buttons matching Figma design
+// Mobile buttons
 function MobileButton1() {
   return (
     <div
@@ -434,7 +338,6 @@ function MobileMenu({
   onClose: () => void;
 }) {
   const handleLinkClick = () => {
-    // Close menu after a short delay to allow navigation
     setTimeout(() => {
       onClose();
     }, 100);
@@ -454,7 +357,7 @@ function MobileMenu({
           className="w-full lg:hidden overflow-hidden"
         >
           <div className="w-full pb-[20px] pt-0 px-[20px]">
-            {/* Navigation Links - Full width */}
+            {/* Navigation Links */}
             <motion.div
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -478,7 +381,7 @@ function MobileMenu({
               </MobileLink>
             </motion.div>
 
-            {/* Buttons - Full width */}
+            {/* Buttons */}
             <motion.div
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -495,7 +398,7 @@ function MobileMenu({
   );
 }
 
-// Mobile close button matching Figma design
+// Mobile close button
 function CloseButton({ onClick }: { onClick: () => void }) {
   return (
     <div
@@ -552,50 +455,6 @@ function CloseButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-function Container({
-  isMenuOpen,
-  toggleMenu,
-}: {
-  isMenuOpen: boolean;
-  toggleMenu: () => void;
-}) {
-  return (
-    <div
-      className="h-[62.984px] lg:h-[63px] relative shrink-0 w-full"
-      data-name="Container"
-    >
-      <div className="flex flex-row items-center size-full">
-        <div className="box-border content-stretch flex h-[62.984px] lg:h-[63px] items-center justify-between pb-px pt-0 px-0 lg:pl-0 lg:pr-[0.008px] lg:py-0 relative w-full">
-          <Logo />
-          <Navigation />
-          <Buttons />
-
-          {/* Mobile Menu Button */}
-          <motion.div
-            animate={{ rotate: isMenuOpen ? 90 : 0 }}
-            transition={{ duration: 0.2 }}
-            className="lg:hidden"
-          >
-            {isMenuOpen ? (
-              <CloseButton onClick={toggleMenu} />
-            ) : (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleMenu}
-                className="text-[#8b6357] hover:text-[#6f4e44] hover:bg-[#8b6357]/5 cursor-pointer"
-                aria-label="Toggle menu"
-              >
-                <Icon name="menu" aria-label="Menu" className="size-[24px] text-[#8b6357]" />
-              </Button>
-            )}
-          </motion.div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -612,13 +471,9 @@ export default function Header() {
       setIsScrolled(scrollTop > 0);
     };
 
-    // 检查初始滚动位置
     handleScroll();
-
-    // 添加滚动事件监听器，使用 passive 选项优化性能
     window.addEventListener("scroll", handleScroll, { passive: true });
 
-    // 清理事件监听器防止内存泄漏
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
@@ -639,20 +494,49 @@ export default function Header() {
       }}
       data-name="Header"
     >
-      <div className="max-w-7xl mx-auto">
-        <div className="min-w-inherit w-full">
-          <div className="box-border content-stretch flex flex-col items-start min-w-inherit pb-px lg:pb-px pt-0 px-4 sm:px-8 md:px-12 lg:px-[57.5px] relative w-full">
-            <Container isMenuOpen={isMenuOpen} toggleMenu={toggleMenu} />
+      {/* 移除 max-w-7xl 限制，使用 padding 控制内容区域 */}
+      <div className="w-full">
+        <div className="box-border content-stretch flex flex-col items-start min-w-inherit pb-px lg:pb-px pt-0 px-4 sm:px-8 md:px-12 lg:px-[57.5px] xl:px-[80px] 2xl:px-[120px] relative w-full">
+          {/* Desktop Header Container */}
+          <div className="flex flex-row items-center justify-between w-full h-[62.984px] lg:h-[63px]">
+            {/* Left: Logo */}
+            <Logo />
 
-            {/* Mobile Menu - Inside the container */}
+            {/* Center: Navigation (Desktop only) */}
+            <Navigation />
+
+            {/* Right: Actions (Desktop only) */}
+            <DesktopActions />
+
+            {/* Mobile Menu Button */}
+            <motion.div
+              animate={{ rotate: isMenuOpen ? 90 : 0 }}
+              transition={{ duration: 0.2 }}
+              className="lg:hidden"
+            >
+              {isMenuOpen ? (
+                <CloseButton onClick={toggleMenu} />
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleMenu}
+                  className="text-[#8b6357] hover:text-[#6f4e44] hover:bg-[#8b6357]/5 cursor-pointer"
+                  aria-label="Toggle menu"
+                >
+                  <Icon name="menu" aria-label="Menu" className="size-[24px] text-[#8b6357]" />
+                </Button>
+              )}
+            </motion.div>
+          </div>
+
+          {/* Mobile Menu */}
             <MobileMenu
               isOpen={isMenuOpen}
               onClose={() => setIsMenuOpen(false)}
             />
-          </div>
         </div>
       </div>
     </div>
   );
 }
-

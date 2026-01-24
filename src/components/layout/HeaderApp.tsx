@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 const imgIcon = "/images/logo.png";
 import { Icon } from "@/components/common/Icon";
-import { OrangeButton, BrownOutlineButton } from "@/components/common";
 import { useAuthStore } from "@/components/auth/authStore";
 import {
   DropdownMenu,
@@ -21,6 +20,9 @@ import {
 import { type MeOut } from "@/lib/api";
 import { useLogout } from "@/hooks/useLogout";
 import { useBookingStore } from "@/components/booking/bookingStore";
+import { BrownOutlineButton, OrangeButton } from "@/components/common";
+import { getEncryptedItem } from "@/lib/encryption";
+import { STORAGE_KEYS } from "@/lib/storageKeys";
 
 function Logo() {
   return (
@@ -53,14 +55,13 @@ function BackToHomeButton() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    // 检查是否在 booking 页面
     const isBookingPage = window.location.pathname.includes("/booking");
     
     if (isBookingPage && hasFormData()) {
       e.preventDefault();
+      e.currentTarget.blur();
       setIsDialogOpen(true);
     }
-    // 如果不在 booking 页面或没有表单数据，正常跳转
   };
 
   const handleCancel = () => {
@@ -78,10 +79,10 @@ function BackToHomeButton() {
       <Link
         to="/"
         onClick={handleClick}
-        className="relative shrink-0 w-[134px] cursor-pointer hover:opacity-80 transition-opacity"
+        className="relative shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
         data-name="Button tertiary"
       >
-        <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[8px] items-center px-[12px] py-[4px] relative w-[134px]">
+        <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[8px] items-center px-[12px] py-[4px] relative">
           <div className="content-stretch flex gap-[10px] items-center justify-center relative shrink-0 size-[20px]" data-name="Icons">
             <div className="flex-none">
               <div className="size-4 rotate-180">
@@ -103,13 +104,15 @@ function BackToHomeButton() {
             </AlertDialogTitle>
           </AlertDialogHeader>
           <div className="px-5 py-4">
-            <AlertDialogDescription className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] text-[#4C4C4C] leading-relaxed">
-              <p className="mb-2 text-left">
-                You have entered information in this form. If you leave this page, your changes will be lost.
-              </p>
-              <p className="text-center font-['Comfortaa',sans-serif] font-semibold text-[16px] text-black leading-[28px]">
-                Are you sure you want to continue?
-              </p>
+            <AlertDialogDescription asChild>
+              <div className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] text-[#4C4C4C] leading-relaxed">
+                <p className="mb-2 text-left">
+                  You have entered information in this form. If you leave this page, your changes will be lost.
+                </p>
+                <p className="text-center font-['Comfortaa',sans-serif] font-semibold text-[16px] text-black leading-[28px]">
+                  Are you sure you want to continue?
+                </p>
+              </div>
             </AlertDialogDescription>
           </div>
           <AlertDialogFooter className="px-6 pb-6 pt-0 flex flex-row items-center gap-3 [&]:justify-center sm:[&]:justify-center">
@@ -135,87 +138,14 @@ function BackToHomeButton() {
   );
 }
 
-function AddressInput({ address, onAddressChange }: { address: string | null; onAddressChange?: (address: string) => void }) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState(address || "");
-
-  useEffect(() => {
-    setEditValue(address || "");
-  }, [address]);
-
-  const handleSubmit = () => {
-    if (onAddressChange) {
-      onAddressChange(editValue);
-    }
-    setIsEditing(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      handleSubmit();
-    } else if (e.key === "Escape") {
-      setEditValue(address || "");
-      setIsEditing(false);
-    }
-  };
-
-  if (isEditing) {
-    return (
-      <div className="border border-gray-200 border-solid h-[34px] relative rounded-[8px] shrink-0 w-[278px]" data-name="Button">
-        <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[7px] h-[34px] items-center px-[15px] py-px relative w-[278px]">
-          <div className="relative shrink-0 size-[18px]" data-name="Icon">
-            <Icon name="location" className="block max-w-none size-full text-[#4a3c2a]" />
-          </div>
-          <input
-            type="text"
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            onBlur={handleSubmit}
-            onKeyDown={handleKeyDown}
-            className="flex-[1_0_0] h-[17.5px] min-h-px min-w-px relative shrink-0 font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] text-[#4a3c2a] text-[12.25px] bg-transparent border-none outline-none"
-            autoFocus
-          />
-          <div className="relative shrink-0 size-[16px]" data-name="Icon">
-            <Icon name="chevron-down" className="block max-w-none size-full text-[#4a3c2a]" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className="border border-gray-200 border-solid h-[34px] relative rounded-[8px] shrink-0 w-[278px] cursor-pointer hover:border-[#8b6357] transition-colors"
-      data-name="Button"
-      onClick={() => setIsEditing(true)}
-    >
-      <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[7px] h-[34px] items-center px-[15px] py-px relative w-[278px]">
-        <div className="relative shrink-0 size-[18px]" data-name="Icon">
-          <Icon name="location" className="block max-w-none size-full text-[#4a3c2a]" />
-        </div>
-        <div className="flex-[1_0_0] h-[17.5px] min-h-px min-w-px relative shrink-0" data-name="Text">
-          <div className="bg-clip-padding border-0 border-transparent border-solid box-border h-[17.5px] overflow-clip relative rounded-[inherit] w-full">
-            <p className="absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] left-0 text-[#4a3c2a] text-[12.25px] top-[-0.5px] w-[206px] whitespace-pre-wrap truncate">
-              {address || "Add address..."}
-            </p>
-          </div>
-        </div>
-        <div className="relative shrink-0 size-[16px]" data-name="Icon">
-          <Icon name="chevron-down" className="block max-w-none size-full" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function CreditsBadge() {
   // TODO: Replace with actual credits from API when available
   const credits = "$0.00";
   
   return (
-    <div className="bg-[#de6a07] h-[24px] relative rounded-[12px] shrink-0 w-[103px]" data-name="Badge">
-      <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[4px] h-[24px] items-center justify-center overflow-clip px-[16px] py-[4px] relative rounded-[inherit] w-[103px]">
-        <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[14px] relative shrink-0 text-[10px] text-white">
+    <div className="bg-[#de6a07] h-[24px] relative rounded-[12px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity" data-name="Badge">
+      <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[4px] h-[24px] items-center justify-center overflow-clip px-[16px] py-[4px] relative rounded-[inherit]">
+        <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[14px] relative shrink-0 text-[10px] text-white whitespace-nowrap">
           <span>Credits </span>{credits}
         </p>
       </div>
@@ -223,18 +153,20 @@ function CreditsBadge() {
   );
 }
 
-function UserInfo({ userInfo }: { userInfo: MeOut }) {
-  const userName = userInfo.first_name || userInfo.email.split("@")[0] || "User";
+function UserInfo({ userInfo, fallbackName }: { userInfo?: MeOut | null; fallbackName?: string }) {
+  const userName = userInfo 
+    ? (userInfo.first_name || userInfo.email.split("@")[0] || "User")
+    : (fallbackName || "User");
   const { handleLogout } = useLogout();
 
   return (
-    <div className="content-stretch flex gap-[10.5px] h-[28px] items-center relative w-[281.008px]" data-name="Buttons">
+    <div className="content-stretch flex gap-[10.5px] h-[28px] items-center relative" data-name="Buttons">
       <CreditsBadge />
       
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <div className="relative shrink-0 w-[134px] cursor-pointer hover:opacity-80 transition-opacity" data-name="Button tertiary">
-            <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[8px] items-center px-[12px] py-[4px] relative w-[134px]">
+          <div className="relative shrink-0 cursor-pointer hover:opacity-80 transition-opacity" data-name="Button tertiary">
+            <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[8px] items-center px-[12px] py-[4px] relative">
               <div className="bg-[#8b6357] overflow-clip relative rounded-[100px] shrink-0 size-[20px] flex items-center justify-center" data-name="Icons/Avatar/Brown/Default/Rempli">
                 <Icon
                   name="user"
@@ -283,8 +215,57 @@ export default function HeaderApp() {
   const user = useAuthStore((state) => state.user);
   const [isScrolled, setIsScrolled] = useState(false);
   
-  // Get user info from authStore (set by LoginModalContent after login)
+  // Get user info from authStore (globally maintained)
+  // Display logic: first check global state, if not found, load from localStorage
   const userInfo = useAuthStore((state) => state.userInfo);
+  const setUserInfo = useAuthStore((state) => state.setUserInfo);
+
+  // Load userInfo from localStorage if not in global state (following user's logic)
+  useEffect(() => {
+    const loadUserInfoFromStorage = async () => {
+      // First check global state - if exists, use it directly
+      if (userInfo) {
+        return; // Already in global state, no need to load
+      }
+
+      // If not in global state, check localStorage
+      if (user) {
+        try {
+          const userInfoStr = await getEncryptedItem(STORAGE_KEYS.USER_INFO);
+          if (userInfoStr) {
+            const parsed = JSON.parse(userInfoStr);
+            // Check if it's MeOut type (has first_name or email, but not just name)
+            if (parsed && typeof parsed === "object" && parsed.email) {
+              if (parsed.first_name !== undefined || !parsed.name) {
+                // It's MeOut type, load to global state
+                setUserInfo(parsed as MeOut);
+              } else {
+                // Legacy User type, convert to MeOut
+                const converted: MeOut = {
+                  id: "",
+                  email: parsed.email,
+                  first_name: parsed.name.split(" ")[0] || null,
+                  last_name: parsed.name.split(" ").slice(1).join(" ") || null,
+                  birthday: null,
+                  address: null,
+                  receive_marketing_message: false,
+                  role: "user",
+                  is_email_verified: true,
+                  invite_code: null,
+                  is_member: false,
+                };
+                setUserInfo(converted);
+              }
+            }
+          }
+        } catch (e) {
+          console.warn("Failed to load userInfo from localStorage:", e);
+        }
+      }
+    };
+
+    loadUserInfoFromStorage();
+  }, [user, userInfo, setUserInfo]);
 
   // Scroll detection
   useEffect(() => {
@@ -306,8 +287,6 @@ export default function HeaderApp() {
     ? "0 10px 15px -3px rgba(0, 0, 0, 0.10), 0 4px 6px -4px rgba(0, 0, 0, 0.10)"
     : "none";
 
-  const hasAddress = userInfo?.address && userInfo.address.trim() !== "";
-
   return (
     <div
       className="bg-[rgba(255,255,255,0.95)] sticky top-0 w-full z-50 rounded-bl-[21px] rounded-br-[21px] border-[rgba(0,0,0,0.1)] border-b border-l-0 border-r-0 border-solid border-t-0"
@@ -317,37 +296,24 @@ export default function HeaderApp() {
       }}
       data-name="HeaderApp"
     >
-      <div className="max-w-7xl mx-auto">
-        <div className="box-border content-stretch flex h-[63px] items-center justify-between pl-0 pr-[0.008px] py-0 relative shrink-0 w-full px-[57.5px]" data-name="Container">
-          {/* Left side: Logo + Back to home (if not logged in or no address) */}
-          {(!user || !hasAddress) ? (
-            <div className="relative shrink-0 w-[549.242px]">
-              <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[24px] items-center relative w-[549.242px]">
-                <Logo />
-                <div className="content-stretch flex gap-[10.5px] h-[28px] items-center justify-end relative shrink-0" data-name="Buttons">
-                  <BackToHomeButton />
-                </div>
-              </div>
-            </div>
-          ) : (
-            <>
-              {/* Left side: Logo only (if logged in and has address) */}
-              <div className="relative shrink-0">
-                <Logo />
-              </div>
+      {/* 移除 max-w-7xl 限制，使用 padding 控制内容区域 */}
+      <div className="w-full">
+        <div className="box-border content-stretch flex h-[63px] items-center justify-between relative shrink-0 w-full px-4 sm:px-8 md:px-12 lg:px-[57.5px] xl:px-[80px] 2xl:px-[120px]" data-name="Container">
+          {/* Left side: Logo + Back to home */}
+          <div className="content-stretch flex gap-[24px] items-center relative shrink-0">
+            <Logo />
+            <BackToHomeButton />
+          </div>
 
-              {/* Middle: Address input (only if logged in and has address) */}
-              {user && hasAddress && userInfo && (
-                <AddressInput address={userInfo.address || null} />
-              )}
-
-              {/* Right side: User info (if logged in) */}
-              {user && userInfo && <UserInfo userInfo={userInfo} />}
-            </>
+          {/* Right side: User info (only if logged in) */}
+          {user && (
+            <UserInfo 
+              userInfo={userInfo ?? undefined} 
+              fallbackName={user.name || user.email.split("@")[0]}
+            />
           )}
         </div>
       </div>
     </div>
   );
 }
-

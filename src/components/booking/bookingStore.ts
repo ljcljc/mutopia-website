@@ -62,6 +62,7 @@ interface BookingState {
   weight: string; // 对应 API: weight_value (需要转换为 number)
   weightUnit: WeightUnit; // 对应 API: weight_unit
   coatCondition: CoatCondition | ""; // 对应 API: coat_condition
+  approveShave: boolean | null; // 对应 API: approve_shave
   behavior: Behavior | ""; // 对应 API: behavior
   groomingFrequency: GroomingFrequency | ""; // 对应 API: grooming_frequency
   petPhoto: File | null; // 对应 API: photos (数组) - 保留用于 UI 显示
@@ -141,6 +142,7 @@ interface BookingState {
   setWeight: (weight: string) => void;
   setWeightUnit: (unit: WeightUnit) => void;
   setCoatCondition: (condition: CoatCondition | "") => void;
+  setApproveShave: (value: boolean | null) => void;
   setBehavior: (behavior: Behavior | "") => void;
   setGroomingFrequency: (frequency: GroomingFrequency | "") => void;
   setPetPhoto: (file: File | null) => void;
@@ -199,6 +201,7 @@ const initialState = {
   weight: "",
   weightUnit: "lbs" as WeightUnit, // 后端默认使用 kg
   coatCondition: "" as CoatCondition | "",
+  approveShave: null as boolean | null,
   behavior: "" as Behavior | "",
   groomingFrequency: "" as GroomingFrequency | "",
   petPhoto: null as File | null,
@@ -240,9 +243,23 @@ export const useBookingStore = create<BookingState>((set) => ({
 
   setCurrentStep: (step) => set({ currentStep: step }),
 
-  nextStep: () => set((state) => ({ currentStep: Math.min(state.currentStep + 1, 6) })),
+  nextStep: () =>
+    set((state) => {
+      const nextStep = Math.min(state.currentStep + 1, 6);
+      if (nextStep !== state.currentStep) {
+        window.scrollTo({ top: 0, behavior: "instant" });
+      }
+      return { currentStep: nextStep };
+    }),
 
-  previousStep: () => set((state) => ({ currentStep: Math.max(state.currentStep - 1, 1) })),
+  previousStep: () =>
+    set((state) => {
+      const previousStep = Math.max(state.currentStep - 1, 1);
+      if (previousStep !== state.currentStep) {
+        window.scrollTo({ top: 0, behavior: "instant" });
+      }
+      return { currentStep: previousStep };
+    }),
 
   setAddress: (address) => set({ address }),
 
@@ -335,6 +352,8 @@ export const useBookingStore = create<BookingState>((set) => ({
 
   setCoatCondition: (condition) => set({ coatCondition: condition }),
 
+  setApproveShave: (value) => set({ approveShave: value }),
+
   setBehavior: (behavior) => set({ behavior }),
 
   setGroomingFrequency: (frequency) => set({ groomingFrequency: frequency }),
@@ -390,6 +409,7 @@ export const useBookingStore = create<BookingState>((set) => ({
       weight_value: weightValue,
       weight_unit: state.weightUnit,
       coat_condition: state.coatCondition || null,
+      approve_shave: state.approveShave,
       behavior: state.behavior || null,
       grooming_frequency: state.groomingFrequency || null,
       special_notes: state.specialNotes || null,
@@ -653,6 +673,7 @@ export const useBookingStore = create<BookingState>((set) => ({
       state.gender !== "" ||
       state.weight !== "" ||
       state.coatCondition !== "" ||
+      state.approveShave !== null ||
       state.behavior !== "" ||
       state.groomingFrequency !== "" ||
       state.petPhoto !== null ||

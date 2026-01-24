@@ -41,16 +41,18 @@ export function Step4() {
   // Check if user is a member
   const isMember = userInfo?.is_member === true;
 
-  // Track if user has declined membership
-  const [hasDeclinedMembership, setHasDeclinedMembership] = useState(false);
+  // Track whether user has interacted with discount checkboxes to avoid overriding later
+  const hasInitializedDiscounts = useRef(false);
+  const hasDeclinedMembership = !(useMembershipDiscount && useCashCoupon);
 
   // Set default checked state for membership discounts (only for non-members)
   useEffect(() => {
-    if (!isMember && !hasDeclinedMembership) {
+    if (!hasInitializedDiscounts.current && !isMember) {
       setUseMembershipDiscount(true);
       setUseCashCoupon(true);
+      hasInitializedDiscounts.current = true;
     }
-  }, [isMember, hasDeclinedMembership, setUseMembershipDiscount, setUseCashCoupon]);
+  }, [isMember, setUseMembershipDiscount, setUseCashCoupon]);
 
   const [isPackageExpanded, setIsPackageExpanded] = useState(false);
   const [isAddOnsExpanded, setIsAddOnsExpanded] = useState(false);
@@ -141,6 +143,28 @@ export function Step4() {
   const subtotalWithDiscount = packagePriceWithDiscount + addOnsPriceWithDiscount;
   const finalTotal = subtotalWithDiscount - cashCouponDiscount;
 
+  const handleMembershipDiscountChange = (checked: boolean) => {
+    hasInitializedDiscounts.current = true;
+    if (checked) {
+      setUseMembershipDiscount(true);
+      setUseCashCoupon(true);
+    } else {
+      setUseMembershipDiscount(false);
+      setUseCashCoupon(false);
+    }
+  };
+
+  const handleCashCouponChange = (checked: boolean) => {
+    hasInitializedDiscounts.current = true;
+    if (checked) {
+      setUseMembershipDiscount(true);
+      setUseCashCoupon(true);
+    } else {
+      setUseMembershipDiscount(false);
+      setUseCashCoupon(false);
+    }
+  };
+
   // Calculate savings
   const totalSavings = originalTotal - finalTotal;
 
@@ -159,7 +183,7 @@ export function Step4() {
   };
 
   const handleNoThanks = () => {
-    setHasDeclinedMembership(true);
+    hasInitializedDiscounts.current = true;
     setUseMembership(false);
     setUseMembershipDiscount(false);
     setUseCashCoupon(false);
@@ -500,26 +524,24 @@ export function Step4() {
                 <div className="content-stretch flex gap-[12px] items-start relative shrink-0 w-full">
                   <Checkbox
                     checked={useMembershipDiscount}
-                    onCheckedChange={setUseMembershipDiscount}
+                    onCheckedChange={handleMembershipDiscountChange}
                     label={`Membership ${membershipDiscountPercentage}% off *`}
                     containerClassName="relative shrink-0"
                   />
                 </div>
-                {!hasDeclinedMembership && (
-                  <div className="content-stretch flex items-start justify-between relative shrink-0 w-full">
-                    <Checkbox
-                      checked={useCashCoupon}
-                      onCheckedChange={setUseCashCoupon}
-                      label={`Cash coupon (${cashCouponInfo.count}x$${cashCouponInfo.amount} left)`}
-                      containerClassName="relative shrink-0"
-                    />
-                    {useCashCoupon && (
-                      <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px]">
-                        -${cashCouponInfo.amount.toFixed(0)}
-                      </p>
-                    )}
-                  </div>
-                )}
+                <div className="content-stretch flex items-start justify-between relative shrink-0 w-full">
+                  <Checkbox
+                    checked={useCashCoupon}
+                    onCheckedChange={handleCashCouponChange}
+                    label={`Cash coupon (${cashCouponInfo.count}x$${cashCouponInfo.amount} left)`}
+                    containerClassName="relative shrink-0"
+                  />
+                  {useCashCoupon && (
+                    <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px]">
+                      -${cashCouponInfo.amount.toFixed(0)}
+                    </p>
+                  )}
+                </div>
                 <div className="h-0 relative shrink-0 w-full border-t border-[#e0e0e0] my-[4px]" />
               </div>
               <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full">
@@ -556,6 +578,7 @@ export function Step4() {
             size="medium"
             variant="primary"
             showArrow={true}
+            textSize={14}
             onClick={handleContinueWithMembership}
           >
             {hasDeclinedMembership ? "Continue without membership" : "Continue with membership"}
@@ -563,6 +586,7 @@ export function Step4() {
           <OrangeButton
             size="medium"
             variant="outline"
+            textSize={14}
             onClick={previousStep}
           >
             Back
@@ -572,9 +596,9 @@ export function Step4() {
           <TertiaryButton
             variant="orange"
             onClick={handleNoThanks}
-            className="h-[36px] rounded-[32px]"
-            fontSize={16}
-            borderWidth={2}
+            className="h-[36px] rounded-[12px]"
+            fontSize={12}
+            borderWidth={1}
           >
             No, continue at regular price
           </TertiaryButton>

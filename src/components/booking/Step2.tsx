@@ -1,11 +1,20 @@
 import { useState, useEffect, useRef } from "react";
 import { Icon } from "@/components/common/Icon";
 import { CustomInput, CustomSelect, CustomSelectItem, CustomRadio, OrangeButton, FileUpload, type FileUploadItem } from "@/components/common";
+import { AutoComplete } from "@/components/common/AutoComplete";
 import { CustomTextarea } from "@/components/common/CustomTextarea";
 import { DatePicker } from "@/components/common/DatePicker";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
 import { useBookingStore } from "./bookingStore";
-import type { WeightUnit, Gender, PetType } from "./bookingStore";
+import type { WeightUnit, Gender, PetType, Behavior, CoatCondition } from "./bookingStore";
 import { ReferenceStylesUpload } from "./ReferenceStylesUpload";
 import type { PetBreedOut } from "@/lib/api";
 import { uploadPetPhoto, uploadReferencePhoto, buildImageUrl } from "@/lib/api";
@@ -29,6 +38,7 @@ export function Step2() {
     weight,
     weightUnit,
     coatCondition,
+    approveShave,
     behavior,
     groomingFrequency,
     specialNotes,
@@ -48,6 +58,7 @@ export function Step2() {
     setWeight,
     setWeightUnit,
     setCoatCondition,
+    setApproveShave,
     setBehavior,
     setGroomingFrequency,
     setSpecialNotes,
@@ -150,6 +161,32 @@ export function Step2() {
       };
     });
   });
+  const previousPetTypeRef = useRef(petType);
+  const [behaviorModal, setBehaviorModal] = useState<"hard_to_handle" | "senior_pets" | null>(null);
+  const [mattingModalOpen, setMattingModalOpen] = useState(false);
+  const [approveShaveSelection, setApproveShaveSelection] = useState<boolean | null>(approveShave ?? null);
+
+  const handleBehaviorSelect = (nextBehavior: Behavior) => {
+    setBehavior(nextBehavior);
+    if (nextBehavior === "hard_to_handle" || nextBehavior === "senior_pets") {
+      setBehaviorModal(nextBehavior);
+    }
+  };
+
+  const handleCoatConditionSelect = (nextCondition: CoatCondition) => {
+    setCoatCondition(nextCondition);
+    if (nextCondition === "matted" || nextCondition === "severely_matted") {
+      setMattingModalOpen(true);
+    } else {
+      setApproveShave(null);
+    }
+  };
+
+  const handleMattingSubmit = () => {
+    if (approveShaveSelection === null) return;
+    setApproveShave(approveShaveSelection);
+    setMattingModalOpen(false);
+  };
 
   const [petPhotoFiles, setPetPhotoFiles] = useState<File[]>(() => {
     const { petPhoto: initialPetPhoto } = useBookingStore.getState();
@@ -170,6 +207,12 @@ export function Step2() {
       loadPetBreeds();
     }
   }, [loadPetBreeds]);
+
+  useEffect(() => {
+    if (mattingModalOpen) {
+      setApproveShaveSelection(approveShave ?? null);
+    }
+  }, [mattingModalOpen, approveShave]);
 
   // 从 bookingStore 恢复图片状态（当 photoIds 或 photoUrls 变化时检查并恢复）
   // 这个 useEffect 确保 bookingStore 和 petPhotoItems 保持同步
@@ -878,9 +921,12 @@ export function Step2() {
 
   // Clear breed when pet type changes and current breed is not in the new options
   useEffect(() => {
-    const breedOptions = getBreedOptions(petType, petBreeds);
-    if (breed && !breedOptions.includes(breed)) {
-      setBreed("");
+    if (previousPetTypeRef.current !== petType) {
+      const breedOptions = getBreedOptions(petType, petBreeds);
+      if (breed && !breedOptions.includes(breed)) {
+        setBreed("");
+      }
+      previousPetTypeRef.current = petType;
     }
   }, [petType, breed, petBreeds, setBreed]);
 
@@ -906,7 +952,7 @@ export function Step2() {
                 <CustomInput
                   label="Pet name"
                   type="text"
-                  placeholder="Duke"
+                  placeholder="Enter pet name"
                   value={petName}
                   onChange={(e) => setPetName(e.target.value)}
                 />
@@ -947,10 +993,11 @@ export function Step2() {
             <div className="flex flex-col gap-[8px] items-start relative shrink-0 w-full">
               <div className="flex h-[12.25px] items-center justify-between relative shrink-0 w-full">
                 <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[14px]">
-                  Breed
+                  {isMixedBreed ? "Primary breed" : "Breed"}
                 </p>
                 <div className="flex gap-[4px] items-center justify-end relative shrink-0">
                   <Switch 
+                    className="cursor-pointer"
                     checked={isMixedBreed} 
                     onCheckedChange={setIsMixedBreed}
                   />
@@ -959,10 +1006,11 @@ export function Step2() {
                   </p>
                 </div>
               </div>
-              <CustomSelect
+              <AutoComplete
                 placeholder={isLoadingBreeds ? "Loading breeds..." : "Select or type breed"}
                 value={breed}
                 onValueChange={setBreed}
+                options={getBreedOptions(petType, petBreeds)}
                 disabled={isLoadingBreeds}
                 leftElement={
                   <Icon
@@ -970,13 +1018,7 @@ export function Step2() {
                     className="relative shrink-0 w-[20px] h-[20px] text-[#717182]"
                   />
                 }
-              >
-                {getBreedOptions(petType, petBreeds).map((breedOption) => (
-                  <CustomSelectItem key={breedOption} value={breedOption}>
-                    {breedOption}
-                  </CustomSelectItem>
-                ))}
-              </CustomSelect>
+              />
             </div>
             )}
 
@@ -1013,11 +1055,16 @@ export function Step2() {
               </div>
               <div className="flex flex-col items-start relative shrink-0 w-[140px]">
                 <CustomSelect
+                  className="cursor-pointer"
                   label="Gender"
                   placeholder="Select"
                   value={gender}
-                  onValueChange={(value) => setGender(value as Gender)}
+                  displayValue={gender ? `${gender[0].toUpperCase()}${gender.slice(1)}` : ""}
+                  onValueChange={(value) => setGender(value === "unknown" ? "" : (value as Gender))}
                 >
+                  {gender === "" ? (
+                    <CustomSelectItem value="unknown">Select</CustomSelectItem>
+                  ) : null}
                   <CustomSelectItem value="male">Male</CustomSelectItem>
                   <CustomSelectItem value="female">Female</CustomSelectItem>
                   <CustomSelectItem value="unknown">Unknown</CustomSelectItem>
@@ -1037,7 +1084,7 @@ export function Step2() {
                   <div className="box-border flex h-[36px] items-center overflow-clip px-[16px] py-[4px] relative rounded-[inherit] w-full">
                     <input
                       type="text"
-                      placeholder="3"
+                      placeholder="Enter weight"
                       value={weight}
                       onChange={(e) => setWeight(e.target.value)}
                       className="flex-1 font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] relative shrink-0 text-[#717182] text-[12.25px] bg-transparent border-none outline-none placeholder:text-[#717182]"
@@ -1076,19 +1123,19 @@ export function Step2() {
                   <CustomRadio
                     label="Not matted"
                     isSelected={coatCondition === "not_matted"}
-                    onClick={() => setCoatCondition("not_matted")}
+                    onClick={() => handleCoatConditionSelect("not_matted")}
                     className="self-stretch h-[53px]"
                   />
                   <CustomRadio
                     label="Matted"
                     isSelected={coatCondition === "matted"}
-                    onClick={() => setCoatCondition("matted")}
+                    onClick={() => handleCoatConditionSelect("matted")}
                     className="self-stretch h-[53px]"
                   />
                   <CustomRadio
                     label="Severely matted"
                     isSelected={coatCondition === "severely_matted"}
-                    onClick={() => setCoatCondition("severely_matted")}
+                    onClick={() => handleCoatConditionSelect("severely_matted")}
                     className="self-stretch h-[53px]"
                   />
                 </div>
@@ -1105,25 +1152,25 @@ export function Step2() {
                   <CustomRadio
                     label="Friendly"
                     isSelected={behavior === "friendly"}
-                    onClick={() => setBehavior("friendly")}
+                    onClick={() => handleBehaviorSelect("friendly")}
                     className="self-stretch h-[53px]"
                   />
                   <CustomRadio
                     label="Anxious"
                     isSelected={behavior === "anxious"}
-                    onClick={() => setBehavior("anxious")}
+                    onClick={() => handleBehaviorSelect("anxious")}
                     className="self-stretch h-[53px]"
                   />
                   <CustomRadio
                     label="Hard to handle"
                     isSelected={behavior === "hard_to_handle"}
-                    onClick={() => setBehavior("hard_to_handle")}
+                    onClick={() => handleBehaviorSelect("hard_to_handle")}
                     className="self-stretch h-[53px]"
                   />
                   <CustomRadio
                     label="Senior pets"
                     isSelected={behavior === "senior_pets"}
-                    onClick={() => setBehavior("senior_pets")}
+                    onClick={() => handleBehaviorSelect("senior_pets")}
                     className="self-stretch h-[53px]"
                   />
                 </div>
@@ -1131,6 +1178,197 @@ export function Step2() {
           </div>
         </div>
       </div>
+
+      <AlertDialog
+        open={behaviorModal === "hard_to_handle"}
+        onOpenChange={(open) => setBehaviorModal(open ? "hard_to_handle" : null)}
+      >
+        <AlertDialogContent className="bg-white rounded-[20px] border border-[rgba(0,0,0,0.2)] p-0 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] max-w-[90%] sm:max-w-[400px]">
+          <div className="flex flex-col gap-[32px] items-start pb-[32px] pt-[12px] w-full">
+            <AlertDialogHeader className="px-[12px] w-full">
+              <AlertDialogTitle className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] text-[#4C4C4C] text-center">
+                Hard to handle notice
+              </AlertDialogTitle>
+              <div className="bg-[rgba(0,0,0,0.1)] h-px w-full mt-[8px]" />
+            </AlertDialogHeader>
+            <div className="px-[24px] w-full">
+              <AlertDialogDescription asChild>
+                <div className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#4C4C4C] leading-[22.75px]">
+                  <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] text-[16px] mb-0 text-black">
+                    Hard to Handle
+                  </p>
+                  <p className="text-[14px] text-[#4C4C4C]">
+                    Some pets may become too anxious or aggressive during grooming. If extra care is needed, a handling fee may apply. If a pet shows signs of aggression, it may fall under our Non-Groomable Policy (see cancellation policy).
+                  </p>
+                </div>
+              </AlertDialogDescription>
+            </div>
+            <AlertDialogFooter className="px-[24px] pt-0 flex flex-row items-center justify-center sm:justify-center w-full">
+              <OrangeButton
+                variant="primary"
+                size="medium"
+                onClick={() => setBehaviorModal(null)}
+                className="w-[151px]"
+              >
+                I understand
+              </OrangeButton>
+            </AlertDialogFooter>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={behaviorModal === "senior_pets"}
+        onOpenChange={(open) => setBehaviorModal(open ? "senior_pets" : null)}
+      >
+        <AlertDialogContent className="bg-white rounded-[20px] border border-[rgba(0,0,0,0.2)] p-0 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] max-w-[90%] sm:max-w-[400px]">
+          <div className="flex flex-col gap-[32px] items-start pb-[32px] pt-[12px] w-full">
+            <AlertDialogHeader className="px-[12px] w-full">
+              <AlertDialogTitle className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] text-[#4C4C4C] text-center">
+                Senior pets notice
+              </AlertDialogTitle>
+              <div className="bg-[rgba(0,0,0,0.1)] h-px w-full mt-[8px]" />
+            </AlertDialogHeader>
+            <div className="px-[24px] w-full">
+              <AlertDialogDescription asChild>
+                <div className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#4C4C4C] leading-[22.75px]">
+                  <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] text-[16px] mb-0 text-black">
+                    Senior pets
+                  </p>
+                  <p className="text-[14px] text-[#4C4C4C]">
+                    Older pets often need more time and gentle handling. A handling fee may be added to ensure their comfort and safety during the service.
+                  </p>
+                </div>
+              </AlertDialogDescription>
+            </div>
+            <AlertDialogFooter className="px-[24px] pt-0 flex flex-row items-center justify-center sm:justify-center w-full">
+              <OrangeButton
+                variant="primary"
+                size="medium"
+                onClick={() => setBehaviorModal(null)}
+                className="w-[151px]"
+              >
+                I understand
+              </OrangeButton>
+            </AlertDialogFooter>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={mattingModalOpen} onOpenChange={setMattingModalOpen}>
+        <AlertDialogContent className="bg-white rounded-[20px] border border-[rgba(0,0,0,0.2)] p-0 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] max-w-[90%] sm:max-w-[400px]">
+          <div className="flex flex-col gap-[32px] items-start pb-[32px] pt-[12px] w-full">
+            <AlertDialogHeader className="px-[12px] w-full">
+              <AlertDialogTitle className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] text-[#4C4C4C] text-center">
+                Matting removal notice
+              </AlertDialogTitle>
+              <div className="bg-[rgba(0,0,0,0.1)] h-px w-full mt-[8px]" />
+            </AlertDialogHeader>
+            <div className="px-[24px] w-full">
+              <AlertDialogDescription asChild>
+                <div className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#4C4C4C] leading-[22.75px]">
+                  <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] text-[16px] mb-0 text-black">
+                    Matting removal notice
+                  </p>
+                  <p className="text-[14px] text-[#4C4C4C] mb-0">
+                    Mat removal is often painful and time-consuming, an additional fee may apply.
+                  </p>
+                  <p className="text-[14px] text-[#4C4C4C] mb-0">
+                    A shave-down may be the safest option, potentially revealing skin issues like irritations or parasites.
+                  </p>
+                  <p className="text-[14px] text-[#4C4C4C]">
+                    If shaving isn't approved, mats may be left if removal causes too much distress, and the full charge will still apply.
+                  </p>
+                </div>
+              </AlertDialogDescription>
+            </div>
+            <div className="px-[24px] w-full">
+              <div className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[16px] text-[#4a3c2a] leading-[28px] mb-[14px]">
+                Select one option
+              </div>
+              <div className="flex flex-col gap-[14px]">
+                <button
+                  type="button"
+                  onClick={() => setApproveShaveSelection(true)}
+                  className={`border-2 rounded-[14px] p-[16px] w-full text-left transition-colors ${
+                    approveShaveSelection === true
+                      ? "border-[#de6a07] bg-[#fff3e9]"
+                      : "border-[#e5e7eb] bg-white"
+                  }`}
+                >
+                  <div className="flex gap-[8px] items-start">
+                    <div className="relative shrink-0 size-[16px] mt-[2.5px]">
+                      <div className="size-[16px] rounded-full border border-solid border-[#717182] bg-white">
+                        {approveShaveSelection === true ? (
+                          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[8px] rounded-full bg-[#de6a07]" />
+                        ) : null}
+                      </div>
+                    </div>
+                    <div className="text-[14px] leading-[21px] text-[#8b6357]">
+                      <span className="font-['Comfortaa:Bold',sans-serif] font-bold">
+                        I approve{" "}
+                      </span>
+                      <span className="font-['Comfortaa:Regular',sans-serif] font-normal">
+                        the groomer to shave my pet
+                      </span>
+                      <br />
+                      <span className="font-['Comfortaa:Regular',sans-serif] font-normal">
+                        if needed.
+                      </span>
+                    </div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setApproveShaveSelection(false)}
+                  className={`border-2 rounded-[14px] p-[16px] w-full text-left transition-colors ${
+                    approveShaveSelection === false
+                      ? "border-[#de6a07] bg-[#fff3e9]"
+                      : "border-[#e5e7eb] bg-white"
+                  }`}
+                >
+                  <div className="flex gap-[8px] items-start">
+                    <div className="relative shrink-0 size-[16px] mt-[2.5px]">
+                      <div className="size-[16px] rounded-full border border-solid border-[#717182] bg-white">
+                        {approveShaveSelection === false ? (
+                          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[8px] rounded-full bg-[#de6a07]" />
+                        ) : null}
+                      </div>
+                    </div>
+                    <div className="text-[14px] leading-[21px] text-[#8b6357]">
+                      <span className="font-['Comfortaa:Bold',sans-serif] font-bold">
+                        I do not approve{" "}
+                      </span>
+                      <span className="font-['Comfortaa:Regular',sans-serif] font-normal">
+                        a shave-down and
+                      </span>
+                      <br />
+                      <span className="font-['Comfortaa:Regular',sans-serif] font-normal">
+                        understand that the full charge will
+                      </span>
+                      <br />
+                      <span className="font-['Comfortaa:Regular',sans-serif] font-normal">
+                        apply even if mats remain.
+                      </span>
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
+            <AlertDialogFooter className="px-[24px] pt-0 flex flex-row items-center justify-center sm:justify-center w-full">
+              <OrangeButton
+                variant="primary"
+                size="medium"
+                onClick={handleMattingSubmit}
+                disabled={approveShaveSelection === null}
+                className="w-[120px]"
+              >
+                Submit
+              </OrangeButton>
+            </AlertDialogFooter>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Grooming Frequency Card */}
       <div className="bg-white box-border flex flex-col gap-[20px] items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">

@@ -12,6 +12,7 @@ export {
   CustomAccordionItem,
 } from "./CustomAccordion";
 export * from "./CustomInput";
+export * from "./AutoComplete";
 export * from "./CustomSelect";
 export * from "./CustomTextarea";
 export * from "./FileUpload";

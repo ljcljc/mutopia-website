@@ -473,7 +473,7 @@ export function DatePicker({
           {showYearPicker && mode === "month" && (
             <div
               ref={yearScrollRef}
-              className="absolute bg-white h-[400px] rounded-[8px] top-[16px] left-[16px] w-[68px] z-[70] overflow-y-auto shadow-[0px_30px_84px_0px_rgba(19,10,46,0.08),0px_8px_32px_0px_rgba(19,10,46,0.07),0px_3px_14px_0px_rgba(19,10,46,0.03),0px_1px_3px_0px_rgba(19,10,46,0.13)]"
+              className="absolute bg-white max-h-[400px] rounded-[8px] top-[16px] left-[16px] w-[68px] z-60 py-[10px] overflow-y-auto shadow-[0px_30px_84px_0px_rgba(19,10,46,0.08),0px_8px_32px_0px_rgba(19,10,46,0.07),0px_3px_14px_0px_rgba(19,10,46,0.03),0px_1px_3px_0px_rgba(19,10,46,0.13)]"
               style={{
                 scrollbarWidth: "thin",
                 scrollbarColor: "#d1d5db transparent",
@@ -512,8 +512,8 @@ export function DatePicker({
                         isDisabled
                           ? "opacity-30 cursor-not-allowed"
                           : isSelected
-                            ? "bg-[#de6a07]"
-                            : "hover:bg-[#f8f7fa] group"
+                            ? "bg-[#de6a07] cursor-pointer"
+                            : "hover:bg-[#f8f7fa] group cursor-pointer"
                       }`}
                     >
                       <p
