@@ -35,7 +35,7 @@ export default function Dashboard() {
 
   return (
     <div className="w-full min-h-full flex flex-col">
-      <div className="w-full max-w-[944px] mx-auto px-6 py-8 flex-1">
+      <div className="w-full max-w-[944px] mx-auto px-6 pb-8 flex-1">
         <div className="flex flex-col gap-[20px]">
           <div className="h-[27px]">
             <h1 className="font-['Comfortaa:Bold',sans-serif] font-bold text-[20px] text-[#4A3C2A]">
