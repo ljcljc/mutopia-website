@@ -45,7 +45,7 @@ export default function AddressesCard() {
       {/* Address List */}
       {isLoadingAddresses ? (
         <div className="text-[#4A3C2A] text-sm">Loading addresses...</div>
-      ) : addresses.length === 0 ? (
+      ) : !Array.isArray(addresses) || addresses.length === 0 ? (
         <div className="text-[#4A3C2A] text-sm py-4">
           No addresses saved yet.
         </div>

@@ -72,7 +72,11 @@ export const useAccountStore = create<AccountState>((set, get: () => AccountStat
   fetchAddresses: async () => {
     set({ isLoadingAddresses: true });
     try {
-      const addresses = await getAddresses();
+      const response = await getAddresses();
+      // Handle paginated response: {total, page, page_size, items: [...]}
+      const addresses = Array.isArray(response) 
+        ? response 
+        : (response as any)?.items || [];
       set({ addresses, isLoadingAddresses: false });
     } catch (error) {
       console.error("Failed to load addresses:", error);
@@ -94,7 +98,11 @@ export const useAccountStore = create<AccountState>((set, get: () => AccountStat
   fetchCoupons: async () => {
     set({ isLoadingCoupons: true });
     try {
-      const coupons = await getMyCoupons();
+      const response = await getMyCoupons();
+      // Handle paginated response: {total, page, page_size, items: [...]}
+      const coupons = Array.isArray(response) 
+        ? response 
+        : (response as any)?.items || [];
       set({ coupons, isLoadingCoupons: false });
     } catch (error) {
       console.error("Failed to load coupons:", error);
@@ -115,6 +123,10 @@ export const useAccountStore = create<AccountState>((set, get: () => AccountStat
   // 获取会员过期日期（从 cash coupons 中获取最晚的 expires_at）
   getMembershipExpiryDate: (): string | null => {
     const state = get();
+    // Ensure coupons is an array
+    if (!Array.isArray(state.coupons)) {
+      return null;
+    }
     const cashCoupons: CouponOut[] = state.coupons.filter((coupon: CouponOut) => {
       return (
         state.isCashCoupon(coupon) &&
@@ -141,6 +153,10 @@ export const useAccountStore = create<AccountState>((set, get: () => AccountStat
   // 获取剩余优惠券数量
   getRemainingCashCouponsCount: (): number => {
     const state = get();
+    // Ensure coupons is an array
+    if (!Array.isArray(state.coupons)) {
+      return 0;
+    }
     return state.coupons.filter((coupon: CouponOut) => {
       return (
         state.isCashCoupon(coupon) &&
@@ -152,6 +168,10 @@ export const useAccountStore = create<AccountState>((set, get: () => AccountStat
   // 获取 cash coupon 的金额（验证所有金额是否一致）
   getCashCouponAmount: (): number | null => {
     const state = get();
+    // Ensure coupons is an array
+    if (!Array.isArray(state.coupons)) {
+      return null;
+    }
     const activeCashCoupons: CouponOut[] = state.coupons.filter((coupon: CouponOut) => {
       return (
         state.isCashCoupon(coupon) &&
