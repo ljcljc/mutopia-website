@@ -5,42 +5,50 @@
  * Figma: https://www.figma.com/design/uPtOY1EQwpnZkgAb8YhWMN/Landing_page?node-id=1417-11278&m=dev
  */
 
+import { useState } from "react";
 import { useAccountStore } from "./accountStore";
 import { Icon } from "@/components/common/Icon";
+import AddAddressModal from "./AddAddressModal";
 
 export default function AddressesCard() {
-  const { addresses, isLoadingAddresses, showComingSoonMessage } = useAccountStore();
+  const { addresses, isLoadingAddresses, fetchAddresses, showComingSoonMessage } = useAccountStore();
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const handleAdd = () => {
-    showComingSoonMessage("添加地址");
-    // TODO: 显示 toast 提示 "功能开发中"
+    setIsAddModalOpen(true);
+  };
+
+  const handleAddSuccess = () => {
+    // 刷新地址列表
+    fetchAddresses();
   };
 
   const handleDelete = (id: number) => {
     showComingSoonMessage("删除地址");
-    // TODO: 显示 toast 提示 "功能开发中"
+    // TODO: 实现删除地址功能
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 border border-[rgba(0,0,0,0.10)]">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center gap-2">
-          <Icon name="location" className="w-5 h-5 text-[#DE6A07] shrink-0" />
-          <h2 className="font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-lg">
-            Addresses
-          </h2>
+    <>
+      <div className="bg-white rounded-lg shadow-sm p-6 border border-[rgba(0,0,0,0.10)]">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-2">
+            <Icon name="location" className="w-5 h-5 text-[#DE6A07] shrink-0" />
+            <h2 className="font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-lg">
+              Addresses
+            </h2>
+          </div>
+          <button
+            onClick={handleAdd}
+            className="flex items-center gap-2 text-[#8B6357] hover:text-[#DE6A07]/80 cursor-pointer"
+          >
+            <Icon name="add-2" className="w-5 h-5" />
+            <span className="font-['Comfortaa',sans-serif] font-medium text-sm">
+              Add
+            </span>
+          </button>
         </div>
-        <button
-          onClick={handleAdd}
-          className="flex items-center gap-2 text-[#8B6357] hover:text-[#DE6A07]/80 cursor-pointer"
-        >
-          <Icon name="add-2" className="w-5 h-5" />
-          <span className="font-['Comfortaa',sans-serif] font-medium text-sm">
-            Add
-          </span>
-        </button>
-      </div>
 
       {/* Address List */}
       {isLoadingAddresses ? (
@@ -84,6 +92,14 @@ export default function AddressesCard() {
           ))}
         </div>
       )}
-    </div>
+      </div>
+
+      {/* Add Address Modal */}
+      <AddAddressModal
+        open={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
+        onSuccess={handleAddSuccess}
+      />
+    </>
   );
 }
