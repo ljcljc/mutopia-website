@@ -7,6 +7,7 @@ import PaymentSuccess from "@/pages/PaymentSuccess";
 import PaymentFail from "@/pages/PaymentFail";
 import Dashboard from "@/pages/account/Dashboard";
 import BookingDetail from "@/pages/account/BookingDetail";
+import AddPet from "@/pages/account/AddPet";
 import MyPets from "@/pages/account/MyPets";
 import Notifications from "@/pages/account/Notifications";
 import MyAccount from "@/pages/account/MyAccount";
@@ -53,6 +54,10 @@ export const router = createBrowserRouter([
       {
         path: "pets",
         element: <MyPets />,
+      },
+      {
+        path: "pets/new",
+        element: <AddPet />,
       },
       {
         path: "notifications",

@@ -81,6 +81,9 @@ export function AccountSidebar({ className }: AccountSidebarProps) {
 
   // 判断当前激活项（支持嵌套路由）
   const isActive = (path: string): boolean => {
+    if (location.pathname.startsWith("/account/pets/new")) {
+      return path === "/account/dashboard";
+    }
     if (path === "/account" || path === "/account/") {
       return (
         location.pathname === "/account" || location.pathname === "/account/"

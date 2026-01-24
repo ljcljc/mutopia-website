@@ -803,29 +803,27 @@ export async function createPet(
   params: CreatePetParams,
   body?: { photo_ids?: number[] | null; reference_photo_ids?: number[] | null }
 ): Promise<PetOut> {
-  // 构建查询参数（根据 openapi.json，所有参数都是查询参数）
-  const queryParams = new URLSearchParams();
-  queryParams.append("name", params.name);
-  if (params.pet_type) queryParams.append("pet_type", params.pet_type);
-  if (params.breed) queryParams.append("breed", params.breed);
-  if (params.mixed_breed !== undefined) {
-    queryParams.append("mixed_breed", String(params.mixed_breed));
-  }
-  if (params.precise_type) queryParams.append("precise_type", params.precise_type);
-  if (params.birthday) queryParams.append("birthday", params.birthday);
-  if (params.gender) queryParams.append("gender", params.gender);
-  if (params.weight_value !== undefined && params.weight_value !== null) {
-    queryParams.append("weight_value", String(params.weight_value));
-  }
-  if (params.weight_unit) queryParams.append("weight_unit", params.weight_unit);
-  if (params.coat_condition) queryParams.append("coat_condition", params.coat_condition);
-  if (params.behavior) queryParams.append("behavior", params.behavior);
-  if (params.grooming_frequency) queryParams.append("grooming_frequency", params.grooming_frequency);
-  if (params.special_notes) queryParams.append("special_notes", params.special_notes);
+  // 将所有参数合并到 data 中
+  const data = {
+    name: params.name,
+    ...(params.pet_type && { pet_type: params.pet_type }),
+    ...(params.breed && { breed: params.breed }),
+    ...(params.mixed_breed !== undefined && { mixed_breed: params.mixed_breed }),
+    ...(params.precise_type && { precise_type: params.precise_type }),
+    ...(params.birthday && { birthday: params.birthday }),
+    ...(params.gender && { gender: params.gender }),
+    ...(params.weight_value !== undefined && params.weight_value !== null && { weight_value: params.weight_value }),
+    ...(params.weight_unit && { weight_unit: params.weight_unit }),
+    ...(params.coat_condition && { coat_condition: params.coat_condition }),
+    ...(params.behavior && { behavior: params.behavior }),
+    ...(params.grooming_frequency && { grooming_frequency: params.grooming_frequency }),
+    ...(params.special_notes && { special_notes: params.special_notes }),
+    ...(body || { photo_ids: null, reference_photo_ids: null }),
+  };
 
   const response = await http.post<PetOut>(
-    `/api/pets/pets?${queryParams.toString()}`,
-    body || { photo_ids: null, reference_photo_ids: null }
+    `/api/pets/pets`,
+    data
   );
   return response.data;
 }

@@ -27,5 +27,6 @@ export * from "./Spinner";
 export * from "./TertiaryButton";
 export * from "./Icon";
 export * from "./MembershipCard";
+export * from "./PetForm";
 
 // 当添加新组件时，请在此文件中添加导出

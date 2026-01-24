@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { Icon } from "@/components/common/Icon";
 import { useAccountStore } from "../accountStore";
 import { buildImageUrl } from "@/lib/api";
@@ -91,6 +92,7 @@ function PetCard({ pet }: { pet: PetOut }) {
 }
 
 export default function DashboardMyPetsCard() {
+  const navigate = useNavigate();
   const { pets, isLoadingPets, fetchPets } = useAccountStore();
   const hasFetchedRef = useRef(false);
 
@@ -110,6 +112,7 @@ export default function DashboardMyPetsCard() {
         </p>
         <button
           type="button"
+          onClick={() => navigate("/account/pets/new")}
           className="flex items-center gap-[6px] font-['Comfortaa:Regular',sans-serif] font-bold text-[12.25px] leading-[17.5px] text-[#8B6357] cursor-pointer"
         >
           <Icon name="add-2" className="w-5 h-5" />
