@@ -55,9 +55,9 @@ export default function MyAccount() {
         </div>
 
         {/* Payment Method Card */}
-        <div className="mb-6">
+        {/* <div className="mb-6">
           <PaymentMethodCard />
-        </div>
+        </div> */}
 
         {/* Bottom Cards Section - Share & Earn and Membership */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
