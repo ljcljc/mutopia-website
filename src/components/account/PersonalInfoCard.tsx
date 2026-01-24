@@ -11,10 +11,11 @@ import { Icon } from "@/components/common/Icon";
 import ChangePasswordModal from "./ChangePasswordModal";
 import ModifyPersonalInfoModal from "./ModifyPersonalInfoModal";
 import { LoginModal } from "@/components/auth/LoginModal";
-import { sendPasswordResetCode, getCurrentUser } from "@/lib/api";
+import { sendPasswordResetCode, getCurrentUser, buildImageUrl } from "@/lib/api";
 import { getSendCountFromError } from "@/components/auth/forgotPasswordUtils";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
+import { useAvatarUpload } from "@/hooks/useAvatarUpload";
 
 /**
  * 获取用户 initials（姓名首字母）
@@ -45,6 +46,31 @@ export default function PersonalInfoCard() {
   const [isModifyPersonalInfoModalOpen, setIsModifyPersonalInfoModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [shouldRestoreChangePassword, setShouldRestoreChangePassword] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(false);
+  const [pendingAvatarUrl, setPendingAvatarUrl] = useState<string | null>(null);
+  
+  // 头像上传 hook
+  const {
+    isUploading: isUploadingAvatar,
+    uploadProgress,
+    handleClick: handleAvatarClick,
+    inputProps: avatarInputProps,
+  } = useAvatarUpload({
+    onSuccess: async () => {
+      // 上传成功后，标记需要等待图片加载
+      // 用户信息会在 hook 内部更新，这里我们等待图片加载完成
+    },
+  });
+
+  // 监听上传状态变化，当上传完成时，等待图片加载
+  useEffect(() => {
+    if (isUploadingAvatar) {
+      setIsImageLoading(true);
+    } else if (!isUploadingAvatar && userInfo?.avatar_url) {
+      // 上传完成，设置待加载的头像 URL
+      setPendingAvatarUrl(userInfo.avatar_url);
+    }
+  }, [isUploadingAvatar, userInfo?.avatar_url]);
   
   const { 
     step, 
@@ -121,11 +147,55 @@ export default function PersonalInfoCard() {
       <div className="flex items-start gap-6">
         {/* 左侧：头像 */}
         <div className="shrink-0">
-          <div className="w-[60px] h-[60px] rounded-full bg-[#8B6357] flex items-center justify-center">
-            <span className="text-white font-['Comfortaa',sans-serif] font-semibold text-lg">
-              {initials}
-            </span>
+          <div 
+            className="relative w-[60px] h-[60px] rounded-full bg-[#8B6357] flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity group"
+            onClick={handleAvatarClick}
+            title="Click to upload avatar"
+          >
+            {/* 如果有头像 URL，显示图片 */}
+            {userInfo.avatar_url ? (
+              <img
+                src={buildImageUrl(userInfo.avatar_url)}
+                alt={fullName}
+                className="w-full h-full rounded-full object-cover"
+                onLoad={() => {
+                  // 图片加载完成
+                  if (pendingAvatarUrl === userInfo.avatar_url) {
+                    setIsImageLoading(false);
+                    setPendingAvatarUrl(null);
+                  }
+                }}
+                onError={(e) => {
+                  // 如果图片加载失败，隐藏图片，显示 initials
+                  e.currentTarget.style.display = "none";
+                  setIsImageLoading(false);
+                  setPendingAvatarUrl(null);
+                }}
+              />
+            ) : (
+              /* 显示 initials（如果没有头像） */
+              <span className="text-white font-['Comfortaa',sans-serif] font-semibold text-lg">
+                {initials}
+              </span>
+            )}
+
+            {/* 上传进度覆盖层（上传时或图片加载中时显示） */}
+            {(isUploadingAvatar || isImageLoading) && (
+              <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
+                <div className="text-white text-xs font-medium">
+                  {isUploadingAvatar ? `${uploadProgress}%` : "Loading..."}
+                </div>
+              </div>
+            )}
+
+            {/* 悬停时显示上传提示 */}
+            <div className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/20 flex items-center justify-center transition-colors pointer-events-none">
+              <Icon name="pencil" className="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
           </div>
+          
+          {/* 隐藏的文件输入 - 使用 hook 提供的 inputProps */}
+          <input {...avatarInputProps} />
         </div>
 
         {/* 中间：用户信息 */}
