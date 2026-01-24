@@ -210,46 +210,17 @@ export function DatePicker({
     return Array.from({ length: yearCount }, (_, i) => minYear + i);
   }, [minDateObj, maxDateObj]);
 
-  // Store refs for year buttons to enable scrolling (for month mode)
-  const yearButtonRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
-
-  // Scroll to selected year when year picker opens (for month mode)
+  // Scroll to current year when year picker opens
   useEffect(() => {
-    if (showYearPicker && yearScrollRef.current && mode === "month") {
-      // For month mode, determine year from value if available
-      let yearToScroll = currentYear;
-      if (value && mode === "month") {
-        try {
-          const [yearStr] = value.split("-");
-          const yearFromValue = parseInt(yearStr, 10);
-          if (!isNaN(yearFromValue) && yearRange.includes(yearFromValue)) {
-            yearToScroll = yearFromValue;
-          }
-        } catch {
-          // Fallback to currentYear
-        }
-      }
-      
-      const yearButton = yearButtonRefs.current.get(yearToScroll);
-      if (yearButton && yearScrollRef.current) {
-        // Calculate scroll position manually
-        const container = yearScrollRef.current;
-        const buttonTop = yearButton.offsetTop;
-        const buttonHeight = yearButton.offsetHeight;
-        const containerHeight = container.clientHeight;
-        
-        // Calculate scroll position to center the button
-        const scrollPosition = buttonTop - (containerHeight / 2) + (buttonHeight / 2);
-        
-        // Use requestAnimationFrame to ensure DOM is ready
-        requestAnimationFrame(() => {
-          if (container) {
-            container.scrollTop = Math.max(0, scrollPosition);
-          }
-        });
+    if (showYearPicker && yearScrollRef.current) {
+      const currentYearIndex = yearRange.indexOf(currentYear);
+      if (currentYearIndex !== -1) {
+        // Scroll to center the current year (32px per item height)
+        const scrollTop = currentYearIndex * 32 - 184;
+        yearScrollRef.current.scrollTop = Math.max(0, scrollTop);
       }
     }
-  }, [showYearPicker, currentYear, yearRange, value, mode]);
+  }, [showYearPicker, currentYear, yearRange]);
 
   function handlePrevMonth() {
     let newMonth = currentMonth;
@@ -503,8 +474,6 @@ export function DatePicker({
                 scrollbarWidth: "thin",
                 scrollbarColor: "#d1d5db transparent",
               }}
-              onMouseDown={(e) => e.stopPropagation()}
-              onClick={(e) => e.stopPropagation()}
             >
               <div
                 aria-hidden="true"
@@ -523,14 +492,6 @@ export function DatePicker({
                   return (
                     <button
                       key={year}
-                      ref={(el) => {
-                        // Store ref for all year buttons
-                        if (el) {
-                          yearButtonRefs.current.set(year, el);
-                        } else {
-                          yearButtonRefs.current.delete(year);
-                        }
-                      }}
                       onClick={() => !isDisabled && handleYearClick(year)}
                       disabled={isDisabled}
                       className={`box-border content-stretch flex gap-[8px] items-start overflow-clip px-[16px] py-[4px] w-full transition-colors relative ${
