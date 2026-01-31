@@ -4,12 +4,6 @@ const imgIcon = "/images/logo.png";
 import { Icon } from "@/components/common/Icon";
 import { useAuthStore } from "@/components/auth/authStore";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   AlertDialog,
   AlertDialogContent,
   AlertDialogDescription,
@@ -18,11 +12,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { type MeOut } from "@/lib/api";
-import { useLogout } from "@/hooks/useLogout";
 import { useBookingStore } from "@/components/booking/bookingStore";
 import { BrownOutlineButton, OrangeButton } from "@/components/common";
 import { getEncryptedItem } from "@/lib/encryption";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
+import NotificationsPopover from "./NotificationsPopover";
+import AccountDropdown from "./AccountDropdown";
 
 function Logo() {
   return (
@@ -44,79 +39,6 @@ function Logo() {
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-function CreditsBadge() {
-  // TODO: Replace with actual credits from API when available
-  const credits = "$0.00";
-  
-  return (
-    <div className="bg-[#de6a07] h-[24px] relative rounded-[12px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity" data-name="Badge">
-      <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[4px] h-[24px] items-center justify-center overflow-clip px-[16px] py-[4px] relative rounded-[inherit]">
-        <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[14px] relative shrink-0 text-[10px] text-white whitespace-nowrap">
-          <span>Credits </span>{credits}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function UserInfo({ userInfo, fallbackName }: { userInfo?: MeOut | null; fallbackName?: string }) {
-  const userName = userInfo 
-    ? (userInfo.first_name || userInfo.email.split("@")[0] || "User")
-    : (fallbackName || "User");
-  const { handleLogout } = useLogout();
-
-  return (
-    <div className="content-stretch flex gap-[10.5px] h-[28px] items-center relative" data-name="Buttons">
-      <CreditsBadge />
-      
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <div className="relative shrink-0 cursor-pointer hover:opacity-80 transition-opacity" data-name="Button tertiary">
-            <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[8px] items-center px-[12px] py-[4px] relative">
-              <div className="bg-[#8b6357] overflow-clip relative rounded-[100px] shrink-0 size-[20px] flex items-center justify-center" data-name="Icons/Avatar/Brown/Default/Rempli">
-                <Icon
-                  name="user"
-                  aria-label="User"
-                  className="block size-full text-white"
-                />
-              </div>
-              <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#8b6357] text-[12px]">
-                {userName}
-              </p>
-            </div>
-          </div>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="min-w-[160px]">
-          <DropdownMenuItem
-            onClick={handleLogout}
-            className="cursor-pointer text-[#8b6357] hover:text-[#6f4e44] hover:bg-[#8b6357]/5"
-          >
-            <span className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px]">
-              Log out
-            </span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <button
-        className="relative shrink-0 size-[24px] cursor-pointer hover:opacity-80 transition-opacity"
-        aria-label="Notifications"
-        data-name="notifications"
-      >
-        <div className="bg-clip-padding border-0 border-transparent border-solid box-border overflow-clip relative rounded-[inherit] size-[24px]">
-          <div className="absolute inset-[8.33%_16.67%]" data-name="icon">
-            <Icon
-              name="notify"
-              aria-label="Notifications"
-              className="block max-w-none size-full text-[#8b6357]"
-            />
-          </div>
-        </div>
-      </button>
     </div>
   );
 }
@@ -266,27 +188,15 @@ export default function HeaderApp() {
             <>
               <div className="flex items-center gap-[10.5px] sm:hidden">
                 <CreditsBadge />
-                <button
-                  className="relative shrink-0 size-[24px] cursor-pointer hover:opacity-80 transition-opacity"
-                  aria-label="Notifications"
-                  data-name="notifications"
-                >
-                  <div className="bg-clip-padding border-0 border-transparent border-solid box-border overflow-clip relative rounded-[inherit] size-[24px]">
-                    <div className="absolute inset-[8.33%_16.67%]" data-name="icon">
-                      <Icon
-                        name="notify"
-                        aria-label="Notifications"
-                        className="block max-w-none size-full text-[#8b6357]"
-                      />
-                    </div>
-                  </div>
-                </button>
+                <NotificationsPopover />
               </div>
-              <div className="hidden sm:flex">
-                <UserInfo 
-                  userInfo={userInfo ?? undefined} 
+              <div className="hidden sm:flex items-center gap-[10.5px]">
+                <CreditsBadge />
+                <AccountDropdown
+                  userInfo={userInfo ?? undefined}
                   fallbackName={user.name || user.email.split("@")[0]}
                 />
+                <NotificationsPopover />
               </div>
             </>
           )}
@@ -334,6 +244,24 @@ export default function HeaderApp() {
           </div>
         </AlertDialogContent>
       </AlertDialog>
+    </div>
+  );
+}
+function CreditsBadge() {
+  // TODO: Replace with actual credits from API when available
+  const credits = "$0.00";
+
+  return (
+    <div
+      className="bg-[#de6a07] h-[24px] relative rounded-[12px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity"
+      data-name="Badge"
+    >
+      <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[4px] h-[24px] items-center justify-center overflow-clip px-[16px] py-[4px] relative rounded-[inherit]">
+        <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[14px] relative shrink-0 text-[10px] text-white whitespace-nowrap">
+          <span>Credits </span>
+          {credits}
+        </p>
+      </div>
     </div>
   );
 }

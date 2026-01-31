@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 // 使用实际图片替换占位图片
 const imgIcon = "/images/logo.png";
 import { Icon } from "@/components/common/Icon";
@@ -121,9 +122,14 @@ function ApplyAsGroomerButton() {
 
 function LoginSignUpButton() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
-    <LoginModal open={isLoginModalOpen} onOpenChange={setIsLoginModalOpen}>
+    <LoginModal
+      open={isLoginModalOpen}
+      onOpenChange={setIsLoginModalOpen}
+      onSuccess={() => navigate("/account/dashboard")}
+    >
       <OrangeButton size="compact" showArrow={false} className="shrink-0">
         Log in/sign up
       </OrangeButton>
@@ -312,8 +318,14 @@ function MobileButton2() {
     );
   }
 
+  const navigate = useNavigate();
+
   return (
-    <LoginModal open={isLoginModalOpen} onOpenChange={setIsLoginModalOpen}>
+    <LoginModal
+      open={isLoginModalOpen}
+      onOpenChange={setIsLoginModalOpen}
+      onSuccess={() => navigate("/account/dashboard")}
+    >
       <div
         className="bg-[#8b6357] h-[48px] relative rounded-[2.47134e+07px] shrink-0 w-full cursor-pointer hover:bg-[#6f4e44] transition-colors"
         data-name="Button"

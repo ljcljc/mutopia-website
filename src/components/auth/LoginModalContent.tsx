@@ -51,7 +51,7 @@ import { getSendCountFromError } from "./forgotPasswordUtils";
 // Maximum number of times a verification code can be sent
 const MAX_SEND_COUNT = 5;
 
-export function ModalContent({ onClose }: { onClose: () => void }) {
+export function ModalContent({ onClose, onSuccess }: { onClose: () => void; onSuccess?: () => void }) {
   const {
     step,
     email,
@@ -680,6 +680,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
       setTimeout(() => {
         reset();
         onClose();
+        onSuccess?.();
       }, 500);
     } catch (err) {
       let errorMessage = "Google login failed. Please try again.";
@@ -925,6 +926,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
         setTimeout(() => {
           reset();
           onClose();
+          onSuccess?.();
         }, 500);
       } else {
         throw new Error("Facebook login was cancelled or failed.");
@@ -1239,6 +1241,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
       setTimeout(() => {
         reset();
         onClose();
+        onSuccess?.();
       }, 500);
     } catch (err) {
       let errorMessage = "Something went wrong. Please try again.";
@@ -1305,6 +1308,7 @@ export function ModalContent({ onClose }: { onClose: () => void }) {
       setTimeout(() => {
         reset();
         onClose();
+        onSuccess?.();
       }, 500);
     } catch (err) {
       let errorMessage = "Something went wrong. Please try again.";

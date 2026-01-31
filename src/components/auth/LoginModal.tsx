@@ -12,9 +12,10 @@ interface LoginModalProps {
   children: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
-export function LoginModal({ children, open, onOpenChange }: LoginModalProps) {
+export function LoginModal({ children, open, onOpenChange, onSuccess }: LoginModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -23,7 +24,7 @@ export function LoginModal({ children, open, onOpenChange }: LoginModalProps) {
         <DialogDescription className="sr-only">
           请输入您的邮箱地址以登录或注册账户
         </DialogDescription>
-        <ModalContent onClose={() => onOpenChange?.(false)} />
+        <ModalContent onClose={() => onOpenChange?.(false)} onSuccess={onSuccess} />
       </DialogContent>
     </Dialog>
   );
