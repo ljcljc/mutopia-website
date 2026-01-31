@@ -1,5 +1,13 @@
 import { create } from "zustand";
-import { getAddresses, getMembershipPlans, getMyCoupons, getPets, getMyBookings, getMembershipInfo } from "@/lib/api";
+import {
+  getAddresses,
+  getMembershipPlans,
+  getMyCoupons,
+  getPets,
+  getMyBookings,
+  getMembershipInfo,
+  getMemorializedPets,
+} from "@/lib/api";
 import type { AddressOut, MembershipPlanOut, CouponOut, PetOut, BookingListOut, MembershipInfoOut } from "@/lib/api";
 
 interface AccountState {
@@ -31,6 +39,10 @@ interface AccountState {
   pets: PetOut[];
   isLoadingPets: boolean;
   
+  // 已纪念宠物列表（✅ 已实现接口）
+  memorializedPets: PetOut[];
+  isLoadingMemorializedPets: boolean;
+  
   // 预约列表（✅ 已实现接口）
   upcomingBookings: BookingListOut[];
   historyBookings: BookingListOut[];
@@ -52,6 +64,7 @@ interface AccountState {
   fetchCashCoupons: () => Promise<void>;
   fetchSpecialCoupons: () => Promise<void>;
   fetchPets: () => Promise<void>;
+  fetchMemorializedPets: () => Promise<void>;
   fetchUpcomingBookings: () => Promise<void>;
   fetchHistoryBookings: () => Promise<void>;
   
@@ -83,6 +96,8 @@ export const useAccountStore = create<AccountState>((set, get: () => AccountStat
   isLoadingSpecialCoupons: false,
   pets: [],
   isLoadingPets: false,
+  memorializedPets: [],
+  isLoadingMemorializedPets: false,
   upcomingBookings: [],
   historyBookings: [],
   isLoadingBookings: false,
@@ -198,6 +213,18 @@ export const useAccountStore = create<AccountState>((set, get: () => AccountStat
     } catch (error) {
       console.error("Failed to load pets:", error);
       set({ pets: [], isLoadingPets: false });
+    }
+  },
+  
+  fetchMemorializedPets: async () => {
+    set({ isLoadingMemorializedPets: true });
+    try {
+      const response = await getMemorializedPets({ page: 1, page_size: 50 });
+      const memorializedPets = response.items;
+      set({ memorializedPets, isLoadingMemorializedPets: false });
+    } catch (error) {
+      console.error("Failed to load memorialized pets:", error);
+      set({ memorializedPets: [], isLoadingMemorializedPets: false });
     }
   },
   

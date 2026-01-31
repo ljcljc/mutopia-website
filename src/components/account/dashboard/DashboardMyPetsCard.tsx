@@ -25,6 +25,22 @@ function formatBirthday(birthday?: string | null): string {
 }
 
 /**
+ * 格式化日期显示（YYYY-MM-DD）
+ */
+function formatDate(dateString?: string | null): string {
+  if (!dateString) return "-";
+  try {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  } catch {
+    return dateString;
+  }
+}
+
+/**
  * 格式化重量显示
  */
 function formatWeight(weightValue?: number | string | null, weightUnit?: string | null): string {
@@ -65,7 +81,7 @@ function PetCard({ pet, onSelect }: { pet: PetOut; onSelect: (petId: number) => 
       onClick={() => onSelect(pet.id)}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onSelect(pet.id)}
     >
-      <div className="flex items-center w-full gap-[16px]">
+      <div className="flex w-full gap-[16px]">
         <div className="size-[56px] rounded-full overflow-hidden border border-[#E5E7EB] bg-[#E5E7EB] flex items-center justify-center">
           {avatarUrl ? (
             <img alt={pet.name} className="size-full object-cover object-center" src={avatarUrl} />
@@ -97,9 +113,51 @@ function PetCard({ pet, onSelect }: { pet: PetOut; onSelect: (petId: number) => 
   );
 }
 
+function MemorializedPetCard({ pet, onSelect }: { pet: PetOut; onSelect: (petId: number) => void }) {
+  const avatarUrl = pet.primary_photo
+    ? buildImageUrl(pet.primary_photo)
+    : pet.photos && pet.photos.length > 0
+    ? buildImageUrl(pet.photos[0])
+    : "";
+
+  const birthday = formatBirthday(pet.birthday);
+  const memorializedAt = formatDate(pet.memorialized_at);
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      className="relative bg-white border border-[#E5E7EB] rounded-[12px] p-[14px] flex items-center gap-[16px] w-full cursor-pointer transition-colors duration-200 hover:bg-[#F9FAFB] overflow-hidden"
+      onClick={() => onSelect(pet.id)}
+      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onSelect(pet.id)}
+    >
+      <div className="flex w-full gap-[16px]">
+        <div className="size-[56px] rounded-full overflow-hidden border border-[#E5E7EB] bg-[#E5E7EB] flex items-center justify-center">
+          {avatarUrl ? (
+            <img alt={pet.name} className="size-full object-cover object-center" src={avatarUrl} />
+          ) : (
+            <Icon name="pet" className="size-8 text-[#99A1AF]" />
+          )}
+        </div>
+        <div className="flex-1">
+          <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[16px] leading-[28px] text-[#DE6A07]">
+            {pet.name}
+          </p>
+          <p className="font-['Comfortaa:Regular',sans-serif] font-bold text-[12px] leading-[18px] text-[#4A3C2A]">
+            {birthday} - {memorializedAt}
+          </p>
+        </div>
+      </div>
+      <Icon name="nav-next" className="text-[#99A1AF]" size={14} />
+      <div className="absolute inset-0 bg-[rgba(0,0,0,0.12)] pointer-events-none rounded-[12px]" />
+    </div>
+  );
+}
+
 export default function DashboardMyPetsCard() {
   const navigate = useNavigate();
-  const { pets, isLoadingPets, fetchPets } = useAccountStore();
+  const { pets, memorializedPets, isLoadingPets, isLoadingMemorializedPets, fetchPets, fetchMemorializedPets } =
+    useAccountStore();
   const hasFetchedRef = useRef(false);
 
   // 组件挂载时加载数据（只执行一次）
@@ -107,6 +165,7 @@ export default function DashboardMyPetsCard() {
     if (hasFetchedRef.current) return;
     hasFetchedRef.current = true;
     fetchPets();
+    fetchMemorializedPets();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -140,6 +199,25 @@ export default function DashboardMyPetsCard() {
           ))}
         </div>
       )}
+
+      {isLoadingMemorializedPets ? (
+        <div className="text-[#4A3C2A] text-sm py-4">Loading memorialized pets...</div>
+      ) : memorializedPets.length > 0 ? (
+        <div className="mt-[20px]">
+          <p className="font-['Comfortaa:Medium',sans-serif] font-medium text-[14px] leading-[21px] text-[#4A3C2A] mb-[12px]">
+            Memorialized
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
+            {memorializedPets.map((pet) => (
+              <MemorializedPetCard
+                key={`memorialized-${pet.id}`}
+                pet={pet}
+                onSelect={(petId) => navigate(`/account/pets/memorialized?pet=${petId}`)}
+              />
+            ))}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

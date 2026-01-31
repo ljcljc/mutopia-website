@@ -183,6 +183,9 @@ export interface PetOut {
   photos: string[]; // 照片 URL 数组
   reference_photos: string[]; // 参考照片 URL 数组
   special_notes?: string | null;
+  used_in_booking?: boolean;
+  memorialized_at?: string | null;
+  is_memorialized?: boolean;
   photo_ids: number[]; // 照片 ID 数组
   reference_photo_ids: number[]; // 参考照片 ID 数组
 }
@@ -198,6 +201,25 @@ export interface PetBreedOut {
   id: number;
   pet_type: string;
   breed: string;
+}
+
+export interface MessageOut {
+  id: number;
+  channel: string;
+  type: string;
+  title: string;
+  content: string;
+  link_text?: string | null;
+  link_uri?: string | null;
+  sent_at: string;
+  is_read: boolean;
+}
+
+export interface MessagePageOut {
+  total: number;
+  page: number;
+  page_size: number;
+  items: MessageOut[];
 }
 
 // PetPayload 用于提交预约时的宠物信息
@@ -947,6 +969,42 @@ export async function getMemorializedPets(params?: {
  */
 export async function memorializePet(petId: number): Promise<OkOut> {
   const response = await http.post<OkOut>(`/api/pets/pets/${petId}/memorialize`);
+  return response.data;
+}
+
+/**
+ * 获取消息列表
+ */
+export async function getMessages(params?: {
+  page?: number;
+  page_size?: number;
+  channel?: "in_app" | "email";
+}): Promise<MessagePageOut> {
+  const queryParams = new URLSearchParams();
+  if (params?.page) queryParams.append("page", String(params.page));
+  if (params?.page_size) queryParams.append("page_size", String(params.page_size));
+  if (params?.channel) queryParams.append("channel", params.channel);
+  const url = `/api/messages${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+  const response = await http.get<MessagePageOut>(url);
+  return response.data;
+}
+
+/**
+ * 标记单条消息已读
+ */
+export async function markMessageRead(messageId: number): Promise<OkOut> {
+  const response = await http.post<OkOut>(`/api/messages/${messageId}/read`);
+  return response.data;
+}
+
+/**
+ * 标记全部消息已读
+ */
+export async function markAllMessagesRead(params?: { channel?: "in_app" | "email" }): Promise<OkOut> {
+  const queryParams = new URLSearchParams();
+  if (params?.channel) queryParams.append("channel", params.channel);
+  const url = `/api/messages/read_all${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+  const response = await http.post<OkOut>(url);
   return response.data;
 }
 

@@ -1607,6 +1607,108 @@
         },
         "security": [{ "JWTAuth": [] }]
       }
+    },
+    "/api/messages": {
+      "get": {
+        "operationId": "api_messages_list_messages",
+        "summary": "List Messages",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": { "default": 1, "title": "Page", "type": "integer" },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "schema": {
+              "default": 10,
+              "title": "Page Size",
+              "type": "integer"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "channel",
+            "schema": {
+              "default": "in_app",
+              "title": "Channel",
+              "type": "string"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MessagePageOut" }
+              }
+            }
+          }
+        },
+        "tags": ["messages"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/messages/{message_id}/read": {
+      "post": {
+        "operationId": "api_messages_mark_message_read",
+        "summary": "Mark Message Read",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "message_id",
+            "schema": { "title": "Message Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OkOut" }
+              }
+            }
+          }
+        },
+        "tags": ["messages"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/messages/read_all": {
+      "post": {
+        "operationId": "api_messages_mark_all_read",
+        "summary": "Mark All Read",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "channel",
+            "schema": {
+              "default": "in_app",
+              "title": "Channel",
+              "type": "string"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OkOut" }
+              }
+            }
+          }
+        },
+        "tags": ["messages"],
+        "security": [{ "JWTAuth": [] }]
+      }
     }
   },
   "components": {
@@ -3481,6 +3583,51 @@
         },
         "required": ["invite_code"],
         "title": "InviteBindIn",
+        "type": "object"
+      },
+      "MessageOut": {
+        "properties": {
+          "id": { "title": "Id", "type": "integer" },
+          "channel": { "title": "Channel", "type": "string" },
+          "type": { "title": "Type", "type": "string" },
+          "title": { "title": "Title", "type": "string" },
+          "content": { "title": "Content", "type": "string" },
+          "link_text": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Link Text"
+          },
+          "link_uri": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Link Uri"
+          },
+          "sent_at": { "title": "Sent At", "type": "string" },
+          "is_read": { "title": "Is Read", "type": "boolean" }
+        },
+        "required": [
+          "id",
+          "channel",
+          "type",
+          "title",
+          "content",
+          "sent_at",
+          "is_read"
+        ],
+        "title": "MessageOut",
+        "type": "object"
+      },
+      "MessagePageOut": {
+        "properties": {
+          "total": { "title": "Total", "type": "integer" },
+          "page": { "title": "Page", "type": "integer" },
+          "page_size": { "title": "Page Size", "type": "integer" },
+          "items": {
+            "items": { "$ref": "#/components/schemas/MessageOut" },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": ["total", "page", "page_size", "items"],
+        "title": "MessagePageOut",
         "type": "object"
       }
     },

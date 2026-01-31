@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useAccountStore } from "@/components/account/accountStore";
 import { Icon } from "@/components/common/Icon";
 import { OrangeButton } from "@/components/common/OrangeButton";
-import { FileUpload, type FileUploadItem } from "@/components/common/FileUpload";
+import { buildImageUrl, deletePet } from "@/lib/api";
 import { CustomTextarea } from "@/components/common/CustomTextarea";
-import { buildImageUrl, updatePet, deletePet, memorializePet } from "@/lib/api";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -53,48 +52,64 @@ function formatLabel(value?: string | null): string {
     .join(" ");
 }
 
-export default function MyPets() {
+function ReadonlyPhotoGrid({ urls }: { urls: string[] }) {
+  if (!urls.length) {
+    return (
+      <div className="text-[#4A3C2A] text-sm py-2">No photos yet.</div>
+    );
+  }
+
+  return (
+    <div className="flex flex-wrap gap-[12px]">
+      {urls.map((url, index) => (
+        <div
+          key={`${url}-${index}`}
+          className="h-[80px] w-[96px] overflow-hidden rounded-[8px] border border-neutral-200 bg-neutral-100"
+        >
+          <img
+            alt="Pet"
+            className="size-full object-cover object-center"
+            src={buildImageUrl(url)}
+            loading="lazy"
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default function MemorializedPets() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { pets, isLoadingPets, fetchPets } = useAccountStore();
+  const { memorializedPets, isLoadingMemorializedPets, fetchMemorializedPets } = useAccountStore();
   const [activePetId, setActivePetId] = useState<number | null>(null);
-  const [petPhotoItems, setPetPhotoItems] = useState<FileUploadItem[]>([]);
-  const [referencePhotoItems, setReferencePhotoItems] = useState<FileUploadItem[]>([]);
-  const [notes, setNotes] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [isMemorializing, setIsMemorializing] = useState(false);
 
   const petIdFromUrl = searchParams.get("pet");
 
   useEffect(() => {
-    fetchPets();
-  }, [fetchPets]);
+    fetchMemorializedPets();
+  }, [fetchMemorializedPets]);
 
   useEffect(() => {
-    if (pets.length === 0) {
+    if (memorializedPets.length === 0) {
       setActivePetId(null);
       return;
     }
-    // 优先使用 URL 中的 pet id（从 Dashboard My pets 跳转过来时打开对应条目）
     if (petIdFromUrl) {
       const id = Number.parseInt(petIdFromUrl, 10);
-      if (Number.isFinite(id) && pets.some((p) => p.id === id)) {
+      if (Number.isFinite(id) && memorializedPets.some((p) => p.id === id)) {
         setActivePetId(id);
         return;
       }
     }
     if (activePetId === null) {
-      setActivePetId(pets[0].id);
-    } else {
-      const activePetExists = pets.some((pet) => pet.id === activePetId);
-      if (!activePetExists) {
-        setActivePetId(pets[0].id);
-      }
+      setActivePetId(memorializedPets[0].id);
+    } else if (!memorializedPets.some((pet) => pet.id === activePetId)) {
+      setActivePetId(memorializedPets[0].id);
     }
-  }, [pets, petIdFromUrl, activePetId]);
+  }, [memorializedPets, petIdFromUrl, activePetId]);
 
-  // 切换宠物时若 URL 带有 ?pet=，可选择性清除（避免与当前选中不一致）
   const handleSelectPet = (id: number) => {
     setActivePetId(id);
     if (petIdFromUrl && Number.parseInt(petIdFromUrl, 10) !== id) {
@@ -106,100 +121,21 @@ export default function MyPets() {
     }
   };
 
-  const activePet = useMemo(() => pets.find((pet) => pet.id === activePetId) || null, [pets, activePetId]);
-  const isMemorialized = Boolean(activePet?.is_memorialized);
-
-  useEffect(() => {
-    if (!activePet) {
-      setPetPhotoItems([]);
-      setReferencePhotoItems([]);
-      setNotes("");
-      return;
-    }
-
-    const petPhotos = activePet.photos || [];
-    const referencePhotos = activePet.reference_photos || [];
-
-    const buildItems = (photos: string[]): FileUploadItem[] =>
-      photos.map((photoUrl, index) => ({
-        file: new File([], `pet-photo-${activePet.id}-${index}.jpg`, { type: "image/jpeg" }),
-        previewUrl: buildImageUrl(photoUrl),
-        uploadStatus: "uploaded",
-        uploadProgress: 100,
-      }));
-
-    setPetPhotoItems(buildItems(petPhotos));
-    setReferencePhotoItems(buildItems(referencePhotos));
-    setNotes(activePet.special_notes || "");
-  }, [activePet]);
-
-  const handlePetPhotoChange = (files: File[]) => {
-    const newItems = files.map((file) => ({
-      file,
-      previewUrl: URL.createObjectURL(file),
-      uploadStatus: "uploaded" as const,
-      uploadProgress: 100,
-    }));
-    setPetPhotoItems((prev) => [...prev, ...newItems]);
-  };
-
-  const handleReferencePhotoChange = (files: File[]) => {
-    const newItems = files.map((file) => ({
-      file,
-      previewUrl: URL.createObjectURL(file),
-      uploadStatus: "uploaded" as const,
-      uploadProgress: 100,
-    }));
-    setReferencePhotoItems((prev) => [...prev, ...newItems]);
-  };
-
-  const handleRemoveItem = (setter: React.Dispatch<React.SetStateAction<FileUploadItem[]>>, index: number) => {
-    setter((prev) => {
-      const item = prev[index];
-      if (item?.previewUrl?.startsWith("blob:")) {
-        URL.revokeObjectURL(item.previewUrl);
-      }
-      return prev.filter((_, i) => i !== index);
-    });
-  };
-
-  const handleSaveNotes = async () => {
-    if (!activePet) return;
-    setIsSaving(true);
-    try {
-      await updatePet(activePet.id, { special_notes: notes || null });
-      toast.success("Saved successfully.");
-    } catch (error) {
-      console.error("Failed to save notes:", error);
-      toast.error("Failed to save. Please try again.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
+  const activePet = useMemo(
+    () => memorializedPets.find((pet) => pet.id === activePetId) || null,
+    [memorializedPets, activePetId]
+  );
 
   const handleDeletePet = async () => {
     if (!activePet) return;
-
     const deletedPetId = activePet.id;
     const deletedPetName = activePet.name;
-    const currentPets = [...pets];
     setIsDeleting(true);
     try {
       await deletePet(deletedPetId);
       toast.success(`${deletedPetName} has been deleted successfully.`);
-      
-      // 刷新宠物列表（useEffect 会自动处理激活宠物的切换）
-      await fetchPets();
-      if (currentPets.length > 1) {
-        const currentIndex = currentPets.findIndex((pet) => pet.id === deletedPetId);
-        const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % currentPets.length : 0;
-        const nextPet = currentPets.find((pet) => pet.id !== deletedPetId) || currentPets[nextIndex];
-        if (nextPet) {
-          setActivePetId(nextPet.id);
-        }
-      } else {
-        setActivePetId(null);
-      }
+      await fetchMemorializedPets();
+      setIsDeleteOpen(false);
     } catch (error) {
       console.error("Failed to delete pet:", error);
       toast.error("Failed to delete pet. Please try again.");
@@ -208,63 +144,51 @@ export default function MyPets() {
     }
   };
 
-  const handleMemorializePet = async () => {
-    if (!activePet || isMemorialized) return;
-    setIsMemorializing(true);
-    try {
-      await memorializePet(activePet.id);
-      toast.success("Pet has been memorialized.");
-      await fetchPets();
-    } catch (error) {
-      console.error("Failed to memorialize pet:", error);
-      toast.error("Failed to memorialize. Please try again.");
-    } finally {
-      setIsMemorializing(false);
-    }
-  };
-
   return (
     <div className="w-full min-h-full flex flex-col">
-      <div className="w-full max-w-[944px] mx-auto px-6 pb-8 flex-1">
-        <div className="flex flex-col gap-[21px]">
-          <div className="flex justify-between">
-            <h1 className="font-['Comfortaa:Bold',sans-serif] font-bold text-[20px] text-[#4A3C2A]">
-              My pets
-            </h1>
-            <div className="flex items-center gap-[8px] overflow-x-auto max-w-[520px] pl-[2px] pr-[2px]">
-              {pets.map((pet) => {
-                const isActive = pet.id === activePetId;
-                return (
-                  <button
-                    key={pet.id}
-                    type="button"
-                    onClick={() => handleSelectPet(pet.id)}
-                    className={`border-2 rounded-tl-[14px] rounded-tr-[14px] px-[16px] py-[8px] min-w-[120px] flex items-center gap-[4px] shrink-0 ${
-                      isActive
-                        ? "border-[#DE6A07] text-[#DE6A07]"
-                        : "border-[#E5E7EB] text-[#8B6357]"
-                    }`}
-                  >
-                    <Icon
-                      name={pet.pet_type === "cat" ? "cat" : "dog"}
-                      className={isActive ? "text-[#DE6A07]" : "text-[#8B6357]"}
-                      size={24}
-                    />
-                    <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[14px] leading-[21px]">
-                      {pet.name}
-                    </span>
-                  </button>
-                );
-              })}
+      <div className="w-full max-w-[944px] mx-auto px-6 flex-1">
+      <div className="flex flex-col gap-[8px] mb-[-2px]">
+            <div className="flex justify-between">
+            <nav
+            aria-label="Breadcrumb"
+            className="font-['Comfortaa:Bold',sans-serif] font-bold text-[20px] text-[#4A3C2A] flex gap-[6px]"
+          >
+            <Link to="/account/pets" className="hover:text-[#DE6A07] transition-colors">
+            My pets
+            </Link>
+            <span aria-hidden="true">{" > "}</span>
+            <span>Memorialized pets</span>
+          </nav>
+              <div className="flex items-center gap-[8px] overflow-x-auto max-w-[520px] pl-[2px] pr-[2px]">
+                {memorializedPets.map((pet) => {
+                  const isActive = pet.id === activePetId;
+                  return (
+                    <button
+                      key={pet.id}
+                      type="button"
+                      onClick={() => handleSelectPet(pet.id)}
+                      className="bg-white border-2 border-[rgba(0,0,0,0.12)] rounded-tl-[14px] rounded-tr-[14px] px-[16px] py-[8px] min-w-[120px] flex items-center gap-[4px] shrink-0 text-[rgba(0,0,0,0.12)] cursor-default"
+                    >
+                      <Icon
+                        name={pet.pet_type === "cat" ? "cat" : "dog"}
+                        className="text-[rgba(0,0,0,0.12)]"
+                        size={24}
+                      />
+                      <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[14px] leading-[21px]">
+                        {pet.name}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
-
-          <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[20px]">
-            {isLoadingPets ? (
-              <div className="text-[#4A3C2A] text-sm">Loading pets...</div>
+        <div className="flex flex-col gap-[21px]">
+          <div className="bg-white rounded-[12px] rounded-tr-none border-2 border-[rgba(0, 0, 0, 0.12)] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[20px]">
+            {isLoadingMemorializedPets ? (
+              <div className="text-[#4A3C2A] text-sm">Loading memorialized pets...</div>
             ) : activePet ? (
               <div className="flex gap-[16px]">
-                {/* 左侧：头像 */}
                 <div className="size-[56px] rounded-full overflow-hidden border border-[#E5E7EB] bg-[#8B6357] flex items-center justify-center shrink-0">
                   {activePet.primary_photo ? (
                     <img
@@ -276,10 +200,7 @@ export default function MyPets() {
                     <Icon name="pet" className="size-6 text-white" />
                   )}
                 </div>
-                
-                {/* 右侧：其他所有模块 */}
                 <div className="flex flex-col gap-[8px] flex-1">
-                  {/* 上方：信息和编辑icon左右结构 */}
                   <div className="flex items-start justify-between">
                     <div className="flex flex-col gap-[8px]">
                       <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
@@ -324,15 +245,8 @@ export default function MyPets() {
                         </div>
                       </div>
                     </div>
-                    <button type="button" className="text-[#8B6357] hover:text-[#DE6A07] cursor-pointer">
-                      <Icon name="pencil" size={20} />
-                    </button>
                   </div>
-                  
-                  {/* 分割线 */}
                   <div className="border-t border-[#E5E7EB] w-full" />
-                  
-                  {/* 下方：按钮和Frequency Monthly space-between */}
                   <div className="flex items-center justify-between">
                     <div className="w-[80px]">
                       <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Frequency</p>
@@ -340,14 +254,11 @@ export default function MyPets() {
                         {formatLabel(activePet.grooming_frequency)}
                       </p>
                     </div>
-                    <OrangeButton size="compact" showArrow className="px-[28px] h-[28px]">
-                      <span className="text-white text-[12px] leading-[17.5px] font-bold">Book for {activePet.name}</span>
-                    </OrangeButton>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="text-[#4A3C2A] text-sm">No pets yet.</div>
+              <div className="text-[#4A3C2A] text-sm">No memorialized pets yet.</div>
             )}
           </div>
 
@@ -360,17 +271,7 @@ export default function MyPets() {
                 <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
                   Pet photos
                 </p>
-                <FileUpload
-                  accept="image/*"
-                  multiple
-                  maxSizeMB={10}
-                  uploadItems={petPhotoItems}
-                  onChange={handlePetPhotoChange}
-                  onRemove={(index) => handleRemoveItem(setPetPhotoItems, index)}
-                  buttonText="Click to upload"
-                  fileTypeHint="JPG, JPEG, PNG less than 10MB"
-                  showDragHint
-                />
+                <ReadonlyPhotoGrid urls={activePet?.photos || []} />
               </div>
 
               <div className="border-t border-[#E5E7EB]" />
@@ -379,17 +280,7 @@ export default function MyPets() {
                 <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
                   Reference photos
                 </p>
-                <FileUpload
-                  accept="image/*"
-                  multiple
-                  maxSizeMB={10}
-                  uploadItems={referencePhotoItems}
-                  onChange={handleReferencePhotoChange}
-                  onRemove={(index) => handleRemoveItem(setReferencePhotoItems, index)}
-                  buttonText="Click to upload"
-                  fileTypeHint="JPG, JPEG, PNG less than 10MB"
-                  showDragHint
-                />
+                <ReadonlyPhotoGrid urls={activePet?.reference_photos || []} />
               </div>
             </div>
           </div>
@@ -428,41 +319,26 @@ export default function MyPets() {
               <CustomTextarea
                 label=""
                 placeholder="Enter your message"
-                value={notes}
-                onChange={(event) => setNotes(event.target.value)}
+                value={activePet?.special_notes || ""}
+                disabled
+                showResizeHandle={false}
               />
-              <OrangeButton
-                size="compact"
-                onClick={handleSaveNotes}
-                loading={isSaving}
-                className="w-[96px] self-end"
-              >
-                Save
-              </OrangeButton>
             </div>
           </div>
+        </div>
+      </div>
 
-          <div className="flex items-center justify-between">
-            <OrangeButton
-              variant="outlineMuted"
-              size="compact"
-              className={`px-[28px] ${isMemorialized ? "border-[#E5E7EB] hover:bg-transparent active:bg-transparent" : ""}`}
-              onClick={handleMemorializePet}
-              loading={isMemorializing}
-              disabled={!activePet || isMemorialized}
-            >
-              {isMemorialized ? <span className="text-[#9CA3AF]">Memorialized</span> : "Memorialize"}
-            </OrangeButton>
-            <button
-              type="button"
-              onClick={() => setIsDeleteOpen(true)}
-              disabled={!activePet}
-              className="flex items-center gap-[8px] text-[#8B6357] text-[12px] leading-[17.5px] font-['Comfortaa:Bold',sans-serif] hover:text-[#DE6A07] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-            >
-              <Icon name="trash" size={16} />
-              Delete pet
-            </button>
-          </div>
+      <div className="w-full max-w-[944px] mx-auto px-6 pb-8 pt-5">
+        <div className="flex items-center justify-end">
+          <button
+            type="button"
+            onClick={() => setIsDeleteOpen(true)}
+            disabled={!activePet}
+            className="flex items-center gap-[8px] text-[#8B6357] text-[12px] leading-[17.5px] font-['Comfortaa:Bold',sans-serif] hover:text-[#DE6A07] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          >
+            <Icon name="trash" size={16} />
+            Delete pet
+          </button>
         </div>
       </div>
 
@@ -494,10 +370,7 @@ export default function MyPets() {
             <AlertDialogFooter className="px-[24px]">
               <div className="flex items-center justify-end gap-[10px] w-full">
                 <AlertDialogPrimitive.Cancel asChild>
-                  <OrangeButton
-                    variant="outline"
-                    size="medium"
-                  >
+                  <OrangeButton variant="outline" size="medium">
                     No, Keep {activePet?.name || "pet"}
                   </OrangeButton>
                 </AlertDialogPrimitive.Cancel>

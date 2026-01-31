@@ -87,6 +87,11 @@ import IconGiftSvg from "@/assets/icons/icon-gift.svg?react";
 import IconPhoneSvg from "@/assets/icons/icon-phone.svg?react";
 import IconLogoSvg from "@/assets/icons/icon-logo.svg?react";
 import IconHomeSvg from "@/assets/icons/icon-home.svg?react";
+import IconNotificationConfirmedSvg from "@/assets/icons/icon-notification-confirmed.svg?react";
+import IconNotificationReminderSvg from "@/assets/icons/icon-notification-reminder.svg?react";
+import IconNotificationReferSvg from "@/assets/icons/icon-notification-refer.svg?react";
+import IconNotificationRefundSvg from "@/assets/icons/icon-notification-refund.svg?react";
+import IconNotificationEmptySvg from "@/assets/icons/icon-notification-empty.svg?react";
 
 // 图标组件映射表
 const iconComponentMap = {
@@ -153,6 +158,11 @@ const iconComponentMap = {
   "phone": IconPhoneSvg,
   "logo": IconLogoSvg,
   "home": IconHomeSvg,
+  "notification-confirmed": IconNotificationConfirmedSvg,
+  "notification-reminder": IconNotificationReminderSvg,
+  "notification-refer": IconNotificationReferSvg,
+  "notification-refund": IconNotificationRefundSvg,
+  "notification-empty": IconNotificationEmptySvg,
 } as const;
 
 export type IconName = keyof typeof iconComponentMap;

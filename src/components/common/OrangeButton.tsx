@@ -3,7 +3,7 @@ import { Spinner } from "./Spinner";
 
 interface OrangeButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
-  variant?: "primary" | "outline" | "secondary";
+  variant?: "primary" | "outline" | "outlineMuted" | "secondary";
   size?: "standard" | "medium" | "compact";
   fullWidth?: boolean;
   showArrow?: boolean;
@@ -223,6 +223,8 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
         "bg-[#de6a07] hover:bg-[rgba(222,106,7,0.8)] active:bg-[rgba(222,106,7,0.8)] focus-visible:bg-[rgba(222,106,7,0.8)] text-white",
       outline:
         "border-2 border-[#de6a07] focus-visible:border-[#2374ff] active:border-[#2374ff] text-[#de6a07] hover:bg-[rgba(222,106,7,0.16)] active:bg-[rgba(222,106,7,0.16)] focus-visible:bg-[rgba(222,106,7,0.16)]",
+      outlineMuted:
+        "border-2 border-[#8B6357] focus-visible:border-[#2374ff] active:border-[#2374ff] text-[#8B6357] hover:bg-[rgba(139,99,87,0.16)] active:bg-[rgba(139,99,87,0.16)] focus-visible:bg-[rgba(139,99,87,0.16)]",
       secondary: "",
     };
 
@@ -265,6 +267,8 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
     }
 
     // Outline variant
+    const outlineTextClass = variant === "outlineMuted" ? "text-[#8B6357]" : "text-[#de6a07]";
+    const outlineSpinnerColor = variant === "outlineMuted" ? "#8B6357" : "#de6a07";
     return (
       <button
         ref={ref}
@@ -276,13 +280,13 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
           {/* Spinner overlay */}
           {loading && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <Spinner size="medium" color="#de6a07" />
+              <Spinner size="medium" color={outlineSpinnerColor} />
             </div>
           )}
           {/* Content - invisible when loading but still takes up space */}
           {typeof children === "string" ? (
             <p
-              className={`font-['Comfortaa:Bold',sans-serif] leading-[24.5px] text-[#de6a07] text-[16px] whitespace-nowrap ${loading ? "invisible" : ""}`}
+              className={`font-['Comfortaa:Bold',sans-serif] leading-[24.5px] ${outlineTextClass} text-[16px] whitespace-nowrap ${loading ? "invisible" : ""}`}
               style={textStyle}
             >
               {children}

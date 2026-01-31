@@ -28,23 +28,28 @@ export function CustomTextarea({
 }: CustomTextareaProps) {
   const [isFocused, setIsFocused] = React.useState(false);
   const [isHovered, setIsHovered] = React.useState(false);
+  const isDisabled = Boolean(disabled);
 
   const borderColor = error
     ? "border-[#de1507]"
-    : isFocused
-      ? "border-[#2374ff]"
-      : isHovered
-        ? "border-[#717182]"
-        : "border-gray-200";
+    : isDisabled
+      ? "border-gray-200"
+      : isFocused
+        ? "border-[#2374ff]"
+        : isHovered
+          ? "border-[#717182]"
+          : "border-gray-200";
 
   const labelColor = error ? "text-[#de1507]" : "text-[#4a3c2a]";
 
   const handleFocus = (event: React.FocusEvent<HTMLTextAreaElement>) => {
+    if (isDisabled) return;
     setIsFocused(true);
     onFocus?.(event);
   };
 
   const handleBlur = (event: React.FocusEvent<HTMLTextAreaElement>) => {
+    if (isDisabled) return;
     setIsFocused(false);
     onBlur?.(event);
   };
@@ -73,8 +78,8 @@ export function CustomTextarea({
           borderColor,
           disabled ? "opacity-60 cursor-not-allowed" : ""
         )}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        onMouseEnter={!isDisabled ? () => setIsHovered(true) : undefined}
+        onMouseLeave={!isDisabled ? () => setIsHovered(false) : undefined}
       >
         <Textarea
           placeholder={placeholder}
