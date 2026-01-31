@@ -1709,6 +1709,32 @@
         "tags": ["messages"],
         "security": [{ "JWTAuth": [] }]
       }
+    },
+    "/api/messages/{message_id}": {
+      "delete": {
+        "operationId": "api_messages_delete_message",
+        "summary": "Delete Message",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "message_id",
+            "schema": { "title": "Message Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OkOut" }
+              }
+            }
+          }
+        },
+        "tags": ["messages"],
+        "security": [{ "JWTAuth": [] }]
+      }
     }
   },
   "components": {

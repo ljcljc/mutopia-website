@@ -1009,6 +1009,14 @@ export async function markAllMessagesRead(params?: { channel?: "in_app" | "email
 }
 
 /**
+ * 删除单条消息
+ */
+export async function deleteMessage(messageId: number): Promise<OkOut> {
+  const response = await http.delete<OkOut>(`/api/messages/${messageId}`);
+  return response.data;
+}
+
+/**
  * 获取宠物品种列表
  */
 export async function getPetBreeds(): Promise<PetBreedOut[]> {

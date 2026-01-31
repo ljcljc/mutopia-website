@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Icon, type IconName } from "@/components/common/Icon";
-import { getMessages, markAllMessagesRead, markMessageRead, type MessageOut } from "@/lib/api";
+import { deleteMessage, getMessages, markAllMessagesRead, markMessageRead, type MessageOut } from "@/lib/api";
 
 type NotificationItem = {
   id: number;
@@ -82,6 +82,7 @@ function buildNotificationBody(message: MessageOut): ReactNode {
 export default function Notifications() {
   const [messages, setMessages] = useState<MessageOut[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const channel = "in_app" as const;
 
   useEffect(() => {
@@ -140,6 +141,23 @@ export default function Notifications() {
     }).catch((error) => {
       console.error("Failed to mark message read:", error);
     });
+  };
+
+  const handleDelete = async (id: number) => {
+    if (deletingId === id) return;
+    setDeletingId(id);
+    try {
+      const result = await deleteMessage(id);
+      if (result.ok) {
+        setMessages((prev) => prev.filter((item) => item.id !== id));
+      } else {
+        console.error("Failed to delete message: ok=false");
+      }
+    } catch (error) {
+      console.error("Failed to delete message:", error);
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   return (
@@ -222,6 +240,8 @@ export default function Notifications() {
                           {item.showClose && (
                             <button
                               type="button"
+                              onClick={() => handleDelete(item.id)}
+                              disabled={deletingId === item.id}
                               className="size-[16px] cursor-pointer text-[#EF4444] hover:text-[#D1202B]"
                               aria-label="Dismiss"
                             >
