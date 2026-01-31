@@ -3,7 +3,7 @@ import { Spinner } from "./Spinner";
 
 interface PurpleButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
-  variant?: "primary" | "outline" | "bordered";
+  variant?: "primary" | "outline" | "outlinePurple" | "bordered";
   size?: "standard" | "medium";
   fullWidth?: boolean;
   loading?: boolean;
@@ -30,11 +30,11 @@ export const PurpleButton = forwardRef<HTMLButtonElement, PurpleButtonProps>(
     // Outline and bordered buttons have border-2, so they need different padding to maintain visual size
     const sizeStyles = {
       standard:
-        variant === "outline" || variant === "bordered"
+        variant === "outline" || variant === "outlinePurple" || variant === "bordered"
           ? "h-[48px] px-[30px] py-[18px]"
           : "h-[48px] px-[28px] py-[14px]",
       medium:
-        variant === "outline" || variant === "bordered"
+        variant === "outline" || variant === "outlinePurple" || variant === "bordered"
           ? "h-[36px] px-[30px] py-[18px]"
           : "h-[36px] px-[28px] py-[14px]",
     };
@@ -44,6 +44,8 @@ export const PurpleButton = forwardRef<HTMLButtonElement, PurpleButtonProps>(
         "bg-[#633479] hover:bg-[rgba(99,52,121,0.8)] active:bg-[rgba(99,52,121,0.8)] focus-visible:bg-[rgba(99,52,121,0.8)] text-white",
       outline:
         "bg-white hover:bg-[rgba(99,52,121,0.2)] active:bg-[rgba(99,52,121,0.2)] focus-visible:bg-[rgba(99,52,121,0.2)] focus-visible:border-[#2374ff] active:border-[#2374ff] text-[#633479] border-2 border-transparent",
+      outlinePurple:
+        "bg-white hover:bg-[#F5F5F5] active:bg-[#F5F5F5] focus-visible:bg-[#F5F5F5] focus-visible:border-[#2374ff] active:border-[#2374ff] text-[#633479] border-2 border-[#633479]",
       bordered:
         "bg-neutral-100 hover:bg-[#f2dfcf] active:bg-[#f2dfcf] focus-visible:bg-[#f2dfcf] focus-visible:border-[#2374ff] active:border-[#2374ff] text-[#633479] border-2 border-[#633479]",
     };
@@ -85,7 +87,7 @@ export const PurpleButton = forwardRef<HTMLButtonElement, PurpleButtonProps>(
       );
     }
 
-    // Outline and bordered variants
+    // Outline variants
     return (
       <button
         ref={ref}
