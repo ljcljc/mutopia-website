@@ -45,7 +45,7 @@ function formatBehavior(behavior?: string | null): string {
     .join(" ");
 }
 
-function PetCard({ pet }: { pet: PetOut }) {
+function PetCard({ pet, onSelect }: { pet: PetOut; onSelect: (petId: number) => void }) {
   // 使用主照片，如果没有则使用第一张照片，都没有则使用占位符
   const avatarUrl = pet.primary_photo
     ? buildImageUrl(pet.primary_photo)
@@ -58,7 +58,13 @@ function PetCard({ pet }: { pet: PetOut }) {
   const behavior = formatBehavior(pet.behavior);
 
   return (
-    <div className="bg-white border border-[#E5E7EB] rounded-[12px] p-[14px] flex items-center gap-[16px] w-full cursor-pointer transition-colors duration-200 hover:bg-[#F9FAFB]">
+    <div
+      role="button"
+      tabIndex={0}
+      className="bg-white border border-[#E5E7EB] rounded-[12px] p-[14px] flex items-center gap-[16px] w-full cursor-pointer transition-colors duration-200 hover:bg-[#F9FAFB]"
+      onClick={() => onSelect(pet.id)}
+      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onSelect(pet.id)}
+    >
       <div className="flex items-center w-full gap-[16px]">
         <div className="size-[56px] rounded-full overflow-hidden border border-[#E5E7EB] bg-[#E5E7EB] flex items-center justify-center">
           {avatarUrl ? (
@@ -126,7 +132,11 @@ export default function DashboardMyPetsCard() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-[24px]">
           {pets.map((pet) => (
-            <PetCard key={pet.id} pet={pet} />
+            <PetCard
+              key={pet.id}
+              pet={pet}
+              onSelect={(petId) => navigate(`/account/pets?pet=${petId}`)}
+            />
           ))}
         </div>
       )}

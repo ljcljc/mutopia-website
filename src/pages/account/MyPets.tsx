@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useAccountStore } from "@/components/account/accountStore";
 import { Icon } from "@/components/common/Icon";
@@ -53,6 +54,7 @@ function formatLabel(value?: string | null): string {
 }
 
 export default function MyPets() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { pets, isLoadingPets, fetchPets } = useAccountStore();
   const [activePetId, setActivePetId] = useState<number | null>(null);
   const [petPhotoItems, setPetPhotoItems] = useState<FileUploadItem[]>([]);
@@ -62,24 +64,46 @@ export default function MyPets() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
+  const petIdFromUrl = searchParams.get("pet");
+
   useEffect(() => {
     fetchPets();
   }, [fetchPets]);
 
   useEffect(() => {
-    if (pets.length > 0 && activePetId === null) {
+    if (pets.length === 0) {
+      setActivePetId(null);
+      return;
+    }
+    // 优先使用 URL 中的 pet id（从 Dashboard My pets 跳转过来时打开对应条目）
+    if (petIdFromUrl) {
+      const id = Number.parseInt(petIdFromUrl, 10);
+      if (Number.isFinite(id) && pets.some((p) => p.id === id)) {
+        setActivePetId(id);
+        return;
+      }
+    }
+    if (activePetId === null) {
       setActivePetId(pets[0].id);
-    } else if (pets.length > 0 && activePetId !== null) {
-      // 如果当前激活的宠物不在列表中（被删除了），切换到第一个
+    } else {
       const activePetExists = pets.some((pet) => pet.id === activePetId);
       if (!activePetExists) {
         setActivePetId(pets[0].id);
       }
-    } else if (pets.length === 0) {
-      // 如果没有宠物了，清空激活状态
-      setActivePetId(null);
     }
-  }, [pets, activePetId]);
+  }, [pets, petIdFromUrl, activePetId]);
+
+  // 切换宠物时若 URL 带有 ?pet=，可选择性清除（避免与当前选中不一致）
+  const handleSelectPet = (id: number) => {
+    setActivePetId(id);
+    if (petIdFromUrl && Number.parseInt(petIdFromUrl, 10) !== id) {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete("pet");
+        return next;
+      });
+    }
+  };
 
   const activePet = useMemo(() => pets.find((pet) => pet.id === activePetId) || null, [pets, activePetId]);
 
@@ -188,7 +212,7 @@ export default function MyPets() {
         <div className="flex flex-col gap-[21px]">
           <div className="flex justify-between">
             <h1 className="font-['Comfortaa:Bold',sans-serif] font-bold text-[20px] text-[#4A3C2A]">
-              Me pets
+              My pets
             </h1>
             <div className="flex items-center gap-[8px] overflow-x-auto max-w-[520px] pl-[2px] pr-[2px]">
               {pets.map((pet) => {
@@ -197,7 +221,7 @@ export default function MyPets() {
                   <button
                     key={pet.id}
                     type="button"
-                    onClick={() => setActivePetId(pet.id)}
+                    onClick={() => handleSelectPet(pet.id)}
                     className={`border-2 rounded-tl-[14px] rounded-tr-[14px] px-[16px] py-[8px] min-w-[120px] flex items-center gap-[4px] shrink-0 ${
                       isActive
                         ? "border-[#DE6A07] text-[#DE6A07]"
