@@ -7,7 +7,6 @@
 
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/components/ui/utils";
 
 export default function PageHeader() {
   return (

@@ -48,7 +48,11 @@ function EmptyState() {
   );
 }
 
-function getNotificationStyle(type: string) {
+function getNotificationStyle(type: string): {
+  iconName: IconName;
+  iconBg: string;
+  iconSize: number;
+} {
   const normalized = type.toLowerCase();
   if (normalized.includes("confirm")) {
     return { iconName: "notification-confirmed", iconBg: "#DCFCE7", iconSize: 20 };

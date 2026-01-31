@@ -16,7 +16,7 @@ export default function PaymentMethodCard() {
     // TODO: 显示 toast 提示 "功能开发中"
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = () => {
     showComingSoonMessage("删除支付方式");
     // TODO: 显示 toast 提示 "功能开发中"
   };
@@ -71,7 +71,7 @@ export default function PaymentMethodCard() {
               </div>
               {!method.isDefault && (
                 <button
-                  onClick={() => handleDelete(method.id)}
+                  onClick={handleDelete}
                   className="ml-auto text-[#4C4C4C] hover:text-red-500 cursor-pointer"
                   aria-label="Delete payment method"
                 >

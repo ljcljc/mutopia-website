@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { OrangeButton } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
 import { useAccountStore } from "@/components/account/accountStore";
-import { getBookingDetail, cancelBooking, createAddress, type AddressManageIn, type AddressOut, type BookingDetailOut } from "@/lib/api";
+import { getBookingDetail, cancelBooking, type AddressOut, type BookingDetailOut } from "@/lib/api";
 import { toast } from "sonner";
 import AddAddressModal from "@/components/account/AddAddressModal";
 import ModifyAddressModal from "@/components/account/ModifyAddressModal";
@@ -51,12 +51,6 @@ export default function BookingDetail() {
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
   const [addressOverride, setAddressOverride] = useState<AddressOut | null>(null);
   const [isAddAddressOpen, setIsAddAddressOpen] = useState(false);
-  const [isCreatingAddress, setIsCreatingAddress] = useState(false);
-  const [newAddress, setNewAddress] = useState("");
-  const [newCity, setNewCity] = useState("");
-  const [newProvince, setNewProvince] = useState("");
-  const [newPostalCode, setNewPostalCode] = useState("");
-  const [setAsDefault, setSetAsDefault] = useState(false);
   const { addresses, isLoadingAddresses, fetchAddresses } = useAccountStore();
 
   useEffect(() => {
@@ -195,15 +189,6 @@ export default function BookingDetail() {
   }, [isModifyOpen, fetchAddresses]);
 
   useEffect(() => {
-    if (!isAddAddressOpen) return;
-    setNewAddress("");
-    setNewCity("");
-    setNewProvince("");
-    setNewPostalCode("");
-    setSetAsDefault(false);
-  }, [isAddAddressOpen]);
-
-  useEffect(() => {
     if (!isModifyOpen) return;
     if (selectedAddressId !== null) return;
     const defaultAddress = addresses.find((address) => address.is_default);
@@ -216,48 +201,6 @@ export default function BookingDetail() {
     setIsModifyOpen(false);
   };
 
-  const handleCreateAddress = async () => {
-    if (!newAddress.trim()) {
-      toast.error("Address is required.");
-      return;
-    }
-    if (!newCity.trim()) {
-      toast.error("City is required.");
-      return;
-    }
-    if (!newProvince.trim()) {
-      toast.error("Province is required.");
-      return;
-    }
-    if (!newPostalCode.trim()) {
-      toast.error("Post code is required.");
-      return;
-    }
-
-    const payload: AddressManageIn = {
-      address: newAddress.trim(),
-      city: newCity.trim(),
-      province: newProvince.trim(),
-      postal_code: newPostalCode.trim(),
-      service_type: "mobile",
-      is_default: setAsDefault,
-    };
-
-    setIsCreatingAddress(true);
-    try {
-      const created = await createAddress(payload);
-      await fetchAddresses();
-      setSelectedAddressId(created.id);
-      setIsAddAddressOpen(false);
-      setIsModifyOpen(true);
-    } catch (error) {
-      console.error("Failed to create address:", error);
-      toast.error("Failed to add address. Please try again.");
-    } finally {
-      setIsCreatingAddress(false);
-    }
-  };
-  
   // 计算折扣信息
   const discountRate = detail?.discount_rate 
     ? (typeof detail.discount_rate === "number" ? detail.discount_rate : parseFloat(String(detail.discount_rate)) || 0)

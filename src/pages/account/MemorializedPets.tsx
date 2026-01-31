@@ -160,9 +160,7 @@ export default function MemorializedPets() {
             <span>Memorialized pets</span>
           </nav>
               <div className="flex items-center gap-[8px] overflow-x-auto max-w-[520px] pl-[2px] pr-[2px]">
-                {memorializedPets.map((pet) => {
-                  const isActive = pet.id === activePetId;
-                  return (
+                {memorializedPets.map((pet) => (
                     <button
                       key={pet.id}
                       type="button"
@@ -178,8 +176,7 @@ export default function MemorializedPets() {
                         {pet.name}
                       </span>
                     </button>
-                  );
-                })}
+                ))}
               </div>
             </div>
           </div>

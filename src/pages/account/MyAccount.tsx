@@ -5,7 +5,6 @@ import { getCurrentUser } from "@/lib/api";
 import PageHeader from "@/components/account/PageHeader";
 import PersonalInfoCard from "@/components/account/PersonalInfoCard";
 import AddressesCard from "@/components/account/AddressesCard";
-import PaymentMethodCard from "@/components/account/PaymentMethodCard";
 import ShareAndEarnCard from "@/components/account/ShareAndEarnCard";
 import MembershipCard from "@/components/account/MembershipCard";
 

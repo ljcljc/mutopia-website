@@ -13,7 +13,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
-import type { WeightUnit, Gender, PetType, Behavior, CoatCondition } from "@/components/booking/bookingStore";
+import type { WeightUnit, Gender, PetType, Behavior, CoatCondition, GroomingFrequency } from "@/components/booking/bookingStore";
 import { ReferenceStylesUpload } from "@/components/booking/ReferenceStylesUpload";
 import type { PetBreedOut } from "@/lib/api";
 import { uploadPetPhoto, uploadReferencePhoto, buildImageUrl } from "@/lib/api";
@@ -60,7 +60,7 @@ export interface PetFormProps {
   setCoatCondition: (value: CoatCondition | "") => void;
   setApproveShave: (value: boolean | null) => void;
   setBehavior: (value: Behavior | "") => void;
-  setGroomingFrequency: (value: string) => void;
+  setGroomingFrequency: (value: GroomingFrequency | "") => void;
   setSpecialNotes: (value: string) => void;
   setPhotoIds: (value: number[]) => void;
   setReferencePhotoIds: (value: number[]) => void;

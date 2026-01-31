@@ -1,7 +1,6 @@
 import { useEffect, useRef, useMemo } from "react";
 import { Icon } from "@/components/common/Icon";
 import { useAccountStore } from "../accountStore";
-import type { BookingListOut } from "@/lib/api";
 
 /**
  * 格式化日期时间显示（YYYY-MM-DDTHH:mm:ss -> YYYY-MM-DD at HH:mm）

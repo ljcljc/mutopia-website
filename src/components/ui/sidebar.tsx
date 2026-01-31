@@ -305,7 +305,7 @@ function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
 }
 
 const SidebarInset = React.forwardRef<
-  HTMLMainElement,
+  HTMLElement,
   React.ComponentProps<"main">
 >(function SidebarInset({ className, ...props }, ref) {
   return (
