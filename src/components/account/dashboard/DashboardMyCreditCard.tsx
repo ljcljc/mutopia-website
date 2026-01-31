@@ -1,14 +1,15 @@
 import { useEffect, useMemo, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { OrangeButton } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
 import { useAccountStore } from "../accountStore";
 import { bindInvitation } from "@/lib/api";
 import type { CouponOut } from "@/lib/api";
 
-/** 邀请码校验：非空、6 位、仅数字与大写字母 */
+/** 邀请码校验：非空、8 位、仅数字与大写字母 */
 function isValidPromoCode(value: string): boolean {
   const trimmed = value.trim();
-  return trimmed.length === 6 && /^[A-Z0-9]{6}$/.test(trimmed);
+  return trimmed.length === 8 && /^[A-Z0-9]{8}$/.test(trimmed);
 }
 
 function CreditRow({
@@ -19,6 +20,9 @@ function CreditRow({
   statusColor,
   dotColor,
   faded,
+  showStatusIcon,
+  count,
+  isPending,
 }: {
   title: string;
   amount: string;
@@ -27,7 +31,13 @@ function CreditRow({
   statusColor: string;
   dotColor: string;
   faded?: boolean;
+  showStatusIcon?: boolean;
+  count?: number;
+  /** 仅 pending 时金额为 #8B6357 */
+  isPending?: boolean;
 }) {
+  const isCountXAmount = count != null && count > 1;
+  const amountColor = isPending ? "text-[#8B6357]" : "text-[#DE6A07]";
   return (
     <div
       className={`rounded-[12px] border border-[#E5E7EB] p-[16px] flex justify-between ${
@@ -42,13 +52,19 @@ function CreditRow({
           <span className={`text-[12.5px] leading-[17.5px] font-bold font-['Comfortaa:Regular',sans-serif] ${statusColor}`}>
             {statusText}
           </span>
-          
-          <Icon name="alert-info" className={`size-[12px] ${dotColor.replace('bg-', 'text-')}`} />
+          {showStatusIcon ? <Icon name="alert-info" className={`size-[12px] ${dotColor.replace('bg-', 'text-')}`} /> : null}
         </div>
       </div>
       <div className="flex justify-start text-right">
-        <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[24px] leading-[21px] text-[#DE6A07]">
-          {amount}
+        <p className={`font-['Comfortaa:Bold',sans-serif] font-bold text-[24px] leading-[21px] ${amountColor}`}>
+          {isCountXAmount ? (
+            <>
+              <span className={`font-['Comfortaa:Medium',sans-serif] font-medium text-[14px] leading-[21px] ${amountColor}`}>{count} x </span>
+              {amount}
+            </>
+          ) : (
+            amount
+          )}
         </p>
         <p className="font-['Comfortaa:Medium',sans-serif] font-medium text-[14px] leading-[21px] text-[#8B6357]">
           {subtitle}
@@ -58,40 +74,62 @@ function CreditRow({
   );
 }
 
+/** 与 Cash credit 条目一致：状态、图标、数量 x 金额、faded；仅 pending 时金额 #8B6357 */
 function SpecialOfferCard({
   title,
   subtitle,
   amount,
-  expiredText,
-  showAlert,
+  statusText,
+  statusColor,
+  dotColor,
+  faded,
+  showStatusIcon,
+  count,
+  isPending,
 }: {
   title: string;
   subtitle: string;
   amount: string;
-  expiredText?: string;
-  showAlert?: boolean;
+  statusText: string;
+  statusColor: string;
+  dotColor: string;
+  faded?: boolean;
+  showStatusIcon?: boolean;
+  count?: number;
+  isPending?: boolean;
 }) {
+  const isCountXAmount = count != null && count > 1;
+  const amountColor = isPending ? "text-[#8B6357]" : "text-[#DE6A07]";
   return (
-    <div className="rounded-[12px] border border-[#E5E7EB] p-[16px] flex justify-between bg-white">
+    <div
+      className={`rounded-[12px] border border-[#E5E7EB] p-[16px] flex justify-between ${
+        faded ? "bg-[#F3F4F6]" : "bg-white"
+      }`}
+    >
       <div>
         <p className="font-['Comfortaa:Medium',sans-serif] font-medium text-[14px] leading-[21px] text-[#8B6357]">
           {title}
         </p>
-        <p className="font-['Comfortaa:Medium',sans-serif] font-medium text-[14px] leading-[21px] text-[#8B6357]">
-          {subtitle}
-        </p>
-        {expiredText && (
-          <div className="flex items-center gap-[6px] mt-[4px]">
-            <span className="text-[12.5px] leading-[17.5px] font-bold font-['Comfortaa:Regular',sans-serif] text-[#DE6A07]">
-              {expiredText}
-            </span>
-            {showAlert ? <Icon name="alert-info" size={12} className="text-[#DE1507]" /> : null}
-          </div>
-        )}
+        <div className="flex items-center gap-[6px] mt-[4px]">
+          <span className={`text-[12.5px] leading-[17.5px] font-bold font-['Comfortaa:Regular',sans-serif] ${statusColor}`}>
+            {statusText}
+          </span>
+          {showStatusIcon ? <Icon name="alert-info" className={`size-[12px] ${dotColor.replace('bg-', 'text-')}`} /> : null}
+        </div>
       </div>
       <div className="flex justify-start text-right">
-        <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[24px] leading-[21px] text-[#DE6A07]">
-          {amount}
+        <p className={`font-['Comfortaa:Bold',sans-serif] font-bold text-[24px] leading-[21px] ${amountColor}`}>
+          {isCountXAmount ? (
+            <>
+              <span className={`font-['Comfortaa:Medium',sans-serif] font-medium text-[14px] leading-[21px] ${amountColor}`}>{count} x </span>
+              {amount}
+            </>
+          ) : (
+            amount
+          )}
+        </p>
+        <p className="font-['Comfortaa:Medium',sans-serif] font-medium text-[14px] leading-[21px] text-[#8B6357]">
+          {subtitle}
         </p>
       </div>
     </div>
@@ -120,12 +158,14 @@ function formatDate(dateString: string | null | undefined): string {
   }
 }
 
-// 判断优惠券状态
+// 判断优惠券状态（正常有效时不显示 icon）
 function getCouponStatus(coupon: CouponOut): {
   statusText: string;
   statusColor: string;
   dotColor: string;
   faded: boolean;
+  showStatusIcon: boolean;
+  isPending: boolean;
 } {
   const statusLower = coupon.status?.toLowerCase() ?? "";
   const now = new Date();
@@ -138,39 +178,51 @@ function getCouponStatus(coupon: CouponOut): {
       statusColor: "text-[#DE6A07]",
       dotColor: "text-[#DE1507]",
       faded: false,
+      showStatusIcon: true,
+      isPending: false,
     };
   }
   
-  // 待激活
-  if (statusLower === "pending" || statusLower === "inactive") {
+  // 待激活（Pending 状态：文字与金额 #8B6357，参考 Figma node-id=2509-25554）
+  if (statusLower === "pending" || statusLower === "locked") {
     return {
       statusText: "Pending",
-      statusColor: "text-[#4A5565]",
+      statusColor: "text-[#8B6357]",
       dotColor: "text-[#2374FF]",
       faded: true,
+      showStatusIcon: true,
+      isPending: true,
     };
   }
   
-  // 有效（有过期日期）
+  // 有效（有过期日期）：剩余不足 30 天显示 "Expires at xxx" + 红色 icon，否则 "Valid until xxx" 不显示 icon
   if (expiresAt) {
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const daysLeft = Math.ceil((expiresAt.getTime() - now.getTime()) / msPerDay);
+    const lessThan30Days = daysLeft < 30;
     return {
-      statusText: `Valid until ${formatDate(coupon.expires_at)}`,
-      statusColor: "text-[#4A5565]",
-      dotColor: "text-[#2374FF]",
+      statusText: lessThan30Days ? `Expires at ${formatDate(coupon.expires_at)}` : `Valid until ${formatDate(coupon.expires_at)}`,
+      statusColor: lessThan30Days ? "text-[#DE6A07]" : "text-[#4A5565]",
+      dotColor: lessThan30Days ? "text-[#DE1507]" : "text-[#2374FF]",
       faded: false,
+      showStatusIcon: lessThan30Days,
+      isPending: false,
     };
   }
   
-  // 默认（active 状态且无过期日期）
+  // 默认（active 状态且无过期日期）：不显示 icon
   return {
     statusText: "Active",
     statusColor: "text-[#4A5565]",
     dotColor: "text-[#2374FF]",
     faded: false,
+    showStatusIcon: false,
+    isPending: false,
   };
 }
 
 export default function DashboardMyCreditCard() {
+  const navigate = useNavigate();
   const { cashCoupons, specialCoupons, isLoadingCashCoupons, isLoadingSpecialCoupons, fetchCashCoupons, fetchSpecialCoupons } = useAccountStore();
   const [showAllCashCredits, setShowAllCashCredits] = useState(false);
   const [showAllSpecialOffers, setShowAllSpecialOffers] = useState(false);
@@ -227,6 +279,7 @@ export default function DashboardMyCreditCard() {
       const status = getCouponStatus(coupon);
       const amount = formatAmount(coupon.amount);
       const title = coupon.template_name || coupon.type || "Cash credit";
+      const count = coupon.count;
       
       return {
         title,
@@ -236,26 +289,33 @@ export default function DashboardMyCreditCard() {
         statusColor: status.statusColor,
         dotColor: status.dotColor,
         faded: status.faded,
+        showStatusIcon: status.showStatusIcon,
+        count: count != null && count > 0 ? count : undefined,
+        isPending: status.isPending,
       };
     });
   }, [cashCoupons]);
 
-  // 转换 Special offer 数据
+  // 转换 Special offer 数据（与 Cash credit 一致：使用 getCouponStatus）
   const specialOffers = useMemo(() => {
     return specialCoupons.map((coupon) => {
+      const status = getCouponStatus(coupon);
       const amount = formatAmount(coupon.amount);
       const title = coupon.template_name || coupon.type || "Special offer";
       const subtitle = coupon.notes || "";
-      const expiresAt = coupon.expires_at;
-      const now = new Date();
-      const isExpired = expiresAt ? new Date(expiresAt) < now : false;
-      
+      const count = coupon.count;
+
       return {
         title,
         subtitle,
         amount,
-        expiredText: expiresAt ? `Expired at ${formatDate(expiresAt)}` : undefined,
-        showAlert: isExpired,
+        statusText: status.statusText,
+        statusColor: status.statusColor,
+        dotColor: status.dotColor,
+        faded: status.faded,
+        showStatusIcon: status.showStatusIcon,
+        count: count != null && count > 0 ? count : undefined,
+        isPending: status.isPending,
       };
     });
   }, [specialCoupons]);
@@ -271,7 +331,12 @@ export default function DashboardMyCreditCard() {
         <p className="font-['Comfortaa:Medium',sans-serif] font-medium text-[16px] leading-[24px] text-[#4A3C2A]">
           My credit
         </p>
-        <OrangeButton type="button" variant="outline" size="medium">
+        <OrangeButton
+          type="button"
+          variant="outline"
+          size="medium"
+          onClick={() => navigate("/booking")}
+        >
           <span className="flex items-center gap-[4px]">
             Book with credit
             <Icon name="button-arrow" className="size-[16px] text-[#DE6A07]" />
@@ -286,9 +351,9 @@ export default function DashboardMyCreditCard() {
         <div className="flex items-center gap-[20px]">
           <input
             className="border border-[#E5E7EB] rounded-[10px] w-[215px] px-[10px] py-[6px] font-['Comfortaa:Regular',sans-serif] text-[12.25px] leading-[17.5px] text-[#4A5565] placeholder:text-[#9CA3AF]"
-            placeholder="6 characters, letters & numbers"
+            placeholder="Enter your code"
             value={promoCode}
-            maxLength={6}
+            maxLength={8}
             onChange={(e) => {
               const v = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
               setPromoCode(v);
@@ -315,7 +380,7 @@ export default function DashboardMyCreditCard() {
           </p>
         ) : promoCode.length > 0 && !isValidPromoCode(normalizedPromo) ? (
           <p className="mt-[6px] text-[12px] text-[#4A5565] font-['Comfortaa:Regular',sans-serif]">
-            Code must be 6 characters, letters and numbers only.
+            Code must be 8 characters, letters and numbers only.
           </p>
         ) : null}
       </div>
@@ -340,6 +405,9 @@ export default function DashboardMyCreditCard() {
                 statusColor={credit.statusColor}
                 dotColor={credit.dotColor}
                 faded={credit.faded}
+                showStatusIcon={credit.showStatusIcon}
+                count={credit.count}
+                isPending={credit.isPending}
               />
             ))}
           </div>
@@ -377,8 +445,13 @@ export default function DashboardMyCreditCard() {
                 title={offer.title}
                 subtitle={offer.subtitle}
                 amount={offer.amount}
-                expiredText={offer.expiredText}
-                showAlert={offer.showAlert}
+                statusText={offer.statusText}
+                statusColor={offer.statusColor}
+                dotColor={offer.dotColor}
+                faded={offer.faded}
+                showStatusIcon={offer.showStatusIcon}
+                count={offer.count}
+                isPending={offer.isPending}
               />
             ))}
           </div>
