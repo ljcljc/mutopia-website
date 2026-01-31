@@ -283,10 +283,12 @@ async function getCurrentUser() {
 ### 宠物管理
 
 - `getPets(params?)` - 获取宠物列表（分页）
+- `getMemorializedPets(params?)` - 获取已纪念宠物列表（分页）
 - `getPet(petId)` - 获取单个宠物信息
 - `createPet(params, body?)` - 创建宠物
-- `updatePet(petId, params, body?)` - 更新宠物信息
+- `updatePet(petId, params, body?)` - 更新宠物信息（请求体为 PetUpdateIn）
 - `deletePet(petId)` - 删除宠物
+- `memorializePet(petId)` - 纪念宠物
 
 ### 预约管理
 
@@ -313,6 +315,14 @@ async function getCurrentUser() {
 - `createFinalSession(bookingId)` - 创建最终支付会话（Stripe Checkout）
 - `getPaymentMethods(params?)` - 获取支付方式列表（分页）
 
+### 促销相关
+
+- `getMembershipPlans()` - 获取会员套餐列表
+- `createMembershipCheckout(data)` - 创建会员套餐结账会话（Stripe Checkout）
+- `getMembershipInfo()` - 获取会员信息
+- `getMyCoupons(params?)` - 获取我的优惠券列表（分页）
+- `bindInvitation(data)` - 绑定邀请码
+
 ### 使用示例
 
 ```typescript
@@ -324,6 +334,9 @@ import {
   getServices,
   getAddresses,
   getMyCoupons,
+  getMembershipPlans,
+  createMembershipCheckout,
+  getMembershipInfo,
 } from "@/lib/api";
 
 // 登录（自动保存 token）
@@ -348,6 +361,16 @@ const addresses = addressesPage.items;
 // 获取优惠券列表（分页）
 const couponsPage = await getMyCoupons({ page: 1, page_size: 10 });
 const coupons = couponsPage.items;
+
+// 获取会员套餐列表
+const membershipPlans = await getMembershipPlans();
+
+// 获取会员信息
+const membershipInfo = await getMembershipInfo();
+
+// 创建会员套餐结账会话
+const checkoutSession = await createMembershipCheckout({ plan_id: membershipPlans[0].id });
+// checkoutSession.url 是 Stripe Checkout 的 URL，可以重定向用户到该 URL
 
 // 提交预约（使用完整的 BookingSubmitIn 格式）
 const booking = await submitBooking({

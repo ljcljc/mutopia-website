@@ -706,6 +706,7 @@ export interface CouponOut {
   category: string;
   apply_scope: string;
   amount: number | string;
+  count?: number; // default: 1
   valid_from?: string | null;
   expires_at?: string | null;
   status: string;
@@ -724,6 +725,25 @@ export interface InviteBindIn {
   invite_code: string;
 }
 
+export interface MembershipCheckoutIn {
+  plan_id: number;
+}
+
+export interface MembershipCheckoutOut {
+  url: string;
+  session_id: string;
+  payment_id: number;
+}
+
+export interface MembershipInfoOut {
+  is_member: boolean;
+  start_at?: string | null;
+  end_at?: string | null;
+  plan_id?: number | null;
+  plan_name?: string | null;
+  gift_coupons_remaining?: number; // default: 0
+}
+
 // 已废弃：redeemCouponCode 和 claimBirthdayCoupon 端点已从 API 中移除
 
 /**
@@ -735,6 +755,29 @@ export async function getMembershipPlans(): Promise<MembershipPlanOut[]> {
     {
       skipAuth: true,
     }
+  );
+  return response.data;
+}
+
+/**
+ * 创建会员套餐结账会话（Stripe Checkout）
+ */
+export async function createMembershipCheckout(
+  data: MembershipCheckoutIn
+): Promise<MembershipCheckoutOut> {
+  const response = await http.post<MembershipCheckoutOut>(
+    "/api/promotions/membership/checkout",
+    data
+  );
+  return response.data;
+}
+
+/**
+ * 获取会员信息
+ */
+export async function getMembershipInfo(): Promise<MembershipInfoOut> {
+  const response = await http.get<MembershipInfoOut>(
+    "/api/promotions/membership/info"
   );
   return response.data;
 }
@@ -853,55 +896,25 @@ export async function updatePet(
   params: UpdatePetParams,
   body?: { photo_ids?: number[] | null; reference_photo_ids?: number[] | null }
 ): Promise<PetOut> {
-  // 构建查询参数
-  const queryParams = new URLSearchParams();
-  if (params.name !== undefined) {
-    queryParams.append("name", params.name || "");
-  }
-  if (params.pet_type !== undefined) {
-    queryParams.append("pet_type", params.pet_type || "");
-  }
-  if (params.breed !== undefined) {
-    queryParams.append("breed", params.breed || "");
-  }
-  if (params.mixed_breed !== undefined) {
-    queryParams.append("mixed_breed", String(params.mixed_breed));
-  }
-  if (params.precise_type !== undefined) {
-    queryParams.append("precise_type", params.precise_type || "");
-  }
-  if (params.birthday !== undefined) {
-    queryParams.append("birthday", params.birthday || "");
-  }
-  if (params.gender !== undefined) {
-    queryParams.append("gender", params.gender || "");
-  }
-  if (params.weight_value !== undefined && params.weight_value !== null) {
-    queryParams.append("weight_value", String(params.weight_value));
-  }
-  if (params.weight_unit !== undefined) {
-    queryParams.append("weight_unit", params.weight_unit || "");
-  }
-  if (params.coat_condition !== undefined) {
-    queryParams.append("coat_condition", params.coat_condition || "");
-  }
-  if (params.approve_shave !== undefined) {
-    queryParams.append("approve_shave", String(params.approve_shave));
-  }
-  if (params.behavior !== undefined) {
-    queryParams.append("behavior", params.behavior || "");
-  }
-  if (params.grooming_frequency !== undefined) {
-    queryParams.append("grooming_frequency", params.grooming_frequency || "");
-  }
-  if (params.special_notes !== undefined) {
-    queryParams.append("special_notes", params.special_notes || "");
-  }
-
-  const response = await http.put<PetOut>(
-    `/api/pets/pets/${petId}?${queryParams.toString()}`,
-    body || { photo_ids: null, reference_photo_ids: null }
-  );
+  // OpenAPI: PUT 使用 requestBody (PetUpdateIn)，合并 params 与 body 为 JSON
+  const data: Record<string, unknown> = {
+    ...(params.name !== undefined && { name: params.name }),
+    ...(params.pet_type !== undefined && { pet_type: params.pet_type }),
+    ...(params.breed !== undefined && { breed: params.breed }),
+    ...(params.mixed_breed !== undefined && { mixed_breed: params.mixed_breed }),
+    ...(params.precise_type !== undefined && { precise_type: params.precise_type }),
+    ...(params.birthday !== undefined && { birthday: params.birthday }),
+    ...(params.gender !== undefined && { gender: params.gender }),
+    ...(params.weight_value !== undefined && { weight_value: params.weight_value }),
+    ...(params.weight_unit !== undefined && { weight_unit: params.weight_unit }),
+    ...(params.coat_condition !== undefined && { coat_condition: params.coat_condition }),
+    ...(params.approve_shave !== undefined && { approve_shave: params.approve_shave }),
+    ...(params.behavior !== undefined && { behavior: params.behavior }),
+    ...(params.grooming_frequency !== undefined && { grooming_frequency: params.grooming_frequency }),
+    ...(params.special_notes !== undefined && { special_notes: params.special_notes }),
+    ...(body && { photo_ids: body.photo_ids ?? null, reference_photo_ids: body.reference_photo_ids ?? null }),
+  };
+  const response = await http.put<PetOut>(`/api/pets/pets/${petId}`, data);
   return response.data;
 }
 
@@ -910,6 +923,30 @@ export async function updatePet(
  */
 export async function deletePet(petId: number): Promise<OkOut> {
   const response = await http.delete<OkOut>(`/api/pets/pets/${petId}`);
+  return response.data;
+}
+
+/**
+ * 获取已纪念宠物列表（分页）
+ */
+export async function getMemorializedPets(params?: {
+  page?: number;
+  page_size?: number;
+}): Promise<PetPageOut> {
+  const queryParams = new URLSearchParams();
+  if (params?.page) queryParams.append("page", String(params.page));
+  if (params?.page_size) queryParams.append("page_size", String(params.page_size));
+
+  const url = `/api/pets/pets/memorialized${queryParams.toString() ? "?" + queryParams.toString() : ""}`;
+  const response = await http.get<PetPageOut>(url);
+  return response.data;
+}
+
+/**
+ * 纪念宠物
+ */
+export async function memorializePet(petId: number): Promise<OkOut> {
+  const response = await http.post<OkOut>(`/api/pets/pets/${petId}/memorialize`);
   return response.data;
 }
 
@@ -1171,7 +1208,8 @@ export async function getMyBookings(params?: {
   if (params?.page) queryParams.append("page", String(params.page));
   if (params?.page_size) queryParams.append("page_size", String(params.page_size));
 
-  const url = `/api/bookings/${queryParams.toString() ? "?" + queryParams.toString() : ""}`;
+  const qs = queryParams.toString();
+  const url = qs ? `/api/bookings/?${qs}` : "/api/bookings/";
   const response = await http.get<BookingPageOut>(url);
   return response.data;
 }
@@ -1207,8 +1245,8 @@ export async function groomerConfirmBooking(
   confirm: boolean = true
 ): Promise<OkOut> {
   const response = await http.post<OkOut>(
-    `/api/bookings/bookings/${bookingId}/groomer_confirm?confirm=${confirm}`,
-    undefined
+    `/api/bookings/${bookingId}/groomer_confirm`,
+    { confirm }
   );
   return response.data;
 }
@@ -1221,13 +1259,9 @@ export async function createAddOnRequest(
   amount: number,
   description: string = ""
 ): Promise<AddOnRequestOut> {
-  const queryParams = new URLSearchParams();
-  queryParams.append("amount", String(amount));
-  if (description) queryParams.append("description", description);
-
   const response = await http.post<AddOnRequestOut>(
-    `/api/bookings/bookings/${bookingId}/addon_request?${queryParams.toString()}`,
-    undefined
+    `/api/bookings/${bookingId}/addon_request`,
+    { amount, description }
   );
   return response.data;
 }
@@ -1240,13 +1274,9 @@ export async function createReview(
   rating: number,
   comment: string = ""
 ): Promise<ReviewCreatedOut> {
-  const queryParams = new URLSearchParams();
-  queryParams.append("rating", String(rating));
-  if (comment) queryParams.append("comment", comment);
-
   const response = await http.post<ReviewCreatedOut>(
-    `/api/bookings/bookings/${bookingId}/review?${queryParams.toString()}`,
-    undefined
+    `/api/bookings/${bookingId}/review`,
+    { rating, comment }
   );
   return response.data;
 }
@@ -1256,7 +1286,7 @@ export async function createReview(
  */
 export async function checkInBooking(bookingId: number): Promise<OkOut> {
   const response = await http.post<OkOut>(
-    `/api/bookings/bookings/${bookingId}/check_in`,
+    `/api/bookings/${bookingId}/check_in`,
     undefined
   );
   return response.data;
@@ -1267,7 +1297,7 @@ export async function checkInBooking(bookingId: number): Promise<OkOut> {
  */
 export async function checkOutBooking(bookingId: number): Promise<CheckOutOut> {
   const response = await http.post<CheckOutOut>(
-    `/api/bookings/bookings/${bookingId}/check_out`,
+    `/api/bookings/${bookingId}/check_out`,
     undefined
   );
   return response.data;
@@ -1282,8 +1312,8 @@ export async function clientDecideAddOn(
   approve: boolean = true
 ): Promise<CheckOutOut> {
   const response = await http.post<CheckOutOut>(
-    `/api/bookings/bookings/${bookingId}/addon_request/${requestId}/client_decide?approve=${approve}`,
-    undefined
+    `/api/bookings/${bookingId}/addon_request/${requestId}/client_decide`,
+    { approve }
   );
   return response.data;
 }
@@ -1295,12 +1325,9 @@ export async function cancelBooking(
   bookingId: number,
   reason: string = ""
 ): Promise<OkOut> {
-  const queryParams = new URLSearchParams();
-  if (reason) queryParams.append("reason", reason);
-
   const response = await http.post<OkOut>(
-    `/api/bookings/bookings/${bookingId}/cancel${queryParams.toString() ? "?" + queryParams.toString() : ""}`,
-    undefined
+    `/api/bookings/${bookingId}/cancel`,
+    { reason }
   );
   return response.data;
 }
