@@ -8,13 +8,8 @@ import { motion, AnimatePresence } from "motion/react";
 import { OrangeButton } from "@/components/common";
 import { LoginModal } from "@/components/auth/LoginModal";
 import { useAuthStore } from "@/components/auth/authStore";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useLogout } from "@/hooks/useLogout";
+import AccountDropdown from "@/components/layout/AccountDropdown";
+import NotificationsPopover from "@/components/layout/NotificationsPopover";
 
 // Helper function to handle smooth scroll to anchor with header offset
 const scrollToAnchor = (href: string) => {
@@ -140,51 +135,18 @@ function LoginSignUpButton() {
 // User info component for logged-in users
 function UserInfo() {
   const user = useAuthStore((state) => state.user);
-  const { handleLogout } = useLogout();
+  const userInfo = useAuthStore((state) => state.userInfo);
 
   if (!user) return null;
 
   return (
     <div className="content-stretch flex gap-[10.5px] items-center">
-      {/* User avatar and name with dropdown */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <div className="content-stretch flex gap-[8px] items-center cursor-pointer hover:opacity-80 transition-opacity group">
-            <div className="bg-[#8b6357] overflow-clip relative rounded-[100px] shrink-0 size-[20px] flex items-center justify-center" data-name="Icons/Avatar/Brown/Default/Rempli">
-              <Icon
-                name="user"
-                aria-label="User"
-                className="block size-full text-white"
-              />
-            </div>
-            <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] text-[#8b6357] text-[12px]">
-              {user.name}
-            </p>
-          </div>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="min-w-[160px]">
-          <DropdownMenuItem
-            onClick={handleLogout}
-            className="cursor-pointer text-[#8b6357] hover:text-[#6f4e44] hover:bg-[#8b6357]/5"
-          >
-            <span className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px]">
-              Log out
-            </span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <AccountDropdown
+        userInfo={userInfo ?? undefined}
+        fallbackName={user.name || user.email}
+      />
 
-      {/* Notification icon */}
-      <button
-        className="relative shrink-0 size-[24px] cursor-pointer hover:opacity-80 transition-opacity"
-        aria-label="Notifications"
-      >
-        <Icon
-          name="notify"
-          aria-label="Notifications"
-          className="block size-full text-[#8b6357]"
-        />
-      </button>
+      <NotificationsPopover />
     </div>
   );
 }
@@ -266,16 +228,9 @@ function MobileButton2() {
       <div className="content-stretch flex flex-col gap-[12px] w-full">
         <div className="content-stretch flex gap-[16px] items-center w-full">
           {/* Notification icon */}
-          <button
-            className="content-stretch flex gap-[10px] h-[48px] items-center justify-center relative shrink-0 w-[48px] cursor-pointer hover:opacity-80 transition-opacity bg-[#f5f5f5] rounded-[2.47134e+07px]"
-            aria-label="Notifications"
-          >
-            <Icon
-              name="notify"
-              aria-label="Notifications"
-              className="relative shrink-0 size-[24px]"
-            />
-          </button>
+          <div className="content-stretch flex gap-[10px] h-[48px] items-center justify-center relative shrink-0 w-[48px] bg-[#f5f5f5] rounded-[2.47134e+07px]">
+            <NotificationsPopover />
+          </div>
 
           {/* User info */}
           <div className="content-stretch flex gap-[12px] items-center flex-1">
