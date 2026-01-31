@@ -12,13 +12,13 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { OrangeButton } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
 import { CustomInput } from "@/components/common/CustomInput";
 import { Checkbox } from "@/components/common/Checkbox";
 import { createAddress, type AddressManageIn } from "@/lib/api";
 import { toast } from "sonner";
 import { HttpError } from "@/lib/http";
-import { Spinner } from "@/components/common/Spinner";
 
 interface AddAddressModalProps {
   open: boolean;
@@ -150,7 +150,7 @@ export default function AddAddressModal({
             
             {/* Title (居中) */}
             <h2 className="absolute left-1/2 -translate-x-1/2 font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-lg">
-              Add address
+              Modify address
             </h2>
           </div>
           
@@ -274,29 +274,25 @@ export default function AddAddressModal({
 
         {/* Action Buttons */}
         <div className="flex items-center justify-end gap-[10px] mt-6">
-          <button
+          <OrangeButton
+            variant="outline"
+            size="medium"
+            className="w-[120px]"
             onClick={handleCancel}
             disabled={isSubmitting}
-            className="w-[120px] h-[36px] rounded-lg border border-[#DE6A07] bg-white text-[#DE6A07] font-['Comfortaa:Medium',sans-serif] font-medium text-sm hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             Cancel
-          </button>
-          <button
+          </OrangeButton>
+          <OrangeButton
+            variant="primary"
+            size="medium"
+            className="w-[120px]"
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="w-[120px] h-[36px] rounded-lg bg-[#DE6A07] text-white font-['Comfortaa:Medium',sans-serif] font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer relative"
+            loading={isSubmitting}
           >
-            {/* Loading Spinner */}
-            {isSubmitting && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Spinner size="small" color="white" />
-              </div>
-            )}
-            {/* Button Text - invisible when loading */}
-            <span className={isSubmitting ? "invisible" : ""}>
-              Save
-            </span>
-          </button>
+            Save
+          </OrangeButton>
         </div>
       </DialogContent>
     </Dialog>

@@ -6,13 +6,16 @@
  */
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { useAccountStore } from "./accountStore";
 import { Icon } from "@/components/common/Icon";
 import AddAddressModal from "./AddAddressModal";
+import { deleteAddress } from "@/lib/api";
 
 export default function AddressesCard() {
-  const { addresses, isLoadingAddresses, fetchAddresses, showComingSoonMessage } = useAccountStore();
+  const { addresses, isLoadingAddresses, fetchAddresses } = useAccountStore();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const handleAdd = () => {
     setIsAddModalOpen(true);
@@ -23,9 +26,19 @@ export default function AddressesCard() {
     fetchAddresses();
   };
 
-  const handleDelete = (id: number) => {
-    showComingSoonMessage("删除地址");
-    // TODO: 实现删除地址功能
+  const handleDelete = async (id: number) => {
+    if (deletingId === id) return;
+    setDeletingId(id);
+    try {
+      await deleteAddress(id);
+      toast.success("Address deleted successfully.");
+      await fetchAddresses();
+    } catch (error) {
+      console.error("Failed to delete address:", error);
+      toast.error("Failed to delete address. Please try again.");
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   return (
@@ -51,47 +64,55 @@ export default function AddressesCard() {
         </div>
 
       {/* Address List */}
-      {isLoadingAddresses ? (
-        <div className="text-[#4A3C2A] text-sm">Loading addresses...</div>
-      ) : !Array.isArray(addresses) || addresses.length === 0 ? (
-        <div className="text-[#4A3C2A] text-sm py-4">
-          No addresses saved yet.
-        </div>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {addresses.map((address) => (
-            <div
-              key={address.id}
-              className="bg-white rounded-lg border border-[rgba(0,0,0,0.1)] p-4 flex items-center"
-            >
-              <div className="flex items-start gap-5">
-                <div className="flex flex-col gap-1">
-                  <span className="font-['Comfortaa',sans-serif] font-normal text-[#4A3C2A] text-sm">
-                    {address.address}
-                  </span>
-                  <span className="font-['Comfortaa',sans-serif] font-normal text-[#4A5565] text-sm">
-                    {address.city}, {address.province} {address.postal_code}
-                  </span>
+      {(() => {
+        const hasAddresses = Array.isArray(addresses) && addresses.length > 0;
+        if (isLoadingAddresses && !hasAddresses) {
+          return <div className="text-[#4A3C2A] text-sm">Loading addresses...</div>;
+        }
+        if (!hasAddresses) {
+          return (
+            <div className="text-[#4A3C2A] text-sm py-4">
+              No addresses saved yet.
+            </div>
+          );
+        }
+        return (
+          <div className="flex flex-col gap-3">
+            {addresses.map((address) => (
+              <div
+                key={address.id}
+                className="bg-white rounded-lg border border-[rgba(0,0,0,0.1)] p-4 flex items-center"
+              >
+                <div className="flex items-start gap-5">
+                  <div className="flex flex-col gap-1">
+                    <span className="font-['Comfortaa',sans-serif] font-normal text-[#4A3C2A] text-sm">
+                      {address.address}
+                    </span>
+                    <span className="font-['Comfortaa',sans-serif] font-normal text-[#4A5565] text-sm">
+                      {address.city}, {address.province} {address.postal_code}
+                    </span>
+                  </div>
+                  {address.is_default && (
+                    <span className="bg-[#DCFCE7] text-[#008236] px-3 py-1 rounded-full text-xs font-['Comfortaa',sans-serif] font-medium">
+                      Default
+                    </span>
+                  )}
                 </div>
-                {address.is_default && (
-                  <span className="bg-[#DCFCE7] text-[#008236] px-3 py-1 rounded-full text-xs font-['Comfortaa',sans-serif] font-medium">
-                    Default
-                  </span>
+                {!address.is_default && (
+                  <button
+                    onClick={() => handleDelete(address.id)}
+                    className="ml-auto text-[#4C4C4C] hover:text-red-500 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                    aria-label="Delete address"
+                    disabled={deletingId === address.id}
+                  >
+                    <Icon name="trash" className="w-5 h-5" />
+                  </button>
                 )}
               </div>
-              {!address.is_default && (
-                <button
-                  onClick={() => handleDelete(address.id)}
-                  className="ml-auto text-[#4C4C4C] hover:text-red-500 cursor-pointer"
-                  aria-label="Delete address"
-                >
-                  <Icon name="trash" className="w-5 h-5" />
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        );
+      })()}
       </div>
 
       {/* Add Address Modal */}

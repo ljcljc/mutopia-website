@@ -2,8 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { OrangeButton } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
-import { getBookingDetail, cancelBooking, type BookingDetailOut } from "@/lib/api";
+import { useAccountStore } from "@/components/account/accountStore";
+import { getBookingDetail, cancelBooking, createAddress, type AddressManageIn, type AddressOut, type BookingDetailOut } from "@/lib/api";
 import { toast } from "sonner";
+import AddAddressModal from "@/components/account/AddAddressModal";
+import ModifyAddressModal from "@/components/account/ModifyAddressModal";
 
 function formatDateTime(dateString?: string | null): string {
   if (!dateString) return "";
@@ -44,6 +47,17 @@ export default function BookingDetail() {
   const [isPackageExpanded, setIsPackageExpanded] = useState(true);
   const [isCanceling, setIsCanceling] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isModifyOpen, setIsModifyOpen] = useState(false);
+  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
+  const [addressOverride, setAddressOverride] = useState<AddressOut | null>(null);
+  const [isAddAddressOpen, setIsAddAddressOpen] = useState(false);
+  const [isCreatingAddress, setIsCreatingAddress] = useState(false);
+  const [newAddress, setNewAddress] = useState("");
+  const [newCity, setNewCity] = useState("");
+  const [newProvince, setNewProvince] = useState("");
+  const [newPostalCode, setNewPostalCode] = useState("");
+  const [setAsDefault, setSetAsDefault] = useState(false);
+  const { addresses, isLoadingAddresses, fetchAddresses } = useAccountStore();
 
   useEffect(() => {
     const id = Number(bookingId);
@@ -82,18 +96,21 @@ export default function BookingDetail() {
   const scheduledDisplay = formatDateTime(detail?.scheduled_time) || "2026-04-03 at 10H";
 
   const addressLine1 =
-    (addressSnapshot.address as string | undefined) ?? "100 Vancouver Cres";
+    addressOverride?.address ??
+    (addressSnapshot.address as string | undefined) ??
+    "100 Vancouver Cres";
   const addressLine2 =
     [
-      addressSnapshot.city as string | undefined,
-      addressSnapshot.province as string | undefined,
-      addressSnapshot.postal_code as string | undefined,
+      addressOverride?.city ?? (addressSnapshot.city as string | undefined),
+      addressOverride?.province ?? (addressSnapshot.province as string | undefined),
+      addressOverride?.postal_code ?? (addressSnapshot.postal_code as string | undefined),
     ]
       .filter(Boolean)
       .join(" ") || "MIRAMICHI NB E1N 2E5";
 
   const statusLabel = getStatusLabel(detail?.status);
   const statusLower = detail?.status?.toLowerCase() ?? "";
+  const isPending = statusLower.includes("pending");
   const progressVariant =
     statusLower.includes("confirm") || statusLower.includes("proposed")
       ? "confirm"
@@ -129,6 +146,7 @@ export default function BookingDetail() {
   } as const;
 
   const activeProgress = progressConfig[progressVariant];
+  const canModifyAddress = isPending || progressVariant === "waiting";
   const proposedTimeDisplay = "2026-04-03 at 11H";
   
   // 价格信息（需要在 useMemo 之前定义）
@@ -170,6 +188,75 @@ export default function BookingDetail() {
       return { label: name, amount: price };
     });
   }, [detail?.addons_snapshot]);
+
+  useEffect(() => {
+    if (!isModifyOpen) return;
+    fetchAddresses();
+  }, [isModifyOpen, fetchAddresses]);
+
+  useEffect(() => {
+    if (!isAddAddressOpen) return;
+    setNewAddress("");
+    setNewCity("");
+    setNewProvince("");
+    setNewPostalCode("");
+    setSetAsDefault(false);
+  }, [isAddAddressOpen]);
+
+  useEffect(() => {
+    if (!isModifyOpen) return;
+    if (selectedAddressId !== null) return;
+    const defaultAddress = addresses.find((address) => address.is_default);
+    setSelectedAddressId(defaultAddress?.id ?? addresses[0]?.id ?? null);
+  }, [isModifyOpen, addresses, selectedAddressId]);
+
+  const handleSaveAddress = () => {
+    const selected = addresses.find((address) => address.id === selectedAddressId) || null;
+    setAddressOverride(selected);
+    setIsModifyOpen(false);
+  };
+
+  const handleCreateAddress = async () => {
+    if (!newAddress.trim()) {
+      toast.error("Address is required.");
+      return;
+    }
+    if (!newCity.trim()) {
+      toast.error("City is required.");
+      return;
+    }
+    if (!newProvince.trim()) {
+      toast.error("Province is required.");
+      return;
+    }
+    if (!newPostalCode.trim()) {
+      toast.error("Post code is required.");
+      return;
+    }
+
+    const payload: AddressManageIn = {
+      address: newAddress.trim(),
+      city: newCity.trim(),
+      province: newProvince.trim(),
+      postal_code: newPostalCode.trim(),
+      service_type: "mobile",
+      is_default: setAsDefault,
+    };
+
+    setIsCreatingAddress(true);
+    try {
+      const created = await createAddress(payload);
+      await fetchAddresses();
+      setSelectedAddressId(created.id);
+      setIsAddAddressOpen(false);
+      setIsModifyOpen(true);
+    } catch (error) {
+      console.error("Failed to create address:", error);
+      toast.error("Failed to add address. Please try again.");
+    } finally {
+      setIsCreatingAddress(false);
+    }
+  };
   
   // 计算折扣信息
   const discountRate = detail?.discount_rate 
@@ -333,9 +420,16 @@ export default function BookingDetail() {
                   </p>
                 </div>
               </div>
-              <OrangeButton variant="secondary" size="compact" className="w-[103px]">
-                Modify
-              </OrangeButton>
+              {canModifyAddress ? (
+                <OrangeButton
+                  variant="secondary"
+                  size="compact"
+                  className="w-[103px]"
+                  onClick={() => setIsModifyOpen(true)}
+                >
+                  Modify
+                </OrangeButton>
+              ) : null}
             </div>
           </div>
 
@@ -517,6 +611,23 @@ export default function BookingDetail() {
           )}
         </div>
       </div>
+
+      <ModifyAddressModal
+        open={isModifyOpen}
+        onOpenChange={setIsModifyOpen}
+        addresses={addresses}
+        isLoading={isLoadingAddresses}
+        selectedAddressId={selectedAddressId}
+        onSelectAddress={(id) => setSelectedAddressId(id)}
+        onAddNew={() => setIsAddAddressOpen(true)}
+        onSave={handleSaveAddress}
+      />
+
+      <AddAddressModal
+        open={isAddAddressOpen}
+        onOpenChange={setIsAddAddressOpen}
+        onSuccess={() => fetchAddresses()}
+      />
     </div>
   );
 }
