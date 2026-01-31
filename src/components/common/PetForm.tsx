@@ -74,6 +74,13 @@ export interface PetFormProps {
   showBackButton?: boolean;
   backLabel?: string;
   onBackAction?: () => void;
+  petInfoCardClassName?: string;
+  mergeGroomingIntoInfoCard?: boolean;
+  alignActionsRight?: boolean;
+  actionsOrder?: "primary-first" | "secondary-first";
+  actionsPlacement?: "default" | "inside-pet-info";
+  primaryActionShowArrow?: boolean;
+  hideAfterPetInfo?: boolean;
 }
 
 export function PetForm({
@@ -125,6 +132,13 @@ export function PetForm({
   showBackButton = true,
   backLabel = "Back",
   onBackAction,
+  petInfoCardClassName,
+  mergeGroomingIntoInfoCard = false,
+  alignActionsRight = false,
+  actionsOrder = "primary-first",
+  actionsPlacement = "default",
+  primaryActionShowArrow = true,
+  hideAfterPetInfo = false,
 }: PetFormProps) {
 
   // 计算日期限制：最多20年前的今天，不能超过今天
@@ -137,6 +151,116 @@ export function PetForm({
   const handlePrimaryAction = onPrimaryAction ?? (() => {});
   const handleBackAction = onBackAction ?? (() => {});
   const primaryLabel = primaryActionLabel ?? "Continue";
+
+  const groomingFrequencyContent = (
+    <div className="flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full">
+      <div className="flex flex-col gap-[calc(3.5*var(--px393))] sm:gap-[3.5px] items-start relative shrink-0">
+        <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px]">
+          How often would you like grooming?
+        </p>
+        <div className="bg-blue-50 border border-[#bedbff] border-solid relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] shrink-0 w-full">
+          <div className="box-border flex items-center overflow-clip px-[calc(16*var(--px393))] py-[calc(8*var(--px393))] sm:px-[16px] sm:py-[8px] relative rounded-[inherit]">
+            <div className="flex gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full min-w-0">
+              <Icon
+                name="alert-info"
+                className="relative shrink-0 size-[12px] text-[#2374FF]"
+              />
+              <div className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(14*var(--px393))] sm:leading-[14px] relative text-[#193cb8] text-[calc(10*var(--px393))] sm:text-[10px] whitespace-normal break-words min-w-0">
+                <p className="font-['Comfortaa:Bold',sans-serif] font-bold mb-0">
+                  Professional Tip:
+                </p>
+                <p>
+                  Regular grooming every 2-4 weeks keeps your pet's coat healthy, reduces shedding, and helps detect health issues early.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex flex-row flex-wrap gap-[calc(8*var(--px393))] sm:gap-[16px] relative sm:h-[166px] *:flex-[1_1_calc(50%-4px)] *:min-w-0 *:sm:flex-[1_1_calc(50%-8px)]">
+        <CustomRadio
+          label="Weekly"
+          description="Once a week"
+          isSelected={groomingFrequency === "weekly"}
+          onClick={() => setGroomingFrequency("weekly")}
+          variant="with-description"
+        />
+        <CustomRadio
+          label="Bi-weekly"
+          description="Every 2 weeks"
+          isSelected={groomingFrequency === "bi_weekly"}
+          onClick={() => setGroomingFrequency("bi_weekly")}
+          variant="with-description"
+        />
+        <CustomRadio
+          label="Monthly"
+          description="Once a month"
+          isSelected={groomingFrequency === "monthly"}
+          onClick={() => setGroomingFrequency("monthly")}
+          variant="with-description"
+        />
+        <CustomRadio
+          label="Occasionally"
+          description="As needed"
+          isSelected={groomingFrequency === "occasionally"}
+          onClick={() => setGroomingFrequency("occasionally")}
+          variant="with-description"
+        />
+      </div>
+    </div>
+  );
+
+  const actionButtons = (
+    <div className="flex flex-col gap-[calc(12*var(--px393))] sm:flex-row sm:gap-[20px] items-start relative shrink-0 w-full">
+      <div
+        className={`flex flex-col gap-[calc(12*var(--px393))] sm:flex-row sm:gap-[20px] items-center relative shrink-0 w-full sm:w-auto ${
+          alignActionsRight ? "sm:ml-auto sm:justify-end" : ""
+        }`}
+      >
+        {actionsOrder === "secondary-first" && showBackButton ? (
+          <button
+            type="button"
+            onClick={handleBackAction}
+            className="border-2 border-[#de6a07] border-solid box-border flex gap-[calc(8*var(--px393))] sm:gap-[8px] h-[calc(36*var(--px393))] sm:h-[36px] items-center justify-center px-[calc(30*var(--px393))] sm:px-[30px] relative rounded-[calc(32*var(--px393))] sm:rounded-[32px] shrink-0 cursor-pointer hover:bg-[rgba(222,106,7,0.1)] transition-colors w-full sm:w-auto"
+          >
+            <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[calc(14*var(--px393))] sm:text-[14px] text-[#de6a07]">
+              {backLabel}
+            </p>
+          </button>
+        ) : null}
+        <OrangeButton
+          size="medium"
+          onClick={handlePrimaryAction}
+          loading={isPrimaryActionLoading}
+          className="w-full sm:w-auto"
+        >
+          <div className="flex gap-[calc(4*var(--px393))] sm:gap-[4px] items-center">
+            <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] text-[calc(14*var(--px393))] sm:text-[14px] text-white">
+              {primaryLabel}
+            </p>
+            {primaryActionShowArrow ? (
+              <Icon
+                name="button-arrow"
+                aria-label="Arrow"
+                className="size-[14px] text-white"
+              />
+            ) : null}
+          </div>
+        </OrangeButton>
+        {actionsOrder !== "secondary-first" && showBackButton ? (
+          <button
+            type="button"
+            onClick={handleBackAction}
+            className="border-2 border-[#de6a07] border-solid box-border flex gap-[calc(8*var(--px393))] sm:gap-[8px] h-[calc(36*var(--px393))] sm:h-[36px] items-center justify-center px-[calc(30*var(--px393))] sm:px-[30px] relative rounded-[calc(32*var(--px393))] sm:rounded-[32px] shrink-0 cursor-pointer hover:bg-[rgba(222,106,7,0.1)] transition-colors w-full sm:w-auto"
+          >
+            <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[calc(14*var(--px393))] sm:text-[14px] text-[#de6a07]">
+              {backLabel}
+            </p>
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
 
   const photoIdsRef = useRef(photoIds);
   const photoUrlsRef = useRef(photoUrls);
@@ -1023,7 +1147,7 @@ export function PetForm({
       </div>
       <div className="flex flex-col gap-[calc(32*var(--px393))] sm:gap-[32px] items-start relative w-full">
         {/* Pet Information Card */}
-        <div className="bg-white box-border flex flex-col gap-[calc(16*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
+        <div className={`bg-white box-border flex flex-col gap-[calc(16*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full ${petInfoCardClassName ?? ""}`}>
           <div className="flex flex-col gap-[calc(16*var(--px393))] sm:gap-[16px] items-start relative w-full">
             {/* Section Header */}
             <div className="flex flex-col gap-[calc(4*var(--px393))] sm:gap-[4px] items-start relative shrink-0 w-full">
@@ -1266,6 +1390,16 @@ export function PetForm({
               </div>
             </div>
           </div>
+          {mergeGroomingIntoInfoCard ? (
+            <div className="flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start relative shrink-0 w-full">
+              {groomingFrequencyContent}
+              {actionsPlacement === "inside-pet-info" ? (
+                <div className="w-full">
+                  {actionButtons}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
         </div>
 
       <AlertDialog
@@ -1448,168 +1582,88 @@ export function PetForm({
       </AlertDialog>
 
         {/* Grooming Frequency Card */}
-        <div className="bg-white box-border flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
-        <div className="flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full">
-          <div className="flex flex-col gap-[calc(3.5*var(--px393))] sm:gap-[3.5px] items-start relative shrink-0">
-            <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px]">
-              How often would you like grooming?
-            </p>
-            {/* Info Alert */}
-            <div className="bg-blue-50 border border-[#bedbff] border-solid relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] shrink-0 w-full">
-              <div className="box-border flex items-center overflow-clip px-[calc(16*var(--px393))] py-[calc(8*var(--px393))] sm:px-[16px] sm:py-[8px] relative rounded-[inherit]">
-                <div className="flex gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full min-w-0">
-                  <Icon
-                    name="alert-info"
-                    className="relative shrink-0 size-[12px] text-[#2374FF]"
-                  />
-                  <div className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(14*var(--px393))] sm:leading-[14px] relative text-[#193cb8] text-[calc(10*var(--px393))] sm:text-[10px] whitespace-normal break-words min-w-0">
-                    <p className="font-['Comfortaa:Bold',sans-serif] font-bold mb-0">
-                      Professional Tip:
-                    </p>
-                    <p>
-                      Regular grooming every 2-4 weeks keeps your pet's coat healthy, reduces shedding, and helps detect health issues early.
-                    </p>
+        {!mergeGroomingIntoInfoCard ? (
+          <div className="bg-white box-border flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
+            {groomingFrequencyContent}
+          </div>
+        ) : null}
+
+        {!hideAfterPetInfo ? (
+          <>
+            {/* Upload Pet Photo Card */}
+            <div className="bg-white box-border flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
+              <div className="flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full">
+                <div className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full">
+                  <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[calc(16*var(--px393))] sm:text-[16px] text-black whitespace-pre-wrap">
+                    Upload pet photo (optional but helpful)
+                  </p>
+                  <div className="flex flex-col gap-[calc(12*var(--px393))] sm:gap-[12px] items-start overflow-clip relative shrink-0 w-full">
+                    <FileUpload
+                      accept="image/*"
+                      multiple={true}
+                      maxSizeMB={10}
+                      onChange={handlePetPhotoChange}
+                      onRemove={(index) => {
+                        // 删除已上传的图片
+                        // 使用函数式更新，确保基于最新状态
+                        setPetPhotoItems((prevItems) => {
+                          const item = prevItems[index];
+                          if (item && item.uploadStatus === "uploaded" && item.photoId !== undefined) {
+                            // 从当前状态中移除对应的 photoId 和 photoUrl
+                            const currentPhotoIds = photoIdsRef.current;
+                            const currentPhotoUrls = photoUrlsRef.current;
+                            const photoIndex = currentPhotoIds.indexOf(item.photoId);
+                            
+                            setPhotoIds(currentPhotoIds.filter((id) => id !== item.photoId));
+                            if (photoIndex >= 0 && photoIndex < currentPhotoUrls.length) {
+                              setPhotoUrls(currentPhotoUrls.filter((_, idx) => idx !== photoIndex));
+                            }
+                            
+                            // 从 petPhotoItems 中移除（使用函数式更新，避免闭包问题）
+                            return prevItems.filter((_, i) => i !== index);
+                          }
+                          return prevItems;
+                        });
+                      }}
+                      uploadItems={petPhotoItems}
+                      buttonText="Click to upload"
+                      fileTypeHint="JPG, JPEG, PNG less than 10MB"
+                      showDragHint={true}
+                      className="w-full"
+                    />
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div className="flex flex-row flex-wrap gap-[calc(8*var(--px393))] sm:gap-[16px] relative sm:h-[166px] *:flex-[1_1_calc(50%-4px)] *:min-w-0 *:sm:flex-[1_1_calc(50%-8px)]">
-            <CustomRadio
-              label="Weekly"
-              description="Once a week"
-              isSelected={groomingFrequency === "weekly"}
-              onClick={() => setGroomingFrequency("weekly")}
-              variant="with-description"
-            />
-            <CustomRadio
-              label="Bi-weekly"
-              description="Every 2 weeks"
-              isSelected={groomingFrequency === "bi_weekly"}
-              onClick={() => setGroomingFrequency("bi_weekly")}
-              variant="with-description"
-            />
-            <CustomRadio
-              label="Monthly"
-              description="Once a month"
-              isSelected={groomingFrequency === "monthly"}
-              onClick={() => setGroomingFrequency("monthly")}
-              variant="with-description"
-            />
-            <CustomRadio
-              label="Occasionally"
-              description="As needed"
-              isSelected={groomingFrequency === "occasionally"}
-              onClick={() => setGroomingFrequency("occasionally")}
-              variant="with-description"
-            />
-          </div>
-        </div>
-        </div>
 
-        {/* Upload Pet Photo Card */}
-        <div className="bg-white box-border flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
-          <div className="flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full">
-            <div className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full">
-              <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[calc(16*var(--px393))] sm:text-[16px] text-black whitespace-pre-wrap">
-                Upload pet photo (optional but helpful)
-              </p>
-              <div className="flex flex-col gap-[calc(12*var(--px393))] sm:gap-[12px] items-start overflow-clip relative shrink-0 w-full">
-                <FileUpload
-                  accept="image/*"
-                  multiple={true}
-                  maxSizeMB={10}
-                  onChange={handlePetPhotoChange}
-                  onRemove={(index) => {
-                    // 删除已上传的图片
-                    // 使用函数式更新，确保基于最新状态
-                    setPetPhotoItems((prevItems) => {
-                      const item = prevItems[index];
-                      if (item && item.uploadStatus === "uploaded" && item.photoId !== undefined) {
-                        // 从当前状态中移除对应的 photoId 和 photoUrl
-                        const currentPhotoIds = photoIdsRef.current;
-                        const currentPhotoUrls = photoUrlsRef.current;
-                        const photoIndex = currentPhotoIds.indexOf(item.photoId);
-                        
-                        setPhotoIds(currentPhotoIds.filter((id) => id !== item.photoId));
-                        if (photoIndex >= 0 && photoIndex < currentPhotoUrls.length) {
-                          setPhotoUrls(currentPhotoUrls.filter((_, idx) => idx !== photoIndex));
-                        }
-                        
-                        // 从 petPhotoItems 中移除（使用函数式更新，避免闭包问题）
-                        return prevItems.filter((_, i) => i !== index);
-                      }
-                      return prevItems;
-                    });
-                  }}
-                  uploadItems={petPhotoItems}
-                  buttonText="Click to upload"
-                  fileTypeHint="JPG, JPEG, PNG less than 10MB"
-                  showDragHint={true}
-                  className="w-full"
-                />
+            {/* Upload Reference Styles Card */}
+            <ReferenceStylesUpload 
+              onChange={handleReferenceStylesChange}
+              uploadItems={referenceStyleItems}
+            />
+
+            {/* Special Notes Card */}
+            <div className="bg-white box-border flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
+              <div className="flex flex-col gap-[calc(12*var(--px393))] sm:gap-[12px] items-start relative shrink-0 w-full">
+                <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] text-[calc(16*var(--px393))] sm:text-[16px] text-[#4a3c2a] w-full whitespace-pre-wrap">
+                  Special instruments or notes{"\n"}(optional)
+                </p>
+                  <CustomTextarea
+                    label=""
+                    placeholder="e.g., 'My dog is nervous around clippers', 'Has sensitive skin', 'I have 2 pets and prefer to groom together..."
+                    value={specialNotes}
+                    onChange={(e) => setSpecialNotes(e.target.value)}
+                    helperText="Include any health conditions, behavioral notes, or grooming preferences"
+                    aria-label="Special instruments or notes (optional)"
+                    labelClassName="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] text-[calc(16*var(--px393))] sm:text-[16px]"
+                  />
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Upload Reference Styles Card */}
-        <ReferenceStylesUpload 
-          onChange={handleReferenceStylesChange}
-          uploadItems={referenceStyleItems}
-        />
-
-        {/* Special Notes Card */}
-        <div className="bg-white box-border flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
-          <div className="flex flex-col gap-[calc(12*var(--px393))] sm:gap-[12px] items-start relative shrink-0 w-full">
-            <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] text-[calc(16*var(--px393))] sm:text-[16px] text-[#4a3c2a] w-full whitespace-pre-wrap">
-              Special instruments or notes{"\n"}(optional)
-            </p>
-              <CustomTextarea
-                label=""
-                placeholder="e.g., 'My dog is nervous around clippers', 'Has sensitive skin', 'I have 2 pets and prefer to groom together..."
-                value={specialNotes}
-                onChange={(e) => setSpecialNotes(e.target.value)}
-                helperText="Include any health conditions, behavioral notes, or grooming preferences"
-                aria-label="Special instruments or notes (optional)"
-                labelClassName="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] text-[calc(16*var(--px393))] sm:text-[16px]"
-              />
-          </div>
-        </div>
+          </>
+        ) : null}
 
         {/* Action Buttons */}
-        <div className="flex flex-col gap-[calc(12*var(--px393))] sm:flex-row sm:gap-[20px] items-start relative shrink-0 w-full">
-          <div className="flex flex-col gap-[calc(12*var(--px393))] sm:flex-row sm:gap-[20px] items-center relative shrink-0 w-full sm:w-auto">
-            <OrangeButton
-              size="medium"
-              onClick={handlePrimaryAction}
-              loading={isPrimaryActionLoading}
-              className="w-full sm:w-auto"
-            >
-              <div className="flex gap-[calc(4*var(--px393))] sm:gap-[4px] items-center">
-                <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] text-[calc(14*var(--px393))] sm:text-[14px] text-white">
-                  {primaryLabel}
-                </p>
-                <Icon
-                  name="button-arrow"
-                  aria-label="Arrow"
-                  className="size-[14px] text-white"
-                />
-              </div>
-            </OrangeButton>
-            {showBackButton ? (
-              <button
-                type="button"
-                onClick={handleBackAction}
-                className="border-2 border-[#de6a07] border-solid box-border flex gap-[calc(8*var(--px393))] sm:gap-[8px] h-[calc(36*var(--px393))] sm:h-[36px] items-center justify-center px-[calc(30*var(--px393))] sm:px-[30px] relative rounded-[calc(32*var(--px393))] sm:rounded-[32px] shrink-0 cursor-pointer hover:bg-[rgba(222,106,7,0.1)] transition-colors w-full sm:w-auto"
-              >
-                <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[calc(14*var(--px393))] sm:text-[14px] text-[#de6a07]">
-                  {backLabel}
-                </p>
-              </button>
-            ) : null}
-          </div>
-        </div>
+        {!hideAfterPetInfo && actionsPlacement === "default" ? actionButtons : null}
       </div>
     </div>
   );

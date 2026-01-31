@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useAccountStore } from "@/components/account/accountStore";
@@ -6,7 +6,9 @@ import { Icon } from "@/components/common/Icon";
 import { OrangeButton } from "@/components/common/OrangeButton";
 import { FileUpload, type FileUploadItem } from "@/components/common/FileUpload";
 import { CustomTextarea } from "@/components/common/CustomTextarea";
-import { buildImageUrl, updatePet, deletePet, memorializePet } from "@/lib/api";
+import { PetForm } from "@/components/common/PetForm";
+import type { Behavior, CoatCondition, Gender, PetType, WeightUnit } from "@/components/booking/bookingStore";
+import { buildImageUrl, getPetBreeds, updatePet, deletePet, memorializePet, type PetBreedOut, type PetOut } from "@/lib/api";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -64,12 +66,50 @@ export default function MyPets() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isMemorializing, setIsMemorializing] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isUpdatingPet, setIsUpdatingPet] = useState(false);
+
+  const [petName, setPetName] = useState("");
+  const [petType, setPetType] = useState<PetType>("dog");
+  const [breed, setBreed] = useState("");
+  const [isMixedBreed, setIsMixedBreed] = useState(false);
+  const [precisePetType, setPrecisePetType] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [gender, setGender] = useState<Gender | "">("");
+  const [weight, setWeight] = useState("");
+  const [weightUnit, setWeightUnit] = useState<WeightUnit>("lbs");
+  const [coatCondition, setCoatCondition] = useState<CoatCondition | "">("");
+  const [approveShave, setApproveShave] = useState<boolean | null>(null);
+  const [behavior, setBehavior] = useState<Behavior | "">("");
+  const [groomingFrequency, setGroomingFrequency] = useState("");
+  const [specialNotes, setSpecialNotes] = useState("");
+  const [petBreeds, setPetBreeds] = useState<PetBreedOut[]>([]);
+  const [isLoadingBreeds, setIsLoadingBreeds] = useState(false);
+  const [photoIds, setPhotoIds] = useState<number[]>([]);
+  const [referencePhotoIds, setReferencePhotoIds] = useState<number[]>([]);
+  const [photoUrls, setPhotoUrls] = useState<string[]>([]);
+  const [referencePhotoUrls, setReferencePhotoUrls] = useState<string[]>([]);
+  const [petPhoto, setPetPhoto] = useState<File | null>(null);
+  const [referenceStyles, setReferenceStyles] = useState<File[]>([]);
 
   const petIdFromUrl = searchParams.get("pet");
 
   useEffect(() => {
     fetchPets();
   }, [fetchPets]);
+
+  const hasLoadedBreedsRef = useRef(false);
+  useEffect(() => {
+    if (hasLoadedBreedsRef.current) return;
+    hasLoadedBreedsRef.current = true;
+    setIsLoadingBreeds(true);
+    getPetBreeds()
+      .then((breeds) => setPetBreeds(breeds))
+      .catch((error) => {
+        console.error("Failed to load pet breeds:", error);
+      })
+      .finally(() => setIsLoadingBreeds(false));
+  }, []);
 
   useEffect(() => {
     if (pets.length === 0) {
@@ -94,6 +134,10 @@ export default function MyPets() {
     }
   }, [pets, petIdFromUrl, activePetId]);
 
+  useEffect(() => {
+    setIsEditing(false);
+  }, [activePetId]);
+
   // 切换宠物时若 URL 带有 ?pet=，可选择性清除（避免与当前选中不一致）
   const handleSelectPet = (id: number) => {
     setActivePetId(id);
@@ -108,6 +152,29 @@ export default function MyPets() {
 
   const activePet = useMemo(() => pets.find((pet) => pet.id === activePetId) || null, [pets, activePetId]);
   const isMemorialized = Boolean(activePet?.is_memorialized);
+
+  const applyPetToForm = (pet: PetOut) => {
+    setPetName(pet.name || "");
+    setPetType((pet.pet_type as PetType) || "dog");
+    setBreed(pet.breed || "");
+    setIsMixedBreed(Boolean(pet.mixed_breed));
+    setPrecisePetType(pet.precise_type || "");
+    setDateOfBirth(pet.birthday || "");
+    setGender((pet.gender as Gender) || "");
+    setWeight(pet.weight_value ? String(pet.weight_value) : "");
+    setWeightUnit((pet.weight_unit as WeightUnit) || "lbs");
+    setCoatCondition((pet.coat_condition as CoatCondition) || "");
+    setApproveShave(pet.approve_shave ?? null);
+    setBehavior((pet.behavior as Behavior) || "");
+    setGroomingFrequency(pet.grooming_frequency || "");
+    setSpecialNotes(pet.special_notes || "");
+    setPhotoIds(pet.photo_ids || []);
+    setReferencePhotoIds(pet.reference_photo_ids || []);
+    setPhotoUrls(pet.photos || []);
+    setReferencePhotoUrls(pet.reference_photos || []);
+    setPetPhoto(null);
+    setReferenceStyles([]);
+  };
 
   useEffect(() => {
     if (!activePet) {
@@ -131,6 +198,8 @@ export default function MyPets() {
     setPetPhotoItems(buildItems(petPhotos));
     setReferencePhotoItems(buildItems(referencePhotos));
     setNotes(activePet.special_notes || "");
+
+    applyPetToForm(activePet);
   }, [activePet]);
 
   const handlePetPhotoChange = (files: File[]) => {
@@ -223,10 +292,58 @@ export default function MyPets() {
     }
   };
 
+  const handleSavePet = async () => {
+    if (!activePet) return;
+    if (!petName.trim()) {
+      toast.error("Please enter your pet's name.");
+      return;
+    }
+    if (!petType) {
+      toast.error("Please select a pet type.");
+      return;
+    }
+
+    const weightValue = weight ? parseFloat(weight) : null;
+    setIsUpdatingPet(true);
+    try {
+      await updatePet(
+        activePet.id,
+        {
+          name: petName.trim(),
+          pet_type: petType,
+          breed: breed || undefined,
+          mixed_breed: isMixedBreed,
+          precise_type: precisePetType || undefined,
+          birthday: dateOfBirth || null,
+          gender: gender || undefined,
+          weight_value: Number.isNaN(weightValue) ? null : weightValue,
+          weight_unit: weightUnit || undefined,
+          coat_condition: coatCondition || undefined,
+          approve_shave: approveShave ?? undefined,
+          behavior: behavior || undefined,
+          grooming_frequency: groomingFrequency || undefined,
+          special_notes: specialNotes || undefined,
+        },
+        {
+          photo_ids: photoIds.length > 0 ? photoIds : null,
+          reference_photo_ids: referencePhotoIds.length > 0 ? referencePhotoIds : null,
+        }
+      );
+      toast.success("Pet updated successfully.");
+      await fetchPets();
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Failed to update pet:", error);
+      toast.error("Failed to update pet. Please try again.");
+    } finally {
+      setIsUpdatingPet(false);
+    }
+  };
+
   return (
     <div className="w-full min-h-full flex flex-col">
       <div className="w-full max-w-[944px] mx-auto px-6 pb-8 flex-1">
-        <div className="flex flex-col gap-[21px]">
+        <div className="flex flex-col gap-[8px] mb-[-2px] relative z-1">
           <div className="flex justify-between">
             <h1 className="font-['Comfortaa:Bold',sans-serif] font-bold text-[20px] text-[#4A3C2A]">
               My pets
@@ -258,98 +375,166 @@ export default function MyPets() {
               })}
             </div>
           </div>
+        </div>
 
-          <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[20px]">
-            {isLoadingPets ? (
-              <div className="text-[#4A3C2A] text-sm">Loading pets...</div>
-            ) : activePet ? (
-              <div className="flex gap-[16px]">
-                {/* 左侧：头像 */}
-                <div className="size-[56px] rounded-full overflow-hidden border border-[#E5E7EB] bg-[#8B6357] flex items-center justify-center shrink-0">
-                  {activePet.primary_photo ? (
-                    <img
-                      alt={activePet.name}
-                      className="size-full object-cover"
-                      src={buildImageUrl(activePet.primary_photo)}
-                    />
-                  ) : (
-                    <Icon name="pet" className="size-6 text-white" />
-                  )}
-                </div>
-                
-                {/* 右侧：其他所有模块 */}
-                <div className="flex flex-col gap-[8px] flex-1">
-                  {/* 上方：信息和编辑icon左右结构 */}
-                  <div className="flex items-start justify-between">
-                    <div className="flex flex-col gap-[8px]">
-                      <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
-                        {activePet.name}
-                      </p>
-                      <div className="grid grid-cols-3 gap-y-[16px] gap-x-[40px] text-[#4A3C2A]">
-                        <div className="w-[80px]">
-                          <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Pet type</p>
-                          <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
-                            {formatLabel(activePet.pet_type)}
-                          </p>
-                        </div>
-                        <div className="w-[80px]">
-                          <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Breed</p>
-                          <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
-                            {activePet.breed || "-"}
-                          </p>
-                        </div>
-                        <div className="w-[80px]">
-                          <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Date of birth</p>
-                          <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
-                            {formatBirthday(activePet.birthday)}
-                          </p>
-                        </div>
-                        <div className="w-[80px]">
-                          <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Weight</p>
-                          <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
-                            {formatWeight(activePet.weight_value, activePet.weight_unit)}
-                          </p>
-                        </div>
-                        <div className="w-[80px]">
-                          <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Coat condition</p>
-                          <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
-                            {formatLabel(activePet.coat_condition)}
-                          </p>
-                        </div>
-                        <div className="w-[80px]">
-                          <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Behavior</p>
-                          <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
-                            {formatBehavior(activePet.behavior)}
-                          </p>
+        <div className="flex flex-col gap-[21px]">
+          {isEditing ? (
+            <PetForm
+              petName={petName}
+              petType={petType}
+              breed={breed}
+              isMixedBreed={isMixedBreed}
+              precisePetType={precisePetType}
+              dateOfBirth={dateOfBirth}
+              gender={gender}
+              weight={weight}
+              weightUnit={weightUnit}
+              coatCondition={coatCondition}
+              approveShave={approveShave}
+              behavior={behavior}
+              groomingFrequency={groomingFrequency}
+              specialNotes={specialNotes}
+              petBreeds={petBreeds}
+              isLoadingBreeds={isLoadingBreeds}
+              photoIds={photoIds}
+              photoUrls={photoUrls}
+              referencePhotoIds={referencePhotoIds}
+              referencePhotoUrls={referencePhotoUrls}
+              petPhoto={petPhoto}
+              referenceStyles={referenceStyles}
+              setPetName={setPetName}
+              setPetType={setPetType}
+              setBreed={setBreed}
+              setIsMixedBreed={setIsMixedBreed}
+              setPrecisePetType={setPrecisePetType}
+              setDateOfBirth={setDateOfBirth}
+              setGender={setGender}
+              setWeight={setWeight}
+              setWeightUnit={setWeightUnit}
+              setCoatCondition={setCoatCondition}
+              setApproveShave={setApproveShave}
+              setBehavior={setBehavior}
+              setGroomingFrequency={setGroomingFrequency}
+              setSpecialNotes={setSpecialNotes}
+              setPhotoIds={setPhotoIds}
+              setReferencePhotoIds={setReferencePhotoIds}
+              setPhotoUrls={setPhotoUrls}
+              setReferencePhotoUrls={setReferencePhotoUrls}
+              setPetPhoto={setPetPhoto}
+              setReferenceStyles={setReferenceStyles}
+              primaryActionLabel="Save"
+              isPrimaryActionLoading={isUpdatingPet}
+              onPrimaryAction={handleSavePet}
+              backLabel="Cancel"
+              petInfoCardClassName="rounded-tr-none sm:rounded-tr-none"
+              mergeGroomingIntoInfoCard
+              alignActionsRight
+              actionsOrder="secondary-first"
+              actionsPlacement="inside-pet-info"
+              primaryActionShowArrow={false}
+              hideAfterPetInfo
+              onBackAction={() => {
+                if (activePet) applyPetToForm(activePet);
+                setIsEditing(false);
+              }}
+            />
+          ) : (
+            <div className="bg-white rounded-[12px] rounded-tr-none border-2 border-[#DE6A07] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[20px]">
+              {isLoadingPets ? (
+                <div className="text-[#4A3C2A] text-sm">Loading pets...</div>
+              ) : activePet ? (
+                <div className="flex gap-[16px]">
+                  {/* 左侧：头像 */}
+                  <div className="size-[56px] rounded-full overflow-hidden border border-[#E5E7EB] bg-[#8B6357] flex items-center justify-center shrink-0">
+                    {activePet.primary_photo ? (
+                      <img
+                        alt={activePet.name}
+                        className="size-full object-cover"
+                        src={buildImageUrl(activePet.primary_photo)}
+                      />
+                    ) : (
+                      <Icon name="pet" className="size-6 text-white" />
+                    )}
+                  </div>
+                  
+                  {/* 右侧：其他所有模块 */}
+                  <div className="flex flex-col gap-[8px] flex-1">
+                    {/* 上方：信息和编辑icon左右结构 */}
+                    <div className="flex items-start justify-between">
+                      <div className="flex flex-col gap-[8px]">
+                        <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
+                          {activePet.name}
+                        </p>
+                        <div className="grid grid-cols-3 gap-y-[16px] gap-x-[40px] text-[#4A3C2A]">
+                          <div className="w-[80px]">
+                            <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Pet type</p>
+                            <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
+                              {formatLabel(activePet.pet_type)}
+                            </p>
+                          </div>
+                          <div className="w-[80px]">
+                            <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Breed</p>
+                            <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
+                              {activePet.breed || "-"}
+                            </p>
+                          </div>
+                          <div className="w-[80px]">
+                            <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Date of birth</p>
+                            <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
+                              {formatBirthday(activePet.birthday)}
+                            </p>
+                          </div>
+                          <div className="w-[80px]">
+                            <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Weight</p>
+                            <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
+                              {formatWeight(activePet.weight_value, activePet.weight_unit)}
+                            </p>
+                          </div>
+                          <div className="w-[80px]">
+                            <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Coat condition</p>
+                            <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
+                              {formatLabel(activePet.coat_condition)}
+                            </p>
+                          </div>
+                          <div className="w-[80px]">
+                            <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Behavior</p>
+                            <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
+                              {formatBehavior(activePet.behavior)}
+                            </p>
+                          </div>
                         </div>
                       </div>
+                      <button
+                        type="button"
+                        className="text-[#8B6357] hover:text-[#DE6A07] cursor-pointer"
+                        onClick={() => setIsEditing(true)}
+                      >
+                        <Icon name="pencil" size={20} />
+                      </button>
                     </div>
-                    <button type="button" className="text-[#8B6357] hover:text-[#DE6A07] cursor-pointer">
-                      <Icon name="pencil" size={20} />
-                    </button>
-                  </div>
-                  
-                  {/* 分割线 */}
-                  <div className="border-t border-[#E5E7EB] w-full" />
-                  
-                  {/* 下方：按钮和Frequency Monthly space-between */}
-                  <div className="flex items-center justify-between">
-                    <div className="w-[80px]">
-                      <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Frequency</p>
-                      <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
-                        {formatLabel(activePet.grooming_frequency)}
-                      </p>
+                    
+                    {/* 分割线 */}
+                    <div className="border-t border-[#E5E7EB] w-full" />
+                    
+                    {/* 下方：按钮和Frequency Monthly space-between */}
+                    <div className="flex items-center justify-between">
+                      <div className="w-[80px]">
+                        <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Frequency</p>
+                        <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
+                          {formatLabel(activePet.grooming_frequency)}
+                        </p>
+                      </div>
+                      <OrangeButton size="compact" showArrow className="px-[28px] h-[28px]">
+                        <span className="text-white text-[12px] leading-[17.5px] font-bold">Book for {activePet.name}</span>
+                      </OrangeButton>
                     </div>
-                    <OrangeButton size="compact" showArrow className="px-[28px] h-[28px]">
-                      <span className="text-white text-[12px] leading-[17.5px] font-bold">Book for {activePet.name}</span>
-                    </OrangeButton>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="text-[#4A3C2A] text-sm">No pets yet.</div>
-            )}
-          </div>
+              ) : (
+                <div className="text-[#4A3C2A] text-sm">No pets yet.</div>
+              )}
+            </div>
+          )}
 
           <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[24px]">
             <div className="flex flex-col gap-[24px]">

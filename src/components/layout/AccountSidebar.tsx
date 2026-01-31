@@ -84,6 +84,9 @@ export function AccountSidebar({ className }: AccountSidebarProps) {
     if (location.pathname.startsWith("/account/pets/new")) {
       return path === "/account/dashboard";
     }
+    if (location.pathname.startsWith("/account/bookings")) {
+      return path === "/account/dashboard";
+    }
     if (path === "/account" || path === "/account/") {
       return (
         location.pathname === "/account" || location.pathname === "/account/"
