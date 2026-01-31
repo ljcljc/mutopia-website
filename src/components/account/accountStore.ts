@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import { getAddresses, getMembershipPlans, getMyCoupons, getPets, getMyBookings } from "@/lib/api";
-import type { AddressOut, MembershipPlanOut, CouponOut, PetOut, BookingListOut } from "@/lib/api";
+import { getAddresses, getMembershipPlans, getMyCoupons, getPets, getMyBookings, getMembershipInfo } from "@/lib/api";
+import type { AddressOut, MembershipPlanOut, CouponOut, PetOut, BookingListOut, MembershipInfoOut } from "@/lib/api";
 
 interface AccountState {
   // 地址列表（✅ 已实现接口）
@@ -11,9 +11,21 @@ interface AccountState {
   membershipPlans: MembershipPlanOut[];
   isLoadingMembershipPlans: boolean;
   
+  // 会员信息（✅ 已实现接口）
+  membershipInfo: MembershipInfoOut | null;
+  isLoadingMembershipInfo: boolean;
+  
   // 优惠券列表（✅ 已实现接口）
   coupons: CouponOut[];
   isLoadingCoupons: boolean;
+  
+  // Cash credit 优惠券列表（✅ 已实现接口）
+  cashCoupons: CouponOut[];
+  isLoadingCashCoupons: boolean;
+  
+  // Special offer 优惠券列表（✅ 已实现接口）
+  specialCoupons: CouponOut[];
+  isLoadingSpecialCoupons: boolean;
   
   // 宠物列表（✅ 已实现接口）
   pets: PetOut[];
@@ -35,7 +47,10 @@ interface AccountState {
   // Actions（仅实现已存在接口）
   fetchAddresses: () => Promise<void>;
   fetchMembershipPlans: () => Promise<void>;
+  fetchMembershipInfo: () => Promise<void>;
   fetchCoupons: () => Promise<void>;
+  fetchCashCoupons: () => Promise<void>;
+  fetchSpecialCoupons: () => Promise<void>;
   fetchPets: () => Promise<void>;
   fetchUpcomingBookings: () => Promise<void>;
   fetchHistoryBookings: () => Promise<void>;
@@ -58,8 +73,14 @@ export const useAccountStore = create<AccountState>((set, get: () => AccountStat
   isLoadingAddresses: false,
   membershipPlans: [],
   isLoadingMembershipPlans: false,
+  membershipInfo: null,
+  isLoadingMembershipInfo: false,
   coupons: [],
   isLoadingCoupons: false,
+  cashCoupons: [],
+  isLoadingCashCoupons: false,
+  specialCoupons: [],
+  isLoadingSpecialCoupons: false,
   pets: [],
   isLoadingPets: false,
   upcomingBookings: [],
@@ -109,6 +130,21 @@ export const useAccountStore = create<AccountState>((set, get: () => AccountStat
     }
   },
   
+  /**
+   * 获取会员信息
+   * API: GET /api/promotions/membership/info
+   */
+  fetchMembershipInfo: async () => {
+    set({ isLoadingMembershipInfo: true });
+    try {
+      const info = await getMembershipInfo();
+      set({ membershipInfo: info, isLoadingMembershipInfo: false });
+    } catch (error) {
+      console.error("Failed to load membership info:", error);
+      set({ membershipInfo: null, isLoadingMembershipInfo: false });
+    }
+  },
+  
   fetchCoupons: async () => {
     set({ isLoadingCoupons: true });
     try {
@@ -118,6 +154,38 @@ export const useAccountStore = create<AccountState>((set, get: () => AccountStat
     } catch (error) {
       console.error("Failed to load coupons:", error);
       set({ coupons: [], isLoadingCoupons: false });
+    }
+  },
+  
+  /**
+   * 获取 Cash credit 优惠券列表
+   * API: GET /api/promotions/coupons?category=cash&page=1&page_size=50
+   */
+  fetchCashCoupons: async () => {
+    set({ isLoadingCashCoupons: true });
+    try {
+      const response = await getMyCoupons({ category: "cash", page: 1, page_size: 50 });
+      const coupons = response.items || [];
+      set({ cashCoupons: coupons, isLoadingCashCoupons: false });
+    } catch (error) {
+      console.error("Failed to load cash coupons:", error);
+      set({ cashCoupons: [], isLoadingCashCoupons: false });
+    }
+  },
+  
+  /**
+   * 获取 Special offer 优惠券列表
+   * API: GET /api/promotions/coupons?category=special&page=1&page_size=50
+   */
+  fetchSpecialCoupons: async () => {
+    set({ isLoadingSpecialCoupons: true });
+    try {
+      const response = await getMyCoupons({ category: "special", page: 1, page_size: 50 });
+      const coupons = response.items || [];
+      set({ specialCoupons: coupons, isLoadingSpecialCoupons: false });
+    } catch (error) {
+      console.error("Failed to load special coupons:", error);
+      set({ specialCoupons: [], isLoadingSpecialCoupons: false });
     }
   },
   

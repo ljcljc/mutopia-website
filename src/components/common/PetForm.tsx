@@ -1379,7 +1379,7 @@ export function PetForm({
                 <button
                   type="button"
                   onClick={() => setApproveShaveSelection(true)}
-                  className={`border-2 rounded-[calc(14*var(--px393))] p-[calc(16*var(--px393))] sm:rounded-[14px] sm:p-[16px] w-full text-left transition-colors ${
+                  className={`border-2 rounded-[calc(14*var(--px393))] p-[calc(16*var(--px393))] sm:rounded-[14px] sm:p-[16px] w-full text-left transition-colors cursor-pointer ${
                     approveShaveSelection === true
                       ? "border-[#de6a07] bg-[#fff3e9]"
                       : "border-[#e5e7eb] bg-white"
@@ -1406,7 +1406,7 @@ export function PetForm({
                 <button
                   type="button"
                   onClick={() => setApproveShaveSelection(false)}
-                  className={`border-2 rounded-[calc(14*var(--px393))] p-[calc(16*var(--px393))] sm:rounded-[14px] sm:p-[16px] w-full text-left transition-colors ${
+                  className={`border-2 rounded-[calc(14*var(--px393))] p-[calc(16*var(--px393))] sm:rounded-[14px] sm:p-[16px] w-full text-left transition-colors cursor-pointer ${
                     approveShaveSelection === false
                       ? "border-[#de6a07] bg-[#fff3e9]"
                       : "border-[#e5e7eb] bg-white"
