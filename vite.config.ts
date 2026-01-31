@@ -49,19 +49,17 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks: (id) => {
-            // 将 node_modules 中的大型依赖单独打包
-            if (id.includes('node_modules')) {
-              // React 相关库
-              if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
-                return 'react-vendor';
-              }
-              // UI 组件库
-              if (id.includes('sonner') || id.includes('@radix-ui')) {
-                return 'ui-vendor';
-              }
-              // 其他第三方库
-              return 'vendor';
+            if (!id.includes("node_modules")) return;
+            // React 相关库
+            if (id.includes("react") || id.includes("react-dom") || id.includes("react-router")) {
+              return "react-vendor";
             }
+            // UI 组件库
+            if (id.includes("sonner") || id.includes("@radix-ui")) {
+              return "ui-vendor";
+            }
+            // 其他依赖交给 Rollup 自动分包，避免 vendor/react-vendor 形成循环引用
+            return;
           },
         },
       },
