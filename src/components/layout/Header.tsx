@@ -10,6 +10,7 @@ import { LoginModal } from "@/components/auth/LoginModal";
 import { useAuthStore } from "@/components/auth/authStore";
 import AccountDropdown from "@/components/layout/AccountDropdown";
 import NotificationsPopover from "@/components/layout/NotificationsPopover";
+import { useLogout } from "@/hooks/useLogout";
 
 // Helper function to handle smooth scroll to anchor with header offset
 const scrollToAnchor = (href: string) => {
