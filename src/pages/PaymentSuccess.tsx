@@ -75,7 +75,7 @@ export default function PaymentSuccess() {
   };
 
   const handleGoToAccount = () => {
-    navigate("/account");
+    navigate("/account/dashboard");
   };
 
   const handleBookAnother = () => {
@@ -222,7 +222,7 @@ export default function PaymentSuccess() {
             onClick={handleGoToAccount}
             className="flex items-center gap-2 w-full md:w-auto md:h-[48px] md:px-[28px] md:py-[14px]"
           >
-            <span>Go to My account</span>
+            Go to My account
           </OrangeButton>
 
           <PurpleButton

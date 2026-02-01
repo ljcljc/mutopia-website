@@ -52,7 +52,6 @@ export default function PaymentFail() {
             onClick={handleGoToAccount}
             className="flex items-center gap-2 w-full md:w-auto md:h-[48px] md:px-[28px] md:py-[14px]"
           >
-            <Icon name="button-arrow" className="size-4 rotate-180" />
             <span>Go to My account</span>
           </OrangeButton>
 
