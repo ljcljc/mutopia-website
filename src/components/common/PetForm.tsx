@@ -15,7 +15,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import type { WeightUnit, Gender, PetType, Behavior, CoatCondition, GroomingFrequency } from "@/components/booking/bookingStore";
 import { ReferenceStylesUpload } from "@/components/booking/ReferenceStylesUpload";
-import type { PetBreedOut } from "@/lib/api";
+import type { PetBreedOut, PetOut } from "@/lib/api";
 import { uploadPetPhoto, uploadReferencePhoto, buildImageUrl } from "@/lib/api";
 
 function getBreedOptions(petType: PetType, breeds: PetBreedOut[]): string[] {
@@ -27,6 +27,12 @@ function getBreedOptions(petType: PetType, breeds: PetBreedOut[]): string[] {
 
 export interface PetFormProps {
   petName: string;
+  petOptions?: PetOut[];
+  selectedPetId?: number | null;
+  setSelectedPetId?: (id: number | null) => void;
+  onPetSelect?: (pet: PetOut) => void;
+  onPetClear?: (nextName: string) => void;
+  photoResetKey?: number;
   petType: PetType;
   breed: string;
   isMixedBreed: boolean;
@@ -85,6 +91,12 @@ export interface PetFormProps {
 
 export function PetForm({
   petName,
+  petOptions,
+  selectedPetId,
+  setSelectedPetId,
+  onPetSelect,
+  onPetClear,
+  photoResetKey,
   petType,
   breed,
   isMixedBreed,
@@ -140,6 +152,22 @@ export function PetForm({
   primaryActionShowArrow = true,
   hideAfterPetInfo = false,
 }: PetFormProps) {
+  const [isPetDropdownOpen, setIsPetDropdownOpen] = useState(false);
+  const petDropdownRef = useRef<HTMLDivElement>(null);
+  const selectedPet = petOptions?.find((pet) => pet.id === selectedPetId) ?? null;
+
+  useEffect(() => {
+    if (!petOptions || petOptions.length === 0) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (petDropdownRef.current && !petDropdownRef.current.contains(event.target as Node)) {
+        setIsPetDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [petOptions]);
 
   // 计算日期限制：最多20年前的今天，不能超过今天
   const today = new Date();
@@ -406,6 +434,13 @@ export function PetForm({
     return referenceStyles;
   });
 
+  useEffect(() => {
+    if (photoResetKey === undefined) return;
+    setPetPhotoItems([]);
+    setReferenceStyleItems([]);
+    setPetPhotoFiles([]);
+    setReferenceStyleFiles([]);
+  }, [photoResetKey]);
 
   useEffect(() => {
     if (mattingModalOpen) {
@@ -1163,13 +1198,76 @@ export function PetForm({
               {/* Pet Name */}
               <div className="flex gap-[calc(20*var(--px393))] sm:gap-[20px] items-start relative shrink-0 w-full sm:w-[330px]">
                 <div className="flex flex-[1_0_0] flex-col items-start min-h-px min-w-px relative shrink-0">
-                  <CustomInput
-                    label="Pet name"
-                    type="text"
-                    placeholder="Enter pet name"
-                    value={petName}
-                    onChange={(e) => setPetName(e.target.value)}
-                  />
+                  {petOptions && petOptions.length > 0 && onPetSelect && setSelectedPetId ? (
+                    <div className="flex flex-col items-start relative w-full" ref={petDropdownRef}>
+                      <div className="flex gap-[7px] items-center relative mb-2">
+                        <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] text-[#4a3c2a] text-[14px]">
+                          Pet name
+                        </p>
+                      </div>
+                      <div className="bg-white border border-gray-200 border-solid h-[36px] relative rounded-[8px] w-full hover:border-[#633479] transition-colors">
+                        <div className="box-border flex h-[36px] items-center overflow-clip px-[12px] py-[4px] relative rounded-[inherit] w-full">
+                          <div className="flex flex-1 items-center relative">
+                            <input
+                              type="text"
+                              value={selectedPet?.name || petName}
+                              onChange={(e) => {
+                                const nextValue = e.target.value;
+                                setPetName(nextValue);
+                                if (setSelectedPetId && selectedPetId !== null) {
+                                  setSelectedPetId(null);
+                                  onPetClear?.(nextValue);
+                                }
+                              }}
+                              onFocus={() => setIsPetDropdownOpen(true)}
+                              placeholder="Select a pet or type"
+                              className="flex-1 font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] relative text-[#717182] text-[12.25px] bg-transparent border-none outline-none placeholder:text-[#717182]"
+                            />
+                            <div
+                              className="relative shrink-0 w-[16px] cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setIsPetDropdownOpen(!isPetDropdownOpen);
+                              }}
+                            >
+                              <Icon
+                                name="chevron-down"
+                                aria-label="Dropdown"
+                                className={`block size-full text-[#717182] transition-transform ${isPetDropdownOpen ? "rotate-180" : ""}`}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      {isPetDropdownOpen && (
+                        <div className="absolute left-0 right-0 top-full z-10 mt-[8px] w-full bg-white border border-gray-200 rounded-[8px] shadow-md max-h-[200px] overflow-y-auto">
+                          {petOptions.map((pet) => (
+                            <button
+                              key={pet.id}
+                              type="button"
+                              onClick={() => {
+                                setSelectedPetId?.(pet.id);
+                                setPetName(pet.name || "");
+                                onPetSelect?.(pet);
+                                setIsPetDropdownOpen(false);
+                              }}
+                              className="w-full text-left px-[12px] py-[8px] hover:bg-[#f5f5f5] text-[#4a3c2a] text-[12.25px]"
+                            >
+                              {pet.name || "Unnamed pet"}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <CustomInput
+                      label="Pet name"
+                      type="text"
+                      placeholder="Enter pet name"
+                      value={petName}
+                      onChange={(e) => setPetName(e.target.value)}
+                    />
+                  )}
                 </div>
               </div>
 

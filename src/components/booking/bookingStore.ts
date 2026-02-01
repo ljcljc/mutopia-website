@@ -53,6 +53,7 @@ interface BookingState {
 
   // Step 2: Pet information - 使用与 API 一致的字段名称
   petName: string; // 对应 API: name
+  selectedPetId: number | null; // 选择已有宠物（可选）
   petType: PetType; // 对应 API: pet_type
   breed: string; // 对应 API: breed
   isMixedBreed: boolean; // 对应 API: mixed_breed
@@ -133,6 +134,7 @@ interface BookingState {
   loadAddresses: () => Promise<void>;
   loadStores: () => Promise<void>;
   setPetName: (name: string) => void;
+  setSelectedPetId: (id: number | null) => void;
   setPetType: (type: PetType) => void;
   setBreed: (breed: string) => void;
   setIsMixedBreed: (isMixed: boolean) => void;
@@ -192,6 +194,7 @@ const initialState = {
   isLoadingAddresses: false,
   stores: [] as StoreLocationOut[],
   petName: "",
+  selectedPetId: null as number | null,
   petType: "dog" as PetType,
   breed: "",
   isMixedBreed: false,
@@ -334,6 +337,7 @@ export const useBookingStore = create<BookingState>((set) => ({
   },
 
   setPetName: (name) => set({ petName: name }),
+  setSelectedPetId: (id) => set({ selectedPetId: id }),
 
   setPetType: (type) => set({ petType: type }),
 
