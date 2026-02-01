@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useAccountStore } from "@/components/account/accountStore";
 import { Icon } from "@/components/common/Icon";
@@ -7,6 +7,7 @@ import { OrangeButton } from "@/components/common/OrangeButton";
 import { FileUpload, type FileUploadItem } from "@/components/common/FileUpload";
 import { CustomTextarea } from "@/components/common/CustomTextarea";
 import { PetForm } from "@/components/common/PetForm";
+import { useBookingStore } from "@/components/booking/bookingStore";
 import type { Behavior, CoatCondition, Gender, PetType, WeightUnit } from "@/components/booking/bookingStore";
 import { buildImageUrl, getPetBreeds, updatePet, deletePet, memorializePet, type PetBreedOut, type PetOut } from "@/lib/api";
 import {
@@ -57,6 +58,7 @@ function formatLabel(value?: string | null): string {
 
 export default function MyPets() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const { pets, isLoadingPets, fetchPets } = useAccountStore();
   const [activePetId, setActivePetId] = useState<number | null>(null);
   const [petPhotoItems, setPetPhotoItems] = useState<FileUploadItem[]>([]);
@@ -91,6 +93,29 @@ export default function MyPets() {
   const [referencePhotoUrls, setReferencePhotoUrls] = useState<string[]>([]);
   const [petPhoto, setPetPhoto] = useState<File | null>(null);
   const [referenceStyles, setReferenceStyles] = useState<File[]>([]);
+  const {
+    setPetName: setBookingPetName,
+    setPetType: setBookingPetType,
+    setBreed: setBookingBreed,
+    setIsMixedBreed: setBookingIsMixedBreed,
+    setPrecisePetType: setBookingPrecisePetType,
+    setDateOfBirth: setBookingDateOfBirth,
+    setGender: setBookingGender,
+    setWeight: setBookingWeight,
+    setWeightUnit: setBookingWeightUnit,
+    setCoatCondition: setBookingCoatCondition,
+    setApproveShave: setBookingApproveShave,
+    setBehavior: setBookingBehavior,
+    setGroomingFrequency: setBookingGroomingFrequency,
+    setSpecialNotes: setBookingSpecialNotes,
+    setPhotoIds: setBookingPhotoIds,
+    setReferencePhotoIds: setBookingReferencePhotoIds,
+    setPhotoUrls: setBookingPhotoUrls,
+    setReferencePhotoUrls: setBookingReferencePhotoUrls,
+    setPetPhoto: setBookingPetPhoto,
+    setReferenceStyles: setBookingReferenceStyles,
+    setCurrentStep: setBookingCurrentStep,
+  } = useBookingStore();
 
   const petIdFromUrl = searchParams.get("pet");
 
@@ -174,6 +199,31 @@ export default function MyPets() {
     setReferencePhotoUrls(pet.reference_photos || []);
     setPetPhoto(null);
     setReferenceStyles([]);
+  };
+
+  const handleBookForPet = (pet: PetOut) => {
+    setBookingPetName(pet.name || "");
+    setBookingPetType((pet.pet_type as PetType) || "dog");
+    setBookingBreed(pet.breed || "");
+    setBookingIsMixedBreed(Boolean(pet.mixed_breed));
+    setBookingPrecisePetType(pet.precise_type || "");
+    setBookingDateOfBirth(pet.birthday || "");
+    setBookingGender((pet.gender as Gender) || "");
+    setBookingWeight(pet.weight_value ? String(pet.weight_value) : "");
+    setBookingWeightUnit((pet.weight_unit as WeightUnit) || "lbs");
+    setBookingCoatCondition((pet.coat_condition as CoatCondition) || "");
+    setBookingApproveShave(pet.approve_shave ?? null);
+    setBookingBehavior((pet.behavior as Behavior) || "");
+    setBookingGroomingFrequency(pet.grooming_frequency || "");
+    setBookingSpecialNotes(pet.special_notes || "");
+    setBookingPhotoIds(pet.photo_ids || []);
+    setBookingReferencePhotoIds(pet.reference_photo_ids || []);
+    setBookingPhotoUrls(pet.photos || []);
+    setBookingReferencePhotoUrls(pet.reference_photos || []);
+    setBookingPetPhoto(null);
+    setBookingReferenceStyles([]);
+    setBookingCurrentStep(1);
+    navigate("/booking");
   };
 
   useEffect(() => {
@@ -524,7 +574,12 @@ export default function MyPets() {
                           {formatLabel(activePet.grooming_frequency)}
                         </p>
                       </div>
-                      <OrangeButton size="compact" showArrow className="px-[28px] h-[28px]">
+                      <OrangeButton
+                        size="compact"
+                        showArrow
+                        className="px-[28px] h-[28px]"
+                        onClick={() => activePet && handleBookForPet(activePet)}
+                      >
                         <span className="text-white text-[12px] leading-[17.5px] font-bold">Book for {activePet.name}</span>
                       </OrangeButton>
                     </div>
