@@ -61,8 +61,10 @@ export function ModalContent({ onClose, onSuccess }: { onClose: () => void; onSu
     rememberMe,
     firstName,
     lastName,
+    phone,
     birthday,
     address,
+    inviteCode,
     optOutMarketing,
     verificationCode,
     verificationMode,
@@ -76,8 +78,10 @@ export function ModalContent({ onClose, onSuccess }: { onClose: () => void; onSu
     confirmPasswordError,
     firstNameError,
     lastNameError,
+    phoneError,
     birthdayError,
     addressError,
+    inviteCodeError,
     isLoading,
     setStep,
     setEmail,
@@ -87,8 +91,10 @@ export function ModalContent({ onClose, onSuccess }: { onClose: () => void; onSu
     toggleShowPassword,
     setFirstName,
     setLastName,
+    setPhone,
     setBirthday,
     setAddress,
+    setInviteCode,
     setOptOutMarketing,
     setVerificationCode,
     setVerificationMode,
@@ -103,8 +109,10 @@ export function ModalContent({ onClose, onSuccess }: { onClose: () => void; onSu
     setConfirmPasswordError,
     setFirstNameError,
     setLastNameError,
+    setPhoneError,
     setBirthdayError,
     setAddressError,
+    setInviteCodeError,
     setIsLoading,
     reset,
     login,
@@ -300,10 +308,12 @@ export function ModalContent({ onClose, onSuccess }: { onClose: () => void; onSu
         email,
         firstName,
         lastName,
+        phone,
         birthday,
         address,
         password,
         confirmPassword,
+        inviteCode,
       });
       if (!result.success && result.error) {
         const passwordError = result.error.issues.find((e: z.ZodIssue) =>
@@ -341,10 +351,12 @@ export function ModalContent({ onClose, onSuccess }: { onClose: () => void; onSu
       email,
       firstName,
       lastName,
+      phone,
       birthday,
       address,
       password,
       confirmPassword,
+      inviteCode,
     });
     if (!result.success && result.error) {
       const confirmPasswordError = result.error.issues.find((e: z.ZodIssue) =>
@@ -366,10 +378,12 @@ export function ModalContent({ onClose, onSuccess }: { onClose: () => void; onSu
       email,
       firstName,
       lastName,
+      phone,
       birthday,
       address,
       password,
       confirmPassword,
+      inviteCode,
     });
     if (!result.success && result.error) {
       const firstNameError = result.error.issues.find((e: z.ZodIssue) =>
@@ -391,10 +405,12 @@ export function ModalContent({ onClose, onSuccess }: { onClose: () => void; onSu
       email,
       firstName,
       lastName,
+      phone,
       birthday,
       address,
       password,
       confirmPassword,
+      inviteCode,
     });
     if (!result.success && result.error) {
       const lastNameError = result.error.issues.find((e: z.ZodIssue) =>
@@ -407,6 +423,58 @@ export function ModalContent({ onClose, onSuccess }: { onClose: () => void; onSu
       }
     } else {
       setLastNameError("");
+    }
+  };
+
+  const handlePhoneBlur = () => {
+    const result = validateSignUpForm({
+      email,
+      firstName,
+      lastName,
+      phone,
+      birthday,
+      address,
+      password,
+      confirmPassword,
+      inviteCode,
+    });
+    if (!result.success && result.error) {
+      const phoneIssue = result.error.issues.find((e: z.ZodIssue) =>
+        e.path.includes("phone")
+      );
+      if (phoneIssue) {
+        setPhoneError(phoneIssue.message);
+      } else {
+        setPhoneError("");
+      }
+    } else {
+      setPhoneError("");
+    }
+  };
+
+  const handleInviteCodeBlur = () => {
+    const result = validateSignUpForm({
+      email,
+      firstName,
+      lastName,
+      phone,
+      birthday,
+      address,
+      password,
+      confirmPassword,
+      inviteCode,
+    });
+    if (!result.success && result.error) {
+      const inviteIssue = result.error.issues.find((e: z.ZodIssue) =>
+        e.path.includes("inviteCode")
+      );
+      if (inviteIssue) {
+        setInviteCodeError(inviteIssue.message);
+      } else {
+        setInviteCodeError("");
+      }
+    } else {
+      setInviteCodeError("");
     }
   };
 
@@ -458,10 +526,12 @@ export function ModalContent({ onClose, onSuccess }: { onClose: () => void; onSu
       email,
       firstName,
       lastName,
+      phone,
       birthday,
       address,
       password,
       confirmPassword,
+      inviteCode,
     });
     if (!result.success && result.error) {
       const addressError = result.error.issues.find((e: z.ZodIssue) =>
@@ -560,10 +630,12 @@ export function ModalContent({ onClose, onSuccess }: { onClose: () => void; onSu
       email,
       firstName,
       lastName,
+      phone,
       birthday,
       address,
       password,
       confirmPassword,
+      inviteCode,
     });
     if (!result.success && result.error) {
       // Set field-specific errors
@@ -577,6 +649,9 @@ export function ModalContent({ onClose, onSuccess }: { onClose: () => void; onSu
         if (err.path.includes("lastName")) {
           setLastNameError(err.message);
         }
+        if (err.path.includes("phone")) {
+          setPhoneError(err.message);
+        }
         if (err.path.includes("birthday")) {
           setBirthdayError(err.message);
         }
@@ -588,6 +663,9 @@ export function ModalContent({ onClose, onSuccess }: { onClose: () => void; onSu
         }
         if (err.path.includes("confirmPassword")) {
           setConfirmPasswordError(err.message);
+        }
+        if (err.path.includes("inviteCode")) {
+          setInviteCodeError(err.message);
         }
       });
       return;
@@ -1220,8 +1298,10 @@ export function ModalContent({ onClose, onSuccess }: { onClose: () => void; onSu
         code: codeString,
         first_name: firstName,
         last_name: lastName,
+        phone: phone,
         birthday: birthday,
         address: address,
+        invite_code: inviteCode || undefined,
         receive_marketing_message: !optOutMarketing,
         password1: password,
         password2: confirmPassword,
@@ -1430,34 +1510,42 @@ export function ModalContent({ onClose, onSuccess }: { onClose: () => void; onSu
               <SignUpContainer
                 firstName={firstName}
                 lastName={lastName}
+                phone={phone}
                 birthday={birthday}
                 address={address}
                 password={password}
                 confirmPassword={confirmPassword}
+                inviteCode={inviteCode}
                 showPassword={showPassword}
                 optOutMarketing={optOutMarketing}
                 setFirstName={setFirstName}
                 setLastName={setLastName}
+                setPhone={setPhone}
                 setBirthday={setBirthday}
                 setAddress={setAddress}
                 setPassword={setPassword}
                 setConfirmPassword={setConfirmPassword}
+                setInviteCode={setInviteCode}
                 toggleShowPassword={toggleShowPassword}
                 setOptOutMarketing={setOptOutMarketing}
                 onSignUp={handleSignUp}
                 firstNameError={firstNameError}
                 lastNameError={lastNameError}
+                phoneError={phoneError}
                 birthdayError={birthdayError}
                 addressError={addressError}
                 passwordError={passwordError}
                 confirmPasswordError={confirmPasswordError}
+                inviteCodeError={inviteCodeError}
                 isLoading={isLoading}
                 onBlur={handlePasswordBlur}
                 onConfirmPasswordBlur={handleConfirmPasswordBlur}
                 onFirstNameBlur={handleFirstNameBlur}
                 onLastNameBlur={handleLastNameBlur}
+                onPhoneBlur={handlePhoneBlur}
                 onBirthdayBlur={handleBirthdayBlur}
                 onAddressBlur={handleAddressBlur}
+                onInviteCodeBlur={handleInviteCodeBlur}
               />
             </div>
           </div>

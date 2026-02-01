@@ -70,8 +70,10 @@ export interface RegisterCompleteIn {
   code: string;
   first_name: string;
   last_name: string;
+  phone: string;
   birthday: string;
   address: string;
+  invite_code?: string | null;
   receive_marketing_message: boolean;
   password1: string;
   password2: string;

@@ -33,9 +33,11 @@ interface AuthState {
   // Sign up form data
   firstName: string;
   lastName: string;
+  phone: string;
   birthday: string;
   address: string;
   optOutMarketing: boolean;
+  inviteCode: string;
 
   // Verification code
   verificationCode: string[];
@@ -63,9 +65,11 @@ interface AuthState {
   toggleShowPassword: () => void;
   setFirstName: (firstName: string) => void;
   setLastName: (lastName: string) => void;
+  setPhone: (phone: string) => void;
   setBirthday: (birthday: string) => void;
   setAddress: (address: string) => void;
   setOptOutMarketing: (optOut: boolean) => void;
+  setInviteCode: (inviteCode: string) => void;
 
   // UI state
   isEmailFocused: boolean;
@@ -77,15 +81,19 @@ interface AuthState {
   confirmPasswordError: string;
   firstNameError: string;
   lastNameError: string;
+  phoneError: string;
   birthdayError: string;
   addressError: string;
+  inviteCodeError: string;
   setEmailError: (error: string) => void;
   setPasswordError: (error: string) => void;
   setConfirmPasswordError: (error: string) => void;
   setFirstNameError: (error: string) => void;
   setLastNameError: (error: string) => void;
+  setPhoneError: (error: string) => void;
   setBirthdayError: (error: string) => void;
   setAddressError: (error: string) => void;
+  setInviteCodeError: (error: string) => void;
   clearErrors: () => void;
 
   // Loading state
@@ -124,9 +132,11 @@ const initialState = {
   showPassword: false,
   firstName: "",
   lastName: "",
+  phone: "",
   birthday: "",
   address: "",
   optOutMarketing: false,
+  inviteCode: "",
   verificationCode: ["", "", "", "", "", ""],
   verificationMode: "signup" as VerificationMode,
   codeSendCount: 0,
@@ -140,8 +150,10 @@ const initialState = {
   confirmPasswordError: "",
   firstNameError: "",
   lastNameError: "",
+  phoneError: "",
   birthdayError: "",
   addressError: "",
+  inviteCodeError: "",
   isLoading: false,
   user: loadUserFromStorage(),
   userInfo: null as MeOut | null,
@@ -192,6 +204,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ lastName, lastNameError: "" });
   },
 
+  setPhone: (phone) => {
+    set({ phone, phoneError: "" });
+  },
+
   setBirthday: (birthday) => {
     set({ birthday, birthdayError: "" });
   },
@@ -201,6 +217,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   setOptOutMarketing: (optOutMarketing) => set({ optOutMarketing }),
+
+  setInviteCode: (inviteCode) => {
+    set({ inviteCode, inviteCodeError: "" });
+  },
 
   setVerificationCode: (verificationCode) => set({ verificationCode }),
   setVerificationMode: (verificationMode) => set({ verificationMode }),
@@ -224,9 +244,13 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setLastNameError: (lastNameError) => set({ lastNameError }),
 
+  setPhoneError: (phoneError) => set({ phoneError }),
+
   setBirthdayError: (birthdayError) => set({ birthdayError }),
 
   setAddressError: (addressError) => set({ addressError }),
+
+  setInviteCodeError: (inviteCodeError) => set({ inviteCodeError }),
 
   clearErrors: () =>
     set({
@@ -235,8 +259,10 @@ export const useAuthStore = create<AuthState>((set) => ({
       confirmPasswordError: "",
       firstNameError: "",
       lastNameError: "",
+      phoneError: "",
       birthdayError: "",
       addressError: "",
+      inviteCodeError: "",
     }),
 
   setIsLoading: (isLoading) => set({ isLoading }),
@@ -343,10 +369,12 @@ export const validateSignUpForm = (data: {
   email: string;
   firstName?: string;
   lastName?: string;
+  phone?: string;
   birthday?: string;
   address?: string;
   password: string;
   confirmPassword: string;
+  inviteCode?: string;
 }): { success: boolean; error?: z.ZodError } => {
   try {
     signUpFormSchema.parse(data);

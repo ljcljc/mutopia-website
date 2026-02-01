@@ -35,6 +35,9 @@ export const signUpFormSchema = z
     email: emailSchema,
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
+    phone: z
+      .string()
+      .min(1, "Phone is required"),
     birthday: z
       .string()
       .min(1, "Date of birth is required")
@@ -62,6 +65,15 @@ export const signUpFormSchema = z
     address: z.string().min(1, "Address is required"),
     password: strongPasswordSchema,
     confirmPassword: z.string().min(1, "Please confirm your password"),
+    inviteCode: z
+      .string()
+      .optional()
+      .refine(
+        (value) => value === undefined || value === "" || /^[A-Z0-9]{8}$/.test(value),
+        {
+          message: "Promo code must be 8 characters with uppercase letters and numbers",
+        }
+      ),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Password doesn't match",

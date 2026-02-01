@@ -280,65 +280,81 @@ export function PasswordContainer({
 export function SignUpContainer({
   firstName,
   lastName,
+  phone,
   birthday,
   address,
   password,
   confirmPassword,
+  inviteCode,
   showPassword,
   optOutMarketing,
   setFirstName,
   setLastName,
+  setPhone,
   setBirthday,
   setAddress,
   setPassword,
   setConfirmPassword,
+  setInviteCode,
   toggleShowPassword,
   setOptOutMarketing,
   onSignUp,
   firstNameError,
   lastNameError,
+  phoneError,
   birthdayError,
   addressError,
   passwordError,
   confirmPasswordError,
+  inviteCodeError,
   isLoading,
   onBlur,
   onConfirmPasswordBlur,
   onFirstNameBlur,
   onLastNameBlur,
+  onPhoneBlur,
   onBirthdayBlur,
   onAddressBlur,
+  onInviteCodeBlur,
 }: {
   firstName: string;
   lastName: string;
+  phone: string;
   birthday: string;
   address: string;
   password: string;
   confirmPassword: string;
+  inviteCode: string;
   showPassword: boolean;
   optOutMarketing: boolean;
   setFirstName: (value: string) => void;
   setLastName: (value: string) => void;
+  setPhone: (value: string) => void;
   setBirthday: (value: string) => void;
   setAddress: (value: string) => void;
   setPassword: (value: string) => void;
   setConfirmPassword: (value: string) => void;
+  setInviteCode: (value: string) => void;
   toggleShowPassword: () => void;
   setOptOutMarketing: (value: boolean) => void;
   onSignUp: () => void;
   firstNameError?: string;
   lastNameError?: string;
+  phoneError?: string;
   birthdayError?: string;
   addressError?: string;
   passwordError?: string;
   confirmPasswordError?: string;
+  inviteCodeError?: string;
   isLoading?: boolean;
   onBlur?: () => void;
   onConfirmPasswordBlur?: () => void;
   onFirstNameBlur?: () => void;
   onLastNameBlur?: () => void;
+  onPhoneBlur?: () => void;
   onBirthdayBlur?: (value?: string) => void;
   onAddressBlur?: () => void;
+  onInviteCodeBlur?: () => void;
 }) {
   return (
     <div
@@ -374,6 +390,20 @@ export function SignUpContainer({
                 error={lastNameError}
               />
               {lastNameError && <ErrorMessage message={lastNameError} />}
+            </div>
+
+            {/* Phone */}
+            <div className="content-stretch flex flex-col gap-[4px] items-start w-full">
+              <CustomInput
+                label="Phone"
+                placeholder="Enter your phone"
+                value={phone}
+                onChange={(event) => setPhone(event.target.value)}
+                onBlur={onPhoneBlur}
+                autoComplete="tel"
+                error={phoneError}
+              />
+              {phoneError && <ErrorMessage message={phoneError} />}
             </div>
 
             {/* Date of birth */}
@@ -458,6 +488,20 @@ export function SignUpContainer({
                 label="Confirm password"
               />
             )}
+
+            {/* Promo code (optional) */}
+            <div className="content-stretch flex flex-col gap-[4px] items-start w-full">
+              <CustomInput
+                label="Promo code (optional)"
+                placeholder="Enter your code"
+                value={inviteCode}
+                onChange={(event) => setInviteCode(event.target.value.toUpperCase())}
+                onBlur={onInviteCodeBlur}
+                autoComplete="off"
+                error={inviteCodeError}
+              />
+              {inviteCodeError && <ErrorMessage message={inviteCodeError} />}
+            </div>
 
             {/* Terms of Service */}
             <div
