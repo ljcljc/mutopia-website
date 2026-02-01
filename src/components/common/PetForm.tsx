@@ -1744,7 +1744,7 @@ export function PetForm({
             <div className="bg-white box-border flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
               <div className="flex flex-col gap-[calc(12*var(--px393))] sm:gap-[12px] items-start relative shrink-0 w-full">
                 <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] text-[calc(16*var(--px393))] sm:text-[16px] text-[#4a3c2a] w-full whitespace-pre-wrap">
-                  Special instruments or notes{"\n"}(optional)
+                  Special instruments or notes(optional)
                 </p>
                   <CustomTextarea
                     label=""
