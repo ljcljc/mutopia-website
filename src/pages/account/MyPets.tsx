@@ -8,7 +8,7 @@ import { FileUpload, type FileUploadItem } from "@/components/common/FileUpload"
 import { CustomTextarea } from "@/components/common/CustomTextarea";
 import { PetForm } from "@/components/common/PetForm";
 import { useBookingStore } from "@/components/booking/bookingStore";
-import type { Behavior, CoatCondition, Gender, PetType, WeightUnit } from "@/components/booking/bookingStore";
+import type { Behavior, CoatCondition, Gender, PetType, WeightUnit, GroomingFrequency } from "@/components/booking/bookingStore";
 import { buildImageUrl, getPetBreeds, updatePet, deletePet, memorializePet, type PetBreedOut, type PetOut } from "@/lib/api";
 import {
   AlertDialog,
@@ -94,6 +94,7 @@ export default function MyPets() {
   const [petPhoto, setPetPhoto] = useState<File | null>(null);
   const [referenceStyles, setReferenceStyles] = useState<File[]>([]);
   const {
+    reset: resetBookingStore,
     setPetName: setBookingPetName,
     setPetType: setBookingPetType,
     setBreed: setBookingBreed,
@@ -116,6 +117,10 @@ export default function MyPets() {
     setReferenceStyles: setBookingReferenceStyles,
     setCurrentStep: setBookingCurrentStep,
   } = useBookingStore();
+
+  useEffect(() => {
+    resetBookingStore();
+  }, [resetBookingStore]);
 
   const petIdFromUrl = searchParams.get("pet");
 
@@ -214,7 +219,7 @@ export default function MyPets() {
     setBookingCoatCondition((pet.coat_condition as CoatCondition) || "");
     setBookingApproveShave(pet.approve_shave ?? null);
     setBookingBehavior((pet.behavior as Behavior) || "");
-    setBookingGroomingFrequency(pet.grooming_frequency || "");
+    setBookingGroomingFrequency((pet.grooming_frequency as GroomingFrequency) || "");
     setBookingSpecialNotes(pet.special_notes || "");
     setBookingPhotoIds(pet.photo_ids || []);
     setBookingReferencePhotoIds(pet.reference_photo_ids || []);
