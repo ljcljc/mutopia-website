@@ -1,6 +1,6 @@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Icon } from "@/components/common/Icon";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useLogout } from "@/hooks/useLogout";
 import type { MeOut } from "@/lib/api";
 
@@ -15,7 +15,9 @@ export default function AccountDropdown({
     ? (userInfo.first_name || userInfo.email.split("@")[0] || "User")
     : (fallbackName || "User");
   const navigate = useNavigate();
+  const location = useLocation();
   const { handleLogout } = useLogout();
+  const isDashboardActive = location.pathname.startsWith("/account/dashboard");
 
   return (
     <DropdownMenu>
@@ -34,7 +36,9 @@ export default function AccountDropdown({
       <DropdownMenuContent align="end" className="min-w-[160px]">
         <DropdownMenuItem
           onClick={() => navigate("/account/dashboard")}
-          className="cursor-pointer text-[#8b6357] hover:text-[#6f4e44] hover:bg-[#8b6357]/5"
+          className={`cursor-pointer text-[#8b6357] hover:text-[#6f4e44] hover:bg-[#8b6357]/5 ${
+            isDashboardActive ? "bg-[#8b6357]/10 text-[#6f4e44]" : ""
+          }`}
         >
           <span className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px]">
             Dashboard
