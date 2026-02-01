@@ -1,6 +1,5 @@
-# pnpm workspace configuration
 packages:
-  - '.'
-  # Add more packages here if needed in the future
-  # - 'packages/*'
-  # - 'apps/*'
+  - .
+
+onlyBuiltDependencies:
+  - esbuild
