@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import type { MouseEvent as ReactMouseEvent } from "react";
+import type { MouseEvent as ReactMouseEvent, WheelEvent as ReactWheelEvent } from "react";
 import {
   Dialog,
   DialogContent,
@@ -162,6 +162,15 @@ export function ImagePreview({
 
   const handleWheel = useCallback(
     (e: globalThis.WheelEvent) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -10 : 10;
+      setZoom((prev) => Math.min(Math.max(prev + delta, minZoom), maxZoom));
+    },
+    [minZoom, maxZoom]
+  );
+
+  const handleWheelReact = useCallback(
+    (e: ReactWheelEvent<HTMLDivElement>) => {
       e.preventDefault();
       const delta = e.deltaY > 0 ? -10 : 10;
       setZoom((prev) => Math.min(Math.max(prev + delta, minZoom), maxZoom));
@@ -360,6 +369,7 @@ export function ImagePreview({
           onMouseMove={handleDragMove}
           onMouseUp={handleDragEnd}
           onMouseLeave={handleDragEnd}
+          onWheel={handleWheelReact}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
