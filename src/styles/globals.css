@@ -243,8 +243,8 @@ label {
 }
 
 /* 默认颜色，但不包括辅助链接的特殊类 */
-[data-sidebar="menu-button"] svg:not(.sidebar-icon-danger):not(.sidebar-icon-default),
-[data-sidebar="menu-button"] span:not(.sidebar-text-danger):not(.sidebar-text-default) {
+[data-sidebar="menu-button"]:not([data-active="true"]) svg:not(.sidebar-icon-danger):not(.sidebar-icon-default),
+[data-sidebar="menu-button"]:not([data-active="true"]) span:not(.sidebar-text-danger):not(.sidebar-text-default) {
   color: #8B6357 !important;
 }
 
