@@ -71,6 +71,7 @@ export default function MyPets() {
   const [isMemorializing, setIsMemorializing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isUpdatingPet, setIsUpdatingPet] = useState(false);
+  const hasFetchedPetsRef = useRef(false);
 
   const [petName, setPetName] = useState("");
   const [petType, setPetType] = useState<PetType>("dog");
@@ -126,6 +127,8 @@ export default function MyPets() {
   const petIdFromUrl = searchParams.get("pet");
 
   useEffect(() => {
+    if (hasFetchedPetsRef.current) return;
+    hasFetchedPetsRef.current = true;
     fetchPets();
   }, [fetchPets]);
 

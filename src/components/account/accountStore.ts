@@ -38,6 +38,8 @@ interface AccountState {
   // 宠物列表（✅ 已实现接口）
   pets: PetOut[];
   isLoadingPets: boolean;
+  petsLastFetchedAt: number;
+  petsFetchPromise: Promise<void> | null;
   
   // 已纪念宠物列表（✅ 已实现接口）
   memorializedPets: PetOut[];
@@ -47,6 +49,8 @@ interface AccountState {
   upcomingBookings: BookingListOut[];
   historyBookings: BookingListOut[];
   isLoadingBookings: boolean;
+  upcomingBookingsLastFetchedAt: number;
+  upcomingBookingsFetchPromise: Promise<void> | null;
   
   // 支付方式列表（❌ 仅 UI，使用模拟数据）
   paymentMethods: Array<{
@@ -63,9 +67,9 @@ interface AccountState {
   fetchCoupons: () => Promise<void>;
   fetchCashCoupons: () => Promise<void>;
   fetchSpecialCoupons: () => Promise<void>;
-  fetchPets: () => Promise<void>;
+  fetchPets: (options?: { force?: boolean; maxAgeMs?: number }) => Promise<void>;
   fetchMemorializedPets: () => Promise<void>;
-  fetchUpcomingBookings: () => Promise<void>;
+  fetchUpcomingBookings: (options?: { force?: boolean; maxAgeMs?: number }) => Promise<void>;
   fetchHistoryBookings: () => Promise<void>;
   
   // 会员相关计算函数
@@ -101,6 +105,10 @@ export const useAccountStore = create<AccountState>((set, get: () => AccountStat
   upcomingBookings: [],
   historyBookings: [],
   isLoadingBookings: false,
+  petsLastFetchedAt: 0,
+  petsFetchPromise: null,
+  upcomingBookingsLastFetchedAt: 0,
+  upcomingBookingsFetchPromise: null,
   paymentMethods: [
     {
       id: 1,
@@ -204,16 +212,32 @@ export const useAccountStore = create<AccountState>((set, get: () => AccountStat
     }
   },
   
-  fetchPets: async () => {
-    set({ isLoadingPets: true });
-    try {
-      const response = await getPets({ page: 1, page_size: 50 });
-      const pets = response.items;
-      set({ pets, isLoadingPets: false });
-    } catch (error) {
-      console.error("Failed to load pets:", error);
-      set({ pets: [], isLoadingPets: false });
+  fetchPets: async (options = {}) => {
+    const { force = false, maxAgeMs = 10000 } = options;
+    const state = get();
+    const now = Date.now();
+    if (!force && state.petsFetchPromise) {
+      await state.petsFetchPromise;
+      return;
     }
+    if (!force && state.petsLastFetchedAt > 0 && now - state.petsLastFetchedAt < maxAgeMs) {
+      return;
+    }
+    const request = (async () => {
+      set({ isLoadingPets: true });
+      try {
+        const response = await getPets({ page: 1, page_size: 50 });
+        const pets = response.items;
+        set({ pets, isLoadingPets: false, petsLastFetchedAt: Date.now() });
+      } catch (error) {
+        console.error("Failed to load pets:", error);
+        set({ pets: [], isLoadingPets: false });
+      } finally {
+        set({ petsFetchPromise: null });
+      }
+    })();
+    set({ petsFetchPromise: request });
+    await request;
   },
   
   fetchMemorializedPets: async () => {
@@ -234,17 +258,33 @@ export const useAccountStore = create<AccountState>((set, get: () => AccountStat
    * 
    * upcoming 包含除 history 以外的所有状态（即非 canceled/completed/refunded 的预约）
    */
-  fetchUpcomingBookings: async () => {
-    set({ isLoadingBookings: true });
-    try {
-      const response = await getMyBookings({ group: "upcoming", page: 1, page_size: 50 });
-      const bookings = response.items || [];
-      console.log("[fetchUpcomingBookings] Loaded", bookings.length, "upcoming bookings:", bookings);
-      set({ upcomingBookings: bookings, isLoadingBookings: false });
-    } catch (error) {
-      console.error("Failed to load upcoming bookings:", error);
-      set({ upcomingBookings: [], isLoadingBookings: false });
+  fetchUpcomingBookings: async (options = {}) => {
+    const { force = false, maxAgeMs = 10000 } = options;
+    const state = get();
+    const now = Date.now();
+    if (!force && state.upcomingBookingsFetchPromise) {
+      await state.upcomingBookingsFetchPromise;
+      return;
     }
+    if (!force && state.upcomingBookingsLastFetchedAt > 0 && now - state.upcomingBookingsLastFetchedAt < maxAgeMs) {
+      return;
+    }
+    const request = (async () => {
+      set({ isLoadingBookings: true });
+      try {
+        const response = await getMyBookings({ group: "upcoming", page: 1, page_size: 50 });
+        const bookings = response.items || [];
+        console.log("[fetchUpcomingBookings] Loaded", bookings.length, "upcoming bookings:", bookings);
+        set({ upcomingBookings: bookings, isLoadingBookings: false, upcomingBookingsLastFetchedAt: Date.now() });
+      } catch (error) {
+        console.error("Failed to load upcoming bookings:", error);
+        set({ upcomingBookings: [], isLoadingBookings: false });
+      } finally {
+        set({ upcomingBookingsFetchPromise: null });
+      }
+    })();
+    set({ upcomingBookingsFetchPromise: request });
+    await request;
   },
   
   /**

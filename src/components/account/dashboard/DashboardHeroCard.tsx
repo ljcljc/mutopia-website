@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from "react";
+import { useMemo } from "react";
 import { Icon } from "@/components/common/Icon";
 import { useAccountStore } from "../accountStore";
 
@@ -37,16 +37,7 @@ function parseAddress(address?: string | null): { line1: string; line2: string }
 }
 
 export default function DashboardHeroCard() {
-  const { upcomingBookings, fetchUpcomingBookings } = useAccountStore();
-  const hasFetchedRef = useRef(false);
-
-  // 组件挂载时加载 upcoming 数据（checked in 的预约通常在 upcoming 中）
-  useEffect(() => {
-    if (hasFetchedRef.current) return;
-    hasFetchedRef.current = true;
-    fetchUpcomingBookings();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { upcomingBookings } = useAccountStore();
 
   // 找到最近的 checked in 预约（从 upcoming 中查找）
   const checkedInBooking = useMemo(() => {

@@ -17,6 +17,11 @@ type NotificationItem = {
   showClose: boolean;
 };
 
+const NOTIFICATIONS_MAX_AGE_MS = 10000;
+let notificationsLastFetchedAt = 0;
+let notificationsLastItems: MessageOut[] = [];
+let notificationsInFlight: Promise<MessageOut[]> | null = null;
+
 const linkClassName = "text-[#DE6A07] underline hover:text-[#C15A05]";
 
 function TimeStamp({ text }: { text: string }) {
@@ -91,18 +96,38 @@ export default function Notifications() {
 
   useEffect(() => {
     let isMounted = true;
+    const now = Date.now();
+    if (now - notificationsLastFetchedAt < NOTIFICATIONS_MAX_AGE_MS && notificationsLastItems.length > 0) {
+      setMessages(notificationsLastItems);
+      return () => {
+        isMounted = false;
+      };
+    }
     const loadMessages = async () => {
       setIsLoading(true);
       try {
-        const response = await getMessages({ page: 1, page_size: 50, channel });
+        if (notificationsInFlight) {
+          const items = await notificationsInFlight;
+          if (isMounted) setMessages(items);
+          return;
+        }
+        notificationsInFlight = (async () => {
+          const response = await getMessages({ page: 1, page_size: 50, channel });
+          const items = response.items || [];
+          notificationsLastItems = items;
+          notificationsLastFetchedAt = Date.now();
+          return items;
+        })();
+        const items = await notificationsInFlight;
         if (isMounted) {
-          setMessages(response.items || []);
+          setMessages(items);
         }
       } catch (error) {
         console.error("Failed to load messages:", error);
         if (isMounted) setMessages([]);
       } finally {
         if (isMounted) setIsLoading(false);
+        notificationsInFlight = null;
       }
     };
     loadMessages();
