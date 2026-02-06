@@ -7,6 +7,7 @@ import { OrangeButton } from "@/components/common/OrangeButton";
 import { FileUpload, type FileUploadItem } from "@/components/common/FileUpload";
 import { CustomTextarea } from "@/components/common/CustomTextarea";
 import { PetForm } from "@/components/common/PetForm";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { useBookingStore } from "@/components/booking/bookingStore";
 import type { Behavior, CoatCondition, Gender, PetType, WeightUnit, GroomingFrequency } from "@/components/booking/bookingStore";
 import { buildImageUrl, getPetBreeds, updatePet, deletePet, memorializePet, type PetBreedOut, type PetOut } from "@/lib/api";
@@ -182,6 +183,7 @@ export default function MyPets() {
 
   const activePet = useMemo(() => pets.find((pet) => pet.id === activePetId) || null, [pets, activePetId]);
   const isMemorialized = Boolean(activePet?.is_memorialized);
+  const isPetSelectDropdown = pets.length > 3;
 
   const applyPetToForm = (pet: PetOut) => {
     setPetName(pet.name || "");
@@ -403,32 +405,99 @@ export default function MyPets() {
             <h1 className="font-['Comfortaa:Bold',sans-serif] font-bold text-[20px] text-[#4A3C2A]">
               My pets
             </h1>
-            <div className="flex items-center gap-[8px] overflow-x-auto max-w-[520px] pl-[2px] pr-[2px]">
-              {pets.map((pet) => {
-                const isActive = pet.id === activePetId;
-                return (
-                  <button
-                    key={pet.id}
-                    type="button"
-                    onClick={() => handleSelectPet(pet.id)}
-                    className={`border-2 rounded-tl-[14px] rounded-tr-[14px] px-[16px] py-[8px] min-w-[120px] flex items-center gap-[4px] shrink-0 ${
-                      isActive
-                        ? "border-[#DE6A07] text-[#DE6A07]"
-                        : "border-[#E5E7EB] text-[#8B6357]"
-                    }`}
-                  >
+            {isPetSelectDropdown ? (
+              <Select
+                value={activePetId ? String(activePetId) : ""}
+                onValueChange={(value) => {
+                  if (value === "__add__") {
+                    navigate("/account/pets/new", { state: { from: "my-pets" } });
+                    return;
+                  }
+                  const nextId = Number.parseInt(value, 10);
+                  if (Number.isFinite(nextId)) {
+                    handleSelectPet(nextId);
+                  }
+                }}
+              >
+                <SelectTrigger
+                  className="w-[160px] min-w-[160px] h-[40px] px-[16px] py-[8px] border-2 border-[#DE6A07] rounded-tl-[14px] rounded-tr-[14px] bg-white text-[#DE6A07] [&_svg]:text-[#DE6A07]"
+                >
+                  <div className="flex items-center gap-[4px]">
                     <Icon
-                      name={pet.pet_type === "cat" ? "cat" : "dog"}
-                      className={isActive ? "text-[#DE6A07]" : "text-[#8B6357]"}
+                      name={activePet?.pet_type === "cat" ? "cat" : "dog"}
+                      className="text-[#DE6A07]"
                       size={24}
                     />
                     <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[14px] leading-[21px]">
-                      {pet.name}
+                      {activePet?.name ?? "Select pet"}
                     </span>
-                  </button>
-                );
-              })}
-            </div>
+                  </div>
+                </SelectTrigger>
+                <SelectContent
+                  className="w-[160px] border border-[#D6D6D6] rounded-[8px] bg-white p-[4px]"
+                  position="popper"
+                >
+                  {pets.map((pet) => (
+                    <SelectItem
+                      key={pet.id}
+                      value={String(pet.id)}
+                      className="h-[36px] px-[8px] py-[12px] rounded-[4px] text-[14px] leading-[20px] font-['Poppins:Regular',sans-serif] text-[#6B6B6B] data-[highlighted]:bg-[#FFFBEB] data-[state=checked]:text-[#DE6A07] data-[state=checked]:bg-white [&_svg]:text-[#6B6B6B] data-[state=checked]:[&_svg]:text-[#DE6A07] [&>span:first-child]:hidden [&>span:last-child]:flex [&>span:last-child]:items-center [&>span:last-child]:gap-[12px]"
+                    >
+                      <div className="flex items-center gap-[12px]">
+                        <Icon name={pet.pet_type === "cat" ? "cat" : "dog"} size={20} />
+                        <span>{pet.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                  <SelectItem
+                    value="__add__"
+                    className="h-[36px] px-[8px] py-[12px] rounded-[4px] text-[14px] leading-[20px] font-['Poppins:Regular',sans-serif] text-[#6B6B6B] data-[highlighted]:bg-[#FFFBEB] [&>span:first-child]:hidden [&>span:last-child]:flex [&>span:last-child]:items-center [&>span:last-child]:gap-[12px]"
+                  >
+                    <div className="flex items-center gap-[12px]">
+                      <Icon name="add-2" size={20} />
+                      <span>Add pet</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            ) : (
+              <div className="flex items-center overflow-x-auto max-w-[520px] pl-[2px] pr-[2px]">
+                {pets.map((pet) => {
+                  const isActive = pet.id === activePetId;
+                  return (
+                    <button
+                      key={pet.id}
+                      type="button"
+                      onClick={() => handleSelectPet(pet.id)}
+                      className={`border-2 rounded-tl-[14px] rounded-tr-[14px] px-[16px] py-[8px] min-w-[120px] flex items-center gap-[4px] shrink-0 ${
+                        isActive
+                          ? "border-[#DE6A07] text-[#DE6A07]"
+                          : "border-[#E5E7EB] text-[#8B6357]"
+                      }`}
+                    >
+                      <Icon
+                        name={pet.pet_type === "cat" ? "cat" : "dog"}
+                        className={isActive ? "text-[#DE6A07]" : "text-[#8B6357]"}
+                        size={24}
+                      />
+                      <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[14px] leading-[21px]">
+                        {pet.name}
+                      </span>
+                    </button>
+                  );
+                })}
+                <button
+                  type="button"
+                  onClick={() => navigate("/account/pets/new", { state: { from: "my-pets" } })}
+                  className="border-2 rounded-tl-[14px] rounded-tr-[14px] px-[16px] py-[8px] min-w-[88px] flex items-center gap-[4px] shrink-0 border-[#E5E7EB] text-[#8B6357] cursor-pointer"
+                >
+                  <Icon name="add-2" className="text-[#8B6357]" size={20} />
+                  <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[14px] leading-[21px]">
+                    Add pet
+                  </span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

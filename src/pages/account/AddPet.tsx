@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { PetForm } from "@/components/common/PetForm";
 import type { WeightUnit, Gender, PetType, Behavior, CoatCondition } from "@/components/booking/bookingStore";
@@ -8,6 +8,7 @@ import { createPet, getPetBreeds } from "@/lib/api";
 
 export default function AddPet() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isSaving, setIsSaving] = useState(false);
 
   const [petName, setPetName] = useState("");
@@ -108,11 +109,23 @@ export default function AddPet() {
             aria-label="Breadcrumb"
             className="font-['Comfortaa:Bold',sans-serif] font-bold text-[20px] text-[#4A3C2A] flex items-center gap-[6px]"
           >
-            <Link to="/account/dashboard" className="hover:text-[#DE6A07] transition-colors">
-              Dashboard
-            </Link>
-            <span aria-hidden="true">{" > "}</span>
-            <span>Add pets</span>
+            {location.state?.from === "my-pets" ? (
+              <>
+                <Link to="/account/pets" className="hover:text-[#DE6A07] transition-colors">
+                  My pets
+                </Link>
+                <span aria-hidden="true">{" > "}</span>
+                <span>Add pet</span>
+              </>
+            ) : (
+              <>
+                <Link to="/account/dashboard" className="hover:text-[#DE6A07] transition-colors">
+                  Dashboard
+                </Link>
+                <span aria-hidden="true">{" > "}</span>
+                <span>Add pet</span>
+              </>
+            )}
           </nav>
         </div>
         <div className="content-stretch flex flex-col gap-[32px] items-start relative shrink-0 w-full">

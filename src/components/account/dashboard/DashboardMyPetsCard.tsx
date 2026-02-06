@@ -177,7 +177,7 @@ export default function DashboardMyPetsCard() {
         </p>
         <button
           type="button"
-          onClick={() => navigate("/account/pets/new")}
+          onClick={() => navigate("/account/pets/new", { state: { from: "dashboard" } })}
           className="flex items-center gap-[6px] font-['Comfortaa:Regular',sans-serif] font-bold text-[12.25px] leading-[17.5px] text-[#8B6357] cursor-pointer"
         >
           <Icon name="add-2" className="w-5 h-5" />
