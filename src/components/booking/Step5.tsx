@@ -14,7 +14,14 @@ export function Step5() {
   const remainingSlots = Math.max(0, maxTimeSlots - selectedTimeSlots.length);
   const isMaxSlotsReached = selectedTimeSlots.length >= maxTimeSlots;
   
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const buildMinDate = () => {
+    const date = new Date();
+    date.setDate(date.getDate() + 7);
+    date.setHours(0, 0, 0, 0);
+    return date;
+  };
+
+  const [currentDate, setCurrentDate] = useState(buildMinDate);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showYearPicker, setShowYearPicker] = useState(false);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
@@ -23,11 +30,7 @@ export function Step5() {
 
   // Date range: today to exactly 1 year from today (365 days)
   // This ensures users can only book appointments within one year
-  const minDate = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return today;
-  }, []);
+  const minDate = useMemo(() => buildMinDate(), []);
 
   const maxDate = useMemo(() => {
     // Calculate exactly one year from today
@@ -393,7 +396,7 @@ export function Step5() {
             </div>
 
             {/* Calendar and Time Period Selection */}
-            <div className="content-stretch flex gap-[12px] items-start relative shrink-0">
+            <div className="content-stretch flex gap-[12px] items-start relative shrink-0 w-full">
               {/* Calendar */}
               <Calendar
                 currentDate={currentDate}
@@ -403,7 +406,7 @@ export function Step5() {
                 maxDate={maxDate}
                 yearRange={yearRange}
                 disabled={isMaxSlotsReached}
-                className={isMaxSlotsReached ? "cursor-not-allowed" : undefined}
+                className={cn(isMaxSlotsReached && "cursor-not-allowed", "flex-1")}
                 onMonthChange={(year, month) => {
                   setCurrentDate(new Date(year, month, 1));
                 }}
