@@ -92,7 +92,11 @@ export default function AddPet() {
         }
       );
       toast.success("Pet saved successfully.");
-      navigate("/account/dashboard");
+      if (location.state?.from === "my-pets") {
+        navigate("/account/pets");
+      } else {
+        navigate("/account/dashboard");
+      }
     } catch (error) {
       console.error("Failed to create pet:", error);
       toast.error("Failed to save pet. Please try again.");
