@@ -1374,9 +1374,6 @@ export function PetForm({
                     displayValue={gender ? `${gender[0].toUpperCase()}${gender.slice(1)}` : ""}
                     onValueChange={(value) => setGender(value === "unknown" ? "" : (value as Gender))}
                   >
-                    {gender === "" ? (
-                      <CustomSelectItem value="unknown">Select</CustomSelectItem>
-                    ) : null}
                     <CustomSelectItem value="male">Male</CustomSelectItem>
                     <CustomSelectItem value="female">Female</CustomSelectItem>
                     <CustomSelectItem value="unknown">Unknown</CustomSelectItem>
