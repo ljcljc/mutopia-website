@@ -12,6 +12,13 @@ export default function Hero() {
   const handleBookAppointment = () => {
     navigate("/booking");
   };
+
+  const handleViewServices = () => {
+    const servicesSection = document.getElementById("services");
+    if (servicesSection) {
+      servicesSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
   return (
     <div
       className="relative w-full bg-linear-to-b from-[#fdf8f3] to-[#f9f1e8] overflow-hidden"
@@ -97,7 +104,7 @@ export default function Hero() {
                 Book Appointment
               </OrangeButton>
 
-              <OrangeButton variant="outline" className="w-[170px]">
+              <OrangeButton variant="outline" className="w-[170px]" onClick={handleViewServices}>
                 View Services
               </OrangeButton>
             </div>
@@ -195,7 +202,7 @@ export default function Hero() {
               Book Appointment
             </OrangeButton>
 
-            <OrangeButton variant="outline" fullWidth>
+            <OrangeButton variant="outline" fullWidth onClick={handleViewServices}>
               View Services
             </OrangeButton>
           </div>
