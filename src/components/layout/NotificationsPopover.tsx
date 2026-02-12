@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Icon } from "@/components/common/Icon";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { getMessages, type MessageOut } from "@/lib/api";
 
 export default function NotificationsPopover() {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<MessageOut[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -76,7 +78,15 @@ export default function NotificationsPopover() {
               <div className="px-[16px] py-[12px] text-[#64748B] text-[12px]">No notifications</div>
             ) : (
               items.map((item) => (
-                <div key={item.id} className="flex flex-col gap-[4px] h-[64px] pt-[12px] px-[16px] w-full">
+                <button
+                  key={item.id}
+                  type="button"
+                  className="flex flex-col gap-[4px] h-[64px] pt-[12px] px-[16px] w-full text-left hover:bg-[rgba(0,0,0,0.03)] transition-colors"
+                  onClick={() => {
+                    setOpen(false);
+                    navigate("/account/notifications");
+                  }}
+                >
                   <div className="flex items-start w-full">
                     <div className="flex flex-1 gap-[4px] items-center">
                       {!item.is_read && (
@@ -92,7 +102,7 @@ export default function NotificationsPopover() {
                       {item.sent_at}
                     </p>
                   </div>
-                </div>
+                </button>
               ))
             )}
           </div>

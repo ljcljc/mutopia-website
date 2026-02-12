@@ -275,7 +275,7 @@ export default function Notifications() {
                               aria-label="Dismiss"
                             >
                               <Icon
-                                name="close-arrow"
+                                name="trash"
                                 size={16}
                                 className="text-current"
                               />
