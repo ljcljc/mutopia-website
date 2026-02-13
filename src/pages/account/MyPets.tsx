@@ -797,14 +797,14 @@ export default function MyPets() {
                         <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
                           {activePet.name}
                         </p>
-                        <div className="grid grid-cols-3 gap-y-[16px] gap-x-[40px] text-[#4A3C2A]">
+                        <div className="flex flex-wrap gap-y-[16px] gap-x-[40px] text-[#4A3C2A]">
                           <div className="w-[80px]">
                             <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Pet type</p>
                             <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
                               {formatLabel(activePet.pet_type)}
                             </p>
                           </div>
-                          <div className="w-[80px]">
+                          <div className="min-w-[80px] max-w-[160px]">
                             <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Breed</p>
                             <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
                               {activePet.breed || "-"}
@@ -820,18 +820,6 @@ export default function MyPets() {
                             <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Weight</p>
                             <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
                               {formatWeight(activePet.weight_value, activePet.weight_unit)}
-                            </p>
-                          </div>
-                          <div className="w-[80px]">
-                            <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Coat condition</p>
-                            <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
-                              {formatLabel(activePet.coat_condition)}
-                            </p>
-                          </div>
-                          <div className="w-[80px]">
-                            <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Behavior</p>
-                            <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
-                              {formatBehavior(activePet.behavior)}
                             </p>
                           </div>
                         </div>
