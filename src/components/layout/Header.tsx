@@ -219,62 +219,50 @@ function MobileButton1() {
   );
 }
 
+function MobileUserSummary() {
+  const user = useAuthStore((state) => state.user);
+  if (!user) return null;
+
+  return (
+    <div className="content-stretch flex gap-[16px] items-center justify-center w-full">
+      <div className="content-stretch flex gap-[12px] items-center justify-center w-full">
+        <div className="bg-[#8b6357] overflow-clip relative rounded-[100px] shrink-0 size-[20px] flex items-center justify-center" data-name="Icons/Avatar/Brown/Default/Rempli">
+          <Icon
+            name="user"
+            aria-label="User"
+            className="block size-full text-white"
+          />
+        </div>
+        <div className="flex flex-col items-center text-center">
+          <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[#4a3c2a] text-[14px]">
+            {`Welcome, ${user.name}`}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function MobileButton2() {
   const user = useAuthStore((state) => state.user);
   const { handleLogout } = useLogout();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   if (user) {
     return (
-      <div className="content-stretch flex flex-col gap-[12px] w-full">
-        <div className="content-stretch flex gap-[16px] items-center w-full">
-          {/* Notification icon */}
-          <div className="content-stretch flex gap-[10px] h-[48px] items-center justify-center relative shrink-0 w-[48px] bg-[#f5f5f5] rounded-[2.47134e+07px]">
-            <NotificationsPopover />
-          </div>
-
-          {/* User info */}
-          <div className="content-stretch flex gap-[12px] items-center flex-1">
-            <div className="bg-[#8b6357] overflow-clip relative rounded-[100px] shrink-0 size-[48px] flex items-center justify-center" data-name="Icons/Avatar/Brown/Default/Rempli">
-              <Icon
-                name="user"
-                aria-label="User"
-                className="block size-full text-white"
-              />
-            </div>
-            <div className="flex flex-col flex-1">
-              <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[#4a3c2a] text-[14px]">
-                {user.name}
-              </p>
-              <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#717182] text-[12px]">
-                {user.email}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Logout button */}
-        <button
-          onClick={handleLogout}
-          className="bg-[#f8f7f1] h-[48px] relative rounded-[2.47134e+07px] shrink-0 w-full cursor-pointer hover:bg-[#f0efe8] transition-colors"
-        >
-          <div
-            aria-hidden="true"
-            className="absolute border-[0.737px] border-[rgba(0,0,0,0.1)] border-solid inset-0 pointer-events-none rounded-[2.47134e+07px]"
-          />
-          <div className="flex flex-row items-center justify-center size-full">
-            <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[5.25px] h-[48px] items-center justify-center px-[11.237px] py-[0.737px] relative w-full">
-              <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12.25px] text-nowrap whitespace-pre">
-                Log out
-              </p>
-            </div>
-          </div>
-        </button>
-      </div>
+      <a
+        href="/logout"
+        onClick={(event) => {
+          event.preventDefault();
+          handleLogout();
+        }}
+        className="w-full py-[12px] text-center font-['Comfortaa:Regular',sans-serif] font-normal leading-[21px] text-[#4a3c2a] text-[14px] hover:text-[#8b6357] transition-colors no-underline cursor-pointer"
+      >
+        Log out
+      </a>
     );
   }
-
-  const navigate = useNavigate();
 
   return (
     <LoginModal
@@ -288,9 +276,9 @@ function MobileButton2() {
       >
         <div className="flex flex-row items-center justify-center size-full">
           <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[5.25px] h-[48px] items-center justify-center px-[10.5px] py-0 relative w-full">
-            <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[12.25px] text-nowrap text-white whitespace-pre">
-              Login / Sign Up
-            </p>
+          <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[12.25px] text-nowrap text-white whitespace-pre">
+            Login / Sign Up
+          </p>
           </div>
         </div>
       </div>
@@ -305,6 +293,7 @@ function MobileMenu({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const user = useAuthStore((state) => state.user);
   const handleLinkClick = () => {
     setTimeout(() => {
       onClose();
@@ -325,6 +314,19 @@ function MobileMenu({
           className="w-full lg:hidden overflow-hidden"
         >
           <div className="w-full pb-[20px] pt-0 px-[20px]">
+            <div className="pt-[12px] pb-[8px]">
+              <MobileUserSummary />
+            </div>
+            {user ? (
+              <div className="pb-[8px]">
+                <a
+                  href="/account/dashboard"
+                  className="w-full py-[8px] mt-[8px] text-center font-['Comfortaa:Regular',sans-serif] font-normal leading-[21px] text-[#4a3c2a] text-[14px] hover:text-[#8b6357] transition-colors no-underline cursor-pointer block"
+                >
+                  Dashboard
+                </a>
+              </div>
+            ) : null}
             {/* Navigation Links */}
             <motion.div
               initial={{ y: -20, opacity: 0 }}
@@ -354,7 +356,7 @@ function MobileMenu({
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.3 }}
-              className="box-border content-stretch flex flex-col gap-[20px] items-start pb-0 pt-[13.994px] px-0 relative shrink-0 w-full"
+              className="box-border content-stretch flex flex-col gap-[16px] items-start pb-0 pt-[13.994px] px-0 relative shrink-0 w-full"
             >
               <MobileButton1 />
               <MobileButton2 />
