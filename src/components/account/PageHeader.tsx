@@ -11,12 +11,12 @@ import { Label } from "@/components/ui/label";
 export default function PageHeader() {
   return (
     <div className="w-full flex items-center justify-between mb-6">
-      <h1 className="font-['Comfortaa',sans-serif] font-bold text-[#4A3C2A] text-3xl">
+      <h1 className="font-['Comfortaa',sans-serif] font-bold text-[#4A3C2A] text-[20px] sm:text-3xl">
         My Account
       </h1>
       
       {/* Groomer Account Toggle */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         <Switch
           id="groomer-account-toggle"
           checked={false}
@@ -27,7 +27,7 @@ export default function PageHeader() {
         />
         <Label
           htmlFor="groomer-account-toggle"
-          className="font-['Comfortaa',sans-serif] font-bold text-[#8B6357] text-sm cursor-default"
+          className="font-['Comfortaa',sans-serif] font-bold text-[#8B6357] text-[14px] sm:text-sm cursor-default"
         >
           Groomer account
         </Label>

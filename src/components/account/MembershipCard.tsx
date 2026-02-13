@@ -140,12 +140,12 @@ export default function MembershipCard() {
     }
 
     return (
-      <div className="bg-white rounded-[12px] border-2 border-[#6D28D9] p-5 shadow-[0_8px_12px_0_rgba(0,0,0,0.10)]">
+      <div className="bg-white rounded-[12px] border-2 border-[#754387] sm:border-[#6D28D9] p-[22px] sm:p-5 shadow-[0_8px_12px_0_rgba(0,0,0,0.10)]">
         {/* Header */}
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
             <Icon name="logo" className="w-6 h-6 text-[#6D28D9] shrink-0" />
-            <h2 className="font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-lg">
+            <h2 className="font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-[15.75px] sm:text-lg">
               Membership
             </h2>
           </div>
@@ -217,18 +217,20 @@ export default function MembershipCard() {
 
   // 未购买状态 UI（也作为加载占位）
   return (
-    <div className="bg-white rounded-[12px] border-2 border-[#6D28D9] p-5 shadow-[0_8px_12px_0_rgba(0,0,0,0.10)]">
+      <div className="bg-white rounded-[12px] border-2 border-[#754387] sm:border-[#6D28D9] p-[22px] sm:p-5 shadow-[0_8px_12px_0_rgba(0,0,0,0.10)]">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col gap-[12px] sm:flex-row sm:items-center sm:justify-between mb-4">
         <div className="flex items-center gap-2">
           <Icon name="logo" className="w-6 h-6 text-[#6D28D9] shrink-0" />
-          <h2 className="font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-lg">
+          <h2 className="font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-[15.75px] sm:text-lg">
             Membership
           </h2>
         </div>
-        <span className="bg-[#DCFCE7] text-[#008236] px-3 py-1 rounded-full text-xs font-['Comfortaa',sans-serif] font-medium">
-          Save up to 100%
-        </span>
+        <div className="flex justify-center sm:justify-end">
+          <span className="bg-[#DCFCE7] text-[#008236] px-3 py-1 rounded-full text-[10px] sm:text-xs font-['Comfortaa',sans-serif] font-medium">
+            Save up to 100%
+          </span>
+        </div>
       </div>
 
       {/* Benefits List */}

@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/api";
 import PageHeader from "@/components/account/PageHeader";
 import PersonalInfoCard from "@/components/account/PersonalInfoCard";
 import AddressesCard from "@/components/account/AddressesCard";
+import PaymentMethodCard from "@/components/account/PaymentMethodCard";
 import ShareAndEarnCard from "@/components/account/ShareAndEarnCard";
 import MembershipCard from "@/components/account/MembershipCard";
 
@@ -39,27 +40,27 @@ export default function MyAccount() {
 
   return (
     <div className="w-full min-h-full flex flex-col">
-      <div className="w-full max-w-[944px] mx-auto px-6 pb-8 flex-1">
+      <div className="w-full max-w-none sm:max-w-[944px] mx-auto px-[20px] sm:px-6 pb-[20px] sm:pb-8 flex-1">
         {/* Page Header */}
         <PageHeader />
 
         {/* Personal Information Card */}
-        <div className="mb-6">
+        <div className="mb-[20px] sm:mb-6">
           <PersonalInfoCard />
         </div>
 
         {/* Addresses Card */}
-        <div className="mb-6">
+        <div className="mb-[20px] sm:mb-6">
           <AddressesCard />
         </div>
 
-        {/* Payment Method Card */}
-        {/* <div className="mb-6">
+        {/* Payment Method Card (mobile only) */}
+        <div className="mb-[20px] sm:mb-6 sm:hidden">
           <PaymentMethodCard />
-        </div> */}
+        </div>
 
         {/* Bottom Cards Section - Share & Earn and Membership */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px] sm:gap-6">
           <ShareAndEarnCard />
           <MembershipCard />
         </div>

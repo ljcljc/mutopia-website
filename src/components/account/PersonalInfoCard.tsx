@@ -143,12 +143,12 @@ export default function PersonalInfoCard() {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 border border-[rgba(0,0,0,0.10)]">
-      <div className="flex items-start gap-6">
+      <div className="bg-white rounded-[12px] sm:rounded-lg shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] sm:shadow-sm p-[20px] sm:p-6 border border-[rgba(0,0,0,0.10)]">
+      <div className="flex items-start gap-[14px] sm:gap-6">
         {/* 左侧：头像 */}
         <div className="shrink-0">
           <div 
-            className="relative w-[60px] h-[60px] rounded-full bg-[#8B6357] flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity group"
+            className="relative w-[56px] h-[56px] sm:w-[60px] sm:h-[60px] rounded-full bg-[#8B6357] flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity group"
             onClick={handleAvatarClick}
             title="Click to upload avatar"
           >
@@ -174,7 +174,7 @@ export default function PersonalInfoCard() {
               />
             ) : (
               /* 显示 initials（如果没有头像） */
-              <span className="text-white font-['Comfortaa',sans-serif] font-semibold text-lg">
+              <span className="text-white font-['Comfortaa',sans-serif] font-semibold text-[14px] sm:text-lg">
                 {initials}
               </span>
             )}
@@ -200,8 +200,8 @@ export default function PersonalInfoCard() {
 
         {/* 中间：用户信息 */}
         <div className="flex-1">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-lg">
+          <div className="flex items-center justify-between mb-[12px] sm:mb-4">
+            <h2 className="font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-[14px] sm:text-lg">
               {fullName}
             </h2>
             {/* Modify 按钮 */}
@@ -210,7 +210,7 @@ export default function PersonalInfoCard() {
               className="flex items-center gap-2 text-[#8B6357] hover:text-[#DE6A07]/80 cursor-pointer"
             >
               <Icon name="pencil" className="w-4 h-4" />
-              <span className="font-['Comfortaa',sans-serif] font-medium text-sm">
+              <span className="hidden sm:inline font-['Comfortaa',sans-serif] font-medium text-sm">
                 Modify
               </span>
             </button>
@@ -221,8 +221,8 @@ export default function PersonalInfoCard() {
             {/* 生日 */}
             {userInfo.birthday && (
               <div className="flex items-center gap-4">
-                <Icon name="birthday" className="w-5 h-5 text-[#8B6357] shrink-0" />
-                <span className="font-['Comfortaa',sans-serif] font-normal text-[#4A5565] text-sm">
+                <Icon name="birthday" className="w-4 h-4 sm:w-5 sm:h-5 text-[#8B6357] shrink-0" />
+                <span className="font-['Comfortaa',sans-serif] font-normal text-[#4A5565] text-[12.25px] sm:text-sm">
                   {formatDate(userInfo.birthday)}
                 </span>
               </div>
@@ -230,16 +230,16 @@ export default function PersonalInfoCard() {
 
             {/* 邮箱 */}
             <div className="flex items-center gap-4">
-              <Icon name="email" className="w-5 h-5 text-[#8B6357] shrink-0" />
-              <span className="font-['Comfortaa',sans-serif] font-normal text-[#4A5565] text-sm">
+              <Icon name="email" className="w-4 h-4 sm:w-5 sm:h-5 text-[#8B6357] shrink-0" />
+              <span className="font-['Comfortaa',sans-serif] font-normal text-[#4A5565] text-[12.25px] sm:text-sm">
                 {userInfo.email}
               </span>
             </div>
 
             {/* 电话 - TODO: 从 userInfo 获取，目前 API 可能不包含 */}
             <div className="flex items-center gap-4">
-              <Icon name="phone" className="w-5 h-5 text-[#8B6357] shrink-0" />
-              <span className="font-['Comfortaa',sans-serif] font-normal text-[#4A3C2A] text-sm">
+              <Icon name="phone" className="w-4 h-4 sm:w-5 sm:h-5 text-[#8B6357] shrink-0" />
+              <span className="font-['Comfortaa',sans-serif] font-normal text-[#4A3C2A] text-[12.25px] sm:text-sm">
                 -
               </span>
             </div>
@@ -249,8 +249,8 @@ export default function PersonalInfoCard() {
               onClick={handleChangePassword}
               className="flex items-center gap-4 text-[#8B6357] hover:text-[#DE6A07]/80 cursor-pointer self-start"
             >
-              <Icon name="lock" className="w-5 h-5 text-[#8B6357] shrink-0" />
-              <span className="font-['Comfortaa',sans-serif] font-medium text-sm">
+              <Icon name="lock" className="w-4 h-4 sm:w-5 sm:h-5 text-[#8B6357] shrink-0" />
+              <span className="font-['Comfortaa',sans-serif] font-medium text-[12px] sm:text-sm text-[#DE6A07] sm:text-[#8B6357]">
                 Change password
               </span>
             </button>

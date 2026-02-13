@@ -43,12 +43,12 @@ export default function AddressesCard() {
 
   return (
     <>
-      <div className="bg-white rounded-lg shadow-sm p-6 border border-[rgba(0,0,0,0.10)]">
+      <div className="bg-white rounded-[12px] sm:rounded-lg shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] sm:shadow-sm p-[20px] sm:p-6 border border-[rgba(0,0,0,0.10)]">
         {/* Header */}
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center justify-between mb-[16px] sm:mb-5">
           <div className="flex items-center gap-2">
-            <Icon name="location" className="w-5 h-5 text-[#DE6A07] shrink-0" />
-            <h2 className="font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-lg">
+            <Icon name="location" className="w-4 h-4 sm:w-5 sm:h-5 text-[#DE6A07] shrink-0" />
+            <h2 className="font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-[14px] sm:text-lg">
               Addresses
             </h2>
           </div>
@@ -56,9 +56,10 @@ export default function AddressesCard() {
             onClick={handleAdd}
             className="flex items-center gap-2 text-[#8B6357] hover:text-[#DE6A07]/80 cursor-pointer"
           >
-            <Icon name="add-2" className="w-5 h-5" />
-            <span className="font-['Comfortaa',sans-serif] font-medium text-sm">
-              Add
+            <Icon name="add-2" className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="font-['Comfortaa',sans-serif] font-medium text-[12px] sm:text-sm">
+              <span className="sm:hidden">Add new</span>
+              <span className="hidden sm:inline">Add</span>
             </span>
           </button>
         </div>
@@ -81,19 +82,19 @@ export default function AddressesCard() {
             {addresses.map((address) => (
               <div
                 key={address.id}
-                className="bg-white rounded-lg border border-[rgba(0,0,0,0.1)] p-4 flex items-center"
+                className="bg-white rounded-[14px] sm:rounded-lg border border-[rgba(0,0,0,0.1)] p-[15px] sm:p-4 flex items-center"
               >
                 <div className="flex items-start gap-5">
                   <div className="flex flex-col gap-1">
-                    <span className="font-['Comfortaa',sans-serif] font-normal text-[#4A3C2A] text-sm">
+                    <span className="font-['Comfortaa',sans-serif] font-normal text-[#4A3C2A] text-[12.25px] sm:text-sm">
                       {address.address}
                     </span>
-                    <span className="font-['Comfortaa',sans-serif] font-normal text-[#4A5565] text-sm">
+                    <span className="font-['Comfortaa',sans-serif] font-normal text-[#4A5565] text-[12.25px] sm:text-sm">
                       {address.city}, {address.province} {address.postal_code}
                     </span>
                   </div>
                   {address.is_default && (
-                    <span className="bg-[#DCFCE7] text-[#008236] px-3 py-1 rounded-full text-xs font-['Comfortaa',sans-serif] font-medium">
+                    <span className="bg-[#DCFCE7] text-[#008236] px-3 py-1 rounded-full text-[10.5px] sm:text-xs font-['Comfortaa',sans-serif] font-medium">
                       Default
                     </span>
                   )}
@@ -105,7 +106,7 @@ export default function AddressesCard() {
                     aria-label="Delete address"
                     disabled={deletingId === address.id}
                   >
-                    <Icon name="trash" className="w-5 h-5" />
+                    <Icon name="trash" className="w-4 h-4 sm:w-5 sm:h-5" />
                   </button>
                 )}
               </div>
