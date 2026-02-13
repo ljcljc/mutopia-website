@@ -247,16 +247,18 @@ export default function MyPets() {
     const petPhotos = activePet.photos || [];
     const referencePhotos = activePet.reference_photos || [];
 
-    const buildItems = (photos: string[]): FileUploadItem[] =>
+    const buildItems = (photos: string[], photoIds: number[]): FileUploadItem[] =>
       photos.map((photoUrl, index) => ({
         file: new File([], `pet-photo-${activePet.id}-${index}.jpg`, { type: "image/jpeg" }),
         previewUrl: buildImageUrl(photoUrl),
         uploadStatus: "uploaded",
         uploadProgress: 100,
+        photoId: photoIds[index],
+        serverUrl: photoUrl,
       }));
 
-    setPetPhotoItems(buildItems(petPhotos));
-    setReferencePhotoItems(buildItems(referencePhotos));
+    setPetPhotoItems(buildItems(petPhotos, activePet.photo_ids || []));
+    setReferencePhotoItems(buildItems(referencePhotos, activePet.reference_photo_ids || []));
     setNotes(activePet.special_notes || "");
 
     applyPetToForm(activePet);

@@ -454,6 +454,11 @@ export function PetForm({
     // 恢复宠物照片：如果外部状态中有数据，但 petPhotoItems 为空或不匹配
     if (photoIds.length > 0 && photoUrls.length > 0) {
       setPetPhotoItems((prevItems) => {
+        console.debug("[PetForm] sync pet photos from store", {
+          storeIds: photoIds,
+          storeUrlsCount: photoUrls.length,
+          prevCount: prevItems.length,
+        });
         // 获取当前 petPhotoItems 中的所有 photoId
         const currentPhotoIds = prevItems
           .map((item) => item.photoId)
@@ -465,6 +470,7 @@ export function PetForm({
         const needsRestore = 
           photoIds.length > currentPhotoIds.length ||
           photoIds.some((id) => !currentPhotoIds.includes(id));
+        console.debug("[PetForm] needsRestore", { needsRestore, currentPhotoIds });
         
         if (needsRestore) {
           // 恢复所有图片（不仅仅是第一个）
@@ -504,19 +510,28 @@ export function PetForm({
       });
     } else if (photoIds.length === 0 && photoUrls.length === 0) {
       setPetPhotoItems((prevItems) => {
-        // 如果外部状态中没有数据，但 petPhotoItems 有数据，清空（可能是状态不一致）
-        // 但只清空未上传的项，保留已上传的（以防万一）
-        const uploadedItems = prevItems.filter(item => item.photoId !== undefined);
-        if (uploadedItems.length !== prevItems.length) {
-          return uploadedItems;
-        }
-        return prevItems;
+        console.debug("[PetForm] store cleared, clearing petPhotoItems", {
+          prevCount: prevItems.length,
+        });
+        // 外部状态为空时，清空所有图片项（以外部状态为准）
+        // 避免删除最后一张图片时被错误地“恢复”
+        prevItems.forEach((item) => {
+          if (item.previewUrl && item.previewUrl.startsWith("blob:")) {
+            URL.revokeObjectURL(item.previewUrl);
+          }
+        });
+        return [];
       });
     }
     
     // 恢复参考照片：如果外部状态中有数据，但 referenceStyleItems 为空或不匹配
     if (referencePhotoIds.length > 0 && referencePhotoUrls.length > 0) {
       setReferenceStyleItems((prevItems) => {
+        console.debug("[PetForm] sync reference photos from store", {
+          storeIds: referencePhotoIds,
+          storeUrlsCount: referencePhotoUrls.length,
+          prevCount: prevItems.length,
+        });
         const currentReferenceIds = prevItems.map(item => item.photoId).filter((id): id is number => id !== undefined);
         const storeReferenceIds = referencePhotoIds;
         
@@ -524,6 +539,7 @@ export function PetForm({
         const needsRestore = 
           storeReferenceIds.length > currentReferenceIds.length ||
           storeReferenceIds.some(id => !currentReferenceIds.includes(id));
+        console.debug("[PetForm] reference needsRestore", { needsRestore, currentReferenceIds });
         
         if (needsRestore) {
           // 只恢复那些不在当前 referenceStyleItems 中的图片
@@ -562,13 +578,17 @@ export function PetForm({
       });
     } else if (referencePhotoIds.length === 0 && referencePhotoUrls.length === 0) {
       setReferenceStyleItems((prevItems) => {
-        // 如果外部状态中没有数据，但 referenceStyleItems 有数据，清空（可能是状态不一致）
-        // 但只清空未上传的项，保留已上传的（以防万一）
-        const uploadedItems = prevItems.filter(item => item.photoId !== undefined);
-        if (uploadedItems.length !== prevItems.length) {
-          return uploadedItems;
-        }
-        return prevItems;
+        console.debug("[PetForm] store cleared, clearing referenceStyleItems", {
+          prevCount: prevItems.length,
+        });
+        // 外部状态为空时，清空所有图片项（以外部状态为准）
+        // 避免删除最后一张图片时被错误地“恢复”
+        prevItems.forEach((item) => {
+          if (item.previewUrl && item.previewUrl.startsWith("blob:")) {
+            URL.revokeObjectURL(item.previewUrl);
+          }
+        });
+        return [];
       });
     }
   }, [photoIds, photoUrls, referencePhotoIds, referencePhotoUrls]);
@@ -822,6 +842,10 @@ export function PetForm({
   };
 
   const handlePetPhotoChange = async (files: File[]) => {
+    console.debug("[PetForm] handlePetPhotoChange", {
+      incomingCount: files.length,
+      incomingFiles: files.map((f) => ({ name: f.name, size: f.size, lastModified: f.lastModified })),
+    });
     // 获取当前已上传的图片（确保与当前状态同步）
     const currentPhotoIds = photoIdsRef.current;
     const currentPhotoUrls = photoUrlsRef.current;
@@ -830,11 +854,19 @@ export function PetForm({
     // 这样可以避免在追加模式下重复上传已上传的图片
     const previousFiles = petPhotoFiles;
     const newFilesFromInput = files.filter((file) => !previousFiles.includes(file));
+    console.debug("[PetForm] newFilesFromInput", {
+      count: newFilesFromInput.length,
+      names: newFilesFromInput.map((f) => f.name),
+    });
     
     // 更新 petPhotoFiles（只包含用户选择的 File 对象，不包含已上传的图片）
     // 注意：已上传的图片使用占位符 File，不应该在 petPhotoFiles 中
     const realFiles = files.filter((file) => !(file.size === 0 && file.name.includes("placeholder")));
     setPetPhotoFiles(realFiles);
+    console.debug("[PetForm] petPhotoFiles set", {
+      count: realFiles.length,
+      names: realFiles.map((f) => f.name),
+    });
     
     // 同步到外部状态（只同步第一个文件，用于兼容性）
     setPetPhoto(realFiles.length > 0 ? realFiles[0] : null);
@@ -858,6 +890,10 @@ export function PetForm({
     const nonUploadedItems = petPhotoItems.filter(
       (item) => item.uploadStatus !== "uploaded" || item.photoId === undefined
     );
+    console.debug("[PetForm] nonUploadedItems", {
+      count: nonUploadedItems.length,
+      names: nonUploadedItems.map((i) => i.file.name),
+    });
     
     if (files.length > 0) {
       // 找出被删除的未上传文件（在 nonUploadedItems 中但不在 files 中）
@@ -963,6 +999,12 @@ export function PetForm({
         ...newItems,
       ];
       
+      console.debug("[PetForm] updatedItems", {
+        total: updatedItems.length,
+        uploaded: uploadedItems.length,
+        existing: existingItems.length,
+        new: newItems.length,
+      });
       setPetPhotoItems(updatedItems);
 
       // 只为新文件启动真实上传
@@ -984,8 +1026,10 @@ export function PetForm({
       
       // 如果还有已上传的图片，保留它们；否则清空所有
       if (uploadedItems.length > 0) {
+        console.debug("[PetForm] keep uploaded items only", { count: uploadedItems.length });
         setPetPhotoItems(uploadedItems);
       } else {
+        console.debug("[PetForm] clear all pet photo items");
         setPetPhotoItems([]);
         // 清空宠物照片 ID 和 URL
         setPhotoIds([]);
@@ -1699,15 +1743,27 @@ export function PetForm({
                       maxSizeMB={10}
                       onChange={handlePetPhotoChange}
                       onRemove={(index) => {
+                        console.debug("[PetForm] onRemove pet photo", { index });
                         // 删除已上传的图片
                         // 使用函数式更新，确保基于最新状态
                         setPetPhotoItems((prevItems) => {
+                          console.debug("[PetForm] onRemove prevItems", {
+                            count: prevItems.length,
+                            index,
+                            item: prevItems[index],
+                          });
                           const item = prevItems[index];
                           if (item && item.uploadStatus === "uploaded" && item.photoId !== undefined) {
                             // 从当前状态中移除对应的 photoId 和 photoUrl
                             const currentPhotoIds = photoIdsRef.current;
                             const currentPhotoUrls = photoUrlsRef.current;
                             const photoIndex = currentPhotoIds.indexOf(item.photoId);
+                            console.debug("[PetForm] remove uploaded photo", {
+                              photoId: item.photoId,
+                              photoIndex,
+                              currentPhotoIds,
+                              currentPhotoUrlsCount: currentPhotoUrls.length,
+                            });
                             
                             setPhotoIds(currentPhotoIds.filter((id) => id !== item.photoId));
                             if (photoIndex >= 0 && photoIndex < currentPhotoUrls.length) {

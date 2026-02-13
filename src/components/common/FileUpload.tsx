@@ -243,21 +243,34 @@ export function FileUpload({
                             className="absolute bg-neutral-100 border border-[#4c4c4c] border-solid overflow-clip rounded-[calc(8*var(--px393))] sm:rounded-[8px] size-[calc(20*var(--px393))] sm:size-[20px] top-[calc(-6*var(--px393))] right-[calc(-6*var(--px393))] sm:top-[-6px] sm:right-[-6px] cursor-pointer flex items-center justify-center z-20 shadow-[0px_2px_4px_0px_rgba(0,0,0,0.1)]"
                             onClick={(e) => {
                               e.stopPropagation();
+                              console.debug("[FileUpload] delete click", {
+                                index,
+                                hasUploadItems: Boolean(uploadItems),
+                                item: displayItems[index],
+                              });
                               // 清理预览 URL（只清理 blob URL，不清理服务器 URL）
                               if (displayItems[index]?.previewUrl && displayItems[index].previewUrl.startsWith("blob:")) {
                                 URL.revokeObjectURL(displayItems[index].previewUrl);
                               }
                               // 如果是从外部传入的 uploadItems，需要通过回调通知父组件
                               if (uploadItems) {
-                                // 如果是已上传的图片（有 photoId），使用 onRemove 回调
-                                if (displayItems[index]?.uploadStatus === "uploaded" && displayItems[index]?.photoId !== undefined) {
+                                // 外部传入 uploadItems：已上传项直接走 onRemove（即便没有 photoId）
+                                if (displayItems[index]?.uploadStatus === "uploaded") {
+                                  console.debug("[FileUpload] onRemove uploaded", {
+                                    index,
+                                    photoId: displayItems[index]?.photoId,
+                                  });
                                   onRemove?.(index);
                                 } else {
                                   // 未上传的文件，使用 onChange 回调
                                   const remainingFiles = files.filter((_, i) => i !== index);
+                                  console.debug("[FileUpload] onChange remaining files", {
+                                    remainingCount: remainingFiles.length,
+                                  });
                                   onChange?.(remainingFiles);
                                 }
                               } else {
+                                console.debug("[FileUpload] removeFile internal", { index });
                                 removeFile(index);
                               }
                             }}
