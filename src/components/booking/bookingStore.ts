@@ -404,6 +404,7 @@ export const useBookingStore = create<BookingState>((set) => ({
     const weightValue = state.weight ? parseFloat(state.weight) : null;
     
     return {
+      id: state.selectedPetId ?? undefined,
       name: state.petName,
       pet_type: state.petType,
       breed: state.breed || null,
