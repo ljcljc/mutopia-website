@@ -31,6 +31,7 @@ import IconUserSvg from "@/assets/icons/icon-user.svg?react";
 import IconNotifySvg from "@/assets/icons/icon-notify.svg?react";
 import IconChevronDownSvg from "@/assets/icons/icon-chevron-down.svg?react";
 import IconMenuSvg from "@/assets/icons/icon-menu.svg?react";
+import IconMoreSvg from "@/assets/icons/icon-more.svg?react";
 import IconEmailSvg from "@/assets/icons/icon-email.svg?react";
 import IconCalendarSvg from "@/assets/icons/icon-calendar.svg?react";
 import IconAlertErrorSvg from "@/assets/icons/icon-alert-error.svg?react";
@@ -102,6 +103,7 @@ const iconComponentMap = {
   "notify": IconNotifySvg,
   "chevron-down": IconChevronDownSvg,
   "menu": IconMenuSvg,
+  "more": IconMoreSvg,
   "email": IconEmailSvg,
   "calendar": IconCalendarSvg,
   "alert-error": IconAlertErrorSvg,

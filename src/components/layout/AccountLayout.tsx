@@ -7,6 +7,7 @@ import {
 import { AccountSidebar } from "./AccountSidebar";
 import HeaderApp from "./HeaderApp";
 import Footer from "./Footer";
+import AccountBottomNav from "./AccountBottomNav";
 import { ScrollToTop } from "@/components/common";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -28,14 +29,14 @@ export default function AccountLayout() {
         <HeaderApp />
         
         {/* 主内容区域：侧边栏 + 内容区 */}
-        <div className="w-7xl mx-auto flex flex-1 overflow-hidden gap-6 my-14">
-          {/* 左侧侧边栏 */}
-          <AccountSidebar />
+        <div className="w-full sm:w-7xl mx-auto flex flex-1 overflow-hidden gap-6 my-6 sm:my-14">
+          {/* 左侧侧边栏（H5 隐藏） */}
+          <AccountSidebar className="hidden sm:block" />
           
           {/* 右侧主内容区域 */}
           <SidebarInset
             ref={contentRef}
-            className="flex-1 bg-[#F9F1E8] overflow-auto rounded-lg"
+            className="flex-1 bg-[#F9F1E8] overflow-auto rounded-lg pb-[96px] sm:pb-0"
           >
             <main className="flex-1 min-h-full w-full flex flex-col">
               <Outlet />
@@ -43,8 +44,11 @@ export default function AccountLayout() {
           </SidebarInset>
         </div>
         
-        {/* 全局底部 Footer */}
-        <Footer />
+        {/* 全局底部 Footer（H5 隐藏） */}
+        <div className="hidden sm:block">
+          <Footer />
+        </div>
+        <AccountBottomNav />
         <ScrollToTop />
         <Toaster />
       </div>

@@ -162,10 +162,10 @@ export function FileUpload({
   const isUploadDisabled = maxFiles ? displayItems.length >= maxFiles : false;
 
   return (
-    <div className={cn("content-stretch flex flex-col items-start relative shadow-[0px_4px_10px_0px_rgba(0,0,0,0.15)] w-full", className)}>
+    <div className={cn("content-stretch flex flex-col items-start relative w-full ", className)}>
       <div
         className={cn(
-          "bg-neutral-50 border-[#de6a07] border-[1.5px] border-dashed content-stretch flex flex-col items-center justify-center p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(16*var(--px393))] sm:rounded-[16px] shrink-0 w-full transition-colors",
+          "bg-neutral-50 border-[#de6a07] border-[1.5px] border-dashed content-stretch flex flex-col items-center justify-center p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(16*var(--px393))] sm:rounded-[16px] shrink-0 w-full transition-colors shadow-[0px_4px_10px_0px_rgba(0,0,0,0.15)]",
           isDragging && "border-[#de6a07] bg-[rgba(222,106,7,0.05)]",
           (disabled || isUploadDisabled) && "opacity-60 cursor-not-allowed",
           (state === "error-size" || state === "error-format") && "gap-[12px]"

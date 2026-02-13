@@ -87,6 +87,7 @@ export interface PetFormProps {
   actionsPlacement?: "default" | "inside-pet-info";
   primaryActionShowArrow?: boolean;
   hideAfterPetInfo?: boolean;
+  showMobileStepHeader?: boolean;
 }
 
 export function PetForm({
@@ -151,6 +152,7 @@ export function PetForm({
   actionsPlacement = "default",
   primaryActionShowArrow = true,
   hideAfterPetInfo = false,
+  showMobileStepHeader = true,
 }: PetFormProps) {
   const [isPetDropdownOpen, setIsPetDropdownOpen] = useState(false);
   const petDropdownRef = useRef<HTMLDivElement>(null);
@@ -1209,24 +1211,26 @@ export function PetForm({
   }, [petType, breed, petBreeds, setBreed]);
 
   return (
-    <div className="content-stretch flex flex-col gap-[calc(16*var(--px393))] sm:gap-[24px] items-start relative w-full px-[calc(20*var(--px393))] sm:px-0">
+    <div className="content-stretch flex flex-col gap-[calc(16*var(--px393))] sm:gap-[24px] items-start relative w-full sm:px-[calc(20*var(--px393))] px-0">
       {/* Mobile Step Header */}
-      <div className="content-stretch flex flex-col gap-[calc(12*var(--px393))] sm:gap-[12px] items-start relative shrink-0 w-full sm:hidden">
-        <p className="font-['Comfortaa:Bold',sans-serif] font-bold h-[calc(19*var(--px393))] sm:h-[19px] leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[calc(12*var(--px393))] sm:text-[12px] text-black w-full whitespace-pre-wrap">
-          Book your appointment
-        </p>
-        <div className="border border-[#4c4c4c] border-solid content-stretch flex h-[calc(24*var(--px393))] sm:h-[24px] items-center justify-center overflow-clip px-[calc(9*var(--px393))] py-[calc(5*var(--px393))] sm:px-[9px] sm:py-[5px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shrink-0">
-          <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[calc(14*var(--px393))] sm:leading-[14px] relative shrink-0 text-[#4c4c4c] text-[calc(10*var(--px393))] sm:text-[10px]">
-            Step 2 of 6
+      {showMobileStepHeader ? (
+        <div className="content-stretch flex flex-col gap-[calc(12*var(--px393))] sm:gap-[12px] items-start relative shrink-0 w-full sm:hidden">
+          <p className="font-['Comfortaa:Bold',sans-serif] font-bold h-[calc(19*var(--px393))] sm:h-[19px] leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[calc(12*var(--px393))] sm:text-[12px] text-black w-full whitespace-pre-wrap">
+            Book your appointment
+          </p>
+          <div className="border border-[#4c4c4c] border-solid content-stretch flex h-[calc(24*var(--px393))] sm:h-[24px] items-center justify-center overflow-clip px-[calc(9*var(--px393))] py-[calc(5*var(--px393))] sm:px-[9px] sm:py-[5px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shrink-0">
+            <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[calc(14*var(--px393))] sm:leading-[14px] relative shrink-0 text-[#4c4c4c] text-[calc(10*var(--px393))] sm:text-[10px]">
+              Step 2 of 6
+            </p>
+          </div>
+          <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] min-w-full relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px] w-[min-content] whitespace-pre-wrap">
+            Pet information
           </p>
         </div>
-        <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] min-w-full relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px] w-[min-content] whitespace-pre-wrap">
-          Pet information
-        </p>
-      </div>
+      ) : null}
       <div className="flex flex-col gap-[calc(32*var(--px393))] sm:gap-[32px] items-start relative w-full">
         {/* Pet Information Card */}
-        <div className={`bg-white box-border flex flex-col gap-[calc(16*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full ${petInfoCardClassName ?? ""}`}>
+        <div className={`bg-white box-border flex flex-col gap-[calc(16*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-tr-none sm:rounded-tr-none rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full ${petInfoCardClassName ?? ""}`}>
           <div className="flex flex-col gap-[calc(16*var(--px393))] sm:gap-[16px] items-start relative w-full">
             {/* Section Header */}
             <div className="flex flex-col gap-[calc(4*var(--px393))] sm:gap-[4px] items-start relative shrink-0 w-full">

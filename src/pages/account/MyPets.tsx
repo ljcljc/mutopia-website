@@ -195,7 +195,7 @@ export default function MyPets() {
 
   const activePet = useMemo(() => pets.find((pet) => pet.id === activePetId) || null, [pets, activePetId]);
   const isMemorialized = Boolean(activePet?.is_memorialized);
-  const isPetSelectDropdown = pets.length >= 3;
+  const isPetSelectDropdown = pets.length > 3;
 
   const applyPetToForm = (pet: PetOut) => {
     setPetName(pet.name || "");
@@ -605,9 +605,9 @@ export default function MyPets() {
 
   return (
     <div className="w-full min-h-full flex flex-col">
-      <div className="w-full max-w-[944px] mx-auto px-6 pb-8 flex-1">
-        <div className="flex flex-col gap-[8px] mb-[-2px]">
-          <div className="flex justify-between">
+      <div className="w-full max-w-none sm:max-w-[944px] mx-auto px-[20px] sm:px-6 pb-[20px] sm:pb-8 flex-1">
+        <div className="flex flex-col gap-[16px] mb-[-2px]">
+          <div className="flex flex-col gap-[16px] sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
             <h1 className="font-['Comfortaa:Bold',sans-serif] font-bold text-[20px] text-[#4A3C2A]">
               My pets
             </h1>
@@ -668,7 +668,7 @@ export default function MyPets() {
                   </SelectContent>
                 </Select>
               ) : (
-                <div className="flex items-center overflow-x-auto max-w-[520px] pl-[2px] pr-[2px]">
+                <div className="flex justify-end items-center overflow-x-auto max-w-[520px] pl-[2px]">
                   {pets.map((pet) => {
                     const isActive = pet.id === activePetId;
                     return (
@@ -676,7 +676,7 @@ export default function MyPets() {
                         key={pet.id}
                         type="button"
                         onClick={() => handleSelectPet(pet.id)}
-                        className={`border-2 rounded-tl-[14px] rounded-tr-[14px] px-[16px] py-[8px] min-w-[120px] flex items-center gap-[4px] shrink-0 ${
+                        className={`border-2 rounded-tl-[14px] rounded-tr-[14px] px-[16px] py-[8px] min-w-[88px] sm:min-w-[120px] flex items-center gap-[4px] shrink-0 ${
                           isActive
                             ? "border-[#DE6A07] text-[#DE6A07]"
                             : "border-[#E5E7EB] text-[#8B6357]"
@@ -758,20 +758,21 @@ export default function MyPets() {
               isPrimaryActionLoading={isUpdatingPet}
               onPrimaryAction={handleSavePet}
               backLabel="Cancel"
-              petInfoCardClassName="rounded-tr-none sm:rounded-tr-none"
+              petInfoCardClassName="border-2 border-[#DE6A07] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[22px] sm:p-[24px]"
               mergeGroomingIntoInfoCard
               alignActionsRight
-              actionsOrder="secondary-first"
+              actionsOrder="primary-first"
               actionsPlacement="inside-pet-info"
               primaryActionShowArrow={false}
               hideAfterPetInfo
+              showMobileStepHeader={false}
               onBackAction={() => {
                 if (activePet) applyPetToForm(activePet);
                 setIsEditing(false);
               }}
             />
           ) : (
-            <div className="bg-white rounded-[12px] rounded-tr-none border-2 border-[#DE6A07] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[20px]">
+            <div className="bg-white rounded-[12px] rounded-tr-none border-2 border-[#DE6A07] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[22px] sm:p-[20px]">
               {isLoadingPets ? (
                 <div className="text-[#4A3C2A] text-sm">Loading pets...</div>
               ) : activePet ? (
@@ -797,7 +798,7 @@ export default function MyPets() {
                         <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
                           {activePet.name}
                         </p>
-                        <div className="flex flex-wrap gap-y-[16px] gap-x-[40px] text-[#4A3C2A]">
+                        <div className="grid grid-cols-2 gap-x-[40px] gap-y-[16px] text-[#4A3C2A]">
                           <div className="w-[80px]">
                             <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Pet type</p>
                             <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
@@ -811,15 +812,27 @@ export default function MyPets() {
                             </p>
                           </div>
                           <div className="w-[80px]">
+                            <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Weight</p>
+                            <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
+                              {formatWeight(activePet.weight_value, activePet.weight_unit)}
+                            </p>
+                          </div>
+                          <div className="w-[80px]">
                             <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Date of birth</p>
                             <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
                               {formatBirthday(activePet.birthday)}
                             </p>
                           </div>
                           <div className="w-[80px]">
-                            <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Weight</p>
+                            <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Coat condition</p>
                             <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
-                              {formatWeight(activePet.weight_value, activePet.weight_unit)}
+                              {formatLabel(activePet.coat_condition)}
+                            </p>
+                          </div>
+                          <div className="w-[80px]">
+                            <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Behavior</p>
+                            <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
+                              {formatBehavior(activePet.behavior)}
                             </p>
                           </div>
                         </div>
@@ -836,8 +849,8 @@ export default function MyPets() {
                     {/* 分割线 */}
                     <div className="border-t border-[#E5E7EB] w-full" />
                     
-                    {/* 下方：按钮和Frequency Monthly space-between */}
-                    <div className="flex items-center justify-between">
+                    {/* 下方：移动端换行，PC 端同一行 */}
+                    <div className="flex flex-col items-start sm:flex-row sm:items-center sm:justify-between">
                       <div className="w-[80px]">
                         <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Frequency</p>
                         <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
@@ -847,7 +860,7 @@ export default function MyPets() {
                       <OrangeButton
                         size="compact"
                         showArrow
-                        className="px-[28px] h-[28px]"
+                        className="px-[28px] h-[28px] mt-[12px] sm:mt-0"
                         onClick={() => activePet && handleBookForPet(activePet)}
                       >
                         <span className="text-white text-[12px] leading-[17.5px] font-bold">Book for {activePet.name}</span>
@@ -861,7 +874,7 @@ export default function MyPets() {
             </div>
           )}
 
-          <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[24px]">
+          <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[14px] sm:p-[24px]">
             <div className="flex flex-col gap-[24px]">
               <div className="flex flex-col gap-[8px]">
                 <div className="flex items-center justify-between">
@@ -874,7 +887,7 @@ export default function MyPets() {
                     </span>
                   ) : null}
                 </div>
-                <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
+                <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
                   Pet photos
                 </p>
                 <FileUpload
@@ -893,7 +906,7 @@ export default function MyPets() {
               <div className="border-t border-[#E5E7EB]" />
 
               <div className="flex flex-col gap-[8px]">
-                <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
+                <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[12.25px] leading-[17.5px] text-[#4A3C2A]">
                   Reference photos
                 </p>
                 <FileUpload
@@ -911,12 +924,12 @@ export default function MyPets() {
             </div>
           </div>
 
-          <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[20px]">
+          <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[12px] sm:p-[20px]">
             <div className="flex flex-col gap-[12px]">
               <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
                 Health report
               </p>
-              <div className="border border-[#E5E7EB] rounded-[14px] px-[15px] py-[13px] flex items-center justify-between max-w-[280px]">
+              <div className="border border-[#E5E7EB] rounded-[12px] px-[15px] py-[13px] flex items-center justify-between w-full">
                 <div>
                   <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[16px] leading-[28px] text-[#DE6A07]">
                     {activePet?.name || "-"}
@@ -937,7 +950,7 @@ export default function MyPets() {
             </div>
           </div>
 
-          <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[20px]">
+          <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[12px] sm:p-[20px]">
             <div className="flex flex-col gap-[12px]">
               <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
                 Special instruments or notes
