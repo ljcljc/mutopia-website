@@ -10,7 +10,7 @@ import { PetForm } from "@/components/common/PetForm";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { useBookingStore } from "@/components/booking/bookingStore";
 import type { Behavior, CoatCondition, Gender, PetType, WeightUnit, GroomingFrequency } from "@/components/booking/bookingStore";
-import { buildImageUrl, getPetBreeds, updatePet, deletePet, memorializePet, type PetBreedOut, type PetOut } from "@/lib/api";
+import { buildImageUrl, getPetBreeds, updatePet, deletePet, memorializePet, uploadPetPhoto, uploadReferencePhoto, type PetBreedOut, type PetOut } from "@/lib/api";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -71,7 +71,16 @@ export default function MyPets() {
   const [isMemorializing, setIsMemorializing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isUpdatingPet, setIsUpdatingPet] = useState(false);
+  const [isSavingPhotos, setIsSavingPhotos] = useState(false);
   const hasFetchedPetsRef = useRef(false);
+  const petPhotoInputFilesRef = useRef<File[]>([]);
+  const referencePhotoInputFilesRef = useRef<File[]>([]);
+  const petPhotoIdsRef = useRef<number[]>([]);
+  const referencePhotoIdsRef = useRef<number[]>([]);
+  const petPhotoUrlsRef = useRef<string[]>([]);
+  const referencePhotoUrlsRef = useRef<string[]>([]);
+  const photoSaveQueueRef = useRef<Promise<void>>(Promise.resolve());
+  const pendingPhotoSavesRef = useRef(0);
 
   const [petName, setPetName] = useState("");
   const [petType, setPetType] = useState<PetType>("dog");
@@ -241,6 +250,8 @@ export default function MyPets() {
       setPetPhotoItems([]);
       setReferencePhotoItems([]);
       setNotes("");
+      petPhotoInputFilesRef.current = [];
+      referencePhotoInputFilesRef.current = [];
       return;
     }
 
@@ -260,38 +271,228 @@ export default function MyPets() {
     setPetPhotoItems(buildItems(petPhotos, activePet.photo_ids || []));
     setReferencePhotoItems(buildItems(referencePhotos, activePet.reference_photo_ids || []));
     setNotes(activePet.special_notes || "");
+    petPhotoInputFilesRef.current = [];
+    referencePhotoInputFilesRef.current = [];
 
     applyPetToForm(activePet);
   }, [activePet]);
 
+  useEffect(() => {
+    petPhotoIdsRef.current = petPhotoItems
+      .map((item) => item.photoId)
+      .filter((id): id is number => id !== undefined);
+    petPhotoUrlsRef.current = petPhotoItems
+      .map((item) => item.serverUrl)
+      .filter((url): url is string => Boolean(url));
+  }, [petPhotoItems]);
+
+  useEffect(() => {
+    referencePhotoIdsRef.current = referencePhotoItems
+      .map((item) => item.photoId)
+      .filter((id): id is number => id !== undefined);
+    referencePhotoUrlsRef.current = referencePhotoItems
+      .map((item) => item.serverUrl)
+      .filter((url): url is string => Boolean(url));
+  }, [referencePhotoItems]);
+
+  const enqueuePhotoSave = (petId: number, nextPhotoIds: number[], nextReferencePhotoIds: number[]) => {
+    const payload = {
+      photo_ids: nextPhotoIds.length > 0 ? nextPhotoIds : null,
+      reference_photo_ids: nextReferencePhotoIds.length > 0 ? nextReferencePhotoIds : null,
+    };
+    pendingPhotoSavesRef.current += 1;
+    setIsSavingPhotos(true);
+    photoSaveQueueRef.current = photoSaveQueueRef.current.then(async () => {
+      try {
+        await updatePet(petId, {}, payload);
+      } catch (error) {
+        console.error("Failed to save photos:", error);
+        toast.error("Failed to save photos. Please try again.");
+      }
+    }).finally(() => {
+      pendingPhotoSavesRef.current = Math.max(0, pendingPhotoSavesRef.current - 1);
+      if (pendingPhotoSavesRef.current === 0) {
+        setIsSavingPhotos(false);
+      }
+    });
+    return photoSaveQueueRef.current;
+  };
+
+  const isSameFile = (a: File, b: File) =>
+    a.name === b.name && a.size === b.size && a.lastModified === b.lastModified;
+
+  const handlePetPhotoUpload = async (file: File) => {
+    if (!activePet) return;
+    try {
+      const response = await uploadPetPhoto(file, (progress) => {
+        setPetPhotoItems((prev) =>
+          prev.map((item) =>
+            item.file === file ? { ...item, uploadProgress: progress } : item
+          )
+        );
+      });
+
+      const previewUrl = buildImageUrl(response.url);
+      setPetPhotoItems((prev) =>
+        prev.map((item) =>
+          item.file === file
+            ? {
+                ...item,
+                uploadStatus: "uploaded",
+                uploadProgress: 100,
+                photoId: response.id,
+                serverUrl: response.url,
+                previewUrl,
+              }
+            : item
+        )
+      );
+
+      const nextPhotoIds = petPhotoIdsRef.current.includes(response.id)
+        ? petPhotoIdsRef.current
+        : [...petPhotoIdsRef.current, response.id];
+      const nextPhotoUrls = petPhotoUrlsRef.current.includes(response.url)
+        ? petPhotoUrlsRef.current
+        : [...petPhotoUrlsRef.current, response.url];
+      setPhotoIds(nextPhotoIds);
+      setPhotoUrls(nextPhotoUrls);
+      await enqueuePhotoSave(activePet.id, nextPhotoIds, referencePhotoIdsRef.current);
+    } catch (error) {
+      console.error("Failed to upload pet photo:", error);
+      setPetPhotoItems((prev) =>
+        prev.map((item) =>
+          item.file === file ? { ...item, uploadStatus: "error", errorType: "upload" } : item
+        )
+      );
+      toast.error("Failed to upload pet photo. Please try again.");
+    }
+  };
+
+  const handleReferencePhotoUpload = async (file: File) => {
+    if (!activePet) return;
+    try {
+      const response = await uploadReferencePhoto(file, (progress) => {
+        setReferencePhotoItems((prev) =>
+          prev.map((item) =>
+            item.file === file ? { ...item, uploadProgress: progress } : item
+          )
+        );
+      });
+
+      const previewUrl = buildImageUrl(response.url);
+      setReferencePhotoItems((prev) =>
+        prev.map((item) =>
+          item.file === file
+            ? {
+                ...item,
+                uploadStatus: "uploaded",
+                uploadProgress: 100,
+                photoId: response.id,
+                serverUrl: response.url,
+                previewUrl,
+              }
+            : item
+        )
+      );
+
+      const nextReferenceIds = referencePhotoIdsRef.current.includes(response.id)
+        ? referencePhotoIdsRef.current
+        : [...referencePhotoIdsRef.current, response.id];
+      const nextReferenceUrls = referencePhotoUrlsRef.current.includes(response.url)
+        ? referencePhotoUrlsRef.current
+        : [...referencePhotoUrlsRef.current, response.url];
+      setReferencePhotoIds(nextReferenceIds);
+      setReferencePhotoUrls(nextReferenceUrls);
+      await enqueuePhotoSave(activePet.id, petPhotoIdsRef.current, nextReferenceIds);
+    } catch (error) {
+      console.error("Failed to upload reference photo:", error);
+      setReferencePhotoItems((prev) =>
+        prev.map((item) =>
+          item.file === file ? { ...item, uploadStatus: "error", errorType: "upload" } : item
+        )
+      );
+      toast.error("Failed to upload reference photo. Please try again.");
+    }
+  };
+
   const handlePetPhotoChange = (files: File[]) => {
-    const newItems = files.map((file) => ({
+    if (!activePet) return;
+    const incomingFiles = files;
+    const previousFiles = petPhotoInputFilesRef.current;
+    const newFiles = incomingFiles.filter((file) => !previousFiles.some((prev) => isSameFile(prev, file)));
+    petPhotoInputFilesRef.current = incomingFiles;
+    if (newFiles.length === 0) return;
+
+    const newItems = newFiles.map((file) => ({
       file,
       previewUrl: URL.createObjectURL(file),
-      uploadStatus: "uploaded" as const,
-      uploadProgress: 100,
+      uploadStatus: "uploading" as const,
+      uploadProgress: 0,
     }));
     setPetPhotoItems((prev) => [...prev, ...newItems]);
+    newFiles.forEach((file) => {
+      handlePetPhotoUpload(file);
+    });
   };
 
   const handleReferencePhotoChange = (files: File[]) => {
-    const newItems = files.map((file) => ({
+    if (!activePet) return;
+    const incomingFiles = files;
+    const previousFiles = referencePhotoInputFilesRef.current;
+    const newFiles = incomingFiles.filter((file) => !previousFiles.some((prev) => isSameFile(prev, file)));
+    referencePhotoInputFilesRef.current = incomingFiles;
+    if (newFiles.length === 0) return;
+
+    const newItems = newFiles.map((file) => ({
       file,
       previewUrl: URL.createObjectURL(file),
-      uploadStatus: "uploaded" as const,
-      uploadProgress: 100,
+      uploadStatus: "uploading" as const,
+      uploadProgress: 0,
     }));
     setReferencePhotoItems((prev) => [...prev, ...newItems]);
+    newFiles.forEach((file) => {
+      handleReferencePhotoUpload(file);
+    });
   };
 
-  const handleRemoveItem = (setter: React.Dispatch<React.SetStateAction<FileUploadItem[]>>, index: number) => {
-    setter((prev) => {
-      const item = prev[index];
-      if (item?.previewUrl?.startsWith("blob:")) {
-        URL.revokeObjectURL(item.previewUrl);
-      }
-      return prev.filter((_, i) => i !== index);
-    });
+  const handleRemovePetPhotoItem = (index: number) => {
+    if (!activePet) return;
+    const currentItems = petPhotoItems;
+    const item = currentItems[index];
+    if (item?.previewUrl?.startsWith("blob:")) {
+      URL.revokeObjectURL(item.previewUrl);
+    }
+    const nextItems = currentItems.filter((_, i) => i !== index);
+    const nextPhotoIds = nextItems
+      .map((nextItem) => nextItem.photoId)
+      .filter((id): id is number => id !== undefined);
+    const nextPhotoUrls = nextItems
+      .map((nextItem) => nextItem.serverUrl)
+      .filter((url): url is string => Boolean(url));
+    setPetPhotoItems(nextItems);
+    setPhotoIds(nextPhotoIds);
+    setPhotoUrls(nextPhotoUrls);
+    enqueuePhotoSave(activePet.id, nextPhotoIds, referencePhotoIdsRef.current);
+  };
+
+  const handleRemoveReferencePhotoItem = (index: number) => {
+    if (!activePet) return;
+    const currentItems = referencePhotoItems;
+    const item = currentItems[index];
+    if (item?.previewUrl?.startsWith("blob:")) {
+      URL.revokeObjectURL(item.previewUrl);
+    }
+    const nextItems = currentItems.filter((_, i) => i !== index);
+    const nextReferenceIds = nextItems
+      .map((nextItem) => nextItem.photoId)
+      .filter((id): id is number => id !== undefined);
+    const nextReferenceUrls = nextItems
+      .map((nextItem) => nextItem.serverUrl)
+      .filter((url): url is string => Boolean(url));
+    setReferencePhotoItems(nextItems);
+    setReferencePhotoIds(nextReferenceIds);
+    setReferencePhotoUrls(nextReferenceUrls);
+    enqueuePhotoSave(activePet.id, petPhotoIdsRef.current, nextReferenceIds);
   };
 
   const handleSaveNotes = async () => {
@@ -675,9 +876,16 @@ export default function MyPets() {
           <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[24px]">
             <div className="flex flex-col gap-[24px]">
               <div className="flex flex-col gap-[8px]">
-                <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
-                  Photos
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
+                    Photos
+                  </p>
+                  {isSavingPhotos ? (
+                    <span className="text-[12px] leading-[17.5px] text-[#8B6357]">
+                      Saving...
+                    </span>
+                  ) : null}
+                </div>
                 <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
                   Pet photos
                 </p>
@@ -687,7 +895,7 @@ export default function MyPets() {
                   maxSizeMB={10}
                   uploadItems={petPhotoItems}
                   onChange={handlePetPhotoChange}
-                  onRemove={(index) => handleRemoveItem(setPetPhotoItems, index)}
+                  onRemove={handleRemovePetPhotoItem}
                   buttonText="Click to upload"
                   fileTypeHint="JPG, JPEG, PNG less than 10MB"
                   showDragHint
@@ -706,7 +914,7 @@ export default function MyPets() {
                   maxSizeMB={10}
                   uploadItems={referencePhotoItems}
                   onChange={handleReferencePhotoChange}
-                  onRemove={(index) => handleRemoveItem(setReferencePhotoItems, index)}
+                  onRemove={handleRemoveReferencePhotoItem}
                   buttonText="Click to upload"
                   fileTypeHint="JPG, JPEG, PNG less than 10MB"
                   showDragHint
