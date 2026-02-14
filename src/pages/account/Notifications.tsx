@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { toast } from "sonner";
 import { Icon, type IconName } from "@/components/common/Icon";
 import { deleteMessage, getMessages, markAllMessagesRead, markMessageRead, type MessageOut } from "@/lib/api";
 
@@ -76,10 +77,36 @@ function getNotificationStyle(type: string): {
 
 function buildNotificationBody(message: MessageOut): ReactNode {
   if (message.link_text && message.link_uri) {
+    const isCopyReferCode = message.link_text.toLowerCase().includes("copy unique refer code");
+    const linkUri = message.link_uri;
     return (
       <>
         {message.content}{" "}
-        <a href={message.link_uri} className={linkClassName}>
+        <a
+          href={message.link_uri}
+          className={linkClassName}
+          onClick={(event) => {
+            if (!isCopyReferCode) return;
+            event.preventDefault();
+            const clipboard = (
+              globalThis as unknown as {
+                navigator?: { clipboard?: { writeText: (text: string) => Promise<void> } };
+              }
+            ).navigator?.clipboard;
+            if (!clipboard?.writeText) {
+              toast.error("Copy failed. Please try again.");
+              return;
+            }
+            clipboard
+              .writeText(linkUri)
+              .then(() => {
+                toast.success("Copied to clipboard");
+              })
+              .catch(() => {
+                toast.error("Copy failed. Please try again.");
+              });
+          }}
+        >
           {message.link_text}
         </a>
       </>
