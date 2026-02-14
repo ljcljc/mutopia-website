@@ -65,7 +65,7 @@ function getNotificationStyle(type: string): {
   if (normalized.includes("reminder")) {
     return { iconName: "notification-reminder", iconBg: "#FEF3C7", iconSize: 20 };
   }
-  if (normalized.includes("refer") || normalized.includes("referral")) {
+  if (normalized.includes("refer") || normalized.includes("benefit")) {
     return { iconName: "notification-refer", iconBg: "#FEE2E2", iconSize: 16 };
   }
   if (normalized.includes("refund")) {

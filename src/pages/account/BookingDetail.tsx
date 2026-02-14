@@ -247,7 +247,7 @@ export default function BookingDetail() {
           <div className="h-[27px] flex items-center">
             <nav
               aria-label="Breadcrumb"
-              className="font-['Comfortaa:Bold',sans-serif] font-bold text-[20px] text-[#4A3C2A] flex items-center gap-[6px]"
+              className="font-['Comfortaa:Bold',sans-serif] font-bold text-[14px] leading-[20px] text-[#4A3C2A] flex items-center gap-[6px] whitespace-nowrap"
             >
               <Link to="/account/dashboard" className="hover:text-[#DE6A07] transition-colors">
                 Dashboard
