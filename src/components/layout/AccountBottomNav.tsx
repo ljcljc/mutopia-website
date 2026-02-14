@@ -41,9 +41,9 @@ const navItems: NavItem[] = [
   },
 ];
 
-const isActiveRoute = (pathname: string, path: string): boolean => {
+const isActiveRoute = (pathname: string, path: string, from?: string | null): boolean => {
   if (pathname.startsWith("/account/pets/new")) {
-    return path === "/account/dashboard";
+    return path === (from === "my-pets" ? "/account/pets" : "/account/dashboard");
   }
   if (pathname.startsWith("/account/bookings")) {
     return path === "/account/dashboard";
@@ -57,6 +57,7 @@ const isActiveRoute = (pathname: string, path: string): boolean => {
 export default function AccountBottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
+  const from = (location.state as { from?: string } | null)?.from ?? null;
 
   return (
     <div className="account-bottom-nav fixed bottom-0 left-0 right-0 z-50 sm:hidden">
@@ -70,7 +71,7 @@ export default function AccountBottomNav() {
         </div>
         <div className="nav-list relative flex h-full items-end justify-between px-6 pb-[8px]">
           {navItems.slice(0, 2).map((item) => {
-            const active = isActiveRoute(location.pathname, item.path);
+            const active = isActiveRoute(location.pathname, item.path, from);
             return (
               <button
                 key={item.id}
@@ -117,7 +118,7 @@ export default function AccountBottomNav() {
           </div>
 
           {navItems.slice(2).map((item) => {
-            const active = isActiveRoute(location.pathname, item.path);
+            const active = isActiveRoute(location.pathname, item.path, from);
             return (
               <button
                 key={item.id}

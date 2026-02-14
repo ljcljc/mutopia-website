@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@/components/common/Icon";
 import { useAccountStore } from "../accountStore";
@@ -159,6 +159,20 @@ export default function DashboardMyPetsCard() {
   const { pets, memorializedPets, isLoadingPets, isLoadingMemorializedPets, fetchPets, fetchMemorializedPets } =
     useAccountStore();
   const hasFetchedRef = useRef(false);
+  const [isMemorializedOpen, setIsMemorializedOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const media = window.matchMedia("(min-width: 640px)");
+    const sync = () => setIsMemorializedOpen(media.matches);
+    sync();
+    if (media.addEventListener) {
+      media.addEventListener("change", sync);
+      return () => media.removeEventListener("change", sync);
+    }
+    media.addListener(sync);
+    return () => media.removeListener(sync);
+  }, []);
 
   // 组件挂载时加载数据（只执行一次）
   useEffect(() => {
@@ -204,18 +218,30 @@ export default function DashboardMyPetsCard() {
         <div className="text-[#4A3C2A] text-sm py-4">Loading memorialized pets...</div>
       ) : memorializedPets.length > 0 ? (
         <div className="mt-[20px]">
-          <p className="font-['Comfortaa:Medium',sans-serif] font-medium text-[14px] leading-[21px] text-[#4A3C2A] mb-[12px]">
-            Memorialized
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
-            {memorializedPets.map((pet) => (
-              <MemorializedPetCard
-                key={`memorialized-${pet.id}`}
-                pet={pet}
-                onSelect={(petId) => navigate(`/account/pets/memorialized?pet=${petId}`)}
-              />
-            ))}
-          </div>
+          <button
+            type="button"
+            onClick={() => setIsMemorializedOpen((value) => !value)}
+            className="w-full flex items-center justify-between font-['Comfortaa:Medium',sans-serif] font-medium text-[14px] leading-[21px] text-[#4A3C2A] mb-[12px]"
+            aria-expanded={isMemorializedOpen}
+          >
+            <span>Memorialized</span>
+            <Icon
+              name="chevron-down"
+              size={16}
+              className={`text-[#8B6357] transition-transform duration-200 ${isMemorializedOpen ? "rotate-180" : "rotate-0"}`}
+            />
+          </button>
+          {isMemorializedOpen ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
+              {memorializedPets.map((pet) => (
+                <MemorializedPetCard
+                  key={`memorialized-${pet.id}`}
+                  pet={pet}
+                  onSelect={(petId) => navigate(`/account/pets/memorialized?pet=${petId}`)}
+                />
+              ))}
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>

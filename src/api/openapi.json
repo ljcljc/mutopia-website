@@ -1735,6 +1735,113 @@
         "tags": ["messages"],
         "security": [{ "JWTAuth": [] }]
       }
+    },
+    "/api/groomers/apply/status": {
+      "get": {
+        "operationId": "api_groomers_apply_status",
+        "summary": "Apply Status",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "email",
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Email"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApplyStatusOut" }
+              }
+            }
+          }
+        },
+        "tags": ["groomers"]
+      }
+    },
+    "/api/groomers/apply/upload_image": {
+      "post": {
+        "operationId": "api_groomers_upload_apply_image",
+        "summary": "Upload Apply Image",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "category",
+            "schema": { "title": "Category", "type": "string" },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "email",
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Email"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ImageUploadOut" }
+              }
+            }
+          }
+        },
+        "tags": ["groomers"],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "format": "binary",
+                    "title": "File",
+                    "type": "string"
+                  }
+                },
+                "required": ["file"],
+                "title": "FileParams",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/groomers/apply/submit": {
+      "post": {
+        "operationId": "api_groomers_apply_submit",
+        "summary": "Apply Submit",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApplySubmitOut" }
+              }
+            }
+          }
+        },
+        "tags": ["groomers"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ApplySubmitIn" }
+            }
+          },
+          "required": true
+        }
+      }
     }
   },
   "components": {
@@ -1808,6 +1915,11 @@
           "first_name": { "title": "First Name", "type": "string" },
           "last_name": { "title": "Last Name", "type": "string" },
           "birthday": { "title": "Birthday", "type": "string" },
+          "phone": { "title": "Phone", "type": "string" },
+          "invite_code": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Invite Code"
+          },
           "address": { "title": "Address", "type": "string" },
           "receive_marketing_message": {
             "title": "Receive Marketing Message",
@@ -1822,6 +1934,7 @@
           "first_name",
           "last_name",
           "birthday",
+          "phone",
           "address",
           "receive_marketing_message",
           "password1",
@@ -2982,16 +3095,18 @@
             "title": "Special Notes"
           },
           "photo_ids": {
-            "default": [],
-            "items": { "type": "integer" },
-            "title": "Photo Ids",
-            "type": "array"
+            "anyOf": [
+              { "items": { "type": "integer" }, "type": "array" },
+              { "type": "null" }
+            ],
+            "title": "Photo Ids"
           },
           "reference_photo_ids": {
-            "default": [],
-            "items": { "type": "integer" },
-            "title": "Reference Photo Ids",
-            "type": "array"
+            "anyOf": [
+              { "items": { "type": "integer" }, "type": "array" },
+              { "type": "null" }
+            ],
+            "title": "Reference Photo Ids"
           }
         },
         "required": ["name", "pet_type"],
@@ -3654,6 +3769,182 @@
         },
         "required": ["total", "page", "page_size", "items"],
         "title": "MessagePageOut",
+        "type": "object"
+      },
+      "ApplyStatusOut": {
+        "properties": {
+          "authenticated": { "title": "Authenticated", "type": "boolean" },
+          "is_registered": { "title": "Is Registered", "type": "boolean" },
+          "is_groomer": { "title": "Is Groomer", "type": "boolean" },
+          "has_application": { "title": "Has Application", "type": "boolean" },
+          "application_status": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Application Status"
+          },
+          "can_apply": { "title": "Can Apply", "type": "boolean" },
+          "detail": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Detail"
+          }
+        },
+        "required": [
+          "authenticated",
+          "is_registered",
+          "is_groomer",
+          "has_application",
+          "can_apply"
+        ],
+        "title": "ApplyStatusOut",
+        "type": "object"
+      },
+      "ImageUploadOut": {
+        "properties": {
+          "id": { "title": "Id", "type": "integer" },
+          "url": { "title": "Url", "type": "string" },
+          "category": { "title": "Category", "type": "string" }
+        },
+        "required": ["id", "url", "category"],
+        "title": "ImageUploadOut",
+        "type": "object"
+      },
+      "ApplySubmitOut": {
+        "properties": {
+          "ok": { "title": "Ok", "type": "boolean" },
+          "application_id": { "title": "Application Id", "type": "integer" },
+          "status": { "title": "Status", "type": "string" },
+          "user_id": { "title": "User Id", "type": "string" }
+        },
+        "required": ["ok", "application_id", "status", "user_id"],
+        "title": "ApplySubmitOut",
+        "type": "object"
+      },
+      "ApplyReferenceIn": {
+        "properties": {
+          "name": { "title": "Name", "type": "string" },
+          "email": { "title": "Email", "type": "string" }
+        },
+        "required": ["name", "email"],
+        "title": "ApplyReferenceIn",
+        "type": "object"
+      },
+      "ApplySubmitIn": {
+        "properties": {
+          "email": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Email"
+          },
+          "first_name": { "title": "First Name", "type": "string" },
+          "last_name": { "title": "Last Name", "type": "string" },
+          "birthday": { "title": "Birthday", "type": "string" },
+          "address": { "title": "Address", "type": "string" },
+          "phone": { "title": "Phone", "type": "string" },
+          "has_valid_work_permit_or_sin": {
+            "title": "Has Valid Work Permit Or Sin",
+            "type": "boolean"
+          },
+          "years_bathing_experience": {
+            "anyOf": [{ "type": "integer" }, { "type": "null" }],
+            "title": "Years Bathing Experience"
+          },
+          "service_pets": {
+            "default": [],
+            "items": { "type": "string" },
+            "title": "Service Pets",
+            "type": "array"
+          },
+          "pet_type": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Pet Type"
+          },
+          "provided_services": {
+            "default": [],
+            "items": { "type": "string" },
+            "title": "Provided Services",
+            "type": "array"
+          },
+          "current_work_places": {
+            "default": [],
+            "items": { "type": "string" },
+            "title": "Current Work Places",
+            "type": "array"
+          },
+          "has_driver_license": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }],
+            "title": "Has Driver License"
+          },
+          "has_grooming_van": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }],
+            "title": "Has Grooming Van"
+          },
+          "has_references": {
+            "default": false,
+            "title": "Has References",
+            "type": "boolean"
+          },
+          "references": {
+            "default": [],
+            "items": { "$ref": "#/components/schemas/ApplyReferenceIn" },
+            "title": "References",
+            "type": "array"
+          },
+          "where_learn_bathing": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Where Learn Bathing"
+          },
+          "work_image_ids": {
+            "default": [],
+            "items": { "type": "integer" },
+            "title": "Work Image Ids",
+            "type": "array"
+          },
+          "environment_image_ids": {
+            "default": [],
+            "items": { "type": "integer" },
+            "title": "Environment Image Ids",
+            "type": "array"
+          },
+          "showcase_profile_on": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Showcase Profile On"
+          },
+          "showcase_link": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Showcase Link"
+          },
+          "has_bathing_experience": {
+            "title": "Has Bathing Experience",
+            "type": "boolean"
+          },
+          "has_grooming_experience": {
+            "title": "Has Grooming Experience",
+            "type": "boolean"
+          },
+          "hear_about_us": { "title": "Hear About Us", "type": "string" },
+          "password1": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Password1"
+          },
+          "password2": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Password2"
+          },
+          "code": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Code"
+          }
+        },
+        "required": [
+          "first_name",
+          "last_name",
+          "birthday",
+          "address",
+          "phone",
+          "has_valid_work_permit_or_sin",
+          "has_bathing_experience",
+          "has_grooming_experience",
+          "hear_about_us"
+        ],
+        "title": "ApplySubmitIn",
         "type": "object"
       }
     },

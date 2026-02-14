@@ -327,7 +327,7 @@ export default function DashboardMyCreditCard() {
 
   return (
     <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[20px]">
-      <div className="flex items-center justify-between mb-[12px]">
+      <div className="flex flex-col gap-[8px] sm:flex-row sm:items-center sm:justify-between mb-[12px]">
         <p className="font-['Comfortaa:Medium',sans-serif] font-medium text-[16px] leading-[24px] text-[#4A3C2A]">
           My credit
         </p>
@@ -336,6 +336,7 @@ export default function DashboardMyCreditCard() {
           variant="outline"
           size="medium"
           onClick={() => navigate("/booking")}
+          className="w-full self-start sm:w-auto sm:self-auto"
         >
           <span className="flex items-center gap-[4px]">
             Book with credit

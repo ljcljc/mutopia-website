@@ -262,6 +262,12 @@ export interface CreatePetParams {
   special_notes?: string;
 }
 
+// OpenAPI: PetCreateIn 包含照片字段
+export interface PetCreateIn extends CreatePetParams {
+  photo_ids?: number[] | null;
+  reference_photo_ids?: number[] | null;
+}
+
 // 预约管理类型
 export interface BookingOut {
   id: number;
@@ -558,6 +564,12 @@ export interface UpdateUserInfoIn {
   phone?: string | null;
   receive_marketing_message?: boolean | null;
 }
+
+// OpenAPI: ProfileUpdateIn 与 UpdateUserInfoIn 字段一致
+export type ProfileUpdateIn = UpdateUserInfoIn;
+
+// OpenAPI: ProfileUpdateIn 与 UpdateUserInfoIn 字段一致
+export type ProfileUpdateIn = UpdateUserInfoIn;
 
 export interface AvatarOut {
   url: string;
@@ -871,7 +883,7 @@ export async function createPet(
   body?: { photo_ids?: number[] | null; reference_photo_ids?: number[] | null }
 ): Promise<PetOut> {
   // 将所有参数合并到 data 中
-  const data = {
+  const data: PetCreateIn = {
     name: params.name,
     ...(params.pet_type && { pet_type: params.pet_type }),
     ...(params.breed && { breed: params.breed }),
@@ -882,6 +894,7 @@ export async function createPet(
     ...(params.weight_value !== undefined && params.weight_value !== null && { weight_value: params.weight_value }),
     ...(params.weight_unit && { weight_unit: params.weight_unit }),
     ...(params.coat_condition && { coat_condition: params.coat_condition }),
+    ...(params.approve_shave !== undefined && { approve_shave: params.approve_shave }),
     ...(params.behavior && { behavior: params.behavior }),
     ...(params.grooming_frequency && { grooming_frequency: params.grooming_frequency }),
     ...(params.special_notes && { special_notes: params.special_notes }),
@@ -915,13 +928,19 @@ export interface UpdatePetParams {
   special_notes?: string | null;
 }
 
+// OpenAPI: PetUpdateIn 包含照片字段
+export interface PetUpdateIn extends UpdatePetParams {
+  photo_ids?: number[] | null;
+  reference_photo_ids?: number[] | null;
+}
+
 export async function updatePet(
   petId: number,
   params: UpdatePetParams,
   body?: { photo_ids?: number[] | null; reference_photo_ids?: number[] | null }
 ): Promise<PetOut> {
   // OpenAPI: PUT 使用 requestBody (PetUpdateIn)，合并 params 与 body 为 JSON
-  const data: Record<string, unknown> = {
+  const data: PetUpdateIn = {
     ...(params.name !== undefined && { name: params.name }),
     ...(params.pet_type !== undefined && { pet_type: params.pet_type }),
     ...(params.breed !== undefined && { breed: params.breed }),
@@ -1039,6 +1058,13 @@ export interface PhotoUploadResponse {
   url: string; // 相对路径，例如 "/media/pets/anonymous/temp/photos/dog-2.jpg"
 }
 
+// OpenAPI: ImageUploadOut（groomer 申请图片上传）
+export interface ImageUploadOut {
+  id: number;
+  url: string;
+  category: string;
+}
+
 /**
  * 构建图片的完整 URL
  * @param relativeUrl 相对路径（例如 "/media/pets/anonymous/temp/photos/dog-2.jpg"）
@@ -1078,6 +1104,95 @@ export async function uploadReferencePhoto(
   onProgress?: (progress: number) => void
 ): Promise<PhotoUploadResponse> {
   return uploadFileWithProgress("/api/pets/reference_photos", file, onProgress);
+}
+
+// ==================== Groomer Apply API ====================
+
+export interface ApplyReferenceIn {
+  name: string;
+  email: string;
+}
+
+export interface ApplySubmitIn {
+  email?: string | null;
+  first_name: string;
+  last_name: string;
+  birthday: string;
+  address: string;
+  phone: string;
+  has_valid_work_permit_or_sin: boolean;
+  years_bathing_experience?: number | null;
+  service_pets?: string[];
+  pet_type?: string | null;
+  provided_services?: string[];
+  current_work_places?: string[];
+  has_driver_license?: boolean | null;
+  has_grooming_van?: boolean | null;
+  has_references?: boolean;
+  references?: ApplyReferenceIn[];
+  where_learn_bathing?: string | null;
+  work_image_ids?: number[];
+  environment_image_ids?: number[];
+  showcase_profile_on?: string | null;
+  showcase_link?: string | null;
+  has_bathing_experience: boolean;
+  has_grooming_experience: boolean;
+  hear_about_us: string;
+  password1?: string | null;
+  password2?: string | null;
+  code?: string | null;
+}
+
+export interface ApplySubmitOut {
+  ok: boolean;
+  application_id: number;
+  status: string;
+  user_id: string;
+}
+
+export interface ApplyStatusOut {
+  authenticated: boolean;
+  is_registered: boolean;
+  is_groomer: boolean;
+  has_application: boolean;
+  application_status?: string | null;
+  can_apply: boolean;
+  detail?: string | null;
+}
+
+/**
+ * 获取美容师申请状态
+ */
+export async function getGroomerApplyStatus(email?: string | null): Promise<ApplyStatusOut> {
+  const queryParams = new URLSearchParams();
+  if (email !== undefined && email !== null) queryParams.append("email", email);
+  const url = `/api/groomers/apply/status${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+  const response = await http.get<ApplyStatusOut>(url, { skipAuth: true });
+  return response.data;
+}
+
+/**
+ * 提交美容师申请
+ */
+export async function submitGroomerApply(data: ApplySubmitIn): Promise<ApplySubmitOut> {
+  const response = await http.post<ApplySubmitOut>("/api/groomers/apply/submit", data, { skipAuth: true });
+  return response.data;
+}
+
+/**
+ * 上传美容师申请图片
+ */
+export async function uploadGroomerApplyImage(
+  file: File,
+  category: string,
+  email?: string | null,
+  onProgress?: (progress: number) => void
+): Promise<ImageUploadOut> {
+  const queryParams = new URLSearchParams();
+  queryParams.append("category", category);
+  if (email !== undefined && email !== null) queryParams.append("email", email);
+  const url = `/api/groomers/apply/upload_image?${queryParams.toString()}`;
+  return uploadFileWithProgress<ImageUploadOut>(url, file, onProgress);
 }
 
 /**
@@ -1300,6 +1415,28 @@ export interface ReviewCreatedOut {
   review_id: number;
 }
 
+export interface GroomerConfirmIn {
+  confirm?: boolean; // default: true
+}
+
+export interface AddOnRequestIn {
+  amount: number;
+  description?: string; // default: ""
+}
+
+export interface AddOnDecisionIn {
+  approve?: boolean; // default: true
+}
+
+export interface ReviewCreateIn {
+  rating: number;
+  comment?: string; // default: ""
+}
+
+export interface CancelBookingIn {
+  reason?: string; // default: ""
+}
+
 export interface CheckOutOut {
   ok: boolean;
   status: string;
@@ -1314,7 +1451,7 @@ export async function groomerConfirmBooking(
 ): Promise<OkOut> {
   const response = await http.post<OkOut>(
     `/api/bookings/${bookingId}/groomer_confirm`,
-    { confirm }
+    { confirm } satisfies GroomerConfirmIn
   );
   return response.data;
 }
@@ -1329,7 +1466,7 @@ export async function createAddOnRequest(
 ): Promise<AddOnRequestOut> {
   const response = await http.post<AddOnRequestOut>(
     `/api/bookings/${bookingId}/addon_request`,
-    { amount, description }
+    { amount, description } satisfies AddOnRequestIn
   );
   return response.data;
 }
@@ -1344,7 +1481,7 @@ export async function createReview(
 ): Promise<ReviewCreatedOut> {
   const response = await http.post<ReviewCreatedOut>(
     `/api/bookings/${bookingId}/review`,
-    { rating, comment }
+    { rating, comment } satisfies ReviewCreateIn
   );
   return response.data;
 }
@@ -1381,7 +1518,7 @@ export async function clientDecideAddOn(
 ): Promise<CheckOutOut> {
   const response = await http.post<CheckOutOut>(
     `/api/bookings/${bookingId}/addon_request/${requestId}/client_decide`,
-    { approve }
+    { approve } satisfies AddOnDecisionIn
   );
   return response.data;
 }
@@ -1395,7 +1532,7 @@ export async function cancelBooking(
 ): Promise<OkOut> {
   const response = await http.post<OkOut>(
     `/api/bookings/${bookingId}/cancel`,
-    { reason }
+    { reason } satisfies CancelBookingIn
   );
   return response.data;
 }

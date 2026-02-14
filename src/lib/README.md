@@ -285,7 +285,7 @@ async function getCurrentUser() {
 - `getPets(params?)` - 获取宠物列表（分页）
 - `getMemorializedPets(params?)` - 获取已纪念宠物列表（分页）
 - `getPet(petId)` - 获取单个宠物信息
-- `createPet(params, body?)` - 创建宠物
+- `createPet(params, body?)` - 创建宠物（请求体为 PetCreateIn）
 - `updatePet(petId, params, body?)` - 更新宠物信息（请求体为 PetUpdateIn）
 - `deletePet(petId)` - 删除宠物
 - `memorializePet(petId)` - 纪念宠物
@@ -308,6 +308,12 @@ async function getCurrentUser() {
 - `clientDecideAddOn(bookingId, requestId, approve?)` - 客户决定附加服务
 - `createReview(bookingId, rating, comment?)` - 创建评价
 - `cancelBooking(bookingId, reason?)` - 取消预约
+
+### Groomer Apply
+
+- `getGroomerApplyStatus(email?)` - 获取美容师申请状态
+- `submitGroomerApply(data)` - 提交美容师申请
+- `uploadGroomerApplyImage(file, category, email?, onProgress?)` - 上传美容师申请图片
 
 ### 支付管理
 

@@ -255,7 +255,7 @@ export default function DashboardBookingCard() {
   return (
     <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[20px]">
       <div className="flex flex-col gap-[24px]">
-        <div ref={tabsRef} className="relative flex items-start pb-[4px] whitespace-nowrap">
+        <div ref={tabsRef} className="relative flex items-start pb-[4px] whitespace-nowrap ml-[-20px]">
           <button
             type="button"
             onClick={() => setActiveTab("upcoming")}
