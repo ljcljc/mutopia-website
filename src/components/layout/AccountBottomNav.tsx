@@ -62,14 +62,7 @@ export default function AccountBottomNav() {
   return (
     <div className="account-bottom-nav fixed bottom-0 left-0 right-0 z-50 sm:hidden">
       <div className="bg-white border-t-2 border-[#8B6357] relative h-[60px]">
-        <div className="pointer-events-none absolute -top-[15px] left-1/2 z-10 h-[15.273px] w-[56px] -translate-x-1/2">
-          <img
-            alt=""
-            src="https://www.figma.com/api/mcp/asset/7fe23bd9-b0e3-4610-94ad-cf4622ea0c6a"
-            className="h-full w-full"
-          />
-        </div>
-        <div className="nav-list relative flex h-full items-end justify-between px-6 pb-[8px]">
+        <div className="nav-list relative flex h-full items-center justify-between px-6">
           {navItems.slice(0, 2).map((item) => {
             const active = isActiveRoute(location.pathname, item.path, from);
             return (
@@ -80,10 +73,30 @@ export default function AccountBottomNav() {
                 aria-label={item.label}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "nav-item flex flex-col items-center gap-[3px] px-[6px]",
+                  "nav-item flex flex-col items-center gap-[3px]",
                   active && "nav-item-active"
                 )}
               >
+                {active && (
+                  <span className="nav-item-outline" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 58 17"
+                      preserveAspectRatio="none"
+                      role="presentation"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M1 16.25L1 9C0.999862 6.5 1.4 1 9 1C16.6 1 38.5001 1 49.0001 1C51.6668 1 57.0001 2.6 57.0001 9C57.0001 9 57.0001 16.75 57.0001 16.25"
+                        fill="none"
+                        stroke="#8B6357"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    </svg>
+                  </span>
+                )}
                 <Icon
                   name={item.iconName}
                   className={cn("size-[20px]", active ? "text-[#DE6A07]" : "text-[#8B6357]")}
@@ -127,14 +140,34 @@ export default function AccountBottomNav() {
                 aria-label={item.label}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "nav-item flex flex-col items-center gap-[3px] px-[6px]",
+                  "nav-item flex flex-col items-center gap-[3px]",
                   active && item.showLabel
                     ? "nav-item-active"
                     : item.showLabel
                       ? ""
-                      : "pt-[10px] nav-item-icononly"
+                      : "nav-item-icononly"
                 )}
               >
+                {active && item.showLabel && (
+                  <span className="nav-item-outline" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 58 17"
+                      preserveAspectRatio="none"
+                      role="presentation"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M1 16.25L1 9C0.999862 6.5 1.4 1 9 1C16.6 1 38.5001 1 49.0001 1C51.6668 1 57.0001 2.6 57.0001 9C57.0001 9 57.0001 16.75 57.0001 16.25"
+                        fill="none"
+                        stroke="#8B6357"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    </svg>
+                  </span>
+                )}
                 <Icon
                   name={item.iconName}
                   className={cn("size-[20px]", active ? "text-[#DE6A07]" : "text-[#8B6357]")}
@@ -157,34 +190,36 @@ export default function AccountBottomNav() {
       </div>
       <style>{`
         .account-bottom-nav .nav-item {
-          width: 60px;
+          position: relative;
+          width: max-content;
+          padding: 4px;
           height: 50px;
           transition: all 0.3s ease;
           border-top-left-radius: 100px;
           border-top-right-radius: 100px;
         }
+        .account-bottom-nav .nav-item-icononly {
+          justify-content: center;
+        }
         .account-bottom-nav .nav-item-active {
-          transform: translateY(-12px);
+          transform: translateY(-16px);
           height: 60px;
-          background: #ffffff;
+          background-color: #ffffff;
+          border-radius: 0;
+          box-sizing: border-box;
         }
-        .account-bottom-nav .nav-item-active::before,
-        .account-bottom-nav .nav-item-active::after {
-          content: "";
+        .account-bottom-nav .nav-item-outline {
           position: absolute;
-          top: 6px;
-          width: 6px;
-          height: 6px;
-          border-bottom: 2px solid #8B6357;
-          background: transparent;
+          inset: 0;
+          pointer-events: none;
         }
-        .account-bottom-nav .nav-item-active::before {
-          left: -3px;
-          border-bottom-right-radius: 6px;
-        }
-        .account-bottom-nav .nav-item-active::after {
-          right: -3px;
-          border-bottom-left-radius: 6px;
+        .account-bottom-nav .nav-item-outline svg {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 17px;
+          display: block;
         }
         .account-bottom-nav .nav-item-active::marker {
           content: none;
