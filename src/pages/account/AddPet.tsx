@@ -107,7 +107,7 @@ export default function AddPet() {
 
   return (
     <div className="box-border content-stretch flex flex-col gap-[60px] items-center pb-[60px] sm:pb-[100px] px-[calc(20*var(--px393))] sm:px-0 w-full min-h-full relative bg-[#f9f1e8]">
-      <div className="content-stretch flex flex-col gap-[16px] items-start relative shrink-0 w-full max-w-[780px]">
+      <div className="content-stretch flex flex-col gap-[16px] items-start relative shrink-0 w-full max-w-[944px]">
         <div className="h-[27px] flex items-center w-full">
           <nav
             aria-label="Breadcrumb"
