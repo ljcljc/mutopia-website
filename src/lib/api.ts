@@ -569,9 +569,6 @@ export interface UpdateUserInfoIn {
 // OpenAPI: ProfileUpdateIn 与 UpdateUserInfoIn 字段一致
 export type ProfileUpdateIn = UpdateUserInfoIn;
 
-// OpenAPI: ProfileUpdateIn 与 UpdateUserInfoIn 字段一致
-export type ProfileUpdateIn = UpdateUserInfoIn;
-
 export interface AvatarOut {
   url: string;
 }
