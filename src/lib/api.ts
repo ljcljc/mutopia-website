@@ -94,6 +94,7 @@ export interface MeOut {
   is_email_verified: boolean;
   invite_code?: string | null;
   is_member?: boolean; // default: false
+  is_groomer?: boolean;
 }
 
 export interface SocialLoginIn {
