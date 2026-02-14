@@ -49,6 +49,7 @@ export function PasswordInput({
   label,
   showLabel = true,
   placeholder,
+  autoComplete,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -62,6 +63,7 @@ export function PasswordInput({
   label?: string;
   showLabel?: boolean;
   placeholder?: string;
+  autoComplete?: string;
 }) {
   const [isFocused, setIsFocused] = React.useState(false);
 
@@ -118,6 +120,7 @@ export function PasswordInput({
                   onBlur={handleBlur}
                   onFocus={handleFocus}
                   placeholder={placeholder || "Enter your password"}
+                  autoComplete={autoComplete}
                   className="basis-0 font-['Comfortaa:Regular',sans-serif] font-normal grow leading-[normal] min-h-px min-w-px relative shrink-0 text-[#717182] text-[12.25px] placeholder:text-[#717182] bg-transparent border-none outline-none w-full"
                 />
                 <VisibleIcon

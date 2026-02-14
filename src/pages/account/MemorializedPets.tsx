@@ -340,7 +340,7 @@ export default function MemorializedPets() {
       </div>
 
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <AlertDialogContent className="rounded-[20px] px-0 py-0 max-w-[520px]">
+        <AlertDialogContent className="rounded-[20px] px-0 py-0 max-w-[calc(100%-32px)] sm:max-w-[520px]">
           <div className="flex flex-col gap-[16px] pb-[32px] pt-[12px]">
             <AlertDialogHeader className="px-[12px]">
               <div className="flex items-center justify-between w-full">

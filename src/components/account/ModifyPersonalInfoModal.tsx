@@ -196,28 +196,33 @@ export default function ModifyPersonalInfoModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white rounded-[12px] border border-[rgba(0,0,0,0.1)] px-6 pt-3 pb-6 shadow-[0_8px_12px_0_rgba(0,0,0,0.10)] max-w-[400px] [&>button]:hidden">
+      <DialogContent className="bg-white rounded-[12px] border border-[rgba(0,0,0,0.1)] px-6 pt-3 pb-6 shadow-[0_8px_12px_0_rgba(0,0,0,0.10)] max-w-[calc(100%-32px)] sm:max-w-[400px] [&>button]:hidden">
         <DialogTitle className="sr-only">Modify personal information</DialogTitle>
         <DialogDescription className="sr-only">
           Update your personal information including name, birthday, and phone number
         </DialogDescription>
 
         {/* Header */}
-        <div className="flex items-center justify-center relative mb-3">
-          <button
-            onClick={handleCancel}
-            className="absolute left-0 top-0 w-5 h-5 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
-            aria-label="Close"
-          >
-            <Icon name="close-arrow" className="w-5 h-5 text-[#4A3C2A]" />
-          </button>
-          <h2 className="font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-lg">
-            Modify personal information
-          </h2>
+        <div className="mb-6">
+          <div className="relative flex items-center mb-3">
+            {/* Close Button (左上角) */}
+            <button
+              onClick={handleCancel}
+              className="opacity-70 hover:opacity-100 transition-opacity cursor-pointer z-10"
+              aria-label="Close"
+            >
+              <Icon name="close-arrow" className="w-5 h-5 text-[#717182]" />
+            </button>
+            
+            {/* Title (居中) */}
+            <h2 className="absolute left-1/2 -translate-x-1/2 pl-6 whitespace-nowrap font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-lg">
+              Modify personal information
+            </h2>
+          </div>
+          
+          {/* Divider */}
+          <div className="bg-[rgba(0,0,0,0.1)] h-px w-full" />
         </div>
-
-        {/* Divider */}
-        <div className="h-px bg-[rgba(0,0,0,0.1)] mb-4" />
 
         {/* Form Fields */}
         <div className="flex flex-col gap-4">

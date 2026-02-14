@@ -250,7 +250,7 @@ export default function ChangePasswordModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="bg-white rounded-[12px] border border-[rgba(0,0,0,0.1)] px-6 pt-3 pb-6 shadow-[0_8px_12px_0_rgba(0,0,0,0.10)] max-w-[400px] [&>button]:hidden"
+        className="bg-white rounded-[12px] border border-[rgba(0,0,0,0.1)] px-6 pt-3 pb-6 shadow-[0_8px_12px_0_rgba(0,0,0,0.10)] max-w-[calc(100%-32px)] sm:max-w-[400px] [&>button]:hidden"
       >
         <DialogTitle className="sr-only">Change password</DialogTitle>
         <DialogDescription className="sr-only">
@@ -270,7 +270,7 @@ export default function ChangePasswordModal({
             </button>
             
             {/* Title (居中) */}
-            <h2 className="absolute left-1/2 -translate-x-1/2 font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-lg">
+            <h2 className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-lg">
               Change password
             </h2>
           </div>
@@ -279,6 +279,20 @@ export default function ChangePasswordModal({
           <div className="bg-[rgba(0,0,0,0.1)] h-px w-full" />
         </div>
 
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            handleChange();
+          }}
+        >
+        <input
+          type="text"
+          name="username"
+          autoComplete="username"
+          className="sr-only"
+          tabIndex={-1}
+          aria-hidden="true"
+        />
         {/* Password Inputs */}
         <div className="flex flex-col gap-4 mb-6">
           {/* Current Password */}
@@ -293,6 +307,7 @@ export default function ChangePasswordModal({
               label="Current password"
               showLabel={true}
               placeholder="Enter current password"
+              autoComplete="current-password"
             />
             {currentPasswordError && (
               <div className="flex flex-col mt-1">
@@ -303,6 +318,7 @@ export default function ChangePasswordModal({
                   </p>
                 </div>
                 <button
+                  type="button"
                   onClick={() => {
                     // 保存当前状态
                     saveState();
@@ -329,6 +345,7 @@ export default function ChangePasswordModal({
               label="New password"
               showLabel={true}
               placeholder="Enter new password"
+              autoComplete="new-password"
             />
             {newPasswordError && (
               <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] text-[#de1507] text-[12px] mt-1">
@@ -349,6 +366,7 @@ export default function ChangePasswordModal({
               label="Confirm new password"
               showLabel={true}
               placeholder="Re-enter new password"
+              autoComplete="new-password"
             />
             {confirmPasswordError && (
               <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] text-[#de1507] text-[12px] mt-1">
@@ -362,6 +380,7 @@ export default function ChangePasswordModal({
         <div className="flex items-center justify-end gap-[10px]">
           {/* Cancel Button */}
           <button
+            type="button"
             onClick={handleCancel}
             className="w-[120px] h-[36px] rounded-[32px] border-2 border-[#de6a07] bg-white text-[#de6a07] font-['Comfortaa:Medium',sans-serif] font-medium text-sm hover:bg-[#de6a07]/10 transition-colors"
           >
@@ -370,7 +389,7 @@ export default function ChangePasswordModal({
           
           {/* Change Button */}
           <button
-            onClick={handleChange}
+            type="submit"
             disabled={!currentPassword || !newPassword || !confirmPassword || !!currentPasswordError || !!newPasswordError || !!confirmPasswordError || isSubmitting}
             className={`w-[120px] h-[36px] relative rounded-[32px] shrink-0 transition-colors flex items-center justify-center ${
               !currentPassword || !newPassword || !confirmPassword || !!currentPasswordError || !!newPasswordError || !!confirmPasswordError || isSubmitting
@@ -387,6 +406,7 @@ export default function ChangePasswordModal({
             )}
           </button>
         </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

@@ -33,7 +33,7 @@ export default function ModifyAddressModal({
 }: ModifyAddressModalProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="rounded-[20px] px-0 py-0 max-w-[720px]">
+      <AlertDialogContent className="rounded-[20px] px-0 py-0 max-w-[calc(100%-32px)] sm:max-w-[720px]">
         <div className="flex flex-col gap-[16px] pb-[32px] pt-[12px]">
           <AlertDialogHeader className="px-[12px]">
             <div className="relative flex items-center w-full mb-3">

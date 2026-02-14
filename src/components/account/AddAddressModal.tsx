@@ -129,7 +129,7 @@ export default function AddAddressModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white rounded-[12px] border border-[rgba(0,0,0,0.1)] px-6 pt-3 pb-6 shadow-[0_8px_12px_0_rgba(0,0,0,0.10)] max-w-[400px] [&>button]:hidden">
+      <DialogContent className="bg-white rounded-[12px] border border-[rgba(0,0,0,0.1)] px-6 pt-3 pb-6 shadow-[0_8px_12px_0_rgba(0,0,0,0.10)] max-w-[calc(100%-32px)] sm:max-w-[400px] [&>button]:hidden">
         <DialogTitle className="sr-only">Add address</DialogTitle>
         <DialogDescription className="sr-only">
           Add a new address for your bookings
