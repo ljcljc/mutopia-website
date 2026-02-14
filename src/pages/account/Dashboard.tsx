@@ -35,9 +35,12 @@ export default function Dashboard() {
 
   return (
     <div className="w-full min-h-full flex flex-col">
-      <div className="w-full max-w-[944px] mx-auto px-6 pb-8 flex-1">
-        <div className="flex flex-col gap-[20px]">
-          <div className="h-[27px]">
+      <div
+        className="w-full max-w-none sm:max-w-[944px] mx-auto px-[calc(20*var(--px493))] sm:px-6 pb-[calc(20*var(--px493))] sm:pb-8 flex-1"
+        style={{ ["--px493" as never]: "calc(100vw / 493)" }}
+      >
+        <div className="flex flex-col gap-[calc(16*var(--px493))] sm:gap-[20px]">
+          <div className="h-auto sm:h-[27px]">
             <h1 className="font-['Comfortaa:Bold',sans-serif] font-bold text-[20px] text-[#4A3C2A]">
               Dashboard
             </h1>
@@ -48,7 +51,7 @@ export default function Dashboard() {
           <DashboardMyPetsCard />
           <DashboardMyCreditCard />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-[calc(20*var(--px493))] sm:gap-6">
             <ShareAndEarnCard />
             <MembershipCard />
           </div>
