@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { Icon, type IconName } from "@/components/common/Icon";
 import { deleteMessage, getMessages, markAllMessagesRead, markMessageRead, type MessageOut } from "@/lib/api";
@@ -119,6 +119,9 @@ export default function Notifications() {
   const [messages, setMessages] = useState<MessageOut[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [swipedId, setSwipedId] = useState<number | null>(null);
+  const touchStartXRef = useRef(0);
+  const touchStartYRef = useRef(0);
   const channel = "in_app" as const;
 
   useEffect(() => {
@@ -192,6 +195,7 @@ export default function Notifications() {
   };
 
   const handleMarkRead = (id: number) => {
+    setSwipedId(null);
     markMessageRead(id).then(() => {
       setMessages((prev) => prev.map((item) => (item.id === id ? { ...item, is_read: true } : item)));
     }).catch((error) => {
@@ -201,6 +205,7 @@ export default function Notifications() {
 
   const handleDelete = async (id: number) => {
     if (deletingId === id) return;
+    setSwipedId(null);
     setDeletingId(id);
     try {
       const result = await deleteMessage(id);
@@ -248,74 +253,170 @@ export default function Notifications() {
             ) : (
               notifications.map((item) => {
                 const isRead = messages.find((m) => m.id === item.id)?.is_read ?? true;
+                const showReadAction = item.showCheck && !isRead;
+                const showDeleteAction = item.showClose;
+                const actionWidth = showReadAction || showDeleteAction ? 56 : 0;
                 return (
-                  <div
-                    key={item.id}
-                    className="w-full bg-white border border-[rgba(0,0,0,0.1)] rounded-[12px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_0px_rgba(0,0,0,0.1)] px-[21px] py-[21px]"
-                  >
-                  <div className="flex gap-[14px]">
-                    <div className="relative size-[40px]">
-                      <div
-                        className="size-[40px] rounded-full flex items-center justify-center"
-                        style={{ backgroundColor: item.iconBg }}
-                      >
-                        <Icon name={item.iconName} size={item.iconSize} />
-                      </div>
-                      {item.showUnreadDot && !isRead && (
-                        <span
-                          className="absolute size-[7.2px] bg-[#EF4444] rounded-full"
-                          style={{ top: item.dotTop, left: item.dotLeft }}
-                        />
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h2 className="font-['Comfortaa:Bold',sans-serif] font-bold text-[14px] leading-[17.5px] text-[#4A3C2A]">
-                            {item.title}
-                          </h2>
-                          <p className="mt-[4px] font-['Comfortaa:Regular',sans-serif] text-[12.25px] leading-[17.5px] text-[#6A7282]">
-                            {item.body}
-                          </p>
+                  <div key={item.id} className="w-full">
+                    <div className="hidden sm:block bg-white border border-[rgba(0,0,0,0.1)] rounded-[12px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_0px_rgba(0,0,0,0.1)] px-[21px] py-[21px]">
+                      <div className="flex gap-[14px]">
+                        <div className="relative size-[40px]">
+                          <div
+                            className="size-[40px] rounded-full flex items-center justify-center"
+                            style={{ backgroundColor: item.iconBg }}
+                          >
+                            <Icon name={item.iconName} size={item.iconSize} />
+                          </div>
+                          {item.showUnreadDot && !isRead && (
+                            <span
+                              className="absolute size-[7.2px] bg-[#EF4444] rounded-full"
+                              style={{ top: item.dotTop, left: item.dotLeft }}
+                            />
+                          )}
                         </div>
-                        <div className="flex items-center gap-[7px]">
-                          {item.showCheck && (
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h2 className="font-['Comfortaa:Bold',sans-serif] font-bold text-[14px] leading-[17.5px] text-[#4A3C2A]">
+                                {item.title}
+                              </h2>
+                              <p className="mt-[4px] font-['Comfortaa:Regular',sans-serif] text-[12.25px] leading-[17.5px] text-[#6A7282]">
+                                {item.body}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-[7px]">
+                              {item.showCheck && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleMarkRead(item.id)}
+                                  className="size-[16px] cursor-pointer text-[#00A63E] hover:text-[#008A2E]"
+                                  aria-label="Mark as read"
+                                >
+                                  <Icon
+                                    name="check-green"
+                                    size={16}
+                                    className="text-current"
+                                  />
+                                </button>
+                              )}
+                              {item.showClose && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleDelete(item.id)}
+                                  disabled={deletingId === item.id}
+                                  className="size-[16px] cursor-pointer text-[#EF4444] hover:text-[#D1202B]"
+                                  aria-label="Dismiss"
+                                >
+                                  <Icon
+                                    name="trash"
+                                    size={16}
+                                    className="text-current"
+                                  />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                          <div className="mt-[6px]">
+                            <TimeStamp text={item.time} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div
+                      className="sm:hidden relative"
+                      onTouchStart={(event) => {
+                        const touch = event.touches[0];
+                        touchStartXRef.current = touch?.clientX ?? 0;
+                        touchStartYRef.current = touch?.clientY ?? 0;
+                      }}
+                      onTouchEnd={(event) => {
+                        const touch = event.changedTouches[0];
+                        const endX = touch?.clientX ?? 0;
+                        const endY = touch?.clientY ?? 0;
+                        const deltaX = touchStartXRef.current - endX;
+                        const deltaY = Math.abs(touchStartYRef.current - endY);
+                        if (deltaX > 30 && deltaX > deltaY) {
+                          setSwipedId(item.id);
+                          return;
+                        }
+                        if (deltaX < -20) {
+                          setSwipedId(null);
+                        }
+                      }}
+                    >
+                      {actionWidth ? (
+                        <div
+                          className={`absolute right-0 top-[8px] bottom-[8px] flex flex-col gap-[8px] transition-opacity duration-200 ${
+                            swipedId === item.id ? "opacity-100" : "opacity-0 pointer-events-none"
+                          }`}
+                          style={{ width: `${actionWidth}px` }}
+                        >
+                          {showReadAction ? (
                             <button
                               type="button"
                               onClick={() => handleMarkRead(item.id)}
-                              className="size-[16px] cursor-pointer text-[#00A63E] hover:text-[#008A2E]"
-                              aria-label="Mark as read"
+                              className="flex-1 bg-[#16A34A] text-white text-[11px] font-semibold flex flex-col items-center justify-center gap-[4px] rounded-[8px]"
                             >
-                              <Icon
-                                name="check-green"
-                                size={16}
-                                className="text-current"
-                              />
+                              <Icon name="check-green" size={16} className="text-white" />
+                              <span>Read</span>
                             </button>
-                          )}
-                          {item.showClose && (
+                          ) : null}
+                          {showDeleteAction ? (
                             <button
                               type="button"
                               onClick={() => handleDelete(item.id)}
                               disabled={deletingId === item.id}
-                              className="size-[16px] cursor-pointer text-[#EF4444] hover:text-[#D1202B]"
-                              aria-label="Dismiss"
+                              className="flex-1 bg-[#EF4444] text-white text-[11px] font-semibold flex flex-col items-center justify-center gap-[4px] rounded-[8px]"
                             >
-                              <Icon
-                                name="trash"
-                                size={16}
-                                className="text-current"
-                              />
+                              <Icon name="trash" size={16} className="text-white" />
+                              <span>Delete</span>
                             </button>
+                          ) : null}
+                        </div>
+                      ) : null}
+                      <div
+                        className="relative z-10 rounded-[14px] bg-white border border-[rgba(0,0,0,0.08)] shadow-[0px_2px_8px_rgba(0,0,0,0.08)] px-[8px] overflow-hidden transition-transform duration-200 ease-out"
+                        style={{
+                          transform:
+                            swipedId === item.id && actionWidth
+                              ? `translateX(-${actionWidth + 8}px)`
+                              : "translateX(0px)",
+                        }}
+                        onClick={() => {
+                          if (swipedId === item.id) setSwipedId(null);
+                        }}
+                      >
+                        <div className="flex gap-[12px] px-[8px] py-[14px]">
+                          <div className="relative size-[36px]">
+                          <div
+                            className="size-[36px] rounded-full flex items-center justify-center"
+                            style={{ backgroundColor: item.iconBg }}
+                          >
+                            <Icon name={item.iconName} size={item.iconSize} />
+                          </div>
+                          {item.showUnreadDot && !isRead && (
+                            <span
+                              className="absolute size-[6px] bg-[#EF4444] rounded-full"
+                              style={{ top: "2px", right: "2px" }}
+                            />
                           )}
                         </div>
-                      </div>
-                      <div className="mt-[6px]">
-                        <TimeStamp text={item.time} />
+                          <div className="flex-1">
+                            <h2 className="font-['Comfortaa:Bold',sans-serif] font-bold text-[14px] leading-[18px] text-[#4A3C2A]">
+                              {item.title}
+                            </h2>
+                            <p className="mt-[3px] font-['Comfortaa:Regular',sans-serif] text-[12px] leading-[16px] text-[#6A7282]">
+                              {item.body}
+                            </p>
+                            <div className="mt-[6px]">
+                              <TimeStamp text={item.time} />
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
                 );
               })
             )}
