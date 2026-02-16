@@ -11,6 +11,7 @@ export interface MembershipCardProps {
   title: string;
   price: string;
   priceUnit?: string;
+  hidePrice?: boolean;
   badgeText?: string;
   description?: string;
   features: FeatureItem[];
@@ -30,6 +31,7 @@ export function MembershipCard({
   title,
   price,
   priceUnit = "/year",
+  hidePrice = false,
   badgeText,
   description,
   features,
@@ -101,16 +103,18 @@ export function MembershipCard({
                   <p className="font-['Comfortaa:Bold',sans-serif] leading-[normal] text-[#633479] text-[24px] text-center whitespace-nowrap">
                     {title}
                   </p>
-                  <div className="flex gap-[4px] items-center">
-                    <p className="font-['Comfortaa:Bold',sans-serif] leading-[normal] text-[#633479] text-[24px] text-center whitespace-nowrap">
-                      {price}
-                    </p>
-                    {priceUnit && (
-                      <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] text-[#4a5565] text-[14px] text-center whitespace-nowrap">
-                        {priceUnit}
+                  {!hidePrice && (
+                    <div className="flex gap-[4px] items-center">
+                      <p className="font-['Comfortaa:Bold',sans-serif] leading-[normal] text-[#633479] text-[24px] text-center whitespace-nowrap">
+                        {price}
                       </p>
-                    )}
-                  </div>
+                      {priceUnit && (
+                        <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] text-[#4a5565] text-[14px] text-center whitespace-nowrap">
+                          {priceUnit}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
                 {/* Badge */}
                 {badgeText && (
@@ -165,17 +169,17 @@ export function MembershipCard({
         <div className="content-stretch flex flex-col gap-[14px] items-center relative shrink-0 w-full">
           {/* Header Title and Subtitle */}
           {(headerTitle || headerSubtitle) && (
-            <div className="content-stretch flex flex-col gap-[3.5px] h-[45.5px] items-center relative shrink-0">
+            <div className="content-stretch flex flex-col gap-[3.5px] h-[45.5px] items-start relative shrink-0 w-full">
               {headerTitle && (
                 <div className="content-stretch flex h-[24.5px] items-center relative shrink-0 w-full">
-                  <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[24.5px] relative shrink-0 text-[15.75px] text-white text-center">
+                  <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[24.5px] relative shrink-0 text-[15.75px] text-white text-left w-full">
                     {headerTitle}
                   </p>
                 </div>
               )}
               {headerSubtitle && (
                 <div className="h-[17.5px] relative shrink-0 w-full">
-                  <p className="absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] left-0 text-[12.25px] text-white top-[-0.5px]">
+                  <p className="absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] left-0 text-[12.25px] text-white top-[-0.5px] w-full text-left">
                     {headerSubtitle}
                   </p>
                 </div>
@@ -195,20 +199,22 @@ export function MembershipCard({
                           <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[normal] relative shrink-0 text-[#633479] text-[24px] text-center">
                             {title}
                           </p>
-                          <div className="content-stretch flex items-center relative shrink-0">
-                            <div className="content-stretch flex gap-[4px] items-center relative shrink-0">
-                              <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[normal] relative shrink-0 text-[#633479] text-[24px] text-center">
-                                {price}
-                              </p>
-                              {priceUnit && (
-                                <div className="content-stretch flex items-center justify-center relative shrink-0">
-                                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[#4a5565] text-[14px] text-center">
-                                    {priceUnit}
-                                  </p>
-                                </div>
-                              )}
+                          {!hidePrice && (
+                            <div className="content-stretch flex items-center relative shrink-0">
+                              <div className="content-stretch flex gap-[4px] items-center relative shrink-0">
+                                <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[normal] relative shrink-0 text-[#633479] text-[24px] text-center">
+                                  {price}
+                                </p>
+                                {priceUnit && (
+                                  <div className="content-stretch flex items-center justify-center relative shrink-0">
+                                    <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[#4a5565] text-[14px] text-center">
+                                      {priceUnit}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          </div>
+                          )}
                         </div>
                         {/* Badge */}
                         {badgeText && (

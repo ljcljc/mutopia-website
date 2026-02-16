@@ -5,6 +5,8 @@ import { useBookingStore } from "./bookingStore";
 import { cn } from "@/components/ui/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getServicePrice } from "@/lib/pricing";
+import { useAccountStore } from "@/components/account/accountStore";
+import { useAuthStore } from "@/components/auth/authStore";
 
 export function Step4() {
   const {
@@ -24,10 +26,16 @@ export function Step4() {
     setUseCashCoupon,
     previousStep,
     nextStep,
-    userInfo,
     weight,
     weightUnit,
   } = useBookingStore();
+  const { membershipInfo, fetchMembershipInfo, isLoadingMembershipInfo } = useAccountStore();
+  const authUserInfo = useAuthStore((state) => state.userInfo);
+
+  // Check if user is a member
+  const isMember = authUserInfo?.is_member === true;
+  console.log("[Booking Step4] isMember:", isMember);
+  console.log("[Booking Step4] userInfo:", authUserInfo);
 
   // Load membership plans on mount
   const hasLoadedMembershipPlans = useRef(false);
@@ -38,20 +46,25 @@ export function Step4() {
     }
   }, [loadMembershipPlans]);
 
-  // Check if user is a member
-  const isMember = userInfo?.is_member === true;
+  const hasLoadedMembershipInfo = useRef(false);
+  useEffect(() => {
+    if (!isMember || hasLoadedMembershipInfo.current || isLoadingMembershipInfo) return;
+    if (!membershipInfo) {
+      fetchMembershipInfo();
+      hasLoadedMembershipInfo.current = true;
+    }
+  }, [fetchMembershipInfo, isMember, isLoadingMembershipInfo, membershipInfo]);
 
   // Track whether user has interacted with discount checkboxes to avoid overriding later
   const hasInitializedDiscounts = useRef(false);
   const hasDeclinedMembership = !(useMembershipDiscount && useCashCoupon);
 
-  // Set default checked state for membership discounts (only for non-members)
+  // Set default checked state for membership discounts
   useEffect(() => {
-    if (!hasInitializedDiscounts.current && !isMember) {
-      setUseMembershipDiscount(true);
-      setUseCashCoupon(true);
-      hasInitializedDiscounts.current = true;
-    }
+    if (hasInitializedDiscounts.current) return;
+    setUseMembershipDiscount(true);
+    setUseCashCoupon(true);
+    hasInitializedDiscounts.current = true;
   }, [isMember, setUseMembershipDiscount, setUseCashCoupon]);
 
   const [isPackageExpanded, setIsPackageExpanded] = useState(false);
@@ -169,8 +182,8 @@ export function Step4() {
   const totalSavings = originalTotal - finalTotal;
 
   const handleContinueWithMembership = () => {
-    // If user has declined membership, don't set useMembership to true
-    if (hasDeclinedMembership) {
+    // If user is already a member or has declined membership, don't add membership purchase
+    if (isMember || hasDeclinedMembership) {
       setUseMembership(false);
     } else {
       setUseMembership(true);
@@ -218,6 +231,19 @@ export function Step4() {
     : "$ 99";
 
   const membershipBadgeText = "More bookings, more savings";
+  const memberName = authUserInfo?.first_name || authUserInfo?.email?.split("@")[0] || "there";
+  const membershipHeaderTitle = isMember ? `Welcome back ${memberName}` : "Upgrade to annual membership";
+  const membershipHeaderSubtitle = "Enjoy year-round savings on every visit";
+  const showMembershipPrice = !isMember;
+  const membershipExpiryDate = membershipInfo?.end_at
+    ? new Date(membershipInfo.end_at).toISOString().split("T")[0]
+    : null;
+  const membershipTopLabel = isMember && membershipExpiryDate
+    ? `Membership until ${membershipExpiryDate}`
+    : "Membership (optional but save more)";
+  const isMemberEstimation = useMembershipDiscount && discountRate < 1;
+  const estimationLabel = isMemberEstimation ? "Estimation for members" : "Estimation for non member";
+  const estimationTextColor = isMemberEstimation ? "text-[#633479]" : "text-[#4A5565]";
 
   return (
     <div className="content-stretch flex flex-col gap-[calc(16*var(--px393))] sm:gap-[32px] items-start relative w-full px-[calc(20*var(--px393))] sm:px-0">
@@ -233,7 +259,7 @@ export function Step4() {
         </div>
         <div className="content-stretch flex gap-[calc(12*var(--px393))] items-center relative shrink-0 w-full">
           <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))]">
-            Membership (optional but save more)
+            {membershipTopLabel}
           </p>
         </div>
       </div>
@@ -245,12 +271,12 @@ export function Step4() {
             <div className="content-stretch flex flex-col gap-[calc(3.5*var(--px393))] items-center relative shrink-0 w-full">
               <div className="content-stretch flex items-center justify-center relative shrink-0 w-full">
                 <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[calc(24.5*var(--px393))] relative shrink-0 text-[calc(15.75*var(--px393))] text-center text-white w-[calc(265*var(--px393))] whitespace-pre-wrap">
-                  Upgrade to annual membership to save more
+                  {membershipHeaderTitle}
                 </p>
               </div>
               <div className="content-stretch flex items-center justify-center relative shrink-0 w-full">
                 <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(17.5*var(--px393))] relative shrink-0 text-[calc(12.25*var(--px393))] text-white">
-                  Enjoy year-round savings on every visit
+                  {membershipHeaderSubtitle}
                 </p>
               </div>
             </div>
@@ -265,18 +291,20 @@ export function Step4() {
                             <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[normal] relative shrink-0 text-center">
                               {membershipPlan?.name || "Premium Plus"}
                             </p>
-                            <div className="content-stretch flex items-center relative shrink-0">
-                              <div className="content-stretch flex gap-[calc(4*var(--px393))] items-center relative shrink-0">
-                                <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[normal] relative shrink-0 text-center">
-                                  {membershipPrice.replace(/\$?\s*(\d+\.?\d*)/, (_, num) => `$ ${Math.floor(parseFloat(num))}`)}
-                                </p>
-                                <div className="content-stretch flex items-center justify-center relative shrink-0">
-                                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(22.75*var(--px393))] relative shrink-0 text-[#4a5565] text-[calc(14*var(--px393))] text-center">
-                                    /year
+                            {showMembershipPrice && (
+                              <div className="content-stretch flex items-center relative shrink-0">
+                                <div className="content-stretch flex gap-[calc(4*var(--px393))] items-center relative shrink-0">
+                                  <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[normal] relative shrink-0 text-center">
+                                    {membershipPrice.replace(/\$?\s*(\d+\.?\d*)/, (_, num) => `$ ${Math.floor(parseFloat(num))}`)}
                                   </p>
+                                  <div className="content-stretch flex items-center justify-center relative shrink-0">
+                                    <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(22.75*var(--px393))] relative shrink-0 text-[#4a5565] text-[calc(14*var(--px393))] text-center">
+                                      /year
+                                    </p>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
+                            )}
                           </div>
                           <div className="content-stretch flex items-center relative shrink-0">
                             <div className="bg-[#dcfce7] content-stretch flex h-[calc(24*var(--px393))] items-center justify-center overflow-clip px-[calc(16*var(--px393))] py-[calc(4*var(--px393))] relative rounded-[calc(12*var(--px393))] shrink-0">
@@ -337,9 +365,9 @@ export function Step4() {
               <div className="h-[calc(17.5*var(--px393))] relative shrink-0 w-full">
                 <p className={cn(
                   "absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(17.5*var(--px393))] left-0 text-[calc(12.25*var(--px393))] top-[-0.5px]",
-                  hasDeclinedMembership ? "text-[#4A5565]" : "text-[#633479]"
+                  estimationTextColor
                 )}>
-                  Estimation for members
+                  {estimationLabel}
                 </p>
               </div>
             </div>
@@ -540,7 +568,7 @@ export function Step4() {
             textSize={14}
             onClick={handleContinueWithMembership}
           >
-            {hasDeclinedMembership ? "Continue without membership" : "Continue with membership"}
+            {isMember ? "Continue" : (hasDeclinedMembership ? "Continue without membership" : "Continue with membership")}
           </OrangeButton>
           <OrangeButton
             size="medium"
@@ -551,7 +579,7 @@ export function Step4() {
           >
             Back
           </OrangeButton>
-          {!hasDeclinedMembership && (
+          {!isMember && !hasDeclinedMembership && (
             <TertiaryButton
               variant="orange"
               onClick={handleNoThanks}
@@ -623,11 +651,12 @@ export function Step4() {
             title={membershipPlan?.name || "Premium Plus"}
             price={membershipPrice.replace(/\$?\s*(\d+\.?\d*)/, (_, num) => `$ ${Math.floor(parseFloat(num))}`)}
             priceUnit="/year"
+            hidePrice={!showMembershipPrice}
             badgeText={membershipBadgeText}
             description={membershipPlan?.description || "Our most popular package for complete pet care"}
             features={membershipFeatures}
-            headerTitle="Upgrade to annual membership to save more"
-            headerSubtitle="Enjoy year-round savings on every visit"
+            headerTitle={membershipHeaderTitle}
+            headerSubtitle={membershipHeaderSubtitle}
             showButton={false}
             className="w-[440px]"
           />
@@ -657,9 +686,9 @@ export function Step4() {
                   <div className="h-[17.5px] relative shrink-0 w-full">
                     <p className={cn(
                       "absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] left-0 text-[12.25px] top-[-0.5px]",
-                      hasDeclinedMembership ? "text-[#4A5565]" : "text-[#633479]"
+                      estimationTextColor
                     )}>
-                      Estimation for members
+                      {estimationLabel}
                     </p>
                   </div>
                 </div>
@@ -917,7 +946,7 @@ export function Step4() {
             textSize={14}
             onClick={handleContinueWithMembership}
           >
-            {hasDeclinedMembership ? "Continue without membership" : "Continue with membership"}
+            {isMember ? "Continue" : (hasDeclinedMembership ? "Continue without membership" : "Continue with membership")}
           </OrangeButton>
           <OrangeButton
             size="medium"
@@ -928,7 +957,7 @@ export function Step4() {
             Back
           </OrangeButton>
         </div>
-        {!hasDeclinedMembership && (
+        {!isMember && !hasDeclinedMembership && (
           <TertiaryButton
             variant="orange"
             onClick={handleNoThanks}

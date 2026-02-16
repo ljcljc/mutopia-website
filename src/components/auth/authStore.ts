@@ -292,6 +292,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   setUserInfo: (userInfo) => {
+    console.log("[AuthStore] setUserInfo:", userInfo);
     set({ userInfo });
     // Persist userInfo to localStorage when set (this is the source of truth)
     if (userInfo) {

@@ -531,6 +531,7 @@ export const useBookingStore = create<BookingState>((set) => ({
       set({ isLoadingUserInfo: true });
       // Get user info from authStore (set by LoginModalContent after login)
       const info = useAuthStore.getState().userInfo;
+      console.log("[BookingStore] loadUserInfo -> authStore.userInfo:", info);
       if (info) {
         set({ userInfo: info, isLoadingUserInfo: false });
         // Auto-fill address if available

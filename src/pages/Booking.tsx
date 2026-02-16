@@ -14,6 +14,8 @@ import { STEP_TITLES } from "@/components/booking/stepTitles";
 
 export default function Booking() {
   const user = useAuthStore((state) => state.user);
+  const userInfo = useAuthStore((state) => state.userInfo);
+  const loadUserInfo = useBookingStore((state) => state.loadUserInfo);
   const { currentStep, nextStep, petName } = useBookingStore();
 
   // 当用户登出时，清空 bookingStore 的 userInfo
@@ -23,6 +25,13 @@ export default function Booking() {
       useBookingStore.setState({ userInfo: null });
     }
   }, [user]);
+
+  // Sync authStore.userInfo into bookingStore when available
+  useEffect(() => {
+    if (userInfo) {
+      loadUserInfo();
+    }
+  }, [loadUserInfo, userInfo]);
 
   // Render step component based on current step
   const renderStepComponent = () => {
