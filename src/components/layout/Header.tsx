@@ -11,6 +11,7 @@ import { useAuthStore } from "@/components/auth/authStore";
 import AccountDropdown from "@/components/layout/AccountDropdown";
 import NotificationsPopover from "@/components/layout/NotificationsPopover";
 import { useLogout } from "@/hooks/useLogout";
+import ApplyGroomerModal from "@/components/groomer/ApplyGroomerModal";
 
 // Helper function to handle smooth scroll to anchor with header offset
 const scrollToAnchor = (href: string) => {
@@ -104,15 +105,22 @@ function Navigation() {
 }
 
 function ApplyAsGroomerButton() {
+  const [isApplyOpen, setIsApplyOpen] = useState(false);
+
   return (
-    <OrangeButton
-      variant="secondary"
-      size="compact"
-      showArrow={false}
-      className="shrink-0"
-    >
-      Apply as groomer
-    </OrangeButton>
+    <>
+      <OrangeButton
+        variant="secondary"
+        size="compact"
+        showArrow={false}
+        className="shrink-0"
+        type="button"
+        onClick={() => setIsApplyOpen(true)}
+      >
+        Apply as groomer
+      </OrangeButton>
+      <ApplyGroomerModal open={isApplyOpen} onOpenChange={setIsApplyOpen} />
+    </>
   );
 }
 

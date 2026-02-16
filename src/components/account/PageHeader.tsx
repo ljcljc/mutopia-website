@@ -5,13 +5,20 @@
  * Figma: https://www.figma.com/design/uPtOY1EQwpnZkgAb8YhWMN/Landing_page?node-id=1417-11252&m=dev
  */
 
+import { useState } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { OrangeButton } from "@/components/common";
 import { useAuthStore } from "@/components/auth/authStore";
+import ApplyGroomerModal from "@/components/groomer/ApplyGroomerModal";
 
 export default function PageHeader() {
   const { userInfo } = useAuthStore();
+  const [isApplyOpen, setIsApplyOpen] = useState(false);
+  const handleApplyOpen = () => {
+    console.log("[ApplyGroomer] open modal");
+    setIsApplyOpen(true);
+  };
 
   return (
     <div className="w-full flex items-center justify-between mb-6">
@@ -37,10 +44,23 @@ export default function PageHeader() {
           </Label>
         </div>
       ) : (
-        <OrangeButton variant="secondary" size="compact" showArrow={false}>
+        <OrangeButton
+          variant="secondary"
+          size="compact"
+          showArrow={false}
+          type="button"
+          onClick={handleApplyOpen}
+        >
           Apply as groomer
         </OrangeButton>
       )}
+      <ApplyGroomerModal
+        open={isApplyOpen}
+        onOpenChange={(open) => {
+          console.log("[ApplyGroomer] onOpenChange:", open);
+          setIsApplyOpen(open);
+        }}
+      />
     </div>
   );
 }
