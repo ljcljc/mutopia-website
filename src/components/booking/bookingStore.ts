@@ -17,6 +17,7 @@ import {
   type AddOnOut,
   type MembershipPlanOut,
   type CouponOut,
+  type CouponPageOut,
   type BookingSubmitIn,
   type TimeSlotIn,
 } from "@/lib/api";
@@ -626,9 +627,24 @@ export const useBookingStore = create<BookingState>((set) => ({
     }
     try {
       set({ isLoadingCoupons: true });
-      const response = await getMyCoupons();
-      const coupons = response.items;
-      console.log("Loaded coupons:", coupons);
+      const categories = ["cash", "special"] as const;
+      const responses = await Promise.all(
+        categories.map((category) =>
+          getMyCoupons({ page: 1, page_size: 50, category })
+            .catch((error) => {
+              console.error(`Failed to load coupons for category ${category}:`, error);
+              return { items: [], total: 0, page: 1, page_size: 50 } as CouponPageOut;
+            })
+        )
+      );
+      const mergedMap = new Map<number, CouponOut>();
+      responses.forEach((response) => {
+        response.items.forEach((coupon) => {
+          mergedMap.set(coupon.id, coupon);
+        });
+      });
+      const coupons = Array.from(mergedMap.values());
+      console.log("Loaded coupons by category:", coupons);
       set({ coupons, isLoadingCoupons: false });
     } catch (error) {
       console.error("Failed to load coupons:", error);

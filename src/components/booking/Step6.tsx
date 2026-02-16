@@ -306,6 +306,7 @@ export function Step6() {
       category: "cash",
       apply_scope: "all",
       amount: amount,
+      count: 1,
       valid_from: null,
       expires_at: null, // Will be set after membership purchase
       status: "pending" as const, // Virtual coupons are pending until membership is purchased
@@ -464,18 +465,10 @@ export function Step6() {
       });
     });
     
-    // Group special coupons by category for radio button groups
+    // Group special coupons into a single "special_gift" group
     const specialGroups: Record<string, typeof allCoupons> = {};
     specialCoupons.forEach((coupon) => {
-      // Birthday coupons go to "birthday" group
-      // Other special coupons (gift/custom) go to "special_gift" group
-      // But if it's a birthday type coupon, it should go to birthday group
-      let groupKey: string;
-      if (coupon.category === "birthday" || coupon.type === "birthday") {
-        groupKey = "birthday";
-      } else {
-        groupKey = "special_gift";
-      }
+      const groupKey = "special_gift";
       if (!specialGroups[groupKey]) {
         specialGroups[groupKey] = [];
       }
@@ -522,7 +515,7 @@ export function Step6() {
       })),
       special: Object.entries(specialGroups).map(([key, coupons]) => ({
         groupKey: key,
-        groupName: key === "birthday" ? "Special gift" : "Special gift",
+        groupName: "Special gift",
         coupons,
       })),
     };
@@ -1391,7 +1384,10 @@ export function Step6() {
                     index === self.findIndex((c) => c.id === coupon.id)
                   );
                   
-                  const remainingCount = uniqueCoupons.length;
+                  const remainingCount = uniqueCoupons.reduce((sum, coupon) => {
+                    const quantity = coupon.count ?? 1;
+                    return sum + quantity;
+                  }, 0);
                   const categoryText = formatCouponCategory(group.category, uniqueGroupCoupons[0]?.type);
                   
                   // Find the best coupon to use (prefer real coupons, closest to expiration)
@@ -1492,20 +1488,7 @@ export function Step6() {
                 
                 {/* Special Holiday Coupons (特殊节日券) */}
                 {couponGroups.special
-                  .filter((group) => {
-                    // Filter to only include active coupons
-                    const activeCoupons = group.coupons.filter((c) => c.status === "active");
-                    
-                    // For special_gift group, only show if there are active birthday coupons
-                    if (group.groupKey === "special_gift") {
-                      const hasActiveBirthdayCoupons = activeCoupons.some(
-                        (c) => c.category === "birthday" || c.type === "birthday"
-                      );
-                      return hasActiveBirthdayCoupons;
-                    }
-                    // For other groups (birthday), show if there are active coupons
-                    return activeCoupons.length > 0;
-                  })
+                  .filter((group) => group.coupons.some((c) => c.status === "active"))
                   .map((group) => {
                     // Filter group coupons to only include active ones
                     const activeGroupCoupons = group.coupons.filter((c) => c.status === "active");
@@ -1515,7 +1498,6 @@ export function Step6() {
                       coupons: activeGroupCoupons,
                     };
                   // For "special_gift", use checkbox style (default checked)
-                  // For "birthday", use radio button style
                   const isSpecialGift = filteredGroup.groupKey === "special_gift";
                   const hasSelectedCoupon = filteredGroup.coupons.some((c) => selectedCouponIds.includes(c.id));
                   const selectedCoupon = filteredGroup.coupons.find((c) => selectedCouponIds.includes(c.id));
@@ -1533,16 +1515,11 @@ export function Step6() {
                   }
                   
                   if (isSpecialGift) {
-                    // Filter to only show active birthday coupons in special_gift group
-                    const birthdayCoupons = filteredGroup.coupons.filter((coupon) => {
-                      return (coupon.category === "birthday" || coupon.type === "birthday") && coupon.status === "active";
-                    });
-                    
-                    // If no birthday coupons, don't render this group
-                    if (birthdayCoupons.length === 0) {
+                    const availableSpecialCoupons = filteredGroup.coupons;
+                    if (availableSpecialCoupons.length === 0) {
                       return null;
                     }
-                    
+
                     // Special gift: Checkbox style with nested radio buttons for individual coupons
                     const selectedAmount = selectedCoupon 
                       ? (typeof selectedCoupon.amount === "string" ? parseFloat(selectedCoupon.amount) : selectedCoupon.amount)
@@ -1589,7 +1566,7 @@ export function Step6() {
                       checked: hasSelectedCoupon,
                       label: group.groupName,
                       couponsCount: group.coupons.length,
-                      birthdayCouponsCount: birthdayCoupons.length,
+                      availableCouponsCount: availableSpecialCoupons.length,
                     });
                     
                     return (
@@ -1614,7 +1591,7 @@ export function Step6() {
                         {/* Coupons in group - Radio buttons */}
                         {hasSelectedCoupon && (
                           <div className="content-stretch flex flex-col gap-[calc(4*var(--px393))] sm:gap-[4px] items-end relative shrink-0 w-full ml-[calc(24*var(--px393))] sm:ml-[24px]">
-                            {birthdayCoupons.map((coupon, index) => {
+                            {availableSpecialCoupons.map((coupon, index) => {
                                 const isSelected = selectedCouponIds.includes(coupon.id);
                                 const couponAmount = typeof coupon.amount === "string" ? parseFloat(coupon.amount) : coupon.amount;
                                 const expirationText = formatCouponExpiration(coupon.expires_at);
@@ -1639,7 +1616,6 @@ export function Step6() {
                                   category: coupon.category,
                                   notes: coupon.notes,
                                   template_id: coupon.template_id,
-                                  isBirthday: coupon.category === "birthday" || coupon.type === "birthday",
                                 });
                                 
                                 return (
