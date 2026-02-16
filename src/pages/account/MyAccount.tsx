@@ -21,8 +21,8 @@ export default function MyAccount() {
     
     hasFetchedRef.current = true;
 
-    // 如果 userInfo 不存在，先获取用户信息
-    if (!userInfo) {
+    // 如果 userInfo 不存在或缺少 is_member，先获取用户信息
+    if (!userInfo || userInfo.is_member === undefined) {
       getCurrentUser()
         .then((info) => {
           setUserInfo(info);

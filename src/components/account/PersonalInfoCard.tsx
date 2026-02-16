@@ -146,7 +146,7 @@ export default function PersonalInfoCard() {
       <div className="bg-white rounded-[12px] sm:rounded-lg shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] sm:shadow-sm p-[20px] sm:p-6 border border-[rgba(0,0,0,0.10)]">
       <div className="flex items-start gap-[14px] sm:gap-6">
         {/* 左侧：头像 */}
-        <div className="shrink-0">
+        <div className="shrink-0 relative">
           <div 
             className="relative w-[56px] h-[56px] sm:w-[60px] sm:h-[60px] rounded-full bg-[#8B6357] flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity group"
             onClick={handleAvatarClick}
@@ -196,6 +196,13 @@ export default function PersonalInfoCard() {
           
           {/* 隐藏的文件输入 - 使用 hook 提供的 inputProps */}
           <input {...avatarInputProps} />
+          {userInfo.is_member && (
+            <div className="absolute left-1/2 -translate-x-1/2 bottom-[-8px] inline-flex items-center justify-center rounded-[12px] bg-[#DCFCE7] px-2 py-[4px]">
+              <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-[#016630]">
+                Member
+              </span>
+            </div>
+          )}
         </div>
 
         {/* 中间：用户信息 */}
