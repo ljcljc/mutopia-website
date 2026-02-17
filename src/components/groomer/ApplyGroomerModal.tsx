@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Icon } from "@/components/common/Icon";
 import { OrangeButton } from "@/components/common";
+import { DatePicker } from "@/components/common/DatePicker";
 import { getGroomerApplyStatus, type ApplyStatusOut } from "@/lib/api";
 import { useAuthStore } from "@/components/auth/authStore";
 
@@ -15,6 +16,15 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
   const [applyStatus, setApplyStatus] = useState<ApplyStatusOut | null>(null);
   const [isCheckingStatus, setIsCheckingStatus] = useState(false);
   const [statusError, setStatusError] = useState<string | null>(null);
+  const [sinAnswer, setSinAnswer] = useState<"yes" | "no" | null>(null);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [hasBathingExperience, setHasBathingExperience] = useState<boolean | null>(null);
+  const [hasGroomingExperience, setHasGroomingExperience] = useState<boolean | null>(null);
+  const [address, setAddress] = useState("");
+  const [phone, setPhone] = useState("");
+  const [hearAboutUs, setHearAboutUs] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
   const userInfo = useAuthStore((state) => state.userInfo);
   const user = useAuthStore((state) => state.user);
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
@@ -25,6 +35,22 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
     isLoggedIn && (!normalizedEmail || loginEmail.toLowerCase() === normalizedEmail)
   );
   const loginStatusLabel = isAuthenticated ? "logged_in_ui" : "logged_out_ui";
+  const [birthDate, setBirthDate] = useState("");
+  const maxBirthDate = (() => {
+    const today = new Date();
+    const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+    return maxDate.toISOString().split("T")[0];
+  })();
+  const isFormComplete = (() => {
+    if (!firstName.trim() || !lastName.trim() || !sinAnswer) return false;
+    if (sinAnswer === "no") return false;
+    if (!birthDate) return false;
+    if (!address.trim() || !phone.trim()) return false;
+    if (isAuthenticated) return true;
+    if (hasBathingExperience === null || hasGroomingExperience === null) return false;
+    if (!hearAboutUs.trim()) return false;
+    return true;
+  })();
   const greetingName =
     userInfo?.first_name ||
     user?.name?.split(" ")[0] ||
@@ -77,6 +103,10 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
     }
   };
 
+  const sinAlert = sinAnswer === "no"
+    ? "Unfortunately, we are not allowed to collaborate with you by law."
+    : null;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -114,7 +144,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
             {showApplyForm && (
               <div className="px-[24px] flex items-center justify-between text-[10px] leading-[12px]">
                 <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#4c4c4c]">
-                  Fill out the application in about 10 minutes
+                  Fill out the application in about {sinAnswer === "yes" ? "5" : "10"} minutes
                 </p>
                 <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[#4a3c2a]">
                   All fields are required.
@@ -275,6 +305,8 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                       <input
                         type="text"
                         placeholder="Enter your first name"
+                        value={firstName}
+                        onChange={(event) => setFirstName(event.target.value)}
                         className="h-[36px] w-full rounded-[12px] border border-[#e5e7eb] px-[16px] text-[12.25px] text-[#4a3c2a] placeholder:text-[#717182]"
                       />
                     </label>
@@ -285,6 +317,8 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                       <input
                         type="text"
                         placeholder="Enter your last name"
+                        value={lastName}
+                        onChange={(event) => setLastName(event.target.value)}
                         className="h-[36px] w-full rounded-[12px] border border-[#e5e7eb] px-[16px] text-[12.25px] text-[#4a3c2a] placeholder:text-[#717182]"
                       />
                     </label>
@@ -297,16 +331,79 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                       Do you have a valid work permit or social insurance number (SIN) ?
                     </p>
                     <div className="flex gap-[20px]">
-                      <label className="flex items-center gap-[8px] text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#4a3c2a]">
-                        <input type="radio" name="sin" className="size-[16px] accent-[#de6a07]" />
+                      <label className="flex items-center gap-[8px] text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#4a3c2a] cursor-pointer">
+                        <input
+                          type="radio"
+                          name="sin"
+                          className="size-[16px] accent-[#de6a07] cursor-pointer"
+                          checked={sinAnswer === "yes"}
+                          onChange={() => setSinAnswer("yes")}
+                        />
                         Yes
                       </label>
-                      <label className="flex items-center gap-[8px] text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#4a3c2a]">
-                        <input type="radio" name="sin" className="size-[16px] accent-[#de6a07]" />
+                      <label className="flex items-center gap-[8px] text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#4a3c2a] cursor-pointer">
+                        <input
+                          type="radio"
+                          name="sin"
+                          className="size-[16px] accent-[#de6a07] cursor-pointer"
+                          checked={sinAnswer === "no"}
+                          onChange={() => setSinAnswer("no")}
+                        />
                         No
                       </label>
                     </div>
+                    {sinAlert && (
+                      <div className="h-[36px] w-fit rounded-[8px] border border-[#de1507] px-[16px] flex items-center gap-[8px] text-[#de1507]">
+                        <span className="size-[12px] rounded-full bg-[#de1507] text-white text-[10px] leading-[12px] flex items-center justify-center">!</span>
+                        <span className="font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px]">
+                          {sinAlert}
+                        </span>
+                      </div>
+                    )}
                   </div>
+
+                  {sinAnswer === "yes" && (
+                    <>
+                      <div className="max-w-[348px]">
+                        <DatePicker
+                          label="Date of birth"
+                          placeholder="yyyy-mm-dd"
+                          value={birthDate}
+                          onChange={setBirthDate}
+                          helperText="At least 18 years old. Your birthday won't be shared."
+                          minDate="1900-01-01"
+                          maxDate={maxBirthDate}
+                        />
+                      </div>
+
+                      <div className="flex gap-[20px]">
+                        <label className="flex flex-1 flex-col gap-[8px]">
+                          <span className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-[#4a3c2a]">
+                            Address (Starting point of work)
+                          </span>
+                          <input
+                            type="text"
+                            placeholder="Enter address"
+                            value={address}
+                            onChange={(event) => setAddress(event.target.value)}
+                            className="h-[36px] w-full rounded-[12px] border border-[#e5e7eb] px-[16px] text-[12.25px] text-[#4a3c2a] placeholder:text-[#717182]"
+                          />
+                        </label>
+                        <label className="flex flex-1 flex-col gap-[8px]">
+                          <span className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-[#4a3c2a]">
+                            Phone Number
+                          </span>
+                          <input
+                            type="text"
+                            placeholder="Enter phone number"
+                            value={phone}
+                            onChange={(event) => setPhone(event.target.value)}
+                            className="h-[36px] w-full rounded-[12px] border border-[#e5e7eb] px-[16px] text-[12.25px] text-[#4a3c2a] placeholder:text-[#717182]"
+                          />
+                        </label>
+                      </div>
+                    </>
+                  )}
                 </div>
               ) : (
                 <div className="flex flex-col gap-[16px]">
@@ -318,6 +415,8 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                       <input
                         type="text"
                         placeholder="Enter first name"
+                        value={firstName}
+                        onChange={(event) => setFirstName(event.target.value)}
                         className="h-[36px] w-full rounded-[12px] border border-[#e5e7eb] px-[16px] text-[12.25px] text-[#4a3c2a] placeholder:text-[#717182]"
                       />
                     </label>
@@ -328,6 +427,8 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                       <input
                         type="text"
                         placeholder="Enter last name"
+                        value={lastName}
+                        onChange={(event) => setLastName(event.target.value)}
                         className="h-[36px] w-full rounded-[12px] border border-[#e5e7eb] px-[16px] text-[12.25px] text-[#4a3c2a] placeholder:text-[#717182]"
                       />
                     </label>
@@ -340,16 +441,168 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                       Do you have a valid work permit or social insurance number (SIN)?
                     </p>
                     <div className="flex gap-[20px]">
-                      <label className="flex items-center gap-[8px] text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#4a3c2a]">
-                        <input type="radio" name="sin" className="size-[16px] accent-[#de6a07]" />
+                      <label className="flex items-center gap-[8px] text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#4a3c2a] cursor-pointer">
+                        <input
+                          type="radio"
+                          name="sin"
+                          className="size-[16px] accent-[#de6a07] cursor-pointer"
+                          checked={sinAnswer === "yes"}
+                          onChange={() => setSinAnswer("yes")}
+                        />
                         Yes
                       </label>
-                      <label className="flex items-center gap-[8px] text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#4a3c2a]">
-                        <input type="radio" name="sin" className="size-[16px] accent-[#de6a07]" />
+                      <label className="flex items-center gap-[8px] text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#4a3c2a] cursor-pointer">
+                        <input
+                          type="radio"
+                          name="sin"
+                          className="size-[16px] accent-[#de6a07] cursor-pointer"
+                          checked={sinAnswer === "no"}
+                          onChange={() => setSinAnswer("no")}
+                        />
                         No
                       </label>
                     </div>
+                    {sinAlert && (
+                      <div className="h-[36px] w-fit rounded-[8px] border border-[#de1507] px-[16px] flex items-center gap-[8px] text-[#de1507]">
+                        <span className="size-[12px] rounded-full bg-[#de1507] text-white text-[10px] leading-[12px] flex items-center justify-center">!</span>
+                        <span className="font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px]">
+                          {sinAlert}
+                        </span>
+                      </div>
+                    )}
                   </div>
+
+                  {sinAnswer === "yes" && (
+                    <>
+                      <div className="flex flex-col gap-[8px]">
+                        <p className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-black">
+                          Do you have bathing working experience?
+                        </p>
+                        <div className="flex gap-[20px]">
+                          <label className="flex items-center gap-[8px] text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#4a3c2a] cursor-pointer">
+                            <input
+                              type="radio"
+                              name="bathing"
+                              className="size-[16px] accent-[#de6a07] cursor-pointer"
+                              checked={hasBathingExperience === true}
+                              onChange={() => setHasBathingExperience(true)}
+                            />
+                            Yes
+                          </label>
+                          <label className="flex items-center gap-[8px] text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#4a3c2a] cursor-pointer">
+                            <input
+                              type="radio"
+                              name="bathing"
+                              className="size-[16px] accent-[#de6a07] cursor-pointer"
+                              checked={hasBathingExperience === false}
+                              onChange={() => setHasBathingExperience(false)}
+                            />
+                            No
+                          </label>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-[8px]">
+                        <p className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-black">
+                          Do you have grooming working experience?
+                        </p>
+                        <div className="flex gap-[20px]">
+                          <label className="flex items-center gap-[8px] text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#4a3c2a] cursor-pointer">
+                            <input
+                              type="radio"
+                              name="grooming"
+                              className="size-[16px] accent-[#de6a07] cursor-pointer"
+                              checked={hasGroomingExperience === true}
+                              onChange={() => setHasGroomingExperience(true)}
+                            />
+                            Yes
+                          </label>
+                          <label className="flex items-center gap-[8px] text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#4a3c2a] cursor-pointer">
+                            <input
+                              type="radio"
+                              name="grooming"
+                              className="size-[16px] accent-[#de6a07] cursor-pointer"
+                              checked={hasGroomingExperience === false}
+                              onChange={() => setHasGroomingExperience(false)}
+                            />
+                            No
+                          </label>
+                        </div>
+                      </div>
+
+                      <div className="max-w-[348px]">
+                        <DatePicker
+                          label="Date of birth"
+                          placeholder="yyyy-mm-dd"
+                          value={birthDate}
+                          onChange={setBirthDate}
+                          helperText="At least 18 years old. Your birthday won't be shared."
+                          minDate="1900-01-01"
+                          maxDate={maxBirthDate}
+                        />
+                      </div>
+
+                      <div className="flex gap-[20px]">
+                        <label className="flex flex-1 flex-col gap-[8px]">
+                          <span className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-[#4a3c2a]">
+                            Address (Starting point of work)
+                          </span>
+                          <input
+                            type="text"
+                            placeholder="Enter address"
+                            value={address}
+                            onChange={(event) => setAddress(event.target.value)}
+                            className="h-[36px] w-full rounded-[12px] border border-[#e5e7eb] px-[16px] text-[12.25px] text-[#4a3c2a] placeholder:text-[#717182]"
+                          />
+                        </label>
+                        <label className="flex flex-1 flex-col gap-[8px]">
+                          <span className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-[#4a3c2a]">
+                            Phone Number
+                          </span>
+                          <input
+                            type="text"
+                            placeholder="Enter phone number"
+                            value={phone}
+                            onChange={(event) => setPhone(event.target.value)}
+                            className="h-[36px] w-full rounded-[12px] border border-[#e5e7eb] px-[16px] text-[12.25px] text-[#4a3c2a] placeholder:text-[#717182]"
+                          />
+                        </label>
+                      </div>
+
+                      <div className="flex gap-[20px]">
+                        <label className="flex flex-1 flex-col gap-[8px]">
+                          <span className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-black">
+                            How did you hear about us?
+                          </span>
+                          <div className="h-[36px] w-full rounded-[8px] border border-[#e5e7eb] px-[12px] flex items-center justify-between">
+                            <div className="flex items-center gap-[6px] text-[12.25px] text-[#717182] w-full">
+                              <Icon name="search" size={16} className="text-[#717182]" />
+                              <input
+                                type="text"
+                                placeholder="Invited by a friend"
+                                value={hearAboutUs}
+                                onChange={(event) => setHearAboutUs(event.target.value)}
+                                className="w-full bg-transparent outline-none placeholder:text-[#717182]"
+                              />
+                            </div>
+                            <Icon name="chevron-down" size={16} className="text-[#717182]" />
+                          </div>
+                        </label>
+                        <label className="flex flex-1 flex-col gap-[8px]">
+                          <span className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-[#4a3c2a]">
+                            Invite code
+                          </span>
+                          <input
+                            type="text"
+                            placeholder="Enter invite code"
+                            value={inviteCode}
+                            onChange={(event) => setInviteCode(event.target.value)}
+                            className="h-[36px] w-full rounded-[12px] border border-[#e5e7eb] px-[16px] text-[12.25px] text-[#4a3c2a] placeholder:text-[#717182]"
+                          />
+                        </label>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
 
@@ -358,11 +611,18 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                   size="compact"
                   variant="secondary"
                   type="button"
+                  className="w-[120px] h-[36px]"
                   onClick={() => setApplyStatus(null)}
                 >
                   Back
                 </OrangeButton>
-                <OrangeButton size="medium" variant="primary" type="button">
+                <OrangeButton
+                  size="medium"
+                  variant="primary"
+                  type="button"
+                  className="w-[120px]"
+                  disabled={!isFormComplete}
+                >
                   <div className="flex items-center gap-[4px]">
                     <span className="text-[14px]">Next</span>
                     <Icon name="button-arrow" size={16} className="text-white" />
