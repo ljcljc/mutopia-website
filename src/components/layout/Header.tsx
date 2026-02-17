@@ -12,6 +12,9 @@ import AccountDropdown from "@/components/layout/AccountDropdown";
 import NotificationsPopover from "@/components/layout/NotificationsPopover";
 import { useLogout } from "@/hooks/useLogout";
 import ApplyGroomerModal from "@/components/groomer/ApplyGroomerModal";
+import { getEncryptedItem } from "@/lib/encryption";
+import { STORAGE_KEYS } from "@/lib/storageKeys";
+import { type MeOut } from "@/lib/api";
 
 // Helper function to handle smooth scroll to anchor with header offset
 const scrollToAnchor = (href: string) => {
@@ -436,10 +439,47 @@ function CloseButton({ onClick }: { onClick: () => void }) {
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const userInfo = useAuthStore((state) => state.userInfo);
+  const setUserInfo = useAuthStore((state) => state.setUserInfo);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+
+  useEffect(() => {
+    const loadUserInfoFromStorage = async () => {
+      if (userInfo) return;
+      try {
+        const userInfoStr = await getEncryptedItem(STORAGE_KEYS.USER_INFO);
+        if (!userInfoStr) return;
+        const parsed = JSON.parse(userInfoStr);
+        if (parsed && typeof parsed === "object" && parsed.email) {
+          if (parsed.first_name !== undefined || !parsed.name) {
+            setUserInfo(parsed as MeOut);
+          } else {
+            const converted: MeOut = {
+              id: "",
+              email: parsed.email,
+              first_name: parsed.name.split(" ")[0] || null,
+              last_name: parsed.name.split(" ").slice(1).join(" ") || null,
+              birthday: null,
+              address: null,
+              receive_marketing_message: false,
+              role: "user",
+              is_email_verified: true,
+              invite_code: null,
+              is_member: false,
+            };
+            setUserInfo(converted);
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to load userInfo from localStorage:", e);
+      }
+    };
+
+    loadUserInfoFromStorage();
+  }, [userInfo, setUserInfo]);
 
   // 滚动检测和智能阴影显示
   useEffect(() => {

@@ -93,6 +93,9 @@ import IconNotificationReminderSvg from "@/assets/icons/icon-notification-remind
 import IconNotificationReferSvg from "@/assets/icons/icon-notification-refer.svg?react";
 import IconNotificationRefundSvg from "@/assets/icons/icon-notification-refund.svg?react";
 import IconNotificationEmptySvg from "@/assets/icons/icon-notification-empty.svg?react";
+import IconAccountSvg from "@/assets/icons/icon-account.svg?react";
+import IconExperienceSvg from "@/assets/icons/icon-experience.svg?react";
+import IconIdentificationSvg from "@/assets/icons/icon-identification.svg?react";
 
 // 图标组件映射表
 const iconComponentMap = {
@@ -165,6 +168,9 @@ const iconComponentMap = {
   "notification-refer": IconNotificationReferSvg,
   "notification-refund": IconNotificationRefundSvg,
   "notification-empty": IconNotificationEmptySvg,
+  "account": IconAccountSvg,
+  "experience": IconExperienceSvg,
+  "identification": IconIdentificationSvg,
 } as const;
 
 export type IconName = keyof typeof iconComponentMap;
