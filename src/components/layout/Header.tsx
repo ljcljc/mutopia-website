@@ -165,13 +165,14 @@ function UserInfo() {
 
 function DesktopActions() {
   const user = useAuthStore((state) => state.user);
+  const userInfo = useAuthStore((state) => state.userInfo);
 
   return (
     <div
       className="h-[28px] relative shrink-0 hidden lg:flex items-center gap-[10.5px]"
       data-name="Buttons"
     >
-      <ApplyAsGroomerButton />
+      {!userInfo?.is_groomer && <ApplyAsGroomerButton />}
       {user ? <UserInfo /> : <LoginSignUpButton />}
     </div>
   );
@@ -441,6 +442,7 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const userInfo = useAuthStore((state) => state.userInfo);
   const setUserInfo = useAuthStore((state) => state.setUserInfo);
+  console.log("[Header] userInfo.is_groomer:", userInfo?.is_groomer);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);

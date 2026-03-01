@@ -15,6 +15,7 @@ import ApplyGroomerModal from "@/components/groomer/ApplyGroomerModal";
 export default function PageHeader() {
   const { userInfo } = useAuthStore();
   const [isApplyOpen, setIsApplyOpen] = useState(false);
+  const [isGroomerSwitchOn, setIsGroomerSwitchOn] = useState(false);
   const handleApplyOpen = () => {
     console.log("[ApplyGroomer] open modal");
     setIsApplyOpen(true);
@@ -31,15 +32,14 @@ export default function PageHeader() {
             <div className="flex items-center gap-2 sm:gap-3">
               <Switch
                 id="groomer-account-toggle"
-                checked={false}
-                onCheckedChange={() => {}} // readonly: 阻止状态改变
-                className="cursor-default pointer-events-none" // readonly: 防止交互但保持正常样式
+                checked={isGroomerSwitchOn}
+                onCheckedChange={setIsGroomerSwitchOn}
+                className="cursor-pointer"
                 aria-label="Groomer account toggle"
-                aria-readonly="true"
               />
               <Label
                 htmlFor="groomer-account-toggle"
-                className="font-['Comfortaa',sans-serif] font-bold text-[#8B6357] text-[14px] sm:text-sm cursor-default"
+                className="font-['Comfortaa',sans-serif] font-bold text-[#8B6357] text-[14px] sm:text-sm cursor-pointer"
               >
                 Groomer account
               </Label>

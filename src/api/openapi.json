@@ -2105,14 +2105,16 @@
             "default": false,
             "title": "Is Member",
             "type": "boolean"
-          }
+          },
+          "is_groomer": { "title": "Is Groomer", "type": "boolean" }
         },
         "required": [
           "id",
           "email",
           "receive_marketing_message",
           "role",
-          "is_email_verified"
+          "is_email_verified",
+          "is_groomer"
         ],
         "title": "MeOut",
         "type": "object"
@@ -2298,6 +2300,39 @@
           "label": {
             "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Label"
+          },
+          "surcharge_ratio_a": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "default": "0",
+            "title": "Surcharge Ratio A"
+          },
+          "surcharge_ratio_b": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "default": "0",
+            "title": "Surcharge Ratio B"
+          },
+          "surcharge_ratio_c": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "default": "0",
+            "title": "Surcharge Ratio C"
           }
         },
         "required": ["id", "min_weight_kg", "price"],
@@ -2628,7 +2663,22 @@
         "properties": {
           "id": { "title": "Id", "type": "integer" },
           "pet_type": { "title": "Pet Type", "type": "string" },
-          "breed": { "title": "Breed", "type": "string" }
+          "breed": { "title": "Breed", "type": "string" },
+          "surcharge_a": {
+            "default": false,
+            "title": "Surcharge A",
+            "type": "boolean"
+          },
+          "surcharge_b": {
+            "default": false,
+            "title": "Surcharge B",
+            "type": "boolean"
+          },
+          "surcharge_c": {
+            "default": false,
+            "title": "Surcharge C",
+            "type": "boolean"
+          }
         },
         "required": ["id", "pet_type", "breed"],
         "title": "PetBreedOut",
@@ -2758,6 +2808,32 @@
       },
       "BookingPriceBreakdown": {
         "properties": {
+          "base_package_amount": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "title": "Base Package Amount"
+          },
+          "breed_surcharge_amount": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "title": "Breed Surcharge Amount"
+          },
+          "breed_surcharge_labels": {
+            "default": [],
+            "items": { "type": "string" },
+            "title": "Breed Surcharge Labels",
+            "type": "array"
+          },
           "package_amount": {
             "anyOf": [
               { "type": "number" },
@@ -2841,6 +2917,8 @@
           }
         },
         "required": [
+          "base_package_amount",
+          "breed_surcharge_amount",
           "package_amount",
           "addons_amount",
           "membership_fee",
@@ -2876,6 +2954,15 @@
             "default": "kg",
             "title": "Weight Unit",
             "type": "string"
+          },
+          "pet_type": {
+            "default": "other",
+            "title": "Pet Type",
+            "type": "string"
+          },
+          "breed": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Breed"
           },
           "membership_plan_id": {
             "anyOf": [{ "type": "integer" }, { "type": "null" }],
@@ -2985,6 +3072,15 @@
             "default": "kg",
             "title": "Weight Unit",
             "type": "string"
+          },
+          "pet_type": {
+            "default": "other",
+            "title": "Pet Type",
+            "type": "string"
+          },
+          "breed": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Breed"
           },
           "membership_plan_id": {
             "anyOf": [{ "type": "integer" }, { "type": "null" }],

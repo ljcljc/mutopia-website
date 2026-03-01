@@ -292,6 +292,13 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   setUserInfo: (userInfo) => {
+    // Normalize backend casing for is_groomer if needed
+    if (userInfo && (userInfo as { is_groomer?: boolean }).is_groomer === undefined) {
+      const legacyFlag = (userInfo as { is_Groomer?: boolean }).is_Groomer;
+      if (typeof legacyFlag === "boolean") {
+        userInfo = { ...(userInfo as MeOut), is_groomer: legacyFlag };
+      }
+    }
     console.log("[AuthStore] setUserInfo:", userInfo);
     set({ userInfo });
     // Persist userInfo to localStorage when set (this is the source of truth)
