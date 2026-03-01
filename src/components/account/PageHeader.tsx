@@ -21,39 +21,42 @@ export default function PageHeader() {
   };
 
   return (
-    <div className="w-full flex items-center justify-between mb-6">
-      <h1 className="font-['Comfortaa',sans-serif] font-bold text-[#4A3C2A] text-[20px] sm:text-3xl">
-        My Account
-      </h1>
-      
-      {userInfo?.is_groomer ? (
-        <div className="flex items-center gap-2 sm:gap-3">
-          <Switch
-            id="groomer-account-toggle"
-            checked={false}
-            onCheckedChange={() => {}} // readonly: 阻止状态改变
-            className="cursor-default pointer-events-none" // readonly: 防止交互但保持正常样式
-            aria-label="Groomer account toggle"
-            aria-readonly="true"
-          />
-          <Label
-            htmlFor="groomer-account-toggle"
-            className="font-['Comfortaa',sans-serif] font-bold text-[#8B6357] text-[14px] sm:text-sm cursor-default"
-          >
-            Groomer account
-          </Label>
+    <>
+      <div className="w-full flex items-center gap-4 mb-6">
+        <h1 className="font-['Comfortaa',sans-serif] font-bold text-[#4A3C2A] text-[20px] sm:text-3xl">
+          My Account
+        </h1>
+        <div className="ml-auto flex items-center">
+          {userInfo?.is_groomer ? (
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Switch
+                id="groomer-account-toggle"
+                checked={false}
+                onCheckedChange={() => {}} // readonly: 阻止状态改变
+                className="cursor-default pointer-events-none" // readonly: 防止交互但保持正常样式
+                aria-label="Groomer account toggle"
+                aria-readonly="true"
+              />
+              <Label
+                htmlFor="groomer-account-toggle"
+                className="font-['Comfortaa',sans-serif] font-bold text-[#8B6357] text-[14px] sm:text-sm cursor-default"
+              >
+                Groomer account
+              </Label>
+            </div>
+          ) : (
+            <OrangeButton
+              variant="secondary"
+              size="compact"
+              showArrow={false}
+              type="button"
+              onClick={handleApplyOpen}
+            >
+              Apply as groomer
+            </OrangeButton>
+          )}
         </div>
-      ) : (
-        <OrangeButton
-          variant="secondary"
-          size="compact"
-          showArrow={false}
-          type="button"
-          onClick={handleApplyOpen}
-        >
-          Apply as groomer
-        </OrangeButton>
-      )}
+      </div>
       <ApplyGroomerModal
         open={isApplyOpen}
         onOpenChange={(open) => {
@@ -61,6 +64,6 @@ export default function PageHeader() {
           setIsApplyOpen(open);
         }}
       />
-    </div>
+    </>
   );
 }
