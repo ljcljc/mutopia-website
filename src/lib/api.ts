@@ -1173,7 +1173,7 @@ export async function getGroomerApplyStatus(email?: string | null): Promise<Appl
  * 提交美容师申请
  */
 export async function submitGroomerApply(data: ApplySubmitIn): Promise<ApplySubmitOut> {
-  const response = await http.post<ApplySubmitOut>("/api/groomers/apply/submit", data, { skipAuth: true });
+  const response = await http.post<ApplySubmitOut>("/api/groomers/apply/submit", data);
   return response.data;
 }
 
