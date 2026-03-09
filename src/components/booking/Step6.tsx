@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { Icon } from "@/components/common/Icon";
-import { OrangeButton, MembershipCard, Checkbox, type FeatureItem } from "@/components/common";
+import { OrangeButton, MembershipCard, Checkbox, BrownOutlineButton, type FeatureItem } from "@/components/common";
 import { useBookingStore } from "./bookingStore";
 import { useAuthStore } from "@/components/auth/authStore";
 import { cn } from "@/components/ui/utils";
@@ -824,16 +824,11 @@ export function Step6() {
           </div>
         </div>
         {/* Modify Button */}
-        <div className="border-2 border-[#8b6357] border-solid content-stretch flex h-[28px] items-center justify-center px-[22px] relative rounded-[32px] shrink-0">
-          <button
-            onClick={() => handleModify(1)}
-            className="bg-clip-padding border-0 border-transparent border-solid content-stretch flex gap-[5px] items-center relative cursor-pointer hover:opacity-80 transition-opacity"
-          >
-            <p className="font-['Comfortaa:Bold',sans-serif] font-bold sm:font-['Comfortaa:Medium',sans-serif] sm:font-medium leading-[17.5px] relative shrink-0 text-[12px] text-[#8b6357]">
-              Modify
-            </p>
-          </button>
-        </div>
+        <BrownOutlineButton size="compact" onClick={() => handleModify(1)}>
+          <span className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] text-[12px] text-[#8b6357]">
+            Modify
+          </span>
+        </BrownOutlineButton>
       </div>
 
       {/* Pet Information card */}
@@ -977,16 +972,15 @@ export function Step6() {
             </p>
           </div>
           {/* Modify Button */}
-          <div className="border-2 border-[#8b6357] border-solid content-stretch flex h-[calc(28*var(--px393))] sm:h-[28px] items-center justify-center px-[calc(22*var(--px393))] sm:px-[22px] relative rounded-[calc(32*var(--px393))] sm:rounded-[32px] shrink-0 w-full sm:w-auto">
-            <button
-              onClick={() => handleModify(2)}
-              className="bg-clip-padding border-0 border-transparent border-solid content-stretch flex gap-[calc(5*var(--px393))] sm:gap-[5px] items-center relative cursor-pointer hover:opacity-80 transition-opacity"
-            >
-              <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[calc(12*var(--px393))] sm:text-[12px] text-[#8b6357]">
-                Modify
-              </p>
-            </button>
-          </div>
+          <BrownOutlineButton
+            size="compact"
+            onClick={() => handleModify(2)}
+            className="w-full sm:w-auto"
+          >
+            <span className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] text-[12px] text-[#8b6357]">
+              Modify
+            </span>
+          </BrownOutlineButton>
         </div>
       </div>
 
@@ -1137,16 +1131,11 @@ export function Step6() {
           )}
           
           {/* Modify Button */}
-          <div className="border-2 border-[#8b6357] border-solid content-stretch flex h-[calc(28*var(--px393))] sm:h-[28px] items-center justify-center px-[calc(22*var(--px393))] sm:px-[22px] relative rounded-[calc(32*var(--px393))] sm:rounded-[32px] shrink-0">
-            <button
-              onClick={() => handleModify(3)}
-              className="bg-clip-padding border-0 border-transparent border-solid content-stretch flex gap-[5px] items-center relative cursor-pointer hover:opacity-80 transition-opacity"
-            >
-              <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[12px] text-[#8b6357]">
-                Modify
-              </p>
-            </button>
-          </div>
+          <BrownOutlineButton size="compact" onClick={() => handleModify(3)}>
+            <span className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] text-[12px] text-[#8b6357]">
+              Modify
+            </span>
+          </BrownOutlineButton>
         </div>
       </div>
 
@@ -1259,16 +1248,11 @@ export function Step6() {
             )}
           </div>
           {/* Modify Button */}
-          <div className="border-2 border-[#8b6357] border-solid content-stretch flex h-[calc(28*var(--px393))] sm:h-[28px] items-center justify-center px-[calc(22*var(--px393))] sm:px-[22px] relative rounded-[calc(32*var(--px393))] sm:rounded-[32px] shrink-0">
-            <button
-              onClick={() => handleModify(5)}
-              className="bg-clip-padding border-0 border-transparent border-solid content-stretch flex gap-[5px] items-center relative cursor-pointer hover:opacity-80 transition-opacity"
-            >
-              <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[12px] text-[#8b6357]">
-                Modify
-              </p>
-            </button>
-          </div>
+          <BrownOutlineButton size="compact" onClick={() => handleModify(5)}>
+            <span className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] text-[12px] text-[#8b6357]">
+              Modify
+            </span>
+          </BrownOutlineButton>
         </div>
       </div>
 
