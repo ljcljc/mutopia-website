@@ -21,8 +21,22 @@ export function Step5() {
     return date;
   };
 
-  const [currentDate, setCurrentDate] = useState(buildMinDate);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const getInitialSelectedDate = () => {
+    if (selectedTimeSlots.length === 0) return null;
+    const lastSlot = selectedTimeSlots[selectedTimeSlots.length - 1];
+    if (!lastSlot?.date) return null;
+    const parsed = new Date(`${lastSlot.date}T00:00:00`);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  };
+
+  const initialSelectedDate = getInitialSelectedDate();
+  const [currentDate, setCurrentDate] = useState(() => {
+    if (initialSelectedDate) {
+      return new Date(initialSelectedDate.getFullYear(), initialSelectedDate.getMonth(), 1);
+    }
+    return buildMinDate();
+  });
+  const [selectedDate, setSelectedDate] = useState<Date | null>(initialSelectedDate);
   const [showYearPicker, setShowYearPicker] = useState(false);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
   const timeOptionsRef = useRef<HTMLDivElement | null>(null);
@@ -113,6 +127,17 @@ export function Step5() {
     });
     return () => cancelAnimationFrame(raf);
   }, [selectedDate]);
+
+  // Restore selected date when returning from Step6.
+  // selectedTimeSlots persists in store, but selectedDate is local UI state.
+  useEffect(() => {
+    if (selectedDate || selectedTimeSlots.length === 0) return;
+    const lastSlot = selectedTimeSlots[selectedTimeSlots.length - 1];
+    const parsed = new Date(`${lastSlot.date}T00:00:00`);
+    if (Number.isNaN(parsed.getTime())) return;
+    setSelectedDate(parsed);
+    setCurrentDate(new Date(parsed.getFullYear(), parsed.getMonth(), 1));
+  }, [selectedDate, selectedTimeSlots]);
 
   // Toggle time period - generate time slot entries
   const toggleTimePeriod = (periodId: string) => {
