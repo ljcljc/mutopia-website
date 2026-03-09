@@ -471,6 +471,7 @@ export default function Header() {
               is_email_verified: true,
               invite_code: null,
               is_member: false,
+              is_groomer: false,
             };
             setUserInfo(converted);
           }

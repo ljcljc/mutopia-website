@@ -23,6 +23,8 @@ export function Step3() {
     loadAddOns,
     previousStep,
     nextStep,
+    petType,
+    breed,
     weight,
     weightUnit,
   } = useBookingStore();
@@ -31,7 +33,6 @@ export function Step3() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const isLoggedIn = userInfo !== null || user !== null;
 
-  const hasLoadedServices = useRef(false);
   const hasLoadedAddOns = useRef(false);
   const hasAutoSelectedMembership = useRef(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>("Most Popular");
@@ -48,13 +49,10 @@ export function Step3() {
     }
   }, [user, isLoginModalOpen]);
 
-  // 获取服务数据（只加载一次）
+  // 根据当前宠物信息获取服务数据
   useEffect(() => {
-    if (!hasLoadedServices.current) {
-      hasLoadedServices.current = true;
-      loadServices();
-    }
-  }, [loadServices]);
+    loadServices();
+  }, [loadServices, petType, breed, weight, weightUnit]);
 
   // 获取 add-ons 数据（只加载一次）
   useEffect(() => {
@@ -283,7 +281,7 @@ export function Step3() {
                 Choose the package that best fits your pet's needs
               </p>
             </div>
-            <div className="gap-[calc(16*var(--px393))] sm:gap-[16px] grid grid-cols-1 relative shrink-0 w-full">
+            <div className="gap-[calc(16*var(--px393))] sm:gap-[16px] grid grid-cols-1 sm:grid-cols-2 relative shrink-0 w-full">
               {isLoadingServices ? (
                 <div className="flex items-center justify-center gap-2 py-8 text-[#4a5565]">
                   <Spinner size="small" color="#4a5565" />

@@ -22,8 +22,7 @@ export function convertWeightToKg(weightValue: string, unit: string): number | n
 
 /**
  * 根据用户体重计算服务价格
- * 如果用户填写了体重且服务有 weight_prices，则使用基于体重的价格
- * 否则使用 base_price
+ * 服务价格统一使用 base_price
  * 
  * @param service 服务对象
  * @param weight 用户填写的体重（字符串）
@@ -36,40 +35,14 @@ export function getServicePrice(
   weightUnit?: string
 ): number {
   if (!service) return 0;
-  
-  // If user has weight and service has weight_prices, use weight-based pricing
-  if (weight && weightUnit && service.weight_prices && service.weight_prices.length > 0) {
-    const weightKg = convertWeightToKg(weight, weightUnit);
-    if (weightKg !== null) {
-      // Find matching weight price range
-      const matchingPrice = service.weight_prices.find((wp) => {
-        const minWeight = typeof wp.min_weight_kg === "string" 
-          ? parseFloat(wp.min_weight_kg) 
-          : wp.min_weight_kg;
-        const maxWeight = wp.max_weight_kg 
-          ? (typeof wp.max_weight_kg === "string" 
-              ? parseFloat(wp.max_weight_kg) 
-              : wp.max_weight_kg)
-          : Infinity;
-        
-        return weightKg >= minWeight && weightKg <= maxWeight;
-      });
-      
-      if (matchingPrice) {
-        return typeof matchingPrice.price === "string"
-          ? parseFloat(matchingPrice.price)
-          : matchingPrice.price;
-      }
-    }
-  }
-  
-  // Fallback to base_price
+
+  void weight;
+  void weightUnit;
+
   return typeof service.base_price === "string"
     ? parseFloat(service.base_price)
     : service.base_price;
 }
-
-
 
 
 

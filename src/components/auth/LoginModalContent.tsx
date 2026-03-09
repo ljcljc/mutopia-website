@@ -738,7 +738,6 @@ export function ModalContent({ onClose, onSuccess }: { onClose: () => void; onSu
         id_token: response.credential,
         first_name: firstName,
         last_name: lastName,
-        email: email || null,
         birthday: birthday,
       });
 
@@ -944,9 +943,6 @@ export function ModalContent({ onClose, onSuccess }: { onClose: () => void; onSu
         // Check if email is a Facebook temporary email (fb_*@users.facebook.com)
         const isTemporaryEmail = userInfo.email && /^fb_\d+@users\.facebook\.com$/.test(userInfo.email);
         
-        // Determine email to send: null if temporary email, otherwise use the actual email
-        const emailToSend = isTemporaryEmail ? null : (userInfo.email || null);
-        
         // Format birthday: Facebook returns MM/DD/YYYY, convert to YYYY-MM-DD if needed
         let birthdayFormatted: string | null = null;
         if (userInfo.birthday) {
@@ -975,7 +971,6 @@ export function ModalContent({ onClose, onSuccess }: { onClose: () => void; onSu
           access_token: authResponse.authResponse.accessToken,
           first_name: userInfo.first_name || null,
           last_name: userInfo.last_name || null,
-          email: emailToSend,
           birthday: birthdayFormatted,
         });
 

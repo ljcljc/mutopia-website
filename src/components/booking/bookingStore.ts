@@ -569,13 +569,20 @@ export const useBookingStore = create<BookingState>((set) => ({
 
   loadServices: async () => {
     const state = useBookingStore.getState();
-    // 如果已经在加载中或已有数据，则不再请求
-    if (state.isLoadingServices || state.services.length > 0) {
+    // 如果已经在加载中，则不再请求
+    if (state.isLoadingServices) {
       return;
     }
     try {
       set({ isLoadingServices: true });
-      const services = await getServices();
+      const weight = state.weight.trim();
+      const weightUnit = state.weightUnit === "lbs" ? "lb" : state.weightUnit;
+      const services = await getServices({
+        pet_type: state.petType,
+        breed: state.breed.trim() || undefined,
+        weight: weight || undefined,
+        weight_unit: weight ? weightUnit : undefined,
+      });
       set({ services, isLoadingServices: false });
     } catch (error) {
       console.error("Failed to load services:", error);

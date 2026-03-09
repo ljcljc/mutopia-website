@@ -94,7 +94,7 @@ export interface MeOut {
   is_email_verified: boolean;
   invite_code?: string | null;
   is_member?: boolean; // default: false
-  is_groomer?: boolean;
+  is_groomer: boolean;
 }
 
 export interface SocialLoginIn {
@@ -104,7 +104,6 @@ export interface SocialLoginIn {
   first_name?: string | null;
   last_name?: string | null;
   birthday?: string | null;
-  email?: string | null;
 }
 
 export interface ForgotPasswordSendIn {
@@ -123,7 +122,7 @@ export interface ForgotPasswordResetIn {
 }
 
 export interface OkOut {
-  ok: boolean;
+  ok?: boolean;
 }
 
 // 服务目录类型
@@ -137,10 +136,14 @@ export interface ServiceItemOut {
 
 export interface ServiceWeightPriceOut {
   id: number;
+  pet_type: string;
   min_weight_kg: number | string;
   max_weight_kg?: number | string | null;
   price: number | string;
   label?: string | null;
+  surcharge_ratio_a?: number | string;
+  surcharge_ratio_b?: number | string;
+  surcharge_ratio_c?: number | string;
 }
 
 export interface ServiceOut {
@@ -149,9 +152,13 @@ export interface ServiceOut {
   type: string;
   description?: string | null;
   base_price: number | string;
+  base_amount?: number | string | null;
+  breed_surcharge_amount?: number | string | null;
+  breed_surcharge_labels?: string[] | null;
+  pricing_pet_type?: string | null;
+  weight_price_id?: number | null;
   service_time?: string | null;
   items?: ServiceItemOut[] | null;
-  weight_prices?: ServiceWeightPriceOut[] | null;
 }
 
 export interface AddOnOut {
@@ -183,14 +190,14 @@ export interface PetOut {
   behavior?: string | null;
   grooming_frequency?: string | null;
   primary_photo?: string | null; // 主照片 URL
-  photos: string[]; // 照片 URL 数组
-  reference_photos: string[]; // 参考照片 URL 数组
+  photos?: string[]; // 照片 URL 数组
+  reference_photos?: string[]; // 参考照片 URL 数组
   special_notes?: string | null;
   used_in_booking?: boolean;
   memorialized_at?: string | null;
   is_memorialized?: boolean;
-  photo_ids: number[]; // 照片 ID 数组
-  reference_photo_ids: number[]; // 参考照片 ID 数组
+  photo_ids?: number[]; // 照片 ID 数组
+  reference_photo_ids?: number[]; // 参考照片 ID 数组
 }
 
 export interface PetPageOut {
@@ -345,6 +352,8 @@ export interface BookingSubmitIn {
   add_on_ids?: number[];
   weight_value?: number | string | null;
   weight_unit?: string; // default: "kg"
+  pet_type?: string; // default: "other"
+  breed?: string | null;
   membership_plan_id?: number | null;
   open_membership?: boolean; // default: false
   use_gift_coupon?: boolean; // default: false
@@ -363,6 +372,8 @@ export interface BookingQuoteIn {
   add_on_ids?: number[]; // default: []
   weight_value?: number | string | null;
   weight_unit?: string; // default: "kg"
+  pet_type?: string; // default: "other"
+  breed?: string | null;
   membership_plan_id?: number | null;
   open_membership?: boolean; // default: false
   use_gift_coupon?: boolean; // default: false
@@ -371,6 +382,10 @@ export interface BookingQuoteIn {
 }
 
 export interface BookingPriceBreakdown {
+  pricing_pet_type: string;
+  base_package_amount: number | string;
+  breed_surcharge_amount: number | string;
+  breed_surcharge_labels?: string[]; // default: []
   package_amount: number | string;
   addons_amount: number | string;
   membership_fee: number | string;
@@ -413,13 +428,13 @@ export interface BookingDetailOut {
   status: string;
   scheduled_time?: string | null;
   notes?: string | null;
-  preferred_time_slots: Record<string, unknown>[];
-  address_snapshot: Record<string, unknown>;
-  pet_snapshot: Record<string, unknown>;
-  package_snapshot: Record<string, unknown>;
-  addons_snapshot: Record<string, unknown>[];
-  membership_snapshot: Record<string, unknown>;
-  coupon_snapshot: Record<string, unknown>;
+  preferred_time_slots?: Record<string, unknown>[];
+  address_snapshot?: Record<string, unknown>;
+  pet_snapshot?: Record<string, unknown>;
+  package_snapshot?: Record<string, unknown>;
+  addons_snapshot?: Record<string, unknown>[];
+  membership_snapshot?: Record<string, unknown>;
+  coupon_snapshot?: Record<string, unknown>;
   package_amount: number | string;
   addons_amount: number | string;
   membership_fee: number | string;
@@ -429,7 +444,7 @@ export interface BookingDetailOut {
   payable_amount: number | string;
   deposit_amount: number | string;
   final_amount: number | string;
-  payments: BookingPaymentOut[];
+  payments?: BookingPaymentOut[];
 }
 
 // 门店相关类型
@@ -697,8 +712,24 @@ export async function socialLogin(data: SocialLoginIn): Promise<TokenOut> {
 /**
  * 获取服务列表
  */
-export async function getServices(): Promise<ServiceOut[]> {
-  const response = await http.get<ServiceOut[]>("/api/catalog/services");
+export interface GetServicesIn {
+  pet_type?: string;
+  breed?: string;
+  weight?: number | string;
+  weight_unit?: string;
+}
+
+export async function getServices(params?: GetServicesIn): Promise<ServiceOut[]> {
+  const queryParams = new URLSearchParams();
+  if (params?.pet_type) queryParams.append("pet_type", params.pet_type);
+  if (params?.breed) queryParams.append("breed", params.breed);
+  if (params?.weight !== undefined && params.weight !== null && String(params.weight).trim() !== "") {
+    queryParams.append("weight", String(params.weight));
+  }
+  if (params?.weight_unit) queryParams.append("weight_unit", params.weight_unit);
+
+  const url = `/api/catalog/services${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+  const response = await http.get<ServiceOut[]>(url);
   return response.data;
 }
 

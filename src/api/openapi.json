@@ -486,7 +486,53 @@
       "get": {
         "operationId": "api_services_list_services",
         "summary": "List Services",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pet_type",
+            "schema": {
+              "default": "other",
+              "title": "Pet Type",
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "breed",
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Breed"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "weight",
+            "schema": {
+              "anyOf": [
+                { "type": "number" },
+                {
+                  "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                  "type": "string"
+                },
+                { "type": "null" }
+              ],
+              "title": "Weight"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "weight_unit",
+            "schema": {
+              "default": "kg",
+              "title": "Weight Unit",
+              "type": "string"
+            },
+            "required": false
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2232,6 +2278,42 @@
             ],
             "title": "Base Price"
           },
+          "base_amount": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              { "type": "null" }
+            ],
+            "title": "Base Amount"
+          },
+          "breed_surcharge_amount": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "default": "0",
+            "title": "Breed Surcharge Amount"
+          },
+          "breed_surcharge_labels": {
+            "default": [],
+            "items": { "type": "string" },
+            "title": "Breed Surcharge Labels",
+            "type": "array"
+          },
+          "pricing_pet_type": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Pricing Pet Type"
+          },
+          "weight_price_id": {
+            "anyOf": [{ "type": "integer" }, { "type": "null" }],
+            "title": "Weight Price Id"
+          },
           "service_time": {
             "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Service Time"
@@ -2245,98 +2327,10 @@
               { "type": "null" }
             ],
             "title": "Items"
-          },
-          "weight_prices": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/ServiceWeightPriceOut"
-                },
-                "type": "array"
-              },
-              { "type": "null" }
-            ],
-            "title": "Weight Prices"
           }
         },
         "required": ["id", "name", "type", "base_price"],
         "title": "ServiceOut",
-        "type": "object"
-      },
-      "ServiceWeightPriceOut": {
-        "properties": {
-          "id": { "title": "Id", "type": "integer" },
-          "min_weight_kg": {
-            "anyOf": [
-              { "type": "number" },
-              {
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
-                "type": "string"
-              }
-            ],
-            "title": "Min Weight Kg"
-          },
-          "max_weight_kg": {
-            "anyOf": [
-              { "type": "number" },
-              {
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
-                "type": "string"
-              },
-              { "type": "null" }
-            ],
-            "title": "Max Weight Kg"
-          },
-          "price": {
-            "anyOf": [
-              { "type": "number" },
-              {
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
-                "type": "string"
-              }
-            ],
-            "title": "Price"
-          },
-          "label": {
-            "anyOf": [{ "type": "string" }, { "type": "null" }],
-            "title": "Label"
-          },
-          "surcharge_ratio_a": {
-            "anyOf": [
-              { "type": "number" },
-              {
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
-                "type": "string"
-              }
-            ],
-            "default": "0",
-            "title": "Surcharge Ratio A"
-          },
-          "surcharge_ratio_b": {
-            "anyOf": [
-              { "type": "number" },
-              {
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
-                "type": "string"
-              }
-            ],
-            "default": "0",
-            "title": "Surcharge Ratio B"
-          },
-          "surcharge_ratio_c": {
-            "anyOf": [
-              { "type": "number" },
-              {
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
-                "type": "string"
-              }
-            ],
-            "default": "0",
-            "title": "Surcharge Ratio C"
-          }
-        },
-        "required": ["id", "min_weight_kg", "price"],
-        "title": "ServiceWeightPriceOut",
         "type": "object"
       },
       "AddOnOut": {
@@ -2663,22 +2657,7 @@
         "properties": {
           "id": { "title": "Id", "type": "integer" },
           "pet_type": { "title": "Pet Type", "type": "string" },
-          "breed": { "title": "Breed", "type": "string" },
-          "surcharge_a": {
-            "default": false,
-            "title": "Surcharge A",
-            "type": "boolean"
-          },
-          "surcharge_b": {
-            "default": false,
-            "title": "Surcharge B",
-            "type": "boolean"
-          },
-          "surcharge_c": {
-            "default": false,
-            "title": "Surcharge C",
-            "type": "boolean"
-          }
+          "breed": { "title": "Breed", "type": "string" }
         },
         "required": ["id", "pet_type", "breed"],
         "title": "PetBreedOut",
@@ -2808,6 +2787,7 @@
       },
       "BookingPriceBreakdown": {
         "properties": {
+          "pricing_pet_type": { "title": "Pricing Pet Type", "type": "string" },
           "base_package_amount": {
             "anyOf": [
               { "type": "number" },
@@ -2917,6 +2897,7 @@
           }
         },
         "required": [
+          "pricing_pet_type",
           "base_package_amount",
           "breed_surcharge_amount",
           "package_amount",
