@@ -706,8 +706,8 @@ export function Step4() {
                 <div className="flex items-center justify-center relative shrink-0 size-[calc(20*var(--px393))]">
                   <div className={cn("flex-none", isPackageExpanded ? "rotate-180" : "")}>
                     <div className={cn(
-                      "content-stretch flex items-center justify-center relative rounded-[calc(8*var(--px393))] size-[calc(20*var(--px393))]",
-                      "hover:border hover:border-[#8b6357] hover:border-solid transition-colors"
+                      "content-stretch flex items-center justify-center relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] size-[calc(20*var(--px393))] border border-transparent",
+                      "hover:border-[#8b6357] hover:border-solid transition-colors"
                     )}>
                       <Icon name="chevron-down" size={16} className="text-[#8b6357]" />
                     </div>
@@ -798,8 +798,8 @@ export function Step4() {
                 <div className="flex items-center justify-center relative shrink-0 size-[calc(20*var(--px393))]">
                   <div className={cn("flex-none", isAddOnsExpanded ? "rotate-180" : "")}>
                     <div className={cn(
-                      "content-stretch flex items-center justify-center relative rounded-[calc(8*var(--px393))] size-[calc(20*var(--px393))]",
-                      "hover:border hover:border-[#8b6357] hover:border-solid transition-colors"
+                      "content-stretch flex items-center justify-center relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] size-[calc(20*var(--px393))] border border-transparent",
+                      "hover:border-[#8b6357] hover:border-solid transition-colors"
                     )}>
                       <Icon name="chevron-down" size={16} className="text-[#8b6357]" />
                     </div>
