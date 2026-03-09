@@ -498,17 +498,17 @@ export function ImagePreview({
                     key={index}
                     onClick={() => setCurrentIndex(index)}
                     className={cn(
-                      "content-stretch flex flex-col items-start overflow-visible relative rounded-[14px] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] shrink-0 transition-all size-[61.6px]",
+                      "content-stretch flex flex-col items-start overflow-hidden relative rounded-[14px] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] shrink-0 transition-all size-[61.6px] cursor-pointer",
                       isSelected
                         ? "bg-[rgba(255,255,255,0)] border-2 border-[#de6a07] border-solid p-[2.2px] scale-110 z-10"
                         : "border-2 border-[#d1d5dc] border-solid opacity-70 p-[2.2px] scale-100"
                     )}
                     aria-label={`View image ${index + 1}`}
                   >
-                    <div className="relative shrink-0 w-full h-[57.2px]">
+                    <div className="relative shrink-0 w-full h-full overflow-hidden rounded-[10px]">
                       <img
                         alt={`Thumbnail ${index + 1}`}
-                        className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full rounded-[10px]"
+                        className="block max-w-none object-50%-50% object-cover pointer-events-none w-full h-full"
                         src={image}
                       />
                     </div>
