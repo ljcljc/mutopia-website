@@ -24,8 +24,13 @@ export default function AccountDropdown({
       <DropdownMenuTrigger asChild>
         <div className="relative shrink-0 cursor-pointer hover:opacity-80 transition-opacity" data-name="Button tertiary">
           <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[8px] items-center px-[12px] py-[4px] relative">
-            <div className="bg-[#8b6357] overflow-clip relative rounded-[100px] shrink-0 size-[20px] flex items-center justify-center" data-name="Icons/Avatar/Brown/Default/Rempli">
+            <div className="bg-[#8b6357] relative rounded-[100px] shrink-0 size-[20px] flex items-center justify-center" data-name="Icons/Avatar/Brown/Default/Rempli">
               <Icon name="user" aria-label="User" className="block size-full text-white" />
+              {userInfo?.is_member && (
+                <span className="absolute -right-[4px] -top-[4px] z-10 inline-flex h-[12px] w-[12px] items-center justify-center rounded-full border border-white bg-[#DCFCE7] text-[8px] font-['Comfortaa:Bold',sans-serif] font-bold leading-none text-[#008236] pointer-events-none">
+                  M
+                </span>
+              )}
             </div>
             <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#8b6357] text-[12px]">
               {userName}
