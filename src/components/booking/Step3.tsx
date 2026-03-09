@@ -476,7 +476,7 @@ export function Step3() {
                       </>
                     )}
                     {/* Separator line */}
-                    <div className="h-0 relative shrink-0 w-full border-t border-[#e0e0e0] my-[4px]" />
+                    <div className="h-0 relative shrink-0 w-full border-t border-[#000000] my-[4px]" />
                     <div className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
                       <p className="relative shrink-0">
                         Subtotal
@@ -507,7 +507,7 @@ export function Step3() {
                       </div>
                     ))}
                     {/* Separator line */}
-                    <div className="h-0 relative shrink-0 w-full border-t border-[#e0e0e0] my-[4px]" />
+                    <div className="h-0 relative shrink-0 w-full border-t border-[#000000] my-[4px]" />
                     <div className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
                       <p className="relative shrink-0">
                         Subtotal

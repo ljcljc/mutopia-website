@@ -716,7 +716,7 @@ export function Step4() {
               </div>
               {isPackageExpanded && (
                 <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full">
-                  <div className="h-0 relative shrink-0 w-full border-t border-[#e0e0e0] my-[4px]" />
+                  <div className="h-0 relative shrink-0 w-full border-t border-[#000000] my-[4px]" />
                   {selectedService && (
                     <>
                       {/* Service package name */}
@@ -764,7 +764,7 @@ export function Step4() {
                         </>
                       )}
                       {/* Separator line */}
-                      <div className="h-0 relative shrink-0 w-full border-t border-[#e0e0e0] my-[4px]" />
+                      <div className="h-0 relative shrink-0 w-full border-t border-[#000000] my-[4px]" />
                     </>
                   )}
                   <div className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between relative shrink-0 text-[#4a3c2a] w-full">
@@ -808,7 +808,7 @@ export function Step4() {
               </div>
               {isAddOnsExpanded && (
                 <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full">
-                  <div className="h-0 relative shrink-0 w-full border-t border-[#e0e0e0] my-[4px]" />
+                  <div className="h-0 relative shrink-0 w-full border-t border-[#000000] my-[4px]" />
                   {/* Add-ons list */}
                   {selectedAddOnsDetails.length > 0 && (
                     <>
@@ -855,7 +855,7 @@ export function Step4() {
                         );
                       })}
                       {/* Separator line */}
-                      <div className="h-0 relative shrink-0 w-full border-t border-[#e0e0e0] my-[4px]" />
+                      <div className="h-0 relative shrink-0 w-full border-t border-[#000000] my-[4px]" />
                     </>
                   )}
                   <div className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between relative shrink-0 text-[#4a3c2a] w-full">
@@ -907,7 +907,7 @@ export function Step4() {
                     </p>
                   )}
                 </div>
-                <div className="h-0 relative shrink-0 w-full border-t border-[#e0e0e0] my-[4px]" />
+                <div className="h-0 relative shrink-0 w-full border-t border-[#000000] my-[4px]" />
               </div>
               <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full">
                 <div className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between relative shrink-0 text-[#4a3c2a] w-full">

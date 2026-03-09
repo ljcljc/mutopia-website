@@ -1193,7 +1193,7 @@ export function Step6() {
       )}
 
       {/* Annual membership promotion card - shown when user hasn't selected membership */}
-      {!useMembership && membershipPlan && (
+      {!useMembership && membershipPlan && userInfo?.is_member !== true && (
         <div className="bg-[#6e3d81] content-stretch flex flex-col items-start p-[calc(24*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full overflow-hidden">
           {/* Decorative background circles */}
           <div className="absolute bg-[rgba(255,255,255,0.15)] opacity-30 rounded-full size-[74px] left-[46px] top-[116px]" />
