@@ -1289,18 +1289,18 @@ export function Step6() {
                   ${finalTotal.toFixed(2)}
                 </p>
               </div>
-              {/* Dropdown button - show on mobile when expanded, desktop always */}
+              {/* Dropdown button - mobile only */}
               <button
                 onClick={() => setIsTotalExpanded(!isTotalExpanded)}
                 className={cn(
-                  "flex items-center justify-center relative shrink-0 size-[calc(20*var(--px393))] sm:size-[20px] cursor-pointer hover:border hover:border-[#8b6357] hover:border-solid transition-colors rounded-[calc(8*var(--px393))] sm:rounded-[8px]",
+                  "flex sm:hidden items-center justify-center relative shrink-0 size-[calc(20*var(--px393))] cursor-pointer hover:border hover:border-[#8b6357] hover:border-solid transition-colors rounded-[calc(8*var(--px393))]",
                   isTotalExpanded ? "ml-[calc(8*var(--px393))] sm:ml-0" : "ml-[calc(8*var(--px393))] sm:ml-0"
                 )}
               >
                 <Icon
                   name="chevron-down"
                   className={cn(
-                    "size-[calc(20*var(--px393))] sm:size-[20px] text-[#4a3c2a] transition-transform",
+                    "size-[calc(20*var(--px393))] text-[#4a3c2a] transition-transform",
                     isTotalExpanded ? "rotate-180" : ""
                   )}
                 />
@@ -1720,7 +1720,7 @@ export function Step6() {
       </div>
 
       {/* Bottom buttons */}
-      <div className="content-stretch flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-[calc(12*var(--px393))] sm:gap-0 relative shrink-0 w-full">
+      <div className="content-stretch flex flex-col sm:flex-row items-stretch sm:items-center gap-[calc(12*var(--px393))] sm:gap-[20px] relative shrink-0 w-full">
         <OrangeButton size="medium" onClick={handleProceedToPayment} disabled={isSubmitting} loading={isSubmitting} className="w-[220px] sm:w-auto">
           <div className="flex gap-[calc(4*var(--px393))] sm:gap-[4px] items-center">
             <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] text-[calc(14*var(--px393))] sm:text-[14px] text-white">
@@ -1732,6 +1732,15 @@ export function Step6() {
               className="size-[calc(14*var(--px393))] sm:size-[14px] text-white"
             />
           </div>
+        </OrangeButton>
+        <OrangeButton
+          size="medium"
+          variant="outline"
+          onClick={() => setCurrentStep(5)}
+          disabled={isSubmitting}
+          className="w-[220px] sm:w-auto"
+        >
+          Back
         </OrangeButton>
       </div>
     </div>
