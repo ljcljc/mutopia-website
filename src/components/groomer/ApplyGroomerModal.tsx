@@ -403,16 +403,6 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
     setSubmitError(null);
   };
 
-  const handleEmailChange = (value: string) => {
-    setEmail(value);
-    console.log("[ApplyGroomer] inputEmail:", value, "loginEmail:", loginEmail || null);
-    if (applyStatus || statusError) {
-      setApplyStatus(null);
-      setStatusError(null);
-      setStep("identification");
-    }
-  };
-
   useEffect(() => {
     if (open) return;
     resetAllFields();
@@ -1131,135 +1121,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                 </div>
               )}
 
-              {step === "accountAgreement" && (
-                <div className="flex flex-col gap-[28px] items-start">
-                <div className="flex flex-col gap-[16px] items-center w-full">
-                    <div className="w-[348px]">
-                      <PasswordInput
-                        value={accountPassword}
-                        onChange={setAccountPassword}
-                        showPassword={showAccountPassword}
-                        onTogglePassword={() => setShowAccountPassword((prev) => !prev)}
-                        hasError={showPasswordError}
-                        showValidation
-                        label="Password"
-                        placeholder="Enter password"
-                      />
-                    </div>
-                    <div className="w-[348px]">
-                      <PasswordInput
-                        value={accountPasswordConfirm}
-                        onChange={setAccountPasswordConfirm}
-                        showPassword={showAccountPasswordConfirm}
-                        onTogglePassword={() => setShowAccountPasswordConfirm((prev) => !prev)}
-                        hasError={showConfirmError}
-                        label="Confirm password"
-                        placeholder="Enter password"
-                      />
-                      {showConfirmError && (
-                        <p className="font-['Comfortaa:Regular',sans-serif] text-[12px] leading-[17.5px] text-[#de1507] mt-[4px]">
-                          Passwords do not match.
-                        </p>
-                      )}
-                    </div>
-                    <p className="font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[17.5px] text-[#4a3c2a] w-[348px]">
-                      By selecting Agree and continue, I agree to{" "}
-                      <span className="text-[#de6a07] underline">Terms of Service</span>,{" "}
-                      <span className="text-[#de6a07] underline">Payments Terms of Service</span>, and{" "}
-                      <span className="text-[#de6a07] underline">Privacy Policy</span>.
-                    </p>
-                  </div>
-                  <div className="flex items-center justify-between w-full">
-                    <OrangeButton
-                      size="compact"
-                      variant="secondary"
-                      type="button"
-                      className="w-[120px] h-[36px]"
-                      onClick={() => setStep("portfolio")}
-                    >
-                      Back
-                    </OrangeButton>
-                    <OrangeButton
-                      size="medium"
-                      variant="primary"
-                      type="button"
-                      className="w-[200px]"
-                      disabled={!isPasswordValid || !accountPasswordConfirm || showConfirmError}
-                      onClick={() => setStep("accountVerify")}
-                    >
-                      <div className="flex items-center gap-[4px]">
-                        <span className="text-[14px]">Agree and continue</span>
-                        <Icon name="button-arrow" size={16} className="text-white" />
-                      </div>
-                    </OrangeButton>
-                  </div>
-                </div>
-              )}
-
-              {step === "accountVerify" && (
-                <div className="flex flex-col items-center gap-[32px]">
-                  <div className="flex flex-col items-center gap-[12px] w-[316px]">
-                    <div className="text-center text-[#4a3c2a]">
-                      <p className="font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[17.5px]">
-                        Enter the <span className="font-['Comfortaa:Medium',sans-serif] font-medium">6-digital code sent to</span>
-                      </p>
-                      <p className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px]">
-                        {email.trim() || loginEmail}
-                      </p>
-                    </div>
-                    <p className="font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[17.5px] text-[#de6a07]">
-                      {verificationCountdown > 0 ? (
-                        <>
-                          Expired in <span className="underline">{verificationCountdown}</span> secondes
-                        </>
-                      ) : (
-                        "Code expired"
-                      )}
-                    </p>
-                    <VerificationCodeInput
-                      code={verificationCode}
-                      onChange={setVerificationCode}
-                      error={verificationError || undefined}
-                    />
-                    {verificationError && (
-                      <p className="font-['Comfortaa:Regular',sans-serif] text-[12px] leading-[17.5px] text-[#de1507] text-center">
-                        {verificationError}
-                      </p>
-                    )}
-                    <div className="flex items-center justify-between w-full text-[#4a3c2a]">
-                      <button
-                        type="button"
-                        className="text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#4a3c2a]"
-                        onClick={() => setStep("portfolio")}
-                      >
-                        Change email
-                      </button>
-                      <button
-                        type="button"
-                        className="text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#4a3c2a]"
-                        onClick={handleResendVerificationCode}
-                        disabled={verificationCountdown > 0 || isResendingCode}
-                      >
-                        {isResendingCode ? "Sending..." : "Resend code"}
-                      </button>
-                    </div>
-                  </div>
-                  <OrangeButton
-                    size="medium"
-                    variant="primary"
-                    type="button"
-                    className="w-[209px]"
-                    onClick={handleSubmitApply}
-                  >
-                    <div className="flex items-center gap-[4px]">
-                      <span className="text-[14px]">Submit</span>
-                      <Icon name="button-arrow" size={16} className="text-white" />
-                    </div>
-                  </OrangeButton>
-                </div>
-              )}
-
-              {!isAccountStep && !isSubmittedStep && (
+              {!isSubmittedStep && (
                 <>
                   <div className="flex items-center justify-between">
                     <OrangeButton
@@ -1284,7 +1146,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                       variant="primary"
                       type="button"
                       className="w-[120px]"
-                      loading={step === "portfolio" && !shouldShowAccountSteps && isSubmitting}
+                      loading={step === "portfolio" && isSubmitting}
                       disabled={
                         step === "identification"
                           ? !isFormComplete
@@ -1299,18 +1161,12 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                         } else if (step === "experience") {
                           setStep("portfolio");
                         } else if (step === "portfolio") {
-                          if (shouldShowAccountSteps) {
-                            setStep(isEmailRegistered ? "accountVerify" : "accountAgreement");
-                          } else {
-                            handleSubmitApply();
-                          }
+                          handleSubmitApply();
                         }
                       }}
                     >
                       <div className="flex items-center gap-[4px]">
-                        <span className="text-[14px]">
-                          {step === "portfolio" && !shouldShowAccountSteps ? "Submit" : "Next"}
-                        </span>
+                        <span className="text-[14px]">{step === "portfolio" ? "Submit" : "Next"}</span>
                         <Icon name="button-arrow" size={16} className="text-white" />
                       </div>
                     </OrangeButton>
@@ -1323,14 +1179,10 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                 </>
               )}
               </div>
-            )}
           </div>
         </div>
       </DialogContent>
     </Dialog>
-    <LoginModal open={isLoginModalOpen} onOpenChange={setIsLoginModalOpen}>
-      <div />
-    </LoginModal>
     </>
   );
 }
