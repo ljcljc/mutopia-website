@@ -7,6 +7,15 @@ import { getBookingDetail, cancelBooking, type AddressOut, type BookingDetailOut
 import { toast } from "sonner";
 import AddAddressModal from "@/components/account/AddAddressModal";
 import ModifyAddressModal from "@/components/account/ModifyAddressModal";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 
 function formatDateTime(dateString?: string | null): string {
   if (!dateString) return "";
@@ -46,6 +55,7 @@ export default function BookingDetail() {
   const [isLoading, setIsLoading] = useState(false);
   const [isPackageExpanded, setIsPackageExpanded] = useState(true);
   const [isCanceling, setIsCanceling] = useState(false);
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isModifyOpen, setIsModifyOpen] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
@@ -222,13 +232,11 @@ export default function BookingDetail() {
   // 处理取消预约
   const handleCancelBooking = async () => {
     if (!detail?.id) return;
-    
-    const confirmed = window.confirm("Are you sure you want to cancel this booking?");
-    if (!confirmed) return;
-    
+
     setIsCanceling(true);
     try {
       await cancelBooking(detail.id);
+      setIsCancelDialogOpen(false);
       toast.success("Booking canceled successfully");
       // 刷新数据或跳转回 dashboard
       navigate("/account/dashboard");
@@ -543,7 +551,7 @@ export default function BookingDetail() {
             <div className="flex justify-end">
               <button
                 type="button"
-                onClick={handleCancelBooking}
+                onClick={() => setIsCancelDialogOpen(true)}
                 disabled={isCanceling}
                 className="flex items-center justify-center gap-[8px] text-[#8B6357] text-[12px] leading-[17.5px] font-['Comfortaa:Bold',sans-serif] disabled:opacity-50 disabled:cursor-not-allowed hover:text-[#DE6A07] transition-colors cursor-pointer"
               >
@@ -554,6 +562,54 @@ export default function BookingDetail() {
           )}
         </div>
       </div>
+
+      <AlertDialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
+        <AlertDialogContent className="rounded-[20px] px-0 py-0 max-w-[calc(100%-32px)] sm:max-w-[520px]">
+          <div className="flex flex-col gap-[16px] pb-[32px] pt-[12px]">
+            <AlertDialogHeader className="px-[12px]">
+              <div className="flex items-center justify-between w-full">
+                <AlertDialogPrimitive.Cancel asChild>
+                  <button
+                    type="button"
+                    className="h-[16px] w-[16px] p-0 border-0 bg-transparent text-[#4A3C2A] opacity-70 hover:opacity-100"
+                  >
+                    <Icon name="close-arrow" size={16} className="text-[#4A3C2A]" />
+                  </button>
+                </AlertDialogPrimitive.Cancel>
+                <AlertDialogTitle className="flex-1 text-center font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] leading-[22.75px] text-[#4C4C4C]">
+                  Cancel booking for {petName}
+                </AlertDialogTitle>
+                <span className="w-[16px]" />
+              </div>
+            </AlertDialogHeader>
+            <div className="h-px bg-[rgba(0,0,0,0.1)]" />
+            <div className="px-[24px]">
+              <AlertDialogDescription className="font-['Comfortaa:Bold',sans-serif] font-bold text-[14px] leading-[22px] text-[#4A5565] m-0">
+                By canceling this booking, it will no longer appear in your upcoming bookings. Are you sure you want to continue?
+              </AlertDialogDescription>
+            </div>
+            <AlertDialogFooter className="px-[24px]">
+              <div className="flex items-center justify-end gap-[10px] w-full">
+                <AlertDialogPrimitive.Cancel asChild>
+                  <OrangeButton variant="outline" size="medium">
+                    No, Keep booking
+                  </OrangeButton>
+                </AlertDialogPrimitive.Cancel>
+                <AlertDialogPrimitive.Action asChild>
+                  <OrangeButton
+                    variant="primary"
+                    size="medium"
+                    onClick={handleCancelBooking}
+                    loading={isCanceling}
+                  >
+                    Yes, Cancel
+                  </OrangeButton>
+                </AlertDialogPrimitive.Action>
+              </div>
+            </AlertDialogFooter>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <ModifyAddressModal
         open={isModifyOpen}

@@ -3,6 +3,7 @@ import { Icon } from "@/components/common/Icon";
 import {
   AlertDialog,
   AlertDialogContent,
+  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -50,6 +51,9 @@ export default function ModifyAddressModal({
               </AlertDialogTitle>
             </div>
             <div className="h-px bg-[rgba(0,0,0,0.1)] w-full" />
+            <AlertDialogDescription className="sr-only">
+              Select an existing address or add a new one, then save it for this booking.
+            </AlertDialogDescription>
           </AlertDialogHeader>
 
           <div className="px-[24px] flex flex-col gap-[16px]">

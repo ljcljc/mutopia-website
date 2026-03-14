@@ -14,6 +14,7 @@ import { buildImageUrl, getPetBreeds, updatePet, deletePet, memorializePet, uplo
 import {
   AlertDialog,
   AlertDialogContent,
+  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -1017,9 +1018,9 @@ export default function MyPets() {
             </AlertDialogHeader>
             <div className="h-px bg-[rgba(0,0,0,0.1)]" />
             <div className="px-[24px]">
-              <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[14px] leading-[22px] text-[#4A5565]">
+              <AlertDialogDescription className="font-['Comfortaa:Bold',sans-serif] font-bold text-[14px] leading-[22px] text-[#4A5565] m-0">
                 By deleting this pet’s profile, it will no longer appear in your app. Are you sure you want to continue?
-              </p>
+              </AlertDialogDescription>
             </div>
             <AlertDialogFooter className="px-[24px]">
               <div className="flex items-center justify-end gap-[10px] w-full">
