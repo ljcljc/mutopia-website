@@ -9,14 +9,23 @@ import { useState } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { OrangeButton } from "@/components/common";
+import { LoginModal } from "@/components/auth/LoginModal";
 import { useAuthStore } from "@/components/auth/authStore";
 import ApplyGroomerModal from "@/components/groomer/ApplyGroomerModal";
 
 export default function PageHeader() {
-  const { userInfo } = useAuthStore();
+  const { userInfo, user } = useAuthStore();
   const [isApplyOpen, setIsApplyOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isGroomerSwitchOn, setIsGroomerSwitchOn] = useState(false);
+  const isLoggedIn = Boolean(userInfo?.email ?? user?.email);
+
   const handleApplyOpen = () => {
+    if (!isLoggedIn) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+
     console.log("[ApplyGroomer] open modal");
     setIsApplyOpen(true);
   };
@@ -64,6 +73,16 @@ export default function PageHeader() {
           setIsApplyOpen(open);
         }}
       />
+      <LoginModal
+        open={isLoginModalOpen}
+        onOpenChange={setIsLoginModalOpen}
+        onSuccess={() => {
+          setIsLoginModalOpen(false);
+          setIsApplyOpen(true);
+        }}
+      >
+        <div />
+      </LoginModal>
     </>
   );
 }

@@ -108,7 +108,20 @@ function Navigation() {
 }
 
 function ApplyAsGroomerButton() {
+  const user = useAuthStore((state) => state.user);
+  const userInfo = useAuthStore((state) => state.userInfo);
   const [isApplyOpen, setIsApplyOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const isLoggedIn = Boolean(userInfo?.email ?? user?.email);
+
+  const handleApplyClick = () => {
+    if (!isLoggedIn) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+
+    setIsApplyOpen(true);
+  };
 
   return (
     <>
@@ -118,11 +131,21 @@ function ApplyAsGroomerButton() {
         showArrow={false}
         className="shrink-0"
         type="button"
-        onClick={() => setIsApplyOpen(true)}
+        onClick={handleApplyClick}
       >
         Apply as groomer
       </OrangeButton>
       <ApplyGroomerModal open={isApplyOpen} onOpenChange={setIsApplyOpen} />
+      <LoginModal
+        open={isLoginModalOpen}
+        onOpenChange={setIsLoginModalOpen}
+        onSuccess={() => {
+          setIsLoginModalOpen(false);
+          setIsApplyOpen(true);
+        }}
+      >
+        <div />
+      </LoginModal>
     </>
   );
 }
