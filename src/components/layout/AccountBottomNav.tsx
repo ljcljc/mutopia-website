@@ -7,65 +7,127 @@ interface NavItem {
   label: string;
   path: string;
   iconName: IconName;
-  showLabel?: boolean;
 }
 
-const navItems: NavItem[] = [
-  {
-    id: "dashboard",
-    label: "Dashboard",
-    path: "/account/dashboard",
-    iconName: "dashboard",
-    showLabel: true,
-  },
-  {
-    id: "my-pets",
-    label: "My Pets",
-    path: "/account/pets",
-    iconName: "pets",
-    showLabel: true,
-  },
-  {
-    id: "account",
-    label: "Account",
-    path: "/account/profile",
-    iconName: "user",
-    showLabel: true,
-  },
-  {
-    id: "more",
-    label: "Menu",
-    path: "/account/notifications",
-    iconName: "more",
-    showLabel: false,
-  },
-];
+type NavMode = "customer" | "groomer";
 
-const isActiveRoute = (pathname: string, path: string, from?: string | null): boolean => {
-  if (pathname.startsWith("/account/pets/new")) {
-    return path === (from === "my-pets" ? "/account/pets" : "/account/dashboard");
-  }
-  if (pathname.startsWith("/account/bookings")) {
-    return path === "/account/dashboard";
-  }
-  if (path === "/account" || path === "/account/") {
-    return pathname === "/account" || pathname === "/account/";
+interface NavConfig {
+  items: NavItem[];
+  center: {
+    path: string;
+    iconName: IconName;
+    label?: string;
+  };
+}
+
+const customerNavConfig: NavConfig = {
+  items: [
+    {
+      id: "dashboard",
+      label: "Dashboard",
+      path: "/account/dashboard",
+      iconName: "dashboard",
+    },
+    {
+      id: "my-pets",
+      label: "My Pets",
+      path: "/account/pets",
+      iconName: "pets",
+    },
+    {
+      id: "account",
+      label: "Account",
+      path: "/account/profile",
+      iconName: "user",
+    },
+    {
+      id: "more",
+      label: "Menu",
+      path: "/account/notifications",
+      iconName: "more",
+    },
+  ],
+  center: {
+    path: "/booking",
+    iconName: "calendar",
+    label: "Book",
+  },
+};
+
+const groomerNavConfig: NavConfig = {
+  items: [
+    {
+      id: "my-work",
+      label: "My work",
+      path: "/groomer/my-work",
+      iconName: "home",
+    },
+    {
+      id: "earnings",
+      label: "Earnings",
+      path: "/groomer/earnings",
+      iconName: "gift",
+    },
+    {
+      id: "account",
+      label: "Account",
+      path: "/groomer/account",
+      iconName: "user",
+    },
+    {
+      id: "more",
+      label: "Menu",
+      path: "/groomer/menu",
+      iconName: "more",
+    },
+  ],
+  center: {
+    path: "/groomer/account",
+    iconName: "logo",
+  },
+};
+
+const isActiveRoute = (
+  pathname: string,
+  path: string,
+  mode: NavMode,
+  from?: string | null
+): boolean => {
+  if (mode === "customer") {
+    if (pathname.startsWith("/account/pets/new")) {
+      return path === (from === "my-pets" ? "/account/pets" : "/account/dashboard");
+    }
+    if (pathname.startsWith("/account/bookings")) {
+      return path === "/account/dashboard";
+    }
+    if (path === "/account" || path === "/account/") {
+      return pathname === "/account" || pathname === "/account/";
+    }
   }
   return pathname === path || pathname.startsWith(path + "/");
+};
+
+const getNavConfig = (pathname: string): { mode: NavMode; config: NavConfig } => {
+  if (pathname.startsWith("/groomer")) {
+    return { mode: "groomer", config: groomerNavConfig };
+  }
+  return { mode: "customer", config: customerNavConfig };
 };
 
 export default function AccountBottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
   const from = (location.state as { from?: string } | null)?.from ?? null;
+  const { mode, config } = getNavConfig(location.pathname);
+  const items = config.items;
 
   return (
     <div className="account-bottom-nav fixed bottom-0 left-0 right-0 z-50 sm:hidden">
       <div className="relative mx-auto h-[71px] max-w-[393px] bg-white">
         <div aria-hidden="true" className="nav-bridge" />
         <div className="relative h-full">
-          {navItems.slice(0, 2).map((item) => {
-            const active = isActiveRoute(location.pathname, item.path, from);
+          {items.slice(0, 2).map((item) => {
+            const active = isActiveRoute(location.pathname, item.path, mode, from);
             return (
               <button
                 key={item.id}
@@ -101,21 +163,30 @@ export default function AccountBottomNav() {
           <div className="absolute left-1/2 top-[-9px] -translate-x-1/2">
             <button
               type="button"
-              onClick={() => navigate("/booking")}
-              aria-label="Book"
+              onClick={() => navigate(config.center.path)}
+              aria-label={config.center.label ?? "Main action"}
               className="book-btn flex h-16 w-16 flex-col items-center justify-center rounded-full"
             >
-              <div className="book-inner">
-                <Icon name="calendar" className="book-icon size-6 text-white" aria-hidden="true" />
-                <span className="book-text font-comfortaa text-[10px] font-normal leading-[15px] text-white">
-                  Book
-                </span>
+              <div className={cn("book-inner", mode === "groomer" && "book-inner-groomer")}>
+                <Icon
+                  name={config.center.iconName}
+                  className={cn(
+                    "book-icon",
+                    mode === "groomer" ? "h-[28px] w-[26.6px] text-[#8B6357]" : "size-6 text-white"
+                  )}
+                  aria-hidden="true"
+                />
+                {config.center.label ? (
+                  <span className="book-text font-comfortaa text-[10px] font-normal leading-[15px] text-white">
+                    {config.center.label}
+                  </span>
+                ) : null}
               </div>
             </button>
           </div>
 
-          {navItems.slice(2).map((item) => {
-            const active = isActiveRoute(location.pathname, item.path, from);
+          {items.slice(2).map((item) => {
+            const active = isActiveRoute(location.pathname, item.path, mode, from);
             return (
               <button
                 key={item.id}
@@ -168,7 +239,20 @@ export default function AccountBottomNav() {
           left: 94px;
           width: 48px;
         }
+        .account-bottom-nav .nav-item-my-work {
+          left: 22px;
+          width: 37.55px;
+        }
+        .account-bottom-nav .nav-item-earnings {
+          left: 86px;
+          width: 46.84px;
+        }
         .account-bottom-nav .nav-item-account {
+          left: 260px;
+          width: 43.23px;
+        }
+        .account-bottom-nav .nav-item-dashboard ~ .nav-item-account,
+        .account-bottom-nav .nav-item-my-pets ~ .nav-item-account {
           left: 253.16px;
           width: 46.84px;
         }
@@ -200,6 +284,10 @@ export default function AccountBottomNav() {
           flex-direction: column;
           align-items: center;
           padding-top: 12.5px;
+        }
+        .account-bottom-nav .book-inner-groomer {
+          justify-content: center;
+          padding-top: 0;
         }
         .account-bottom-nav .book-icon {
           flex-shrink: 0;

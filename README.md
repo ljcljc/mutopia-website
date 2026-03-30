@@ -316,6 +316,12 @@ pnpm lint:fix
 # 类型检查
 pnpm type-check
 
+# 运行自动测试
+pnpm test
+
+# 监听模式运行测试
+pnpm test:watch
+
 # 清理和重新安装
 pnpm clean
 pnpm reinstall
@@ -325,6 +331,25 @@ pnpm outdated
 ```
 
 访问 `http://localhost:5173`（默认端口）查看应用。
+
+### CI 校验
+
+项目已配置 GitHub Actions CI，触发条件如下：
+
+- push 到 `main`
+- 任意 `pull_request`
+
+CI 会执行以下校验：
+
+- `pnpm type-check`
+- `pnpm test`
+- `pnpm lint`
+
+建议在本地提交前至少先运行一次：
+
+```bash
+pnpm type-check && pnpm test && pnpm lint
+```
 
 ## 核心功能说明
 

@@ -5,13 +5,8 @@ import Home from "@/pages/Home";
 import Booking from "@/pages/Booking";
 import PaymentSuccess from "@/pages/PaymentSuccess";
 import PaymentFail from "@/pages/PaymentFail";
-import Dashboard from "@/pages/account/Dashboard";
-import BookingDetail from "@/pages/account/BookingDetail";
-import AddPet from "@/pages/account/AddPet";
-import MyPets from "@/pages/account/MyPets";
-import MemorializedPets from "@/pages/account/MemorializedPets";
-import Notifications from "@/pages/account/Notifications";
-import MyAccount from "@/pages/account/MyAccount";
+import { customerAccountRoutes } from "@/modules/customer/routes";
+import { groomerRoutes } from "@/modules/groomer/routes";
 
 export const router = createBrowserRouter([
   {
@@ -39,39 +34,7 @@ export const router = createBrowserRouter([
   {
     path: "/account",
     element: <AccountLayout />,
-    children: [
-      {
-        index: true,
-        element: <Dashboard />,
-      },
-      {
-        path: "dashboard",
-        element: <Dashboard />,
-      },
-      {
-        path: "bookings/:bookingId",
-        element: <BookingDetail />,
-      },
-      {
-        path: "pets",
-        element: <MyPets />,
-      },
-      {
-        path: "pets/memorialized",
-        element: <MemorializedPets />,
-      },
-      {
-        path: "pets/new",
-        element: <AddPet />,
-      },
-      {
-        path: "notifications",
-        element: <Notifications />,
-      },
-      {
-        path: "profile",
-        element: <MyAccount />,
-      },
-    ],
+    children: customerAccountRoutes,
   },
+  ...groomerRoutes,
 ]);

@@ -6,6 +6,7 @@
  */
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { OrangeButton } from "@/components/common";
@@ -14,10 +15,10 @@ import { useAuthStore } from "@/components/auth/authStore";
 import ApplyGroomerModal from "@/components/groomer/ApplyGroomerModal";
 
 export default function PageHeader() {
+  const navigate = useNavigate();
   const { userInfo, user } = useAuthStore();
   const [isApplyOpen, setIsApplyOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [isGroomerSwitchOn, setIsGroomerSwitchOn] = useState(false);
   const isLoggedIn = Boolean(userInfo?.email ?? user?.email);
 
   const handleApplyOpen = () => {
@@ -41,8 +42,12 @@ export default function PageHeader() {
             <div className="flex items-center gap-2 sm:gap-3">
               <Switch
                 id="groomer-account-toggle"
-                checked={isGroomerSwitchOn}
-                onCheckedChange={setIsGroomerSwitchOn}
+                checked={false}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    navigate("/groomer/account");
+                  }
+                }}
                 className="cursor-pointer"
                 aria-label="Groomer account toggle"
               />
