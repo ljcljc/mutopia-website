@@ -7,6 +7,40 @@
 
 import { thirdPartyConfig } from "./env";
 
+interface GooglePromptNotification {
+  getNotDisplayedReason?: () => string | undefined;
+  getSkippedReason?: () => string | undefined;
+}
+
+interface GoogleAccountsId {
+  initialize: (options: {
+    client_id: string;
+    callback: (response: GoogleCredentialResponse) => void;
+    auto_select: boolean;
+    cancel_on_tap_outside: boolean;
+    use_fedcm_for_prompt: boolean;
+  }) => void;
+  prompt: (callback: (notification: GooglePromptNotification) => void) => void;
+  renderButton: (
+    element: HTMLElement | null,
+    options: {
+      type: string;
+      theme: string;
+      size: string;
+      text: string;
+      shape: string;
+      logo_alignment: string;
+    }
+  ) => void;
+}
+
+interface GoogleWindow extends Window {
+  google?: {
+    accounts?: {
+      id?: GoogleAccountsId;
+    };
+  };
+}
 
 /**
  * Google 凭据响应
@@ -28,7 +62,8 @@ export interface GoogleErrorResponse {
  * 检查 Google OAuth 脚本是否已加载
  */
 function isGoogleScriptLoaded(): boolean {
-  return typeof window !== "undefined" && "google" in window && "accounts" in (window as any).google;
+  const googleWindow = window as GoogleWindow;
+  return typeof window !== "undefined" && !!googleWindow.google?.accounts?.id;
 }
 
 /**
@@ -83,7 +118,8 @@ export async function initializeGoogleAuth(
     throw new Error("Google Identity Services is not available");
   }
 
-  const google = (window as any).google;
+  const google = (window as GoogleWindow).google;
+  const googleAccountsId = google?.accounts?.id;
   
   // 获取当前页面的 origin（用于调试）
   const currentOrigin = window.location.origin;
@@ -91,7 +127,11 @@ export async function initializeGoogleAuth(
   console.log("[Google Auth] Current origin:", currentOrigin);
   
   try {
-    google.accounts.id.initialize({
+    if (!googleAccountsId) {
+      throw new Error("Google Identity Services is not available");
+    }
+
+    googleAccountsId.initialize({
       client_id: clientId,
       callback: callback,
       auto_select: false,
@@ -118,11 +158,11 @@ export function promptGoogleLogin(): void {
     throw new Error("Google Identity Services is not loaded. Call initializeGoogleAuth first.");
   }
 
-  const google = (window as any).google;
+  const google = (window as GoogleWindow).google;
   
   // 使用 FedCM 兼容的方式处理通知
   // 注意：即使启用了 use_fedcm_for_prompts，仍然建议使用 renderButton 而不是 prompt
-  google.accounts.id.prompt((notification: any) => {
+  google?.accounts?.id?.prompt((notification: GooglePromptNotification) => {
     // FedCM 兼容：使用 getNotDisplayedReason 和 getSkippedReason 替代旧方法
     // 这些方法在 FedCM 模式下可用
     if (typeof notification.getNotDisplayedReason === "function") {
@@ -155,14 +195,14 @@ export function renderGoogleButton(
     throw new Error("Google Identity Services is not loaded. Call initializeGoogleAuth first.");
   }
 
-  const google = (window as any).google;
+  const google = (window as GoogleWindow).google;
   const clientId = thirdPartyConfig.googleClientId;
 
   if (!clientId) {
     throw new Error("Google Client ID is not configured");
   }
 
-  google.accounts.id.renderButton(
+  google?.accounts?.id?.renderButton(
     document.getElementById(elementId),
     {
       type: "standard",

@@ -1,4 +1,4 @@
-import { Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useEffect, useRef } from "react";
 import {
   SidebarProvider,
@@ -10,10 +10,17 @@ import Footer from "./Footer";
 import AccountBottomNav from "./AccountBottomNav";
 import { ScrollToTop } from "@/components/common";
 import { Toaster } from "@/components/ui/sonner";
+import { useAuthStore } from "@/components/auth/authStore";
+import { STORAGE_KEYS } from "@/lib/storageKeys";
 
 export default function AccountLayout() {
   const location = useLocation();
   const contentRef = useRef<HTMLDivElement | null>(null);
+  const user = useAuthStore((state) => state.user);
+  const userInfo = useAuthStore((state) => state.userInfo);
+  const hasAccessToken =
+    typeof window !== "undefined" &&
+    !!window.localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
 
   useEffect(() => {
     if (contentRef.current) {
@@ -21,6 +28,10 @@ export default function AccountLayout() {
     }
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [location.pathname]);
+
+  if (!hasAccessToken && !user && !userInfo) {
+    return <Navigate to="/" replace state={{ from: location.pathname }} />;
+  }
 
   return (
     <SidebarProvider className="w-full" defaultOpen={true}>

@@ -7,6 +7,35 @@
 
 import { thirdPartyConfig } from "./env";
 
+interface FacebookSDK {
+  init: (options: {
+    appId: string;
+    cookie: boolean;
+    xfbml: boolean;
+    version: string;
+  }) => void;
+  getLoginStatus: (callback: (response: FacebookAuthResponse) => void) => void;
+  login: (
+    callback: (response: FacebookAuthResponse) => void,
+    options: {
+      scope: string;
+    }
+  ) => void;
+  api: (
+    path: string,
+    params: {
+      fields: string;
+      access_token: string;
+    },
+    callback: (response: FacebookUserInfo | { error?: { message: string } }) => void
+  ) => void;
+  logout: (callback: () => void) => void;
+}
+
+interface FacebookWindow extends Window {
+  FB?: FacebookSDK;
+}
+
 /**
  * Facebook 登录响应
  */
@@ -41,7 +70,7 @@ export interface FacebookUserInfo {
  * 检查 Facebook SDK 是否已加载
  */
 function isFacebookSDKLoaded(): boolean {
-  return typeof window !== "undefined" && "FB" in window;
+  return typeof window !== "undefined" && !!(window as FacebookWindow).FB;
 }
 
 /**
@@ -104,7 +133,10 @@ export async function initializeFacebookAuth(): Promise<void> {
     throw new Error("Facebook SDK is not available");
   }
 
-  const FB = (window as any).FB;
+  const FB = (window as FacebookWindow).FB;
+  if (!FB) {
+    throw new Error("Facebook SDK is not available");
+  }
   
   FB.init({
     appId: appId,
@@ -126,7 +158,11 @@ export function getFacebookLoginStatus(): Promise<FacebookAuthResponse | null> {
       return;
     }
 
-    const FB = (window as any).FB;
+    const FB = (window as FacebookWindow).FB;
+    if (!FB) {
+      resolve(null);
+      return;
+    }
     FB.getLoginStatus((response: FacebookAuthResponse) => {
       resolve(response);
     });
@@ -143,7 +179,11 @@ export function loginWithFacebook(): Promise<FacebookAuthResponse> {
       return;
     }
 
-    const FB = (window as any).FB;
+    const FB = (window as FacebookWindow).FB;
+    if (!FB) {
+      reject(new Error("Facebook SDK is not loaded. Call initializeFacebookAuth first."));
+      return;
+    }
     
     FB.login(
       (response: FacebookAuthResponse) => {
@@ -174,7 +214,11 @@ export function getFacebookUserInfo(accessToken: string): Promise<FacebookUserIn
       return;
     }
 
-    const FB = (window as any).FB;
+    const FB = (window as FacebookWindow).FB;
+    if (!FB) {
+      reject(new Error("Facebook SDK is not loaded."));
+      return;
+    }
     
     FB.api(
       "/me",
@@ -183,8 +227,8 @@ export function getFacebookUserInfo(accessToken: string): Promise<FacebookUserIn
         access_token: accessToken,
       },
       (response: FacebookUserInfo | { error?: { message: string } }) => {
-        if ((response as any).error) {
-          reject(new Error((response as any).error.message || "Failed to get Facebook user info"));
+        if ("error" in response && response.error) {
+          reject(new Error(response.error.message || "Failed to get Facebook user info"));
         } else {
           resolve(response as FacebookUserInfo);
         }
@@ -203,10 +247,13 @@ export function logoutFromFacebook(): Promise<void> {
       return;
     }
 
-    const FB = (window as any).FB;
+    const FB = (window as FacebookWindow).FB;
+    if (!FB) {
+      resolve();
+      return;
+    }
     FB.logout(() => {
       resolve();
     });
   });
 }
-

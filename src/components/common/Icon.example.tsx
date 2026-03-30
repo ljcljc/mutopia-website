@@ -5,7 +5,26 @@
  * 可以删除或作为参考
  */
 
-import { Icon } from "./Icon";
+import { Icon, type IconName } from "./Icon";
+
+const exampleIconNames = [
+  "nav-prev",
+  "nav-next",
+  "location",
+  "user",
+  "notify",
+  "chevron-down",
+  "menu",
+  "email",
+  "calendar",
+  "alert-error",
+  "alert-success",
+  "alert-warning",
+  "eye-visible",
+  "eye-invisible",
+  "facebook",
+  "google",
+] satisfies IconName[];
 
 export function IconExamples() {
   return (
@@ -84,29 +103,12 @@ export function IconExamples() {
       <section>
         <h2 className="text-xl font-semibold mb-4">所有可用图标</h2>
         <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
-          {[
-            "nav-prev",
-            "nav-next",
-            "location",
-            "user",
-            "notify",
-            "chevron-down",
-            "menu",
-            "email",
-            "calendar",
-            "alert-error",
-            "alert-success",
-            "alert-warning",
-            "eye-visible",
-            "eye-invisible",
-            "facebook",
-            "google",
-          ].map((iconName) => (
+          {exampleIconNames.map((iconName) => (
             <div
               key={iconName}
               className="flex flex-col items-center gap-2 p-4 border rounded"
             >
-              <Icon name={iconName as any} size={32} className="text-[#8b6357]" />
+              <Icon name={iconName} size={32} className="text-[#8b6357]" />
               <span className="text-xs text-center">{iconName}</span>
             </div>
           ))}
@@ -115,4 +117,3 @@ export function IconExamples() {
     </div>
   );
 }
-

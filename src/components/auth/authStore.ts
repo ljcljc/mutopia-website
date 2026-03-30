@@ -329,6 +329,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       ...initialState,
       // Preserve user info when resetting form state
       user: state.user,
+      userInfo: state.userInfo,
       verificationCode: ["", "", "", "", "", ""],
       verificationMode: "signup",
       codeSendCount: 0,

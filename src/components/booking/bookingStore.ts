@@ -538,8 +538,6 @@ export const useBookingStore = create<BookingState>((set) => ({
         // Auto-fill address if available
         if (info.address) {
           set({ address: info.address });
-          // Auto-fill city and postcode based on address (mock data for now)
-          set({ city: "Vancouver", postCode: "E1N 2E5" });
         }
       } else {
         // If userInfo is not in authStore, it means user hasn't logged in yet
