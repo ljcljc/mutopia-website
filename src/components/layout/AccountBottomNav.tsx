@@ -34,7 +34,7 @@ const navItems: NavItem[] = [
   },
   {
     id: "more",
-    label: "More",
+    label: "Menu",
     path: "/account/notifications",
     iconName: "more",
     showLabel: false,
@@ -61,8 +61,9 @@ export default function AccountBottomNav() {
 
   return (
     <div className="account-bottom-nav fixed bottom-0 left-0 right-0 z-50 sm:hidden">
-      <div className="bg-white border-t-2 border-[#8B6357] relative h-[60px]">
-        <div className="nav-list relative flex h-full items-center justify-between px-6">
+      <div className="relative mx-auto h-[71px] max-w-[393px] bg-white">
+        <div aria-hidden="true" className="nav-bridge" />
+        <div className="relative h-full">
           {navItems.slice(0, 2).map((item) => {
             const active = isActiveRoute(location.pathname, item.path, from);
             return (
@@ -73,61 +74,44 @@ export default function AccountBottomNav() {
                 aria-label={item.label}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "nav-item flex flex-col items-center gap-[3px]",
-                  active && "nav-item-active"
+                  "nav-item absolute top-[12px] h-[43px] transition-colors duration-200",
+                  `nav-item-${item.id}`
                 )}
               >
-                {active && (
-                  <span className="nav-item-outline" aria-hidden="true">
-                    <svg
-                      viewBox="0 0 58 17"
-                      preserveAspectRatio="none"
-                      role="presentation"
-                      aria-hidden="true"
-                    >
-                      <path
-                        d="M1 16.25L1 9C0.999862 6.5 1.4 1 9 1C16.6 1 38.5001 1 49.0001 1C51.6668 1 57.0001 2.6 57.0001 9C57.0001 9 57.0001 16.75 57.0001 16.25"
-                        fill="none"
-                        stroke="#8B6357"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        vectorEffect="non-scaling-stroke"
-                      />
-                    </svg>
-                  </span>
-                )}
                 <Icon
                   name={item.iconName}
-                  className={cn("size-[20px]", active ? "text-[#DE6A07]" : "text-[#8B6357]")}
+                  className={cn(
+                    "nav-item-icon size-6 transition-colors duration-200",
+                    active ? "text-[#E67E22]" : "text-[#9CA3AF]"
+                  )}
                   aria-hidden="true"
                 />
-                {item.showLabel && (
-                  <span
-                    className={cn(
-                      "font-comfortaa text-[12px] font-bold leading-[17.5px]",
-                      active ? "text-[#DE6A07]" : "text-[#8B6357]"
-                    )}
-                  >
-                    {item.label}
-                  </span>
-                )}
+                <span
+                  className={cn(
+                    "nav-item-text whitespace-nowrap font-comfortaa text-[10px] leading-[15px] transition-colors duration-200",
+                    active ? "font-bold text-[#E67E22]" : "font-normal text-[#9CA3AF]"
+                  )}
+                >
+                  {item.label}
+                </span>
               </button>
             );
           })}
 
-          <div className="flex flex-col items-center">
+          <div className="absolute left-1/2 top-[-9px] -translate-x-1/2">
             <button
               type="button"
               onClick={() => navigate("/booking")}
               aria-label="Book"
-              className="-mt-[22px] flex items-center justify-center rounded-full bg-[#DE6A07] shadow-[0px_10px_15px_0px_rgba(0,0,0,0.1),0px_4px_6px_0px_rgba(0,0,0,0.1)] size-[42px]"
+              className="book-btn flex h-16 w-16 flex-col items-center justify-center rounded-full"
             >
-              <Icon name="pet" className="size-[20px] text-white" aria-hidden="true" />
+              <div className="book-inner">
+                <Icon name="calendar" className="book-icon size-6 text-white" aria-hidden="true" />
+                <span className="book-text font-comfortaa text-[10px] font-normal leading-[15px] text-white">
+                  Book
+                </span>
+              </div>
             </button>
-            <span className="mt-[2px] font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#8B6357]">
-              Book
-            </span>
           </div>
 
           {navItems.slice(2).map((item) => {
@@ -140,99 +124,92 @@ export default function AccountBottomNav() {
                 aria-label={item.label}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "nav-item flex flex-col items-center gap-[3px]",
-                  active && item.showLabel
-                    ? "nav-item-active"
-                    : item.showLabel
-                      ? ""
-                      : "nav-item-icononly"
+                  "nav-item absolute top-[12px] h-[43px] transition-colors duration-200",
+                  `nav-item-${item.id}`
                 )}
               >
-                {active && item.showLabel && (
-                  <span className="nav-item-outline" aria-hidden="true">
-                    <svg
-                      viewBox="0 0 58 17"
-                      preserveAspectRatio="none"
-                      role="presentation"
-                      aria-hidden="true"
-                    >
-                      <path
-                        d="M1 16.25L1 9C0.999862 6.5 1.4 1 9 1C16.6 1 38.5001 1 49.0001 1C51.6668 1 57.0001 2.6 57.0001 9C57.0001 9 57.0001 16.75 57.0001 16.25"
-                        fill="none"
-                        stroke="#8B6357"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        vectorEffect="non-scaling-stroke"
-                      />
-                    </svg>
-                  </span>
-                )}
                 <Icon
                   name={item.iconName}
-                  className={cn("size-[20px]", active ? "text-[#DE6A07]" : "text-[#8B6357]")}
+                  className={cn(
+                    "nav-item-icon size-6 transition-colors duration-200",
+                    active ? "text-[#E67E22]" : "text-[#9CA3AF]"
+                  )}
                   aria-hidden="true"
                 />
-                {item.showLabel && (
-                  <span
-                    className={cn(
-                      "font-comfortaa text-[12px] font-bold leading-[17.5px]",
-                      active ? "text-[#DE6A07]" : "text-[#8B6357]"
-                    )}
-                  >
-                    {item.label}
-                  </span>
-                )}
+                <span
+                  className={cn(
+                    "nav-item-text whitespace-nowrap font-comfortaa text-[10px] leading-[15px] transition-colors duration-200",
+                    active ? "font-bold text-[#E67E22]" : "font-normal text-[#9CA3AF]"
+                  )}
+                >
+                  {item.label}
+                </span>
               </button>
             );
           })}
         </div>
       </div>
       <style>{`
-        .account-bottom-nav .nav-item {
-          position: relative;
-          width: max-content;
-          padding: 4px;
-          height: 50px;
-          transition: all 0.3s ease;
-          border-top-left-radius: 100px;
-          border-top-right-radius: 100px;
-        }
-        .account-bottom-nav .nav-item-icononly {
-          justify-content: center;
-        }
-        .account-bottom-nav .nav-item-active {
-          transform: translateY(-16px);
-          height: 60px;
-          background-color: #ffffff;
-          border-radius: 0;
-          box-sizing: border-box;
-        }
-        .account-bottom-nav .nav-item-outline {
+        .account-bottom-nav .nav-bridge {
           position: absolute;
-          inset: 0;
-          pointer-events: none;
-        }
-        .account-bottom-nav .nav-item-outline svg {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 17px;
-          display: block;
-        }
-        .account-bottom-nav .nav-item-active::marker {
-          content: none;
-        }
-        .account-bottom-nav .nav-list::before {
-          content: "";
-          position: absolute;
-          top: 0;
-          height: 2px;
-          width: 60px;
+          top: -21px;
+          left: 50%;
+          width: 78px;
+          height: 70px;
+          transform: translateX(-50%);
+          border-radius: 39px 39px 0 0;
           background: #ffffff;
-          left: calc(50% - 30px);
-          opacity: 0;
+        }
+        .account-bottom-nav .nav-item-dashboard {
+          left: 34.39px;
+          width: 30.81px;
+        }
+        .account-bottom-nav .nav-item-my-pets {
+          left: 94px;
+          width: 48px;
+        }
+        .account-bottom-nav .nav-item-account {
+          left: 253.16px;
+          width: 46.84px;
+        }
+        .account-bottom-nav .nav-item-more {
+          left: 328.8px;
+          width: 29.47px;
+        }
+        .account-bottom-nav .nav-item-icon {
+          position: absolute;
+          top: 0;
+          left: 50%;
+          transform: translateX(-50%);
+        }
+        .account-bottom-nav .nav-item-text {
+          position: absolute;
+          top: 28px;
+          left: 50%;
+          transform: translateX(-50%);
+        }
+        .account-bottom-nav .book-btn {
+          background: linear-gradient(180deg, #e67e22 0%, #f39c12 100%);
+          box-shadow: 0 8px 20px rgba(230, 126, 34, 0.4);
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .account-bottom-nav .book-inner {
+          display: flex;
+          height: 100%;
+          width: 100%;
+          flex-direction: column;
+          align-items: center;
+          padding-top: 12.5px;
+        }
+        .account-bottom-nav .book-icon {
+          flex-shrink: 0;
+        }
+        .account-bottom-nav .book-text {
+          margin-top: 0;
+        }
+        .account-bottom-nav .book-btn:active {
+          transform: scale(0.97);
+          box-shadow: 0 6px 14px rgba(230, 126, 34, 0.34);
         }
       `}</style>
     </div>

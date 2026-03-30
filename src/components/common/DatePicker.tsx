@@ -458,7 +458,7 @@ export function DatePicker({
                     name="calendar"
                     aria-label="Calendar"
                     className={`block size-full ${
-                      disabled ? "opacity-40" : ""
+                      disabled ? "text-[#717182] opacity-40" : "text-[#717182]"
                     }`}
                   />
                 </div>
