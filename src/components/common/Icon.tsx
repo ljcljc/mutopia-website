@@ -87,6 +87,7 @@ import IconPencilSvg from "@/assets/icons/icon-pencil.svg?react";
 import IconGiftSvg from "@/assets/icons/icon-gift.svg?react";
 import IconPhoneSvg from "@/assets/icons/icon-phone.svg?react";
 import IconLogoSvg from "@/assets/icons/icon-logo.svg?react";
+import IconLogoWhiteSvg from "@/assets/icons/icon-logo-white.svg?react";
 import IconHomeSvg from "@/assets/icons/icon-home.svg?react";
 import IconNotificationConfirmedSvg from "@/assets/icons/icon-notification-confirmed.svg?react";
 import IconNotificationReminderSvg from "@/assets/icons/icon-notification-reminder.svg?react";
@@ -94,6 +95,8 @@ import IconNotificationReferSvg from "@/assets/icons/icon-notification-refer.svg
 import IconNotificationRefundSvg from "@/assets/icons/icon-notification-refund.svg?react";
 import IconNotificationEmptySvg from "@/assets/icons/icon-notification-empty.svg?react";
 import IconAccountSvg from "@/assets/icons/icon-account.svg?react";
+import IconAccount2Svg from "@/assets/icons/icon-account-2.svg?react";
+import IconEarningSvg from "@/assets/icons/icon-earning.svg?react";
 import IconExperienceSvg from "@/assets/icons/icon-experience.svg?react";
 import IconIdentificationSvg from "@/assets/icons/icon-identification.svg?react";
 
@@ -162,6 +165,7 @@ const iconComponentMap = {
   "gift": IconGiftSvg,
   "phone": IconPhoneSvg,
   "logo": IconLogoSvg,
+  "logo-white": IconLogoWhiteSvg,
   "home": IconHomeSvg,
   "notification-confirmed": IconNotificationConfirmedSvg,
   "notification-reminder": IconNotificationReminderSvg,
@@ -169,6 +173,8 @@ const iconComponentMap = {
   "notification-refund": IconNotificationRefundSvg,
   "notification-empty": IconNotificationEmptySvg,
   "account": IconAccountSvg,
+  "account-2": IconAccount2Svg,
+  "earning": IconEarningSvg,
   "experience": IconExperienceSvg,
   "identification": IconIdentificationSvg,
 } as const;

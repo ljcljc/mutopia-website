@@ -1,5 +1,6 @@
 import GroomerLayout from "@/modules/groomer/layout/GroomerLayout";
 import GroomerRouteGuard from "@/modules/groomer/components/GroomerRouteGuard";
+import GroomerDashboardPage from "@/modules/groomer/pages/GroomerDashboardPage";
 import GroomerAccountPage from "@/modules/groomer/pages/GroomerAccountPage";
 import GroomerMyWorkPage from "@/modules/groomer/pages/GroomerMyWorkPage";
 import GroomerEarningsPage from "@/modules/groomer/pages/GroomerEarningsPage";
@@ -14,8 +15,8 @@ export const groomerRoutes = [
         element: <GroomerRouteGuard />,
         children: [
           {
-            index: true,
-            element: <GroomerAccountPage />,
+            path: "dashboard",
+            element: <GroomerDashboardPage />,
           },
           {
             path: "account",

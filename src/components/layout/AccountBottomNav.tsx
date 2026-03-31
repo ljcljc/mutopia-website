@@ -66,13 +66,13 @@ const groomerNavConfig: NavConfig = {
       id: "earnings",
       label: "Earnings",
       path: "/groomer/earnings",
-      iconName: "gift",
+      iconName: "earning",
     },
     {
       id: "account",
       label: "Account",
       path: "/groomer/account",
-      iconName: "user",
+      iconName: "account-2",
     },
     {
       id: "more",
@@ -82,8 +82,8 @@ const groomerNavConfig: NavConfig = {
     },
   ],
   center: {
-    path: "/groomer/account",
-    iconName: "logo",
+    path: "/groomer/dashboard",
+    iconName: "logo-white",
   },
 };
 
@@ -172,7 +172,7 @@ export default function AccountBottomNav() {
                   name={config.center.iconName}
                   className={cn(
                     "book-icon",
-                    mode === "groomer" ? "h-[28px] w-[26.6px] text-[#8B6357]" : "size-6 text-white"
+                    mode === "groomer" ? "h-[28px] w-[27px] text-white" : "size-6 text-white"
                   )}
                   aria-hidden="true"
                 />
