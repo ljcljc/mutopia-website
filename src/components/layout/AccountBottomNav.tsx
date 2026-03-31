@@ -83,7 +83,7 @@ const groomerNavConfig: NavConfig = {
   ],
   center: {
     path: "/groomer/dashboard",
-    iconName: "logo-white",
+    iconName: "logo-mark",
   },
 };
 

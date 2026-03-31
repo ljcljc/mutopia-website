@@ -29,7 +29,7 @@ export function VisibleIcon({
       <Icon
         name={showPassword ? "eye-visible" : "eye-invisible"}
         aria-label={showPassword ? "Hide" : "Show"}
-        className="block size-full"
+        className="block size-full text-[#4C4C4C]"
       />
     </button>
   );

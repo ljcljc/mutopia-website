@@ -87,7 +87,7 @@ import IconPencilSvg from "@/assets/icons/icon-pencil.svg?react";
 import IconGiftSvg from "@/assets/icons/icon-gift.svg?react";
 import IconPhoneSvg from "@/assets/icons/icon-phone.svg?react";
 import IconLogoSvg from "@/assets/icons/icon-logo.svg?react";
-import IconLogoWhiteSvg from "@/assets/icons/icon-logo-white.svg?react";
+import IconLogoMarkSvg from "@/assets/icons/icon-logo-mark.svg?react";
 import IconHomeSvg from "@/assets/icons/icon-home.svg?react";
 import IconNotificationConfirmedSvg from "@/assets/icons/icon-notification-confirmed.svg?react";
 import IconNotificationReminderSvg from "@/assets/icons/icon-notification-reminder.svg?react";
@@ -165,7 +165,7 @@ const iconComponentMap = {
   "gift": IconGiftSvg,
   "phone": IconPhoneSvg,
   "logo": IconLogoSvg,
-  "logo-white": IconLogoWhiteSvg,
+  "logo-mark": IconLogoMarkSvg,
   "home": IconHomeSvg,
   "notification-confirmed": IconNotificationConfirmedSvg,
   "notification-reminder": IconNotificationReminderSvg,
