@@ -34,7 +34,7 @@ export default function PageHeader() {
   return (
     <>
       <div className="w-full flex items-center gap-4 mb-6">
-        <h1 className="font-['Comfortaa',sans-serif] font-bold text-[#4A3C2A] text-[20px] sm:text-3xl">
+        <h1 className="font-['Comfortaa',sans-serif] font-bold text-[#4A3C2A] text-[20px]">
           My Account
         </h1>
         <div className="ml-auto flex items-center">
