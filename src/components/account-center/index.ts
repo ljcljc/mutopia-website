@@ -4,4 +4,5 @@ export { default as InfoEntryRow } from "./InfoEntryRow";
 export { default as PerformanceBenefitItem } from "./PerformanceBenefitItem";
 export { default as SimpleListCard } from "./SimpleListCard";
 export { default as PayoutCard } from "./PayoutCard";
+export { accountCenterTheme } from "./theme";
 export type { AccountInfoRowItem, AccountListRow } from "./types";
