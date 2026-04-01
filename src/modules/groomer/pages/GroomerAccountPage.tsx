@@ -2,34 +2,16 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Icon } from "@/components/common/Icon";
 import { useNavigate } from "react-router-dom";
-import { useAuthStore } from "@/components/auth/authStore";
+import PersonalInfoCard from "@/components/account/PersonalInfoCard";
 import {
-  InfoRow,
   PayoutCard,
   PerformanceBenefitItem,
-  SectionCard,
   SimpleListCard,
-  type AccountInfoRowItem,
   type AccountListRow,
 } from "@/components/account-center";
 
 export default function GroomerAccountPage() {
   const navigate = useNavigate();
-  const userInfo = useAuthStore((state) => state.userInfo);
-
-  const fullName = `${userInfo?.first_name ?? ""} ${userInfo?.last_name ?? ""}`.trim() || "Lei CAO";
-  const initials = fullName
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-  const profileRows: AccountInfoRowItem[] = [
-    { icon: "birthday", value: userInfo?.birthday || "2000-09-07" },
-    { icon: "email", value: userInfo?.email || "clxtf1111@gmail.com" },
-    { icon: "phone", value: userInfo?.phone || "567 987-0988" },
-    { icon: "lock", value: "Change password", emphasize: true },
-  ];
   const serviceRows: AccountListRow[] = [
     {
       id: "vancouver",
@@ -48,7 +30,7 @@ export default function GroomerAccountPage() {
 
   return (
     <div className="mx-auto min-h-[calc(100vh-64px)] w-full max-w-[393px] bg-[#633479] px-5 pb-28 pt-1 lg:min-h-0 lg:max-w-[944px] lg:px-0 lg:pb-4 lg:pt-1">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 sm:mb-5 flex items-center justify-between">
         <h1 className="font-comfortaa text-[20px] font-bold leading-[22px] text-white">My account</h1>
         <div className="flex items-center gap-3">
           <Label
@@ -69,39 +51,8 @@ export default function GroomerAccountPage() {
         </div>
       </div>
 
-      <div className="space-y-4 lg:space-y-4">
-        <SectionCard className="p-5 shadow-[0px_8px_12px_rgba(0,0,0,0.1)] lg:h-[152px]">
-          <div className="flex items-start justify-between h-full">
-            <div className="flex items-start gap-[14px]">
-              <div className="relative">
-                <div className="flex size-14 items-center justify-center rounded-full bg-[#DE6A07]">
-                  <span className="font-comfortaa text-[17.5px] font-normal leading-[24.5px] text-white">{initials || "LC"}</span>
-                </div>
-                {userInfo?.is_member ? (
-                  <div className="absolute left-1/2 top-[60px] -translate-x-1/2 rounded-[12px] bg-[#DCFCE7] px-2 py-0.5">
-                    <span className="font-comfortaa text-[10px] font-bold leading-[14px] text-[#016630]">Member</span>
-                  </div>
-                ) : null}
-              </div>
-              <div className="space-y-[7px]">
-                <p className="font-comfortaa text-[14px] font-normal leading-[22.75px] text-[#4A3C2A]">{fullName}</p>
-                {profileRows.map((item) => (
-                  <InfoRow key={`${item.icon}-${item.value}`} item={item} />
-                ))}
-              </div>
-            </div>
-            <button
-              type="button"
-              aria-label="Edit profile"
-              className="rounded-[14px] p-1 flex items-center gap-2 text-[#8B6357] hover:text-[#DE6A07]/80"
-            >
-              <Icon name="pencil" className="size-6 lg:size-4 text-[#DE6A07] lg:text-[#8B6357]" />
-              <span className="hidden lg:inline font-comfortaa text-[14px] font-medium leading-[21px]">
-                Modify
-              </span>
-            </button>
-          </div>
-        </SectionCard>
+      <div className="space-y-4 sm:space-y-5">
+        <PersonalInfoCard mode="groomer" />
 
         <SimpleListCard
           title="Service areas"

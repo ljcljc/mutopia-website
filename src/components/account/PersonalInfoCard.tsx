@@ -17,6 +17,11 @@ import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
 import { useAvatarUpload } from "@/hooks/useAvatarUpload";
 import { InfoRow, SectionCard, type AccountInfoRowItem } from "@/components/account-center";
+import { cn } from "@/components/ui/utils";
+
+interface PersonalInfoCardProps {
+  mode?: "customer" | "groomer";
+}
 
 /**
  * 获取用户 initials（姓名首字母）
@@ -40,7 +45,7 @@ function formatDate(dateString?: string | null): string {
   }
 }
 
-export default function PersonalInfoCard() {
+export default function PersonalInfoCard({ mode = "customer" }: PersonalInfoCardProps) {
   const userInfo = useAuthStore((state) => state.userInfo);
   const setUserInfo = useAuthStore((state) => state.setUserInfo);
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
@@ -150,7 +155,14 @@ export default function PersonalInfoCard() {
   ];
 
   return (
-      <SectionCard className="rounded-[12px] border border-[rgba(0,0,0,0.10)] p-[20px] sm:rounded-lg sm:p-6 sm:shadow-sm shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
+      <SectionCard
+        className={cn(
+          "p-[20px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]",
+          mode === "groomer"
+            ? "rounded-[20px] border-[1.47px] border-[#4A2C55] sm:rounded-[20px] sm:p-[20px] sm:shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]"
+            : "rounded-[12px] border border-[rgba(0,0,0,0.10)] sm:rounded-lg sm:p-6 sm:shadow-sm"
+        )}
+      >
       <div className="flex items-start gap-[14px] sm:gap-6">
         {/* 左侧：头像 */}
         <div className="shrink-0 relative">
@@ -215,7 +227,10 @@ export default function PersonalInfoCard() {
         {/* 中间：用户信息 */}
         <div className="flex-1">
           <div className="flex items-center justify-between mb-[12px] sm:mb-4">
-            <h2 className="font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-[14px] sm:text-lg">
+            <h2 className={cn(
+              "font-['Comfortaa',sans-serif] text-[#4A3C2A]",
+              mode === "groomer" ? "font-normal text-[14px] sm:text-[14px]" : "font-semibold text-[14px] sm:text-lg"
+            )}>
               {fullName}
             </h2>
             {/* Modify 按钮 */}
@@ -237,17 +252,22 @@ export default function PersonalInfoCard() {
                 key={`${row.icon}-${row.value}`}
                 item={row}
                 iconClassName="h-4 w-4 shrink-0 text-[#8B6357] sm:h-5 sm:w-5"
-                valueClassName="sm:text-sm"
+                valueClassName={cn("sm:text-sm", mode === "groomer" && "text-[14px] leading-[21px]")}
               />
             ))}
 
             {/* Change Password 链接 */}
             <button
               onClick={handleChangePassword}
-              className="flex items-center gap-4 text-[#8B6357] hover:text-[#DE6A07]/80 cursor-pointer self-start"
+              className="group flex items-center gap-4 text-[#8B6357] hover:text-[#DE6A07]/80 active:scale-[0.99] transition-all duration-150 cursor-pointer self-start rounded-[8px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DE6A07]/40 focus-visible:ring-offset-1"
             >
               <Icon name="lock" className="w-4 h-4 sm:w-5 sm:h-5 text-[#8B6357] shrink-0" />
-              <span className="font-['Comfortaa',sans-serif] font-medium text-[12px] sm:text-sm text-[#DE6A07] sm:text-[#8B6357]">
+              <span
+                className={cn(
+                  "font-['Comfortaa',sans-serif] font-medium text-[12px] sm:text-sm transition-colors duration-150 group-hover:opacity-80 group-active:opacity-70",
+                  mode === "groomer" ? "text-[#DE6A07]" : "text-[#DE6A07] sm:text-[#8B6357]"
+                )}
+              >
                 Change password
               </span>
             </button>
