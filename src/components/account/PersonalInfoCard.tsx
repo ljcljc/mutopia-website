@@ -16,6 +16,7 @@ import { getSendCountFromError } from "@/components/auth/forgotPasswordUtils";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
 import { useAvatarUpload } from "@/hooks/useAvatarUpload";
+import { InfoRow, SectionCard, type AccountInfoRowItem } from "@/components/account-center";
 
 /**
  * 获取用户 initials（姓名首字母）
@@ -142,8 +143,14 @@ export default function PersonalInfoCard() {
     setIsChangePasswordModalOpen(true);
   };
 
+  const infoRows: AccountInfoRowItem[] = [
+    ...(userInfo.birthday ? [{ icon: "birthday" as const, value: formatDate(userInfo.birthday) }] : []),
+    { icon: "email", value: userInfo.email },
+    { icon: "phone", value: "-" },
+  ];
+
   return (
-      <div className="bg-white rounded-[12px] sm:rounded-lg shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] sm:shadow-sm p-[20px] sm:p-6 border border-[rgba(0,0,0,0.10)]">
+      <SectionCard className="rounded-[12px] border border-[rgba(0,0,0,0.10)] p-[20px] sm:rounded-lg sm:p-6 sm:shadow-sm shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
       <div className="flex items-start gap-[14px] sm:gap-6">
         {/* 左侧：头像 */}
         <div className="shrink-0 relative">
@@ -225,31 +232,14 @@ export default function PersonalInfoCard() {
 
           {/* 信息行 */}
           <div className="flex flex-col gap-2">
-            {/* 生日 */}
-            {userInfo.birthday && (
-              <div className="flex items-center gap-4">
-                <Icon name="birthday" className="w-4 h-4 sm:w-5 sm:h-5 text-[#8B6357] shrink-0" />
-                <span className="font-['Comfortaa',sans-serif] font-normal text-[#4A5565] text-[12.25px] sm:text-sm">
-                  {formatDate(userInfo.birthday)}
-                </span>
-              </div>
-            )}
-
-            {/* 邮箱 */}
-            <div className="flex items-center gap-4">
-              <Icon name="email" className="w-4 h-4 sm:w-5 sm:h-5 text-[#8B6357] shrink-0" />
-              <span className="font-['Comfortaa',sans-serif] font-normal text-[#4A5565] text-[12.25px] sm:text-sm">
-                {userInfo.email}
-              </span>
-            </div>
-
-            {/* 电话 - TODO: 从 userInfo 获取，目前 API 可能不包含 */}
-            <div className="flex items-center gap-4">
-              <Icon name="phone" className="w-4 h-4 sm:w-5 sm:h-5 text-[#8B6357] shrink-0" />
-              <span className="font-['Comfortaa',sans-serif] font-normal text-[#4A3C2A] text-[12.25px] sm:text-sm">
-                -
-              </span>
-            </div>
+            {infoRows.map((row) => (
+              <InfoRow
+                key={`${row.icon}-${row.value}`}
+                item={row}
+                iconClassName="h-4 w-4 shrink-0 text-[#8B6357] sm:h-5 sm:w-5"
+                valueClassName="sm:text-sm"
+              />
+            ))}
 
             {/* Change Password 链接 */}
             <button
@@ -380,6 +370,6 @@ export default function PersonalInfoCard() {
       >
         <div style={{ display: "none" }} />
       </LoginModal>
-    </div>
+    </SectionCard>
   );
 }

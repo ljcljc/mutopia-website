@@ -18,6 +18,7 @@ import { getEncryptedItem } from "@/lib/encryption";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
 import NotificationsPopover from "./NotificationsPopover";
 import AccountDropdown from "./AccountDropdown";
+import BaseAccountHeaderShell from "./BaseAccountHeaderShell";
 
 function Logo() {
   return (
@@ -145,64 +146,62 @@ export default function HeaderApp() {
   };
 
   return (
-    <div
-      className="bg-[rgba(255,255,255,0.95)] sticky top-0 w-full z-50 rounded-bl-[21px] rounded-br-[21px] border-[rgba(0,0,0,0.1)] border-b border-l-0 border-r-0 border-solid border-t-0"
-      style={{
+    <>
+      <BaseAccountHeaderShell
+      wrapperClassName="border-l-0 border-r-0 border-solid border-t-0"
+      wrapperStyle={{
         boxShadow: shadowStyle,
         transition: "box-shadow 0.3s ease-in-out",
       }}
-      data-name="HeaderApp"
+      dataName="HeaderApp"
+      containerClassName="box-border content-stretch flex h-[63px] items-center justify-between relative shrink-0 w-full px-[20px] sm:px-8 md:px-12 lg:px-[57.5px] xl:px-[80px] 2xl:px-[120px]"
     >
-      {/* 移除 max-w-7xl 限制，使用 padding 控制内容区域 */}
-      <div className="w-full">
-        <div className="box-border content-stretch flex h-[63px] items-center justify-between relative shrink-0 w-full px-[20px] sm:px-8 md:px-12 lg:px-[57.5px] xl:px-[80px] 2xl:px-[120px]" data-name="Container">
-          {/* Left side: Logo + Back to home */}
-          <div className="content-stretch flex gap-[24px] items-center relative shrink-0">
-            <Link to="/" onClick={handleHomeClick} className="cursor-pointer" aria-label="Go to home">
-              <Logo />
-            </Link>
-            {!user && (
-              <Link
-                to="/"
-                onClick={handleHomeClick}
-                className="relative shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
-                data-name="Button tertiary"
-              >
-                <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[8px] items-center px-[12px] py-[4px] relative">
-                  <div className="content-stretch flex gap-[10px] items-center justify-center relative shrink-0 size-[20px]" data-name="Icons">
-                    <div className="flex-none">
-                      <div className="size-4 rotate-180">
-                        <Icon name="button-arrow" className="block max-w-none size-full text-[#8b6357]" />
-                      </div>
-                    </div>
+      {/* Left side: Logo + Back to home */}
+      <div className="content-stretch flex gap-[24px] items-center relative shrink-0">
+        <Link to="/" onClick={handleHomeClick} className="cursor-pointer" aria-label="Go to home">
+          <Logo />
+        </Link>
+        {!user && (
+          <Link
+            to="/"
+            onClick={handleHomeClick}
+            className="relative shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+            data-name="Button tertiary"
+          >
+            <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[8px] items-center px-[12px] py-[4px] relative">
+              <div className="content-stretch flex gap-[10px] items-center justify-center relative shrink-0 size-[20px]" data-name="Icons">
+                <div className="flex-none">
+                  <div className="size-4 rotate-180">
+                    <Icon name="button-arrow" className="block max-w-none size-full text-[#8b6357]" />
                   </div>
-                  <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#8b6357] text-[12px]">
-                    Back to home
-                  </p>
                 </div>
-              </Link>
-            )}
-          </div>
-
-          {/* Right side: User info (only if logged in) */}
-          {user && (
-            <>
-              <div className="flex items-center gap-[10.5px] sm:hidden">
-                <CreditsBadge />
-                <NotificationsPopover />
               </div>
-              <div className="hidden sm:flex items-center gap-[10.5px]">
-                <CreditsBadge />
-                <AccountDropdown
-                  userInfo={userInfo ?? undefined}
-                  fallbackName={user.name || user.email.split("@")[0]}
-                />
-                <NotificationsPopover />
-              </div>
-            </>
-          )}
-        </div>
+              <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#8b6357] text-[12px]">
+                Back to home
+              </p>
+            </div>
+          </Link>
+        )}
       </div>
+
+      {/* Right side: User info (only if logged in) */}
+      {user && (
+        <>
+          <div className="flex items-center gap-[10.5px] sm:hidden">
+            <CreditsBadge />
+            <NotificationsPopover />
+          </div>
+          <div className="hidden sm:flex items-center gap-[10.5px]">
+            <CreditsBadge />
+            <AccountDropdown
+              userInfo={userInfo ?? undefined}
+              fallbackName={user.name || user.email.split("@")[0]}
+            />
+            <NotificationsPopover />
+          </div>
+        </>
+      )}
+      </BaseAccountHeaderShell>
 
       <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <AlertDialogContent className="bg-white rounded-[20px] border border-[rgba(0,0,0,0.2)] p-0 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] max-w-[90%] sm:max-w-[700px]">
@@ -245,7 +244,7 @@ export default function HeaderApp() {
           </div>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </>
   );
 }
 function CreditsBadge() {

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Icon } from "@/components/common/Icon";
+import BaseAccountHeaderShell from "@/components/layout/BaseAccountHeaderShell";
 
 function PartnerLogo() {
   return (
@@ -39,14 +40,15 @@ function TodayBadge() {
 
 export default function GroomerHeader() {
   return (
-    <header className="sticky top-0 z-50 w-full rounded-b-[21px] border-b border-[rgba(0,0,0,0.1)] bg-[rgba(255,255,255,0.95)] pb-px shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)]">
-      <div className="mx-auto flex h-[63px] w-full max-w-[393px] items-center justify-between px-5">
-        <PartnerLogo />
-        <div className="flex items-center gap-2">
-          <TodayBadge />
-          <Icon name="notify" className="size-6 text-[#633479]" aria-hidden="true" />
-        </div>
+    <BaseAccountHeaderShell
+      wrapperClassName="pb-px shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)]"
+      containerClassName="box-border content-stretch flex h-[63px] items-center justify-between relative shrink-0 w-full px-[20px] sm:px-8 md:px-12 lg:px-[57.5px] xl:px-[80px] 2xl:px-[120px]"
+    >
+      <PartnerLogo />
+      <div className="flex items-center gap-2">
+        <TodayBadge />
+        <Icon name="notify" className="size-6 text-[#633479]" aria-hidden="true" />
       </div>
-    </header>
+    </BaseAccountHeaderShell>
   );
 }

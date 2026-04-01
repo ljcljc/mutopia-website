@@ -60,7 +60,7 @@ const groomerNavConfig: NavConfig = {
       id: "my-work",
       label: "My work",
       path: "/groomer/my-work",
-      iconName: "home",
+      iconName: "clock",
     },
     {
       id: "earnings",

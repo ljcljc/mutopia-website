@@ -1,68 +1,36 @@
-import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useEffect, useRef } from "react";
-import {
-  SidebarProvider,
-  SidebarInset,
-} from "@/components/ui/sidebar";
+import { Navigate, useLocation } from "react-router-dom";
+import BaseAccountLayoutShell from "./BaseAccountLayoutShell";
 import { AccountSidebar } from "./AccountSidebar";
 import HeaderApp from "./HeaderApp";
 import Footer from "./Footer";
 import AccountBottomNav from "./AccountBottomNav";
-import { ScrollToTop } from "@/components/common";
-import { Toaster } from "@/components/ui/sonner";
 import { useAuthStore } from "@/components/auth/authStore";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
 
 export default function AccountLayout() {
   const location = useLocation();
-  const contentRef = useRef<HTMLDivElement | null>(null);
   const user = useAuthStore((state) => state.user);
   const userInfo = useAuthStore((state) => state.userInfo);
   const hasAccessToken =
     typeof window !== "undefined" &&
     !!window.localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
 
-  useEffect(() => {
-    if (contentRef.current) {
-      contentRef.current.scrollTo({ top: 0, behavior: "instant" });
-    }
-    window.scrollTo({ top: 0, behavior: "instant" });
-  }, [location.pathname]);
-
   if (!hasAccessToken && !user && !userInfo) {
     return <Navigate to="/" replace state={{ from: location.pathname }} />;
   }
 
   return (
-    <SidebarProvider className="w-full" defaultOpen={true}>
-      <div className="min-h-screen flex flex-col bg-[#F9F1E8] w-full">
-        {/* 全局顶部 Header */}
-        <HeaderApp />
-        
-        {/* 主内容区域：侧边栏 + 内容区 */}
-        <div className="w-full sm:w-7xl mx-auto flex flex-1 overflow-hidden gap-6 my-6 sm:my-14">
-          {/* 左侧侧边栏（H5 隐藏） */}
-          <AccountSidebar className="hidden sm:block" />
-          
-          {/* 右侧主内容区域 */}
-          <SidebarInset
-            ref={contentRef}
-            className="flex-1 bg-[#F9F1E8] overflow-auto rounded-lg pb-[96px] sm:pb-0"
-          >
-            <main className="flex-1 min-h-full w-full flex flex-col">
-              <Outlet />
-            </main>
-          </SidebarInset>
-        </div>
-        
-        {/* 全局底部 Footer（H5 隐藏） */}
-        <div className="hidden sm:block">
-          <Footer />
-        </div>
-        <AccountBottomNav />
-        <ScrollToTop />
-        <Toaster />
-      </div>
-    </SidebarProvider>
+    <BaseAccountLayoutShell
+      rootClassName="bg-[#F9F1E8]"
+      contentBackgroundClassName="bg-[#F9F1E8]"
+      contentContainerClassName="w-full sm:w-7xl mx-auto flex flex-1 overflow-hidden gap-6 my-6 sm:my-14"
+      sidebar={<AccountSidebar className="hidden sm:block" />}
+      header={<HeaderApp />}
+      footer={<Footer />}
+      footerClassName="hidden sm:block"
+      bottomNav={<AccountBottomNav />}
+      bottomNavClassName="sm:hidden"
+      insetClassName="bg-[#F9F1E8] pb-[96px] sm:pb-0"
+    />
   );
 }
