@@ -11,6 +11,6 @@ export interface AccountListRow {
   label: string;
   rightIcon: IconName;
   rightIconColor?: string;
+  rightIconClassName?: string;
   heightClassName?: string;
 }
-

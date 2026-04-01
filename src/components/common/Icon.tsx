@@ -100,6 +100,8 @@ import IconEarningSvg from "@/assets/icons/icon-earning.svg?react";
 import IconExperienceSvg from "@/assets/icons/icon-experience.svg?react";
 import IconIdentificationSvg from "@/assets/icons/icon-identification.svg?react";
 import IconStar2Svg from "@/assets/icons/icon-star-2.svg?react";
+import IconStar3Svg from "@/assets/icons/icon-star-3.svg?react";
+import IconDotSvg from "@/assets/icons/icon-dot.svg?react";
 import IconOutLinkSvg from "@/assets/icons/icon-out-link.svg?react";
 import IconCreditSvg from "@/assets/icons/icon-credit.svg?react";
 import IconTargetSvg from "@/assets/icons/icon-target.svg?react";
@@ -182,6 +184,8 @@ const iconComponentMap = {
   "experience": IconExperienceSvg,
   "identification": IconIdentificationSvg,
   "star-2": IconStar2Svg,
+  "star-3": IconStar3Svg,
+  "dot": IconDotSvg,
   "out-link": IconOutLinkSvg,
   "credit": IconCreditSvg,
   "target": IconTargetSvg,

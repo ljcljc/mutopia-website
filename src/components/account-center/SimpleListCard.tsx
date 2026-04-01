@@ -63,7 +63,10 @@ export default function SimpleListCard({
             }
           >
             <span className="font-comfortaa text-[14px] font-medium leading-[21px] text-[#4A2C55]">{row.label}</span>
-            <Icon name={row.rightIcon} className={`size-5 ${row.rightIconColor ?? "text-[#DE6A07]"}`} />
+            <Icon
+              name={row.rightIcon}
+              className={`size-5 ${row.rightIconColor ?? "text-[#DE6A07]"} ${row.rightIconClassName ?? ""}`}
+            />
           </div>
         ))}
       </div>

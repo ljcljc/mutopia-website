@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { OrangeButton } from "@/components/common";
-import { Icon } from "@/components/common/Icon";
+import { Icon, type IconName } from "@/components/common/Icon";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import PersonalInfoCard from "@/components/account/PersonalInfoCard";
@@ -15,6 +15,8 @@ import {
   type AccountListRow,
 } from "@/components/account-center";
 
+type PerformanceTier = "gold" | "silver" | "premium";
+
 export default function GroomerAccountPage() {
   const navigate = useNavigate();
   const [isAddAreaModalOpen, setIsAddAreaModalOpen] = useState(false);
@@ -24,13 +26,16 @@ export default function GroomerAccountPage() {
       id: "vancouver",
       label: "Vancouver",
       rightIcon: "pencil",
+      rightIconColor: "text-[#4C4C4C]",
+      rightIconClassName: "transition-colors duration-150 hover:text-red-500",
       heightClassName: "h-[48px]",
     },
     {
       id: "richmond",
       label: "Richmond",
       rightIcon: "trash",
-      rightIconColor: accountCenterTheme.dangerTextClassName,
+      rightIconColor: "text-[#4C4C4C]",
+      rightIconClassName: "transition-colors duration-150 hover:text-red-500",
       heightClassName: "h-[52px]",
     },
   ]);
@@ -48,7 +53,8 @@ export default function GroomerAccountPage() {
         id: `area-${Date.now()}`,
         label: areaName,
         rightIcon: "trash",
-        rightIconColor: accountCenterTheme.dangerTextClassName,
+        rightIconColor: "text-[#4C4C4C]",
+        rightIconClassName: "transition-colors duration-150 hover:text-red-500",
       },
     ]);
     toast.success("Service area added");
@@ -86,10 +92,69 @@ export default function GroomerAccountPage() {
 
   const editingRow = serviceRows.find((row) => row.id === editingRowId) ?? null;
   const isEditMode = Boolean(editingRow);
+  const performanceTier: PerformanceTier = "premium";
+
+  const performanceConfig: Record<
+    PerformanceTier,
+    {
+      badgeClassName: string;
+      badgeTextClassName: string;
+      badgeText: string;
+      showStars: boolean;
+      badgeIconName?: IconName;
+      badgeIconClassName?: string;
+      benefitTone: "gold" | "neutral";
+      buttonText: string;
+      benefits: Array<{ title: string; description: string }>;
+    }
+  > = {
+    gold: {
+      badgeClassName:
+        "h-[26px] rounded-full bg-[linear-gradient(180deg,#FFF584_0%,#F0D65A_13.46%,#E0B730_26.92%,#C78A0E_75.96%,#BB7F12_87.98%,#C8A32B_100%)] px-3 shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)]",
+      badgeTextClassName:
+        "bg-[linear-gradient(168.31deg,#FFF7ED_0%,#FFFBEB_100%)] bg-clip-text font-comfortaa text-[12px] font-bold leading-[17.5px] text-transparent",
+      badgeText: "Gold groomer",
+      showStars: true,
+      benefitTone: "gold",
+      buttonText: "View your performance",
+      benefits: [
+        { title: "80% payout share", description: "Higher earnings per job" },
+        { title: "Priority client matching", description: "Get bookings first in first 24 hours" },
+        { title: "Free Liability Insurance", description: "Full coverage included" },
+      ],
+    },
+    silver: {
+      badgeClassName:
+        "h-[26px] rounded-full bg-[linear-gradient(180deg,#EEECEC_0%,#EDECEC_16.83%,#DFDEDE_50%,#A4A4A4_88.46%,#B8B6B6_100%)] px-3 shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)]",
+      badgeTextClassName: "font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#633479]",
+      badgeText: "Silver groomer",
+      showStars: false,
+      badgeIconName: "star-3",
+      badgeIconClassName: "size-[12px]",
+      benefitTone: "neutral",
+      buttonText: "View your goals",
+      benefits: [
+        { title: "70% payout share", description: "Higher earnings per job" },
+        { title: "Priority client matching", description: "Get bookings first" },
+      ],
+    },
+    premium: {
+      badgeClassName:
+        "h-[26px] rounded-full bg-[linear-gradient(180deg,#8B6357_0%,#4A2C55_100%)] px-3 shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)]",
+      badgeTextClassName: "font-comfortaa text-[12px] font-bold leading-[17.5px] text-white",
+      badgeText: "Premium groomer",
+      showStars: false,
+      benefitTone: "neutral",
+      buttonText: "View your goals",
+      benefits: [{ title: "60% payout share", description: "Higher earnings per job" }],
+    },
+  };
+
+  const selectedPerformance = performanceConfig[performanceTier];
 
   return (
     <>
-      <div className="mx-auto min-h-[calc(100vh-64px)] w-full max-w-[393px] bg-[#633479] px-5 pb-28 pt-1 lg:min-h-0 lg:max-w-[944px] lg:px-0 lg:pb-4 lg:pt-1">
+      <div className="mx-auto min-h-[calc(100vh-64px)] w-full max-w-[393px] bg-[#633479] px-5 pb-[36px] pt-1 lg:min-h-0 lg:max-w-[944px] lg:px-0 lg:pb-4 lg:pt-1">
         <div className="mb-4 flex items-center justify-between sm:mb-5">
           <h1 className="font-comfortaa text-[20px] font-bold leading-[22px] text-white">My account</h1>
           <div className="flex items-center gap-3">
@@ -133,15 +198,21 @@ export default function GroomerAccountPage() {
           <section className="rounded-[20px] border-[1.47px] border-[#4A2C55] bg-white px-5 pb-5 pt-[19px] shadow-[0px_4px_12px_rgba(0,0,0,0.08)] lg:h-[332px]">
             <div className="mb-[14px] flex items-center justify-between">
               <h2 className="font-comfortaa text-[16px] font-bold leading-6 text-[#4A2C55]">Performance</h2>
-              <div className="h-[26px] rounded-full bg-[linear-gradient(180deg,#FFF584_0%,#F0D65A_13.46%,#E0B730_26.92%,#C78A0E_75.96%,#BB7F12_87.98%,#C8A32B_100%)] px-3 shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)]">
+              <div className={selectedPerformance.badgeClassName}>
                 <div className="flex h-full items-center gap-2">
-                  <div className="flex items-center gap-0.5">
-                    <Icon name="star-2" className="size-[12px] text-white" />
-                    <Icon name="star-2" className="size-[12px] text-white" />
-                  </div>
-                  <span className="bg-[linear-gradient(168.31deg,#FFF7ED_0%,#FFFBEB_100%)] bg-clip-text font-comfortaa text-[12px] font-bold leading-[17.5px] text-transparent">
-                    Gold groomer
-                  </span>
+                  {selectedPerformance.showStars ? (
+                    <div className="flex items-center gap-0.5">
+                      <Icon name="star-2" className="size-[12px] text-white" />
+                      <Icon name="star-2" className="size-[12px] text-white" />
+                    </div>
+                  ) : null}
+                  {!selectedPerformance.showStars && selectedPerformance.badgeIconName ? (
+                    <Icon
+                      name={selectedPerformance.badgeIconName}
+                      className={selectedPerformance.badgeIconClassName ?? "size-[12px]"}
+                    />
+                  ) : null}
+                  <span className={selectedPerformance.badgeTextClassName}>{selectedPerformance.badgeText}</span>
                 </div>
               </div>
             </div>
@@ -149,9 +220,14 @@ export default function GroomerAccountPage() {
               Maintain your excellent performance to keep these benefits:
             </p>
             <ul className="mt-3 space-y-3">
-              <PerformanceBenefitItem title="80% payout share" description="Higher earnings per job" />
-              <PerformanceBenefitItem title="Priority client matching" description="Get bookings first in first 24 hours" />
-              <PerformanceBenefitItem title="Free Liability Insurance" description="Full coverage included" />
+              {selectedPerformance.benefits.map((benefit) => (
+                <PerformanceBenefitItem
+                  key={benefit.title}
+                  title={benefit.title}
+                  description={benefit.description}
+                  tone={selectedPerformance.benefitTone}
+                />
+              ))}
             </ul>
             <OrangeButton
               type="button"
@@ -160,7 +236,7 @@ export default function GroomerAccountPage() {
               className="mt-6 w-full !border-[#633479] !text-[#633479] shadow-[0_4px_12px_0_rgba(74,44,85,0.30)] hover:!bg-[rgba(99,52,121,0.12)] active:!bg-[rgba(99,52,121,0.12)] focus-visible:!bg-[rgba(99,52,121,0.12)] focus-visible:!border-[#633479] active:!border-[#633479] lg:w-[247px]"
             >
               <span className="text-center font-comfortaa text-[15px] font-bold leading-[22.5px] text-[#633479]">
-                View your performance
+                {selectedPerformance.buttonText}
               </span>
             </OrangeButton>
           </section>
