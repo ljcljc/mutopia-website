@@ -9,8 +9,9 @@ export interface AccountInfoRowItem {
 export interface AccountListRow {
   id: string;
   label: string;
-  rightIcon: IconName;
+  rightIcon?: IconName;
   rightIconColor?: string;
   rightIconClassName?: string;
   heightClassName?: string;
+  rowClickable?: boolean;
 }

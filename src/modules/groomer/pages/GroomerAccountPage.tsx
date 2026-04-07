@@ -3,6 +3,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { OrangeButton } from "@/components/common";
 import { Icon, type IconName } from "@/components/common/Icon";
+import { useIsMobile } from "@/components/ui/use-mobile";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import PersonalInfoCard from "@/components/account/PersonalInfoCard";
@@ -16,29 +17,74 @@ import {
 } from "@/components/account-center";
 
 type PerformanceTier = "gold" | "silver" | "premium";
+const SERVICE_AREA_OPTIONS = [
+  "Burnaby",
+  "Coquitlam",
+  "Delta",
+  "New Westminster",
+  "North Vancouver City",
+  "Richmond",
+  "Surrey",
+  "Vancouver",
+  "West Vancouver",
+] as const;
+
+const SERVICE_AREA_ORDER = new Map(SERVICE_AREA_OPTIONS.map((area, index) => [area.toLowerCase(), index]));
+
+function createServiceRow(label: string, index: number): AccountListRow {
+  return {
+    id: label.toLowerCase().replace(/\s+/g, "-"),
+    label,
+    rightIcon: index === 0 ? undefined : "trash",
+    rightIconColor: index === 0 ? undefined : "text-[#EF4444]",
+    rightIconClassName:
+      index === 0
+        ? undefined
+        : "transition-colors duration-150 hover:text-[#DC2626]",
+    heightClassName: index === 0 ? "h-[48px]" : "h-[52px]",
+    rowClickable: index !== 0,
+  };
+}
+
+function sortServiceAreas(labels: string[]) {
+  return [...labels].sort((left, right) => {
+    const leftIndex = SERVICE_AREA_ORDER.get(left.toLowerCase()) ?? Number.MAX_SAFE_INTEGER;
+    const rightIndex = SERVICE_AREA_ORDER.get(right.toLowerCase()) ?? Number.MAX_SAFE_INTEGER;
+    return leftIndex - rightIndex;
+  });
+}
+
+function createServiceRows(labels: string[]) {
+  return sortServiceAreas(labels).map((label, index) => createServiceRow(label, index));
+}
+
+function ToastStatusIcon({ type }: { type: "check" | "warning" }) {
+  return (
+    <span className="flex size-4 items-center justify-center rounded-full bg-[#19181A]">
+      {type === "check" ? (
+        <Icon name="check" className="size-2.5 text-white" />
+      ) : (
+        <span className="font-sans text-[10px] font-bold leading-none text-white">!</span>
+      )}
+    </span>
+  );
+}
 
 export default function GroomerAccountPage() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [isAddAreaModalOpen, setIsAddAreaModalOpen] = useState(false);
   const [editingRowId, setEditingRowId] = useState<string | null>(null);
-  const [serviceRows, setServiceRows] = useState<AccountListRow[]>([
-    {
-      id: "vancouver",
-      label: "Vancouver",
-      rightIcon: "pencil",
-      rightIconColor: "text-[#4C4C4C]",
-      rightIconClassName: "transition-colors duration-150 hover:text-red-500",
-      heightClassName: "h-[48px]",
-    },
-    {
-      id: "richmond",
-      label: "Richmond",
-      rightIcon: "trash",
-      rightIconColor: "text-[#4C4C4C]",
-      rightIconClassName: "transition-colors duration-150 hover:text-red-500",
-      heightClassName: "h-[52px]",
-    },
-  ]);
+  const [serviceRows, setServiceRows] = useState<AccountListRow[]>(() => createServiceRows(["Vancouver", "Richmond"]));
+
+  const showServiceAreaToast = (
+    message: string,
+    type: "check" | "warning",
+  ) => {
+    toast(message, {
+      icon: <ToastStatusIcon type={type} />,
+    });
+  };
 
   const handleAddArea = (areaName: string) => {
     const exists = serviceRows.some((row) => row.label.toLowerCase() === areaName.toLowerCase());
@@ -47,17 +93,8 @@ export default function GroomerAccountPage() {
       return;
     }
 
-    setServiceRows((previous) => [
-      ...previous,
-      {
-        id: `area-${Date.now()}`,
-        label: areaName,
-        rightIcon: "trash",
-        rightIconColor: "text-[#4C4C4C]",
-        rightIconClassName: "transition-colors duration-150 hover:text-red-500",
-      },
-    ]);
-    toast.success("Service area added");
+    setServiceRows((previous) => createServiceRows([...previous.map((row) => row.label), areaName]));
+    showServiceAreaToast(`${areaName} added to service areas`, "check");
   };
 
   const handleEditArea = (areaName: string) => {
@@ -72,13 +109,51 @@ export default function GroomerAccountPage() {
     }
 
     setServiceRows((previous) =>
-      previous.map((row) => (row.id === editingRowId ? { ...row, label: areaName } : row)),
+      createServiceRows(previous.map((row) => (row.id === editingRowId ? areaName : row.label))),
     );
     setEditingRowId(null);
-    toast.success("Service area updated");
+    showServiceAreaToast(`${areaName} added to service areas`, "check");
+  };
+
+  const handleMobileToggleArea = (areaName: string) => {
+    const isSelected = serviceRows.some((row) => row.label.toLowerCase() === areaName.toLowerCase());
+
+    if (isSelected) {
+      if (serviceRows.length === 1) {
+        showServiceAreaToast("At least one service area is required", "warning");
+        return;
+      }
+
+      setServiceRows((previous) =>
+        createServiceRows(previous.filter((row) => row.label.toLowerCase() !== areaName.toLowerCase()).map((row) => row.label)),
+      );
+      showServiceAreaToast(`${areaName} removed from service areas`, "check");
+      return;
+    }
+
+    setServiceRows((previous) => createServiceRows([...previous.map((row) => row.label), areaName]));
+    showServiceAreaToast(`${areaName} added to service areas`, "check");
+  };
+
+  const handleRemoveArea = (row: AccountListRow) => {
+    if (serviceRows.length === 1) {
+      showServiceAreaToast("At least one service area is required", "warning");
+      return;
+    }
+
+    setServiceRows((previous) =>
+      createServiceRows(previous.filter((item) => item.id !== row.id).map((item) => item.label)),
+    );
+    showServiceAreaToast(`${row.label} removed from service areas`, "check");
   };
 
   const handleServiceRowClick = (row: AccountListRow) => {
+    if (isMobile) {
+      setEditingRowId(null);
+      setIsAddAreaModalOpen(true);
+      return;
+    }
+
     if (row.rightIcon === "pencil") {
       setEditingRowId(row.id);
       setIsAddAreaModalOpen(true);
@@ -86,12 +161,19 @@ export default function GroomerAccountPage() {
     }
     if (row.rightIcon !== "trash") return;
 
-    setServiceRows((previous) => previous.filter((item) => item.id !== row.id));
-    toast.success("Service area removed");
+    handleRemoveArea(row);
   };
 
   const editingRow = serviceRows.find((row) => row.id === editingRowId) ?? null;
   const isEditMode = Boolean(editingRow);
+  const selectableServiceAreas = SERVICE_AREA_OPTIONS.filter((option) => {
+    const normalizedOption = option.toLowerCase();
+    const isCurrentEditingValue = editingRow?.label.toLowerCase() === normalizedOption;
+
+    if (isCurrentEditingValue) return true;
+
+    return !serviceRows.some((row) => row.label.toLowerCase() === normalizedOption);
+  });
   const performanceTier: PerformanceTier = "premium";
 
   const performanceConfig: Record<
@@ -182,7 +264,7 @@ export default function GroomerAccountPage() {
           <SimpleListCard
             title="Service areas"
             titleIcon="location"
-            actionText="+ Add area"
+            actionText="Modify"
             onActionClick={() => {
               setEditingRowId(null);
               setIsAddAreaModalOpen(true);
@@ -190,7 +272,7 @@ export default function GroomerAccountPage() {
             actionButtonClassName={accountCenterTheme.actionInteractiveClassName}
             rows={serviceRows}
             onRowClick={handleServiceRowClick}
-            className="lg:h-[192px]"
+            onRightIconClick={handleRemoveArea}
           />
 
           <PayoutCard bankName="TD Bank Checking" bankMask="**** **** **** 5678" className="lg:h-[152px]" />
@@ -248,9 +330,11 @@ export default function GroomerAccountPage() {
           setIsAddAreaModalOpen(open);
           if (!open) setEditingRowId(null);
         }}
-        mode={isEditMode ? "edit" : "add"}
         initialValue={editingRow?.label ?? ""}
+        options={isMobile ? [...SERVICE_AREA_OPTIONS] : selectableServiceAreas}
+        selectedValues={serviceRows.map((row) => row.label)}
         onSubmit={isEditMode ? handleEditArea : handleAddArea}
+        onMobileToggle={handleMobileToggleArea}
       />
     </>
   );
