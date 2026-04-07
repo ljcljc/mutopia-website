@@ -105,6 +105,7 @@ import IconDotSvg from "@/assets/icons/icon-dot.svg?react";
 import IconOutLinkSvg from "@/assets/icons/icon-out-link.svg?react";
 import IconCreditSvg from "@/assets/icons/icon-credit.svg?react";
 import IconTargetSvg from "@/assets/icons/icon-target.svg?react";
+import IconBankSvg from "@/assets/icons/icon-bank.svg?react";
 
 // 图标组件映射表
 const iconComponentMap = {
@@ -189,6 +190,7 @@ const iconComponentMap = {
   "out-link": IconOutLinkSvg,
   "credit": IconCreditSvg,
   "target": IconTargetSvg,
+  "bank": IconBankSvg,
 } as const;
 
 export type IconName = keyof typeof iconComponentMap;

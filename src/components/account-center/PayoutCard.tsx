@@ -19,7 +19,7 @@ export default function PayoutCard({
   actionIcon = "out-link",
   bankName,
   bankMask,
-  leftIcon = "account",
+  leftIcon = "bank",
   statusText = "Verified",
   className = "",
 }: PayoutCardProps) {
