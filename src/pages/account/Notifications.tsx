@@ -27,7 +27,7 @@ const linkClassName = "text-[#DE6A07] underline hover:text-[#C15A05]";
 
 function TimeStamp({ text }: { text: string }) {
   return (
-    <div className="flex items-center gap-[7px] text-[#9CA3AF]">
+    <div className="flex items-center gap-1.5 text-[#9CA3AF]">
       <Icon name="clock" size={12} className="text-[#9CA3AF]" />
       <span className="font-comfortaa text-[10.5px] leading-[14px]">
         {text}
@@ -38,11 +38,11 @@ function TimeStamp({ text }: { text: string }) {
 
 function EmptyState() {
   return (
-    <div className="w-full flex flex-col items-center justify-center py-[32px]">
-      <div className="bg-[#F3F4F6] rounded-full size-[56px] flex items-center justify-center">
+    <div className="flex w-full flex-col items-center justify-center py-8">
+      <div className="flex size-14 items-center justify-center rounded-full bg-[#F3F4F6]">
         <Icon name="notification-empty" size={28} className="text-[#9CA3AF]" />
       </div>
-      <div className="mt-[14px] text-center">
+      <div className="mt-3.5 text-center">
         <p className="font-comfortaa font-bold text-[14px] leading-[22px] text-[#4A3C2A]">
           No notifications
         </p>
@@ -233,7 +233,7 @@ export default function Notifications() {
               <button
                 type="button"
                 onClick={handleMarkAllAsRead}
-                className="group flex cursor-pointer items-center gap-[6px] rounded-xl border border-transparent px-3 py-1 text-[#00A63E] hover:border-[#00A63E]"
+                className="group flex cursor-pointer items-center gap-1.5 rounded-xl border border-transparent px-3 py-1 text-[#00A63E] hover:border-[#00A63E]"
               >
                 <Icon name="check-green" size={16} className="text-current" />
                 <span className="font-comfortaa font-medium text-[12.25px] leading-[17.5px] text-current">
@@ -259,10 +259,10 @@ export default function Notifications() {
                 return (
                   <div key={item.id} className="w-full">
                     <div className="hidden rounded-xl border border-[rgba(0,0,0,0.1)] bg-white px-[21px] py-[21px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_0px_rgba(0,0,0,0.1)] sm:block">
-                      <div className="flex gap-[14px]">
-                        <div className="relative size-[40px]">
+                      <div className="flex gap-3.5">
+                        <div className="relative size-10">
                           <div
-                            className="size-[40px] rounded-full flex items-center justify-center"
+                            className="flex size-10 items-center justify-center rounded-full"
                             style={{ backgroundColor: item.iconBg }}
                           >
                             <Icon name={item.iconName} size={item.iconSize} />
@@ -274,22 +274,22 @@ export default function Notifications() {
                             />
                           )}
                         </div>
-                        <div className="flex-1">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <h2 className="font-comfortaa font-bold text-[14px] leading-[17.5px] text-[#4A3C2A]">
-                                {item.title}
-                              </h2>
-                              <p className="mt-[4px] font-comfortaa text-[12.25px] leading-[17.5px] text-[#6A7282]">
-                                {item.body}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-[7px]">
+                          <div className="flex-1">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <h2 className="font-comfortaa font-bold text-[14px] leading-[17.5px] text-[#4A3C2A]">
+                                  {item.title}
+                                </h2>
+                                <p className="mt-1 font-comfortaa text-[12.25px] leading-[17.5px] text-[#6A7282]">
+                                  {item.body}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-1.5">
                               {item.showCheck && (
                                 <button
                                   type="button"
                                   onClick={() => handleMarkRead(item.id)}
-                                  className="size-[16px] cursor-pointer text-[#00A63E] hover:text-[#008A2E]"
+                                  className="size-4 cursor-pointer text-[#00A63E] hover:text-[#008A2E]"
                                   aria-label="Mark as read"
                                 >
                                   <Icon
@@ -304,7 +304,7 @@ export default function Notifications() {
                                   type="button"
                                   onClick={() => handleDelete(item.id)}
                                   disabled={deletingId === item.id}
-                                  className="size-[16px] cursor-pointer text-[#EF4444] hover:text-[#D1202B]"
+                                  className="size-4 cursor-pointer text-[#EF4444] hover:text-[#D1202B]"
                                   aria-label="Dismiss"
                                 >
                                   <Icon
@@ -316,7 +316,7 @@ export default function Notifications() {
                               )}
                             </div>
                           </div>
-                          <div className="mt-[6px]">
+                          <div className="mt-1.5">
                             <TimeStamp text={item.time} />
                           </div>
                         </div>
@@ -347,7 +347,7 @@ export default function Notifications() {
                     >
                       {actionWidth ? (
                         <div
-                          className={`absolute right-0 top-[8px] bottom-[8px] flex flex-col gap-[8px] transition-opacity duration-200 ${
+                          className={`absolute right-0 top-2 bottom-2 flex flex-col gap-2 transition-opacity duration-200 ${
                             swipedId === item.id ? "opacity-100" : "opacity-0 pointer-events-none"
                           }`}
                           style={{ width: `${actionWidth}px` }}
@@ -356,7 +356,7 @@ export default function Notifications() {
                             <button
                               type="button"
                               onClick={() => handleMarkRead(item.id)}
-                              className="flex-1 bg-[#16A34A] text-white text-[11px] font-semibold flex flex-col items-center justify-center gap-[4px] rounded-[8px]"
+                              className="flex flex-1 flex-col items-center justify-center gap-1 rounded-lg bg-[#16A34A] text-[11px] font-semibold text-white"
                             >
                               <Icon name="check-green" size={16} className="text-white" />
                               <span>Read</span>
@@ -367,7 +367,7 @@ export default function Notifications() {
                               type="button"
                               onClick={() => handleDelete(item.id)}
                               disabled={deletingId === item.id}
-                              className="flex-1 bg-[#EF4444] text-white text-[11px] font-semibold flex flex-col items-center justify-center gap-[4px] rounded-[8px]"
+                              className="flex flex-1 flex-col items-center justify-center gap-1 rounded-lg bg-[#EF4444] text-[11px] font-semibold text-white"
                             >
                               <Icon name="trash" size={16} className="text-white" />
                               <span>Delete</span>
@@ -387,21 +387,21 @@ export default function Notifications() {
                           if (swipedId === item.id) setSwipedId(null);
                         }}
                       >
-                        <div className="flex gap-[12px] px-[8px] py-[14px]">
-                          <div className="relative size-[36px]">
-                          <div
-                            className="size-[36px] rounded-full flex items-center justify-center"
-                            style={{ backgroundColor: item.iconBg }}
-                          >
-                            <Icon name={item.iconName} size={item.iconSize} />
+                        <div className="flex gap-3 px-2 py-3.5">
+                          <div className="relative size-9">
+                            <div
+                              className="flex size-9 items-center justify-center rounded-full"
+                              style={{ backgroundColor: item.iconBg }}
+                            >
+                              <Icon name={item.iconName} size={item.iconSize} />
+                            </div>
+                            {item.showUnreadDot && !isRead && (
+                              <span
+                                className="absolute size-1.5 rounded-full bg-[#EF4444]"
+                                style={{ top: "2px", right: "2px" }}
+                              />
+                            )}
                           </div>
-                          {item.showUnreadDot && !isRead && (
-                            <span
-                              className="absolute size-[6px] bg-[#EF4444] rounded-full"
-                              style={{ top: "2px", right: "2px" }}
-                            />
-                          )}
-                        </div>
                           <div className="flex-1">
                             <h2 className="font-comfortaa font-bold text-[14px] leading-[18px] text-[#4A3C2A]">
                               {item.title}
@@ -409,7 +409,7 @@ export default function Notifications() {
                             <p className="mt-[3px] font-comfortaa text-[12px] leading-[16px] text-[#6A7282]">
                               {item.body}
                             </p>
-                            <div className="mt-[6px]">
+                            <div className="mt-1.5">
                               <TimeStamp text={item.time} />
                             </div>
                           </div>
