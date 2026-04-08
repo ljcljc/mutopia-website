@@ -129,7 +129,7 @@ export default function AddAddressModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white rounded-[12px] border border-[rgba(0,0,0,0.1)] px-6 pt-3 pb-6 shadow-[0_8px_12px_0_rgba(0,0,0,0.10)] max-w-[calc(100%-32px)] sm:max-w-[400px] [&>button]:hidden">
+      <DialogContent className="max-w-[calc(100%-32px)] rounded-xl border border-[rgba(0,0,0,0.1)] bg-white px-6 pb-6 pt-3 shadow-[0_8px_12px_0_rgba(0,0,0,0.10)] sm:max-w-[400px] [&>button]:hidden">
         <DialogTitle className="sr-only">Add address</DialogTitle>
         <DialogDescription className="sr-only">
           Add a new address for your bookings
@@ -169,11 +169,11 @@ export default function AddAddressModal({
         </div>
 
         {/* Alert - 服务范围提示 - 与 booking step1 保持一致 */}
-        <div className="bg-[#eff6ff] border border-[#bedbff] border-solid relative rounded-[8px]">
-          <div className="flex items-center overflow-clip px-[16px] py-[8px] relative rounded-[inherit]">
-            <div className="flex gap-[8px] items-start relative w-full min-w-0">
+        <div className="relative rounded-lg border border-solid border-[#bedbff] bg-[#eff6ff]">
+          <div className="relative flex items-center overflow-clip rounded-[inherit] px-4 py-2">
+            <div className="relative flex w-full min-w-0 items-start gap-2">
               {/* Info Icon */}
-              <div className="relative shrink-0 size-[12px]">
+              <div className="relative size-3 shrink-0">
                 <Icon
                   name="alert-info"
                   aria-label="Info"
@@ -213,8 +213,8 @@ export default function AddAddressModal({
           </div>
 
           {/* City and Province - 并排显示，与 booking step1 保持一致 */}
-          <div className="flex flex-col sm:flex-row gap-[12px] sm:gap-[20px] items-start relative shrink-0 w-full">
-            <div className="flex flex-col items-start relative shrink-0 w-full sm:w-[192px]">
+          <div className="relative flex w-full shrink-0 flex-col items-start gap-3 sm:flex-row sm:items-start sm:gap-5">
+            <div className="relative flex w-full shrink-0 flex-col items-start sm:w-48">
               <CustomInput
                 label="City"
                 type="text"
@@ -226,7 +226,7 @@ export default function AddAddressModal({
                 inputClassName="text-[#717182] sm:text-[#4a3c2a]"
               />
             </div>
-            <div className="flex flex-col items-start relative shrink-0 w-full sm:w-[95px]">
+            <div className="relative flex w-full shrink-0 flex-col items-start sm:w-[95px]">
               <CustomInput
                 label="Province"
                 type="text"
@@ -241,8 +241,8 @@ export default function AddAddressModal({
           </div>
 
           {/* Post Code - 单独一行，与 booking step1 保持一致 */}
-          <div className="flex gap-[20px] items-start relative shrink-0 w-full">
-            <div className="flex flex-col items-start relative shrink-0 w-full sm:w-[192px]">
+          <div className="relative flex w-full shrink-0 items-start gap-5">
+            <div className="relative flex w-full shrink-0 flex-col items-start sm:w-48">
               <CustomInput
                 label="Post code"
                 type="text"
@@ -273,11 +273,11 @@ export default function AddAddressModal({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-[10px] mt-6">
+        <div className="mt-6 flex items-center justify-end gap-2.5">
           <OrangeButton
             variant="outline"
             size="medium"
-            className="w-[120px]"
+            className="w-30"
             onClick={handleCancel}
             disabled={isSubmitting}
           >
@@ -286,7 +286,7 @@ export default function AddAddressModal({
           <OrangeButton
             variant="primary"
             size="medium"
-            className="w-[120px]"
+            className="w-30"
             onClick={handleSubmit}
             disabled={isSubmitting}
             loading={isSubmitting}
