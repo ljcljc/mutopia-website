@@ -60,7 +60,7 @@ function StatusBadge({ status }: { status: string }) {
   
   if (displayType === "ready") {
     return (
-      <div className="bg-[#DCFCE7] rounded-[12px] h-[24px] px-[10px] flex items-center justify-center">
+      <div className="flex h-6 items-center justify-center rounded-xl bg-[#DCFCE7] px-[10px]">
         <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#016630]">
           Ready for service
         </span>
@@ -70,7 +70,7 @@ function StatusBadge({ status }: { status: string }) {
 
   if (displayType === "canceled") {
     return (
-      <div className="border border-[#4C4C4C] rounded-[12px] h-[24px] px-[9px] py-[5px] flex items-center">
+      <div className="flex h-6 items-center rounded-xl border border-[#4C4C4C] px-[9px] py-[5px]">
         <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#4C4C4C]">
           Service canceled
         </span>
@@ -79,7 +79,7 @@ function StatusBadge({ status }: { status: string }) {
   }
 
   return (
-    <div className="border border-[#4C4C4C] rounded-[12px] h-[24px] px-[9px] py-[5px] flex items-center">
+    <div className="flex h-6 items-center rounded-xl border border-[#4C4C4C] px-[9px] py-[5px]">
       <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#4C4C4C]">
         Pending
       </span>
@@ -98,7 +98,7 @@ function BookingItem({ booking }: { booking: BookingListOut }) {
 
   return (
     <div
-      className="border border-[#E5E7EB] rounded-[14px] p-[13px] flex items-center justify-between transition-colors duration-200 hover:bg-[#F9FAFB] cursor-pointer"
+      className="flex cursor-pointer items-center justify-between rounded-[14px] border border-[#E5E7EB] p-[13px] transition-colors duration-200 hover:bg-[#F9FAFB]"
       role="button"
       tabIndex={0}
       onClick={() => navigate(`/account/bookings/${booking.id}`)}
@@ -109,8 +109,8 @@ function BookingItem({ booking }: { booking: BookingListOut }) {
         }
       }}
     >
-      <div className="flex flex-col gap-[12px]">
-        <div className="flex flex-col gap-[8px] pr-[30px]">
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2 pr-[30px]">
           <p className="font-comfortaa font-bold text-[16px] leading-[28px] text-[#DE6A07]">
             {petName}
           </p>
@@ -131,7 +131,7 @@ function BookingItem({ booking }: { booking: BookingListOut }) {
       </div>
       <div className="flex items-center gap-[7px]">
         <StatusBadge status={booking.status} />
-        <Icon name="nav-next" className="size-[16px] text-[#99A1AF]" />
+        <Icon name="nav-next" className="size-4 text-[#99A1AF]" />
       </div>
     </div>
   );
@@ -253,9 +253,9 @@ export default function DashboardBookingCard() {
   }, []);
 
   return (
-    <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[20px]">
-      <div className="flex flex-col gap-[24px]">
-        <div ref={tabsRef} className="relative flex items-start pb-[4px] whitespace-nowrap ml-[-20px]">
+    <div className="rounded-xl bg-white p-5 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
+      <div className="flex flex-col gap-6">
+        <div ref={tabsRef} className="relative ml-[-20px] flex items-start whitespace-nowrap pb-1">
           <button
             type="button"
             onClick={() => setActiveTab("upcoming")}

@@ -222,18 +222,18 @@ export default function Notifications() {
   };
 
   return (
-    <div className="w-full min-h-full flex flex-col">
-      <div className="w-full max-w-[944px] mx-auto px-6 pb-8 flex-1">
-        <div className="flex flex-col gap-[24px]">
+    <div className="flex min-h-full w-full flex-col">
+      <div className="mx-auto w-full max-w-[944px] flex-1 px-6 pb-8">
+        <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between">
-            <h1 className="font-comfortaa font-bold text-[20px] text-[#4A3C2A]">
+            <h1 className="font-comfortaa text-[20px] font-bold text-[#4A3C2A]">
               Notifications
             </h1>
             {notifications.length > 0 ? (
               <button
                 type="button"
                 onClick={handleMarkAllAsRead}
-                className="group flex items-center gap-[6px] px-[12px] py-[4px] rounded-[12px] text-[#00A63E] border border-transparent hover:border-[#00A63E] cursor-pointer"
+                className="group flex cursor-pointer items-center gap-[6px] rounded-xl border border-transparent px-3 py-1 text-[#00A63E] hover:border-[#00A63E]"
               >
                 <Icon name="check-green" size={16} className="text-current" />
                 <span className="font-comfortaa font-medium text-[12.25px] leading-[17.5px] text-current">
@@ -243,11 +243,11 @@ export default function Notifications() {
             ) : null}
           </div>
 
-          <div className="flex flex-col gap-[16px] w-full">
+          <div className="flex w-full flex-col gap-4">
             {isLoading ? (
               <div className="text-[#4A3C2A] text-sm py-4">Loading notifications...</div>
             ) : notifications.length === 0 ? (
-              <div className="w-full rounded-[12px] border border-[rgba(0,0,0,0.10)] bg-[rgba(255,255,255,0.7)] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.10),0px_1px_2px_-1px_rgba(0,0,0,0.10)] px-[21px] py-[21px]">
+              <div className="w-full rounded-xl border border-[rgba(0,0,0,0.10)] bg-[rgba(255,255,255,0.7)] px-[21px] py-[21px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.10),0px_1px_2px_-1px_rgba(0,0,0,0.10)]">
                 <EmptyState />
               </div>
             ) : (
@@ -258,7 +258,7 @@ export default function Notifications() {
                 const actionWidth = showReadAction || showDeleteAction ? 56 : 0;
                 return (
                   <div key={item.id} className="w-full">
-                    <div className="hidden sm:block bg-white border border-[rgba(0,0,0,0.1)] rounded-[12px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_0px_rgba(0,0,0,0.1)] px-[21px] py-[21px]">
+                    <div className="hidden rounded-xl border border-[rgba(0,0,0,0.1)] bg-white px-[21px] py-[21px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_0px_rgba(0,0,0,0.1)] sm:block">
                       <div className="flex gap-[14px]">
                         <div className="relative size-[40px]">
                           <div
@@ -376,7 +376,7 @@ export default function Notifications() {
                         </div>
                       ) : null}
                       <div
-                        className="relative z-10 rounded-[14px] bg-white border border-[rgba(0,0,0,0.08)] shadow-[0px_2px_8px_rgba(0,0,0,0.08)] px-[8px] overflow-hidden transition-transform duration-200 ease-out"
+                        className="relative z-10 overflow-hidden rounded-[14px] border border-[rgba(0,0,0,0.08)] bg-white px-2 shadow-[0px_2px_8px_rgba(0,0,0,0.08)] transition-transform duration-200 ease-out"
                         style={{
                           transform:
                             swipedId === item.id && actionWidth

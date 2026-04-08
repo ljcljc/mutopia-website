@@ -16,24 +16,24 @@ const benefits = [
 
 export default function DashboardMembershipCard() {
   return (
-    <div className="bg-white border-2 border-[#754387] rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[22px] flex flex-col gap-[28px] w-full">
-      <div className="flex flex-col gap-[12px]">
-        <div className="flex items-center gap-[8px]">
+    <div className="flex w-full flex-col gap-7 rounded-xl border-2 border-[#754387] bg-white p-[22px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-2">
           <img alt="" className="h-[24px] w-[21px]" src={membershipIcon} />
           <p className="font-comfortaa font-medium text-[15.75px] leading-[24.5px] text-[#4A3C2A]">
             Membership
           </p>
         </div>
         <div className="flex items-center justify-center">
-          <span className="bg-[#DCFCE7] rounded-[12px] px-[16px] py-[4px] font-comfortaa font-bold text-[10px] leading-[14px] text-[#016630]">
+          <span className="rounded-xl bg-[#DCFCE7] px-4 py-1 font-comfortaa text-[10px] leading-[14px] font-bold text-[#016630]">
             Save up to 50%
           </span>
         </div>
       </div>
 
-      <div className="flex flex-col gap-[12px]">
+      <div className="flex flex-col gap-3">
         {benefits.map((benefit) => (
-          <div key={benefit.text} className="flex items-center gap-[12px]">
+          <div key={benefit.text} className="flex items-center gap-3">
             <img alt="" className="size-[16.8px]" src={benefit.icon} />
             <p
               className={`font-comfortaa font-bold text-[12.25px] leading-[17.5px] ${
@@ -46,10 +46,10 @@ export default function DashboardMembershipCard() {
         ))}
       </div>
 
-      <div className="px-[24px]">
+      <div className="px-6">
         <button
           type="button"
-          className="w-full bg-[#633479] rounded-[32px] h-[36px] flex items-center justify-center gap-[4px]"
+          className="flex h-9 w-full items-center justify-center gap-1 rounded-[32px] bg-[#633479]"
         >
           <span className="font-comfortaa font-medium text-[14px] leading-[17.5px] text-white">
             Go premium

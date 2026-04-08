@@ -249,13 +249,13 @@ export default function BookingDetail() {
   };
 
   return (
-    <div className="w-full min-h-full flex flex-col">
-      <div className="w-full max-w-[944px] mx-auto px-6 pb-8 flex-1">
-        <div className="flex flex-col gap-[20px]">
-          <div className="h-[27px] flex items-center">
+    <div className="flex min-h-full w-full flex-col">
+      <div className="mx-auto w-full max-w-[944px] flex-1 px-6 pb-8">
+        <div className="flex flex-col gap-5">
+          <div className="flex h-[27px] items-center">
             <nav
               aria-label="Breadcrumb"
-              className="font-comfortaa font-bold text-[14px] leading-[20px] text-[#4A3C2A] flex items-center gap-[6px] whitespace-nowrap"
+              className="flex items-center gap-[6px] whitespace-nowrap font-comfortaa text-[14px] leading-[20px] font-bold text-[#4A3C2A]"
             >
               <Link to="/account/dashboard" className="hover:text-[#DE6A07] transition-colors">
                 Dashboard

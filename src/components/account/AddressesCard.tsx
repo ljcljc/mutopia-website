@@ -44,12 +44,12 @@ export default function AddressesCard() {
 
   return (
     <>
-      <SectionCard className="rounded-[12px] border border-[rgba(0,0,0,0.10)] p-[20px] sm:rounded-lg sm:p-6 sm:shadow-sm shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
+      <SectionCard className="rounded-xl border border-[rgba(0,0,0,0.10)] p-5 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] sm:rounded-lg sm:p-6 sm:shadow-sm">
         {/* Header */}
-        <div className="flex items-center justify-between mb-[16px] sm:mb-5">
+        <div className="mb-4 flex items-center justify-between sm:mb-5">
           <div className="flex items-center gap-2">
-            <Icon name="location" className="w-4 h-4 sm:w-5 sm:h-5 text-[#DE6A07] shrink-0" />
-            <h2 className="font-comfortaa font-semibold text-[#4A3C2A] text-[14px] sm:text-lg">
+            <Icon name="location" className="h-4 w-4 shrink-0 text-[#DE6A07] sm:h-5 sm:w-5" />
+            <h2 className="font-comfortaa text-[14px] font-semibold text-[#4A3C2A] sm:text-lg">
               Addresses
             </h2>
           </div>
@@ -57,8 +57,8 @@ export default function AddressesCard() {
             onClick={handleAdd}
             className="flex items-center gap-2 text-[#8B6357] hover:text-[#DE6A07]/80 cursor-pointer"
           >
-            <Icon name="add-2" className="w-4 h-4 sm:w-5 sm:h-5" />
-            <span className="font-comfortaa font-medium text-[12px] sm:text-sm">
+            <Icon name="add-2" className="h-4 w-4 sm:h-5 sm:w-5" />
+            <span className="font-comfortaa text-[12px] font-medium sm:text-sm">
               <span className="sm:hidden">Add new</span>
               <span className="hidden sm:inline">Add</span>
             </span>
@@ -73,7 +73,7 @@ export default function AddressesCard() {
         }
         if (!hasAddresses) {
           return (
-            <div className="text-[#4A3C2A] text-sm py-4">
+            <div className="py-4 text-sm text-[#4A3C2A]">
               No addresses saved yet.
             </div>
           );

@@ -77,11 +77,11 @@ function PetCard({ pet, onSelect }: { pet: PetOut; onSelect: (petId: number) => 
     <div
       role="button"
       tabIndex={0}
-      className="bg-white border border-[#E5E7EB] rounded-[12px] p-[14px] flex items-center gap-[16px] w-full cursor-pointer transition-colors duration-200 hover:bg-[#F9FAFB]"
+      className="flex w-full cursor-pointer items-center gap-4 rounded-xl border border-[#E5E7EB] bg-white p-[14px] transition-colors duration-200 hover:bg-[#F9FAFB]"
       onClick={() => onSelect(pet.id)}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onSelect(pet.id)}
     >
-      <div className="flex w-full gap-[16px]">
+      <div className="flex w-full gap-4">
         <div className="size-[56px] rounded-full overflow-hidden border border-[#E5E7EB] bg-[#E5E7EB] flex items-center justify-center">
           {avatarUrl ? (
             <img alt={pet.name} className="size-full object-cover object-center" src={avatarUrl} />
@@ -96,7 +96,7 @@ function PetCard({ pet, onSelect }: { pet: PetOut; onSelect: (petId: number) => 
           <p className="font-comfortaa font-bold text-[12px] leading-[18px] text-[#4A3C2A]">
             {birthday}
           </p>
-          <div className="flex flex-col mt-[10px]">
+          <div className="mt-[10px] flex flex-col">
             <p className="font-comfortaa font-normal text-[12px] leading-[18px] text-[#4A3C2A]">
               {weight}
             </p>
@@ -127,11 +127,11 @@ function MemorializedPetCard({ pet, onSelect }: { pet: PetOut; onSelect: (petId:
     <div
       role="button"
       tabIndex={0}
-      className="relative bg-white border border-[#E5E7EB] rounded-[12px] p-[14px] flex items-center gap-[16px] w-full cursor-pointer transition-colors duration-200 hover:bg-[#F9FAFB] overflow-hidden"
+      className="relative flex w-full cursor-pointer items-center gap-4 overflow-hidden rounded-xl border border-[#E5E7EB] bg-white p-[14px] transition-colors duration-200 hover:bg-[#F9FAFB]"
       onClick={() => onSelect(pet.id)}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onSelect(pet.id)}
     >
-      <div className="flex w-full gap-[16px]">
+      <div className="flex w-full gap-4">
         <div className="size-[56px] rounded-full overflow-hidden border border-[#E5E7EB] bg-[#E5E7EB] flex items-center justify-center">
           {avatarUrl ? (
             <img alt={pet.name} className="size-full object-cover object-center" src={avatarUrl} />
@@ -149,7 +149,7 @@ function MemorializedPetCard({ pet, onSelect }: { pet: PetOut; onSelect: (petId:
         </div>
       </div>
       <Icon name="nav-next" className="text-[#99A1AF]" size={14} />
-      <div className="absolute inset-0 bg-[rgba(0,0,0,0.12)] pointer-events-none rounded-[12px]" />
+      <div className="pointer-events-none absolute inset-0 rounded-xl bg-[rgba(0,0,0,0.12)]" />
     </div>
   );
 }
@@ -184,15 +184,15 @@ export default function DashboardMyPetsCard() {
   }, []);
 
   return (
-    <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[20px]">
-      <div className="flex items-center justify-between mb-[24px]">
+    <div className="rounded-xl bg-white p-5 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
+      <div className="mb-6 flex items-center justify-between">
         <p className="font-comfortaa font-medium text-[16px] leading-[24px] text-[#4A3C2A]">
           My pets
         </p>
         <button
           type="button"
           onClick={() => navigate("/account/pets/new", { state: { from: "dashboard" } })}
-          className="flex items-center gap-[6px] font-comfortaa font-bold text-[12.25px] leading-[17.5px] text-[#8B6357] cursor-pointer"
+          className="flex cursor-pointer items-center gap-[6px] font-comfortaa text-[12.25px] leading-[17.5px] font-bold text-[#8B6357]"
         >
           <Icon name="add-2" className="w-5 h-5" />
           Add pet
@@ -203,7 +203,7 @@ export default function DashboardMyPetsCard() {
       ) : pets.length === 0 ? (
         <div className="text-[#4A3C2A] text-sm py-4">No pets yet.</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-[24px]">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {pets.map((pet) => (
             <PetCard
               key={pet.id}
@@ -217,11 +217,11 @@ export default function DashboardMyPetsCard() {
       {isLoadingMemorializedPets ? (
         <div className="text-[#4A3C2A] text-sm py-4">Loading memorialized pets...</div>
       ) : memorializedPets.length > 0 ? (
-        <div className="mt-[20px]">
+        <div className="mt-5">
           <button
             type="button"
             onClick={() => setIsMemorializedOpen((value) => !value)}
-            className="w-full flex items-center justify-between font-comfortaa font-medium text-[14px] leading-[21px] text-[#4A3C2A] mb-[12px]"
+            className="mb-3 flex w-full items-center justify-between font-comfortaa text-[14px] leading-[21px] font-medium text-[#4A3C2A]"
             aria-expanded={isMemorializedOpen}
           >
             <span>Memorialized</span>
@@ -232,7 +232,7 @@ export default function DashboardMyPetsCard() {
             />
           </button>
           {isMemorializedOpen ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {memorializedPets.map((pet) => (
                 <MemorializedPetCard
                   key={`memorialized-${pet.id}`}

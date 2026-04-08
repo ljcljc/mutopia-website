@@ -66,10 +66,10 @@ export default function DashboardHeroCard() {
   const address = parseAddress(checkedInBooking.address);
 
   return (
-    <div className="bg-[#E2FFE8] rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[20px]">
-      <div className="border border-[#4A5565] rounded-[14px] p-[13px] flex items-center justify-between">
-        <div className="flex flex-col gap-[12px]">
-          <div className="flex flex-col gap-[8px] w-[134px]">
+    <div className="rounded-xl bg-[#E2FFE8] p-5 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
+      <div className="flex items-center justify-between rounded-[14px] border border-[#4A5565] p-[13px]">
+        <div className="flex flex-col gap-3">
+          <div className="flex w-[134px] flex-col gap-2">
             <p className="font-comfortaa font-bold text-[16px] leading-[28px] text-[#8B6357]">
               {petName}
             </p>
@@ -89,12 +89,12 @@ export default function DashboardHeroCard() {
           </div>
         </div>
         <div className="flex items-center gap-[7px]">
-          <div className="border border-[#4C4C4C] rounded-[12px] h-[24px] px-[9px] py-[5px] flex items-center">
+          <div className="flex h-6 items-center rounded-xl border border-[#4C4C4C] px-[9px] py-[5px]">
             <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#4C4C4C]">
               Checked in
             </span>
           </div>
-          <Icon name="nav-next" className="size-[16px] text-[#99A1AF]" />
+          <Icon name="nav-next" className="size-4 text-[#99A1AF]" />
         </div>
       </div>
     </div>

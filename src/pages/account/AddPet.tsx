@@ -106,12 +106,12 @@ export default function AddPet() {
   };
 
   return (
-    <div className="flex flex-col gap-[60px] items-center pb-[60px] sm:pb-[100px] px-[calc(20*var(--px393))] sm:px-0 w-full min-h-full relative bg-[#f9f1e8]">
-      <div className="flex flex-col gap-[16px] items-start relative shrink-0 w-full max-w-[944px]">
+    <div className="relative flex min-h-full w-full flex-col items-center gap-[60px] bg-[#f9f1e8] px-[calc(20*var(--px393))] pb-[60px] sm:px-0 sm:pb-[100px]">
+      <div className="relative flex w-full max-w-[944px] shrink-0 flex-col items-start gap-4">
         <div className="h-[27px] flex items-center w-full">
           <nav
             aria-label="Breadcrumb"
-            className="font-comfortaa font-bold text-[20px] text-[#4A3C2A] flex items-center gap-[6px]"
+            className="flex items-center gap-[6px] font-comfortaa text-[20px] font-bold text-[#4A3C2A]"
           >
             {location.state?.from === "my-pets" ? (
               <>
@@ -132,7 +132,7 @@ export default function AddPet() {
             )}
           </nav>
         </div>
-        <div className="flex flex-col gap-[32px] items-start relative shrink-0 w-full">
+        <div className="relative flex w-full shrink-0 flex-col items-start gap-8">
           <PetForm
             petName={petName}
             petType={petType}

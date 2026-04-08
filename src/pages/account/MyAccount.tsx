@@ -39,28 +39,28 @@ export default function MyAccount() {
   }, []); // 空依赖数组，只在组件挂载时执行一次
 
   return (
-    <div className="w-full min-h-full flex flex-col">
-      <div className="w-full max-w-none sm:max-w-[944px] mx-auto px-[20px] sm:px-6 pb-[20px] sm:pb-8 flex-1">
+    <div className="flex min-h-full w-full flex-col">
+      <div className="mx-auto w-full max-w-none flex-1 px-5 pb-5 sm:max-w-[944px] sm:px-6 sm:pb-8">
         {/* Page Header */}
         <PageHeader />
 
         {/* Personal Information Card */}
-        <div className="mb-[20px] sm:mb-6">
+        <div className="mb-5 sm:mb-6">
           <PersonalInfoCard />
         </div>
 
         {/* Addresses Card */}
-        <div className="mb-[20px] sm:mb-6">
+        <div className="mb-5 sm:mb-6">
           <AddressesCard />
         </div>
 
         {/* Payment Method Card (mobile only) */}
-        <div className="mb-[20px] sm:mb-6 sm:hidden">
+        <div className="mb-5 sm:mb-6 sm:hidden">
           <PaymentMethodCard />
         </div>
 
         {/* Bottom Cards Section - Share & Earn and Membership */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px] sm:gap-6">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 sm:gap-6">
           <ShareAndEarnCard />
           <MembershipCard />
         </div>
