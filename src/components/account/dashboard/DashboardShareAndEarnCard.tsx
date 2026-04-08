@@ -3,15 +3,15 @@ const codeIcon = "https://www.figma.com/api/mcp/asset/cf303528-2395-4812-a63f-03
 
 export default function DashboardShareAndEarnCard() {
   return (
-    <div className="bg-white border-2 border-[#DE6A07] rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[22px] flex flex-col gap-[28px] w-full">
-      <div className="flex items-center gap-[8px]">
-        <img alt="" className="size-[24px]" src={giftIcon} />
+    <div className="flex w-full flex-col gap-7 rounded-xl border-2 border-[#DE6A07] bg-white p-[22px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
+      <div className="flex items-center gap-2">
+        <img alt="" className="size-6" src={giftIcon} />
         <p className="font-comfortaa font-medium text-[15.75px] leading-[24.5px] text-[#4A3C2A]">
           Share & Earn
         </p>
       </div>
 
-      <div className="pl-[27px] flex flex-col gap-[24px] text-[#4A5565]">
+      <div className="flex flex-col gap-6 pl-[27px] text-[#4A5565]">
         <p className="font-comfortaa text-[14px] leading-[22.75px] whitespace-pre-wrap">
           Invite a friend to book our service and you'll both get {""}
           <span className="font-comfortaa font-bold text-[#DE6A07]">
@@ -24,9 +24,9 @@ export default function DashboardShareAndEarnCard() {
         </p>
       </div>
 
-      <div className="border border-[#8B6357] rounded-[12px] h-[38px] px-[11.5px] flex items-center justify-between">
+      <div className="flex h-[38px] items-center justify-between rounded-xl border border-[#8B6357] px-[11.5px]">
         <div className="flex items-center gap-[7px]">
-          <img alt="" className="size-[16px]" src={codeIcon} />
+          <img alt="" className="size-4" src={codeIcon} />
           <span className="font-comfortaa font-medium text-[12.25px] leading-[17.5px] text-[#4A3C2A]">
             LEIBI41
           </span>

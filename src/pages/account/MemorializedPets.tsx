@@ -61,7 +61,7 @@ function ReadonlyPhotoGrid({ urls }: { urls: string[] }) {
   }
 
   return (
-    <div className="flex flex-wrap gap-[12px]">
+    <div className="flex flex-wrap gap-3">
       {urls.map((url, index) => (
         <div
           key={`${url}-${index}`}
@@ -146,13 +146,13 @@ export default function MemorializedPets() {
   };
 
   return (
-    <div className="w-full min-h-full flex flex-col">
-      <div className="w-full max-w-[944px] mx-auto px-6 flex-1">
-      <div className="flex flex-col gap-[8px] mb-[-2px]">
+    <div className="flex min-h-full w-full flex-col">
+      <div className="mx-auto flex w-full max-w-[944px] flex-1 px-6">
+      <div className="mb-[-2px] flex flex-col gap-2">
             <div className="flex justify-between">
             <nav
             aria-label="Breadcrumb"
-            className="font-comfortaa font-bold text-[20px] text-[#4A3C2A] flex gap-[6px]"
+            className="flex gap-1.5 font-comfortaa text-[20px] font-bold text-[#4A3C2A]"
           >
             <Link to="/account/pets" className="hover:text-[#DE6A07] transition-colors">
             My pets
@@ -160,13 +160,13 @@ export default function MemorializedPets() {
             <span aria-hidden="true">{" > "}</span>
             <span>Memorialized pets</span>
           </nav>
-              <div className="flex items-center gap-[8px] overflow-x-auto max-w-[520px] pl-[2px] pr-[2px]">
+              <div className="flex max-w-[520px] items-center gap-2 overflow-x-auto px-0.5">
                 {memorializedPets.map((pet) => (
                     <button
                       key={pet.id}
                       type="button"
                       onClick={() => handleSelectPet(pet.id)}
-                      className="bg-white border-2 border-[rgba(0,0,0,0.12)] rounded-tl-[14px] rounded-tr-[14px] px-[16px] py-[8px] min-w-[120px] flex items-center gap-[4px] shrink-0 text-[rgba(0,0,0,0.12)] cursor-default"
+                      className="flex min-w-[120px] shrink-0 items-center gap-1 rounded-tl-[14px] rounded-tr-[14px] border-2 border-[rgba(0,0,0,0.12)] bg-white px-4 py-2 text-[rgba(0,0,0,0.12)] cursor-default"
                     >
                       <Icon
                         name={pet.pet_type === "cat" ? "cat" : "dog"}
@@ -182,12 +182,12 @@ export default function MemorializedPets() {
             </div>
           </div>
         <div className="flex flex-col gap-[21px]">
-          <div className="bg-white rounded-[12px] rounded-tr-none border-2 border-[rgba(0, 0, 0, 0.12)] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[20px]">
+          <div className="rounded-xl rounded-tr-none border-2 border-[rgba(0,0,0,0.12)] bg-white p-5 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
             {isLoadingMemorializedPets ? (
               <div className="text-[#4A3C2A] text-sm">Loading memorialized pets...</div>
             ) : activePet ? (
-              <div className="flex gap-[16px]">
-                <div className="size-[56px] rounded-full overflow-hidden border border-[#E5E7EB] bg-[#8B6357] flex items-center justify-center shrink-0">
+              <div className="flex gap-4">
+                <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E5E7EB] bg-[#8B6357]">
                   {activePet.primary_photo ? (
                     <img
                       alt={activePet.name}
@@ -198,13 +198,13 @@ export default function MemorializedPets() {
                     <Icon name="pet" className="size-6 text-white" />
                   )}
                 </div>
-                <div className="flex flex-col gap-[8px] flex-1">
+                <div className="flex flex-1 flex-col gap-2">
                   <div className="flex items-start justify-between">
-                    <div className="flex flex-col gap-[8px]">
+                    <div className="flex flex-col gap-2">
                       <p className="font-comfortaa font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
                         {activePet.name}
                       </p>
-                      <div className="grid grid-cols-3 gap-y-[16px] gap-x-[40px] text-[#4A3C2A]">
+                      <div className="grid grid-cols-3 gap-x-10 gap-y-4 text-[#4A3C2A]">
                         <div className="w-[80px]">
                           <p className="font-comfortaa text-[10px] leading-[12px]">Pet type</p>
                           <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
@@ -260,9 +260,9 @@ export default function MemorializedPets() {
             )}
           </div>
 
-          <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[24px]">
-            <div className="flex flex-col gap-[24px]">
-              <div className="flex flex-col gap-[8px]">
+          <div className="rounded-xl bg-white p-6 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-2">
                 <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
                   Photos
                 </p>
@@ -274,7 +274,7 @@ export default function MemorializedPets() {
 
               <div className="border-t border-[#E5E7EB]" />
 
-              <div className="flex flex-col gap-[8px]">
+              <div className="flex flex-col gap-2">
                 <p className="font-comfortaa font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
                   Reference photos
                 </p>
@@ -283,12 +283,12 @@ export default function MemorializedPets() {
             </div>
           </div>
 
-          <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[20px]">
-            <div className="flex flex-col gap-[12px]">
+          <div className="rounded-xl bg-white p-5 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
+            <div className="flex flex-col gap-3">
               <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
                 Health report
               </p>
-              <div className="border border-[#E5E7EB] rounded-[14px] px-[15px] py-[13px] flex items-center justify-between max-w-[280px]">
+              <div className="flex max-w-[280px] items-center justify-between rounded-[14px] border border-[#E5E7EB] px-[15px] py-[13px]">
                 <div>
                   <p className="font-comfortaa font-normal text-[16px] leading-[28px] text-[#DE6A07]">
                     {activePet?.name || "-"}
@@ -298,7 +298,7 @@ export default function MemorializedPets() {
                   </p>
                 </div>
                 <div className="flex items-center gap-[7px]">
-                  <div className="bg-[#DCFCE7] h-[24px] px-[16px] py-[4px] rounded-[12px] flex items-center">
+                  <div className="flex h-6 items-center rounded-xl bg-[#DCFCE7] px-4 py-1">
                     <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#016630]">
                       Ready
                     </span>
@@ -309,8 +309,8 @@ export default function MemorializedPets() {
             </div>
           </div>
 
-          <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[20px]">
-            <div className="flex flex-col gap-[12px]">
+          <div className="rounded-xl bg-white p-5 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
+            <div className="flex flex-col gap-3">
               <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
                 Special instruments or notes
               </p>
@@ -326,13 +326,13 @@ export default function MemorializedPets() {
         </div>
       </div>
 
-      <div className="w-full max-w-[944px] mx-auto px-6 pb-8 pt-5">
+      <div className="mx-auto w-full max-w-[944px] px-6 pb-8 pt-5">
         <div className="flex items-center justify-end">
           <button
             type="button"
             onClick={() => setIsDeleteOpen(true)}
             disabled={!activePet}
-            className="flex items-center gap-[8px] text-[#8B6357] text-[12px] leading-[17.5px] font-comfortaa hover:text-[#DE6A07] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="flex items-center gap-2 font-comfortaa text-[12px] leading-[17.5px] text-[#8B6357] transition-colors hover:text-[#DE6A07] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
           >
             <Icon name="trash" size={16} />
             Delete pet
@@ -342,13 +342,13 @@ export default function MemorializedPets() {
 
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent className="rounded-[20px] px-0 py-0 max-w-[calc(100%-32px)] sm:max-w-[520px]">
-          <div className="flex flex-col gap-[16px] pb-[32px] pt-[12px]">
-            <AlertDialogHeader className="px-[12px]">
+          <div className="flex flex-col gap-4 pb-8 pt-3">
+            <AlertDialogHeader className="px-3">
               <div className="flex items-center justify-between w-full">
                 <AlertDialogPrimitive.Cancel asChild>
                   <button
                     type="button"
-                    className="h-[16px] w-[16px] p-0 border-0 bg-transparent text-[#4A3C2A] opacity-70 hover:opacity-100"
+                    className="h-4 w-4 border-0 bg-transparent p-0 text-[#4A3C2A] opacity-70 hover:opacity-100"
                   >
                     <Icon name="close-arrow" size={16} className="text-[#4A3C2A]" />
                   </button>
@@ -356,17 +356,17 @@ export default function MemorializedPets() {
                 <AlertDialogTitle className="flex-1 text-center font-comfortaa font-normal text-[14px] leading-[22.75px] text-[#4C4C4C]">
                   Delete {activePet?.name || "pet"}
                 </AlertDialogTitle>
-                <span className="w-[16px]" />
+                <span className="w-4" />
               </div>
             </AlertDialogHeader>
             <div className="h-px bg-[rgba(0,0,0,0.1)]" />
-            <div className="px-[24px]">
+            <div className="px-6">
               <AlertDialogDescription className="font-comfortaa font-bold text-[14px] leading-[22px] text-[#4A5565] m-0">
                 By deleting this pet’s profile, it will no longer appear in your app. Are you sure you want to continue?
               </AlertDialogDescription>
             </div>
-            <AlertDialogFooter className="px-[24px]">
-              <div className="flex items-center justify-end gap-[10px] w-full">
+            <AlertDialogFooter className="px-6">
+              <div className="flex w-full items-center justify-end gap-2.5">
                 <AlertDialogPrimitive.Cancel asChild>
                   <OrangeButton variant="outline" size="medium">
                     No, Keep {activePet?.name || "pet"}

@@ -40,7 +40,7 @@ function CreditRow({
   const amountColor = isPending ? "text-[#8B6357]" : "text-[#DE6A07]";
   return (
     <div
-      className={`rounded-[12px] border border-[#E5E7EB] p-[16px] flex justify-between ${
+      className={`flex justify-between rounded-xl border border-[#E5E7EB] p-4 ${
         faded ? "bg-[#F3F4F6]" : "bg-white"
       }`}
     >
@@ -48,11 +48,11 @@ function CreditRow({
         <p className="font-comfortaa font-medium text-[14px] leading-[21px] text-[#8B6357]">
           {title}
         </p>
-        <div className="flex items-center gap-[6px] mt-[4px]">
+        <div className="mt-1 flex items-center gap-1.5">
           <span className={`text-[12.5px] leading-[17.5px] font-bold font-comfortaa ${statusColor}`}>
             {statusText}
           </span>
-          {showStatusIcon ? <Icon name="alert-info" className={`size-[12px] ${dotColor.replace('bg-', 'text-')}`} /> : null}
+          {showStatusIcon ? <Icon name="alert-info" className={`size-3 ${dotColor.replace('bg-', 'text-')}`} /> : null}
         </div>
       </div>
       <div className="flex justify-start text-right">
@@ -102,7 +102,7 @@ function SpecialOfferCard({
   const amountColor = isPending ? "text-[#8B6357]" : "text-[#DE6A07]";
   return (
     <div
-      className={`rounded-[12px] border border-[#E5E7EB] p-[16px] flex justify-between ${
+      className={`flex justify-between rounded-xl border border-[#E5E7EB] p-4 ${
         faded ? "bg-[#F3F4F6]" : "bg-white"
       }`}
     >
@@ -110,11 +110,11 @@ function SpecialOfferCard({
         <p className="font-comfortaa font-medium text-[14px] leading-[21px] text-[#8B6357]">
           {title}
         </p>
-        <div className="flex items-center gap-[6px] mt-[4px]">
+        <div className="mt-1 flex items-center gap-1.5">
           <span className={`text-[12.5px] leading-[17.5px] font-bold font-comfortaa ${statusColor}`}>
             {statusText}
           </span>
-          {showStatusIcon ? <Icon name="alert-info" className={`size-[12px] ${dotColor.replace('bg-', 'text-')}`} /> : null}
+          {showStatusIcon ? <Icon name="alert-info" className={`size-3 ${dotColor.replace('bg-', 'text-')}`} /> : null}
         </div>
       </div>
       <div className="flex justify-start text-right">
@@ -326,8 +326,8 @@ export default function DashboardMyCreditCard() {
   const shouldShowSpecialOfferToggle = specialOffers.length > 2;
 
   return (
-    <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[20px]">
-      <div className="flex flex-col gap-[8px] sm:flex-row sm:items-center sm:justify-between mb-[12px]">
+    <div className="rounded-xl bg-white p-5 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
+      <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <p className="font-comfortaa font-medium text-[16px] leading-[24px] text-[#4A3C2A]">
           My credit
         </p>
@@ -338,20 +338,20 @@ export default function DashboardMyCreditCard() {
           onClick={() => navigate("/booking")}
           className="w-full self-start sm:w-auto sm:self-auto"
         >
-          <span className="flex items-center gap-[4px]">
+          <span className="flex items-center gap-1">
             Book with credit
-            <Icon name="button-arrow" className="size-[16px] text-[#DE6A07]" />
+            <Icon name="button-arrow" className="size-4 text-[#DE6A07]" />
           </span>
         </OrangeButton>
       </div>
 
-      <div className="mb-[20px]">
+      <div className="mb-5">
         <p className="font-comfortaa font-normal text-[14px] leading-[22.5px] text-[#4A5565] mb-[6px]">
           Add promo code
         </p>
-        <div className="flex items-center gap-[20px]">
+        <div className="flex items-center gap-5">
           <input
-            className="border border-[#E5E7EB] rounded-[10px] w-[215px] px-[10px] py-[6px] font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565] placeholder:text-[#9CA3AF]"
+            className="w-[215px] rounded-[10px] border border-[#E5E7EB] px-2.5 py-1.5 font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565] placeholder:text-[#9CA3AF]"
             placeholder="Enter your code"
             value={promoCode}
             maxLength={8}
@@ -367,7 +367,7 @@ export default function DashboardMyCreditCard() {
           <OrangeButton
             type="button"
             size="compact"
-            className="px-[16px]"
+            className="px-4"
             disabled={!canApplyPromo}
             loading={isBinding}
             onClick={handleApplyPromo}
@@ -376,18 +376,18 @@ export default function DashboardMyCreditCard() {
           </OrangeButton>
         </div>
         {promoError ? (
-          <p id="promo-error" className="mt-[6px] text-[12px] text-[#DE1507] font-comfortaa">
+          <p id="promo-error" className="mt-1.5 text-[12px] text-[#DE1507] font-comfortaa">
             {promoError}
           </p>
         ) : promoCode.length > 0 && !isValidPromoCode(normalizedPromo) ? (
-          <p className="mt-[6px] text-[12px] text-[#4A5565] font-comfortaa">
+          <p className="mt-1.5 text-[12px] text-[#4A5565] font-comfortaa">
             Code must be 8 characters, letters and numbers only.
           </p>
         ) : null}
       </div>
 
-      <div className="mb-[12px]">
-        <p className="font-comfortaa font-bold text-[14px] leading-[20px] text-[#DE6A07] mb-[12px]">
+      <div className="mb-3">
+        <p className="mb-3 font-comfortaa text-[14px] font-bold leading-[20px] text-[#DE6A07]">
           Cash credit
         </p>
         {isLoadingCashCoupons && cashCredits.length === 0 ? (
@@ -395,7 +395,7 @@ export default function DashboardMyCreditCard() {
         ) : cashCredits.length === 0 ? (
           <div className="text-[#4A3C2A] text-sm py-4">No cash credits available.</div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {cashCreditsToShow.map((credit, index) => (
               <CreditRow
                 key={`cash-${index}-${credit.title}-${credit.amount}`}
@@ -419,7 +419,7 @@ export default function DashboardMyCreditCard() {
         <button
           type="button"
           onClick={() => setShowAllCashCredits((value) => !value)}
-          className="w-full flex items-center justify-center gap-[6px] text-[#8B6357] font-bold text-[12px] leading-[17.5px] font-comfortaa mb-[20px]"
+          className="mb-5 flex w-full items-center justify-center gap-1.5 font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#8B6357]"
         >
           <Icon
             name="chevron-down"
@@ -431,7 +431,7 @@ export default function DashboardMyCreditCard() {
       ) : null}
 
       <div>
-        <p className="font-comfortaa font-bold text-[14px] leading-[20px] text-[#DE6A07] mb-[12px]">
+        <p className="mb-3 font-comfortaa text-[14px] font-bold leading-[20px] text-[#DE6A07]">
           Special offer
         </p>
         {isLoadingSpecialCoupons && specialOffers.length === 0 ? (
@@ -439,7 +439,7 @@ export default function DashboardMyCreditCard() {
         ) : specialOffers.length === 0 ? (
           <div className="text-[#4A3C2A] text-sm py-4">No special offers available.</div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {specialOffersToShow.map((offer, index) => (
               <SpecialOfferCard
                 key={`special-${index}-${offer.title}-${offer.amount}`}
@@ -463,7 +463,7 @@ export default function DashboardMyCreditCard() {
         <button
           type="button"
           onClick={() => setShowAllSpecialOffers((value) => !value)}
-          className="w-full flex items-center justify-center gap-[6px] text-[#8B6357] font-bold text-[12px] leading-[17.5px] font-comfortaa mt-[20px]"
+          className="mt-5 flex w-full items-center justify-center gap-1.5 font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#8B6357]"
         >
           <Icon
             name="chevron-down"

@@ -605,10 +605,10 @@ export default function MyPets() {
   };
 
   return (
-    <div className="w-full min-h-full flex flex-col">
-      <div className="w-full max-w-none sm:max-w-[944px] mx-auto px-[20px] sm:px-6 pb-[20px] sm:pb-8 flex-1">
-        <div className="flex flex-col gap-[16px] mb-[-2px]">
-          <div className="flex flex-col gap-[16px] sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex min-h-full w-full flex-col">
+      <div className="mx-auto flex w-full max-w-none flex-1 px-5 pb-5 sm:max-w-[944px] sm:px-6 sm:pb-8">
+        <div className="mb-[-2px] flex flex-col gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
             <h1 className="font-comfortaa font-bold text-[20px] text-[#4A3C2A]">
               My pets
             </h1>
@@ -628,9 +628,9 @@ export default function MyPets() {
                   }}
                 >
                   <SelectTrigger
-                    className="w-[160px] min-w-[160px] h-[40px] px-[16px] py-[8px] border-2 border-[#DE6A07] rounded-tl-[14px] rounded-tr-[14px] bg-white text-[#DE6A07] [&_svg]:text-[#DE6A07]"
+                    className="h-10 min-w-[160px] w-[160px] rounded-tl-[14px] rounded-tr-[14px] border-2 border-[#DE6A07] bg-white px-4 py-2 text-[#DE6A07] [&_svg]:text-[#DE6A07]"
                   >
-                    <div className="flex items-center gap-[4px]">
+                    <div className="flex items-center gap-1">
                       <Icon
                         name={activePet?.pet_type === "cat" ? "cat" : "dog"}
                         className="text-[#DE6A07]"
@@ -642,16 +642,16 @@ export default function MyPets() {
                     </div>
                   </SelectTrigger>
                   <SelectContent
-                    className="border border-[#D6D6D6] rounded-tl-[8px] rounded-tr-[8px] rounded-bl-0 rounded-br-0 bg-white p-[8px]"
+                    className="rounded-tl-[8px] rounded-tr-[8px] rounded-bl-0 rounded-br-0 border border-[#D6D6D6] bg-white p-2"
                     position="popper"
                   >
                     {pets.map((pet) => (
                       <SelectItem
                         key={pet.id}
                         value={String(pet.id)}
-                        className="h-[36px] rounded-[4px] px-[12px] py-[12px] font-poppins text-[14px] leading-[20px] text-[#6B6B6B] data-highlighted:bg-[#FFFBEB] data-[state=checked]:bg-white data-[state=checked]:text-[#DE6A07] [&_svg]:text-[#6B6B6B] data-[state=checked]:[&_svg]:text-[#DE6A07] [&>span:first-child]:hidden [&>span:last-child]:flex [&>span:last-child]:items-center [&>span:last-child]:gap-[12px]"
+                        className="h-9 rounded px-3 py-3 font-poppins text-[14px] leading-[20px] text-[#6B6B6B] data-highlighted:bg-[#FFFBEB] data-[state=checked]:bg-white data-[state=checked]:text-[#DE6A07] [&_svg]:text-[#6B6B6B] data-[state=checked]:[&_svg]:text-[#DE6A07] [&>span:first-child]:hidden [&>span:last-child]:flex [&>span:last-child]:items-center [&>span:last-child]:gap-3"
                       >
-                        <div className="flex items-center gap-[12px]">
+                        <div className="flex items-center gap-3">
                           <Icon name={pet.pet_type === "cat" ? "cat" : "dog"} size={20} className="text-[#DE6A07]" />
                           <span>{pet.name}</span>
                         </div>
@@ -659,9 +659,9 @@ export default function MyPets() {
                     ))}
                     <SelectItem
                       value="__add__"
-                      className="h-[36px] rounded-[4px] px-[12px] py-[12px] font-poppins text-[14px] leading-[20px] text-[#6B6B6B] data-highlighted:bg-[#FFFBEB] [&>span:first-child]:hidden [&>span:last-child]:flex [&>span:last-child]:items-center [&>span:last-child]:gap-[12px]"
+                      className="h-9 rounded px-3 py-3 font-poppins text-[14px] leading-[20px] text-[#6B6B6B] data-highlighted:bg-[#FFFBEB] [&>span:first-child]:hidden [&>span:last-child]:flex [&>span:last-child]:items-center [&>span:last-child]:gap-3"
                     >
-                      <div className="flex items-center gap-[12px]">
+                      <div className="flex items-center gap-3">
                         <Icon name="add-2" size={20} className="text-[#DE6A07]" />
                         <span>Add pet</span>
                       </div>
@@ -669,7 +669,7 @@ export default function MyPets() {
                   </SelectContent>
                 </Select>
               ) : (
-                <div className="flex justify-end items-center overflow-x-auto max-w-[520px] pl-[2px]">
+                <div className="flex max-w-[520px] items-center justify-end overflow-x-auto pl-0.5">
                   {pets.map((pet) => {
                     const isActive = pet.id === activePetId;
                     return (
@@ -677,7 +677,7 @@ export default function MyPets() {
                         key={pet.id}
                         type="button"
                         onClick={() => handleSelectPet(pet.id)}
-                        className={`border-2 rounded-tl-[14px] rounded-tr-[14px] px-[16px] py-[8px] min-w-[88px] sm:min-w-[120px] flex items-center gap-[4px] shrink-0 ${
+                        className={`flex min-w-[88px] shrink-0 items-center gap-1 rounded-tl-[14px] rounded-tr-[14px] border-2 px-4 py-2 sm:min-w-[120px] ${
                           isActive
                             ? "border-[#DE6A07] text-[#DE6A07]"
                             : "border-[#E5E7EB] text-[#8B6357]"
@@ -697,7 +697,7 @@ export default function MyPets() {
                   <button
                     type="button"
                     onClick={() => navigate("/account/pets/new", { state: { from: "my-pets" } })}
-                    className="border-2 rounded-tl-[14px] rounded-tr-[14px] px-[16px] py-[8px] min-w-[88px] flex items-center gap-[4px] shrink-0 border-[#E5E7EB] text-[#8B6357] cursor-pointer"
+                    className="flex min-w-[88px] shrink-0 items-center gap-1 rounded-tl-[14px] rounded-tr-[14px] border-2 border-[#E5E7EB] px-4 py-2 text-[#8B6357] cursor-pointer"
                   >
                     <Icon name="add-2" className="text-[#8B6357]" size={20} />
                     <span className="font-comfortaa font-bold text-[14px] leading-[21px]">
@@ -710,7 +710,7 @@ export default function MyPets() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-[21px] relative z-1">
+        <div className="relative z-1 flex flex-col gap-[21px]">
           {isEditing ? (
             <PetForm
               petName={petName}
