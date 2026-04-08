@@ -22,7 +22,7 @@ export default function InfoEntryRow({
   deleteIconClassName = "w-4 h-4 sm:w-5 sm:h-5",
 }: InfoEntryRowProps) {
   return (
-    <div className="bg-white rounded-[14px] sm:rounded-lg border border-[rgba(0,0,0,0.1)] p-[15px] sm:p-4 flex items-center">
+    <div className="flex items-center rounded-[14px] border border-[rgba(0,0,0,0.1)] bg-white p-[15px] sm:rounded-lg sm:p-4">
       <div className="flex items-start gap-5">
         <div className="flex flex-col gap-1">
           <span className="font-comfortaa font-normal text-[#4A3C2A] text-[12.25px] sm:text-sm">
@@ -51,4 +51,3 @@ export default function InfoEntryRow({
     </div>
   );
 }
-
