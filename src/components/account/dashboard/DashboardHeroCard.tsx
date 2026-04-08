@@ -77,7 +77,7 @@ export default function DashboardHeroCard() {
               {dateTime}
             </p>
           </div>
-          <div className="flex flex-col w-[134px]">
+          <div className="flex w-[134px] flex-col">
             <p className="font-comfortaa font-medium text-[12.25px] leading-[17.5px] text-[#4A3C2A]">
               {address.line1}
             </p>
@@ -88,7 +88,7 @@ export default function DashboardHeroCard() {
             )}
           </div>
         </div>
-        <div className="flex items-center gap-[7px]">
+        <div className="flex items-center gap-1.5">
           <div className="flex h-6 items-center rounded-xl border border-[#4C4C4C] px-[9px] py-[5px]">
             <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#4C4C4C]">
               Checked in

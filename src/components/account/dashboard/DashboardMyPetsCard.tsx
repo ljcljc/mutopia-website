@@ -77,12 +77,12 @@ function PetCard({ pet, onSelect }: { pet: PetOut; onSelect: (petId: number) => 
     <div
       role="button"
       tabIndex={0}
-      className="flex w-full cursor-pointer items-center gap-4 rounded-xl border border-[#E5E7EB] bg-white p-[14px] transition-colors duration-200 hover:bg-[#F9FAFB]"
+      className="flex w-full cursor-pointer items-center gap-4 rounded-xl border border-[#E5E7EB] bg-white p-3.5 transition-colors duration-200 hover:bg-[#F9FAFB]"
       onClick={() => onSelect(pet.id)}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onSelect(pet.id)}
     >
       <div className="flex w-full gap-4">
-        <div className="size-[56px] rounded-full overflow-hidden border border-[#E5E7EB] bg-[#E5E7EB] flex items-center justify-center">
+        <div className="flex size-14 items-center justify-center overflow-hidden rounded-full border border-[#E5E7EB] bg-[#E5E7EB]">
           {avatarUrl ? (
             <img alt={pet.name} className="size-full object-cover object-center" src={avatarUrl} />
           ) : (
@@ -96,7 +96,7 @@ function PetCard({ pet, onSelect }: { pet: PetOut; onSelect: (petId: number) => 
           <p className="font-comfortaa font-bold text-[12px] leading-[18px] text-[#4A3C2A]">
             {birthday}
           </p>
-          <div className="mt-[10px] flex flex-col">
+          <div className="mt-2.5 flex flex-col">
             <p className="font-comfortaa font-normal text-[12px] leading-[18px] text-[#4A3C2A]">
               {weight}
             </p>
@@ -127,12 +127,12 @@ function MemorializedPetCard({ pet, onSelect }: { pet: PetOut; onSelect: (petId:
     <div
       role="button"
       tabIndex={0}
-      className="relative flex w-full cursor-pointer items-center gap-4 overflow-hidden rounded-xl border border-[#E5E7EB] bg-white p-[14px] transition-colors duration-200 hover:bg-[#F9FAFB]"
+      className="relative flex w-full cursor-pointer items-center gap-4 overflow-hidden rounded-xl border border-[#E5E7EB] bg-white p-3.5 transition-colors duration-200 hover:bg-[#F9FAFB]"
       onClick={() => onSelect(pet.id)}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onSelect(pet.id)}
     >
       <div className="flex w-full gap-4">
-        <div className="size-[56px] rounded-full overflow-hidden border border-[#E5E7EB] bg-[#E5E7EB] flex items-center justify-center">
+        <div className="flex size-14 items-center justify-center overflow-hidden rounded-full border border-[#E5E7EB] bg-[#E5E7EB]">
           {avatarUrl ? (
             <img alt={pet.name} className="size-full object-cover object-center" src={avatarUrl} />
           ) : (
@@ -192,9 +192,9 @@ export default function DashboardMyPetsCard() {
         <button
           type="button"
           onClick={() => navigate("/account/pets/new", { state: { from: "dashboard" } })}
-          className="flex cursor-pointer items-center gap-[6px] font-comfortaa text-[12.25px] leading-[17.5px] font-bold text-[#8B6357]"
+          className="flex cursor-pointer items-center gap-1.5 font-comfortaa text-[12.25px] font-bold leading-[17.5px] text-[#8B6357]"
         >
-          <Icon name="add-2" className="w-5 h-5" />
+          <Icon name="add-2" className="h-5 w-5" />
           Add pet
         </button>
       </div>
