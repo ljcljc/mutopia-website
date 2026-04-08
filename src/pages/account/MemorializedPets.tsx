@@ -65,7 +65,7 @@ function ReadonlyPhotoGrid({ urls }: { urls: string[] }) {
       {urls.map((url, index) => (
         <div
           key={`${url}-${index}`}
-          className="h-[80px] w-[96px] overflow-hidden rounded-[8px] border border-neutral-200 bg-neutral-100"
+          className="h-20 w-24 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100"
         >
           <img
             alt="Pet"
@@ -205,37 +205,37 @@ export default function MemorializedPets() {
                         {activePet.name}
                       </p>
                       <div className="grid grid-cols-3 gap-x-10 gap-y-4 text-[#4A3C2A]">
-                        <div className="w-[80px]">
+                        <div className="w-20">
                           <p className="font-comfortaa text-[10px] leading-[12px]">Pet type</p>
                           <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
                             {formatLabel(activePet.pet_type)}
                           </p>
                         </div>
-                        <div className="w-[80px]">
+                        <div className="w-20">
                           <p className="font-comfortaa text-[10px] leading-[12px]">Breed</p>
                           <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
                             {activePet.breed || "-"}
                           </p>
                         </div>
-                        <div className="w-[80px]">
+                        <div className="w-20">
                           <p className="font-comfortaa text-[10px] leading-[12px]">Date of birth</p>
                           <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
                             {formatBirthday(activePet.birthday)}
                           </p>
                         </div>
-                        <div className="w-[80px]">
+                        <div className="w-20">
                           <p className="font-comfortaa text-[10px] leading-[12px]">Weight</p>
                           <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
                             {formatWeight(activePet.weight_value, activePet.weight_unit)}
                           </p>
                         </div>
-                        <div className="w-[80px]">
+                        <div className="w-20">
                           <p className="font-comfortaa text-[10px] leading-[12px]">Coat condition</p>
                           <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
                             {formatLabel(activePet.coat_condition)}
                           </p>
                         </div>
-                        <div className="w-[80px]">
+                        <div className="w-20">
                           <p className="font-comfortaa text-[10px] leading-[12px]">Behavior</p>
                           <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
                             {formatBehavior(activePet.behavior)}
@@ -246,7 +246,7 @@ export default function MemorializedPets() {
                   </div>
                   <div className="border-t border-[#E5E7EB] w-full" />
                   <div className="flex items-center justify-between">
-                    <div className="w-[80px]">
+                    <div className="w-20">
                       <p className="font-comfortaa text-[10px] leading-[12px]">Frequency</p>
                       <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
                         {formatLabel(activePet.grooming_frequency)}

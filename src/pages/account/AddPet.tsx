@@ -108,10 +108,10 @@ export default function AddPet() {
   return (
     <div className="relative flex min-h-full w-full flex-col items-center gap-[60px] bg-[#f9f1e8] px-[calc(20*var(--px393))] pb-[60px] sm:px-0 sm:pb-[100px]">
       <div className="relative flex w-full max-w-[944px] shrink-0 flex-col items-start gap-4">
-        <div className="h-[27px] flex items-center w-full">
+        <div className="flex h-[27px] w-full items-center">
           <nav
             aria-label="Breadcrumb"
-            className="flex items-center gap-[6px] font-comfortaa text-[20px] font-bold text-[#4A3C2A]"
+            className="flex items-center gap-1.5 font-comfortaa text-[20px] font-bold text-[#4A3C2A]"
           >
             {location.state?.from === "my-pets" ? (
               <>
