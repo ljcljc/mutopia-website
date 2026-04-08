@@ -250,12 +250,12 @@ export default function BookingDetail() {
 
   return (
     <div className="flex min-h-full w-full flex-col">
-      <div className="mx-auto w-full max-w-[944px] flex-1 px-6 pb-8">
+      <div className="mx-auto flex-1 w-full max-w-[944px] px-6 pb-8">
         <div className="flex flex-col gap-5">
           <div className="flex h-[27px] items-center">
             <nav
               aria-label="Breadcrumb"
-              className="flex items-center gap-[6px] whitespace-nowrap font-comfortaa text-[14px] leading-[20px] font-bold text-[#4A3C2A]"
+              className="flex items-center gap-1.5 whitespace-nowrap font-comfortaa text-[14px] leading-[20px] font-bold text-[#4A3C2A]"
             >
               <Link to="/account/dashboard" className="hover:text-[#DE6A07] transition-colors">
                 Dashboard
@@ -265,11 +265,11 @@ export default function BookingDetail() {
             </nav>
           </div>
 
-          <div className="bg-white p-[24px] rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
+          <div className="rounded-xl bg-white p-6 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
             <div className="flex items-start justify-between">
-              <div className="flex flex-col gap-[14px] flex-1">
-                <div className="flex items-start justify-between gap-[14px]">
-                  <div className="flex flex-col gap-[4px]">
+              <div className="flex flex-1 flex-col gap-3.5">
+                <div className="flex items-start justify-between gap-3.5">
+                  <div className="flex flex-col gap-1">
                     <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#DE6A07]">
                       {petName}
                     </p>
@@ -282,10 +282,10 @@ export default function BookingDetail() {
                   </p>
                 </div>
 
-                <div className="flex flex-col gap-[8px]">
-                  <div className="relative h-[8px] w-full rounded-[8px] bg-[#D9D9D9]">
+                <div className="flex flex-col gap-2">
+                  <div className="relative h-2 w-full rounded-lg bg-[#D9D9D9]">
                     <div
-                      className="absolute left-0 top-0 h-full rounded-[8px] transition-all duration-300"
+                      className="absolute left-0 top-0 h-full rounded-lg transition-all duration-300"
                       style={{
                         width: `${activeProgress.barWidth}%`,
                         backgroundColor: activeProgress.barColor,
@@ -293,7 +293,7 @@ export default function BookingDetail() {
                     />
                   </div>
                   {progressVariant === "ready" ? (
-                    <div className="bg-[#DCFCE7] h-[24px] w-fit px-[16px] py-[4px] rounded-[12px] flex items-center">
+                    <div className="flex h-6 w-fit items-center rounded-xl bg-[#DCFCE7] px-4 py-1">
                       <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#016630]">
                         {activeProgress.badgeText}
                       </span>
@@ -303,7 +303,7 @@ export default function BookingDetail() {
                       size="compact"
                       variant="primary"
                       showArrow={false}
-                      className="cursor-default w-[190px] h-[24px] px-[16px] py-[4px] gap-[4px] bg-[#DE6A07] hover:bg-[#DE6A07] active:bg-[#DE6A07] focus-visible:bg-[#DE6A07]"
+                      className="cursor-default h-6 w-[190px] gap-1 bg-[#DE6A07] px-4 py-1 hover:bg-[#DE6A07] active:bg-[#DE6A07] focus-visible:bg-[#DE6A07]"
                     >
                       {activeProgress.badgeText}
                     </OrangeButton>
@@ -312,7 +312,7 @@ export default function BookingDetail() {
               </div>
             </div>
 
-            <div className="mt-[20px]">
+            <div className="mt-5">
               <p className="font-comfortaa font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
                 Next step
               </p>
@@ -322,14 +322,14 @@ export default function BookingDetail() {
             </div>
 
             {isLoading ? (
-              <p className="mt-[12px] text-[10px] text-[#8B6357]">Loading booking detail...</p>
+              <p className="mt-3 text-[10px] text-[#8B6357]">Loading booking detail...</p>
             ) : error ? (
-              <p className="mt-[12px] text-[10px] text-red-600">{error}</p>
+              <p className="mt-3 text-[10px] text-red-600">{error}</p>
             ) : null}
 
             {progressVariant === "confirm" ? (
-              <div className="mt-[16px] flex flex-wrap items-center gap-[8px]">
-                <div className="flex flex-1 min-w-[200px] flex-col gap-[4px] text-[#4A3C2A]">
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <div className="flex min-w-[200px] flex-1 flex-col gap-1 text-[#4A3C2A]">
                   <p className="font-comfortaa font-normal text-[10px] leading-[12px]">
                     New time proposed by groomer
                   </p>
@@ -347,12 +347,12 @@ export default function BookingDetail() {
             ) : null}
           </div>
 
-          <div className="bg-white p-[24px] rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
-            <div className="flex flex-col gap-[8px]">
+          <div className="rounded-xl bg-white p-6 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
+            <div className="flex flex-col gap-2">
               <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
                 Address and service type
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-[8px]">
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                 <div>
                   <p className="font-comfortaa font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
                     Address
@@ -384,8 +384,8 @@ export default function BookingDetail() {
             </div>
           </div>
 
-          <div className="bg-white p-[24px] rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
-            <div className="flex flex-col gap-[14px]">
+          <div className="rounded-xl bg-white p-6 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
+            <div className="flex flex-col gap-3.5">
               <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
                 Package and add-on
               </p>
@@ -393,20 +393,20 @@ export default function BookingDetail() {
                 <p className="font-comfortaa font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
                   Total estimation for the service
                 </p>
-                <div className="flex items-center gap-[8px]">
+                <div className="flex items-center gap-2">
                   <span className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#DE6A07]">
                     {totalEstimation}
                   </span>
                   <button
                     type="button"
                     onClick={() => setIsPackageExpanded((value) => !value)}
-                    className="flex items-center justify-center size-[20px] rounded-[8px] hover:border hover:border-[#8B6357] transition-colors"
+                    className="flex size-5 items-center justify-center rounded-lg hover:border hover:border-[#8B6357] transition-colors"
                     aria-expanded={isPackageExpanded}
                     aria-label="Toggle package and add-on details"
                   >
                     <Icon
                       name="chevron-down"
-                      className={`size-[20px] text-[#4A3C2A] transition-transform ${isPackageExpanded ? "rotate-180" : ""}`}
+                      className={`size-5 text-[#4A3C2A] transition-transform ${isPackageExpanded ? "rotate-180" : ""}`}
                     />
                   </button>
                 </div>
@@ -415,11 +415,11 @@ export default function BookingDetail() {
               {isPackageExpanded ? (
                 <>
                   {packageItems.length > 0 && (
-                    <div className="flex flex-col gap-[4px]">
+                    <div className="flex flex-col gap-1">
                       <p className="font-comfortaa font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
                         {serviceName} package
                       </p>
-                      <div className="flex flex-col gap-[4px]">
+                      <div className="flex flex-col gap-1">
                         {packageItems.map((item, index) => (
                           <div key={`package-${index}`} className="flex items-center justify-between">
                             <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
@@ -431,7 +431,7 @@ export default function BookingDetail() {
                           </div>
                         ))}
                       </div>
-                      <div className="border-t border-[#E5E7EB] my-[4px]" />
+                      <div className="my-1 border-t border-[#E5E7EB]" />
                       <div className="flex items-center justify-between">
                         <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
                           Subtotal
@@ -444,11 +444,11 @@ export default function BookingDetail() {
                   )}
 
                   {addOnItems.length > 0 && (
-                    <div className="flex flex-col gap-[4px]">
+                    <div className="flex flex-col gap-1">
                       <p className="font-comfortaa font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
                         Add-on
                       </p>
-                      <div className="flex flex-col gap-[4px]">
+                      <div className="flex flex-col gap-1">
                         {addOnItems.map((item, index) => (
                           <div key={`addon-${index}`} className="flex items-center justify-between">
                             <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
@@ -460,7 +460,7 @@ export default function BookingDetail() {
                           </div>
                         ))}
                       </div>
-                      <div className="border-t border-[#E5E7EB] my-[4px]" />
+                      <div className="my-1 border-t border-[#E5E7EB]" />
                       <div className="flex items-center justify-between">
                         <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
                           Subtotal
@@ -476,9 +476,9 @@ export default function BookingDetail() {
             </div>
           </div>
 
-          <div className="bg-white p-[24px] rounded-[12px] border-2 border-[#DE6A07] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
-            <div className="flex flex-col gap-[20px]">
-              <div className="flex items-start justify-between gap-[14px]">
+          <div className="rounded-xl border-2 border-[#DE6A07] bg-white p-6 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
+            <div className="flex flex-col gap-5">
+              <div className="flex items-start justify-between gap-3.5">
                 <div>
                   <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
                     Total estimation for the service
@@ -492,13 +492,13 @@ export default function BookingDetail() {
                     {totalEstimation}
                   </p>
                   {discountRate > 0 && (
-                    <div className="flex items-center justify-end gap-[8px] mt-[4px]">
-                      <span className="bg-[#DCFCE7] h-[24px] px-[16px] py-[4px] rounded-[12px] text-[10px] leading-[14px] font-comfortaa font-bold text-[#016630]">
+                    <div className="mt-1 flex items-center justify-end gap-2">
+                      <span className="h-6 rounded-xl bg-[#DCFCE7] px-4 py-1 text-[10px] leading-[14px] font-comfortaa font-bold text-[#016630]">
                         {discountRate}% OFF
                       </span>
                     </div>
                   )}
-                  <p className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#4A5565] mt-[4px]">
+                  <p className="mt-1 font-comfortaa font-bold text-[10px] leading-[14px] text-[#4A5565]">
                     tax included
                   </p>
                 </div>
@@ -508,7 +508,7 @@ export default function BookingDetail() {
                 <>
                   <div className="border-t border-[#E5E7EB]" />
 
-                  <div className="flex flex-col gap-[12px]">
+                  <div className="flex flex-col gap-3">
                     {hasMembership && membershipFee !== "$0.00" && (
                       <div className="flex items-center justify-between">
                         <p className="font-comfortaa font-bold text-[12px] leading-[17.5px] text-[#4A3C2A]">
@@ -553,7 +553,7 @@ export default function BookingDetail() {
                 type="button"
                 onClick={() => setIsCancelDialogOpen(true)}
                 disabled={isCanceling}
-                className="flex items-center justify-center gap-[8px] text-[#8B6357] text-[12px] leading-[17.5px] font-comfortaa disabled:opacity-50 disabled:cursor-not-allowed hover:text-[#DE6A07] transition-colors cursor-pointer"
+                className="flex cursor-pointer items-center justify-center gap-2 font-comfortaa text-[12px] leading-[17.5px] text-[#8B6357] transition-colors hover:text-[#DE6A07] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Icon name="trash" size={16} className="text-current" />
                 {isCanceling ? "Canceling..." : "Cancel booking"}
@@ -564,14 +564,14 @@ export default function BookingDetail() {
       </div>
 
       <AlertDialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
-        <AlertDialogContent className="rounded-[20px] px-0 py-0 max-w-[calc(100%-32px)] sm:max-w-[520px]">
-          <div className="flex flex-col gap-[16px] pb-[32px] pt-[12px]">
-            <AlertDialogHeader className="px-[12px]">
+        <AlertDialogContent className="max-w-[calc(100%-32px)] rounded-[20px] px-0 py-0 sm:max-w-[520px]">
+          <div className="flex flex-col gap-4 pb-8 pt-3">
+            <AlertDialogHeader className="px-3">
               <div className="flex items-center justify-between w-full">
                 <AlertDialogPrimitive.Cancel asChild>
                   <button
                     type="button"
-                    className="h-[16px] w-[16px] p-0 border-0 bg-transparent text-[#4A3C2A] opacity-70 hover:opacity-100"
+                    className="size-4 border-0 bg-transparent p-0 text-[#4A3C2A] opacity-70 hover:opacity-100"
                   >
                     <Icon name="close-arrow" size={16} className="text-[#4A3C2A]" />
                   </button>
@@ -579,17 +579,17 @@ export default function BookingDetail() {
                 <AlertDialogTitle className="flex-1 text-center font-comfortaa font-normal text-[14px] leading-[22.75px] text-[#4C4C4C]">
                   Cancel booking for {petName}
                 </AlertDialogTitle>
-                <span className="w-[16px]" />
+                <span className="size-4" />
               </div>
             </AlertDialogHeader>
             <div className="h-px bg-[rgba(0,0,0,0.1)]" />
-            <div className="px-[24px]">
+            <div className="px-6">
               <AlertDialogDescription className="font-comfortaa font-bold text-[14px] leading-[22px] text-[#4A5565] m-0">
                 By canceling this booking, it will no longer appear in your upcoming bookings. Are you sure you want to continue?
               </AlertDialogDescription>
             </div>
-            <AlertDialogFooter className="px-[24px]">
-              <div className="flex items-center justify-end gap-[10px] w-full">
+            <AlertDialogFooter className="px-6">
+              <div className="flex w-full items-center justify-end gap-2.5">
                 <AlertDialogPrimitive.Cancel asChild>
                   <OrangeButton variant="outline" size="medium">
                     No, Keep booking
