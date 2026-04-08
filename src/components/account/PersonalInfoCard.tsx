@@ -157,17 +157,17 @@ export default function PersonalInfoCard({ mode = "customer" }: PersonalInfoCard
   return (
       <SectionCard
         className={cn(
-          "p-[20px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]",
+          "p-5 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]",
           mode === "groomer"
-            ? "rounded-[20px] border-[1.47px] border-[#4A2C55] sm:rounded-[20px] sm:p-[20px] sm:shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]"
-            : "rounded-[12px] border border-[rgba(0,0,0,0.10)] sm:rounded-lg sm:p-6 sm:shadow-sm"
+            ? "rounded-[20px] border-[1.47px] border-[#4A2C55] sm:rounded-[20px] sm:p-5 sm:shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]"
+            : "rounded-xl border border-[rgba(0,0,0,0.10)] sm:rounded-lg sm:p-6 sm:shadow-sm"
         )}
       >
-      <div className="flex items-start gap-[14px] sm:gap-6">
+      <div className="flex items-start gap-3.5 sm:gap-6">
         {/* 左侧：头像 */}
         <div className="shrink-0 relative">
           <div 
-            className="relative w-[56px] h-[56px] sm:w-[60px] sm:h-[60px] rounded-full bg-[#8B6357] flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity group"
+            className="group relative flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-[#8B6357] transition-opacity hover:opacity-80 sm:h-[60px] sm:w-[60px]"
             onClick={handleAvatarClick}
             title="Click to upload avatar"
           >
@@ -200,7 +200,7 @@ export default function PersonalInfoCard({ mode = "customer" }: PersonalInfoCard
 
             {/* 上传进度覆盖层（上传时或图片加载中时显示） */}
             {(isUploadingAvatar || isImageLoading) && (
-              <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50">
                 <div className="text-white text-xs font-medium">
                   {isUploadingAvatar ? `${uploadProgress}%` : "Loading..."}
                 </div>
@@ -208,7 +208,7 @@ export default function PersonalInfoCard({ mode = "customer" }: PersonalInfoCard
             )}
 
             {/* 悬停时显示上传提示 */}
-            <div className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/20 flex items-center justify-center transition-colors pointer-events-none">
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/0 transition-colors group-hover:bg-black/20">
               <Icon name="pencil" className="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
           </div>
@@ -216,7 +216,7 @@ export default function PersonalInfoCard({ mode = "customer" }: PersonalInfoCard
           {/* 隐藏的文件输入 - 使用 hook 提供的 inputProps */}
           <input {...avatarInputProps} />
           {userInfo.is_member && (
-            <div className="absolute left-1/2 -translate-x-1/2 bottom-[-8px] inline-flex items-center justify-center rounded-[12px] bg-[#DCFCE7] px-2 py-[4px]">
+            <div className="absolute bottom-[-8px] left-1/2 inline-flex -translate-x-1/2 items-center justify-center rounded-xl bg-[#DCFCE7] px-2 py-1">
               <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#016630]">
                 Member
               </span>
@@ -226,7 +226,7 @@ export default function PersonalInfoCard({ mode = "customer" }: PersonalInfoCard
 
         {/* 中间：用户信息 */}
         <div className="flex-1">
-          <div className="flex items-center justify-between mb-[12px] sm:mb-4">
+          <div className="mb-3 flex items-center justify-between sm:mb-4">
             <h2 className={cn(
               "font-comfortaa text-[#4A3C2A]",
               mode === "groomer" ? "font-normal text-[14px] sm:text-[14px]" : "font-semibold text-[14px] sm:text-lg"
@@ -259,7 +259,7 @@ export default function PersonalInfoCard({ mode = "customer" }: PersonalInfoCard
             {/* Change Password 链接 */}
             <button
               onClick={handleChangePassword}
-              className="group flex items-center gap-4 text-[#8B6357] hover:text-[#DE6A07]/80 active:scale-[0.99] transition-all duration-150 cursor-pointer self-start rounded-[8px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DE6A07]/40 focus-visible:ring-offset-1"
+              className="group self-start rounded-lg text-[#8B6357] transition-all duration-150 hover:text-[#DE6A07]/80 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DE6A07]/40 focus-visible:ring-offset-1 cursor-pointer flex items-center gap-4"
             >
               <Icon name="lock" className="w-4 h-4 sm:w-5 sm:h-5 text-[#8B6357] shrink-0" />
               <span

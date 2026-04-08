@@ -250,7 +250,7 @@ export default function ChangePasswordModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="bg-white rounded-[12px] border border-[rgba(0,0,0,0.1)] px-6 pt-3 pb-6 shadow-[0_8px_12px_0_rgba(0,0,0,0.10)] max-w-[calc(100%-32px)] sm:max-w-[400px] [&>button]:hidden"
+        className="max-w-[calc(100%-32px)] rounded-xl border border-[rgba(0,0,0,0.1)] bg-white px-6 pb-6 pt-3 shadow-[0_8px_12px_0_rgba(0,0,0,0.10)] sm:max-w-[400px] [&>button]:hidden"
       >
         <DialogTitle className="sr-only">Change password</DialogTitle>
         <DialogDescription className="sr-only">
@@ -259,11 +259,11 @@ export default function ChangePasswordModal({
         
         {/* Header */}
         <div className="mb-6">
-          <div className="relative flex items-center mb-3">
+          <div className="relative mb-3 flex items-center">
             {/* Close Button (左上角) */}
             <button
               onClick={handleCancel}
-              className="opacity-70 hover:opacity-100 transition-opacity cursor-pointer z-10"
+              className="z-10 cursor-pointer opacity-70 transition-opacity hover:opacity-100"
               aria-label="Close"
             >
               <Icon name="close-arrow" className="w-5 h-5 text-[#717182]" />
@@ -276,7 +276,7 @@ export default function ChangePasswordModal({
           </div>
           
           {/* Divider */}
-          <div className="bg-[rgba(0,0,0,0.1)] h-px w-full" />
+          <div className="h-px w-full bg-[rgba(0,0,0,0.1)]" />
         </div>
 
         <form
@@ -294,7 +294,7 @@ export default function ChangePasswordModal({
           aria-hidden="true"
         />
         {/* Password Inputs */}
-        <div className="flex flex-col gap-4 mb-6">
+        <div className="mb-6 flex flex-col gap-4">
           {/* Current Password */}
           <div>
             <PasswordInput
@@ -310,7 +310,7 @@ export default function ChangePasswordModal({
               autoComplete="current-password"
             />
             {currentPasswordError && (
-              <div className="flex flex-col mt-1">
+              <div className="mt-1 flex flex-col">
                 <div className="flex items-center gap-2">
                   <Icon name="alert-error" className="w-4 h-4 text-[#de1507] shrink-0" />
                   <p className="font-comfortaa font-medium leading-[17.5px] text-[#de1507] text-[12px]">
@@ -325,7 +325,7 @@ export default function ChangePasswordModal({
                     // 打开 Forgot password 弹窗（会关闭当前弹窗）
                     onOpenForgotPassword?.();
                   }}
-                  className="text-[#DE6A07] hover:text-[#DE6A07]/80 font-comfortaa font-medium text-sm whitespace-nowrap self-end mt-4 cursor-pointer"
+                  className="mt-4 cursor-pointer self-end whitespace-nowrap font-comfortaa text-sm font-medium text-[#DE6A07] hover:text-[#DE6A07]/80"
                 >
                   Forgot password
                 </button>
@@ -377,12 +377,12 @@ export default function ChangePasswordModal({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-[10px]">
+        <div className="flex items-center justify-end gap-2.5">
           {/* Cancel Button */}
           <button
             type="button"
             onClick={handleCancel}
-            className="w-[120px] h-[36px] rounded-[32px] border-2 border-[#de6a07] bg-white text-[#de6a07] font-comfortaa font-medium text-sm hover:bg-[#de6a07]/10 transition-colors"
+            className="h-9 w-[120px] rounded-full border-2 border-[#de6a07] bg-white font-comfortaa text-sm font-medium text-[#de6a07] transition-colors hover:bg-[#de6a07]/10"
           >
             Cancel
           </button>
@@ -391,14 +391,14 @@ export default function ChangePasswordModal({
           <button
             type="submit"
             disabled={!currentPassword || !newPassword || !confirmPassword || !!currentPasswordError || !!newPasswordError || !!confirmPasswordError || isSubmitting}
-            className={`w-[120px] h-[36px] relative rounded-[32px] shrink-0 transition-colors flex items-center justify-center ${
+            className={`relative flex h-9 w-[120px] shrink-0 items-center justify-center rounded-full transition-colors ${
               !currentPassword || !newPassword || !confirmPassword || !!currentPasswordError || !!newPasswordError || !!confirmPasswordError || isSubmitting
                 ? "bg-[#de6a07]/50 cursor-not-allowed"
                 : "bg-[#de6a07] hover:bg-[#c55f06] cursor-pointer"
             }`}
           >
             {isSubmitting ? (
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
             ) : (
               <span className="font-comfortaa font-medium text-sm text-white">
                 Change

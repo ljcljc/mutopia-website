@@ -34,14 +34,14 @@ export default function ModifyAddressModal({
 }: ModifyAddressModalProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="rounded-[20px] px-0 py-0 max-w-[calc(100%-32px)] sm:max-w-[720px]">
-        <div className="flex flex-col gap-[16px] pb-[32px] pt-[12px]">
-          <AlertDialogHeader className="px-[12px]">
-            <div className="relative flex items-center w-full mb-3">
+      <AlertDialogContent className="max-w-[calc(100%-32px)] rounded-[20px] px-0 py-0 sm:max-w-[720px]">
+        <div className="flex flex-col gap-4 pb-8 pt-3">
+          <AlertDialogHeader className="px-3">
+            <div className="relative mb-3 flex w-full items-center">
               <AlertDialogPrimitive.Cancel asChild>
                 <button
                   type="button"
-                  className="opacity-70 hover:opacity-100 transition-opacity cursor-pointer z-10 p-0 border-0 bg-transparent"
+                  className="z-10 cursor-pointer border-0 bg-transparent p-0 opacity-70 transition-opacity hover:opacity-100"
                 >
                   <Icon name="close-arrow" className="w-5 h-5 text-[#717182]" />
                 </button>
@@ -50,13 +50,13 @@ export default function ModifyAddressModal({
                 Modify address
               </AlertDialogTitle>
             </div>
-            <div className="h-px bg-[rgba(0,0,0,0.1)] w-full" />
+            <div className="h-px w-full bg-[rgba(0,0,0,0.1)]" />
             <AlertDialogDescription className="sr-only">
               Select an existing address or add a new one, then save it for this booking.
             </AlertDialogDescription>
           </AlertDialogHeader>
 
-          <div className="px-[24px] flex flex-col gap-[16px]">
+          <div className="flex flex-col gap-4 px-6">
             <div>
               <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
                 Tell us your location
@@ -66,8 +66,8 @@ export default function ModifyAddressModal({
               </p>
             </div>
 
-            <div className="bg-[#EFF6FF] border border-[#BEDBFF] rounded-[8px] px-[16px] py-[8px] flex gap-[8px]">
-              <Icon name="alert-info" className="text-[#2374FF] size-[12px]" />
+            <div className="flex gap-2 rounded-lg border border-[#BEDBFF] bg-[#EFF6FF] px-4 py-2">
+              <Icon name="alert-info" className="size-3 text-[#2374FF]" />
               <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#193CB8]">
                 We currently provide mobile grooming services throughout Grand Vancouver and surrounding areas.
               </p>
@@ -77,14 +77,14 @@ export default function ModifyAddressModal({
               <button
                 type="button"
                 onClick={onAddNew}
-                className="flex items-center gap-[8px] text-[#8B6357] text-[12px] font-comfortaa hover:text-[#DE6A07] transition-colors cursor-pointer"
+                className="flex items-center gap-2 font-comfortaa text-[12px] text-[#8B6357] transition-colors hover:text-[#DE6A07] cursor-pointer"
               >
                 <Icon name="add-2" size={16} />
                 Add new
               </button>
             </div>
 
-            <div className="flex flex-col gap-[8px]">
+            <div className="flex flex-col gap-2">
               {isLoading ? (
                 <p className="text-[#8B6357] text-[12px]">Loading addresses...</p>
               ) : addresses.length === 0 ? (
@@ -97,19 +97,19 @@ export default function ModifyAddressModal({
                       key={address.id}
                       type="button"
                       onClick={() => onSelectAddress(address.id)}
-                      className={`w-full flex items-center justify-between px-[16px] py-[10px] rounded-[14px] border border-[#E5E7EB] ${
+                      className={`flex w-full items-center justify-between rounded-[14px] border border-[#E5E7EB] px-4 py-2.5 ${
                         isSelected
                           ? "bg-[#F4FFDE] ring-2 ring-[#6AA31C] ring-inset"
                           : "bg-white"
                       }`}
                     >
-                      <div className="text-left flex flex-col gap-[4px]">
-                        <div className="flex items-center gap-[8px]">
+                      <div className="flex flex-col gap-1 text-left">
+                        <div className="flex items-center gap-2">
                           <p className="font-comfortaa font-medium text-[12.25px] leading-[17.5px] text-[#4A3C2A]">
                             {address.address}
                           </p>
                           {address.is_default ? (
-                            <span className="bg-[#DCFCE7] border border-transparent px-[8px] py-[2px] rounded-[12px] text-[10.5px] text-[#008236] font-comfortaa">
+                            <span className="rounded-xl border border-transparent bg-[#DCFCE7] px-2 py-0.5 font-comfortaa text-[10.5px] text-[#008236]">
                               Default
                             </span>
                           ) : null}
@@ -118,9 +118,9 @@ export default function ModifyAddressModal({
                           {address.city}, {address.province} {address.postal_code}
                         </p>
                       </div>
-                      <div className="flex items-center gap-[8px]">
+                      <div className="flex items-center gap-2">
                         {isSelected ? (
-                          <span className="flex items-center justify-center size-[12px] rounded-[6px] bg-[#6AA31C]">
+                          <span className="flex size-3 items-center justify-center rounded-md bg-[#6AA31C]">
                             <Icon name="check" className="text-white" size={10} />
                           </span>
                         ) : null}
@@ -132,8 +132,8 @@ export default function ModifyAddressModal({
             </div>
           </div>
 
-          <AlertDialogFooter className="px-[24px]">
-            <div className="flex items-center justify-end gap-[10px] w-full">
+          <AlertDialogFooter className="px-6">
+            <div className="flex w-full items-center justify-end gap-2.5">
               <AlertDialogPrimitive.Cancel asChild>
                 <OrangeButton variant="outline" size="medium" className="w-[120px]">
                   Cancel

@@ -60,7 +60,7 @@ function StatusBadge({ status }: { status: string }) {
   
   if (displayType === "ready") {
     return (
-      <div className="flex h-6 items-center justify-center rounded-xl bg-[#DCFCE7] px-[10px]">
+      <div className="flex h-6 items-center justify-center rounded-xl bg-[#DCFCE7] px-2.5">
         <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#016630]">
           Ready for service
         </span>
@@ -259,7 +259,7 @@ export default function DashboardBookingCard() {
           <button
             type="button"
             onClick={() => setActiveTab("upcoming")}
-            className="flex flex-col items-end px-[12px] whitespace-nowrap cursor-pointer"
+            className="flex cursor-pointer flex-col items-end whitespace-nowrap px-3"
             aria-pressed={activeTab === "upcoming"}
           >
             <span
@@ -282,7 +282,7 @@ export default function DashboardBookingCard() {
           <button
             type="button"
             onClick={() => setActiveTab("history")}
-            className="flex flex-col items-end px-[12px] whitespace-nowrap cursor-pointer"
+            className="flex cursor-pointer flex-col items-end whitespace-nowrap px-3"
             aria-pressed={activeTab === "history"}
           >
             <span
@@ -303,7 +303,7 @@ export default function DashboardBookingCard() {
             </span>
           </button>
           <div
-            className="absolute bottom-0 h-[2px] bg-[#DE6A07] pointer-events-none transition-[transform,width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+            className="pointer-events-none absolute bottom-0 h-[2px] bg-[#DE6A07] transition-[transform,width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
             style={{
               width: `${underlineStyle.width}px`,
               transform: underlineStyle.transform,
@@ -311,7 +311,7 @@ export default function DashboardBookingCard() {
             }}
           />
 
-          <div className="absolute left-[-9999px] top-0 opacity-0 pointer-events-none whitespace-nowrap">
+          <div className="pointer-events-none absolute left-[-9999px] top-0 whitespace-nowrap opacity-0">
             <span
               ref={upcomingMeasureRef}
               className="font-comfortaa font-bold text-[16px] leading-[28px]"
@@ -333,7 +333,7 @@ export default function DashboardBookingCard() {
             No {activeTab === "upcoming" ? "upcoming" : "history"} bookings.
           </div>
         ) : (
-          <div className="flex flex-col gap-[24px]">
+          <div className="flex flex-col gap-6">
             {filteredBookings.map((booking) => (
               <BookingItem key={booking.id} booking={booking} />
             ))}

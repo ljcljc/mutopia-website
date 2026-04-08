@@ -196,7 +196,7 @@ export default function ModifyPersonalInfoModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white rounded-[12px] border border-[rgba(0,0,0,0.1)] px-6 pt-3 pb-6 shadow-[0_8px_12px_0_rgba(0,0,0,0.10)] max-w-[calc(100%-32px)] sm:max-w-[400px] [&>button]:hidden">
+      <DialogContent className="max-w-[calc(100%-32px)] rounded-xl border border-[rgba(0,0,0,0.1)] bg-white px-6 pb-6 pt-3 shadow-[0_8px_12px_0_rgba(0,0,0,0.10)] sm:max-w-[400px] [&>button]:hidden">
         <DialogTitle className="sr-only">Modify personal information</DialogTitle>
         <DialogDescription className="sr-only">
           Update your personal information including name, birthday, and phone number
@@ -204,11 +204,11 @@ export default function ModifyPersonalInfoModal({
 
         {/* Header */}
         <div className="mb-6">
-          <div className="relative flex items-center mb-3">
+          <div className="relative mb-3 flex items-center">
             {/* Close Button (左上角) */}
             <button
               onClick={handleCancel}
-              className="opacity-70 hover:opacity-100 transition-opacity cursor-pointer z-10"
+              className="z-10 cursor-pointer opacity-70 transition-opacity hover:opacity-100"
               aria-label="Close"
             >
               <Icon name="close-arrow" className="w-5 h-5 text-[#717182]" />
@@ -221,7 +221,7 @@ export default function ModifyPersonalInfoModal({
           </div>
           
           {/* Divider */}
-          <div className="bg-[rgba(0,0,0,0.1)] h-px w-full" />
+          <div className="h-px w-full bg-[rgba(0,0,0,0.1)]" />
         </div>
 
         {/* Form Fields */}
@@ -260,7 +260,7 @@ export default function ModifyPersonalInfoModal({
               </label>
               {/* 1年内修改过生日的标签 */}
               {isBirthdayModified && birthdayModifiedDate && (
-                <span className="px-2 py-0.5 bg-white border border-gray-200 rounded-full text-[#4A3C2A] text-xs font-comfortaa">
+                <span className="rounded-full border border-gray-200 bg-white px-2 py-0.5 font-comfortaa text-xs text-[#4A3C2A]">
                   Modified on {birthdayModifiedDate}
                 </span>
               )}
@@ -292,7 +292,7 @@ export default function ModifyPersonalInfoModal({
             <label className="font-comfortaa font-normal text-[#4a3c2a] text-[14px]">
               Email
             </label>
-            <div className="bg-gray-100 h-[36px] rounded-[12px] border border-gray-200 flex items-center px-4">
+            <div className="flex h-9 items-center rounded-xl border border-gray-200 bg-gray-100 px-4">
               <span className="font-comfortaa font-normal text-[#717182] text-[12.25px]">
                 {userInfo.email}
               </span>
@@ -317,18 +317,18 @@ export default function ModifyPersonalInfoModal({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-[10px] mt-6">
+        <div className="mt-6 flex items-center justify-end gap-2.5">
           <button
             onClick={handleCancel}
             disabled={isSubmitting}
-            className="w-[120px] h-[36px] rounded-lg border border-[#DE6A07] bg-white text-[#DE6A07] font-comfortaa font-medium text-sm hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="h-9 w-[120px] cursor-pointer rounded-lg border border-[#DE6A07] bg-white font-comfortaa text-sm font-medium text-[#DE6A07] transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="w-[120px] h-[36px] rounded-lg bg-[#DE6A07] text-white font-comfortaa font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer relative"
+            className="relative h-9 w-[120px] cursor-pointer rounded-lg bg-[#DE6A07] font-comfortaa text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {/* Loading Spinner */}
             {isSubmitting && (
