@@ -49,7 +49,7 @@ export default function AddressesCard() {
         <div className="flex items-center justify-between mb-[16px] sm:mb-5">
           <div className="flex items-center gap-2">
             <Icon name="location" className="w-4 h-4 sm:w-5 sm:h-5 text-[#DE6A07] shrink-0" />
-            <h2 className="font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-[14px] sm:text-lg">
+            <h2 className="font-comfortaa font-semibold text-[#4A3C2A] text-[14px] sm:text-lg">
               Addresses
             </h2>
           </div>
@@ -58,7 +58,7 @@ export default function AddressesCard() {
             className="flex items-center gap-2 text-[#8B6357] hover:text-[#DE6A07]/80 cursor-pointer"
           >
             <Icon name="add-2" className="w-4 h-4 sm:w-5 sm:h-5" />
-            <span className="font-['Comfortaa',sans-serif] font-medium text-[12px] sm:text-sm">
+            <span className="font-comfortaa font-medium text-[12px] sm:text-sm">
               <span className="sm:hidden">Add new</span>
               <span className="hidden sm:inline">Add</span>
             </span>

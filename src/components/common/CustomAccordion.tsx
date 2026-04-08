@@ -73,10 +73,10 @@ export function CustomAccordionItem({
       />
 
       <div className="size-full">
-        <div className="box-border content-stretch flex flex-col items-start px-[24px] py-0 relative size-full">
+        <div className="flex flex-col items-start px-[24px] py-0 relative size-full">
           {/* Trigger Button */}
           <button
-            className="box-border content-stretch flex w-full items-center justify-between px-0 relative rounded-[12px] shrink-0 outline-none focus:outline-none transition-[padding-bottom] duration-300 ease-in-out"
+            className="flex w-full items-center justify-between px-0 relative rounded-[12px] shrink-0 outline-none focus:outline-none transition-[padding-bottom] duration-300 ease-in-out"
             style={{
               paddingTop: "21px",
               paddingBottom: isOpen ? "0px" : "21px",
@@ -89,7 +89,7 @@ export function CustomAccordionItem({
           >
             {/* Question */}
             <div className="flex-1 pr-4">
-              <p className="font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] text-[#4a3c2a] text-[12.25px] text-left">
+              <p className="font-comfortaa font-medium leading-[17.5px] text-[#4a3c2a] text-[12.25px] text-left">
                 {question}
               </p>
             </div>
@@ -131,7 +131,7 @@ export function CustomAccordionItem({
             }}
           >
             <div ref={contentRef} className="pb-[21px] pt-[12px]">
-              <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[21px] text-[12.25px] text-[rgba(74,60,42,0.7)]">
+              <p className="font-comfortaa font-normal leading-[21px] text-[12.25px] text-[rgba(74,60,42,0.7)]">
                 {answer}
               </p>
             </div>
@@ -176,7 +176,7 @@ export default function CustomAccordion({
 
   return (
     <div
-      className={`content-stretch flex flex-col gap-[16px] items-center w-full ${className}`}
+      className={`flex flex-col gap-[16px] items-center w-full ${className}`}
     >
       {items.map((item, index) => (
         <CustomAccordionItem

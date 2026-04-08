@@ -1475,10 +1475,10 @@ export function ModalContent({ onClose, onSuccess }: { onClose: () => void; onSu
 
   return (
     <div
-      className={`bg-white box-border flex flex-col items-start relative rounded-[20px] w-[420px] max-w-[calc(100vw-32px)] ${
+      className={`bg-white flex flex-col items-start relative rounded-[20px] w-[420px] max-w-[calc(100vw-32px)] ${
         step === "signup"
           ? "max-h-[90vh] overflow-hidden flex"
-          : "content-stretch gap-[16px] px-0"
+          : "gap-[16px] px-0"
       }`}
       data-name={
         step === "email" ? "Modal_Log in or sign up_default" : "Modal_log in"
@@ -1560,12 +1560,12 @@ export function ModalContent({ onClose, onSuccess }: { onClose: () => void; onSu
               {passwordResetSuccess && (
                 <div className="px-[24px] w-full">
                   <div className="bg-[#f4ffde] border border-[#6aa31c] border-solid h-[36px] relative rounded-[8px] shrink-0 w-full mb-[16px]">
-                    <div className="box-border content-stretch flex h-[36px] items-center overflow-clip px-[16px] py-[4px] relative rounded-[inherit]">
-                      <div className="content-stretch flex gap-[8px] items-center relative shrink-0">
+                    <div className="flex h-[36px] items-center overflow-clip px-[16px] py-[4px] relative rounded-[inherit]">
+                      <div className="flex gap-[8px] items-center relative shrink-0">
                         <div className="relative shrink-0 size-[12px]">
                           <Icon name="alert-success" aria-label="Success" className="block size-full" />
                         </div>
-                        <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] relative shrink-0 text-[#467900] text-[10px]">
+                        <p className="font-comfortaa font-normal leading-[normal] relative shrink-0 text-[#467900] text-[10px]">
                           Your password is reset. You can log in with this new password.
                         </p>
                       </div>

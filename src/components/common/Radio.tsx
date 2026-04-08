@@ -165,7 +165,7 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
 
     return (
       <label
-        className={`content-stretch flex gap-[8px] items-center relative cursor-pointer ${
+        className={`flex gap-[8px] items-center relative cursor-pointer ${
           disabled ? "cursor-not-allowed opacity-60" : ""
         } ${containerClassName}`}
         data-name="Radio Label"
@@ -237,7 +237,7 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(
         {/* Label text */}
         {label && (
           <p
-            className={`font-['Comfortaa:Medium',_sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[12px] text-nowrap whitespace-pre select-none transition-colors duration-200 ${getTextColor()}`}
+            className={`font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[12px] text-nowrap whitespace-pre select-none transition-colors duration-200 ${getTextColor()}`}
           >
             {label}
           </p>

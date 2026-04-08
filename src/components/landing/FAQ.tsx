@@ -57,17 +57,17 @@ export default function FAQ() {
       data-name="FAQ"
     >
       <div className="flex flex-col items-center w-full">
-        <div className="content-stretch flex flex-col gap-[60px] md:gap-[32px] items-center w-full md:px-[28px]">
+        <div className="flex flex-col gap-[60px] md:gap-[32px] items-center w-full md:px-[28px]">
           {/* FAQ Section */}
-          <div className="box-border content-stretch flex flex-col gap-[20px] md:gap-[56px] items-center px-[28px] md:px-0 w-full max-w-[784px]">
+          <div className="flex flex-col gap-[20px] md:gap-[56px] items-center px-[28px] md:px-0 w-full max-w-[784px]">
             {/* Title Section */}
-            <div className="content-stretch flex flex-col gap-[16px] items-center text-center w-full">
+            <div className="flex flex-col gap-[16px] items-center text-center w-full">
               {/* Heading */}
-              <p className="font-['Comfortaa:Bold',_sans-serif] leading-[40px] text-[#4a3c2a] text-[32px] text-center">
+              <p className="font-comfortaa leading-[40px] text-[#4a3c2a] text-[32px] text-center">
                 Frequently Asked Questions
               </p>
               {/* Paragraph */}
-              <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[28px] text-[16px] text-[rgba(74,60,42,0.7)] max-w-[265px] md:max-w-none text-center">
+              <p className="font-comfortaa font-normal leading-[28px] text-[16px] text-[rgba(74,60,42,0.7)] max-w-[265px] md:max-w-none text-center">
                 Everything you need to know about our services and how we care
                 for your pets.
               </p>
@@ -75,8 +75,8 @@ export default function FAQ() {
 
             {/* Search Input - Mobile Only */}
             <div className="md:hidden bg-white h-[36px] relative rounded-[8px] w-full max-w-[348px] mx-auto">
-              <div className="box-border content-stretch flex h-[36px] items-center overflow-clip px-[16px] py-[4px] relative rounded-[inherit] w-full">
-                <div className="basis-0 content-stretch flex gap-[4px] grow items-center min-h-px min-w-px relative shrink-0">
+              <div className="flex h-[36px] items-center overflow-clip px-[16px] py-[4px] relative rounded-[inherit] w-full">
+                <div className="basis-0 flex gap-[4px] grow items-center min-h-px min-w-px relative shrink-0">
                   <div className="relative shrink-0 size-[20px]">
                     <svg
                       className="block size-full"
@@ -94,7 +94,7 @@ export default function FAQ() {
                       </g>
                     </svg>
                   </div>
-                  <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[normal] relative shrink-0 text-[#717182] text-[12.25px]">
+                  <p className="font-comfortaa font-normal leading-[normal] relative shrink-0 text-[#717182] text-[12.25px]">
                     Type to search
                   </p>
                 </div>

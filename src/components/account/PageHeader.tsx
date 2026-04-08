@@ -34,7 +34,7 @@ export default function PageHeader() {
   return (
     <>
       <div className="w-full flex items-center gap-4 mb-6">
-        <h1 className="font-['Comfortaa',sans-serif] font-bold text-[#4A3C2A] text-[20px]">
+        <h1 className="font-comfortaa font-bold text-[#4A3C2A] text-[20px]">
           My Account
         </h1>
         <div className="ml-auto flex items-center">
@@ -53,7 +53,7 @@ export default function PageHeader() {
               />
               <Label
                 htmlFor="groomer-account-toggle"
-                className="font-['Comfortaa',sans-serif] font-bold text-[#8B6357] text-[14px] sm:text-sm cursor-pointer"
+                className="font-comfortaa font-bold text-[#8B6357] text-[14px] sm:text-sm cursor-pointer"
               >
                 Groomer account
               </Label>

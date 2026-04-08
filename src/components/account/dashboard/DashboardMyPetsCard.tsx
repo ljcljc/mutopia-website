@@ -90,18 +90,18 @@ function PetCard({ pet, onSelect }: { pet: PetOut; onSelect: (petId: number) => 
           )}
         </div>
         <div className="flex-1">
-          <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[16px] leading-[28px] text-[#DE6A07]">
+          <p className="font-comfortaa font-bold text-[16px] leading-[28px] text-[#DE6A07]">
             {pet.name}
           </p>
-          <p className="font-['Comfortaa:Regular',sans-serif] font-bold text-[12px] leading-[18px] text-[#4A3C2A]">
+          <p className="font-comfortaa font-bold text-[12px] leading-[18px] text-[#4A3C2A]">
             {birthday}
           </p>
           <div className="flex flex-col mt-[10px]">
-            <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[12px] leading-[18px] text-[#4A3C2A]">
+            <p className="font-comfortaa font-normal text-[12px] leading-[18px] text-[#4A3C2A]">
               {weight}
             </p>
             {behavior !== "-" && (
-              <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[12px] leading-[18px] text-[#4A3C2A]">
+              <p className="font-comfortaa font-normal text-[12px] leading-[18px] text-[#4A3C2A]">
                 {behavior}
               </p>
             )}
@@ -140,10 +140,10 @@ function MemorializedPetCard({ pet, onSelect }: { pet: PetOut; onSelect: (petId:
           )}
         </div>
         <div className="flex-1">
-          <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[16px] leading-[28px] text-[#DE6A07]">
+          <p className="font-comfortaa font-bold text-[16px] leading-[28px] text-[#DE6A07]">
             {pet.name}
           </p>
-          <p className="font-['Comfortaa:Regular',sans-serif] font-bold text-[12px] leading-[18px] text-[#4A3C2A]">
+          <p className="font-comfortaa font-bold text-[12px] leading-[18px] text-[#4A3C2A]">
             {birthday} - {memorializedAt}
           </p>
         </div>
@@ -186,13 +186,13 @@ export default function DashboardMyPetsCard() {
   return (
     <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[20px]">
       <div className="flex items-center justify-between mb-[24px]">
-        <p className="font-['Comfortaa:Medium',sans-serif] font-medium text-[16px] leading-[24px] text-[#4A3C2A]">
+        <p className="font-comfortaa font-medium text-[16px] leading-[24px] text-[#4A3C2A]">
           My pets
         </p>
         <button
           type="button"
           onClick={() => navigate("/account/pets/new", { state: { from: "dashboard" } })}
-          className="flex items-center gap-[6px] font-['Comfortaa:Regular',sans-serif] font-bold text-[12.25px] leading-[17.5px] text-[#8B6357] cursor-pointer"
+          className="flex items-center gap-[6px] font-comfortaa font-bold text-[12.25px] leading-[17.5px] text-[#8B6357] cursor-pointer"
         >
           <Icon name="add-2" className="w-5 h-5" />
           Add pet
@@ -221,7 +221,7 @@ export default function DashboardMyPetsCard() {
           <button
             type="button"
             onClick={() => setIsMemorializedOpen((value) => !value)}
-            className="w-full flex items-center justify-between font-['Comfortaa:Medium',sans-serif] font-medium text-[14px] leading-[21px] text-[#4A3C2A] mb-[12px]"
+            className="w-full flex items-center justify-between font-comfortaa font-medium text-[14px] leading-[21px] text-[#4A3C2A] mb-[12px]"
             aria-expanded={isMemorializedOpen}
           >
             <span>Memorialized</span>

@@ -17,7 +17,7 @@ export default function RadioDemo({ onBack }: { onBack?: () => void }) {
         {onBack && (
           <button
             onClick={onBack}
-            className="flex items-center gap-2 font-['Comfortaa:Medium',_sans-serif] text-[14px] text-[#8b6357] hover:text-[#6f4e44] transition-colors mb-4"
+            className="flex items-center gap-2 font-comfortaa text-[14px] text-[#8b6357] hover:text-[#6f4e44] transition-colors mb-4"
           >
             <ArrowLeft size={20} />
             Back to Demo Hub

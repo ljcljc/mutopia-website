@@ -87,16 +87,16 @@ export function PasswordInput({
 
   return (
     <div
-      className="content-stretch flex flex-col gap-[8px] items-start relative shrink-0 w-full"
+      className="flex flex-col gap-[8px] items-start relative shrink-0 w-full"
       data-name="Input_default"
     >
       {showLabel && (
         <div
-          className="content-stretch flex gap-[7px] h-[12.25px] items-center relative shrink-0 w-full"
+          className="flex gap-[7px] h-[12.25px] items-center relative shrink-0 w-full"
           data-name="Primitive.label"
         >
           <p
-            className={`font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[14px] text-nowrap whitespace-pre ${
+            className={`font-comfortaa font-normal leading-[22.75px] relative shrink-0 text-[14px] text-nowrap whitespace-pre ${
               hasError ? "text-[#de1507]" : "text-[#4a3c2a]"
             }`}
           >
@@ -104,14 +104,14 @@ export function PasswordInput({
           </p>
         </div>
       )}
-      <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full">
+      <div className="flex flex-col gap-[4px] items-start relative shrink-0 w-full">
         <div
           className="bg-white h-[36px] relative rounded-[12px] shrink-0 w-full"
           data-name="Input"
         >
           <div className="flex flex-row items-center overflow-clip rounded-[inherit] size-full">
-            <div className="box-border content-stretch flex h-[36px] items-center px-[16px] py-[4px] relative w-full">
-              <div className="basis-0 content-stretch flex grow items-center min-h-px min-w-px relative shrink-0">
+            <div className="flex h-[36px] items-center px-[16px] py-[4px] relative w-full">
+              <div className="basis-0 flex grow items-center min-h-px min-w-px relative shrink-0">
                 <input
                   type={showPassword ? "text" : "password"}
                   value={value}
@@ -121,7 +121,7 @@ export function PasswordInput({
                   onFocus={handleFocus}
                   placeholder={placeholder || "Enter your password"}
                   autoComplete={autoComplete}
-                  className="basis-0 font-['Comfortaa:Regular',sans-serif] font-normal grow leading-[normal] min-h-px min-w-px relative shrink-0 text-[#717182] text-[12.25px] placeholder:text-[#717182] bg-transparent border-none outline-none w-full"
+                  className="basis-0 font-comfortaa font-normal grow leading-[normal] min-h-px min-w-px relative shrink-0 text-[#717182] text-[12.25px] placeholder:text-[#717182] bg-transparent border-none outline-none w-full"
                 />
                 <VisibleIcon
                   onClick={onTogglePassword}
@@ -188,13 +188,13 @@ export function PasswordContainer({
   return (
     <div className="relative shrink-0 w-full" data-name="Container">
       <div className="size-full">
-        <div className="box-border content-stretch flex flex-col gap-[28px] items-start px-[24px] py-0 relative w-full">
+        <div className="flex flex-col gap-[28px] items-start px-[24px] py-0 relative w-full">
           <div className="relative shrink-0 w-full" data-name="Tab Panel">
-            <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex flex-col gap-[20px] items-start relative w-full">
-              <div className="content-stretch flex flex-col gap-[16px] items-start relative shrink-0 w-full">
-                <div className="content-stretch flex flex-col gap-[8px] items-start relative shrink-0 w-full">
+            <div className="bg-clip-padding border-0 border-transparent border-solid flex flex-col gap-[20px] items-start relative w-full">
+              <div className="flex flex-col gap-[16px] items-start relative shrink-0 w-full">
+                <div className="flex flex-col gap-[8px] items-start relative shrink-0 w-full">
                   {error ? (
-                    <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full">
+                    <div className="flex flex-col gap-[4px] items-start relative shrink-0 w-full">
                       <PasswordInput
                         value={password}
                         onChange={setPassword}
@@ -222,7 +222,7 @@ export function PasswordContainer({
                   {isSignUp &&
                     confirmPassword !== undefined &&
                     setConfirmPassword && (
-                      <div className="content-stretch flex flex-col gap-[4px] items-start w-full">
+                      <div className="flex flex-col gap-[4px] items-start w-full">
                         <CustomInput
                           label="Confirm password"
                           type="password"
@@ -240,24 +240,24 @@ export function PasswordContainer({
                       </div>
                     )}
                   {!isSignUp && (
-                    <div className="content-stretch flex gap-[16px] items-center relative shrink-0 w-full">
-                      <div className="basis-0 content-stretch flex flex-col gap-[12px] grow items-start min-h-px min-w-px relative shrink-0">
-                        <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0 w-full">
+                    <div className="flex gap-[16px] items-center relative shrink-0 w-full">
+                      <div className="basis-0 flex flex-col gap-[12px] grow items-start min-h-px min-w-px relative shrink-0">
+                        <div className="flex flex-col gap-[12px] items-start relative shrink-0 w-full">
                           <Checkbox
                             checked={rememberMe}
                             onCheckedChange={setRememberMe}
                             label="Remember me"
-                            containerClassName="content-stretch flex gap-[8px] h-[20px] items-center relative shrink-0 w-full cursor-pointer"
+                            containerClassName="flex gap-[8px] h-[20px] items-center relative shrink-0 w-full cursor-pointer"
                           />
                         </div>
                       </div>
                       <button
                         type="button"
                         onClick={onForgotPassword}
-                        className="box-border content-stretch flex gap-[8px] items-center justify-center px-[12px] py-[4px] relative shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                        className="flex gap-[8px] items-center justify-center px-[12px] py-[4px] relative shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
                         data-name="Button tertiary"
                       >
-                        <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#de6a07] text-[12px] text-nowrap whitespace-pre">
+                        <p className="font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[#de6a07] text-[12px] text-nowrap whitespace-pre">
                           Forgot password
                         </p>
                       </button>
@@ -361,14 +361,14 @@ export function SignUpContainer({
 }) {
   return (
     <div
-      className="box-border content-stretch flex flex-col gap-[28px] items-start px-[24px] py-0 relative shrink-0 w-full"
+      className="flex flex-col gap-[28px] items-start px-[24px] py-0 relative shrink-0 w-full"
       data-name="Container"
     >
       <div className="relative shrink-0 w-full" data-name="Tab Panel">
-        <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex flex-col gap-[20px] items-start relative w-full">
-          <div className="content-stretch flex flex-col gap-[16px] items-start relative shrink-0 w-full">
+        <div className="bg-clip-padding border-0 border-transparent border-solid flex flex-col gap-[20px] items-start relative w-full">
+          <div className="flex flex-col gap-[16px] items-start relative shrink-0 w-full">
             {/* First name */}
-            <div className="content-stretch flex flex-col gap-[4px] items-start w-full">
+            <div className="flex flex-col gap-[4px] items-start w-full">
               <CustomInput
                 label="First name"
                 placeholder="First name"
@@ -382,7 +382,7 @@ export function SignUpContainer({
             </div>
 
             {/* Last name */}
-            <div className="content-stretch flex flex-col gap-[4px] items-start w-full">
+            <div className="flex flex-col gap-[4px] items-start w-full">
               <CustomInput
                 label="Last name"
                 placeholder="Last name"
@@ -396,7 +396,7 @@ export function SignUpContainer({
             </div>
 
             {/* Phone */}
-            <div className="content-stretch flex flex-col gap-[4px] items-start w-full">
+            <div className="flex flex-col gap-[4px] items-start w-full">
               <CustomInput
                 label="Phone"
                 placeholder="Enter your phone"
@@ -436,7 +436,7 @@ export function SignUpContainer({
             />
 
             {/* Address */}
-            <div className="content-stretch flex flex-col gap-[4px] items-start w-full">
+            <div className="flex flex-col gap-[4px] items-start w-full">
               <CustomInput
                 label="Address"
                 placeholder="Enter your address"
@@ -464,7 +464,7 @@ export function SignUpContainer({
 
             {/* Confirm password */}
             {confirmPasswordError ? (
-              <div className="content-stretch flex flex-col gap-[4px] items-start w-full">
+              <div className="flex flex-col gap-[4px] items-start w-full">
                 <PasswordInput
                   value={confirmPassword}
                   onChange={setConfirmPassword}
@@ -493,7 +493,7 @@ export function SignUpContainer({
             )}
 
             {/* Promo code (optional) */}
-            <div className="content-stretch flex flex-col gap-[4px] items-start w-full">
+            <div className="flex flex-col gap-[4px] items-start w-full">
               <CustomInput
                 label="Promo code (optional)"
                 placeholder="Enter your code"
@@ -508,10 +508,10 @@ export function SignUpContainer({
 
             {/* Terms of Service */}
             <div
-              className="content-stretch flex gap-[8px] items-start relative w-full"
+              className="flex gap-[8px] items-start relative w-full"
               data-name="Label"
             >
-              <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] text-[#4a3c2a] text-[12px] whitespace-normal">
+              <p className="font-comfortaa font-medium leading-[17.5px] text-[#4a3c2a] text-[12px] whitespace-normal">
                 <span>By selecting Agree and continue, I agree to </span>
                 <span className="[text-underline-position:from-font] decoration-solid text-[#de6a07] underline">
                   Terms of Service
@@ -549,12 +549,12 @@ export function SignUpContainer({
             </div>
 
             {/* Marketing opt-out */}
-            <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0 w-full">
+            <div className="flex flex-col gap-[12px] items-start relative shrink-0 w-full">
               <div
-                className="content-stretch flex gap-[8px] items-start relative w-full"
+                className="flex gap-[8px] items-start relative w-full"
                 data-name="Label"
               >
-                <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] text-[#4a3c2a] text-[12px] whitespace-normal">
+                <p className="font-comfortaa font-medium leading-[17.5px] text-[#4a3c2a] text-[12px] whitespace-normal">
                   Mutopia will send you members-only deals, inspiration,
                   marketing emails, and push notifications. You can opt out of
                   receiving these at any time in your account settings or
@@ -562,7 +562,7 @@ export function SignUpContainer({
                 </p>
               </div>
               <div
-                className="content-stretch flex gap-[8px] items-center relative w-full"
+                className="flex gap-[8px] items-center relative w-full"
                 data-name="Label"
               >
                 <Checkbox

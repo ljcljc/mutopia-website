@@ -55,13 +55,13 @@ export function CustomTextarea({
   };
 
   return (
-    <div className="content-stretch flex flex-col gap-[8px] items-start relative w-full">
+    <div className="flex flex-col gap-[8px] items-start relative w-full">
       {/* Label */}
       {label && (
-        <div className="content-stretch flex gap-[7px] h-[12.25px] items-center relative shrink-0 w-full">
+        <div className="flex gap-[7px] h-[12.25px] items-center relative shrink-0 w-full">
           <p
             className={cn(
-              "font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] text-[14px] text-nowrap whitespace-pre",
+              "font-comfortaa font-normal leading-[22.75px] text-[14px] text-nowrap whitespace-pre",
               labelColor,
               labelClassName
             )}
@@ -85,7 +85,7 @@ export function CustomTextarea({
           placeholder={placeholder}
           disabled={disabled}
           className={cn(
-            "h-full resize-none border-none bg-transparent outline-none shadow-none font-['Comfortaa:Regular',sans-serif] font-normal text-[#717182] text-[12px] leading-[18px] placeholder:text-[#717182] px-[16px] py-[12px]",
+            "h-full resize-none border-none bg-transparent outline-none shadow-none font-comfortaa font-normal text-[#717182] text-[12px] leading-[18px] placeholder:text-[#717182] px-[16px] py-[12px]",
             "focus-visible:ring-0 focus-visible:border-none focus-visible:outline-none",
             className
           )}
@@ -136,12 +136,12 @@ export function CustomTextarea({
       </div>
 
       {error ? (
-        <p className="font-['Comfortaa:Medium',sans-serif] text-[12px] text-[#de1507]">
+        <p className="font-comfortaa text-[12px] text-[#de1507]">
           {error}
         </p>
       ) : helperText ? (
         <p className={cn(
-          "font-['Comfortaa:Regular',sans-serif] font-normal leading-[14px] text-[10.5px] text-[#6a7282]",
+          "font-comfortaa font-normal leading-[14px] text-[10.5px] text-[#6a7282]",
           helperTextClassName
         )}>
           {helperText}

@@ -39,7 +39,7 @@ export default function NotificationsPopover() {
           aria-label="Notifications"
           data-name="notifications"
         >
-          <div className="bg-clip-padding border-0 border-transparent border-solid box-border overflow-clip relative rounded-[inherit] size-[24px]">
+          <div className="bg-clip-padding border-0 border-transparent border-solid overflow-clip relative rounded-[inherit] size-[24px]">
             <div className="absolute inset-[8.33%_16.67%]" data-name="icon">
               <Icon
                 name="notify"
@@ -65,7 +65,7 @@ export default function NotificationsPopover() {
               >
                 <Icon name="close-arrow" size={16} className="text-[#717182]" />
               </button>
-              <h2 className="absolute left-1/2 -translate-x-1/2 font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-lg">
+              <h2 className="absolute left-1/2 -translate-x-1/2 font-comfortaa font-semibold text-[#4A3C2A] text-lg">
                 Notifications
               </h2>
             </div>
@@ -92,7 +92,7 @@ export default function NotificationsPopover() {
                       {!item.is_read && (
                         <span className="bg-[#EF4444] border-2 border-white rounded-full size-[10px]" />
                       )}
-                      <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[14px] leading-[20px] text-[#0F172B]">
+                      <p className="font-comfortaa font-bold text-[14px] leading-[20px] text-[#0F172B]">
                         {item.title}
                       </p>
                     </div>

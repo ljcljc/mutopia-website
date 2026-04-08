@@ -48,15 +48,15 @@ export const CustomSelect = forwardRef<HTMLButtonElement, CustomSelectProps>(
     
     return (
       <div className={cn(
-        "content-stretch flex flex-col gap-[8px] items-start relative",
+        "flex flex-col gap-[8px] items-start relative",
         isAutoWidth ? "w-auto" : "w-full"
       )}>
         {/* Label */}
         {label && (
-          <div className="content-stretch flex gap-[7px] h-[12.25px] items-center relative shrink-0 w-full">
+          <div className="flex gap-[7px] h-[12.25px] items-center relative shrink-0 w-full">
             <p
               className={cn(
-                "font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[14px] text-nowrap whitespace-pre",
+                "font-comfortaa font-normal leading-[22.75px] relative shrink-0 text-[14px] text-nowrap whitespace-pre",
                 error ? "text-[#de1507]" : "text-[#4a3c2a]"
               )}
             >
@@ -97,7 +97,7 @@ export const CustomSelect = forwardRef<HTMLButtonElement, CustomSelectProps>(
                   <SelectValue placeholder={placeholder}>
                     <span
                       className={cn(
-                        "font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] text-[12.25px]",
+                        "font-comfortaa font-normal leading-[normal] text-[12.25px]",
                         value ? "text-[#4a3c2a]" : "text-[#717182]"
                       )}
                     >
@@ -169,7 +169,7 @@ export function CustomSelectItem({
         // Base styles - use justify-between for space-between layout, fixed height 36px
         "flex justify-between items-center px-[8px] h-[36px] rounded-[4px] cursor-pointer",
         "bg-white!",
-        "font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] leading-[20px]",
+        "font-comfortaa font-normal text-[14px] leading-[20px]",
         
         // Override shadcn default text colors
         "text-[#6b6b6b]!",

@@ -58,7 +58,7 @@ export const BrownOutlineButton = forwardRef<HTMLButtonElement, BrownOutlineButt
           {/* Content - invisible when loading but still takes up space */}
           {typeof children === "string" ? (
             <p
-              className={`font-['Comfortaa:Bold',sans-serif] leading-[24.5px] text-[16px] whitespace-nowrap ${loading ? "invisible" : ""}`}
+              className={`font-comfortaa leading-[24.5px] text-[16px] whitespace-nowrap ${loading ? "invisible" : ""}`}
             >
               {children}
             </p>

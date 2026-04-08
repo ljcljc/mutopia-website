@@ -193,7 +193,7 @@ export default function PersonalInfoCard({ mode = "customer" }: PersonalInfoCard
               />
             ) : (
               /* 显示 initials（如果没有头像） */
-              <span className="text-white font-['Comfortaa',sans-serif] font-semibold text-[14px] sm:text-lg">
+              <span className="text-white font-comfortaa font-semibold text-[14px] sm:text-lg">
                 {initials}
               </span>
             )}
@@ -217,7 +217,7 @@ export default function PersonalInfoCard({ mode = "customer" }: PersonalInfoCard
           <input {...avatarInputProps} />
           {userInfo.is_member && (
             <div className="absolute left-1/2 -translate-x-1/2 bottom-[-8px] inline-flex items-center justify-center rounded-[12px] bg-[#DCFCE7] px-2 py-[4px]">
-              <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-[#016630]">
+              <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#016630]">
                 Member
               </span>
             </div>
@@ -228,7 +228,7 @@ export default function PersonalInfoCard({ mode = "customer" }: PersonalInfoCard
         <div className="flex-1">
           <div className="flex items-center justify-between mb-[12px] sm:mb-4">
             <h2 className={cn(
-              "font-['Comfortaa',sans-serif] text-[#4A3C2A]",
+              "font-comfortaa text-[#4A3C2A]",
               mode === "groomer" ? "font-normal text-[14px] sm:text-[14px]" : "font-semibold text-[14px] sm:text-lg"
             )}>
               {fullName}
@@ -239,7 +239,7 @@ export default function PersonalInfoCard({ mode = "customer" }: PersonalInfoCard
               className="flex items-center gap-2 text-[#8B6357] hover:text-[#DE6A07]/80 cursor-pointer"
             >
               <Icon name="pencil" className="w-4 h-4" />
-              <span className="hidden sm:inline font-['Comfortaa',sans-serif] font-medium text-sm">
+              <span className="hidden sm:inline font-comfortaa font-medium text-sm">
                 Modify
               </span>
             </button>
@@ -264,7 +264,7 @@ export default function PersonalInfoCard({ mode = "customer" }: PersonalInfoCard
               <Icon name="lock" className="w-4 h-4 sm:w-5 sm:h-5 text-[#8B6357] shrink-0" />
               <span
                 className={cn(
-                  "font-['Comfortaa',sans-serif] font-medium text-[12px] sm:text-sm transition-colors duration-150 group-hover:opacity-80 group-active:opacity-70",
+                  "font-comfortaa font-medium text-[12px] sm:text-sm transition-colors duration-150 group-hover:opacity-80 group-active:opacity-70",
                   mode === "groomer" ? "text-[#DE6A07]" : "text-[#DE6A07] sm:text-[#8B6357]"
                 )}
               >

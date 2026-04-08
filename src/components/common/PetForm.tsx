@@ -185,18 +185,18 @@ export function PetForm({
   const groomingFrequencyContent = (
     <div className="flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full">
       <div className="flex flex-col gap-[calc(3.5*var(--px393))] sm:gap-[3.5px] items-start relative shrink-0">
-        <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px]">
+        <p className="font-comfortaa font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px]">
           How often would you like grooming?
         </p>
         <div className="bg-blue-50 border border-[#bedbff] border-solid relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] shrink-0 w-full">
-          <div className="box-border flex items-center overflow-clip px-[calc(16*var(--px393))] py-[calc(8*var(--px393))] sm:px-[16px] sm:py-[8px] relative rounded-[inherit]">
+          <div className="flex items-center overflow-clip px-[calc(16*var(--px393))] py-[calc(8*var(--px393))] sm:px-[16px] sm:py-[8px] relative rounded-[inherit]">
             <div className="flex gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full min-w-0">
               <Icon
                 name="alert-info"
                 className="relative shrink-0 size-[12px] text-[#2374FF]"
               />
-              <div className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(14*var(--px393))] sm:leading-[14px] relative text-[#193cb8] text-[calc(10*var(--px393))] sm:text-[10px] whitespace-normal break-words min-w-0">
-                <p className="font-['Comfortaa:Bold',sans-serif] font-bold mb-0">
+              <div className="font-comfortaa font-normal leading-[calc(14*var(--px393))] sm:leading-[14px] relative text-[#193cb8] text-[calc(10*var(--px393))] sm:text-[10px] whitespace-normal break-words min-w-0">
+                <p className="font-comfortaa font-bold mb-0">
                   Professional Tip:
                 </p>
                 <p>
@@ -251,9 +251,9 @@ export function PetForm({
           <button
             type="button"
             onClick={handleBackAction}
-            className="border-2 border-[#de6a07] border-solid box-border flex gap-[calc(8*var(--px393))] sm:gap-[8px] h-[calc(36*var(--px393))] sm:h-[36px] items-center justify-center px-[calc(30*var(--px393))] sm:px-[30px] relative rounded-[calc(32*var(--px393))] sm:rounded-[32px] shrink-0 cursor-pointer hover:bg-[rgba(222,106,7,0.1)] transition-colors w-full sm:w-auto"
+            className="border-2 border-[#de6a07] border-solid flex gap-[calc(8*var(--px393))] sm:gap-[8px] h-[calc(36*var(--px393))] sm:h-[36px] items-center justify-center px-[calc(30*var(--px393))] sm:px-[30px] relative rounded-[calc(32*var(--px393))] sm:rounded-[32px] shrink-0 cursor-pointer hover:bg-[rgba(222,106,7,0.1)] transition-colors w-full sm:w-auto"
           >
-            <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[calc(14*var(--px393))] sm:text-[14px] text-[#de6a07]">
+            <p className="font-comfortaa font-medium leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[calc(14*var(--px393))] sm:text-[14px] text-[#de6a07]">
               {backLabel}
             </p>
           </button>
@@ -265,7 +265,7 @@ export function PetForm({
           className="w-full sm:w-auto"
         >
           <div className="flex gap-[calc(4*var(--px393))] sm:gap-[4px] items-center">
-            <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] text-[calc(14*var(--px393))] sm:text-[14px] text-white">
+            <p className="font-comfortaa font-medium leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] text-[calc(14*var(--px393))] sm:text-[14px] text-white">
               {primaryLabel}
             </p>
             {primaryActionShowArrow ? (
@@ -281,9 +281,9 @@ export function PetForm({
           <button
             type="button"
             onClick={handleBackAction}
-            className="border-2 border-[#de6a07] border-solid box-border flex gap-[calc(8*var(--px393))] sm:gap-[8px] h-[calc(36*var(--px393))] sm:h-[36px] items-center justify-center px-[calc(30*var(--px393))] sm:px-[30px] relative rounded-[calc(32*var(--px393))] sm:rounded-[32px] shrink-0 cursor-pointer hover:bg-[rgba(222,106,7,0.1)] transition-colors w-full sm:w-auto"
+            className="border-2 border-[#de6a07] border-solid flex gap-[calc(8*var(--px393))] sm:gap-[8px] h-[calc(36*var(--px393))] sm:h-[36px] items-center justify-center px-[calc(30*var(--px393))] sm:px-[30px] relative rounded-[calc(32*var(--px393))] sm:rounded-[32px] shrink-0 cursor-pointer hover:bg-[rgba(222,106,7,0.1)] transition-colors w-full sm:w-auto"
           >
-            <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[calc(14*var(--px393))] sm:text-[14px] text-[#de6a07]">
+            <p className="font-comfortaa font-medium leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[calc(14*var(--px393))] sm:text-[14px] text-[#de6a07]">
               {backLabel}
             </p>
           </button>
@@ -1211,33 +1211,33 @@ export function PetForm({
   }, [petType, breed, petBreeds, setBreed]);
 
   return (
-    <div className="content-stretch flex flex-col gap-[calc(16*var(--px393))] sm:gap-[24px] items-start relative w-full sm:px-[calc(20*var(--px393))] px-0">
+    <div className="flex flex-col gap-[calc(16*var(--px393))] sm:gap-[24px] items-start relative w-full sm:px-[calc(20*var(--px393))] px-0">
       {/* Mobile Step Header */}
       {showMobileStepHeader ? (
-        <div className="content-stretch flex flex-col gap-[calc(12*var(--px393))] sm:gap-[12px] items-start relative shrink-0 w-full sm:hidden">
-          <p className="font-['Comfortaa:Bold',sans-serif] font-bold h-[calc(19*var(--px393))] sm:h-[19px] leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[calc(12*var(--px393))] sm:text-[12px] text-black w-full whitespace-pre-wrap">
+        <div className="flex flex-col gap-[calc(12*var(--px393))] sm:gap-[12px] items-start relative shrink-0 w-full sm:hidden">
+          <p className="font-comfortaa font-bold h-[calc(19*var(--px393))] sm:h-[19px] leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[calc(12*var(--px393))] sm:text-[12px] text-black w-full whitespace-pre-wrap">
             Book your appointment
           </p>
-          <div className="border border-[#4c4c4c] border-solid content-stretch flex h-[calc(24*var(--px393))] sm:h-[24px] items-center justify-center overflow-clip px-[calc(9*var(--px393))] py-[calc(5*var(--px393))] sm:px-[9px] sm:py-[5px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shrink-0">
-            <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[calc(14*var(--px393))] sm:leading-[14px] relative shrink-0 text-[#4c4c4c] text-[calc(10*var(--px393))] sm:text-[10px]">
+          <div className="border border-[#4c4c4c] border-solid flex h-[calc(24*var(--px393))] sm:h-[24px] items-center justify-center overflow-clip px-[calc(9*var(--px393))] py-[calc(5*var(--px393))] sm:px-[9px] sm:py-[5px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shrink-0">
+            <p className="font-comfortaa font-bold leading-[calc(14*var(--px393))] sm:leading-[14px] relative shrink-0 text-[#4c4c4c] text-[calc(10*var(--px393))] sm:text-[10px]">
               Step 2 of 6
             </p>
           </div>
-          <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] min-w-full relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px] w-[min-content] whitespace-pre-wrap">
+          <p className="font-comfortaa font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] min-w-full relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px] w-[min-content] whitespace-pre-wrap">
             Pet information
           </p>
         </div>
       ) : null}
       <div className="flex flex-col gap-[calc(32*var(--px393))] sm:gap-[32px] items-start relative w-full">
         {/* Pet Information Card */}
-        <div className={`bg-white box-border flex flex-col gap-[calc(16*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-tr-none sm:rounded-tr-none rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full ${petInfoCardClassName ?? ""}`}>
+        <div className={`bg-white flex flex-col gap-[calc(16*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-tr-none sm:rounded-tr-none rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full ${petInfoCardClassName ?? ""}`}>
           <div className="flex flex-col gap-[calc(16*var(--px393))] sm:gap-[16px] items-start relative w-full">
             {/* Section Header */}
             <div className="flex flex-col gap-[calc(4*var(--px393))] sm:gap-[4px] items-start relative shrink-0 w-full">
-              <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px]">
+              <p className="font-comfortaa font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px]">
                 Tell us about your furry friend
               </p>
-              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[#4a5565] text-[calc(12.25*var(--px393))] sm:text-[12.25px]">
+              <p className="font-comfortaa font-normal leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[#4a5565] text-[calc(12.25*var(--px393))] sm:text-[12.25px]">
                 This helps groomers prepare and provide the best care possible
               </p>
             </div>
@@ -1249,12 +1249,12 @@ export function PetForm({
                   {petOptions && petOptions.length > 0 && onPetSelect && setSelectedPetId ? (
                     <div className="flex flex-col items-start relative w-full" ref={petDropdownRef}>
                       <div className="flex gap-[7px] items-center relative mb-2">
-                        <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] text-[#4a3c2a] text-[14px]">
+                        <p className="font-comfortaa font-normal leading-[22.75px] text-[#4a3c2a] text-[14px]">
                           Pet name
                         </p>
                       </div>
                       <div className="bg-white border border-gray-200 border-solid h-[36px] relative rounded-[8px] w-full hover:border-[#633479] transition-colors">
-                        <div className="box-border flex h-[36px] items-center overflow-clip px-[12px] py-[4px] relative rounded-[inherit] w-full">
+                        <div className="flex h-[36px] items-center overflow-clip px-[12px] py-[4px] relative rounded-[inherit] w-full">
                           <div className="flex flex-1 items-center relative">
                             <input
                               type="text"
@@ -1269,7 +1269,7 @@ export function PetForm({
                               }}
                               onFocus={() => setIsPetDropdownOpen(true)}
                               placeholder="Select a pet or type"
-                              className="flex-1 font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] relative text-[#717182] text-[12.25px] bg-transparent border-none outline-none placeholder:text-[#717182]"
+                              className="flex-1 font-comfortaa font-normal leading-[normal] relative text-[#717182] text-[12.25px] bg-transparent border-none outline-none placeholder:text-[#717182]"
                             />
                             <div
                               className="relative shrink-0 w-[16px] cursor-pointer"
@@ -1322,7 +1322,7 @@ export function PetForm({
               {/* Pet Type */}
               <div className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full sm:w-[330px]">
                 <div className="flex gap-[7px] h-[calc(12.25*var(--px393))] sm:h-[12.25px] items-center relative shrink-0 w-full">
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
+                  <p className="font-comfortaa font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
                     Pet type
                   </p>
                 </div>
@@ -1352,7 +1352,7 @@ export function PetForm({
               {petType !== "other" && (
                 <div className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full sm:w-[330px]">
                   <div className="flex h-[calc(12.25*var(--px393))] sm:h-[12.25px] items-center justify-between relative shrink-0 w-full">
-                    <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
+                    <p className="font-comfortaa font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
                       {isMixedBreed ? "Primary breed" : "Breed"}
                     </p>
                     <div className="flex gap-[calc(4*var(--px393))] sm:gap-[4px] items-center justify-end relative shrink-0">
@@ -1361,7 +1361,7 @@ export function PetForm({
                         checked={isMixedBreed} 
                         onCheckedChange={setIsMixedBreed}
                       />
-                      <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
+                      <p className="font-comfortaa font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
                         Mixed breed
                       </p>
                     </div>
@@ -1386,7 +1386,7 @@ export function PetForm({
               {petType === "other" && (
                 <div className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full sm:w-[330px]">
                   <div className="flex gap-[7px] h-[calc(12.25*var(--px393))] sm:h-[12.25px] items-center relative shrink-0 w-full">
-                    <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
+                    <p className="font-comfortaa font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
                       Precise pet type
                     </p>
                   </div>
@@ -1432,19 +1432,19 @@ export function PetForm({
               {/* Weight */}
               <div className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full">
                 <div className="flex gap-[7px] h-[calc(12.25*var(--px393))] sm:h-[12.25px] items-center relative shrink-0 w-full">
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
+                  <p className="font-comfortaa font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
                     Weight (lb or kg)
                   </p>
                 </div>
                 <div className="flex items-start relative shrink-0 w-full sm:w-[200px] group">
                   <div className="bg-white flex-1 h-[calc(36*var(--px393))] sm:h-[36px] relative rounded-bl-[calc(12*var(--px393))] rounded-tl-[calc(12*var(--px393))] sm:rounded-bl-[12px] sm:rounded-tl-[12px] shrink-0">
-                    <div className="box-border flex h-[calc(36*var(--px393))] sm:h-[36px] items-center overflow-clip px-[calc(16*var(--px393))] py-[calc(4*var(--px393))] sm:px-[16px] sm:py-[4px] relative rounded-[inherit] w-full">
+                    <div className="flex h-[calc(36*var(--px393))] sm:h-[36px] items-center overflow-clip px-[calc(16*var(--px393))] py-[calc(4*var(--px393))] sm:px-[16px] sm:py-[4px] relative rounded-[inherit] w-full">
                       <input
                         type="text"
                         placeholder="Enter weight"
                         value={weight}
                         onChange={(e) => setWeight(e.target.value)}
-                        className="flex-1 font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] relative shrink-0 text-[#717182] text-[calc(12.25*var(--px393))] sm:text-[12.25px] bg-transparent border-none outline-none placeholder:text-[#717182]"
+                        className="flex-1 font-comfortaa font-normal leading-[normal] relative shrink-0 text-[#717182] text-[calc(12.25*var(--px393))] sm:text-[12.25px] bg-transparent border-none outline-none placeholder:text-[#717182]"
                       />
                     </div>
                     {/* Border with states */}
@@ -1471,7 +1471,7 @@ export function PetForm({
               {/* Coat Condition */}
               <div className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0">
                 <div className="flex gap-[7px] h-[calc(12.25*var(--px393))] sm:h-[12.25px] items-center relative shrink-0">
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
+                  <p className="font-comfortaa font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
                     Coat condition
                   </p>
                 </div>
@@ -1500,7 +1500,7 @@ export function PetForm({
               {/* Behavior */}
               <div className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0">
                 <div className="flex gap-[7px] h-[calc(12.25*var(--px393))] sm:h-[12.25px] items-center relative shrink-0">
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
+                  <p className="font-comfortaa font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
                     Behavior
                   </p>
                 </div>
@@ -1552,15 +1552,15 @@ export function PetForm({
         <AlertDialogContent className="bg-white rounded-[calc(20*var(--px393))] sm:rounded-[20px] border border-[rgba(0,0,0,0.2)] p-0 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] max-w-[90%] sm:max-w-[400px]">
           <div className="flex flex-col gap-[calc(32*var(--px393))] sm:gap-[32px] items-start pb-[calc(32*var(--px393))] pt-[calc(12*var(--px393))] sm:pb-[32px] sm:pt-[12px] w-full">
             <AlertDialogHeader className="px-[calc(12*var(--px393))] sm:px-[12px] w-full">
-              <AlertDialogTitle className="font-['Comfortaa:Regular',sans-serif] font-normal text-[calc(14*var(--px393))] sm:text-[14px] text-[#4C4C4C] text-center">
+              <AlertDialogTitle className="font-comfortaa font-normal text-[calc(14*var(--px393))] sm:text-[14px] text-[#4C4C4C] text-center">
                 Hard to handle notice
               </AlertDialogTitle>
               <div className="bg-[rgba(0,0,0,0.1)] h-px w-full mt-[calc(8*var(--px393))] sm:mt-[8px]" />
             </AlertDialogHeader>
             <div className="px-[calc(20*var(--px393))] sm:px-[24px] w-full">
               <AlertDialogDescription asChild>
-                <div className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#4C4C4C] leading-[calc(22.75*var(--px393))] sm:leading-[22.75px]">
-                  <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] text-[calc(16*var(--px393))] sm:text-[16px] mb-0 text-black">
+                <div className="font-comfortaa font-normal text-[#4C4C4C] leading-[calc(22.75*var(--px393))] sm:leading-[22.75px]">
+                  <p className="font-comfortaa font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] text-[calc(16*var(--px393))] sm:text-[16px] mb-0 text-black">
                     Hard to Handle
                   </p>
                   <p className="text-[calc(14*var(--px393))] sm:text-[14px] text-[#4C4C4C]">
@@ -1590,15 +1590,15 @@ export function PetForm({
         <AlertDialogContent className="bg-white rounded-[calc(20*var(--px393))] sm:rounded-[20px] border border-[rgba(0,0,0,0.2)] p-0 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] max-w-[90%] sm:max-w-[400px]">
           <div className="flex flex-col gap-[calc(32*var(--px393))] sm:gap-[32px] items-start pb-[calc(32*var(--px393))] pt-[calc(12*var(--px393))] sm:pb-[32px] sm:pt-[12px] w-full">
             <AlertDialogHeader className="px-[calc(12*var(--px393))] sm:px-[12px] w-full">
-              <AlertDialogTitle className="font-['Comfortaa:Regular',sans-serif] font-normal text-[calc(14*var(--px393))] sm:text-[14px] text-[#4C4C4C] text-center">
+              <AlertDialogTitle className="font-comfortaa font-normal text-[calc(14*var(--px393))] sm:text-[14px] text-[#4C4C4C] text-center">
                 Senior pets notice
               </AlertDialogTitle>
               <div className="bg-[rgba(0,0,0,0.1)] h-px w-full mt-[calc(8*var(--px393))] sm:mt-[8px]" />
             </AlertDialogHeader>
             <div className="px-[calc(20*var(--px393))] sm:px-[24px] w-full">
               <AlertDialogDescription asChild>
-                <div className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#4C4C4C] leading-[calc(22.75*var(--px393))] sm:leading-[22.75px]">
-                  <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] text-[calc(16*var(--px393))] sm:text-[16px] mb-0 text-black">
+                <div className="font-comfortaa font-normal text-[#4C4C4C] leading-[calc(22.75*var(--px393))] sm:leading-[22.75px]">
+                  <p className="font-comfortaa font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] text-[calc(16*var(--px393))] sm:text-[16px] mb-0 text-black">
                     Senior pets
                   </p>
                   <p className="text-[calc(14*var(--px393))] sm:text-[14px] text-[#4C4C4C]">
@@ -1624,7 +1624,7 @@ export function PetForm({
       <AlertDialog open={mattingModalOpen} onOpenChange={setMattingModalOpen}>
         <AlertDialogContent className="flex flex-col bg-white rounded-[calc(20*var(--px393))] sm:rounded-[20px] border border-[rgba(0,0,0,0.2)] p-0 pt-[calc(12*var(--px393))] sm:pt-[12px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] max-w-[90%] sm:max-w-[400px] max-h-[80vh] overflow-hidden sm:max-h-none sm:overflow-visible gap-[calc(32*var(--px393))] sm:gap-[32px]">
           <AlertDialogHeader className="shrink-0 px-[calc(12*var(--px393))] sm:px-[12px] w-full">
-            <AlertDialogTitle className="font-['Comfortaa:Regular',sans-serif] font-normal text-[calc(14*var(--px393))] sm:text-[14px] text-[#4C4C4C] text-center">
+            <AlertDialogTitle className="font-comfortaa font-normal text-[calc(14*var(--px393))] sm:text-[14px] text-[#4C4C4C] text-center">
               Matting removal notice
             </AlertDialogTitle>
             <div className="bg-[rgba(0,0,0,0.1)] h-px w-full mt-[calc(8*var(--px393))] sm:mt-[8px]" />
@@ -1632,8 +1632,8 @@ export function PetForm({
           <div className="flex flex-col flex-1 min-h-0 overflow-y-auto gap-[calc(32*var(--px393))] sm:gap-[32px] items-start pb-[calc(32*var(--px393))] sm:pb-[32px] w-full">
             <div className="px-[calc(20*var(--px393))] sm:px-[24px] w-full">
               <AlertDialogDescription asChild>
-                <div className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#4C4C4C] leading-[calc(22.75*var(--px393))] sm:leading-[22.75px]">
-                  <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] text-[calc(16*var(--px393))] sm:text-[16px] mb-0 text-black">
+                <div className="font-comfortaa font-normal text-[#4C4C4C] leading-[calc(22.75*var(--px393))] sm:leading-[22.75px]">
+                  <p className="font-comfortaa font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] text-[calc(16*var(--px393))] sm:text-[16px] mb-0 text-black">
                     Matting removal notice
                   </p>
                   <p className="text-[calc(14*var(--px393))] sm:text-[14px] text-[#4C4C4C] mb-0">
@@ -1649,7 +1649,7 @@ export function PetForm({
               </AlertDialogDescription>
             </div>
             <div className="px-[calc(20*var(--px393))] sm:px-[24px] w-full">
-              <div className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[calc(16*var(--px393))] sm:text-[16px] text-[#4a3c2a] leading-[calc(28*var(--px393))] sm:leading-[28px] mb-[calc(14*var(--px393))] sm:mb-[14px]">
+              <div className="font-comfortaa font-semibold text-[calc(16*var(--px393))] sm:text-[16px] text-[#4a3c2a] leading-[calc(28*var(--px393))] sm:leading-[28px] mb-[calc(14*var(--px393))] sm:mb-[14px]">
                 Select one option
               </div>
               <div className="flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px]">
@@ -1671,10 +1671,10 @@ export function PetForm({
                       </div>
                     </div>
                     <div className="text-[calc(14*var(--px393))] sm:text-[14px] leading-[calc(21*var(--px393))] sm:leading-[21px] text-[#8b6357]">
-                      <span className="font-['Comfortaa:Bold',sans-serif] font-bold">
+                      <span className="font-comfortaa font-bold">
                         I approve{" "}
                       </span>
-                      <span className="font-['Comfortaa:Regular',sans-serif] font-normal">
+                      <span className="font-comfortaa font-normal">
                         the groomer to shave my pet if needed.
                       </span>
                     </div>
@@ -1698,10 +1698,10 @@ export function PetForm({
                       </div>
                     </div>
                     <div className="text-[calc(14*var(--px393))] sm:text-[14px] leading-[calc(21*var(--px393))] sm:leading-[21px] text-[#8b6357]">
-                      <span className="font-['Comfortaa:Bold',sans-serif] font-bold">
+                      <span className="font-comfortaa font-bold">
                         I do not approve{" "}
                       </span>
-                      <span className="font-['Comfortaa:Regular',sans-serif] font-normal">
+                      <span className="font-comfortaa font-normal">
                         a shave-down and understand that the full charge will apply even if mats remain.
                       </span>
                     </div>
@@ -1726,7 +1726,7 @@ export function PetForm({
 
         {/* Grooming Frequency Card */}
         {!mergeGroomingIntoInfoCard ? (
-          <div className="bg-white box-border flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
+          <div className="bg-white flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
             {groomingFrequencyContent}
           </div>
         ) : null}
@@ -1734,10 +1734,10 @@ export function PetForm({
         {!hideAfterPetInfo ? (
           <>
             {/* Upload Pet Photo Card */}
-            <div className="bg-white box-border flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
+            <div className="bg-white flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
               <div className="flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full">
                 <div className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full">
-                  <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[calc(16*var(--px393))] sm:text-[16px] text-black whitespace-pre-wrap">
+                  <p className="font-comfortaa font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[calc(16*var(--px393))] sm:text-[16px] text-black whitespace-pre-wrap">
                     Upload pet photo (optional but helpful)
                   </p>
                   <div className="flex flex-col gap-[calc(12*var(--px393))] sm:gap-[12px] items-start overflow-clip relative shrink-0 w-full">
@@ -1798,9 +1798,9 @@ export function PetForm({
             />
 
             {/* Special Notes Card */}
-            <div className="bg-white box-border flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
+            <div className="bg-white flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
               <div className="flex flex-col gap-[calc(12*var(--px393))] sm:gap-[12px] items-start relative shrink-0 w-full">
-                <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] text-[calc(16*var(--px393))] sm:text-[16px] text-[#4a3c2a] w-full whitespace-pre-wrap">
+                <p className="font-comfortaa font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] text-[calc(16*var(--px393))] sm:text-[16px] text-[#4a3c2a] w-full whitespace-pre-wrap">
                   Special instruments or notes(optional)
                 </p>
                   <CustomTextarea
@@ -1810,7 +1810,7 @@ export function PetForm({
                     onChange={(e) => setSpecialNotes(e.target.value)}
                     helperText="Include any health conditions, behavioral notes, or grooming preferences"
                     aria-label="Special instruments or notes (optional)"
-                    labelClassName="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] text-[calc(16*var(--px393))] sm:text-[16px]"
+                    labelClassName="font-comfortaa font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] text-[calc(16*var(--px393))] sm:text-[16px]"
                   />
               </div>
             </div>

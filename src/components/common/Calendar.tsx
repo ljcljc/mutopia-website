@@ -149,7 +149,7 @@ export function Calendar({
     <div
       ref={calendar.calendarRef}
       className={cn(
-        "bg-white content-stretch flex flex-col items-start relative shrink-0",
+        "bg-white flex flex-col items-start relative shrink-0",
         isMobileVariant
           ? "gap-[calc(20*var(--px393))] p-0 rounded-[calc(16*var(--px393))] w-full"
           : "gap-[20px] p-[24px] rounded-[16px]",
@@ -191,7 +191,7 @@ export function Calendar({
             }}
             disabled={disabled}
             className={cn(
-              "font-['Poppins:Bold',sans-serif] font-bold not-italic text-black text-nowrap whitespace-pre hover:opacity-80 transition-opacity cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed",
+              "font-poppins font-bold not-italic text-black text-nowrap whitespace-pre hover:opacity-80 transition-opacity cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed",
               isMobileVariant
                 ? "leading-[calc(24*var(--px393))] text-[calc(20*var(--px393))] tracking-[calc(0.38*var(--px393))]"
                 : "leading-[24px] text-[20px] tracking-[0.38px]"
@@ -261,7 +261,7 @@ export function Calendar({
             }}
             disabled={disabled}
             className={cn(
-              "font-['Poppins:Bold',sans-serif] font-bold not-italic text-black text-nowrap tracking-[0.38px] whitespace-pre hover:opacity-80 transition-opacity cursor-pointer w-[120px] text-center disabled:opacity-60 disabled:cursor-not-allowed",
+              "font-poppins font-bold not-italic text-black text-nowrap whitespace-pre tracking-[0.38px] hover:opacity-80 transition-opacity cursor-pointer w-[120px] text-center disabled:opacity-60 disabled:cursor-not-allowed",
               isMobileVariant
                 ? "leading-[calc(24*var(--px393))] text-[calc(20*var(--px393))] tracking-[calc(0.38*var(--px393))]"
                 : "leading-[24px] text-[20px] tracking-[0.38px]"
@@ -331,7 +331,7 @@ export function Calendar({
                   }}
                   disabled={isDisabled}
                   className={cn(
-                    "box-border content-stretch flex gap-[8px] items-start overflow-clip px-[16px] py-[4px] w-full transition-colors relative cursor-pointer",
+                    "flex gap-[8px] items-start overflow-clip px-[16px] py-[4px] w-full transition-colors relative cursor-pointer",
                     isDisabled
                       ? "opacity-30 cursor-not-allowed"
                       : isSelected
@@ -369,7 +369,7 @@ export function Calendar({
           onMouseDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="relative box-border flex flex-col items-start px-0 py-[8px]">
+          <div className="relative flex flex-col items-start px-0 py-[8px]">
             {calendar.MONTHS.map((month, index) => {
               const isSelected = index === calendar.currentMonth;
               const isDisabled = calendar.isMonthDisabled(index);
@@ -393,7 +393,7 @@ export function Calendar({
                   )}
                 >
                   <div className="overflow-clip rounded-[inherit] size-full">
-                    <div className="box-border content-stretch flex gap-[8px] items-start px-[16px] py-[4px] relative w-full">
+                    <div className="flex gap-[8px] items-start px-[16px] py-[4px] relative w-full">
                       <p
                         className={cn(
                           "basis-0 font-['Inter:Semi_Bold',sans-serif] grow leading-[24px] min-h-px min-w-px not-italic relative shrink-0 text-[14px]",
@@ -422,10 +422,10 @@ export function Calendar({
       {/* Days of Week */}
       <div
         className={cn(
-          "content-stretch flex items-center leading-0 relative shrink-0 text-[rgba(60,60,67,0.6)] text-center whitespace-nowrap w-full",
+          "flex items-center leading-0 relative shrink-0 text-[rgba(60,60,67,0.6)] text-center whitespace-nowrap w-full",
           isMobileVariant
-            ? "font-['Comfortaa:Bold',sans-serif] font-bold text-[calc(12*var(--px393))]"
-            : "font-['Comfortaa:Medium',sans-serif] font-medium text-[12px]"
+            ? "font-comfortaa font-bold text-[calc(12*var(--px393))]"
+            : "font-comfortaa font-medium text-[12px]"
         )}
       >
         {calendar.DAYS.map((day) => (
@@ -444,7 +444,7 @@ export function Calendar({
       </div>
 
       {/* Calendar Grid */}
-      <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
+      <div className="flex flex-col items-start relative shrink-0 w-full">
         {/* Generate 6 rows of 7 days each */}
         {Array.from({ length: 6 }, (_, rowIndex) => {
           const startIndex = rowIndex * 7;
@@ -454,7 +454,7 @@ export function Calendar({
             <div
               key={`row-${rowIndex}`}
               className={cn(
-                "content-stretch flex font-['Comfortaa:Regular',sans-serif] font-normal items-center leading-0 overflow-clip relative shrink-0 text-center w-full",
+                "flex font-comfortaa font-normal items-center leading-0 overflow-clip relative shrink-0 text-center w-full",
                 isMobileVariant ? "text-[calc(16*var(--px393))]" : "text-[16px]",
                 rowDays[0]?.isCurrentMonth ? "text-black" : "text-[grey]"
               )}
@@ -481,7 +481,7 @@ export function Calendar({
                   >
                     <p
                       className={cn(
-                        "whitespace-pre-wrap font-['Comfortaa:Regular',sans-serif] font-normal",
+                        "whitespace-pre-wrap font-comfortaa font-normal",
                         isMobileVariant ? "leading-[calc(28*var(--px393))]" : "leading-[28px]"
                       )}
                     >

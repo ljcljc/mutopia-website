@@ -24,8 +24,8 @@ export function EmailForm({
   isLoading?: boolean;
 }) {
   return (
-    <div className="content-stretch flex flex-col gap-[20px] items-start relative shrink-0 w-full">
-      <div className="content-stretch flex flex-col gap-[4px] items-start w-full">
+    <div className="flex flex-col gap-[20px] items-start relative shrink-0 w-full">
+      <div className="flex flex-col gap-[4px] items-start w-full">
         <CustomInput
           label="Email"
           placeholder="Enter your email"
@@ -74,7 +74,7 @@ export function EmailFormContainer({
 }) {
   return (
     <div
-      className="content-stretch flex flex-col gap-[14px] items-start relative shrink-0 w-full"
+      className="flex flex-col gap-[14px] items-start relative shrink-0 w-full"
       data-name="AuthDialog"
     >
       <EmailForm
@@ -106,7 +106,7 @@ export function DividerText() {
       className="absolute bg-white h-[17.5px] left-1/2 -translate-x-1/2 top-[-8.25px] px-[14px]"
       data-name="Text"
     >
-      <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] text-[#717182] text-[12.25px] text-nowrap whitespace-pre">
+      <p className="font-comfortaa font-normal leading-[17.5px] text-[#717182] text-[12.25px] text-nowrap whitespace-pre">
         or
       </p>
     </div>
@@ -133,20 +133,20 @@ export function GoogleIcon() {
 
 export function GoogleButtonContent({ isLoading }: { isLoading?: boolean }) {
   return (
-    <div className="absolute content-stretch flex gap-[12px] items-center left-[16px] right-[16px] top-[7.75px]">
+    <div className="absolute flex gap-[12px] items-center left-[16px] right-[16px] top-[7.75px]">
       {isLoading ? (
         <>
           <div className="relative shrink-0 size-[14px] flex items-center justify-center">
             <div className="size-[14px] border-2 border-[#717182] border-t-transparent rounded-full animate-spin" />
           </div>
-          <p className="basis-0 font-['Comfortaa:Bold',sans-serif] font-bold grow leading-[20px] min-h-px min-w-px relative shrink-0 text-[#717182] text-[14px] text-center">
+          <p className="basis-0 font-comfortaa font-bold grow leading-[20px] min-h-px min-w-px relative shrink-0 text-[#717182] text-[14px] text-center">
             Connecting...
           </p>
         </>
       ) : (
         <>
           <GoogleIcon />
-          <p className="basis-0 font-['Comfortaa:Bold',sans-serif] font-bold grow leading-[20px] min-h-px min-w-px relative shrink-0 text-[#717182] text-[14px] text-center">
+          <p className="basis-0 font-comfortaa font-bold grow leading-[20px] min-h-px min-w-px relative shrink-0 text-[#717182] text-[14px] text-center">
             Continue with Google
           </p>
         </>
@@ -188,20 +188,20 @@ export function FacebookIcon() {
 
 export function FacebookButtonContent({ isLoading }: { isLoading?: boolean }) {
   return (
-    <div className="absolute content-stretch flex gap-[12px] items-center left-[18px] right-[18px] top-[8.25px]">
+    <div className="absolute flex gap-[12px] items-center left-[18px] right-[18px] top-[8.25px]">
       {isLoading ? (
         <>
           <div className="relative shrink-0 size-[14px] flex items-center justify-center">
             <div className="size-[14px] border-2 border-[#717182] border-t-transparent rounded-full animate-spin" />
           </div>
-          <p className="basis-0 font-['Comfortaa:Bold',sans-serif] font-bold grow leading-[20px] min-h-px min-w-px relative shrink-0 text-[#717182] text-[14px] text-center">
+          <p className="basis-0 font-comfortaa font-bold grow leading-[20px] min-h-px min-w-px relative shrink-0 text-[#717182] text-[14px] text-center">
             Connecting...
           </p>
         </>
       ) : (
         <>
           <FacebookIcon />
-          <p className="basis-0 font-['Comfortaa:Bold',sans-serif] font-bold grow leading-[20px] min-h-px min-w-px relative shrink-0 text-[#717182] text-[14px] text-center">
+          <p className="basis-0 font-comfortaa font-bold grow leading-[20px] min-h-px min-w-px relative shrink-0 text-[#717182] text-[14px] text-center">
             Continue with Facebook
           </p>
         </>
@@ -246,7 +246,7 @@ export function SocialLoginButtons({
 }) {
   return (
     <div
-      className="content-stretch flex flex-col gap-[10.5px] items-start relative shrink-0 w-full"
+      className="flex flex-col gap-[10.5px] items-start relative shrink-0 w-full"
       data-name="AuthDialog"
     >
       <GoogleButton onClick={onGoogleClick} isLoading={isGoogleLoading} />
@@ -283,7 +283,7 @@ export function EmailStepContent({
 }) {
   return (
     <div className="relative shrink-0 w-full" data-name="Tab Panel">
-      <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex flex-col gap-[28px] items-start relative w-full">
+      <div className="bg-clip-padding border-0 border-transparent border-solid flex flex-col gap-[28px] items-start relative w-full">
         <EmailFormContainer
           email={email}
           setEmail={setEmail}
@@ -333,7 +333,7 @@ export function EmailStepContainer({
   return (
     <div className="relative shrink-0 w-full" data-name="Container">
       <div className="size-full">
-        <div className="box-border content-stretch flex flex-col gap-[28px] items-start px-[24px] py-0 relative w-full">
+        <div className="flex flex-col gap-[28px] items-start px-[24px] py-0 relative w-full">
           <EmailStepContent
             email={email}
             setEmail={setEmail}

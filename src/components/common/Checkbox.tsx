@@ -144,7 +144,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
 
     return (
       <label
-        className={`content-stretch flex gap-[8px] items-center relative cursor-pointer ${
+        className={`flex gap-[8px] items-center relative cursor-pointer ${
           disabled ? "cursor-not-allowed opacity-60" : ""
         } ${containerClassName}`}
         data-name="Checkbox Label"
@@ -189,7 +189,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
         {/* Label text */}
         {label && (
           <p
-            className={`font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[12px] whitespace-normal select-none transition-colors duration-200 ${getTextColor()}`}
+            className={`font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[12px] whitespace-normal select-none transition-colors duration-200 ${getTextColor()}`}
           >
             {label}
           </p>

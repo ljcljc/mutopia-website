@@ -42,7 +42,7 @@ export default function GroomerHeader() {
   return (
     <BaseAccountHeaderShell
       wrapperClassName="pb-px shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)]"
-      containerClassName="box-border content-stretch flex h-[63px] items-center justify-between relative shrink-0 w-full px-[20px] sm:px-8 md:px-12 lg:px-[57.5px] xl:px-[80px] 2xl:px-[120px]"
+      containerClassName="flex h-[63px] items-center justify-between relative shrink-0 w-full px-[20px] sm:px-8 md:px-12 lg:px-[57.5px] xl:px-[80px] 2xl:px-[120px]"
     >
       <PartnerLogo />
       <div className="flex items-center gap-2">

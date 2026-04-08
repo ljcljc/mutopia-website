@@ -246,59 +246,59 @@ export function Step4() {
   const estimationTextColor = isMemberEstimation ? "text-[#633479]" : "text-[#4A5565]";
 
   return (
-    <div className="content-stretch flex flex-col gap-[calc(16*var(--px393))] sm:gap-[32px] items-start relative w-full px-[calc(20*var(--px393))] sm:px-0">
+    <div className="flex flex-col gap-[calc(16*var(--px393))] sm:gap-[32px] items-start relative w-full px-[calc(20*var(--px393))] sm:px-0">
       {/* Mobile Step Header */}
-      <div className="content-stretch flex flex-col gap-[calc(12*var(--px393))] items-start relative shrink-0 w-full sm:hidden">
-        <p className="font-['Comfortaa:Bold',sans-serif] font-bold h-[calc(19*var(--px393))] leading-[calc(17.5*var(--px393))] relative shrink-0 text-[calc(12*var(--px393))] text-black w-full whitespace-pre-wrap">
+      <div className="flex flex-col gap-[calc(12*var(--px393))] items-start relative shrink-0 w-full sm:hidden">
+        <p className="font-comfortaa font-bold h-[calc(19*var(--px393))] leading-[calc(17.5*var(--px393))] relative shrink-0 text-[calc(12*var(--px393))] text-black w-full whitespace-pre-wrap">
           Book your appointment
         </p>
-        <div className="border border-[#4c4c4c] border-solid content-stretch flex h-[calc(24*var(--px393))] items-center justify-center overflow-clip px-[calc(9*var(--px393))] py-[calc(5*var(--px393))] relative rounded-[calc(12*var(--px393))] shrink-0">
-          <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[calc(14*var(--px393))] relative shrink-0 text-[#4c4c4c] text-[calc(10*var(--px393))]">
+        <div className="border border-[#4c4c4c] border-solid flex h-[calc(24*var(--px393))] items-center justify-center overflow-clip px-[calc(9*var(--px393))] py-[calc(5*var(--px393))] relative rounded-[calc(12*var(--px393))] shrink-0">
+          <p className="font-comfortaa font-bold leading-[calc(14*var(--px393))] relative shrink-0 text-[#4c4c4c] text-[calc(10*var(--px393))]">
             Step 4 of 6
           </p>
         </div>
-        <div className="content-stretch flex gap-[calc(12*var(--px393))] items-center relative shrink-0 w-full">
-          <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))]">
+        <div className="flex gap-[calc(12*var(--px393))] items-center relative shrink-0 w-full">
+          <p className="font-comfortaa font-semibold leading-[calc(28*var(--px393))] relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))]">
             {membershipTopLabel}
           </p>
         </div>
       </div>
 
       {/* Mobile Layout */}
-      <div className="content-stretch flex flex-col gap-[calc(16*var(--px393))] items-start relative shrink-0 w-full sm:hidden">
-        <div className="bg-[#8760a0] content-stretch flex flex-col items-start p-[calc(24*var(--px393))] relative rounded-[calc(12*var(--px393))] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] shrink-0 w-full">
-          <div className="content-stretch flex flex-col gap-[calc(14*var(--px393))] items-center relative shrink-0 w-full">
-            <div className="content-stretch flex flex-col gap-[calc(3.5*var(--px393))] items-center relative shrink-0 w-full">
-              <div className="content-stretch flex items-center justify-center relative shrink-0 w-full">
-                <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[calc(24.5*var(--px393))] relative shrink-0 text-[calc(15.75*var(--px393))] text-center text-white w-[calc(265*var(--px393))] whitespace-pre-wrap">
+      <div className="flex flex-col gap-[calc(16*var(--px393))] items-start relative shrink-0 w-full sm:hidden">
+        <div className="bg-[#8760a0] flex flex-col items-start p-[calc(24*var(--px393))] relative rounded-[calc(12*var(--px393))] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] shrink-0 w-full">
+          <div className="flex flex-col gap-[calc(14*var(--px393))] items-center relative shrink-0 w-full">
+            <div className="flex flex-col gap-[calc(3.5*var(--px393))] items-center relative shrink-0 w-full">
+              <div className="flex items-center justify-center relative shrink-0 w-full">
+                <p className="font-comfortaa font-medium leading-[calc(24.5*var(--px393))] relative shrink-0 text-[calc(15.75*var(--px393))] text-center text-white w-[calc(265*var(--px393))] whitespace-pre-wrap">
                   {membershipHeaderTitle}
                 </p>
               </div>
-              <div className="content-stretch flex items-center justify-center relative shrink-0 w-full">
-                <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(17.5*var(--px393))] relative shrink-0 text-[calc(12.25*var(--px393))] text-white">
+              <div className="flex items-center justify-center relative shrink-0 w-full">
+                <p className="font-comfortaa font-normal leading-[calc(17.5*var(--px393))] relative shrink-0 text-[calc(12.25*var(--px393))] text-white">
                   {membershipHeaderSubtitle}
                 </p>
               </div>
             </div>
-            <div className="bg-[rgba(255,255,255,0.96)] content-stretch flex flex-col items-center p-[calc(16*var(--px393))] relative rounded-[calc(16*var(--px393))] shrink-0 w-full">
-              <div className="content-stretch flex flex-col gap-[calc(24*var(--px393))] items-center relative shrink-0 w-full">
-                <div className="content-stretch flex flex-col gap-[calc(24*var(--px393))] items-start relative shrink-0 w-full">
-                  <div className="content-stretch flex items-start justify-center relative shrink-0 w-full">
-                    <div className="content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px py-[calc(12*var(--px393))] relative">
-                      <div className="content-stretch flex flex-col gap-[calc(16*var(--px393))] items-center justify-center relative shrink-0 w-full">
-                        <div className="content-stretch flex flex-col gap-[calc(12*var(--px393))] items-center justify-center relative shrink-0 w-full">
-                          <div className="content-stretch flex gap-[calc(12*var(--px393))] items-start justify-center relative shrink-0 text-[#633479] text-[calc(24*var(--px393))]">
-                            <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[normal] relative shrink-0 text-center">
+            <div className="bg-[rgba(255,255,255,0.96)] flex flex-col items-center p-[calc(16*var(--px393))] relative rounded-[calc(16*var(--px393))] shrink-0 w-full">
+              <div className="flex flex-col gap-[calc(24*var(--px393))] items-center relative shrink-0 w-full">
+                <div className="flex flex-col gap-[calc(24*var(--px393))] items-start relative shrink-0 w-full">
+                  <div className="flex items-start justify-center relative shrink-0 w-full">
+                    <div className="flex flex-[1_0_0] items-center justify-center min-h-px min-w-px py-[calc(12*var(--px393))] relative">
+                      <div className="flex flex-col gap-[calc(16*var(--px393))] items-center justify-center relative shrink-0 w-full">
+                        <div className="flex flex-col gap-[calc(12*var(--px393))] items-center justify-center relative shrink-0 w-full">
+                          <div className="flex gap-[calc(12*var(--px393))] items-start justify-center relative shrink-0 text-[#633479] text-[calc(24*var(--px393))]">
+                            <p className="font-comfortaa font-bold leading-[normal] relative shrink-0 text-center">
                               {membershipPlan?.name || "Premium Plus"}
                             </p>
                             {showMembershipPrice && (
-                              <div className="content-stretch flex items-center relative shrink-0">
-                                <div className="content-stretch flex gap-[calc(4*var(--px393))] items-center relative shrink-0">
-                                  <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[normal] relative shrink-0 text-center">
+                              <div className="flex items-center relative shrink-0">
+                                <div className="flex gap-[calc(4*var(--px393))] items-center relative shrink-0">
+                                  <p className="font-comfortaa font-bold leading-[normal] relative shrink-0 text-center">
                                     {membershipPrice.replace(/\$?\s*(\d+\.?\d*)/, (_, num) => `$ ${Math.floor(parseFloat(num))}`)}
                                   </p>
-                                  <div className="content-stretch flex items-center justify-center relative shrink-0">
-                                    <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(22.75*var(--px393))] relative shrink-0 text-[#4a5565] text-[calc(14*var(--px393))] text-center">
+                                  <div className="flex items-center justify-center relative shrink-0">
+                                    <p className="font-comfortaa font-normal leading-[calc(22.75*var(--px393))] relative shrink-0 text-[#4a5565] text-[calc(14*var(--px393))] text-center">
                                       /year
                                     </p>
                                   </div>
@@ -306,30 +306,30 @@ export function Step4() {
                               </div>
                             )}
                           </div>
-                          <div className="content-stretch flex items-center relative shrink-0">
-                            <div className="bg-[#dcfce7] content-stretch flex h-[calc(24*var(--px393))] items-center justify-center overflow-clip px-[calc(16*var(--px393))] py-[calc(4*var(--px393))] relative rounded-[calc(12*var(--px393))] shrink-0">
-                              <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[calc(14*var(--px393))] relative shrink-0 text-[#016630] text-[calc(10*var(--px393))]">
+                          <div className="flex items-center relative shrink-0">
+                            <div className="bg-[#dcfce7] flex h-[calc(24*var(--px393))] items-center justify-center overflow-clip px-[calc(16*var(--px393))] py-[calc(4*var(--px393))] relative rounded-[calc(12*var(--px393))] shrink-0">
+                              <p className="font-comfortaa font-bold leading-[calc(14*var(--px393))] relative shrink-0 text-[#016630] text-[calc(10*var(--px393))]">
                                 {membershipBadgeText}
                               </p>
                             </div>
                           </div>
                         </div>
-                        <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(22.75*var(--px393))] relative shrink-0 text-[calc(14*var(--px393))] text-[rgba(74,60,42,0.7)] text-center whitespace-pre-line">
+                        <p className="font-comfortaa font-normal leading-[calc(22.75*var(--px393))] relative shrink-0 text-[calc(14*var(--px393))] text-[rgba(74,60,42,0.7)] text-center whitespace-pre-line">
                           {membershipPlan?.description || "Our most popular package for complete pet care"}
                         </p>
                       </div>
                     </div>
                   </div>
-                  <div className="content-stretch flex items-start justify-center relative shrink-0 w-full">
-                    <div className="content-stretch flex flex-col gap-[calc(12*var(--px393))] items-center relative shrink-0 max-w-[calc(320*var(--px393))]">
+                  <div className="flex items-start justify-center relative shrink-0 w-full">
+                    <div className="flex flex-col gap-[calc(12*var(--px393))] items-center relative shrink-0 max-w-[calc(320*var(--px393))]">
                       {membershipFeatures.map((feature, index) => (
-                        <div key={`${feature.text}-${index}`} className="content-stretch flex gap-[calc(12*var(--px393))] items-start justify-start relative shrink-0 w-full">
+                        <div key={`${feature.text}-${index}`} className="flex gap-[calc(12*var(--px393))] items-start justify-start relative shrink-0 w-full">
                           <div className="relative shrink-0 size-[calc(16.8*var(--px393))]">
                             <Icon name="check-green" className="block size-full text-[#00A63E]" />
                           </div>
                           <p
                             className={cn(
-                              "font-['Comfortaa:Bold',sans-serif] font-bold leading-[calc(17.5*var(--px393))] relative shrink-0 text-[calc(12.25*var(--px393))]",
+                              "font-comfortaa font-bold leading-[calc(17.5*var(--px393))] relative shrink-0 text-[calc(12.25*var(--px393))]",
                               feature.isHighlight ? "text-[#de6a07]" : "text-[#364153]"
                             )}
                           >
@@ -345,18 +345,18 @@ export function Step4() {
           </div>
         </div>
 
-        <div className="bg-white content-stretch flex flex-col items-start justify-between p-[calc(24*var(--px393))] relative rounded-[calc(12*var(--px393))] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] shrink-0 w-full">
-          <div className="content-stretch flex flex-col gap-[calc(12*var(--px393))] items-start relative shrink-0 w-full">
-            <div className="content-stretch flex flex-col gap-[calc(4*var(--px393))] items-start relative shrink-0 w-full">
-              <div className="content-stretch flex gap-[calc(4*var(--px393))] items-start relative shrink-0 w-full">
-                <div className="content-stretch flex flex-[1_0_0] h-[calc(24.5*var(--px393))] items-center min-h-px min-w-px relative">
-                  <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))]">
+        <div className="bg-white flex flex-col items-start justify-between p-[calc(24*var(--px393))] relative rounded-[calc(12*var(--px393))] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] shrink-0 w-full">
+          <div className="flex flex-col gap-[calc(12*var(--px393))] items-start relative shrink-0 w-full">
+            <div className="flex flex-col gap-[calc(4*var(--px393))] items-start relative shrink-0 w-full">
+              <div className="flex gap-[calc(4*var(--px393))] items-start relative shrink-0 w-full">
+                <div className="flex flex-[1_0_0] h-[calc(24.5*var(--px393))] items-center min-h-px min-w-px relative">
+                  <p className="font-comfortaa font-semibold leading-[calc(28*var(--px393))] relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))]">
                     Service price
                   </p>
                 </div>
                 {totalSavings > 0 && (
-                  <div className="bg-[#dcfce7] content-stretch flex h-[calc(24*var(--px393))] items-center justify-center overflow-clip px-[calc(16*var(--px393))] py-[calc(4*var(--px393))] relative rounded-[calc(12*var(--px393))] shrink-0">
-                    <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[calc(14*var(--px393))] relative shrink-0 text-[#016630] text-[calc(10*var(--px393))]">
+                  <div className="bg-[#dcfce7] flex h-[calc(24*var(--px393))] items-center justify-center overflow-clip px-[calc(16*var(--px393))] py-[calc(4*var(--px393))] relative rounded-[calc(12*var(--px393))] shrink-0">
+                    <p className="font-comfortaa font-bold leading-[calc(14*var(--px393))] relative shrink-0 text-[#016630] text-[calc(10*var(--px393))]">
                       Save $ {totalSavings.toFixed(2)}
                     </p>
                   </div>
@@ -364,7 +364,7 @@ export function Step4() {
               </div>
               <div className="h-[calc(17.5*var(--px393))] relative shrink-0 w-full">
                 <p className={cn(
-                  "absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(17.5*var(--px393))] left-0 text-[calc(12.25*var(--px393))] top-[-0.5px]",
+                  "absolute font-comfortaa font-normal leading-[calc(17.5*var(--px393))] left-0 text-[calc(12.25*var(--px393))] top-[-0.5px]",
                   estimationTextColor
                 )}>
                   {estimationLabel}
@@ -372,12 +372,12 @@ export function Step4() {
               </div>
             </div>
 
-            <div className="content-stretch flex flex-col gap-[calc(4*var(--px393))] items-start relative shrink-0 w-full">
+            <div className="flex flex-col gap-[calc(4*var(--px393))] items-start relative shrink-0 w-full">
               <div
-                className="content-stretch flex items-center justify-between relative shrink-0 w-full cursor-pointer"
+                className="flex items-center justify-between relative shrink-0 w-full cursor-pointer"
                 onClick={() => setIsPackageExpanded(!isPackageExpanded)}
               >
-                <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(12*var(--px393))] relative shrink-0 text-[#4a3c2a] text-[calc(10*var(--px393))]">
+                <p className="font-comfortaa font-normal leading-[calc(12*var(--px393))] relative shrink-0 text-[#4a3c2a] text-[calc(10*var(--px393))]">
                   Full rooming package
                 </p>
                 <div className="flex items-center justify-center relative shrink-0 size-[calc(20*var(--px393))]">
@@ -387,11 +387,11 @@ export function Step4() {
                 </div>
               </div>
               {isPackageExpanded && (
-                <div className="content-stretch flex flex-col gap-[calc(4*var(--px393))] items-start relative shrink-0 w-full">
+                <div className="flex flex-col gap-[calc(4*var(--px393))] items-start relative shrink-0 w-full">
                   <div className="h-0 relative shrink-0 w-full border-t border-[#e0e0e0] my-[calc(4*var(--px393))]" />
                   {selectedService && (
                     <>
-                      <div className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between leading-[calc(16*var(--px393))] relative shrink-0 text-[#4a3c2a] text-[calc(12*var(--px393))] w-full">
+                      <div className="flex font-comfortaa font-bold items-start justify-between leading-[calc(16*var(--px393))] relative shrink-0 text-[#4a3c2a] text-[calc(12*var(--px393))] w-full">
                         <p className="relative shrink-0">
                           {selectedService.name}
                         </p>
@@ -409,7 +409,7 @@ export function Step4() {
                     </>
                   )}
                   <div className="h-0 relative shrink-0 w-full border-t border-[#e0e0e0] my-[calc(4*var(--px393))]" />
-                  <div className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between relative shrink-0 text-[#4a3c2a] w-full">
+                  <div className="flex font-comfortaa font-bold items-start justify-between relative shrink-0 text-[#4a3c2a] w-full">
                     <p className="leading-[calc(16*var(--px393))] relative shrink-0 text-[calc(12*var(--px393))]">
                       Subtotal
                     </p>
@@ -428,12 +428,12 @@ export function Step4() {
               )}
             </div>
 
-            <div className="content-stretch flex flex-col gap-[calc(4*var(--px393))] items-start relative shrink-0 w-full">
+            <div className="flex flex-col gap-[calc(4*var(--px393))] items-start relative shrink-0 w-full">
               <div
-                className="content-stretch flex items-center justify-between relative shrink-0 w-full cursor-pointer"
+                className="flex items-center justify-between relative shrink-0 w-full cursor-pointer"
                 onClick={() => setIsAddOnsExpanded(!isAddOnsExpanded)}
               >
-                <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(12*var(--px393))] relative shrink-0 text-[#4a3c2a] text-[calc(10*var(--px393))]">
+                <p className="font-comfortaa font-normal leading-[calc(12*var(--px393))] relative shrink-0 text-[#4a3c2a] text-[calc(10*var(--px393))]">
                   Add-on
                 </p>
                 <div className="flex items-center justify-center relative shrink-0 size-[calc(20*var(--px393))]">
@@ -443,7 +443,7 @@ export function Step4() {
                 </div>
               </div>
               {isAddOnsExpanded && (
-                <div className="content-stretch flex flex-col gap-[calc(4*var(--px393))] items-start relative shrink-0 w-full">
+                <div className="flex flex-col gap-[calc(4*var(--px393))] items-start relative shrink-0 w-full">
                   <div className="h-0 relative shrink-0 w-full border-t border-[#e0e0e0] my-[calc(4*var(--px393))]" />
                   {selectedAddOnsDetails.length > 0 && (
                     <>
@@ -459,7 +459,7 @@ export function Step4() {
                           ? 0
                           : (useMembershipDiscount && discountRate < 1 ? addOn.price * discountRate : addOn.price);
                         return (
-                          <div key={addOn.id} className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between leading-[calc(16*var(--px393))] relative shrink-0 text-[#4a3c2a] text-[calc(12*var(--px393))] w-full">
+                          <div key={addOn.id} className="flex font-comfortaa font-bold items-start justify-between leading-[calc(16*var(--px393))] relative shrink-0 text-[#4a3c2a] text-[calc(12*var(--px393))] w-full">
                             <p className="relative shrink-0">
                               {addOn.name}
                             </p>
@@ -484,7 +484,7 @@ export function Step4() {
                       <div className="h-0 relative shrink-0 w-full border-t border-[#e0e0e0] my-[calc(4*var(--px393))]" />
                     </>
                   )}
-                  <div className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between relative shrink-0 text-[#4a3c2a] w-full">
+                  <div className="flex font-comfortaa font-bold items-start justify-between relative shrink-0 text-[#4a3c2a] w-full">
                     <p className="leading-[calc(16*var(--px393))] relative shrink-0 text-[calc(12*var(--px393))]">
                       Subtotal
                     </p>
@@ -504,14 +504,14 @@ export function Step4() {
             </div>
           </div>
 
-          <div className="content-stretch flex flex-col gap-[calc(4*var(--px393))] items-start relative shrink-0 w-full">
-            <div className="content-stretch flex flex-col gap-[calc(4*var(--px393))] items-start relative shrink-0 w-full">
-              <div className="content-stretch flex gap-[calc(4*var(--px393))] items-center relative shrink-0 w-full">
-                <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(12*var(--px393))] relative shrink-0 text-[#4a3c2a] text-[calc(10*var(--px393))]">
+          <div className="flex flex-col gap-[calc(4*var(--px393))] items-start relative shrink-0 w-full">
+            <div className="flex flex-col gap-[calc(4*var(--px393))] items-start relative shrink-0 w-full">
+              <div className="flex gap-[calc(4*var(--px393))] items-center relative shrink-0 w-full">
+                <p className="font-comfortaa font-normal leading-[calc(12*var(--px393))] relative shrink-0 text-[#4a3c2a] text-[calc(10*var(--px393))]">
                   Membership discount
                 </p>
               </div>
-              <div className="content-stretch flex gap-[calc(12*var(--px393))] items-start relative shrink-0 w-full">
+              <div className="flex gap-[calc(12*var(--px393))] items-start relative shrink-0 w-full">
                 <Checkbox
                   checked={useMembershipDiscount}
                   onCheckedChange={handleMembershipDiscountChange}
@@ -519,7 +519,7 @@ export function Step4() {
                   containerClassName="relative shrink-0"
                 />
               </div>
-              <div className="content-stretch flex items-start justify-between relative shrink-0 w-full">
+              <div className="flex items-start justify-between relative shrink-0 w-full">
                 <Checkbox
                   checked={useCashCoupon}
                   onCheckedChange={handleCashCouponChange}
@@ -527,15 +527,15 @@ export function Step4() {
                   containerClassName="relative shrink-0"
                 />
                 {useCashCoupon && (
-                  <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[calc(16*var(--px393))] relative shrink-0 text-[#4a3c2a] text-[calc(12*var(--px393))]">
+                  <p className="font-comfortaa font-bold leading-[calc(16*var(--px393))] relative shrink-0 text-[#4a3c2a] text-[calc(12*var(--px393))]">
                     -${cashCouponInfo.amount.toFixed(0)}
                   </p>
                 )}
               </div>
               <div className="h-0 relative shrink-0 w-full border-t border-[#e0e0e0] my-[calc(4*var(--px393))]" />
             </div>
-            <div className="content-stretch flex flex-col gap-[calc(4*var(--px393))] items-start relative shrink-0 w-full">
-              <div className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between relative shrink-0 text-[#4a3c2a] text-[calc(12*var(--px393))] w-full">
+            <div className="flex flex-col gap-[calc(4*var(--px393))] items-start relative shrink-0 w-full">
+              <div className="flex font-comfortaa font-bold items-start justify-between relative shrink-0 text-[#4a3c2a] text-[calc(12*var(--px393))] w-full">
                 <p className="leading-[calc(16*var(--px393))] relative shrink-0">
                   Total for this servie
                 </p>
@@ -550,8 +550,8 @@ export function Step4() {
                   )}
                 </p>
               </div>
-              <div className="content-stretch flex gap-[calc(4*var(--px393))] items-center relative shrink-0 w-full">
-                <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(12*var(--px393))] relative shrink-0 text-[#4a3c2a] text-[calc(10*var(--px393))]">
+              <div className="flex gap-[calc(4*var(--px393))] items-center relative shrink-0 w-full">
+                <p className="font-comfortaa font-normal leading-[calc(12*var(--px393))] relative shrink-0 text-[#4a3c2a] text-[calc(10*var(--px393))]">
                   If selected, {membershipPrice} Membership fee will be added later.
                 </p>
               </div>
@@ -559,7 +559,7 @@ export function Step4() {
           </div>
         </div>
 
-        <div className="content-stretch flex flex-col gap-[calc(20*var(--px393))] items-start justify-center relative shrink-0 w-full">
+        <div className="flex flex-col gap-[calc(20*var(--px393))] items-start justify-center relative shrink-0 w-full">
           <OrangeButton
             size="medium"
             variant="primary"
@@ -594,29 +594,29 @@ export function Step4() {
       </div>
 
       {/* Desktop Layout */}
-      <div className="hidden sm:flex content-stretch flex-col gap-[32px] items-start relative w-full">
+      <div className="hidden sm:flex flex-col gap-[32px] items-start relative w-full">
         {/* Main Content */}
-        <div className="content-stretch flex gap-[32px] items-start relative shrink-0 w-full">
+        <div className="flex gap-[32px] items-start relative shrink-0 w-full">
         {/* Left: VIP Membership Card */}
         {isLoadingMembershipPlans ? (
-          <div className="content-stretch flex flex-col items-start relative shrink-0 w-[440px]">
-            <div className="bg-[#8760a0] content-stretch flex flex-col items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full">
-              <div className="content-stretch flex flex-col gap-[14px] items-center relative shrink-0 w-full">
+          <div className="flex flex-col items-start relative shrink-0 w-[440px]">
+            <div className="bg-[#8760a0] flex flex-col items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full">
+              <div className="flex flex-col gap-[14px] items-center relative shrink-0 w-full">
                 {/* Header Title and Subtitle Skeleton */}
-                <div className="content-stretch flex flex-col gap-[3.5px] h-[45.5px] items-center relative shrink-0 w-full">
+                <div className="flex flex-col gap-[3.5px] h-[45.5px] items-center relative shrink-0 w-full">
                   <Skeleton className="h-[24.5px] w-[280px] bg-white/20" />
                   <Skeleton className="h-[17.5px] w-[240px] bg-white/20" />
                 </div>
                 {/* Card Content Skeleton */}
-                <div className="bg-[rgba(255,255,255,0.96)] content-stretch flex flex-col items-center p-[32px] relative rounded-[16px] shrink-0 w-full">
-                  <div className="content-stretch flex flex-col gap-[24px] items-center relative shrink-0 w-full">
-                    <div className="content-stretch flex flex-col gap-[24px] items-start relative shrink-0 w-full">
+                <div className="bg-[rgba(255,255,255,0.96)] flex flex-col items-center p-[32px] relative rounded-[16px] shrink-0 w-full">
+                  <div className="flex flex-col gap-[24px] items-center relative shrink-0 w-full">
+                    <div className="flex flex-col gap-[24px] items-start relative shrink-0 w-full">
                       {/* Title and Price Skeleton */}
-                      <div className="content-stretch flex items-start justify-center relative shrink-0 w-full">
-                        <div className="content-stretch flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-0 py-[16px] relative shrink-0 max-w-full">
-                          <div className="content-stretch flex flex-col gap-[16px] items-center justify-center relative shrink-0 w-full">
-                            <div className="content-stretch flex flex-col gap-[12px] items-center justify-center relative shrink-0 w-full">
-                              <div className="content-stretch flex gap-[12px] items-start justify-center relative shrink-0">
+                      <div className="flex items-start justify-center relative shrink-0 w-full">
+                        <div className="flex flex-[1_0_0] items-center justify-center min-h-px min-w-px px-0 py-[16px] relative shrink-0 max-w-full">
+                          <div className="flex flex-col gap-[16px] items-center justify-center relative shrink-0 w-full">
+                            <div className="flex flex-col gap-[12px] items-center justify-center relative shrink-0 w-full">
+                              <div className="flex gap-[12px] items-start justify-center relative shrink-0">
                                 <Skeleton className="h-[24px] w-[120px] bg-[#633479]/20" />
                                 <Skeleton className="h-[24px] w-[60px] bg-[#633479]/20" />
                               </div>
@@ -627,11 +627,11 @@ export function Step4() {
                         </div>
                       </div>
                       {/* Features List Skeleton */}
-                      <div className="content-stretch flex flex-col gap-[12px] items-center relative shrink-0 w-full">
-                        <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0">
+                      <div className="flex flex-col gap-[12px] items-center relative shrink-0 w-full">
+                        <div className="flex flex-col gap-[12px] items-start relative shrink-0">
                           {[1, 2, 3, 4, 5, 6].map((i) => (
-                            <div key={i} className="content-stretch flex items-start relative shrink-0">
-                              <div className="content-stretch flex gap-[12px] items-start relative shrink-0">
+                            <div key={i} className="flex items-start relative shrink-0">
+                              <div className="flex gap-[12px] items-start relative shrink-0">
                                 <Skeleton className="size-[16.8px] rounded bg-[#00A63E]/20" />
                                 <Skeleton className="h-[17.5px] w-[180px] bg-[#364153]/20" />
                               </div>
@@ -663,21 +663,21 @@ export function Step4() {
         )}
 
         {/* Right: Service Price Summary */}
-        <div className="bg-white content-stretch flex flex-[1_0_0] flex-col items-start justify-between min-h-px min-w-px p-[24px] relative rounded-[12px] self-stretch shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0">
-          <div className="content-stretch flex flex-col justify-between items-start relative shrink-0 w-full h-full">
+        <div className="bg-white flex flex-[1_0_0] flex-col items-start justify-between min-h-px min-w-px p-[24px] relative rounded-[12px] self-stretch shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0">
+          <div className="flex flex-col justify-between items-start relative shrink-0 w-full h-full">
             {/* Top Section: Title, Package, Add-on */}
-            <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0 w-full">
-              <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-                <div className="content-stretch flex flex-col gap-[4px] h-[45.5px] items-start relative shrink-0 w-full">
-                  <div className="content-stretch flex gap-[4px] items-start relative shrink-0 w-full">
-                    <div className="content-stretch flex flex-[1_0_0] h-[24.5px] items-center min-h-px min-w-px relative shrink-0">
-                      <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] relative shrink-0 text-[#4a3c2a] text-[16px]">
+            <div className="flex flex-col gap-[12px] items-start relative shrink-0 w-full">
+              <div className="flex flex-col items-start relative shrink-0 w-full">
+                <div className="flex flex-col gap-[4px] h-[45.5px] items-start relative shrink-0 w-full">
+                  <div className="flex gap-[4px] items-start relative shrink-0 w-full">
+                    <div className="flex flex-[1_0_0] h-[24.5px] items-center min-h-px min-w-px relative shrink-0">
+                      <p className="font-comfortaa font-semibold leading-[28px] relative shrink-0 text-[#4a3c2a] text-[16px]">
                         Service price
                       </p>
                     </div>
                     {totalSavings > 0 && (
-                      <div className="bg-green-100 content-stretch flex h-[24px] items-center justify-center overflow-clip px-[16px] py-[4px] relative rounded-[12px] shrink-0">
-                        <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[14px] relative shrink-0 text-[#016630] text-[10px]">
+                      <div className="bg-green-100 flex h-[24px] items-center justify-center overflow-clip px-[16px] py-[4px] relative rounded-[12px] shrink-0">
+                        <p className="font-comfortaa font-bold leading-[14px] relative shrink-0 text-[#016630] text-[10px]">
                           Save $ {totalSavings.toFixed(2)}
                         </p>
                       </div>
@@ -685,7 +685,7 @@ export function Step4() {
                   </div>
                   <div className="h-[17.5px] relative shrink-0 w-full">
                     <p className={cn(
-                      "absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] left-0 text-[12.25px] top-[-0.5px]",
+                      "absolute font-comfortaa font-normal leading-[17.5px] left-0 text-[12.25px] top-[-0.5px]",
                       estimationTextColor
                     )}>
                       {estimationLabel}
@@ -695,18 +695,18 @@ export function Step4() {
               </div>
 
               {/* Full rooming package - Collapsible */}
-            <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full">
+            <div className="flex flex-col gap-[4px] items-start relative shrink-0 w-full">
               <div
-                className="content-stretch flex items-center justify-between relative shrink-0 w-full cursor-pointer"
+                className="flex items-center justify-between relative shrink-0 w-full cursor-pointer"
                 onClick={() => setIsPackageExpanded(!isPackageExpanded)}
               >
-                <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
+                <p className="font-comfortaa font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
                   Full rooming package
                 </p>
                 <div className="flex items-center justify-center relative shrink-0 size-[calc(20*var(--px393))]">
                   <div className={cn("flex-none", isPackageExpanded ? "rotate-180" : "")}>
                     <div className={cn(
-                      "content-stretch flex items-center justify-center relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] size-[calc(20*var(--px393))] border border-transparent",
+                      "flex items-center justify-center relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] size-[calc(20*var(--px393))] border border-transparent",
                       "hover:border-[#8b6357] hover:border-solid transition-colors"
                     )}>
                       <Icon name="chevron-down" size={16} className="text-[#8b6357]" />
@@ -715,12 +715,12 @@ export function Step4() {
                 </div>
               </div>
               {isPackageExpanded && (
-                <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full">
+                <div className="flex flex-col gap-[4px] items-start relative shrink-0 w-full">
                   <div className="h-0 relative shrink-0 w-full border-t border-[#000000] my-[4px]" />
                   {selectedService && (
                     <>
                       {/* Service package name */}
-                      <div className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
+                      <div className="flex font-comfortaa font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
                         <p className="relative shrink-0">
                           {selectedService.name}
                         </p>
@@ -744,7 +744,7 @@ export function Step4() {
                               const itemPrice = typeof item.price === "string" ? parseFloat(item.price) : item.price;
                               const itemPriceWithDiscount = useMembershipDiscount && discountRate < 1 ? itemPrice * discountRate : itemPrice;
                               return (
-                                <div key={item.id} className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
+                                <div key={item.id} className="flex font-comfortaa font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
                                   <p className="relative shrink-0">
                                     {item.name}
                                   </p>
@@ -767,7 +767,7 @@ export function Step4() {
                       <div className="h-0 relative shrink-0 w-full border-t border-[#000000] my-[4px]" />
                     </>
                   )}
-                  <div className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between relative shrink-0 text-[#4a3c2a] w-full">
+                  <div className="flex font-comfortaa font-bold items-start justify-between relative shrink-0 text-[#4a3c2a] w-full">
                     <p className="leading-[22.75px] relative shrink-0 text-[12px]">
                       Subtotal
                     </p>
@@ -787,18 +787,18 @@ export function Step4() {
             </div>
 
             {/* Add-on - Collapsible */}
-            <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full">
+            <div className="flex flex-col gap-[4px] items-start relative shrink-0 w-full">
               <div
-                className="content-stretch flex items-center justify-between relative shrink-0 w-full cursor-pointer"
+                className="flex items-center justify-between relative shrink-0 w-full cursor-pointer"
                 onClick={() => setIsAddOnsExpanded(!isAddOnsExpanded)}
               >
-                <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
+                <p className="font-comfortaa font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
                   Add-on
                 </p>
                 <div className="flex items-center justify-center relative shrink-0 size-[calc(20*var(--px393))]">
                   <div className={cn("flex-none", isAddOnsExpanded ? "rotate-180" : "")}>
                     <div className={cn(
-                      "content-stretch flex items-center justify-center relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] size-[calc(20*var(--px393))] border border-transparent",
+                      "flex items-center justify-center relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] size-[calc(20*var(--px393))] border border-transparent",
                       "hover:border-[#8b6357] hover:border-solid transition-colors"
                     )}>
                       <Icon name="chevron-down" size={16} className="text-[#8b6357]" />
@@ -807,7 +807,7 @@ export function Step4() {
                 </div>
               </div>
               {isAddOnsExpanded && (
-                <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full">
+                <div className="flex flex-col gap-[4px] items-start relative shrink-0 w-full">
                   <div className="h-0 relative shrink-0 w-full border-t border-[#000000] my-[4px]" />
                   {/* Add-ons list */}
                   {selectedAddOnsDetails.length > 0 && (
@@ -829,7 +829,7 @@ export function Step4() {
                           ? 0 
                           : (useMembershipDiscount && discountRate < 1 ? addOn.price * discountRate : addOn.price);
                         return (
-                          <div key={addOn.id} className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
+                          <div key={addOn.id} className="flex font-comfortaa font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
                             <p className="relative shrink-0">
                               {addOn.name}
                             </p>
@@ -858,7 +858,7 @@ export function Step4() {
                       <div className="h-0 relative shrink-0 w-full border-t border-[#000000] my-[4px]" />
                     </>
                   )}
-                  <div className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between relative shrink-0 text-[#4a3c2a] w-full">
+                  <div className="flex font-comfortaa font-bold items-start justify-between relative shrink-0 text-[#4a3c2a] w-full">
                     <p className="leading-[22.75px] relative shrink-0 text-[12px]">
                       Subtotal
                     </p>
@@ -879,14 +879,14 @@ export function Step4() {
             </div>
 
             {/* Bottom Section: Membership discount */}
-            <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full">
-              <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full">
-                <div className="content-stretch flex gap-[4px] items-center relative shrink-0 w-full">
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
+            <div className="flex flex-col gap-[4px] items-start relative shrink-0 w-full">
+              <div className="flex flex-col gap-[4px] items-start relative shrink-0 w-full">
+                <div className="flex gap-[4px] items-center relative shrink-0 w-full">
+                  <p className="font-comfortaa font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
                     Membership discount
                   </p>
                 </div>
-                <div className="content-stretch flex gap-[12px] items-start relative shrink-0 w-full">
+                <div className="flex gap-[12px] items-start relative shrink-0 w-full">
                   <Checkbox
                     checked={useMembershipDiscount}
                     onCheckedChange={handleMembershipDiscountChange}
@@ -894,7 +894,7 @@ export function Step4() {
                     containerClassName="relative shrink-0"
                   />
                 </div>
-                <div className="content-stretch flex items-start justify-between relative shrink-0 w-full">
+                <div className="flex items-start justify-between relative shrink-0 w-full">
                   <Checkbox
                     checked={useCashCoupon}
                     onCheckedChange={handleCashCouponChange}
@@ -902,15 +902,15 @@ export function Step4() {
                     containerClassName="relative shrink-0"
                   />
                   {useCashCoupon && (
-                    <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px]">
+                    <p className="font-comfortaa font-bold leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px]">
                       -${cashCouponInfo.amount.toFixed(0)}
                     </p>
                   )}
                 </div>
                 <div className="h-0 relative shrink-0 w-full border-t border-[#000000] my-[4px]" />
               </div>
-              <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full">
-                <div className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between relative shrink-0 text-[#4a3c2a] w-full">
+              <div className="flex flex-col gap-[4px] items-start relative shrink-0 w-full">
+                <div className="flex font-comfortaa font-bold items-start justify-between relative shrink-0 text-[#4a3c2a] w-full">
                   <p className="leading-[22.75px] relative shrink-0 text-[12px]">
                     Total for this service
                   </p>
@@ -925,8 +925,8 @@ export function Step4() {
                     )}
                   </p>
                 </div>
-                <div className="content-stretch flex gap-[4px] items-center relative shrink-0 w-full">
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
+                <div className="flex gap-[4px] items-center relative shrink-0 w-full">
+                  <p className="font-comfortaa font-normal leading-[12px] relative shrink-0 text-[#4a3c2a] text-[10px]">
                     If selected, {membershipPrice} Membership fee will be added later.
                   </p>
                 </div>
@@ -937,8 +937,8 @@ export function Step4() {
       </div>
 
       {/* Buttons */}
-      <div className="content-stretch flex items-center justify-between relative shrink-0 w-full">
-        <div className="content-stretch flex gap-[20px] items-center relative shrink-0">
+      <div className="flex items-center justify-between relative shrink-0 w-full">
+        <div className="flex gap-[20px] items-center relative shrink-0">
           <OrangeButton
             size="medium"
             variant="primary"

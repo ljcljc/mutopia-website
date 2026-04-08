@@ -11,6 +11,7 @@ export default {
     extend: {
       fontFamily: {
         'comfortaa': ['Comfortaa', 'cursive'],
+        'poppins': ['Poppins', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         'sans': ['Comfortaa', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       fontWeight: {

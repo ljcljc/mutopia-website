@@ -42,18 +42,18 @@ export default function Hero() {
           <div className="flex flex-col gap-[32px] items-start shrink-0 max-w-[567px]">
             {/* Title */}
             <div className="flex flex-col items-start w-full">
-              <p className="font-['Comfortaa:Bold',sans-serif] leading-[65.625px] text-[56px] text-[#8b6357] whitespace-pre">
+              <p className="font-comfortaa leading-[65.625px] text-[56px] text-[#8b6357] whitespace-pre">
                 Premium
                 <br />
                 Pet Grooming
               </p>
-              <p className="font-['Comfortaa:Bold',sans-serif] leading-[65.625px] text-[56px] text-[#de6a07] whitespace-pre">
+              <p className="font-comfortaa leading-[65.625px] text-[56px] text-[#de6a07] whitespace-pre">
                 Made Simple
               </p>
             </div>
 
             {/* Description */}
-            <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[28px] text-[16px] text-[rgba(74,60,42,0.7)] w-[489px]">
+            <p className="font-comfortaa font-normal leading-[28px] text-[16px] text-[rgba(74,60,42,0.7)] w-[489px]">
               Transform your furry friend with our professional grooming
               services. Book online, relax at home, and let our certified
               groomers come to you.
@@ -68,7 +68,7 @@ export default function Hero() {
                   aria-label="Easy booking"
                   className="size-[20px] text-[#de6a07]"
                 />
-                <p className="font-['Comfortaa:Bold',sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
+                <p className="font-comfortaa leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
                   Easy booking
                 </p>
               </div>
@@ -80,7 +80,7 @@ export default function Hero() {
                   aria-label="Pet-friendly"
                   className="size-[20px] text-[#de6a07]"
                 />
-                <p className="font-['Comfortaa:Bold',sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
+                <p className="font-comfortaa leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
                   Pet-friendly
                 </p>
               </div>
@@ -92,7 +92,7 @@ export default function Hero() {
                   aria-label="Professional service"
                   className="size-[20px] text-[#de6a07]"
                 />
-                <p className="font-['Comfortaa:Bold',sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
+                <p className="font-comfortaa leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
                   Professional service
                 </p>
               </div>
@@ -129,12 +129,12 @@ export default function Hero() {
         <div className="md:hidden flex flex-col gap-[40px] px-4 pt-[60px] pb-[140px]">
           {/* Title */}
           <div className="flex flex-col items-start w-full">
-            <p className="font-['Comfortaa:Bold',sans-serif] leading-[1.17] text-[32px] text-[#8b6357]">
+            <p className="font-comfortaa leading-[1.17] text-[32px] text-[#8b6357]">
               Premium
               <br />
               Pet Grooming
             </p>
-            <p className="font-['Comfortaa:Bold',sans-serif] leading-[1.17] text-[32px] text-[#de6a07]">
+            <p className="font-comfortaa leading-[1.17] text-[32px] text-[#de6a07]">
               Made Simple
             </p>
           </div>
@@ -151,7 +151,7 @@ export default function Hero() {
           </div> */}
 
           {/* Description */}
-          <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[28px] text-[16px] text-[rgba(74,60,42,0.7)]">
+          <p className="font-comfortaa font-normal leading-[28px] text-[16px] text-[rgba(74,60,42,0.7)]">
             Transform your furry friend with our professional grooming services.
             Book online, relax at home, and let our certified groomers come to
             you.
@@ -166,7 +166,7 @@ export default function Hero() {
                 aria-label="Easy booking"
                 className="size-[20px] text-[#de6a07]"
               />
-              <p className="font-['Comfortaa:Bold',sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
+              <p className="font-comfortaa leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
                 Easy booking
               </p>
             </div>
@@ -178,7 +178,7 @@ export default function Hero() {
                 aria-label="Pet-friendly"
                 className="size-[20px] text-[#de6a07]"
               />
-              <p className="font-['Comfortaa:Bold',sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
+              <p className="font-comfortaa leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
                 Pet-friendly
               </p>
             </div>
@@ -190,7 +190,7 @@ export default function Hero() {
                 aria-label="Professional service"
                 className="size-[20px] text-[#de6a07]"
               />
-              <p className="font-['Comfortaa:Bold',sans-serif] leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
+              <p className="font-comfortaa leading-[20px] text-[14px] text-[rgba(74,60,42,0.8)]">
                 Professional service
               </p>
             </div>

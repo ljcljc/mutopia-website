@@ -61,36 +61,36 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
         {/* Back Button */}
         <button
           onClick={onBack}
-          className="flex items-center gap-2 font-['Comfortaa:Medium',_sans-serif] text-[14px] text-[#8b6357] hover:text-[#6f4e44] transition-colors mb-8"
+          className="flex items-center gap-2 font-comfortaa text-[14px] text-[#8b6357] hover:text-[#6f4e44] transition-colors mb-8"
         >
           <ArrowLeft size={20} />
           Back to Home
         </button>
 
-        <h1 className="font-['Comfortaa:Bold',_sans-serif] text-[42px] leading-[52px] text-[#4a3c2a] mb-4">
+        <h1 className="font-comfortaa text-[42px] leading-[52px] text-[#4a3c2a] mb-4">
           Component Showcase
         </h1>
-        <p className="font-['Comfortaa:Regular',_sans-serif] text-[18px] text-[rgba(74,60,42,0.8)] mb-12">
+        <p className="font-comfortaa text-[18px] text-[rgba(74,60,42,0.8)] mb-12">
           Interactive demonstrations of all custom UI components
         </p>
 
         {/* Spinner Standalone Demo */}
         <div className="bg-white p-8 rounded-lg shadow-sm mb-8">
-          <h2 className="font-['Comfortaa:Bold',_sans-serif] text-[28px] leading-[36px] text-[#633479] mb-6">
+          <h2 className="font-comfortaa text-[28px] leading-[36px] text-[#633479] mb-6">
             Spinner Component
           </h2>
-          <p className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
+          <p className="font-comfortaa text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
             Rotating spinner with customizable size and color, built from Figma
             design
           </p>
 
           {/* Basic Spinners */}
-          <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[21px] leading-[28px] text-[#4a3c2a] mb-4">
+          <h3 className="font-comfortaa text-[21px] leading-[28px] text-[#4a3c2a] mb-4">
             Basic Spinners
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div className="flex flex-col items-center gap-4">
-              <p className="font-['Comfortaa:Medium',_sans-serif] text-[14px] text-[#4a3c2a]">
+              <p className="font-comfortaa text-[14px] text-[#4a3c2a]">
                 Small (16px)
               </p>
               <div className="bg-[#633479] p-4 rounded-lg">
@@ -101,7 +101,7 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
               </code>
             </div>
             <div className="flex flex-col items-center gap-4">
-              <p className="font-['Comfortaa:Medium',_sans-serif] text-[14px] text-[#4a3c2a]">
+              <p className="font-comfortaa text-[14px] text-[#4a3c2a]">
                 Medium (24px)
               </p>
               <div className="bg-[#de6a07] p-4 rounded-lg">
@@ -112,7 +112,7 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
               </code>
             </div>
             <div className="flex flex-col items-center gap-4">
-              <p className="font-['Comfortaa:Medium',_sans-serif] text-[14px] text-[#4a3c2a]">
+              <p className="font-comfortaa text-[14px] text-[#4a3c2a]">
                 Large (48px)
               </p>
               <div className="bg-[#8b6357] p-4 rounded-lg">
@@ -125,15 +125,15 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
           </div>
 
           {/* Spinners with Track */}
-          <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[21px] leading-[28px] text-[#4a3c2a] mb-4">
+          <h3 className="font-comfortaa text-[21px] leading-[28px] text-[#4a3c2a] mb-4">
             Spinners with Background Track
           </h3>
-          <p className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
+          <p className="font-comfortaa text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
             Add a subtle background ring to show the full circular path
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="flex flex-col items-center gap-4">
-              <p className="font-['Comfortaa:Medium',_sans-serif] text-[14px] text-[#4a3c2a]">
+              <p className="font-comfortaa text-[14px] text-[#4a3c2a]">
                 Small with Track
               </p>
               <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-200">
@@ -144,7 +144,7 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
               </code>
             </div>
             <div className="flex flex-col items-center gap-4">
-              <p className="font-['Comfortaa:Medium',_sans-serif] text-[14px] text-[#4a3c2a]">
+              <p className="font-comfortaa text-[14px] text-[#4a3c2a]">
                 Medium with Track
               </p>
               <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-200">
@@ -155,7 +155,7 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
               </code>
             </div>
             <div className="flex flex-col items-center gap-4">
-              <p className="font-['Comfortaa:Medium',_sans-serif] text-[14px] text-[#4a3c2a]">
+              <p className="font-comfortaa text-[14px] text-[#4a3c2a]">
                 Large with Track
               </p>
               <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-200">
@@ -168,12 +168,12 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
           </div>
 
           {/* Track Opacity Examples */}
-          <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[21px] leading-[28px] text-[#4a3c2a] mb-4 mt-8">
+          <h3 className="font-comfortaa text-[21px] leading-[28px] text-[#4a3c2a] mb-4 mt-8">
             Custom Track Opacity
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="flex flex-col items-center gap-3">
-              <p className="font-['Comfortaa:Medium',_sans-serif] text-[12px] text-[#4a3c2a]">
+              <p className="font-comfortaa text-[12px] text-[#4a3c2a]">
                 Opacity 0.1
               </p>
               <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-200">
@@ -186,7 +186,7 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
               </div>
             </div>
             <div className="flex flex-col items-center gap-3">
-              <p className="font-['Comfortaa:Medium',_sans-serif] text-[12px] text-[#4a3c2a]">
+              <p className="font-comfortaa text-[12px] text-[#4a3c2a]">
                 Opacity 0.3
               </p>
               <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-200">
@@ -199,7 +199,7 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
               </div>
             </div>
             <div className="flex flex-col items-center gap-3">
-              <p className="font-['Comfortaa:Medium',_sans-serif] text-[12px] text-[#4a3c2a]">
+              <p className="font-comfortaa text-[12px] text-[#4a3c2a]">
                 Opacity 0.5
               </p>
               <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-200">
@@ -212,7 +212,7 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
               </div>
             </div>
             <div className="flex flex-col items-center gap-3">
-              <p className="font-['Comfortaa:Medium',_sans-serif] text-[12px] text-[#4a3c2a]">
+              <p className="font-comfortaa text-[12px] text-[#4a3c2a]">
                 Opacity 0.8
               </p>
               <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-200">
@@ -229,11 +229,11 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
 
         {/* Buttons with Loading States */}
         <div className="bg-white p-8 rounded-lg shadow-sm mb-8">
-          <h2 className="font-['Comfortaa:Bold',_sans-serif] text-[28px] leading-[36px] text-[#633479] mb-6">
+          <h2 className="font-comfortaa text-[28px] leading-[36px] text-[#633479] mb-6">
             Buttons with Loading States
           </h2>
           <div className="mb-6 p-4 bg-green-50 rounded-lg">
-            <p className="font-['Comfortaa:Medium',_sans-serif] text-[14px] text-[#4a3c2a]">
+            <p className="font-comfortaa text-[14px] text-[#4a3c2a]">
               ✓ Button width stays constant during loading - no layout shift or
               jitter
             </p>
@@ -241,7 +241,7 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
           <div className="space-y-8">
             {/* Purple Buttons */}
             <div>
-              <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[21px] leading-[28px] text-[#633479] mb-4">
+              <h3 className="font-comfortaa text-[21px] leading-[28px] text-[#633479] mb-4">
                 Purple Buttons
               </h3>
               <div className="flex flex-wrap gap-4">
@@ -271,7 +271,7 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
 
             {/* Orange Buttons */}
             <div>
-              <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[21px] leading-[28px] text-[#de6a07] mb-4">
+              <h3 className="font-comfortaa text-[21px] leading-[28px] text-[#de6a07] mb-4">
                 Orange Buttons
               </h3>
               <div className="flex flex-wrap gap-4">
@@ -310,7 +310,7 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
 
             {/* Width Stability Demo */}
             <div>
-              <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[21px] leading-[28px] text-[#4a3c2a] mb-4">
+              <h3 className="font-comfortaa text-[21px] leading-[28px] text-[#4a3c2a] mb-4">
                 Width Stability Test
               </h3>
               <div className="space-y-4">
@@ -322,7 +322,7 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
                   >
                     This is a very long button text
                   </OrangeButton>
-                  <span className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[rgba(74,60,42,0.7)]">
+                  <span className="font-comfortaa text-[14px] text-[rgba(74,60,42,0.7)]">
                     ← Watch the width stay constant
                   </span>
                 </div>
@@ -334,7 +334,7 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
                   >
                     Tertiary with loading
                   </TertiaryButton>
-                  <span className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[rgba(74,60,42,0.7)]">
+                  <span className="font-comfortaa text-[14px] text-[rgba(74,60,42,0.7)]">
                     ← Works on tertiary too
                   </span>
                 </div>
@@ -345,10 +345,10 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
 
         {/* Checkbox Component */}
         <div className="bg-white p-8 rounded-lg shadow-sm mb-8">
-          <h2 className="font-['Comfortaa:Bold',_sans-serif] text-[28px] leading-[36px] text-[#633479] mb-6">
+          <h2 className="font-comfortaa text-[28px] leading-[36px] text-[#633479] mb-6">
             Checkbox Component
           </h2>
-          <p className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
+          <p className="font-comfortaa text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
             Interactive checkbox with 5 states: default, hover, focus, active,
             and checked
           </p>
@@ -356,7 +356,7 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Basic Examples */}
             <div>
-              <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[21px] leading-[28px] text-[#4a3c2a] mb-6">
+              <h3 className="font-comfortaa text-[21px] leading-[28px] text-[#4a3c2a] mb-6">
                 Basic Checkboxes
               </h3>
               <div className="space-y-4 bg-gray-50 p-6 rounded-lg">
@@ -368,18 +368,18 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
 
             {/* States Demo */}
             <div>
-              <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[21px] leading-[28px] text-[#4a3c2a] mb-6">
+              <h3 className="font-comfortaa text-[21px] leading-[28px] text-[#4a3c2a] mb-6">
                 Interactive States
               </h3>
               <div className="space-y-4">
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="font-['Comfortaa:Medium',_sans-serif] text-[12px] text-[rgba(74,60,42,0.7)] mb-2">
+                  <p className="font-comfortaa text-[12px] text-[rgba(74,60,42,0.7)] mb-2">
                     Hover to see text color change
                   </p>
                   <Checkbox label="Hover over me" />
                 </div>
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="font-['Comfortaa:Medium',_sans-serif] text-[12px] text-[rgba(74,60,42,0.7)] mb-2">
+                  <p className="font-comfortaa text-[12px] text-[rgba(74,60,42,0.7)] mb-2">
                     Tab to focus (blue border)
                   </p>
                   <Checkbox label="Focus with keyboard" />
@@ -389,7 +389,7 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
           </div>
 
           <div className="mt-6 p-4 bg-green-50 rounded-lg">
-            <p className="font-['Comfortaa:Medium',_sans-serif] text-[14px] text-[#4a3c2a]">
+            <p className="font-comfortaa text-[14px] text-[#4a3c2a]">
               💡 See the full{" "}
               <span className="text-[#2374ff] font-bold">Checkbox Demo</span>{" "}
               page for more examples and use cases
@@ -399,28 +399,28 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
 
         {/* Tertiary Buttons */}
         <div className="bg-white p-8 rounded-lg shadow-sm mb-8">
-          <h2 className="font-['Comfortaa:Bold',_sans-serif] text-[28px] leading-[36px] text-[#633479] mb-6">
+          <h2 className="font-comfortaa text-[28px] leading-[36px] text-[#633479] mb-6">
             Tertiary Buttons
           </h2>
-          <p className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
+          <p className="font-comfortaa text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
             Lightweight buttons with hover border effect
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Orange Theme */}
             <div>
-              <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[21px] leading-[28px] text-[#de6a07] mb-6">
+              <h3 className="font-comfortaa text-[21px] leading-[28px] text-[#de6a07] mb-6">
                 Orange Theme
               </h3>
               <div className="space-y-4">
                 <div>
-                  <p className="font-['Comfortaa:Medium',_sans-serif] text-[12px] text-[rgba(74,60,42,0.7)] mb-2">
+                  <p className="font-comfortaa text-[12px] text-[rgba(74,60,42,0.7)] mb-2">
                     Default State
                   </p>
                   <TertiaryButton variant="orange">Click Me</TertiaryButton>
                 </div>
                 <div>
-                  <p className="font-['Comfortaa:Medium',_sans-serif] text-[12px] text-[rgba(74,60,42,0.7)] mb-2">
+                  <p className="font-comfortaa text-[12px] text-[rgba(74,60,42,0.7)] mb-2">
                     Hover to see border
                   </p>
                   <TertiaryButton variant="orange">
@@ -432,18 +432,18 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
 
             {/* Brown Theme */}
             <div>
-              <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[21px] leading-[28px] text-[#8b6357] mb-6">
+              <h3 className="font-comfortaa text-[21px] leading-[28px] text-[#8b6357] mb-6">
                 Brown Theme
               </h3>
               <div className="space-y-4">
                 <div>
-                  <p className="font-['Comfortaa:Medium',_sans-serif] text-[12px] text-[rgba(74,60,42,0.7)] mb-2">
+                  <p className="font-comfortaa text-[12px] text-[rgba(74,60,42,0.7)] mb-2">
                     Default State
                   </p>
                   <TertiaryButton variant="brown">Click Me</TertiaryButton>
                 </div>
                 <div>
-                  <p className="font-['Comfortaa:Medium',_sans-serif] text-[12px] text-[rgba(74,60,42,0.7)] mb-2">
+                  <p className="font-comfortaa text-[12px] text-[rgba(74,60,42,0.7)] mb-2">
                     Hover to see border
                   </p>
                   <TertiaryButton variant="brown">Hover Over Me</TertiaryButton>
@@ -455,15 +455,15 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
 
         {/* Usage Instructions */}
         <div className="bg-blue-50 p-8 rounded-lg">
-          <h2 className="font-['Comfortaa:Bold',_sans-serif] text-[21px] leading-[28px] text-[#4a3c2a] mb-6">
+          <h2 className="font-comfortaa text-[21px] leading-[28px] text-[#4a3c2a] mb-6">
             Usage Instructions
           </h2>
           <div className="space-y-4">
             <div>
-              <p className="font-['Comfortaa:Bold',_sans-serif] text-[16px] text-[#4a3c2a] mb-2">
+              <p className="font-comfortaa text-[16px] text-[#4a3c2a] mb-2">
                 Spinner Component:
               </p>
-              <ul className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[#4a3c2a] space-y-1 list-disc list-inside ml-4">
+              <ul className="font-comfortaa text-[14px] text-[#4a3c2a] space-y-1 list-disc list-inside ml-4">
                 <li>
                   Sizes: "small" (16px), "medium" (24px), "large" (48px), or
                   custom number
@@ -483,10 +483,10 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
               </ul>
             </div>
             <div>
-              <p className="font-['Comfortaa:Bold',_sans-serif] text-[16px] text-[#4a3c2a] mb-2">
+              <p className="font-comfortaa text-[16px] text-[#4a3c2a] mb-2">
                 Button Loading States:
               </p>
-              <ul className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[#4a3c2a] space-y-1 list-disc list-inside ml-4">
+              <ul className="font-comfortaa text-[14px] text-[#4a3c2a] space-y-1 list-disc list-inside ml-4">
                 <li>
                   Add <code className="bg-white px-1 rounded">loading</code>{" "}
                   prop to any button
@@ -500,10 +500,10 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
               </ul>
             </div>
             <div>
-              <p className="font-['Comfortaa:Bold',_sans-serif] text-[16px] text-[#4a3c2a] mb-2">
+              <p className="font-comfortaa text-[16px] text-[#4a3c2a] mb-2">
                 Tertiary Button:
               </p>
-              <ul className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[#4a3c2a] space-y-1 list-disc list-inside ml-4">
+              <ul className="font-comfortaa text-[14px] text-[#4a3c2a] space-y-1 list-disc list-inside ml-4">
                 <li>
                   <strong>Default:</strong> Transparent background, no border,
                   colored text
@@ -518,10 +518,10 @@ export function ComponentsDemo({ onBack }: { onBack: () => void }) {
               </ul>
             </div>
             <div>
-              <p className="font-['Comfortaa:Bold',_sans-serif] text-[16px] text-[#4a3c2a] mb-2">
+              <p className="font-comfortaa text-[16px] text-[#4a3c2a] mb-2">
                 Checkbox Component:
               </p>
-              <ul className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[#4a3c2a] space-y-1 list-disc list-inside ml-4">
+              <ul className="font-comfortaa text-[14px] text-[#4a3c2a] space-y-1 list-disc list-inside ml-4">
                 <li>
                   <strong>Default:</strong> Gray border #717182, dark text
                 </li>

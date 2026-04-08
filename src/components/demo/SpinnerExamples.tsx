@@ -22,16 +22,16 @@ export function SpinnerExamples({ onBack }: { onBack: () => void }) {
         {/* Back Button */}
         <button
           onClick={onBack}
-          className="flex items-center gap-2 font-['Comfortaa:Medium',_sans-serif] text-[14px] text-[#8b6357] hover:text-[#6f4e44] transition-colors mb-8"
+          className="flex items-center gap-2 font-comfortaa text-[14px] text-[#8b6357] hover:text-[#6f4e44] transition-colors mb-8"
         >
           <ArrowLeft size={20} />
           Back to Home
         </button>
 
-        <h1 className="font-['Comfortaa:Bold',_sans-serif] text-[42px] leading-[52px] text-[#4a3c2a] mb-4">
+        <h1 className="font-comfortaa text-[42px] leading-[52px] text-[#4a3c2a] mb-4">
           Spinner Usage Examples
         </h1>
-        <p className="font-['Comfortaa:Regular',_sans-serif] text-[18px] text-[rgba(74,60,42,0.8)] mb-12">
+        <p className="font-comfortaa text-[18px] text-[rgba(74,60,42,0.8)] mb-12">
           Real-world examples of using the Spinner component
         </p>
 
@@ -53,15 +53,15 @@ export function SpinnerExamples({ onBack }: { onBack: () => void }) {
 function Example1() {
   return (
     <div className="bg-white p-8 rounded-lg shadow-sm">
-      <h2 className="font-['Comfortaa:Bold',_sans-serif] text-[24px] leading-[32px] text-[#633479] mb-4">
+      <h2 className="font-comfortaa text-[24px] leading-[32px] text-[#633479] mb-4">
         1. Standalone Spinner
       </h2>
-      <p className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
+      <p className="font-comfortaa text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
         Use spinner on its own for loading states
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <p className="font-['Comfortaa:Medium',_sans-serif] text-[14px] text-[#4a3c2a] mb-3">
+          <p className="font-comfortaa text-[14px] text-[#4a3c2a] mb-3">
             Basic Spinner
           </p>
           <div className="flex items-center justify-center p-8 bg-gray-50 rounded">
@@ -74,7 +74,7 @@ function Example1() {
           </div>
         </div>
         <div>
-          <p className="font-['Comfortaa:Medium',_sans-serif] text-[14px] text-[#4a3c2a] mb-3">
+          <p className="font-comfortaa text-[14px] text-[#4a3c2a] mb-3">
             Spinner with Track
           </p>
           <div className="flex items-center justify-center p-8 bg-gray-50 rounded">
@@ -113,10 +113,10 @@ function Example2() {
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-sm">
-      <h2 className="font-['Comfortaa:Bold',_sans-serif] text-[24px] leading-[32px] text-[#633479] mb-4">
+      <h2 className="font-comfortaa text-[24px] leading-[32px] text-[#633479] mb-4">
         2. Button with Loading State
       </h2>
-      <p className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
+      <p className="font-comfortaa text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
         Button automatically shows spinner during async operations
       </p>
       <OrangeButton
@@ -162,10 +162,10 @@ function Example3() {
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-sm">
-      <h2 className="font-['Comfortaa:Bold',_sans-serif] text-[24px] leading-[32px] text-[#633479] mb-4">
+      <h2 className="font-comfortaa text-[24px] leading-[32px] text-[#633479] mb-4">
         3. Toast with Spinner
       </h2>
-      <p className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
+      <p className="font-comfortaa text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
         Show spinner in toast notifications for API calls
       </p>
       <PurpleButton onClick={handleApiCall}>Make API Call</PurpleButton>
@@ -193,19 +193,19 @@ function Example4() {
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-sm">
-      <h2 className="font-['Comfortaa:Bold',_sans-serif] text-[24px] leading-[32px] text-[#633479] mb-4">
+      <h2 className="font-comfortaa text-[24px] leading-[32px] text-[#633479] mb-4">
         4. Custom Loading Overlay
       </h2>
-      <p className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
+      <p className="font-comfortaa text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
         Create loading overlays for entire sections
       </p>
       <div className="relative">
         {/* Content */}
         <div className={isLoading ? "opacity-50 pointer-events-none" : ""}>
-          <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[21px] mb-4">
+          <h3 className="font-comfortaa text-[21px] mb-4">
             Your Content Here
           </h3>
-          <p className="font-['Comfortaa:Regular',_sans-serif] text-[14px]">
+          <p className="font-comfortaa text-[14px]">
             This content will be overlaid with a spinner when loading.
           </p>
         </div>
@@ -252,10 +252,10 @@ function Example5() {
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-sm">
-      <h2 className="font-['Comfortaa:Bold',_sans-serif] text-[24px] leading-[32px] text-[#633479] mb-4">
+      <h2 className="font-comfortaa text-[24px] leading-[32px] text-[#633479] mb-4">
         5. Inline Loading State
       </h2>
-      <p className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
+      <p className="font-comfortaa text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
         Show inline loading indicators
       </p>
       <div className="space-y-4">
@@ -267,16 +267,16 @@ function Example5() {
           {isLoadingData ? (
             <div className="flex items-center gap-2">
               <Spinner size="small" color="#de6a07" />
-              <span className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[#4a3c2a]">
+              <span className="font-comfortaa text-[14px] text-[#4a3c2a]">
                 Loading data...
               </span>
             </div>
           ) : data ? (
-            <p className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[#4a3c2a]">
+            <p className="font-comfortaa text-[14px] text-[#4a3c2a]">
               {data}
             </p>
           ) : (
-            <p className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[rgba(74,60,42,0.5)]">
+            <p className="font-comfortaa text-[14px] text-[rgba(74,60,42,0.5)]">
               Click the button to load data
             </p>
           )}
@@ -305,10 +305,10 @@ function Example6() {
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-sm">
-      <h2 className="font-['Comfortaa:Bold',_sans-serif] text-[24px] leading-[32px] text-[#633479] mb-4">
+      <h2 className="font-comfortaa text-[24px] leading-[32px] text-[#633479] mb-4">
         6. Multiple Independent Loading States
       </h2>
-      <p className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
+      <p className="font-comfortaa text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
         Each button maintains its own loading state
       </p>
       <div className="flex flex-wrap gap-4">
@@ -344,26 +344,26 @@ function Example6() {
 function Example7() {
   return (
     <div className="bg-white p-8 rounded-lg shadow-sm">
-      <h2 className="font-['Comfortaa:Bold',_sans-serif] text-[24px] leading-[32px] text-[#633479] mb-4">
+      <h2 className="font-comfortaa text-[24px] leading-[32px] text-[#633479] mb-4">
         7. Spinners with Background Track
       </h2>
-      <p className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
+      <p className="font-comfortaa text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
         Show a circular progress indicator with a visible background track
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Use Case 1: File Upload Progress */}
         <div className="border-2 border-gray-200 rounded-lg p-6">
-          <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[18px] text-[#4a3c2a] mb-4">
+          <h3 className="font-comfortaa text-[18px] text-[#4a3c2a] mb-4">
             File Upload Progress
           </h3>
           <div className="flex items-center gap-4 mb-4">
             <Spinner size={40} color="#25C8A8" showTrack trackOpacity={0.2} />
             <div className="flex-1">
-              <p className="font-['Comfortaa:Medium',_sans-serif] text-[14px] text-[#4a3c2a]">
+              <p className="font-comfortaa text-[14px] text-[#4a3c2a]">
                 Uploading document.pdf
               </p>
-              <p className="font-['Comfortaa:Regular',_sans-serif] text-[12px] text-[rgba(74,60,42,0.6)]">
+              <p className="font-comfortaa text-[12px] text-[rgba(74,60,42,0.6)]">
                 Please wait...
               </p>
             </div>
@@ -380,16 +380,16 @@ function Example7() {
 
         {/* Use Case 2: API Call Loading */}
         <div className="border-2 border-gray-200 rounded-lg p-6">
-          <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[18px] text-[#4a3c2a] mb-4">
+          <h3 className="font-comfortaa text-[18px] text-[#4a3c2a] mb-4">
             API Call Loading
           </h3>
           <div className="flex items-center gap-4 mb-4">
             <Spinner size={40} color="#633479" showTrack trackOpacity={0.3} />
             <div className="flex-1">
-              <p className="font-['Comfortaa:Medium',_sans-serif] text-[14px] text-[#4a3c2a]">
+              <p className="font-comfortaa text-[14px] text-[#4a3c2a]">
                 Fetching data...
               </p>
-              <p className="font-['Comfortaa:Regular',_sans-serif] text-[12px] text-[rgba(74,60,42,0.6)]">
+              <p className="font-comfortaa text-[12px] text-[rgba(74,60,42,0.6)]">
                 This may take a few seconds
               </p>
             </div>
@@ -406,16 +406,16 @@ function Example7() {
 
         {/* Use Case 3: Processing Status */}
         <div className="border-2 border-gray-200 rounded-lg p-6">
-          <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[18px] text-[#4a3c2a] mb-4">
+          <h3 className="font-comfortaa text-[18px] text-[#4a3c2a] mb-4">
             Processing Status
           </h3>
           <div className="flex flex-col items-center text-center gap-4">
             <Spinner size={56} color="#de6a07" showTrack trackOpacity={0.25} />
             <div>
-              <p className="font-['Comfortaa:Bold',_sans-serif] text-[16px] text-[#4a3c2a] mb-1">
+              <p className="font-comfortaa text-[16px] text-[#4a3c2a] mb-1">
                 Processing Payment
               </p>
-              <p className="font-['Comfortaa:Regular',_sans-serif] text-[13px] text-[rgba(74,60,42,0.6)]">
+              <p className="font-comfortaa text-[13px] text-[rgba(74,60,42,0.6)]">
                 Do not close this window
               </p>
             </div>
@@ -432,12 +432,12 @@ function Example7() {
 
         {/* Use Case 4: Comparison */}
         <div className="border-2 border-gray-200 rounded-lg p-6">
-          <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[18px] text-[#4a3c2a] mb-4">
+          <h3 className="font-comfortaa text-[18px] text-[#4a3c2a] mb-4">
             With vs Without Track
           </h3>
           <div className="flex items-center justify-around mb-4">
             <div className="text-center">
-              <p className="font-['Comfortaa:Medium',_sans-serif] text-[12px] text-[#4a3c2a] mb-3">
+              <p className="font-comfortaa text-[12px] text-[#4a3c2a] mb-3">
                 Without Track
               </p>
               <div className="bg-gray-50 p-4 rounded">
@@ -445,7 +445,7 @@ function Example7() {
               </div>
             </div>
             <div className="text-center">
-              <p className="font-['Comfortaa:Medium',_sans-serif] text-[12px] text-[#4a3c2a] mb-3">
+              <p className="font-comfortaa text-[12px] text-[#4a3c2a] mb-3">
                 With Track
               </p>
               <div className="bg-gray-50 p-4 rounded">
@@ -453,7 +453,7 @@ function Example7() {
               </div>
             </div>
           </div>
-          <p className="font-['Comfortaa:Regular',_sans-serif] text-[12px] text-[rgba(74,60,42,0.7)] text-center">
+          <p className="font-comfortaa text-[12px] text-[rgba(74,60,42,0.7)] text-center">
             The track provides visual context for the loading progress
           </p>
         </div>

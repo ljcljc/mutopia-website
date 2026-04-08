@@ -41,7 +41,7 @@ export default function Dashboard() {
       >
         <div className="flex flex-col gap-[calc(16*var(--px493))] sm:gap-[20px]">
           <div className="h-auto sm:h-[27px]">
-            <h1 className="font-['Comfortaa:Bold',sans-serif] font-bold text-[20px] text-[#4A3C2A]">
+            <h1 className="font-comfortaa font-bold text-[20px] text-[#4A3C2A]">
               Dashboard
             </h1>
           </div>

@@ -15,14 +15,14 @@ export function ReferenceStylesUpload({
   uploadItems,
 }: ReferenceStylesUploadProps) {
   return (
-    <div className="bg-white box-border flex flex-col gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
+    <div className="bg-white flex flex-col gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
       <div className="flex flex-col gap-[14px] items-start relative shrink-0 w-full">
         <div className="flex flex-col gap-[8px] items-start relative shrink-0 w-full">
           <div className="flex flex-col items-start relative shrink-0">
-            <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] relative shrink-0 text-[16px] text-black">
+            <p className="font-comfortaa font-semibold leading-[28px] relative shrink-0 text-[16px] text-black">
               Upload reference styles (optional)
             </p>
-            <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[#4a5565] text-[12.25px]">
+            <p className="font-comfortaa font-normal leading-[17.5px] relative shrink-0 text-[#4a5565] text-[12.25px]">
               This helps groomers prepare and provide the best care possible
             </p>
           </div>

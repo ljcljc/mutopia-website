@@ -239,21 +239,21 @@ export function ForgotPasswordContainer({
   const shouldShowCountdown = !showLastAttemptWarning && !isMaxAttemptsReached && !isMaxSendReached;
 
   return (
-    <div className="box-border content-stretch flex flex-col gap-[28px] items-start px-[24px] py-0 relative shrink-0 w-full">
+    <div className="flex flex-col gap-[28px] items-start px-[24px] py-0 relative shrink-0 w-full">
       <div className="relative shrink-0 w-full">
-        <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex flex-col gap-[20px] items-center relative w-full">
-          <div className="content-stretch flex flex-col gap-[32px] items-center relative shrink-0 w-full">
-            <div className="content-stretch flex flex-col gap-[12px] items-center justify-center relative shrink-0 w-full">
+        <div className="bg-clip-padding border-0 border-transparent border-solid flex flex-col gap-[20px] items-center relative w-full">
+          <div className="flex flex-col gap-[32px] items-center relative shrink-0 w-full">
+            <div className="flex flex-col gap-[12px] items-center justify-center relative shrink-0 w-full">
               {/* Email label */}
               {(showLastAttemptWarning || isMaxAttemptsReached) ? (
                 // 状态3和4: 显示 "Enter the 6-digital code sent to" 和邮箱地址，右侧显示 "Code expired."
-                <div className="content-stretch flex font-['Comfortaa:Medium',sans-serif] font-medium gap-[8px] items-end relative shrink-0 w-full">
+                <div className="flex font-comfortaa font-medium gap-[8px] items-end relative shrink-0 w-full">
                   <div className="flex-[1_0_0] relative shrink-0">
-                    <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex flex-col gap-[4px] items-start justify-end relative text-[#4a3c2a]">
-                      <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[12px]">
+                    <div className="bg-clip-padding border-0 border-transparent border-solid flex flex-col gap-[4px] items-start justify-end relative text-[#4a3c2a]">
+                      <p className="font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[12px]">
                         Enter the<span>{` 6-digital code sent to`}</span>
                       </p>
-                      <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[14px]">
+                      <p className="font-comfortaa font-normal leading-[22.75px] relative shrink-0 text-[14px]">
                         {email}
                       </p>
                     </div>
@@ -264,13 +264,13 @@ export function ForgotPasswordContainer({
                 </div>
               ) : (
                 // 状态1和2: 显示 "Enter the 6-digital code sent to" 和邮箱地址
-                <div className="content-stretch flex gap-[8px] items-end relative shrink-0 w-full">
+                <div className="flex gap-[8px] items-end relative shrink-0 w-full">
                   <div className="relative shrink-0">
-                    <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex flex-col gap-[4px] items-start justify-end relative text-[#4a3c2a]">
-                      <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[12px]">
+                    <div className="bg-clip-padding border-0 border-transparent border-solid flex flex-col gap-[4px] items-start justify-end relative text-[#4a3c2a]">
+                      <p className="font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[12px]">
                         Enter the<span>{` 6-digital code sent to`}</span>
                       </p>
-                      <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[14px]">
+                      <p className="font-comfortaa font-normal leading-[22.75px] relative shrink-0 text-[14px]">
                         {email}
                       </p>
                     </div>
@@ -282,7 +282,7 @@ export function ForgotPasswordContainer({
               {!showLastAttemptWarning && !isMaxAttemptsReached && !isMaxSendReached && (
                 // 状态1和2: 显示倒计时或 "Code expired."
                 // 注意：当 isMaxSendReached 为 true 时，不显示倒计时，而是显示联系方式界面
-                <p className={`font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] min-w-full relative shrink-0 text-[12px] text-center w-min whitespace-pre-wrap ${
+                <p className={`font-comfortaa font-medium leading-[17.5px] min-w-full relative shrink-0 text-[12px] text-center w-min whitespace-pre-wrap ${
                   error && error.includes("Wrong code") ? "text-[#de1507]" : "text-[#de6a07]"
                 }`}>
                   {shouldShowCountdown && countdown > 0 ? (
@@ -310,11 +310,11 @@ export function ForgotPasswordContainer({
 
                   {/* 状态1和2: 错误消息 */}
                   {error && (error.includes("Wrong code") || error === "Enter your code.") && (
-                    <div className="content-stretch flex gap-[4px] items-center relative shrink-0">
+                    <div className="flex gap-[4px] items-center relative shrink-0">
                       <div className="relative shrink-0 size-[12px]">
                         <Icon name="alert-error" aria-label="Error" className="block size-full" />
                       </div>
-                      <p className={`font-['Comfortaa:${error === "Enter your code." ? "Medium" : "Regular"}',sans-serif] ${
+                      <p className={`font-comfortaa ${
                         error === "Enter your code." ? "font-medium" : "font-normal"
                       } leading-[17.5px] relative shrink-0 text-[12px] text-[#de1507]`}>
                         {error}
@@ -323,18 +323,18 @@ export function ForgotPasswordContainer({
                   )}
 
                   {/* 状态1和2: Change email 和 Resend code 按钮 */}
-                  <div className="box-border content-stretch flex items-start justify-between px-[20px] py-0 relative shrink-0 w-full">
+                  <div className="flex items-start justify-between px-[20px] py-0 relative shrink-0 w-full">
                     <button
                       onClick={onChangeEmail}
-                      className="box-border content-stretch flex gap-[8px] items-center px-[12px] py-[4px] relative shrink-0 cursor-pointer hover:opacity-70 transition-opacity"
+                      className="flex gap-[8px] items-center px-[12px] py-[4px] relative shrink-0 cursor-pointer hover:opacity-70 transition-opacity"
                       disabled={isLoading}
                     >
-                      <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12px]">
+                      <p className="font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12px]">
                         Change email
                       </p>
                     </button>
                     {codeResent ? (
-                      <div className="box-border content-stretch flex gap-[8px] items-center justify-center px-[12px] py-[4px] relative shrink-0">
+                      <div className="flex gap-[8px] items-center justify-center px-[12px] py-[4px] relative shrink-0">
                         <div className="flex h-[calc(1px*((var(--transform-inner-width)*1)+(var(--transform-inner-height)*0)))] items-center justify-center relative shrink-0 w-[calc(1px*((var(--transform-inner-height)*1)+(var(--transform-inner-width)*0)))]">
                           <div className="flex-none">
                             <div className="relative size-[12px]">
@@ -342,7 +342,7 @@ export function ForgotPasswordContainer({
                             </div>
                           </div>
                         </div>
-                        <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12px]">
+                        <p className="font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12px]">
                           Code resent
                         </p>
                       </div>
@@ -350,19 +350,19 @@ export function ForgotPasswordContainer({
                       <button
                         onClick={handleResendCode}
                         disabled={!canResend || isResending || isLoading}
-                        className="box-border content-stretch flex gap-[8px] items-center justify-center px-[12px] py-[4px] relative shrink-0 cursor-pointer hover:opacity-70 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex gap-[8px] items-center justify-center px-[12px] py-[4px] relative shrink-0 cursor-pointer hover:opacity-70 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isResending ? (
                           <>
                             <div className="relative shrink-0 size-[12px]">
                               <div className="size-[12px] border-2 border-[#4a3c2a] border-t-transparent rounded-full animate-spin" />
                             </div>
-                            <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12px]">
+                            <p className="font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12px]">
                               Sending...
                             </p>
                           </>
                         ) : (
-                          <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12px]">
+                          <p className="font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12px]">
                             Resend code
                           </p>
                         )}
@@ -375,12 +375,12 @@ export function ForgotPasswordContainer({
               {/* 状态3: 第4次失败后显示警告 */}
               {showLastAttemptWarning && !isMaxAttemptsReached && (
                 <div className="bg-[#fffbed] border border-[#e8b600] border-solid h-[36px] relative rounded-[8px] shrink-0 w-full">
-                  <div className="box-border content-stretch flex h-[36px] items-center overflow-clip px-[16px] py-[4px] relative rounded-[inherit]">
-                    <div className="content-stretch flex gap-[8px] items-center relative shrink-0">
+                  <div className="flex h-[36px] items-center overflow-clip px-[16px] py-[4px] relative rounded-[inherit]">
+                    <div className="flex gap-[8px] items-center relative shrink-0">
                       <div className="relative shrink-0 size-[12px]">
                         <Icon name="alert-warning" aria-label="Warning" className="block size-full" />
                       </div>
-                      <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] relative shrink-0 text-[#b08a00] text-[10px]">
+                      <p className="font-comfortaa font-normal leading-[normal] relative shrink-0 text-[#b08a00] text-[10px]">
                         1 attempt left. Verify your email adresse and resend code.
                       </p>
                     </div>
@@ -391,12 +391,12 @@ export function ForgotPasswordContainer({
               {/* 状态4: 第5次失败后或达到最大发送次数后显示错误 */}
               {(isMaxAttemptsReached || (isMaxSendReached && codeVerifyFailCount < MAX_VERIFY_FAIL_COUNT)) && (
                 <div className="border border-[#de1507] border-solid h-[36px] relative rounded-[8px] shrink-0 w-full">
-                  <div className="box-border content-stretch flex h-[36px] items-center overflow-clip px-[16px] py-[4px] relative rounded-[inherit]">
-                    <div className="content-stretch flex gap-[8px] items-center relative shrink-0">
+                  <div className="flex h-[36px] items-center overflow-clip px-[16px] py-[4px] relative rounded-[inherit]">
+                    <div className="flex gap-[8px] items-center relative shrink-0">
                       <div className="relative shrink-0 size-[12px]">
                         <Icon name="alert-error" aria-label="Error" className="block size-full" />
                       </div>
-                      <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] relative shrink-0 text-[#de1507] text-[10px]">
+                      <p className="font-comfortaa font-normal leading-[normal] relative shrink-0 text-[#de1507] text-[10px]">
                         For security reason. Please contact us to reset your password.
                       </p>
                     </div>

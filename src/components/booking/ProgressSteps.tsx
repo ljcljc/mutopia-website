@@ -26,7 +26,7 @@ export function ProgressStepCompleted() {
         <div className="[grid-area:1_/_1] bg-[#8b6357] ml-0 mt-0 relative rounded-[12px] size-[36px]">
           <div aria-hidden="true" className="absolute border-2 border-[#8b6357] border-solid inset-0 pointer-events-none rounded-[12px]" />
         </div>
-        <p className="[grid-area:1_/_1] font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] ml-[14px] mt-[9px] relative text-[16px] text-nowrap text-white whitespace-pre">
+        <p className="[grid-area:1_/_1] font-comfortaa font-medium leading-[17.5px] ml-[14px] mt-[9px] relative text-[16px] text-nowrap text-white whitespace-pre">
           {number}
         </p>
       </div>
@@ -39,7 +39,7 @@ export function ProgressStepCompleted() {
         <div className="[grid-area:1_/_1] bg-gray-200 ml-0 mt-0 relative rounded-[12px] size-[36px]">
           <div aria-hidden="true" className="absolute border-2 border-gray-200 border-solid inset-0 pointer-events-none rounded-[12px]" />
         </div>
-        <p className="[grid-area:1_/_1] font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] ml-[14px] mt-[9px] relative text-[#1b1b1b] text-[16px] text-nowrap whitespace-pre">
+        <p className="[grid-area:1_/_1] font-comfortaa font-medium leading-[17.5px] ml-[14px] mt-[9px] relative text-[#1b1b1b] text-[16px] text-nowrap whitespace-pre">
           {number}
         </p>
       </div>
@@ -88,13 +88,13 @@ export function ProgressStepCompleted() {
     subtitle 
   }: ProgressStepsProps) {
     return (
-      <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0 w-full max-w-[781px]">
-        <p className="font-['Comfortaa:Medium',sans-serif] font-medium h-[19px] leading-[17.5px] relative shrink-0 text-[12px] text-black w-full whitespace-pre-wrap">
+      <div className="flex flex-col gap-[12px] items-start relative shrink-0 w-full max-w-[781px]">
+        <p className="font-comfortaa font-medium h-[19px] leading-[17.5px] relative shrink-0 text-[12px] text-black w-full whitespace-pre-wrap">
           Book your appointment
         </p>
         
         {/* Progress bar */}
-        <div className="content-stretch flex items-center relative shrink-0 w-full">
+        <div className="flex items-center relative shrink-0 w-full">
           {Array.from({ length: totalSteps }).map((_, index) => {
             const step = index + 1;
             const isCompleted = step < currentStep;
@@ -103,7 +103,7 @@ export function ProgressStepCompleted() {
             return (
               <div 
                 key={step} 
-                className="basis-0 content-stretch flex grow items-center min-h-px min-w-px relative shrink-0"
+                className="basis-0 flex grow items-center min-h-px min-w-px relative shrink-0"
               >
                 {isCompleted ? (
                   <ProgressStepCompleted />
@@ -120,8 +120,8 @@ export function ProgressStepCompleted() {
   
         {/* Step badge */}
         <div className="h-[24px] relative rounded-[12px] shrink-0">
-          <div className="box-border content-stretch flex gap-[4px] h-[24px] items-center justify-center overflow-clip px-[17px] py-[5px] relative rounded-[inherit]">
-            <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[14px] relative shrink-0 text-[#4c4c4c] text-[10px] text-nowrap whitespace-pre">
+          <div className="flex gap-[4px] h-[24px] items-center justify-center overflow-clip px-[17px] py-[5px] relative rounded-[inherit]">
+            <p className="font-comfortaa font-bold leading-[14px] relative shrink-0 text-[#4c4c4c] text-[10px] text-nowrap whitespace-pre">
               Step {currentStep} of {totalSteps}
             </p>
           </div>
@@ -132,12 +132,12 @@ export function ProgressStepCompleted() {
         {(title || subtitle) && (
           <div className="w-full">
             {title && (
-              <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] min-w-full relative shrink-0 text-[#4a3c2a] text-[16px] w-[min-content]">
+              <p className="font-comfortaa font-semibold leading-[28px] min-w-full relative shrink-0 text-[#4a3c2a] text-[16px] w-[min-content]">
                 {title}
               </p>
             )}
             {subtitle && (
-              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[#4a5565] text-[12.25px]">
+              <p className="font-comfortaa font-normal leading-[17.5px] relative shrink-0 text-[#4a5565] text-[12.25px]">
                 {subtitle}
               </p>
             )}

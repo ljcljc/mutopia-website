@@ -126,22 +126,22 @@ export default function Contact() {
       <div className="content-start flex flex-wrap gap-0 items-start justify-center w-full max-w-[729px]">
       <div className="basis-0 bg-[#633479] grow min-h-px min-w-px rounded-tl-none rounded-tr-none md:rounded-tl-[40px] md:rounded-tr-[40px]">
         <div className="flex flex-col items-center size-full">
-          <div className="box-border content-stretch flex flex-col gap-[28px] items-center px-[28px] md:px-[80px] py-[36px] w-full">
+          <div className="flex flex-col gap-[28px] items-center px-[28px] md:px-[80px] py-[36px] w-full">
             {/* Form Header and Fields - Combined */}
-            <div className="content-stretch flex flex-col gap-[12px] items-center w-full">
-              <p className="font-['Comfortaa:Bold',_sans-serif] leading-[normal] text-[24px] text-center text-white">
+            <div className="flex flex-col gap-[12px] items-center w-full">
+              <p className="font-comfortaa leading-[normal] text-[24px] text-center text-white">
                 Contact us for more details
               </p>
-              <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(255,255,255,0.9)] text-center">
+              <p className="font-comfortaa font-normal leading-[22.75px] text-[14px] text-[rgba(255,255,255,0.9)] text-center">
                 Our friendly customer service team is here to help you and
                 your pet.
               </p>
 
               {/* Name Input */}
-              <div className="content-stretch flex flex-col gap-[8px] items-start w-full max-w-[348px]">
+              <div className="flex flex-col gap-[8px] items-start w-full max-w-[348px]">
                 <Label
                   htmlFor="name"
-                  className="content-stretch flex gap-[7px] h-[12.25px] items-center w-full font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] text-[14px]"
+                  className="flex gap-[7px] h-[12.25px] items-center w-full font-comfortaa font-normal leading-[22.75px] text-[14px]"
                   style={{
                     background:
                       "var(--Background-light, linear-gradient(135deg, #FFF7ED 0%, #FFFBEB 100%))",
@@ -159,24 +159,24 @@ export default function Contact() {
                   value={name}
                   onChange={handleNameChange}
                   disabled={isSubmitting}
-                  className={`bg-white h-[36px] rounded-[12px] border w-full px-[16px] py-[4px] font-['Comfortaa:Regular',_sans-serif] font-normal text-[12.25px] placeholder:text-[#717182] ${
+                  className={`bg-white h-[36px] rounded-[12px] border w-full px-[16px] py-[4px] font-comfortaa font-normal text-[12.25px] placeholder:text-[#717182] ${
                     nameError
                       ? "border-[#de1507] focus:border-[#de1507] focus:ring-[#de1507]"
                       : "border-gray-200"
                   }`}
                 />
                 {nameError && (
-                  <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[17.5px] text-[#de1507] text-[12px]">
+                  <p className="font-comfortaa font-normal leading-[17.5px] text-[#de1507] text-[12px]">
                     {nameError}
                   </p>
                 )}
               </div>
 
               {/* Email Input */}
-              <div className="content-stretch flex flex-col gap-[8px] items-start w-full max-w-[348px]">
+              <div className="flex flex-col gap-[8px] items-start w-full max-w-[348px]">
                 <Label
                   htmlFor="email"
-                  className="content-stretch flex gap-[7px] h-[12.25px] items-center w-full font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] text-[14px]"
+                  className="flex gap-[7px] h-[12.25px] items-center w-full font-comfortaa font-normal leading-[22.75px] text-[14px]"
                   style={{
                     background:
                       "var(--Background-light, linear-gradient(135deg, #FFF7ED 0%, #FFFBEB 100%))",
@@ -194,24 +194,24 @@ export default function Contact() {
                   value={email}
                   onChange={handleEmailChange}
                   disabled={isSubmitting}
-                  className={`bg-white h-[36px] rounded-[12px] border w-full px-[16px] py-[4px] font-['Comfortaa:Regular',_sans-serif] font-normal text-[12.25px] placeholder:text-[#717182] ${
+                  className={`bg-white h-[36px] rounded-[12px] border w-full px-[16px] py-[4px] font-comfortaa font-normal text-[12.25px] placeholder:text-[#717182] ${
                     emailError
                       ? "border-[#de1507] focus:border-[#de1507] focus:ring-[#de1507]"
                       : "border-gray-200"
                   }`}
                 />
                 {emailError && (
-                  <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[17.5px] text-[#de1507] text-[12px]">
+                  <p className="font-comfortaa font-normal leading-[17.5px] text-[#de1507] text-[12px]">
                     {emailError}
                   </p>
                 )}
               </div>
 
               {/* Message Textarea */}
-              <div className="content-stretch flex flex-col gap-[8px] items-start w-full max-w-[349px]">
+              <div className="flex flex-col gap-[8px] items-start w-full max-w-[349px]">
                 <Label
                   htmlFor="message"
-                  className="content-stretch flex gap-[7px] h-[12.25px] items-center w-full font-['Comfortaa:Regular',_sans-serif] font-normal leading-[22.75px] text-[14px] text-white"
+                  className="flex gap-[7px] h-[12.25px] items-center w-full font-comfortaa font-normal leading-[22.75px] text-[14px] text-white"
                 >
                   Message
                 </Label>
@@ -221,14 +221,14 @@ export default function Contact() {
                   value={message}
                   onChange={handleMessageChange}
                   disabled={isSubmitting}
-                  className={`bg-white h-[120px] max-h-[120px] rounded-[12px] border w-full px-[16px] py-[12px] font-['Comfortaa:Regular',_sans-serif] font-normal text-[12.25px] placeholder:text-[#717182] resize-none ${
+                  className={`bg-white h-[120px] max-h-[120px] rounded-[12px] border w-full px-[16px] py-[12px] font-comfortaa font-normal text-[12.25px] placeholder:text-[#717182] resize-none ${
                     messageError
                       ? "border-[#de1507] focus:border-[#de1507] focus:ring-[#de1507]"
                       : "border-gray-200"
                   }`}
                 />
                 {messageError && (
-                  <p className="font-['Comfortaa:Regular',_sans-serif] font-normal leading-[17.5px] text-[#de1507] text-[12px]">
+                  <p className="font-comfortaa font-normal leading-[17.5px] text-[#de1507] text-[12px]">
                     {messageError}
                   </p>
                 )}
@@ -259,7 +259,7 @@ export default function Contact() {
                   </div>
                 ) : null}
                 <p className={`
-                  font-['Comfortaa:Bold',_sans-serif] font-bold leading-[20px] text-[14px] relative shrink-0 text-[#633479]
+                  font-comfortaa font-bold leading-[20px] text-[14px] relative shrink-0 text-[#633479]
                   ${isSubmitting ? "invisible" : ""}
                 `}>
                   Submit

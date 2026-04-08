@@ -145,13 +145,13 @@ export default function MembershipCard() {
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
             <Icon name="logo" className="w-6 h-6 text-[#6D28D9] shrink-0" />
-            <h2 className="font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-[15.75px] sm:text-lg">
+            <h2 className="font-comfortaa font-semibold text-[#4A3C2A] text-[15.75px] sm:text-lg">
               Membership
             </h2>
           </div>
           {expiryDate && (
             <div className="flex justify-center">
-              <span className="bg-[#DE6A07] text-white px-3 py-1 rounded-full text-xs font-['Comfortaa',sans-serif] font-medium">
+              <span className="bg-[#DE6A07] text-white px-3 py-1 rounded-full text-xs font-comfortaa font-medium">
                 Until {expiryDate}
               </span>
             </div>
@@ -162,21 +162,21 @@ export default function MembershipCard() {
         {isLoadingMembershipPlans || isLoadingMembershipInfo ? (
           <div className="text-[#4A3C2A] text-sm py-4">Loading membership benefits...</div>
         ) : (
-          <div className="content-stretch flex flex-col gap-[12px] items-center relative shrink-0 w-full mb-6">
-            <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0">
+          <div className="flex flex-col gap-[12px] items-center relative shrink-0 w-full mb-6">
+            <div className="flex flex-col gap-[12px] items-start relative shrink-0">
               {displayBenefits.map((benefit: { content: string; is_highlight: boolean; display_order: number }, index: number) => (
                 <div
                   key={index}
-                  className="content-stretch flex items-start relative shrink-0"
+                  className="flex items-start relative shrink-0"
                 >
                   <div className="relative shrink-0">
-                    <div className="bg-clip-padding border-0 border-transparent border-solid content-stretch flex flex-col items-start justify-center relative">
-                      <div className="content-stretch flex gap-[12px] items-start relative shrink-0">
+                    <div className="bg-clip-padding border-0 border-transparent border-solid flex flex-col items-start justify-center relative">
+                      <div className="flex gap-[12px] items-start relative shrink-0">
                         <div className="relative shrink-0 size-[16.8px]">
                           <Icon name="check-green" className="block size-full text-[#00A63E]" />
                         </div>
                         <p
-                          className={`font-['Comfortaa:Bold',sans-serif] font-bold leading-[17.5px] relative shrink-0 text-[12.25px] whitespace-nowrap ${
+                          className={`font-comfortaa font-bold leading-[17.5px] relative shrink-0 text-[12.25px] whitespace-nowrap ${
                             benefit.is_highlight
                               ? "text-[#de6a07]"
                               : "text-[#364153]"
@@ -202,7 +202,7 @@ export default function MembershipCard() {
             disabled={isProcessingCheckout || isLoadingMembershipPlans}
           >
             <div className="flex gap-[4px] items-center">
-              <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] text-[14px] text-nowrap whitespace-pre">
+              <p className="font-comfortaa font-medium leading-[17.5px] text-[14px] text-nowrap whitespace-pre">
                 {isProcessingCheckout ? "Processing..." : "Renew Membership"}
               </p>
               {!isProcessingCheckout && (
@@ -222,12 +222,12 @@ export default function MembershipCard() {
       <div className="flex flex-col gap-[12px] sm:flex-row sm:items-center sm:justify-between mb-4">
         <div className="flex items-center gap-2">
           <Icon name="logo" className="w-6 h-6 text-[#6D28D9] shrink-0" />
-          <h2 className="font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-[15.75px] sm:text-lg">
+          <h2 className="font-comfortaa font-semibold text-[#4A3C2A] text-[15.75px] sm:text-lg">
             Membership
           </h2>
         </div>
         <div className="flex justify-center sm:justify-end">
-          <span className="bg-[#DCFCE7] text-[#008236] px-3 py-1 rounded-full text-[10px] sm:text-xs font-['Comfortaa',sans-serif] font-medium">
+          <span className="bg-[#DCFCE7] text-[#008236] px-3 py-1 rounded-full text-[10px] sm:text-xs font-comfortaa font-medium">
             Save up to 100%
           </span>
         </div>
@@ -237,21 +237,21 @@ export default function MembershipCard() {
       {isLoadingMembershipPlans ? (
         <div className="text-[#4A3C2A] text-sm py-4">Loading membership benefits...</div>
       ) : (
-        <div className="content-stretch flex flex-col gap-[12px] items-center relative shrink-0 w-full mb-6">
-          <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0">
+        <div className="flex flex-col gap-[12px] items-center relative shrink-0 w-full mb-6">
+          <div className="flex flex-col gap-[12px] items-start relative shrink-0">
             {benefits.map((benefit: { content: string; is_highlight: boolean; display_order: number }, index: number) => (
               <div
                 key={index}
-                className="content-stretch flex items-start relative shrink-0"
+                className="flex items-start relative shrink-0"
               >
                 <div className="relative shrink-0">
-                  <div className="bg-clip-padding border-0 border-transparent border-solid content-stretch flex flex-col items-start justify-center relative">
-                    <div className="content-stretch flex gap-[12px] items-start relative shrink-0">
+                  <div className="bg-clip-padding border-0 border-transparent border-solid flex flex-col items-start justify-center relative">
+                    <div className="flex gap-[12px] items-start relative shrink-0">
                       <div className="relative shrink-0 size-[16.8px]">
                         <Icon name="check-green" className="block size-full text-[#00A63E]" />
                       </div>
                       <p
-                        className={`font-['Comfortaa:Bold',sans-serif] font-bold leading-[17.5px] relative shrink-0 text-[12.25px] whitespace-nowrap ${
+                        className={`font-comfortaa font-bold leading-[17.5px] relative shrink-0 text-[12.25px] whitespace-nowrap ${
                           benefit.is_highlight
                             ? "text-[#de6a07]"
                             : "text-[#364153]"
@@ -277,7 +277,7 @@ export default function MembershipCard() {
           disabled={isProcessingCheckout || isLoadingMembershipPlans}
         >
           <div className="flex gap-[4px] items-center">
-            <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] text-[14px] text-nowrap whitespace-pre">
+            <p className="font-comfortaa font-medium leading-[17.5px] text-[14px] text-nowrap whitespace-pre">
               {isProcessingCheckout ? "Processing..." : "Go premium"}
             </p>
             {!isProcessingCheckout && (

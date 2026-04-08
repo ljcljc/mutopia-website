@@ -20,12 +20,12 @@ export default function DashboardMembershipCard() {
       <div className="flex flex-col gap-[12px]">
         <div className="flex items-center gap-[8px]">
           <img alt="" className="h-[24px] w-[21px]" src={membershipIcon} />
-          <p className="font-['Comfortaa:Medium',sans-serif] font-medium text-[15.75px] leading-[24.5px] text-[#4A3C2A]">
+          <p className="font-comfortaa font-medium text-[15.75px] leading-[24.5px] text-[#4A3C2A]">
             Membership
           </p>
         </div>
         <div className="flex items-center justify-center">
-          <span className="bg-[#DCFCE7] rounded-[12px] px-[16px] py-[4px] font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-[#016630]">
+          <span className="bg-[#DCFCE7] rounded-[12px] px-[16px] py-[4px] font-comfortaa font-bold text-[10px] leading-[14px] text-[#016630]">
             Save up to 50%
           </span>
         </div>
@@ -36,7 +36,7 @@ export default function DashboardMembershipCard() {
           <div key={benefit.text} className="flex items-center gap-[12px]">
             <img alt="" className="size-[16.8px]" src={benefit.icon} />
             <p
-              className={`font-['Comfortaa:Bold',sans-serif] font-bold text-[12.25px] leading-[17.5px] ${
+              className={`font-comfortaa font-bold text-[12.25px] leading-[17.5px] ${
                 benefit.highlight ? "text-[#DE6A07]" : "text-[#364153]"
               }`}
             >
@@ -51,7 +51,7 @@ export default function DashboardMembershipCard() {
           type="button"
           className="w-full bg-[#633479] rounded-[32px] h-[36px] flex items-center justify-center gap-[4px]"
         >
-          <span className="font-['Comfortaa:Medium',sans-serif] font-medium text-[14px] leading-[17.5px] text-white">
+          <span className="font-comfortaa font-medium text-[14px] leading-[17.5px] text-white">
             Go premium
           </span>
           <img alt="" className="size-[14px]" src={buttonArrow} />

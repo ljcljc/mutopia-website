@@ -29,7 +29,7 @@ function TimeStamp({ text }: { text: string }) {
   return (
     <div className="flex items-center gap-[7px] text-[#9CA3AF]">
       <Icon name="clock" size={12} className="text-[#9CA3AF]" />
-      <span className="font-['Comfortaa:Regular',sans-serif] text-[10.5px] leading-[14px]">
+      <span className="font-comfortaa text-[10.5px] leading-[14px]">
         {text}
       </span>
     </div>
@@ -43,10 +43,10 @@ function EmptyState() {
         <Icon name="notification-empty" size={28} className="text-[#9CA3AF]" />
       </div>
       <div className="mt-[14px] text-center">
-        <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[14px] leading-[22px] text-[#4A3C2A]">
+        <p className="font-comfortaa font-bold text-[14px] leading-[22px] text-[#4A3C2A]">
           No notifications
         </p>
-        <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[12.25px] leading-[17.5px] text-[#6A7282]">
+        <p className="font-comfortaa font-normal text-[12.25px] leading-[17.5px] text-[#6A7282]">
           You're all caught up!
         </p>
       </div>
@@ -226,7 +226,7 @@ export default function Notifications() {
       <div className="w-full max-w-[944px] mx-auto px-6 pb-8 flex-1">
         <div className="flex flex-col gap-[24px]">
           <div className="flex items-center justify-between">
-            <h1 className="font-['Comfortaa:Bold',sans-serif] font-bold text-[20px] text-[#4A3C2A]">
+            <h1 className="font-comfortaa font-bold text-[20px] text-[#4A3C2A]">
               Notifications
             </h1>
             {notifications.length > 0 ? (
@@ -236,7 +236,7 @@ export default function Notifications() {
                 className="group flex items-center gap-[6px] px-[12px] py-[4px] rounded-[12px] text-[#00A63E] border border-transparent hover:border-[#00A63E] cursor-pointer"
               >
                 <Icon name="check-green" size={16} className="text-current" />
-                <span className="font-['Comfortaa:Medium',sans-serif] font-medium text-[12.25px] leading-[17.5px] text-current">
+                <span className="font-comfortaa font-medium text-[12.25px] leading-[17.5px] text-current">
                   Mark all as read
                 </span>
               </button>
@@ -277,10 +277,10 @@ export default function Notifications() {
                         <div className="flex-1">
                           <div className="flex items-start justify-between">
                             <div>
-                              <h2 className="font-['Comfortaa:Bold',sans-serif] font-bold text-[14px] leading-[17.5px] text-[#4A3C2A]">
+                              <h2 className="font-comfortaa font-bold text-[14px] leading-[17.5px] text-[#4A3C2A]">
                                 {item.title}
                               </h2>
-                              <p className="mt-[4px] font-['Comfortaa:Regular',sans-serif] text-[12.25px] leading-[17.5px] text-[#6A7282]">
+                              <p className="mt-[4px] font-comfortaa text-[12.25px] leading-[17.5px] text-[#6A7282]">
                                 {item.body}
                               </p>
                             </div>
@@ -403,10 +403,10 @@ export default function Notifications() {
                           )}
                         </div>
                           <div className="flex-1">
-                            <h2 className="font-['Comfortaa:Bold',sans-serif] font-bold text-[14px] leading-[18px] text-[#4A3C2A]">
+                            <h2 className="font-comfortaa font-bold text-[14px] leading-[18px] text-[#4A3C2A]">
                               {item.title}
                             </h2>
-                            <p className="mt-[3px] font-['Comfortaa:Regular',sans-serif] text-[12px] leading-[16px] text-[#6A7282]">
+                            <p className="mt-[3px] font-comfortaa text-[12px] leading-[16px] text-[#6A7282]">
                               {item.body}
                             </p>
                             <div className="mt-[6px]">

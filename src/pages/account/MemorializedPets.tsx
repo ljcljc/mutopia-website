@@ -152,7 +152,7 @@ export default function MemorializedPets() {
             <div className="flex justify-between">
             <nav
             aria-label="Breadcrumb"
-            className="font-['Comfortaa:Bold',sans-serif] font-bold text-[20px] text-[#4A3C2A] flex gap-[6px]"
+            className="font-comfortaa font-bold text-[20px] text-[#4A3C2A] flex gap-[6px]"
           >
             <Link to="/account/pets" className="hover:text-[#DE6A07] transition-colors">
             My pets
@@ -173,7 +173,7 @@ export default function MemorializedPets() {
                         className="text-[rgba(0,0,0,0.12)]"
                         size={24}
                       />
-                      <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[14px] leading-[21px]">
+                      <span className="font-comfortaa font-bold text-[14px] leading-[21px]">
                         {pet.name}
                       </span>
                     </button>
@@ -201,43 +201,43 @@ export default function MemorializedPets() {
                 <div className="flex flex-col gap-[8px] flex-1">
                   <div className="flex items-start justify-between">
                     <div className="flex flex-col gap-[8px]">
-                      <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
+                      <p className="font-comfortaa font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
                         {activePet.name}
                       </p>
                       <div className="grid grid-cols-3 gap-y-[16px] gap-x-[40px] text-[#4A3C2A]">
                         <div className="w-[80px]">
-                          <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Pet type</p>
-                          <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
+                          <p className="font-comfortaa text-[10px] leading-[12px]">Pet type</p>
+                          <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
                             {formatLabel(activePet.pet_type)}
                           </p>
                         </div>
                         <div className="w-[80px]">
-                          <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Breed</p>
-                          <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
+                          <p className="font-comfortaa text-[10px] leading-[12px]">Breed</p>
+                          <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
                             {activePet.breed || "-"}
                           </p>
                         </div>
                         <div className="w-[80px]">
-                          <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Date of birth</p>
-                          <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
+                          <p className="font-comfortaa text-[10px] leading-[12px]">Date of birth</p>
+                          <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
                             {formatBirthday(activePet.birthday)}
                           </p>
                         </div>
                         <div className="w-[80px]">
-                          <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Weight</p>
-                          <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
+                          <p className="font-comfortaa text-[10px] leading-[12px]">Weight</p>
+                          <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
                             {formatWeight(activePet.weight_value, activePet.weight_unit)}
                           </p>
                         </div>
                         <div className="w-[80px]">
-                          <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Coat condition</p>
-                          <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
+                          <p className="font-comfortaa text-[10px] leading-[12px]">Coat condition</p>
+                          <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
                             {formatLabel(activePet.coat_condition)}
                           </p>
                         </div>
                         <div className="w-[80px]">
-                          <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Behavior</p>
-                          <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
+                          <p className="font-comfortaa text-[10px] leading-[12px]">Behavior</p>
+                          <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
                             {formatBehavior(activePet.behavior)}
                           </p>
                         </div>
@@ -247,8 +247,8 @@ export default function MemorializedPets() {
                   <div className="border-t border-[#E5E7EB] w-full" />
                   <div className="flex items-center justify-between">
                     <div className="w-[80px]">
-                      <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Frequency</p>
-                      <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
+                      <p className="font-comfortaa text-[10px] leading-[12px]">Frequency</p>
+                      <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
                         {formatLabel(activePet.grooming_frequency)}
                       </p>
                     </div>
@@ -263,10 +263,10 @@ export default function MemorializedPets() {
           <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[24px]">
             <div className="flex flex-col gap-[24px]">
               <div className="flex flex-col gap-[8px]">
-                <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
+                <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
                   Photos
                 </p>
-                <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
+                <p className="font-comfortaa font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
                   Pet photos
                 </p>
                 <ReadonlyPhotoGrid urls={activePet?.photos || []} />
@@ -275,7 +275,7 @@ export default function MemorializedPets() {
               <div className="border-t border-[#E5E7EB]" />
 
               <div className="flex flex-col gap-[8px]">
-                <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
+                <p className="font-comfortaa font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
                   Reference photos
                 </p>
                 <ReadonlyPhotoGrid urls={activePet?.reference_photos || []} />
@@ -285,21 +285,21 @@ export default function MemorializedPets() {
 
           <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[20px]">
             <div className="flex flex-col gap-[12px]">
-              <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
+              <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
                 Health report
               </p>
               <div className="border border-[#E5E7EB] rounded-[14px] px-[15px] py-[13px] flex items-center justify-between max-w-[280px]">
                 <div>
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[16px] leading-[28px] text-[#DE6A07]">
+                  <p className="font-comfortaa font-normal text-[16px] leading-[28px] text-[#DE6A07]">
                     {activePet?.name || "-"}
                   </p>
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
+                  <p className="font-comfortaa font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
                     2026-04-03 at 10H
                   </p>
                 </div>
                 <div className="flex items-center gap-[7px]">
                   <div className="bg-[#DCFCE7] h-[24px] px-[16px] py-[4px] rounded-[12px] flex items-center">
-                    <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-[#016630]">
+                    <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#016630]">
                       Ready
                     </span>
                   </div>
@@ -311,7 +311,7 @@ export default function MemorializedPets() {
 
           <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[20px]">
             <div className="flex flex-col gap-[12px]">
-              <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
+              <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
                 Special instruments or notes
               </p>
               <CustomTextarea
@@ -332,7 +332,7 @@ export default function MemorializedPets() {
             type="button"
             onClick={() => setIsDeleteOpen(true)}
             disabled={!activePet}
-            className="flex items-center gap-[8px] text-[#8B6357] text-[12px] leading-[17.5px] font-['Comfortaa:Bold',sans-serif] hover:text-[#DE6A07] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="flex items-center gap-[8px] text-[#8B6357] text-[12px] leading-[17.5px] font-comfortaa hover:text-[#DE6A07] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             <Icon name="trash" size={16} />
             Delete pet
@@ -353,7 +353,7 @@ export default function MemorializedPets() {
                     <Icon name="close-arrow" size={16} className="text-[#4A3C2A]" />
                   </button>
                 </AlertDialogPrimitive.Cancel>
-                <AlertDialogTitle className="flex-1 text-center font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] leading-[22.75px] text-[#4C4C4C]">
+                <AlertDialogTitle className="flex-1 text-center font-comfortaa font-normal text-[14px] leading-[22.75px] text-[#4C4C4C]">
                   Delete {activePet?.name || "pet"}
                 </AlertDialogTitle>
                 <span className="w-[16px]" />
@@ -361,7 +361,7 @@ export default function MemorializedPets() {
             </AlertDialogHeader>
             <div className="h-px bg-[rgba(0,0,0,0.1)]" />
             <div className="px-[24px]">
-              <AlertDialogDescription className="font-['Comfortaa:Bold',sans-serif] font-bold text-[14px] leading-[22px] text-[#4A5565] m-0">
+              <AlertDialogDescription className="font-comfortaa font-bold text-[14px] leading-[22px] text-[#4A5565] m-0">
                 By deleting this pet’s profile, it will no longer appear in your app. Are you sure you want to continue?
               </AlertDialogDescription>
             </div>

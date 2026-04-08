@@ -215,7 +215,7 @@ export default function ModifyPersonalInfoModal({
             </button>
             
             {/* Title (居中) */}
-            <h2 className="absolute left-1/2 -translate-x-1/2 pl-6 whitespace-nowrap font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-lg">
+            <h2 className="absolute left-1/2 -translate-x-1/2 pl-6 whitespace-nowrap font-comfortaa font-semibold text-[#4A3C2A] text-lg">
               Modify personal information
             </h2>
           </div>
@@ -246,7 +246,7 @@ export default function ModifyPersonalInfoModal({
           {showBirthdayWarning && (
             <div className="flex items-start gap-2 p-3 bg-[#FFF9E6] border border-[#FFD700] rounded-lg">
               <Icon name="alert-warning" className="w-5 h-5 shrink-0 mt-0.5" style={{ color: "#FFD700" }} />
-              <p className="font-['Comfortaa',sans-serif] font-normal text-[#4A3C2A] text-sm">
+              <p className="font-comfortaa font-normal text-[#4A3C2A] text-sm">
                 <span className="font-semibold">Past and scheduled rewards won't change.</span> Your new birthday applies to future rewards only.
               </p>
             </div>
@@ -255,12 +255,12 @@ export default function ModifyPersonalInfoModal({
           {/* Date of birth */}
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <label className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#4a3c2a] text-[14px]">
+              <label className="font-comfortaa font-normal text-[#4a3c2a] text-[14px]">
                 Date of birth
               </label>
               {/* 1年内修改过生日的标签 */}
               {isBirthdayModified && birthdayModifiedDate && (
-                <span className="px-2 py-0.5 bg-white border border-gray-200 rounded-full text-[#4A3C2A] text-xs font-['Comfortaa',sans-serif]">
+                <span className="px-2 py-0.5 bg-white border border-gray-200 rounded-full text-[#4A3C2A] text-xs font-comfortaa">
                   Modified on {birthdayModifiedDate}
                 </span>
               )}
@@ -289,15 +289,15 @@ export default function ModifyPersonalInfoModal({
 
           {/* Email (不可编辑) */}
           <div className="flex flex-col gap-2">
-            <label className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#4a3c2a] text-[14px]">
+            <label className="font-comfortaa font-normal text-[#4a3c2a] text-[14px]">
               Email
             </label>
             <div className="bg-gray-100 h-[36px] rounded-[12px] border border-gray-200 flex items-center px-4">
-              <span className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#717182] text-[12.25px]">
+              <span className="font-comfortaa font-normal text-[#717182] text-[12.25px]">
                 {userInfo.email}
               </span>
             </div>
-            <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#717182] text-xs">
+            <p className="font-comfortaa font-normal text-[#717182] text-xs">
               Please contact us to modify your email.
             </p>
           </div>
@@ -321,14 +321,14 @@ export default function ModifyPersonalInfoModal({
           <button
             onClick={handleCancel}
             disabled={isSubmitting}
-            className="w-[120px] h-[36px] rounded-lg border border-[#DE6A07] bg-white text-[#DE6A07] font-['Comfortaa:Medium',sans-serif] font-medium text-sm hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="w-[120px] h-[36px] rounded-lg border border-[#DE6A07] bg-white text-[#DE6A07] font-comfortaa font-medium text-sm hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="w-[120px] h-[36px] rounded-lg bg-[#DE6A07] text-white font-['Comfortaa:Medium',sans-serif] font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer relative"
+            className="w-[120px] h-[36px] rounded-lg bg-[#DE6A07] text-white font-comfortaa font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer relative"
           >
             {/* Loading Spinner */}
             {isSubmitting && (

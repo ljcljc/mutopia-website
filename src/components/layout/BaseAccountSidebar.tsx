@@ -86,7 +86,7 @@ export default function BaseAccountSidebar({
                   <SidebarMenuButton
                     asChild
                     isActive={active}
-                    className="font-['Comfortaa',sans-serif] font-normal text-[14px] text-[#8B6357] data-[active=true]:text-[#DE6A07] data-[active=true]:bg-[#FAE7D5] rounded-lg h-auto min-h-[40px] py-2.5 px-4 transition-colors duration-200 hover:bg-[#FAE7D5]/50 hover:text-[#DE6A07]"
+                    className="font-comfortaa font-normal text-[14px] text-[#8B6357] data-[active=true]:text-[#DE6A07] data-[active=true]:bg-[#FAE7D5] rounded-lg h-auto min-h-[40px] py-2.5 px-4 transition-colors duration-200 hover:bg-[#FAE7D5]/50 hover:text-[#DE6A07]"
                   >
                     <Link
                       to={item.path}
@@ -124,7 +124,7 @@ export default function BaseAccountSidebar({
             className="mt-8"
           >
             <div className="flex gap-2 items-center justify-center">
-              <span className="font-['Comfortaa',sans-serif] font-medium text-[14px] text-white">{bookingLabel}</span>
+              <span className="font-comfortaa font-medium text-[14px] text-white">{bookingLabel}</span>
               <Icon name="button-arrow" aria-label="Arrow" className="size-[14px] text-white" />
             </div>
           </OrangeButton>
@@ -156,7 +156,7 @@ export default function BaseAccountSidebar({
                     isDanger ? "sidebar-text-danger text-[#E7000B]" : "sidebar-text-default text-[#364153]"
                   );
               const baseClassName = cn(
-                "font-['Comfortaa',sans-serif] font-normal text-[14px] rounded-lg h-auto min-h-[40px] py-2.5 px-4 transition-colors duration-200",
+                "font-comfortaa font-normal text-[14px] rounded-lg h-auto min-h-[40px] py-2.5 px-4 transition-colors duration-200",
                 isDanger
                   ? "text-[#E7000B] hover:text-[#E7000B] hover:bg-[#FEE2E2] cursor-pointer"
                   : "text-[#8B6357] data-[active=true]:text-[#DE6A07] data-[active=true]:bg-[#FAE7D5] hover:bg-[#FAE7D5]/50 hover:text-[#DE6A07]"
@@ -203,7 +203,7 @@ export default function BaseAccountSidebar({
         )}
       >
         <div className={cn("flex flex-col gap-3")}>
-          <h3 className="font-['Comfortaa',sans-serif] font-normal text-[12px] text-[#8B7A6B] uppercase tracking-wide">
+          <h3 className="font-comfortaa font-normal text-[12px] text-[#8B7A6B] uppercase tracking-wide">
             DOWNLOAD THE APP
           </h3>
           <div
@@ -218,9 +218,9 @@ export default function BaseAccountSidebar({
                 style={{ width: "20px", height: "20px" }}
                 aria-hidden="true"
               />
-              <span className="font-['Comfortaa',sans-serif] font-normal text-[14px] text-[#4A3C2A]">Get the App</span>
+              <span className="font-comfortaa font-normal text-[14px] text-[#4A3C2A]">Get the App</span>
             </div>
-            <span className="font-['Comfortaa',sans-serif] font-normal text-[12px] text-[#DE6A07]">Coming soon</span>
+            <span className="font-comfortaa font-normal text-[12px] text-[#DE6A07]">Coming soon</span>
           </div>
         </div>
       </SidebarFooter>

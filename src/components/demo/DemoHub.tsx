@@ -65,7 +65,7 @@ export function DemoHub({ onBack }: { onBack: () => void }) {
         {/* Back Button */}
         <button
           onClick={onBack}
-          className="flex items-center gap-2 font-['Comfortaa:Medium',_sans-serif] text-[14px] text-[#8b6357] hover:text-[#6f4e44] transition-colors mb-8"
+          className="flex items-center gap-2 font-comfortaa text-[14px] text-[#8b6357] hover:text-[#6f4e44] transition-colors mb-8"
         >
           <ArrowLeft size={20} />
           Back to Home
@@ -75,14 +75,14 @@ export function DemoHub({ onBack }: { onBack: () => void }) {
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 bg-[#633479]/10 px-4 py-2 rounded-full mb-6">
             <Sparkles size={20} className="text-[#633479]" />
-            <span className="font-['Comfortaa:Bold',_sans-serif] text-[14px] text-[#633479]">
+            <span className="font-comfortaa text-[14px] text-[#633479]">
               Component Showcase
             </span>
           </div>
-          <h1 className="font-['Comfortaa:Bold',_sans-serif] text-[48px] leading-[60px] text-[#4a3c2a] mb-4">
+          <h1 className="font-comfortaa text-[48px] leading-[60px] text-[#4a3c2a] mb-4">
             Interactive Demo Gallery
           </h1>
-          <p className="font-['Comfortaa:Regular',_sans-serif] text-[18px] text-[rgba(74,60,42,0.8)] max-w-2xl mx-auto">
+          <p className="font-comfortaa text-[18px] text-[rgba(74,60,42,0.8)] max-w-2xl mx-auto">
             Explore our custom-built components with live examples and code
             snippets. All components are built from Figma designs with
             pixel-perfect accuracy.
@@ -148,7 +148,7 @@ export function DemoHub({ onBack }: { onBack: () => void }) {
 
         {/* Features Section */}
         <div className="bg-white p-8 rounded-lg shadow-sm">
-          <h2 className="font-['Comfortaa:Bold',_sans-serif] text-[28px] leading-[36px] text-[#4a3c2a] mb-6 text-center">
+          <h2 className="font-comfortaa text-[28px] leading-[36px] text-[#4a3c2a] mb-6 text-center">
             Key Features
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -199,13 +199,13 @@ function DemoCard({ icon, title, description, color, onClick }: DemoCardProps) {
       className={`bg-white p-8 rounded-lg border-2 border-transparent transition-all duration-300 cursor-pointer text-left group ${colorClasses[color]}`}
     >
       <div className="mb-4">{icon}</div>
-      <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[21px] leading-[28px] text-[#4a3c2a] mb-3 group-hover:text-[#633479] transition-colors">
+      <h3 className="font-comfortaa text-[21px] leading-[28px] text-[#4a3c2a] mb-3 group-hover:text-[#633479] transition-colors">
         {title}
       </h3>
-      <p className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[rgba(74,60,42,0.8)] leading-relaxed mb-4">
+      <p className="font-comfortaa text-[14px] text-[rgba(74,60,42,0.8)] leading-relaxed mb-4">
         {description}
       </p>
-      <div className="flex items-center gap-2 font-['Comfortaa:Medium',_sans-serif] text-[14px] text-[#633479]">
+      <div className="flex items-center gap-2 font-comfortaa text-[14px] text-[#633479]">
         View Demo
         <ArrowLeft
           size={16}
@@ -227,10 +227,10 @@ function FeatureItem({ title, description }: FeatureItemProps) {
       <div className="inline-flex items-center justify-center w-12 h-12 bg-[#633479]/10 rounded-full mb-3">
         <div className="w-2 h-2 bg-[#633479] rounded-full" />
       </div>
-      <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[16px] text-[#4a3c2a] mb-2">
+      <h3 className="font-comfortaa text-[16px] text-[#4a3c2a] mb-2">
         {title}
       </h3>
-      <p className="font-['Comfortaa:Regular',_sans-serif] text-[13px] text-[rgba(74,60,42,0.7)]">
+      <p className="font-comfortaa text-[13px] text-[rgba(74,60,42,0.7)]">
         {description}
       </p>
     </div>

@@ -255,7 +255,7 @@ export default function BookingDetail() {
           <div className="h-[27px] flex items-center">
             <nav
               aria-label="Breadcrumb"
-              className="font-['Comfortaa:Bold',sans-serif] font-bold text-[14px] leading-[20px] text-[#4A3C2A] flex items-center gap-[6px] whitespace-nowrap"
+              className="font-comfortaa font-bold text-[14px] leading-[20px] text-[#4A3C2A] flex items-center gap-[6px] whitespace-nowrap"
             >
               <Link to="/account/dashboard" className="hover:text-[#DE6A07] transition-colors">
                 Dashboard
@@ -270,14 +270,14 @@ export default function BookingDetail() {
               <div className="flex flex-col gap-[14px] flex-1">
                 <div className="flex items-start justify-between gap-[14px]">
                   <div className="flex flex-col gap-[4px]">
-                    <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[16px] leading-[28px] text-[#DE6A07]">
+                    <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#DE6A07]">
                       {petName}
                     </p>
-                    <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
+                    <p className="font-comfortaa font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
                       {serviceName} - {serviceType} {scheduledDisplay}
                     </p>
                   </div>
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
+                  <p className="font-comfortaa font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
                     {bookingCode}
                   </p>
                 </div>
@@ -294,7 +294,7 @@ export default function BookingDetail() {
                   </div>
                   {progressVariant === "ready" ? (
                     <div className="bg-[#DCFCE7] h-[24px] w-fit px-[16px] py-[4px] rounded-[12px] flex items-center">
-                      <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-[#016630]">
+                      <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#016630]">
                         {activeProgress.badgeText}
                       </span>
                     </div>
@@ -313,10 +313,10 @@ export default function BookingDetail() {
             </div>
 
             <div className="mt-[20px]">
-              <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
+              <p className="font-comfortaa font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
                 Next step
               </p>
-              <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+              <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
                 {activeProgress.nextStep}
               </p>
             </div>
@@ -330,10 +330,10 @@ export default function BookingDetail() {
             {progressVariant === "confirm" ? (
               <div className="mt-[16px] flex flex-wrap items-center gap-[8px]">
                 <div className="flex flex-1 min-w-[200px] flex-col gap-[4px] text-[#4A3C2A]">
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[10px] leading-[12px]">
+                  <p className="font-comfortaa font-normal text-[10px] leading-[12px]">
                     New time proposed by groomer
                   </p>
-                  <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px]">
+                  <p className="font-comfortaa font-bold text-[12px] leading-[16px]">
                     {proposedTimeDisplay}
                   </p>
                 </div>
@@ -349,24 +349,24 @@ export default function BookingDetail() {
 
           <div className="bg-white p-[24px] rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
             <div className="flex flex-col gap-[8px]">
-              <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
+              <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
                 Address and service type
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-[8px]">
                 <div>
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
+                  <p className="font-comfortaa font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
                     Address
                   </p>
-                  <div className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                  <div className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
                     <p>{addressLine1}</p>
                     <p>{addressLine2}</p>
                   </div>
                 </div>
                 <div>
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
+                  <p className="font-comfortaa font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
                     Service type
                   </p>
-                  <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                  <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
                     {serviceType}
                   </p>
                 </div>
@@ -386,15 +386,15 @@ export default function BookingDetail() {
 
           <div className="bg-white p-[24px] rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
             <div className="flex flex-col gap-[14px]">
-              <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
+              <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
                 Package and add-on
               </p>
               <div className="flex items-center justify-between">
-                <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
+                <p className="font-comfortaa font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
                   Total estimation for the service
                 </p>
                 <div className="flex items-center gap-[8px]">
-                  <span className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[16px] leading-[28px] text-[#DE6A07]">
+                  <span className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#DE6A07]">
                     {totalEstimation}
                   </span>
                   <button
@@ -416,16 +416,16 @@ export default function BookingDetail() {
                 <>
                   {packageItems.length > 0 && (
                     <div className="flex flex-col gap-[4px]">
-                      <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
+                      <p className="font-comfortaa font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
                         {serviceName} package
                       </p>
                       <div className="flex flex-col gap-[4px]">
                         {packageItems.map((item, index) => (
                           <div key={`package-${index}`} className="flex items-center justify-between">
-                            <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                            <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
                               {item.label}
                             </p>
-                            <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                            <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
                               {item.amount}
                             </p>
                           </div>
@@ -433,10 +433,10 @@ export default function BookingDetail() {
                       </div>
                       <div className="border-t border-[#E5E7EB] my-[4px]" />
                       <div className="flex items-center justify-between">
-                        <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                        <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
                           Subtotal
                         </p>
-                        <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                        <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
                           {packageSubtotal}
                         </p>
                       </div>
@@ -445,16 +445,16 @@ export default function BookingDetail() {
 
                   {addOnItems.length > 0 && (
                     <div className="flex flex-col gap-[4px]">
-                      <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
+                      <p className="font-comfortaa font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
                         Add-on
                       </p>
                       <div className="flex flex-col gap-[4px]">
                         {addOnItems.map((item, index) => (
                           <div key={`addon-${index}`} className="flex items-center justify-between">
-                            <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                            <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
                               {item.label}
                             </p>
-                            <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                            <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
                               {item.amount}
                             </p>
                           </div>
@@ -462,10 +462,10 @@ export default function BookingDetail() {
                       </div>
                       <div className="border-t border-[#E5E7EB] my-[4px]" />
                       <div className="flex items-center justify-between">
-                        <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                        <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
                           Subtotal
                         </p>
-                        <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                        <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
                           {addOnSubtotal}
                         </p>
                       </div>
@@ -480,25 +480,25 @@ export default function BookingDetail() {
             <div className="flex flex-col gap-[20px]">
               <div className="flex items-start justify-between gap-[14px]">
                 <div>
-                  <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
+                  <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
                     Total estimation for the service
                   </p>
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
+                  <p className="font-comfortaa font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
                     Our groomer will evaluate the final price
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[16px] leading-[28px] text-[#DE6A07]">
+                  <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#DE6A07]">
                     {totalEstimation}
                   </p>
                   {discountRate > 0 && (
                     <div className="flex items-center justify-end gap-[8px] mt-[4px]">
-                      <span className="bg-[#DCFCE7] h-[24px] px-[16px] py-[4px] rounded-[12px] text-[10px] leading-[14px] font-['Comfortaa:Bold',sans-serif] font-bold text-[#016630]">
+                      <span className="bg-[#DCFCE7] h-[24px] px-[16px] py-[4px] rounded-[12px] text-[10px] leading-[14px] font-comfortaa font-bold text-[#016630]">
                         {discountRate}% OFF
                       </span>
                     </div>
                   )}
-                  <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-[#4A5565] mt-[4px]">
+                  <p className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#4A5565] mt-[4px]">
                     tax included
                   </p>
                 </div>
@@ -511,10 +511,10 @@ export default function BookingDetail() {
                   <div className="flex flex-col gap-[12px]">
                     {hasMembership && membershipFee !== "$0.00" && (
                       <div className="flex items-center justify-between">
-                        <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[17.5px] text-[#4A3C2A]">
+                        <p className="font-comfortaa font-bold text-[12px] leading-[17.5px] text-[#4A3C2A]">
                           Membership discount
                         </p>
-                        <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                        <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
                           -{membershipFee}
                         </p>
                       </div>
@@ -522,10 +522,10 @@ export default function BookingDetail() {
 
                     {hasCoupon && couponAmount !== "$0.00" && (
                       <div className="flex items-center justify-between">
-                        <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[17.5px] text-[#4A3C2A]">
+                        <p className="font-comfortaa font-bold text-[12px] leading-[17.5px] text-[#4A3C2A]">
                           Coupon discount
                         </p>
-                        <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                        <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
                           -{couponAmount}
                         </p>
                       </div>
@@ -533,10 +533,10 @@ export default function BookingDetail() {
 
                     {discountAmount !== "$0.00" && (
                       <div className="flex items-center justify-between">
-                        <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[17.5px] text-[#4A3C2A]">
+                        <p className="font-comfortaa font-bold text-[12px] leading-[17.5px] text-[#4A3C2A]">
                           Discount
                         </p>
-                        <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                        <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
                           -{discountAmount}
                         </p>
                       </div>
@@ -553,7 +553,7 @@ export default function BookingDetail() {
                 type="button"
                 onClick={() => setIsCancelDialogOpen(true)}
                 disabled={isCanceling}
-                className="flex items-center justify-center gap-[8px] text-[#8B6357] text-[12px] leading-[17.5px] font-['Comfortaa:Bold',sans-serif] disabled:opacity-50 disabled:cursor-not-allowed hover:text-[#DE6A07] transition-colors cursor-pointer"
+                className="flex items-center justify-center gap-[8px] text-[#8B6357] text-[12px] leading-[17.5px] font-comfortaa disabled:opacity-50 disabled:cursor-not-allowed hover:text-[#DE6A07] transition-colors cursor-pointer"
               >
                 <Icon name="trash" size={16} className="text-current" />
                 {isCanceling ? "Canceling..." : "Cancel booking"}
@@ -576,7 +576,7 @@ export default function BookingDetail() {
                     <Icon name="close-arrow" size={16} className="text-[#4A3C2A]" />
                   </button>
                 </AlertDialogPrimitive.Cancel>
-                <AlertDialogTitle className="flex-1 text-center font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] leading-[22.75px] text-[#4C4C4C]">
+                <AlertDialogTitle className="flex-1 text-center font-comfortaa font-normal text-[14px] leading-[22.75px] text-[#4C4C4C]">
                   Cancel booking for {petName}
                 </AlertDialogTitle>
                 <span className="w-[16px]" />
@@ -584,7 +584,7 @@ export default function BookingDetail() {
             </AlertDialogHeader>
             <div className="h-px bg-[rgba(0,0,0,0.1)]" />
             <div className="px-[24px]">
-              <AlertDialogDescription className="font-['Comfortaa:Bold',sans-serif] font-bold text-[14px] leading-[22px] text-[#4A5565] m-0">
+              <AlertDialogDescription className="font-comfortaa font-bold text-[14px] leading-[22px] text-[#4A5565] m-0">
                 By canceling this booking, it will no longer appear in your upcoming bookings. Are you sure you want to continue?
               </AlertDialogDescription>
             </div>

@@ -149,19 +149,19 @@ export function VerifyEmailContainer({
   const isCodeComplete = verificationCode.join("").length === 6;
 
   return (
-    <div className="box-border content-stretch flex flex-col gap-[28px] items-start px-[24px] py-0 relative shrink-0 w-full">
+    <div className="flex flex-col gap-[28px] items-start px-[24px] py-0 relative shrink-0 w-full">
       <div className="relative shrink-0 w-full">
-        <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex flex-col gap-[20px] items-center relative w-full">
-          <div className="content-stretch flex flex-col gap-[32px] items-center relative shrink-0 w-full">
-            <div className="content-stretch flex flex-col gap-[12px] items-center justify-center relative shrink-0 w-full">
+        <div className="bg-clip-padding border-0 border-transparent border-solid flex flex-col gap-[20px] items-center relative w-full">
+          <div className="flex flex-col gap-[32px] items-center relative shrink-0 w-full">
+            <div className="flex flex-col gap-[12px] items-center justify-center relative shrink-0 w-full">
               {/* Email label */}
-              <div className="content-stretch flex gap-[4px] items-end relative shrink-0 w-full">
+              <div className="flex gap-[4px] items-end relative shrink-0 w-full">
                 <div className="relative shrink-0">
-                  <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex flex-col gap-[4px] items-start justify-end relative text-[#4a3c2a]">
-                    <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[12px]">
+                  <div className="bg-clip-padding border-0 border-transparent border-solid flex flex-col gap-[4px] items-start justify-end relative text-[#4a3c2a]">
+                    <p className="font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[12px]">
                       Enter the 6-digital code sent to
                     </p>
-                    <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[14px]">
+                    <p className="font-comfortaa font-normal leading-[22.75px] relative shrink-0 text-[14px]">
                       {email}
                     </p>
                   </div>
@@ -169,7 +169,7 @@ export function VerifyEmailContainer({
               </div>
 
               {/* Countdown */}
-              <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] min-w-full relative shrink-0 text-[#de6a07] text-[12px] text-center w-min whitespace-pre-wrap">
+              <p className="font-comfortaa font-medium leading-[17.5px] min-w-full relative shrink-0 text-[#de6a07] text-[12px] text-center w-min whitespace-pre-wrap">
                 {countdown > 0 ? (
                   <>
                     <span>Expired in </span>
@@ -192,24 +192,24 @@ export function VerifyEmailContainer({
 
               {/* Error message */}
               {error && (
-                <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] text-[#de1507] text-[12px] text-center">
+                <p className="font-comfortaa font-normal leading-[17.5px] text-[#de1507] text-[12px] text-center">
                   {error}
                 </p>
               )}
 
               {/* Change email and Resend code */}
-              <div className="box-border content-stretch flex items-start justify-between px-[20px] py-0 relative shrink-0 w-full">
+              <div className="flex items-start justify-between px-[20px] py-0 relative shrink-0 w-full">
                 <button
                   onClick={onChangeEmail}
-                  className="box-border content-stretch flex gap-[8px] items-center px-[12px] py-[4px] relative shrink-0 cursor-pointer hover:opacity-70 transition-opacity"
+                  className="flex gap-[8px] items-center px-[12px] py-[4px] relative shrink-0 cursor-pointer hover:opacity-70 transition-opacity"
                   disabled={isLoading}
                 >
-                  <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12px]">
+                  <p className="font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12px]">
                     Change email
                   </p>
                 </button>
                 {codeResent ? (
-                  <div className="box-border content-stretch flex gap-[8px] items-center justify-center px-[12px] py-[4px] relative shrink-0">
+                  <div className="flex gap-[8px] items-center justify-center px-[12px] py-[4px] relative shrink-0">
                     <div className="flex h-[calc(1px*((var(--transform-inner-width)*1)+(var(--transform-inner-height)*0)))] items-center justify-center relative shrink-0 w-[calc(1px*((var(--transform-inner-height)*1)+(var(--transform-inner-width)*0)))]">
                       <div className="flex-none">
                         <div className="relative size-[12px]">
@@ -217,7 +217,7 @@ export function VerifyEmailContainer({
                         </div>
                       </div>
                     </div>
-                    <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12px]">
+                    <p className="font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12px]">
                       Code resent
                     </p>
                   </div>
@@ -225,9 +225,9 @@ export function VerifyEmailContainer({
                   <button
                     onClick={handleResendCode}
                     disabled={countdown > 0 || isResending || isLoading}
-                    className="box-border content-stretch flex gap-[8px] items-center justify-center px-[12px] py-[4px] relative shrink-0 cursor-pointer hover:opacity-70 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex gap-[8px] items-center justify-center px-[12px] py-[4px] relative shrink-0 cursor-pointer hover:opacity-70 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12px]">
+                    <p className="font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12px]">
                       {isResending ? "Sending..." : "Resend code"}
                     </p>
                   </button>

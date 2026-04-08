@@ -43,13 +43,13 @@ export function PasswordValidationMessages({
         : validation.strength;
 
   return (
-    <div className="content-stretch flex flex-col items-start relative shrink-0">
-      <div className="content-stretch flex gap-[4px] items-center relative shrink-0">
+    <div className="flex flex-col items-start relative shrink-0">
+      <div className="flex gap-[4px] items-center relative shrink-0">
         <ValidationIcon
           isValid={allValid && validation.strength !== "weak"}
         />
         <p
-          className={`font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[12px] text-nowrap whitespace-pre ${
+          className={`font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[12px] text-nowrap whitespace-pre ${
             allValid && validation.strength !== "weak"
               ? "text-[#22C55E]"
               : "text-[#de1507]"
@@ -58,20 +58,20 @@ export function PasswordValidationMessages({
           Password strength: {strengthText}
         </p>
       </div>
-      <div className="content-stretch flex gap-[4px] items-center relative shrink-0">
+      <div className="flex gap-[4px] items-center relative shrink-0">
         <ValidationIcon isValid={validation.hasMinLength} />
         <p
-          className={`font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[12px] text-nowrap whitespace-pre ${
+          className={`font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[12px] text-nowrap whitespace-pre ${
             validation.hasMinLength ? "text-[#22C55E]" : "text-[#de1507]"
           }`}
         >
           At least 8 characters
         </p>
       </div>
-      <div className="content-stretch flex gap-[4px] items-center relative shrink-0">
+      <div className="flex gap-[4px] items-center relative shrink-0">
         <ValidationIcon isValid={validation.hasNumberOrSymbol} />
         <p
-          className={`font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[12px] text-nowrap whitespace-pre ${
+          className={`font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[12px] text-nowrap whitespace-pre ${
             validation.hasNumberOrSymbol ? "text-[#22C55E]" : "text-[#de1507]"
           }`}
         >

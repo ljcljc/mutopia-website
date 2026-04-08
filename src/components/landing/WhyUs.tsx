@@ -13,7 +13,7 @@ function FeatureCard1() {
   return (
     <Card className="border-0 shadow-none bg-transparent gap-[16px] p-0 w-full lg:w-[238px]">
       <CardContent className="p-0 flex flex-col gap-[16px]">
-        <div className="content-stretch flex gap-[10.5px] h-[42px] items-center">
+        <div className="flex gap-[10.5px] h-[42px] items-center">
           <Badge
             iconSize="custom"
             className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center"
@@ -24,11 +24,11 @@ function FeatureCard1() {
               className="size-[24px] text-white"
             />
           </Badge>
-          <h3 className="font-['Comfortaa:Bold',sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
+          <h3 className="font-comfortaa leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
             Certified Professionals
           </h3>
         </div>
-        <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">
+        <p className="font-comfortaa font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">
           All our groomers are certified, insured, and background-checked for
           your peace of mind.
         </p>
@@ -41,7 +41,7 @@ function FeatureCard2() {
   return (
     <Card className="border-0 shadow-none bg-transparent gap-[16px] p-0 w-full lg:w-[238px]">
       <CardContent className="p-0 flex flex-col gap-[16px]">
-        <div className="content-stretch flex gap-[10.5px] h-[42px] items-center">
+        <div className="flex gap-[10.5px] h-[42px] items-center">
           <Badge
             iconSize="custom"
             className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center"
@@ -52,11 +52,11 @@ function FeatureCard2() {
               className="size-[24px] text-white"
             />
           </Badge>
-          <h3 className="font-['Comfortaa:Bold',sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
+          <h3 className="font-comfortaa leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
             Convenient Scheduling
           </h3>
         </div>
-        <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">
+        <p className="font-comfortaa font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">
           Book appointments online 24/7. We work around your schedule, not the
           other way around.
         </p>
@@ -69,7 +69,7 @@ function FeatureCard3() {
   return (
     <Card className="border-0 shadow-none bg-transparent gap-[16px] p-0 w-full lg:w-[238px]">
       <CardContent className="p-0 flex flex-col gap-[16px]">
-        <div className="content-stretch flex gap-[10.5px] h-[42px] items-center">
+        <div className="flex gap-[10.5px] h-[42px] items-center">
           <Badge
             iconSize="custom"
             className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center"
@@ -80,11 +80,11 @@ function FeatureCard3() {
               className="size-[24px] text-white"
             />
           </Badge>
-          <h3 className="font-['Comfortaa:Bold',sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
+          <h3 className="font-comfortaa leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
             Personalized Care
           </h3>
         </div>
-        <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">{`Every pet is unique. We tailor our services to your pet's specific needs and temperament.`}</p>
+        <p className="font-comfortaa font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">{`Every pet is unique. We tailor our services to your pet's specific needs and temperament.`}</p>
       </CardContent>
     </Card>
   );
@@ -94,7 +94,7 @@ function FeatureCard4() {
   return (
     <Card className="border-0 shadow-none bg-transparent gap-[16px] p-0 w-full lg:w-[238px]">
       <CardContent className="p-0 flex flex-col gap-[16px]">
-        <div className="content-stretch flex gap-[10.5px] h-[42px] items-center">
+        <div className="flex gap-[10.5px] h-[42px] items-center">
           <Badge
             iconSize="custom"
             className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center"
@@ -105,11 +105,11 @@ function FeatureCard4() {
               className="size-[24px] text-white"
             />
           </Badge>
-          <h3 className="font-['Comfortaa:Bold',sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
+          <h3 className="font-comfortaa leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
             Premium Quality
           </h3>
         </div>
-        <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">
+        <p className="font-comfortaa font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">
           We use only the finest, pet-safe products and state-of-the-art
           equipment.
         </p>
@@ -122,7 +122,7 @@ function FeatureCard5() {
   return (
     <Card className="border-0 shadow-none bg-transparent gap-[16px] p-0 w-full lg:w-[238px]">
       <CardContent className="p-0 flex flex-col gap-[16px]">
-        <div className="content-stretch flex gap-[10.5px] h-[42px] items-center">
+        <div className="flex gap-[10.5px] h-[42px] items-center">
           <Badge
             iconSize="custom"
             className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center"
@@ -133,11 +133,11 @@ function FeatureCard5() {
               className="size-[24px] text-white"
             />
           </Badge>
-          <h3 className="font-['Comfortaa:Bold',sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
+          <h3 className="font-comfortaa leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
             Stress-Free Experience
           </h3>
         </div>
-        <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">
+        <p className="font-comfortaa font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">
           Mobile service means no stressful car rides. Your pet stays
           comfortable at home.
         </p>
@@ -150,7 +150,7 @@ function FeatureCard6() {
   return (
     <Card className="border-0 shadow-none bg-transparent gap-[16px] p-0 w-full lg:w-[238px]">
       <CardContent className="p-0 flex flex-col gap-[16px]">
-        <div className="content-stretch flex gap-[10.5px] h-[42px] items-center">
+        <div className="flex gap-[10.5px] h-[42px] items-center">
           <Badge
             iconSize="custom"
             className="bg-[rgba(222,106,7,0.8)] rounded-[12px] size-[42px] p-0 hover:bg-[rgba(222,106,7,0.8)] flex items-center justify-center"
@@ -161,11 +161,11 @@ function FeatureCard6() {
               className="size-[24px] text-white"
             />
           </Badge>
-          <h3 className="font-['Comfortaa:Bold',sans-serif] leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
+          <h3 className="font-comfortaa leading-[20px] text-[#de6a07] text-[14px] text-nowrap whitespace-pre">
             Real-Time Updates
           </h3>
         </div>
-        <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">
+        <p className="font-comfortaa font-normal leading-[22.75px] text-[14px] text-[rgba(74,60,42,0.7)]">
           Get photos and updates throughout the grooming process via our mobile
           app.
         </p>
@@ -180,7 +180,7 @@ function MobileImageSection() {
     <div className="relative w-full max-w-[393px] mx-auto" data-name="Img">
       <div className="relative h-[349px]" data-name="Container">
         <div
-          className="absolute bg-[rgba(255,255,255,0)] box-border content-stretch flex flex-col h-[324px] items-start left-[2px] right-[2px] overflow-clip rounded-[21px] shadow-[0px_20px_25px_-5px_rgba(0,0,0,0.1),0px_8px_10px_-6px_rgba(0,0,0,0.1)] top-[-9px]"
+          className="absolute bg-[rgba(255,255,255,0)] flex flex-col h-[324px] items-start left-[2px] right-[2px] overflow-clip rounded-[21px] shadow-[0px_20px_25px_-5px_rgba(0,0,0,0.1),0px_8px_10px_-6px_rgba(0,0,0,0.1)] top-[-9px]"
           data-name="Container"
         >
           <div
@@ -195,42 +195,42 @@ function MobileImageSection() {
           </div>
         </div>
         <div
-          className="absolute bg-[rgba(99,52,121,0.78)] box-border content-stretch flex flex-col items-start left-[2px] right-[2px] p-[12px] rounded-[16px] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] top-[279px]"
+          className="absolute bg-[rgba(99,52,121,0.78)] flex flex-col items-start left-[2px] right-[2px] p-[12px] rounded-[16px] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] top-[279px]"
           data-name="Container"
         >
           <div className="relative shrink-0 w-full">
             <div className="flex flex-row items-center size-full">
-              <div className="box-border content-center flex gap-[12px] sm:gap-[20px] items-center justify-between px-[12px] sm:px-[36px] py-0 relative w-full">
+              <div className="content-center flex gap-[12px] sm:gap-[20px] items-center justify-between px-[12px] sm:px-[36px] py-0 relative w-full">
                 <div
-                  className="content-stretch flex flex-col h-[45.5px] items-center relative shrink-0 text-center text-nowrap text-white whitespace-pre"
+                  className="flex flex-col h-[45.5px] items-center relative shrink-0 text-center text-nowrap text-white whitespace-pre"
                   data-name="Container"
                 >
-                  <p className="font-['Comfortaa:Bold',sans-serif] leading-[28px] relative shrink-0 text-[20px]">
+                  <p className="font-comfortaa leading-[28px] relative shrink-0 text-[20px]">
                     100%
                   </p>
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[12px]">
+                  <p className="font-comfortaa font-normal leading-[17.5px] relative shrink-0 text-[12px]">
                     Verified groomer
                   </p>
                 </div>
                 <div
-                  className="content-stretch flex flex-col h-[45.5px] items-center relative shrink-0 text-center text-nowrap text-white whitespace-pre"
+                  className="flex flex-col h-[45.5px] items-center relative shrink-0 text-center text-nowrap text-white whitespace-pre"
                   data-name="Container"
                 >
-                  <p className="font-['Comfortaa:Bold',sans-serif] leading-[28px] relative shrink-0 text-[20px]">
+                  <p className="font-comfortaa leading-[28px] relative shrink-0 text-[20px]">
                     Quick
                   </p>
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[12px]">
+                  <p className="font-comfortaa font-normal leading-[17.5px] relative shrink-0 text-[12px]">
                     Availability
                   </p>
                 </div>
                 <div
-                  className="content-stretch flex flex-col h-[45.5px] items-center relative shrink-0 text-center text-nowrap text-white whitespace-pre"
+                  className="flex flex-col h-[45.5px] items-center relative shrink-0 text-center text-nowrap text-white whitespace-pre"
                   data-name="Container"
                 >
-                  <p className="font-['Comfortaa:Bold',sans-serif] leading-[28px] relative shrink-0 text-[20px]">
+                  <p className="font-comfortaa leading-[28px] relative shrink-0 text-[20px]">
                     Premium
                   </p>
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[12px]">
+                  <p className="font-comfortaa font-normal leading-[17.5px] relative shrink-0 text-[12px]">
                     Service
                   </p>
                 </div>
@@ -272,7 +272,7 @@ function DesktopImageSection() {
     <div className="relative w-full max-w-[504px]">
       <div className="relative h-[400px]" data-name="Container">
         <div
-          className="absolute bg-[rgba(255,255,255,0)] box-border content-stretch flex flex-col h-[417.346px] items-start left-[-6.83px] right-[-13.83px] overflow-clip rounded-[21px] shadow-[0px_20px_25px_-5px_rgba(0,0,0,0.1),0px_8px_10px_-6px_rgba(0,0,0,0.1)] top-[-8.67px]"
+          className="absolute bg-[rgba(255,255,255,0)] flex flex-col h-[417.346px] items-start left-[-6.83px] right-[-13.83px] overflow-clip rounded-[21px] shadow-[0px_20px_25px_-5px_rgba(0,0,0,0.1),0px_8px_10px_-6px_rgba(0,0,0,0.1)] top-[-8.67px]"
           data-name="Container"
         >
           <div className="h-full relative shrink-0 w-full">
@@ -284,31 +284,31 @@ function DesktopImageSection() {
           </div>
         </div>
         <div
-          className="absolute bg-[rgba(99,52,121,0.78)] box-border content-stretch flex flex-col items-start left-[28px] right-[28px] px-[36px] py-[12px] rounded-[16px] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] top-[364.25px]"
+          className="absolute bg-[rgba(99,52,121,0.78)] flex flex-col items-start left-[28px] right-[28px] px-[36px] py-[12px] rounded-[16px] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] top-[364.25px]"
           data-name="Container"
         >
           <div className="content-center flex flex-wrap gap-[20px] items-center justify-between relative shrink-0 w-full">
-            <div className="content-stretch flex flex-col h-[45.5px] items-center relative shrink-0 text-center text-nowrap text-white whitespace-pre">
-              <p className="font-['Comfortaa:Bold',sans-serif] leading-[28px] relative shrink-0 text-[20px]">
+            <div className="flex flex-col h-[45.5px] items-center relative shrink-0 text-center text-nowrap text-white whitespace-pre">
+              <p className="font-comfortaa leading-[28px] relative shrink-0 text-[20px]">
                 100%
               </p>
-              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[12px]">
+              <p className="font-comfortaa font-normal leading-[17.5px] relative shrink-0 text-[12px]">
                 Verified groomer
               </p>
             </div>
-            <div className="content-stretch flex flex-col h-[45.5px] items-center relative shrink-0 text-center text-nowrap text-white whitespace-pre">
-              <p className="font-['Comfortaa:Bold',sans-serif] leading-[28px] relative shrink-0 text-[20px]">
+            <div className="flex flex-col h-[45.5px] items-center relative shrink-0 text-center text-nowrap text-white whitespace-pre">
+              <p className="font-comfortaa leading-[28px] relative shrink-0 text-[20px]">
                 Quick
               </p>
-              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[12px]">
+              <p className="font-comfortaa font-normal leading-[17.5px] relative shrink-0 text-[12px]">
                 Availability
               </p>
             </div>
-            <div className="content-stretch flex flex-col h-[45.5px] items-center relative shrink-0 text-center text-nowrap text-white whitespace-pre">
-              <p className="font-['Comfortaa:Bold',sans-serif] leading-[28px] relative shrink-0 text-[20px]">
+            <div className="flex flex-col h-[45.5px] items-center relative shrink-0 text-center text-nowrap text-white whitespace-pre">
+              <p className="font-comfortaa leading-[28px] relative shrink-0 text-[20px]">
                 Premium
               </p>
-              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[12px]">
+              <p className="font-comfortaa font-normal leading-[17.5px] relative shrink-0 text-[12px]">
                 Service
               </p>
             </div>
@@ -352,19 +352,19 @@ function MobileFeatureCard({
   description: string;
 }) {
   return (
-    <div className="content-stretch flex flex-col gap-[16px] items-start relative shrink-0 w-full">
-      <div className="content-stretch flex flex-col gap-[10.5px] items-center justify-center relative shrink-0 w-full">
+    <div className="flex flex-col gap-[16px] items-start relative shrink-0 w-full">
+      <div className="flex flex-col gap-[10.5px] items-center justify-center relative shrink-0 w-full">
         <div className="bg-[rgba(222,106,7,0.8)] relative rounded-[12px] shrink-0 size-[42px] flex items-center justify-center">
-          <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex items-center justify-center relative size-[42px]">
+          <div className="bg-clip-padding border-0 border-transparent border-solid flex items-center justify-center relative size-[42px]">
             {icon}
           </div>
         </div>
-        <p className="font-['Comfortaa:Bold',sans-serif] leading-[20px] text-[#de6a07] text-[14px]">
+        <p className="font-comfortaa leading-[20px] text-[#de6a07] text-[14px]">
           {title}
         </p>
       </div>
       <div className="h-[68.25px] relative shrink-0 w-full">
-        <p className="absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] left-1/2 -translate-x-1/2 text-[14px] text-[rgba(74,60,42,0.7)] text-center top-0 w-[233px]">
+        <p className="absolute font-comfortaa font-normal leading-[22.75px] left-1/2 -translate-x-1/2 text-[14px] text-[rgba(74,60,42,0.7)] text-center top-0 w-[233px]">
           {description}
         </p>
       </div>
@@ -375,7 +375,7 @@ function MobileFeatureCard({
 // Mobile Slide Component - Contains 2 cards (top and bottom)
 function MobileSlide1() {
   return (
-    <div className="content-stretch flex flex-col gap-[36px] items-start w-[238px]">
+    <div className="flex flex-col gap-[36px] items-start w-[238px]">
       <MobileFeatureCard
         icon={
           <Icon
@@ -404,7 +404,7 @@ function MobileSlide1() {
 
 function MobileSlide2() {
   return (
-    <div className="content-stretch flex flex-col gap-[36px] items-start w-[238px]">
+    <div className="flex flex-col gap-[36px] items-start w-[238px]">
       <MobileFeatureCard
         icon={
           <Icon
@@ -433,7 +433,7 @@ function MobileSlide2() {
 
 function MobileSlide3() {
   return (
-    <div className="content-stretch flex flex-col gap-[36px] items-start w-[238px]">
+    <div className="flex flex-col gap-[36px] items-start w-[238px]">
       <MobileFeatureCard
         icon={
           <Icon
@@ -497,11 +497,11 @@ export default function WhyUs() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-8 md:px-12 lg:px-[57.5px]">
         {/* Title Section */}
-        <div className="content-stretch flex flex-col gap-[16px] items-center relative shrink-0 text-center w-full mb-[48px] lg:mb-[56px]">
-          <p className="font-['Comfortaa:Bold',sans-serif] leading-[40px] relative shrink-0 text-[32px] text-[rgba(99,52,121,0.8)] w-full">
+        <div className="flex flex-col gap-[16px] items-center relative shrink-0 text-center w-full mb-[48px] lg:mb-[56px]">
+          <p className="font-comfortaa leading-[40px] relative shrink-0 text-[32px] text-[rgba(99,52,121,0.8)] w-full">
             Why Choose Mutopia?
           </p>
-          <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[28px] relative shrink-0 text-[16px] text-[rgba(74,60,42,0.7)] w-full max-w-[672px] mx-auto">
+          <p className="font-comfortaa font-normal leading-[28px] relative shrink-0 text-[16px] text-[rgba(74,60,42,0.7)] w-full max-w-[672px] mx-auto">
             {`We're not just another grooming service. We're pet care specialists who understand that your furry family members deserve the very best.`}
           </p>
         </div>
@@ -533,7 +533,7 @@ export default function WhyUs() {
             data-name="Container"
           >
             <div
-              className="box-border content-stretch flex gap-[24px] sm:gap-[36px] items-center px-4 sm:px-[36px] py-0 relative shrink-0"
+              className="flex gap-[24px] sm:gap-[36px] items-center px-4 sm:px-[36px] py-0 relative shrink-0"
               data-name="Frame87"
             >
               <button

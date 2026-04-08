@@ -42,8 +42,8 @@ export default function Packages() {
       <div className="max-w-7xl mx-auto px-4 sm:px-8 md:px-12 lg:px-[57.5px] relative z-10">
         <div className="flex flex-col gap-[56px] md:gap-[70px] items-center w-full">
           {/* Title */}
-          <div className="content-stretch flex flex-col gap-[20px] items-center text-center w-full max-w-[672px]">
-            <h2 className="font-['Comfortaa:Bold',sans-serif] leading-[40px] text-white text-[32px]">
+          <div className="flex flex-col gap-[20px] items-center text-center w-full max-w-[672px]">
+            <h2 className="font-comfortaa leading-[40px] text-white text-[32px]">
               <span className="md:hidden">
                 Membership
                 <br />
@@ -51,7 +51,7 @@ export default function Packages() {
               </span>
               <span className="hidden md:inline">Membership Packages</span>
             </h2>
-            <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[28px] text-[16px] text-[rgba(255,255,255,0.8)] max-w-[588px] px-4 md:px-0">
+            <p className="font-comfortaa font-normal leading-[28px] text-[16px] text-[rgba(255,255,255,0.8)] max-w-[588px] px-4 md:px-0">
               Save money and ensure your pet always looks their best with our
               convenient annuel membership packages.
             </p>

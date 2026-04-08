@@ -178,7 +178,7 @@ export function Step3() {
   const renderSelectedAddOnsPanel = (isFloating: boolean) => (
     <div
       className={cn(
-        "content-stretch flex flex-col gap-[calc(12*var(--px393))] sm:gap-[14px] items-start w-full bg-white sm:px-0 sm:py-0",
+        "flex flex-col gap-[calc(12*var(--px393))] sm:gap-[14px] items-start w-full bg-white sm:px-0 sm:py-0",
         isFloating
           ? "fixed bottom-0 left-0 right-0 z-50 sm:hidden"
           : "relative"
@@ -201,18 +201,18 @@ export function Step3() {
         )}
       >
         <div className={cn(isFloating ? "px-[24px] py-[12px]" : "px-0 py-0")}>
-        <div className="bg-[#f4ffde] border border-[#6aa31c] border-solid content-stretch flex h-[calc(36*var(--px393))] sm:h-[36px] items-center overflow-clip px-[calc(16*var(--px393))] py-[calc(4*var(--px393))] sm:px-[16px] sm:py-[4px] relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] shrink-0 ">
-          <div className="content-stretch flex gap-[calc(8*var(--px393))] sm:gap-[8px] items-center relative shrink-0">
+        <div className="bg-[#f4ffde] border border-[#6aa31c] border-solid flex h-[calc(36*var(--px393))] sm:h-[36px] items-center overflow-clip px-[calc(16*var(--px393))] py-[calc(4*var(--px393))] sm:px-[16px] sm:py-[4px] relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] shrink-0 ">
+          <div className="flex gap-[calc(8*var(--px393))] sm:gap-[8px] items-center relative shrink-0">
             <Icon
               name="alert-success"
               className="relative shrink-0 size-[calc(12*var(--px393))] sm:size-[12px] text-[#6aa31c]"
             />
-            <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] relative shrink-0 text-[#467900] text-[calc(10*var(--px393))] sm:text-[12px] sm:leading-[16px] sm:font-bold sm:font-['Comfortaa:Bold',sans-serif]">
+            <p className="font-comfortaa font-normal leading-[normal] relative shrink-0 text-[#467900] text-[calc(10*var(--px393))] sm:text-[12px] sm:leading-[16px] sm:font-bold sm:font-comfortaa">
               {selectedAddOns.length} add-on{selectedAddOns.length > 1 ? "s" : ""} selected
             </p>
           </div>
         </div>
-        <div className="content-stretch flex flex-wrap gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full mt-[calc(12*var(--px393))] sm:mt-[14px]">
+        <div className="flex flex-wrap gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full mt-[calc(12*var(--px393))] sm:mt-[14px]">
           {selectedAddOns.map((addOnId) => {
             const addOn = addOnsList.find((a) => a.id === addOnId);
             if (!addOn) return null;
@@ -227,9 +227,9 @@ export function Step3() {
             return (
               <div
                 key={addOnId}
-                className="border border-[#4c4c4c] border-solid content-stretch flex gap-[calc(4*var(--px393))] sm:gap-[4px] h-[calc(24*var(--px393))] sm:h-[24px] items-center justify-center overflow-clip px-[calc(10*var(--px393))] py-[calc(5*var(--px393))] sm:px-[17px] sm:py-[5px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shrink-0"
+                className="border border-[#4c4c4c] border-solid flex gap-[calc(4*var(--px393))] sm:gap-[4px] h-[calc(24*var(--px393))] sm:h-[24px] items-center justify-center overflow-clip px-[calc(10*var(--px393))] py-[calc(5*var(--px393))] sm:px-[17px] sm:py-[5px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shrink-0"
               >
-                <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[calc(14*var(--px393))] sm:leading-[14px] relative shrink-0 text-[#4c4c4c] text-[calc(10*var(--px393))] sm:text-[10px]">
+                <p className="font-comfortaa font-bold leading-[calc(14*var(--px393))] sm:leading-[14px] relative shrink-0 text-[#4c4c4c] text-[calc(10*var(--px393))] sm:text-[10px]">
                   {addOn.name} ${price.toFixed(2)}
                 </p>
                 <button
@@ -252,32 +252,32 @@ export function Step3() {
   );
 
   return (
-    <div className="content-stretch flex flex-col gap-[calc(16*var(--px393))] sm:gap-[32px] items-start relative w-full px-[calc(20*var(--px393))] sm:px-0">
+    <div className="flex flex-col gap-[calc(16*var(--px393))] sm:gap-[32px] items-start relative w-full px-[calc(20*var(--px393))] sm:px-0">
       {/* Mobile Step Header */}
-      <div className="content-stretch flex flex-col gap-[calc(12*var(--px393))] sm:gap-[12px] items-start relative shrink-0 w-full sm:hidden">
-        <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[calc(12*var(--px393))] sm:text-[12px] text-black w-full whitespace-pre-wrap">
+      <div className="flex flex-col gap-[calc(12*var(--px393))] sm:gap-[12px] items-start relative shrink-0 w-full sm:hidden">
+        <p className="font-comfortaa font-bold leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[calc(12*var(--px393))] sm:text-[12px] text-black w-full whitespace-pre-wrap">
           Book your appointment
         </p>
-        <div className="border border-[#4c4c4c] border-solid content-stretch flex h-[calc(24*var(--px393))] sm:h-[24px] items-center justify-center overflow-clip px-[calc(9*var(--px393))] py-[calc(5*var(--px393))] sm:px-[9px] sm:py-[5px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shrink-0">
-          <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[calc(14*var(--px393))] sm:leading-[14px] relative shrink-0 text-[#4c4c4c] text-[calc(10*var(--px393))] sm:text-[10px]">
+        <div className="border border-[#4c4c4c] border-solid flex h-[calc(24*var(--px393))] sm:h-[24px] items-center justify-center overflow-clip px-[calc(9*var(--px393))] py-[calc(5*var(--px393))] sm:px-[9px] sm:py-[5px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shrink-0">
+          <p className="font-comfortaa font-bold leading-[calc(14*var(--px393))] sm:leading-[14px] relative shrink-0 text-[#4c4c4c] text-[calc(10*var(--px393))] sm:text-[10px]">
             Step 3 of 6
           </p>
         </div>
-        <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] min-w-full relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px] whitespace-pre-wrap">
+        <p className="font-comfortaa font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] min-w-full relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px] whitespace-pre-wrap">
           {petName ? `${petName} - package and add-on` : "Package and add-on"}
         </p>
       </div>
       <div className="flex flex-col gap-[calc(32*var(--px393))] sm:gap-[32px] items-start relative w-full">
       {/* Service Package Selection */}
-      <div className="bg-white box-border flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
-          <div className="content-stretch flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full">
-            <div className="content-stretch flex flex-col gap-[calc(4*var(--px393))] sm:gap-[4px] items-start relative shrink-0 w-full">
-              <div className="content-stretch flex gap-[7px] items-center relative shrink-0 w-full">
-                <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px]">
+      <div className="bg-white flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
+          <div className="flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full">
+            <div className="flex flex-col gap-[calc(4*var(--px393))] sm:gap-[4px] items-start relative shrink-0 w-full">
+              <div className="flex gap-[7px] items-center relative shrink-0 w-full">
+                <p className="font-comfortaa font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px]">
                   Select your service package
                 </p>
               </div>
-              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[#4a5565] text-[calc(12.25*var(--px393))] sm:text-[12.25px]">
+              <p className="font-comfortaa font-normal leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[#4a5565] text-[calc(12.25*var(--px393))] sm:text-[12.25px]">
                 Choose the package that best fits your pet's needs
               </p>
             </div>
@@ -315,19 +315,19 @@ export function Step3() {
       {/* Add-ons Selection */}
       <div
         ref={addOnSectionRef}
-        className="bg-white box-border flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full"
+        className="bg-white flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full"
       >
-          <div className="content-stretch flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full">
-            <div className="content-stretch flex flex-col gap-[calc(4*var(--px393))] sm:gap-[4px] items-start relative shrink-0 w-full">
-              <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px]">
+          <div className="flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full">
+            <div className="flex flex-col gap-[calc(4*var(--px393))] sm:gap-[4px] items-start relative shrink-0 w-full">
+              <p className="font-comfortaa font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px]">
                 Enhance your service with add-on (Optional)
               </p>
-              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[#4a5565] text-[calc(12.25*var(--px393))] sm:text-[12.25px]">
+              <p className="font-comfortaa font-normal leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[#4a5565] text-[calc(12.25*var(--px393))] sm:text-[12.25px]">
                 Add extra pampering for your furry friend
               </p>
             </div>
             {/* Category Badges */}
-            <div className="content-stretch flex flex-wrap gap-[calc(8*var(--px393))] sm:gap-[8px] items-center relative shrink-0">
+            <div className="flex flex-wrap gap-[calc(8*var(--px393))] sm:gap-[8px] items-center relative shrink-0">
               {categories.map((category) => {
                 const isSelected = selectedCategory === category;
                 return (
@@ -341,10 +341,10 @@ export function Step3() {
                         : "border-[#4c4c4c]"
                     )}
                   >
-                    <div className="box-border content-stretch flex gap-[calc(4*var(--px393))] sm:gap-[4px] h-[calc(24*var(--px393))] sm:h-[24px] items-center justify-center overflow-clip px-[calc(17*var(--px393))] py-[calc(5*var(--px393))] sm:px-[17px] sm:py-[5px] relative rounded-[inherit]">
+                    <div className="flex gap-[calc(4*var(--px393))] sm:gap-[4px] h-[calc(24*var(--px393))] sm:h-[24px] items-center justify-center overflow-clip px-[calc(17*var(--px393))] py-[calc(5*var(--px393))] sm:px-[17px] sm:py-[5px] relative rounded-[inherit]">
                       <p
                         className={cn(
-                          "font-['Comfortaa:Bold',sans-serif] font-bold leading-[calc(14*var(--px393))] sm:leading-[14px] relative shrink-0 text-[calc(10*var(--px393))] sm:text-[10px]",
+                          "font-comfortaa font-bold leading-[calc(14*var(--px393))] sm:leading-[14px] relative shrink-0 text-[calc(10*var(--px393))] sm:text-[10px]",
                           isSelected ? "text-[#de6a07]" : "text-[#4c4c4c]"
                         )}
                       >
@@ -363,7 +363,7 @@ export function Step3() {
                 );
               })}
             </div>
-            <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[calc(20*var(--px393))] sm:leading-[20px] relative shrink-0 text-[calc(14*var(--px393))] sm:text-[14px] text-[#de6a07]">
+            <p className="font-comfortaa font-bold leading-[calc(20*var(--px393))] sm:leading-[20px] relative shrink-0 text-[calc(14*var(--px393))] sm:text-[14px] text-[#de6a07]">
               {selectedCategory === "Most Popular" ? "Most popular add-ons" : `${selectedCategory || ""} add-ons`}
             </p>
             {/* Add-ons Grid - 1 col on mobile, 2 on PC per Figma */}
@@ -404,28 +404,28 @@ export function Step3() {
       {selectedAddOns.length > 0 && isAddOnFloating && renderSelectedAddOnsPanel(true)}
 
       {/* Total Estimation - Collapsible */}
-      <div className="bg-white box-border flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full">
-          <div className="content-stretch flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full">
+      <div className="bg-white flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full">
+          <div className="flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full">
             <div 
-              className="content-stretch flex gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full cursor-pointer"
+              className="flex gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full cursor-pointer"
               onClick={() => setIsEstimationExpanded(!isEstimationExpanded)}
             >
-              <div className="content-stretch flex flex-[1_0_0] flex-col gap-[calc(4*var(--px393))] sm:gap-[4px] items-start min-h-px min-w-px relative shrink-0">
-                <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px]">
+              <div className="flex flex-[1_0_0] flex-col gap-[calc(4*var(--px393))] sm:gap-[4px] items-start min-h-px min-w-px relative shrink-0">
+                <p className="font-comfortaa font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px]">
                   {isEstimationExpanded ? "Total estimation for the service" : "Subtotal estimation for the service"}
                 </p>
-                <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[#4a5565] text-[calc(12.25*var(--px393))] sm:text-[12.25px]">
+                <p className="font-comfortaa font-normal leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[#4a5565] text-[calc(12.25*var(--px393))] sm:text-[12.25px]">
                   Our groomer will evaluate the final price
                 </p>
               </div>
-              <div className="content-stretch flex gap-[calc(8*var(--px393))] sm:gap-[8px] items-center relative shrink-0">
-                <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[calc(16*var(--px393))] sm:text-[16px] text-[#de6a07]">
+              <div className="flex gap-[calc(8*var(--px393))] sm:gap-[8px] items-center relative shrink-0">
+                <p className="font-comfortaa font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[calc(16*var(--px393))] sm:text-[16px] text-[#de6a07]">
                   ${totalPrice.toFixed(2)}
                 </p>
                 <div className="flex items-center justify-center relative shrink-0 size-[calc(20*var(--px393))] sm:size-[20px]">
                   <div className={cn("flex-none", isEstimationExpanded ? "rotate-180" : "")}>
                     <div className={cn(
-                      "content-stretch flex items-center justify-center relative rounded-[8px] size-[20px]",
+                      "flex items-center justify-center relative rounded-[8px] size-[20px]",
                       "hover:border hover:border-[#8b6357] hover:border-solid transition-colors"
                     )}>
                       <Icon name="chevron-down" size={16} className="text-[#8b6357]" />
@@ -437,17 +437,17 @@ export function Step3() {
             
             {/* Expanded Details */}
             {isEstimationExpanded && (
-              <div className="content-stretch flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full">
+              <div className="flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full">
                 {/* Full rooming package section */}
                 {selectedService && (
-                  <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full">
-                    <div className="content-stretch flex items-center relative shrink-0 w-full">
-                      <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] relative shrink-0 text-[#4a3c2a] text-[10px]">
+                  <div className="flex flex-col gap-[4px] items-start relative shrink-0 w-full">
+                    <div className="flex items-center relative shrink-0 w-full">
+                      <p className="font-comfortaa font-normal leading-[normal] relative shrink-0 text-[#4a3c2a] text-[10px]">
                         Full rooming package
                       </p>
                     </div>
                     {/* Service package name */}
-                    <div className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
+                    <div className="flex font-comfortaa font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
                       <p className="relative shrink-0">
                         {selectedService.name}
                       </p>
@@ -463,7 +463,7 @@ export function Step3() {
                           .map((item) => {
                             const itemPrice = typeof item.price === "string" ? parseFloat(item.price) : item.price;
                             return (
-                              <div key={item.id} className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
+                              <div key={item.id} className="flex font-comfortaa font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
                                 <p className="relative shrink-0">
                                   {item.name}
                                 </p>
@@ -477,7 +477,7 @@ export function Step3() {
                     )}
                     {/* Separator line */}
                     <div className="h-0 relative shrink-0 w-full border-t border-[#000000] my-[4px]" />
-                    <div className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
+                    <div className="flex font-comfortaa font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
                       <p className="relative shrink-0">
                         Subtotal
                       </p>
@@ -490,14 +490,14 @@ export function Step3() {
                 
                 {/* Add-ons section */}
                 {selectedAddOnsDetails.length > 0 && (
-                  <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full">
-                    <div className="content-stretch flex items-center relative shrink-0 w-full">
-                      <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] relative shrink-0 text-[#4a3c2a] text-[10px]">
+                  <div className="flex flex-col gap-[4px] items-start relative shrink-0 w-full">
+                    <div className="flex items-center relative shrink-0 w-full">
+                      <p className="font-comfortaa font-normal leading-[normal] relative shrink-0 text-[#4a3c2a] text-[10px]">
                         Add-ons
                       </p>
                     </div>
                     {selectedAddOnsDetails.map((addOn) => (
-                      <div key={addOn.id} className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
+                      <div key={addOn.id} className="flex font-comfortaa font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
                         <p className="relative shrink-0">
                           {addOn.name}
                         </p>
@@ -508,7 +508,7 @@ export function Step3() {
                     ))}
                     {/* Separator line */}
                     <div className="h-0 relative shrink-0 w-full border-t border-[#000000] my-[4px]" />
-                    <div className="content-stretch flex font-['Comfortaa:Bold',sans-serif] font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
+                    <div className="flex font-comfortaa font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
                       <p className="relative shrink-0">
                         Subtotal
                       </p>
@@ -524,8 +524,8 @@ export function Step3() {
       </div>
 
       {/* Buttons */}
-      <div className="content-stretch flex flex-col sm:flex-row gap-[calc(12*var(--px393))] sm:gap-[20px] items-stretch sm:items-start relative shrink-0 w-full">
-          <div className="content-stretch flex flex-col sm:flex-row gap-[calc(12*var(--px393))] sm:gap-[20px] items-stretch sm:items-center relative shrink-0 w-full sm:w-auto">
+      <div className="flex flex-col sm:flex-row gap-[calc(12*var(--px393))] sm:gap-[20px] items-stretch sm:items-start relative shrink-0 w-full">
+          <div className="flex flex-col sm:flex-row gap-[calc(12*var(--px393))] sm:gap-[20px] items-stretch sm:items-center relative shrink-0 w-full sm:w-auto">
             {isLoggedIn ? (
               <OrangeButton
                 size="medium"

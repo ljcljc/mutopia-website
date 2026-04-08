@@ -66,7 +66,7 @@ export function VerificationCodeInput({
   };
 
   return (
-    <div className="content-stretch flex gap-[8px] items-end justify-center relative shrink-0 w-full">
+    <div className="flex gap-[8px] items-end justify-center relative shrink-0 w-full">
       {code.map((digit, index) => (
         <input
           key={index}
@@ -80,7 +80,7 @@ export function VerificationCodeInput({
           onChange={(e) => handleChange(index, e.target.value)}
           onKeyDown={(e) => handleKeyDown(index, e)}
           onPaste={index === 0 ? handlePaste : undefined}
-          className={`border border-solid rounded-[4px] shrink-0 size-[42px] text-center font-['Comfortaa:Medium',sans-serif] font-medium text-[16px] text-[#4a3c2a] focus:outline-none focus:ring-2 focus:ring-[#2374ff] focus:ring-offset-1 ${
+          className={`border border-solid rounded-[4px] shrink-0 size-[42px] text-center font-comfortaa font-medium text-[16px] text-[#4a3c2a] focus:outline-none focus:ring-2 focus:ring-[#2374ff] focus:ring-offset-1 ${
             error
               ? "border-[#de1507]"
               : "border-[#de6a07] focus:border-[#2374ff]"

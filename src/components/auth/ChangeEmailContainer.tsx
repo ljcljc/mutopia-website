@@ -82,11 +82,11 @@ export function ChangeEmailContainer({
   };
 
   return (
-    <div className="box-border content-stretch flex flex-col gap-[28px] items-start px-[24px] py-0 relative shrink-0 w-full">
+    <div className="flex flex-col gap-[28px] items-start px-[24px] py-0 relative shrink-0 w-full">
       <div className="relative shrink-0 w-full">
-        <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex flex-col gap-[20px] items-start relative w-full">
-          <div className="content-stretch flex flex-col gap-[16px] items-start relative shrink-0 w-full">
-            <div className="content-stretch flex flex-col gap-[8px] items-start relative shrink-0 w-full">
+        <div className="bg-clip-padding border-0 border-transparent border-solid flex flex-col gap-[20px] items-start relative w-full">
+          <div className="flex flex-col gap-[16px] items-start relative shrink-0 w-full">
+            <div className="flex flex-col gap-[8px] items-start relative shrink-0 w-full">
               <CustomInput
                 label="Email"
                 value={email}

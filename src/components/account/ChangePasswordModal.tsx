@@ -270,7 +270,7 @@ export default function ChangePasswordModal({
             </button>
             
             {/* Title (居中) */}
-            <h2 className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-lg">
+            <h2 className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap font-comfortaa font-semibold text-[#4A3C2A] text-lg">
               Change password
             </h2>
           </div>
@@ -313,7 +313,7 @@ export default function ChangePasswordModal({
               <div className="flex flex-col mt-1">
                 <div className="flex items-center gap-2">
                   <Icon name="alert-error" className="w-4 h-4 text-[#de1507] shrink-0" />
-                  <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] text-[#de1507] text-[12px]">
+                  <p className="font-comfortaa font-medium leading-[17.5px] text-[#de1507] text-[12px]">
                     {currentPasswordError}
                   </p>
                 </div>
@@ -325,7 +325,7 @@ export default function ChangePasswordModal({
                     // 打开 Forgot password 弹窗（会关闭当前弹窗）
                     onOpenForgotPassword?.();
                   }}
-                  className="text-[#DE6A07] hover:text-[#DE6A07]/80 font-['Comfortaa:Medium',sans-serif] font-medium text-sm whitespace-nowrap self-end mt-4 cursor-pointer"
+                  className="text-[#DE6A07] hover:text-[#DE6A07]/80 font-comfortaa font-medium text-sm whitespace-nowrap self-end mt-4 cursor-pointer"
                 >
                   Forgot password
                 </button>
@@ -348,7 +348,7 @@ export default function ChangePasswordModal({
               autoComplete="new-password"
             />
             {newPasswordError && (
-              <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] text-[#de1507] text-[12px] mt-1">
+              <p className="font-comfortaa font-medium leading-[17.5px] text-[#de1507] text-[12px] mt-1">
                 {newPasswordError}
               </p>
             )}
@@ -369,7 +369,7 @@ export default function ChangePasswordModal({
               autoComplete="new-password"
             />
             {confirmPasswordError && (
-              <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] text-[#de1507] text-[12px] mt-1">
+              <p className="font-comfortaa font-medium leading-[17.5px] text-[#de1507] text-[12px] mt-1">
                 {confirmPasswordError}
               </p>
             )}
@@ -382,7 +382,7 @@ export default function ChangePasswordModal({
           <button
             type="button"
             onClick={handleCancel}
-            className="w-[120px] h-[36px] rounded-[32px] border-2 border-[#de6a07] bg-white text-[#de6a07] font-['Comfortaa:Medium',sans-serif] font-medium text-sm hover:bg-[#de6a07]/10 transition-colors"
+            className="w-[120px] h-[36px] rounded-[32px] border-2 border-[#de6a07] bg-white text-[#de6a07] font-comfortaa font-medium text-sm hover:bg-[#de6a07]/10 transition-colors"
           >
             Cancel
           </button>
@@ -400,7 +400,7 @@ export default function ChangePasswordModal({
             {isSubmitting ? (
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
-              <span className="font-['Comfortaa:Medium',sans-serif] font-medium text-sm text-white">
+              <span className="font-comfortaa font-medium text-sm text-white">
                 Change
               </span>
             )}

@@ -162,10 +162,10 @@ export function FileUpload({
   const isUploadDisabled = maxFiles ? displayItems.length >= maxFiles : false;
 
   return (
-    <div className={cn("content-stretch flex flex-col items-start relative w-full ", className)}>
+    <div className={cn("flex flex-col items-start relative w-full ", className)}>
       <div
         className={cn(
-          "bg-neutral-50 border-[#de6a07] border-[1.5px] border-dashed content-stretch flex flex-col items-center justify-center p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(16*var(--px393))] sm:rounded-[16px] shrink-0 w-full transition-colors shadow-[0px_4px_10px_0px_rgba(0,0,0,0.15)]",
+          "bg-neutral-50 border-[#de6a07] border-[1.5px] border-dashed flex flex-col items-center justify-center p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(16*var(--px393))] sm:rounded-[16px] shrink-0 w-full transition-colors shadow-[0px_4px_10px_0px_rgba(0,0,0,0.15)]",
           isDragging && "border-[#de6a07] bg-[rgba(222,106,7,0.05)]",
           (disabled || isUploadDisabled) && "opacity-60 cursor-not-allowed",
           (state === "error-size" || state === "error-format") && "gap-[12px]"
@@ -176,12 +176,12 @@ export function FileUpload({
         onDrop={!isUploadDisabled ? handleDrop : undefined}
       >
         <div className={cn(
-          "content-stretch flex flex-col gap-[calc(18*var(--px393))] sm:gap-[18px] items-center justify-center relative shrink-0",
+          "flex flex-col gap-[calc(18*var(--px393))] sm:gap-[18px] items-center justify-center relative shrink-0",
           hasFiles && "w-full"
         )}>
           {/* 文件列表：显示在按钮和文字上方 */}
           {hasFiles && (
-            <div className="content-stretch flex flex-wrap sm:flex-nowrap gap-[calc(12*var(--px393))] sm:gap-[12px] items-center relative shrink-0 w-full">
+            <div className="flex flex-wrap sm:flex-nowrap gap-[calc(12*var(--px393))] sm:gap-[12px] items-center relative shrink-0 w-full">
               {/* 已上传的图片缩略图列表 */}
               {displayItems.map((item, index) => {
                 const file = item.file;
@@ -223,7 +223,7 @@ export function FileUpload({
                         {isUploading && (
                           <>
                             <div className="absolute backdrop-blur-[2px] backdrop-filter bg-[rgba(0,0,0,0.2)] inset-0 rounded-[calc(8*var(--px393))] sm:rounded-[8px]" />
-                            <div className="absolute content-stretch flex flex-col gap-[calc(6*var(--px393))] sm:gap-[8px] items-center left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                            <div className="absolute flex flex-col gap-[calc(6*var(--px393))] sm:gap-[8px] items-center left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
                               <p className="font-['Inter:Medium',sans-serif] font-medium leading-[calc(16*var(--px393))] sm:leading-[16px] not-italic relative shrink-0 text-[calc(11*var(--px393))] sm:text-[11px] text-center text-white">
                                 Uploading
                               </p>
@@ -317,22 +317,22 @@ export function FileUpload({
           )}
 
           {/* Text Group: 上传按钮和提示文字（移动端：按钮与 or drag and drop 纵向；PC：横向） */}
-          <div className="content-stretch flex flex-col gap-[calc(6*var(--px393))] sm:gap-[3px] items-center justify-center relative shrink-0">
-            <div className="content-stretch flex flex-col sm:flex-row gap-[calc(6*var(--px393))] sm:gap-[9px] items-center justify-center relative shrink-0">
-              <div className="border-2 border-[#de6a07] sm:border-[#8b6357] border-solid content-stretch flex h-[calc(28*var(--px393))] sm:h-[28px] items-center justify-center px-[calc(26*var(--px393))] sm:px-[26px] relative rounded-[calc(32*var(--px393))] sm:rounded-[32px] shrink-0">
-                <div className="bg-clip-padding border-0 border-transparent border-solid content-stretch flex gap-[5px] items-center relative">
+          <div className="flex flex-col gap-[calc(6*var(--px393))] sm:gap-[3px] items-center justify-center relative shrink-0">
+            <div className="flex flex-col sm:flex-row gap-[calc(6*var(--px393))] sm:gap-[9px] items-center justify-center relative shrink-0">
+              <div className="border-2 border-[#de6a07] sm:border-[#8b6357] border-solid flex h-[calc(28*var(--px393))] sm:h-[28px] items-center justify-center px-[calc(26*var(--px393))] sm:px-[26px] relative rounded-[calc(32*var(--px393))] sm:rounded-[32px] shrink-0">
+                <div className="bg-clip-padding border-0 border-transparent border-solid flex gap-[5px] items-center relative">
                   <button
                     type="button"
                     onClick={handleClick}
                     disabled={disabled || isUploadDisabled}
-                    className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[calc(12*var(--px393))] sm:text-[12px] text-[#de6a07] sm:text-[#8b6357] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="font-comfortaa font-bold leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[calc(12*var(--px393))] sm:text-[12px] text-[#de6a07] sm:text-[#8b6357] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     {buttonText}
                   </button>
                 </div>
               </div>
               {showDragHint && (
-                <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[calc(20*var(--px393))] sm:leading-[20px] relative shrink-0 text-[calc(14*var(--px393))] sm:text-[14px] text-neutral-600">
+                <p className="font-comfortaa font-bold leading-[calc(20*var(--px393))] sm:leading-[20px] relative shrink-0 text-[calc(14*var(--px393))] sm:text-[14px] text-neutral-600">
                   or drag and drop
                 </p>
               )}
@@ -345,13 +345,13 @@ export function FileUpload({
 
         {/* 错误提示 */}
         {(state === "error-size" || state === "error-format") && (
-          <div className="border border-[#de1507] border-solid content-stretch flex h-[36px] items-center overflow-clip px-[16px] py-[4px] relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] shrink-0 w-full">
-            <div className="content-stretch flex gap-[8px] items-center relative shrink-0">
+          <div className="border border-[#de1507] border-solid flex h-[36px] items-center overflow-clip px-[16px] py-[4px] relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] shrink-0 w-full">
+            <div className="flex gap-[8px] items-center relative shrink-0">
               <Icon
                 name="alert-error"
                 className="relative shrink-0 size-[12px] text-[#de1507]"
               />
-              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-normal relative shrink-0 text-[#de1507] text-[10px]">
+              <p className="font-comfortaa font-normal leading-normal relative shrink-0 text-[#de1507] text-[10px]">
                 {state === "error-size"
                   ? "The uploaded image is too big."
                   : "The format of uploaded is not accepted."}

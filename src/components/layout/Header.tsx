@@ -41,10 +41,10 @@ function LogoIcon() {
     <div className="h-[39px] relative shrink-0 w-[35px]" data-name="Icon">
       <img
         alt="Mutopia Logo"
-        className="absolute bg-clip-padding border-0 border-transparent border-solid box-border inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full"
+        className="absolute bg-clip-padding border-0 border-transparent border-solid inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full"
         src={imgIcon}
       />
-      <div className="bg-clip-padding border-0 border-transparent border-solid box-border h-[39px] w-[35px]" />
+      <div className="bg-clip-padding border-0 border-transparent border-solid h-[39px] w-[35px]" />
     </div>
   );
 }
@@ -52,8 +52,8 @@ function LogoIcon() {
 function Mutopia() {
   return (
     <div className="h-[28px] relative shrink-0 w-[92.82px]" data-name="Mutopia">
-      <div className="bg-clip-padding border-0 border-transparent border-solid box-border h-[28px] relative w-[92.82px]">
-        <p className="absolute font-['Comfortaa:Bold',sans-serif] font-bold leading-[28px] left-0 text-[#8b6357] text-[21px] text-nowrap -top-px whitespace-pre">
+      <div className="bg-clip-padding border-0 border-transparent border-solid h-[28px] relative w-[92.82px]">
+        <p className="absolute font-comfortaa font-bold leading-[28px] left-0 text-[#8b6357] text-[21px] text-nowrap -top-px whitespace-pre">
           Mutopia pet
         </p>
       </div>
@@ -67,7 +67,7 @@ function Logo() {
       className="h-[35px] relative shrink-0"
       data-name="Logo"
     >
-      <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[10.5px] h-[35px] items-center relative w-full">
+      <div className="bg-clip-padding border-0 border-transparent border-solid flex gap-[10.5px] h-[35px] items-center relative w-full">
             <LogoIcon />
         <Mutopia />
       </div>
@@ -85,7 +85,7 @@ function NavigationLink({ href, children }: { href: string; children: string }) 
         <a
       href={href}
           onClick={handleClick}
-      className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[21px] text-[#4a3c2a] text-[14px] hover:text-[#8b6357] transition-colors no-underline cursor-pointer whitespace-nowrap"
+      className="font-comfortaa font-normal leading-[21px] text-[#4a3c2a] text-[14px] hover:text-[#8b6357] transition-colors no-underline cursor-pointer whitespace-nowrap"
         >
       {children}
     </a>
@@ -175,7 +175,7 @@ function UserInfo() {
   if (!user) return null;
 
   return (
-    <div className="content-stretch flex gap-[10.5px] items-center">
+    <div className="flex gap-[10.5px] items-center">
       <AccountDropdown
         userInfo={userInfo ?? undefined}
         fallbackName={user.name || user.email}
@@ -224,7 +224,7 @@ function MobileLink({
       <a
         href={href}
         onClick={handleClick}
-        className="absolute flex flex-col font-['Comfortaa:Regular',sans-serif] font-normal h-[48px] justify-center leading-0 left-1/2 text-[#4a3c2a] text-[14px] text-center top-1/2 -translate-x-1/2 -translate-y-1/2 w-full hover:text-[#8b6357] transition-colors no-underline cursor-pointer"
+        className="absolute flex flex-col font-comfortaa font-normal h-[48px] justify-center leading-0 left-1/2 text-[#4a3c2a] text-[14px] text-center top-1/2 -translate-x-1/2 -translate-y-1/2 w-full hover:text-[#8b6357] transition-colors no-underline cursor-pointer"
       >
         <p className="leading-[21px]">{children}</p>
       </a>
@@ -244,8 +244,8 @@ function MobileButton1() {
         className="absolute border-[0.737px] border-[rgba(0,0,0,0.1)] border-solid inset-0 pointer-events-none rounded-[2.47134e+07px]"
       />
       <div className="flex flex-row items-center justify-center size-full">
-        <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[5.25px] h-[48px] items-center justify-center px-[11.237px] py-[0.737px] relative w-full">
-          <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12.25px] text-nowrap whitespace-pre">
+        <div className="bg-clip-padding border-0 border-transparent border-solid flex gap-[5.25px] h-[48px] items-center justify-center px-[11.237px] py-[0.737px] relative w-full">
+          <p className="font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12.25px] text-nowrap whitespace-pre">
             Apply to Groomer
           </p>
         </div>
@@ -259,8 +259,8 @@ function MobileUserSummary() {
   if (!user) return null;
 
   return (
-    <div className="content-stretch flex gap-[16px] items-center justify-center w-full">
-      <div className="content-stretch flex gap-[12px] items-center justify-center w-full">
+    <div className="flex gap-[16px] items-center justify-center w-full">
+      <div className="flex gap-[12px] items-center justify-center w-full">
         <div className="bg-[#8b6357] overflow-clip relative rounded-[100px] shrink-0 size-[20px] flex items-center justify-center" data-name="Icons/Avatar/Brown/Default/Rempli">
           <Icon
             name="user"
@@ -269,7 +269,7 @@ function MobileUserSummary() {
           />
         </div>
         <div className="flex flex-col items-center text-center">
-          <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[#4a3c2a] text-[14px]">
+          <p className="font-comfortaa font-semibold text-[#4a3c2a] text-[14px]">
             {`Welcome, ${user.name}`}
           </p>
         </div>
@@ -292,7 +292,7 @@ function MobileButton2() {
           event.preventDefault();
           handleLogout();
         }}
-        className="w-full py-[12px] text-center font-['Comfortaa:Regular',sans-serif] font-normal leading-[21px] text-[#4a3c2a] text-[14px] hover:text-[#8b6357] transition-colors no-underline cursor-pointer"
+        className="w-full py-[12px] text-center font-comfortaa font-normal leading-[21px] text-[#4a3c2a] text-[14px] hover:text-[#8b6357] transition-colors no-underline cursor-pointer"
       >
         Log out
       </a>
@@ -310,8 +310,8 @@ function MobileButton2() {
         data-name="Button"
       >
         <div className="flex flex-row items-center justify-center size-full">
-          <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[5.25px] h-[48px] items-center justify-center px-[10.5px] py-0 relative w-full">
-          <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[12.25px] text-nowrap text-white whitespace-pre">
+          <div className="bg-clip-padding border-0 border-transparent border-solid flex gap-[5.25px] h-[48px] items-center justify-center px-[10.5px] py-0 relative w-full">
+          <p className="font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[12.25px] text-nowrap text-white whitespace-pre">
             Login / Sign Up
           </p>
           </div>
@@ -356,7 +356,7 @@ function MobileMenu({
               <div className="pb-[8px]">
                 <a
                   href="/account/dashboard"
-                  className="w-full py-[8px] mt-[8px] text-center font-['Comfortaa:Regular',sans-serif] font-normal leading-[21px] text-[#4a3c2a] text-[14px] hover:text-[#8b6357] transition-colors no-underline cursor-pointer block"
+                  className="w-full py-[8px] mt-[8px] text-center font-comfortaa font-normal leading-[21px] text-[#4a3c2a] text-[14px] hover:text-[#8b6357] transition-colors no-underline cursor-pointer block"
                 >
                   Dashboard
                 </a>
@@ -367,7 +367,7 @@ function MobileMenu({
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.1, duration: 0.3 }}
-              className="content-stretch flex flex-col items-start relative shrink-0 w-full"
+              className="flex flex-col items-start relative shrink-0 w-full"
             >
               <MobileLink href="#why-us" onClick={handleLinkClick}>
                 Why Us
@@ -391,7 +391,7 @@ function MobileMenu({
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.3 }}
-              className="box-border content-stretch flex flex-col gap-[16px] items-start pb-0 pt-[13.994px] px-0 relative shrink-0 w-full"
+              className="flex flex-col gap-[16px] items-start pb-0 pt-[13.994px] px-0 relative shrink-0 w-full"
             >
               <MobileButton1 />
               <MobileButton2 />
@@ -411,7 +411,7 @@ function CloseButton({ onClick }: { onClick: () => void }) {
       className="relative shrink-0 size-[23.994px] cursor-pointer"
       data-name="Button"
     >
-      <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex flex-col items-start relative size-[23.994px]">
+      <div className="bg-clip-padding border-0 border-transparent border-solid flex flex-col items-start relative size-[23.994px]">
         <div
           className="h-[23.994px] overflow-clip relative shrink-0 w-full"
           data-name="Icon"
@@ -540,7 +540,7 @@ export default function Header() {
     >
       {/* 移除 max-w-7xl 限制，使用 padding 控制内容区域 */}
       <div className="w-full">
-        <div className="box-border content-stretch flex flex-col items-start min-w-inherit pb-px lg:pb-px pt-0 px-4 sm:px-8 md:px-12 lg:px-[57.5px] xl:px-[80px] 2xl:px-[120px] relative w-full">
+        <div className="flex flex-col items-start min-w-inherit pb-px lg:pb-px pt-0 px-4 sm:px-8 md:px-12 lg:px-[57.5px] xl:px-[80px] 2xl:px-[120px] relative w-full">
           {/* Desktop Header Container */}
           <div className="flex flex-row items-center justify-between w-full h-[62.984px] lg:h-[63px]">
             {/* Left: Logo */}

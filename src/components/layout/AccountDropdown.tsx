@@ -23,16 +23,16 @@ export default function AccountDropdown({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <div className="relative shrink-0 cursor-pointer hover:opacity-80 transition-opacity" data-name="Button tertiary">
-          <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[8px] items-center px-[12px] py-[4px] relative">
+          <div className="bg-clip-padding border-0 border-transparent border-solid flex gap-[8px] items-center px-[12px] py-[4px] relative">
             <div className="bg-[#8b6357] relative rounded-[100px] shrink-0 size-[20px] flex items-center justify-center" data-name="Icons/Avatar/Brown/Default/Rempli">
               <Icon name="user" aria-label="User" className="block size-full text-white" />
               {userInfo?.is_member && (
-                <span className="absolute -right-[4px] -top-[4px] z-10 inline-flex h-[12px] w-[12px] items-center justify-center rounded-full border border-white bg-[#DCFCE7] text-[8px] font-['Comfortaa:Bold',sans-serif] font-bold leading-none text-[#008236] pointer-events-none">
+                <span className="absolute -right-[4px] -top-[4px] z-10 inline-flex h-[12px] w-[12px] items-center justify-center rounded-full border border-white bg-[#DCFCE7] text-[8px] font-comfortaa font-bold leading-none text-[#008236] pointer-events-none">
                   M
                 </span>
               )}
             </div>
-            <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#8b6357] text-[12px]">
+            <p className="font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[#8b6357] text-[12px]">
               {userName}
             </p>
           </div>
@@ -45,7 +45,7 @@ export default function AccountDropdown({
             isDashboardActive ? "bg-[#8b6357]/10 text-[#6f4e44]" : ""
           }`}
         >
-          <span className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px]">
+          <span className="font-comfortaa font-normal text-[14px]">
             Dashboard
           </span>
         </DropdownMenuItem>
@@ -53,7 +53,7 @@ export default function AccountDropdown({
           onClick={handleLogout}
           className="cursor-pointer text-[#8b6357] hover:text-[#6f4e44] hover:bg-[#8b6357]/5"
         >
-          <span className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px]">
+          <span className="font-comfortaa font-normal text-[14px]">
             Log out
           </span>
         </DropdownMenuItem>

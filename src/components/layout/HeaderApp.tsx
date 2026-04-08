@@ -23,18 +23,18 @@ import BaseAccountHeaderShell from "./BaseAccountHeaderShell";
 function Logo() {
   return (
     <div className="h-[35px] relative shrink-0" data-name="Logo">
-      <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[10.5px] h-[35px] items-center relative w-full">
+      <div className="bg-clip-padding border-0 border-transparent border-solid flex gap-[10.5px] h-[35px] items-center relative w-full">
         <div className="h-[39px] relative shrink-0 w-[35px]" data-name="Icon">
           <img
             alt="Mutopia Logo"
-            className="absolute bg-clip-padding border-0 border-transparent border-solid box-border inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full"
+            className="absolute bg-clip-padding border-0 border-transparent border-solid inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full"
             src={imgIcon}
           />
-          <div className="bg-clip-padding border-0 border-transparent border-solid box-border h-[39px] w-[35px]" />
+          <div className="bg-clip-padding border-0 border-transparent border-solid h-[39px] w-[35px]" />
         </div>
         <div className="relative shrink-0" data-name="Mutopia">
-          <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[10px] items-center justify-center relative">
-            <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[28px] relative shrink-0 text-[#8b6357] text-[21px]">
+          <div className="bg-clip-padding border-0 border-transparent border-solid flex gap-[10px] items-center justify-center relative">
+            <p className="font-comfortaa font-bold leading-[28px] relative shrink-0 text-[#8b6357] text-[21px]">
               Mutopia pet
             </p>
           </div>
@@ -154,10 +154,10 @@ export default function HeaderApp() {
         transition: "box-shadow 0.3s ease-in-out",
       }}
       dataName="HeaderApp"
-      containerClassName="box-border content-stretch flex h-[63px] items-center justify-between relative shrink-0 w-full px-[20px] sm:px-8 md:px-12 lg:px-[57.5px] xl:px-[80px] 2xl:px-[120px]"
+      containerClassName="flex h-[63px] items-center justify-between relative shrink-0 w-full px-[20px] sm:px-8 md:px-12 lg:px-[57.5px] xl:px-[80px] 2xl:px-[120px]"
     >
       {/* Left side: Logo + Back to home */}
-      <div className="content-stretch flex gap-[24px] items-center relative shrink-0">
+      <div className="flex gap-[24px] items-center relative shrink-0">
         <Link to="/" onClick={handleHomeClick} className="cursor-pointer" aria-label="Go to home">
           <Logo />
         </Link>
@@ -168,15 +168,15 @@ export default function HeaderApp() {
             className="relative shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
             data-name="Button tertiary"
           >
-            <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[8px] items-center px-[12px] py-[4px] relative">
-              <div className="content-stretch flex gap-[10px] items-center justify-center relative shrink-0 size-[20px]" data-name="Icons">
+            <div className="bg-clip-padding border-0 border-transparent border-solid flex gap-[8px] items-center px-[12px] py-[4px] relative">
+              <div className="flex gap-[10px] items-center justify-center relative shrink-0 size-[20px]" data-name="Icons">
                 <div className="flex-none">
                   <div className="size-4 rotate-180">
                     <Icon name="button-arrow" className="block max-w-none size-full text-[#8b6357]" />
                   </div>
                 </div>
               </div>
-              <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[17.5px] relative shrink-0 text-[#8b6357] text-[12px]">
+              <p className="font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[#8b6357] text-[12px]">
                 Back to home
               </p>
             </div>
@@ -207,18 +207,18 @@ export default function HeaderApp() {
         <AlertDialogContent className="bg-white rounded-[20px] border border-[rgba(0,0,0,0.2)] p-0 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] max-w-[90%] sm:max-w-[700px]">
           <div className="flex flex-col gap-[32px] items-start pb-[32px] pt-[12px] w-full">
             <AlertDialogHeader className="px-[12px] w-full">
-              <AlertDialogTitle className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] text-[#4C4C4C] text-center">
+              <AlertDialogTitle className="font-comfortaa font-normal text-[14px] text-[#4C4C4C] text-center">
                 Leave the page without saving
               </AlertDialogTitle>
               <div className="bg-[rgba(0,0,0,0.1)] h-px w-full mt-[8px]" />
             </AlertDialogHeader>
             <div className="px-[24px] w-full">
               <AlertDialogDescription asChild>
-                <div className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#000000] leading-[22.75px] text-center">
+                <div className="font-comfortaa font-normal text-[#000000] leading-[22.75px] text-center">
                   <p className="text-[14px]">
                     You have entered information in this form. If you leave this page, your changes will be lost.
                   </p>
-                  <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[16px] leading-[28px]">
+                  <p className="font-comfortaa font-semibold text-[16px] leading-[28px]">
                     Are you sure you want to continue?
                   </p>
                 </div>
@@ -256,8 +256,8 @@ function CreditsBadge() {
       className="bg-[#de6a07] h-[24px] relative rounded-[12px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity"
       data-name="Badge"
     >
-      <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[4px] h-[24px] items-center justify-center overflow-clip px-[16px] py-[4px] relative rounded-[inherit]">
-        <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[14px] relative shrink-0 text-[10px] text-white whitespace-nowrap">
+      <div className="bg-clip-padding border-0 border-transparent border-solid flex gap-[4px] h-[24px] items-center justify-center overflow-clip px-[16px] py-[4px] relative rounded-[inherit]">
+        <p className="font-comfortaa font-bold leading-[14px] relative shrink-0 text-[10px] text-white whitespace-nowrap">
           <span>Credits </span>
           {credits}
         </p>

@@ -45,28 +45,28 @@ function CreditRow({
       }`}
     >
       <div>
-        <p className="font-['Comfortaa:Medium',sans-serif] font-medium text-[14px] leading-[21px] text-[#8B6357]">
+        <p className="font-comfortaa font-medium text-[14px] leading-[21px] text-[#8B6357]">
           {title}
         </p>
         <div className="flex items-center gap-[6px] mt-[4px]">
-          <span className={`text-[12.5px] leading-[17.5px] font-bold font-['Comfortaa:Regular',sans-serif] ${statusColor}`}>
+          <span className={`text-[12.5px] leading-[17.5px] font-bold font-comfortaa ${statusColor}`}>
             {statusText}
           </span>
           {showStatusIcon ? <Icon name="alert-info" className={`size-[12px] ${dotColor.replace('bg-', 'text-')}`} /> : null}
         </div>
       </div>
       <div className="flex justify-start text-right">
-        <p className={`font-['Comfortaa:Bold',sans-serif] font-bold text-[24px] leading-[21px] ${amountColor}`}>
+        <p className={`font-comfortaa font-bold text-[24px] leading-[21px] ${amountColor}`}>
           {isCountXAmount ? (
             <>
-              <span className={`font-['Comfortaa:Medium',sans-serif] font-medium text-[14px] leading-[21px] ${amountColor}`}>{count} x </span>
+              <span className={`font-comfortaa font-medium text-[14px] leading-[21px] ${amountColor}`}>{count} x </span>
               {amount}
             </>
           ) : (
             amount
           )}
         </p>
-        <p className="font-['Comfortaa:Medium',sans-serif] font-medium text-[14px] leading-[21px] text-[#8B6357]">
+        <p className="font-comfortaa font-medium text-[14px] leading-[21px] text-[#8B6357]">
           {subtitle}
         </p>
       </div>
@@ -107,28 +107,28 @@ function SpecialOfferCard({
       }`}
     >
       <div>
-        <p className="font-['Comfortaa:Medium',sans-serif] font-medium text-[14px] leading-[21px] text-[#8B6357]">
+        <p className="font-comfortaa font-medium text-[14px] leading-[21px] text-[#8B6357]">
           {title}
         </p>
         <div className="flex items-center gap-[6px] mt-[4px]">
-          <span className={`text-[12.5px] leading-[17.5px] font-bold font-['Comfortaa:Regular',sans-serif] ${statusColor}`}>
+          <span className={`text-[12.5px] leading-[17.5px] font-bold font-comfortaa ${statusColor}`}>
             {statusText}
           </span>
           {showStatusIcon ? <Icon name="alert-info" className={`size-[12px] ${dotColor.replace('bg-', 'text-')}`} /> : null}
         </div>
       </div>
       <div className="flex justify-start text-right">
-        <p className={`font-['Comfortaa:Bold',sans-serif] font-bold text-[24px] leading-[21px] ${amountColor}`}>
+        <p className={`font-comfortaa font-bold text-[24px] leading-[21px] ${amountColor}`}>
           {isCountXAmount ? (
             <>
-              <span className={`font-['Comfortaa:Medium',sans-serif] font-medium text-[14px] leading-[21px] ${amountColor}`}>{count} x </span>
+              <span className={`font-comfortaa font-medium text-[14px] leading-[21px] ${amountColor}`}>{count} x </span>
               {amount}
             </>
           ) : (
             amount
           )}
         </p>
-        <p className="font-['Comfortaa:Medium',sans-serif] font-medium text-[14px] leading-[21px] text-[#8B6357]">
+        <p className="font-comfortaa font-medium text-[14px] leading-[21px] text-[#8B6357]">
           {subtitle}
         </p>
       </div>
@@ -328,7 +328,7 @@ export default function DashboardMyCreditCard() {
   return (
     <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[20px]">
       <div className="flex flex-col gap-[8px] sm:flex-row sm:items-center sm:justify-between mb-[12px]">
-        <p className="font-['Comfortaa:Medium',sans-serif] font-medium text-[16px] leading-[24px] text-[#4A3C2A]">
+        <p className="font-comfortaa font-medium text-[16px] leading-[24px] text-[#4A3C2A]">
           My credit
         </p>
         <OrangeButton
@@ -346,12 +346,12 @@ export default function DashboardMyCreditCard() {
       </div>
 
       <div className="mb-[20px]">
-        <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] leading-[22.5px] text-[#4A5565] mb-[6px]">
+        <p className="font-comfortaa font-normal text-[14px] leading-[22.5px] text-[#4A5565] mb-[6px]">
           Add promo code
         </p>
         <div className="flex items-center gap-[20px]">
           <input
-            className="border border-[#E5E7EB] rounded-[10px] w-[215px] px-[10px] py-[6px] font-['Comfortaa:Regular',sans-serif] text-[12.25px] leading-[17.5px] text-[#4A5565] placeholder:text-[#9CA3AF]"
+            className="border border-[#E5E7EB] rounded-[10px] w-[215px] px-[10px] py-[6px] font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565] placeholder:text-[#9CA3AF]"
             placeholder="Enter your code"
             value={promoCode}
             maxLength={8}
@@ -376,18 +376,18 @@ export default function DashboardMyCreditCard() {
           </OrangeButton>
         </div>
         {promoError ? (
-          <p id="promo-error" className="mt-[6px] text-[12px] text-[#DE1507] font-['Comfortaa:Regular',sans-serif]">
+          <p id="promo-error" className="mt-[6px] text-[12px] text-[#DE1507] font-comfortaa">
             {promoError}
           </p>
         ) : promoCode.length > 0 && !isValidPromoCode(normalizedPromo) ? (
-          <p className="mt-[6px] text-[12px] text-[#4A5565] font-['Comfortaa:Regular',sans-serif]">
+          <p className="mt-[6px] text-[12px] text-[#4A5565] font-comfortaa">
             Code must be 8 characters, letters and numbers only.
           </p>
         ) : null}
       </div>
 
       <div className="mb-[12px]">
-        <p className="font-['Comfortaa:Medium',sans-serif] font-bold text-[14px] leading-[20px] text-[#DE6A07] mb-[12px]">
+        <p className="font-comfortaa font-bold text-[14px] leading-[20px] text-[#DE6A07] mb-[12px]">
           Cash credit
         </p>
         {isLoadingCashCoupons && cashCredits.length === 0 ? (
@@ -419,7 +419,7 @@ export default function DashboardMyCreditCard() {
         <button
           type="button"
           onClick={() => setShowAllCashCredits((value) => !value)}
-          className="w-full flex items-center justify-center gap-[6px] text-[#8B6357] font-bold text-[12px] leading-[17.5px] font-['Comfortaa:Regular',sans-serif] mb-[20px]"
+          className="w-full flex items-center justify-center gap-[6px] text-[#8B6357] font-bold text-[12px] leading-[17.5px] font-comfortaa mb-[20px]"
         >
           <Icon
             name="chevron-down"
@@ -431,7 +431,7 @@ export default function DashboardMyCreditCard() {
       ) : null}
 
       <div>
-        <p className="font-['Comfortaa:Medium',sans-serif] font-bold text-[14px] leading-[20px] text-[#DE6A07] mb-[12px]">
+        <p className="font-comfortaa font-bold text-[14px] leading-[20px] text-[#DE6A07] mb-[12px]">
           Special offer
         </p>
         {isLoadingSpecialCoupons && specialOffers.length === 0 ? (
@@ -463,7 +463,7 @@ export default function DashboardMyCreditCard() {
         <button
           type="button"
           onClick={() => setShowAllSpecialOffers((value) => !value)}
-          className="w-full flex items-center justify-center gap-[6px] text-[#8B6357] font-bold text-[12px] leading-[17.5px] font-['Comfortaa:Regular',sans-serif] mt-[20px]"
+          className="w-full flex items-center justify-center gap-[6px] text-[#8B6357] font-bold text-[12px] leading-[17.5px] font-comfortaa mt-[20px]"
         >
           <Icon
             name="chevron-down"

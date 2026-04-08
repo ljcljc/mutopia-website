@@ -70,19 +70,19 @@ export default function DashboardHeroCard() {
       <div className="border border-[#4A5565] rounded-[14px] p-[13px] flex items-center justify-between">
         <div className="flex flex-col gap-[12px]">
           <div className="flex flex-col gap-[8px] w-[134px]">
-            <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[16px] leading-[28px] text-[#8B6357]">
+            <p className="font-comfortaa font-bold text-[16px] leading-[28px] text-[#8B6357]">
               {petName}
             </p>
-            <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
+            <p className="font-comfortaa font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
               {dateTime}
             </p>
           </div>
           <div className="flex flex-col w-[134px]">
-            <p className="font-['Comfortaa:Medium',sans-serif] font-medium text-[12.25px] leading-[17.5px] text-[#4A3C2A]">
+            <p className="font-comfortaa font-medium text-[12.25px] leading-[17.5px] text-[#4A3C2A]">
               {address.line1}
             </p>
             {address.line2 && (
-              <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[12.25px] leading-[17.5px] text-[#4A3C2A]">
+              <p className="font-comfortaa font-normal text-[12.25px] leading-[17.5px] text-[#4A3C2A]">
                 {address.line2}
               </p>
             )}
@@ -90,7 +90,7 @@ export default function DashboardHeroCard() {
         </div>
         <div className="flex items-center gap-[7px]">
           <div className="border border-[#4C4C4C] rounded-[12px] h-[24px] px-[9px] py-[5px] flex items-center">
-            <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-[#4C4C4C]">
+            <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#4C4C4C]">
               Checked in
             </span>
           </div>

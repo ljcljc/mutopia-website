@@ -84,7 +84,7 @@ function SearchableSelectField({
 
   return (
     <div className="flex w-full max-w-[348px] flex-col gap-[8px]">
-      <span className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-[#4a3c2a]">
+      <span className="font-comfortaa text-[14px] leading-[22.75px] text-[#4a3c2a]">
         {label}
       </span>
       <div className="relative w-full" ref={dropdownRef}>
@@ -186,7 +186,7 @@ function IdentificationAuthenticatedForm({
     <div className="flex flex-col gap-[16px]">
       <div className="flex gap-[20px]">
         <label className="flex flex-1 flex-col gap-[8px]">
-          <span className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-[#4a3c2a]">
+          <span className="font-comfortaa text-[14px] leading-[22.75px] text-[#4a3c2a]">
             First Name
           </span>
           <input
@@ -198,7 +198,7 @@ function IdentificationAuthenticatedForm({
           />
         </label>
         <label className="flex flex-1 flex-col gap-[8px]">
-          <span className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-[#4a3c2a]">
+          <span className="font-comfortaa text-[14px] leading-[22.75px] text-[#4a3c2a]">
             Last Name
           </span>
           <input
@@ -210,15 +210,15 @@ function IdentificationAuthenticatedForm({
           />
         </label>
       </div>
-      <p className="font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[17.5px] text-black">
+      <p className="font-comfortaa text-[12px] leading-[17.5px] text-black">
         Your name should be identical to your ID.
       </p>
       <div className="flex flex-col gap-[8px]">
-        <p className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-black">
+        <p className="font-comfortaa text-[14px] leading-[22.75px] text-black">
           Do you have a valid work permit or social insurance number (SIN) ?
         </p>
         <div className="flex gap-[20px]">
-          <label className="flex items-center gap-[8px] text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#4a3c2a] cursor-pointer">
+          <label className="flex items-center gap-[8px] text-[12px] font-comfortaa text-[#4a3c2a] cursor-pointer">
             <input
               type="radio"
               name="sin"
@@ -228,7 +228,7 @@ function IdentificationAuthenticatedForm({
             />
             Yes
           </label>
-          <label className="flex items-center gap-[8px] text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#4a3c2a] cursor-pointer">
+          <label className="flex items-center gap-[8px] text-[12px] font-comfortaa text-[#4a3c2a] cursor-pointer">
             <input
               type="radio"
               name="sin"
@@ -242,7 +242,7 @@ function IdentificationAuthenticatedForm({
         {sinAlert && (
           <div className="h-[36px] w-fit rounded-[8px] border border-[#de1507] px-[16px] flex items-center gap-[8px] text-[#de1507]">
             <span className="size-[12px] rounded-full bg-[#de1507] text-white text-[10px] leading-[12px] flex items-center justify-center">!</span>
-            <span className="font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px]">
+            <span className="font-comfortaa text-[12px] leading-[16px]">
               {sinAlert}
             </span>
           </div>
@@ -265,7 +265,7 @@ function IdentificationAuthenticatedForm({
 
           <div className="flex gap-[20px]">
             <label className="flex flex-1 flex-col gap-[8px]">
-              <span className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-[#4a3c2a]">
+              <span className="font-comfortaa text-[14px] leading-[22.75px] text-[#4a3c2a]">
                 Address (Starting point of work)
               </span>
               <input
@@ -277,7 +277,7 @@ function IdentificationAuthenticatedForm({
               />
             </label>
             <label className="flex flex-1 flex-col gap-[8px]">
-              <span className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-[#4a3c2a]">
+              <span className="font-comfortaa text-[14px] leading-[22.75px] text-[#4a3c2a]">
                 Phone Number
               </span>
               <input
@@ -651,26 +651,26 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
               >
                 <Icon name="close-arrow" size={16} className="text-[#4a3c2a] block" />
               </button>
-              <p className="flex-1 text-center font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] leading-[22.75px] text-[#4c4c4c]">
+              <p className="flex-1 text-center font-comfortaa font-normal text-[14px] leading-[22.75px] text-[#4c4c4c]">
                 Apply as groomer
               </p>
               <div className="size-[16px]" />
             </div>
             <div className="h-px w-full bg-[rgba(0,0,0,0.1)]" />
             <div className="px-[24px]">
-              <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[16px] leading-[28px] text-[#633479]">
+              <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#633479]">
                 {`Hi ${greetingName || "there"}, welcome to join our grooming team`}
               </p>
             </div>
             <div className="px-[24px] flex items-center justify-between text-[10px] leading-[12px]">
-              <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#4c4c4c]">
+              <p className="font-comfortaa font-normal text-[#4c4c4c]">
                 {step === "portfolio"
                   ? "Complete the application in about 3 minute"
                   : step === "experience"
                     ? "Complete the application in about 5 minutes"
                     : "Fill out the application in about 5 minutes"}
               </p>
-              <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[#4a3c2a]">
+              <p className="font-comfortaa font-bold text-[#4a3c2a]">
                 {step === "portfolio" ? "Upload pictures or paste the link." : "All fields are required."}
               </p>
             </div>
@@ -686,7 +686,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                         <div className="size-[28px] rounded-full border-2 border-[rgba(222,106,7,0.6)] bg-[rgba(222,106,7,0.1)] flex items-center justify-center">
                           <Icon name="account" size={16} className="text-[#de6a07]" />
                         </div>
-                        <span className="font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[17.5px] text-[#de6a07]">
+                        <span className="font-comfortaa text-[12px] leading-[17.5px] text-[#de6a07]">
                           Account
                         </span>
                       </div>
@@ -694,7 +694,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                         <div className="size-[28px] rounded-full border-2 border-[#de6a07] bg-[rgba(222,106,7,0.1)] flex items-center justify-center">
                           <Icon name="identification" size={16} className="text-[#de6a07]" />
                         </div>
-                        <span className="font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[17.5px] text-[#de6a07]">
+                        <span className="font-comfortaa text-[12px] leading-[17.5px] text-[#de6a07]">
                           Identification
                         </span>
                       </div>
@@ -713,7 +713,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                           />
                         </div>
                         <span
-                          className={`font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[17.5px] ${
+                          className={`font-comfortaa text-[12px] leading-[17.5px] ${
                             isExperienceStep ? "text-[#de6a07]" : "text-[#717182]"
                           }`}
                         >
@@ -761,7 +761,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                   <div className="rounded-[8px] border border-[#98d455] bg-[#f0fbdf] px-[12px] py-[10px]">
                     <div className="flex items-start gap-[8px]">
                       <Icon name="check-green" size={16} className="mt-[1px] shrink-0 text-[#6da326]" />
-                      <p className="font-['Comfortaa:Regular',sans-serif] text-[12px] leading-[17.5px] text-[#669a29]">
+                      <p className="font-comfortaa text-[12px] leading-[17.5px] text-[#669a29]">
                         We have received your application for the Groomer position. We are reviewing your application and will be in touch soon regarding next steps.
                       </p>
                     </div>
@@ -772,7 +772,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
               {step === "experience" && (
                 <div className="flex flex-col gap-[20px]">
                   <div className="flex flex-col gap-[8px]">
-                    <p className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-black">
+                    <p className="font-comfortaa text-[14px] leading-[22.75px] text-black">
                       Years of Grooming Experience
                     </p>
                     <div className="w-[348px]">
@@ -803,12 +803,12 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                   </div>
 
                   <div className="flex flex-col gap-[8px]">
-                    <p className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-black">
+                    <p className="font-comfortaa text-[14px] leading-[22.75px] text-black">
                       What pets do you service?
                     </p>
                     <div className="flex gap-[16px]">
                       {["Dogs", "Cats", "Others"].map((pet) => (
-                        <label key={pet} className="flex items-center gap-[8px] text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#4a3c2a] cursor-pointer">
+                        <label key={pet} className="flex items-center gap-[8px] text-[12px] font-comfortaa text-[#4a3c2a] cursor-pointer">
                           <input
                             type="checkbox"
                             className="size-[16px] accent-[#de6a07] cursor-pointer"
@@ -821,7 +821,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                     </div>
                     {servicePets.includes("Others") && (
                       <label className="flex flex-col gap-[8px] w-full max-w-[348px]">
-                        <span className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-[#4a3c2a]">
+                        <span className="font-comfortaa text-[14px] leading-[22.75px] text-[#4a3c2a]">
                           Pet type
                         </span>
                         <input
@@ -836,12 +836,12 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                   </div>
 
                   <div className="flex flex-col gap-[8px]">
-                    <p className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-black">
+                    <p className="font-comfortaa text-[14px] leading-[22.75px] text-black">
                       What service do you provide?
                     </p>
                     <div className="flex gap-[16px]">
                       {["Pet groomer", "Pet bather"].map((service) => (
-                        <label key={service} className="flex items-center gap-[8px] text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#4a3c2a] cursor-pointer">
+                        <label key={service} className="flex items-center gap-[8px] text-[12px] font-comfortaa text-[#4a3c2a] cursor-pointer">
                           <input
                             type="checkbox"
                             className="size-[16px] accent-[#de6a07] cursor-pointer"
@@ -855,12 +855,12 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                   </div>
 
                   <div className="flex flex-col gap-[8px]">
-                    <p className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-black">
+                    <p className="font-comfortaa text-[14px] leading-[22.75px] text-black">
                       Current work place
                     </p>
                     <div className="flex gap-[16px]">
                       {["In salon", "Mobile", "In-Home"].map((place) => (
-                        <label key={place} className="flex items-center gap-[8px] text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#4a3c2a] cursor-pointer">
+                        <label key={place} className="flex items-center gap-[8px] text-[12px] font-comfortaa text-[#4a3c2a] cursor-pointer">
                           <input
                             type="checkbox"
                             className="size-[16px] accent-[#de6a07] cursor-pointer"
@@ -874,11 +874,11 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                   </div>
 
                   <div className="flex flex-col gap-[8px]">
-                    <p className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-black">
+                    <p className="font-comfortaa text-[14px] leading-[22.75px] text-black">
                       Do you have a valid Canada driver's license?
                     </p>
                     <div className="flex gap-[20px]">
-                      <label className="flex items-center gap-[8px] text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#4a3c2a] cursor-pointer">
+                      <label className="flex items-center gap-[8px] text-[12px] font-comfortaa text-[#4a3c2a] cursor-pointer">
                         <input
                           type="radio"
                           name="driver-license"
@@ -888,7 +888,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                         />
                         Yes
                       </label>
-                      <label className="flex items-center gap-[8px] text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#4a3c2a] cursor-pointer">
+                      <label className="flex items-center gap-[8px] text-[12px] font-comfortaa text-[#4a3c2a] cursor-pointer">
                         <input
                           type="radio"
                           name="driver-license"
@@ -902,11 +902,11 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                   </div>
 
                   <div className="flex flex-col gap-[8px]">
-                    <p className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-black">
+                    <p className="font-comfortaa text-[14px] leading-[22.75px] text-black">
                       Do you have a van for grooming?
                     </p>
                     <div className="flex gap-[20px]">
-                      <label className="flex items-center gap-[8px] text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#4a3c2a] cursor-pointer">
+                      <label className="flex items-center gap-[8px] text-[12px] font-comfortaa text-[#4a3c2a] cursor-pointer">
                         <input
                           type="radio"
                           name="grooming-van"
@@ -916,7 +916,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                         />
                         Yes
                       </label>
-                      <label className="flex items-center gap-[8px] text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#4a3c2a] cursor-pointer">
+                      <label className="flex items-center gap-[8px] text-[12px] font-comfortaa text-[#4a3c2a] cursor-pointer">
                         <input
                           type="radio"
                           name="grooming-van"
@@ -930,11 +930,11 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                   </div>
 
                   <div className="flex flex-col gap-[8px]">
-                    <p className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-black">
+                    <p className="font-comfortaa text-[14px] leading-[22.75px] text-black">
                       Do you have any references?
                     </p>
                     <div className="flex gap-[20px]">
-                      <label className="flex items-center gap-[8px] text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#4a3c2a] cursor-pointer">
+                      <label className="flex items-center gap-[8px] text-[12px] font-comfortaa text-[#4a3c2a] cursor-pointer">
                         <input
                           type="radio"
                           name="references"
@@ -949,7 +949,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                         />
                         Yes
                       </label>
-                      <label className="flex items-center gap-[8px] text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#4a3c2a] cursor-pointer">
+                      <label className="flex items-center gap-[8px] text-[12px] font-comfortaa text-[#4a3c2a] cursor-pointer">
                         <input
                           type="radio"
                           name="references"
@@ -967,7 +967,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                       {references.map((ref, index) => (
                         <div key={index} className="flex gap-[20px] items-end">
                           <label className="flex flex-1 flex-col gap-[8px]">
-                            <span className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-[#4a3c2a]">
+                            <span className="font-comfortaa text-[14px] leading-[22.75px] text-[#4a3c2a]">
                               Name
                             </span>
                             <input
@@ -979,7 +979,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                             />
                           </label>
                           <label className="flex flex-1 flex-col gap-[8px]">
-                            <span className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-[#4a3c2a]">
+                            <span className="font-comfortaa text-[14px] leading-[22.75px] text-[#4a3c2a]">
                               Email
                             </span>
                             <input
@@ -992,7 +992,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                           </label>
                           <button
                             type="button"
-                            className="h-[36px] rounded-[12px] border border-[#8b6357] px-[12px] text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#8b6357] shrink-0"
+                            className="h-[36px] rounded-[12px] border border-[#8b6357] px-[12px] text-[12px] font-comfortaa text-[#8b6357] shrink-0"
                             onClick={() => removeReference(index)}
                           >
                             Delete
@@ -1002,7 +1002,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                       {references.length < 5 && (
                         <button
                           type="button"
-                          className="h-[28px] rounded-[12px] border border-[#8b6357] px-[12px] text-[12px] font-['Comfortaa:Bold',sans-serif] text-[#8b6357] w-fit"
+                          className="h-[28px] rounded-[12px] border border-[#8b6357] px-[12px] text-[12px] font-comfortaa text-[#8b6357] w-fit"
                           onClick={addReference}
                         >
                           + Add a reference
@@ -1016,7 +1016,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
               {step === "portfolio" && (
                 <div className="flex flex-col gap-[28px]">
                   <div className="flex flex-col gap-[8px]">
-                    <p className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-[#4a3c2a]">
+                    <p className="font-comfortaa text-[14px] leading-[22.75px] text-[#4a3c2a]">
                       Where did you learn bathing?
                     </p>
                     <textarea
@@ -1028,7 +1028,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                   </div>
 
                   <div className="flex flex-col gap-[8px]">
-                    <p className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-black">
+                    <p className="font-comfortaa text-[14px] leading-[22.75px] text-black">
                       Upload your grooming table and environment (required)
                     </p>
                     <FileUpload
@@ -1058,7 +1058,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                   </div>
 
                   <div className="flex flex-col gap-[8px]">
-                    <p className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-black">
+                    <p className="font-comfortaa text-[14px] leading-[22.75px] text-black">
                       Upload pictures of your work or certifications
                     </p>
                     <FileUpload
@@ -1088,7 +1088,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                   </div>
 
                   <div className="flex flex-col gap-[8px] max-w-[348px]">
-                    <p className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-black">
+                    <p className="font-comfortaa text-[14px] leading-[22.75px] text-black">
                       Showcase your working profile on
                     </p>
                     <CustomSelect
@@ -1107,7 +1107,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                   </div>
 
                   <div className="flex flex-col gap-[8px]">
-                    <p className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] text-[#4a3c2a]">
+                    <p className="font-comfortaa text-[14px] leading-[22.75px] text-[#4a3c2a]">
                       Link
                     </p>
                     <input
@@ -1172,7 +1172,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                     </OrangeButton>
                   </div>
                   {submitError && (
-                    <span className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px] text-[#DE1507]">
+                    <span className="font-comfortaa text-[10px] leading-[12px] text-[#DE1507]">
                       {submitError}
                     </span>
                   )}

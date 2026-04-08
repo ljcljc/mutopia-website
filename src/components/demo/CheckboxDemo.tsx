@@ -29,38 +29,38 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
         {/* Back Button */}
         <button
           onClick={onBack}
-          className="flex items-center gap-2 font-['Comfortaa:Medium',_sans-serif] text-[14px] text-[#8b6357] hover:text-[#6f4e44] transition-colors mb-8"
+          className="flex items-center gap-2 font-comfortaa text-[14px] text-[#8b6357] hover:text-[#6f4e44] transition-colors mb-8"
         >
           <ArrowLeft size={20} />
           Back to Demo Hub
         </button>
 
-        <h1 className="font-['Comfortaa:Bold',_sans-serif] text-[42px] leading-[52px] text-[#4a3c2a] mb-4">
+        <h1 className="font-comfortaa text-[42px] leading-[52px] text-[#4a3c2a] mb-4">
           Checkbox Component
         </h1>
-        <p className="font-['Comfortaa:Regular',_sans-serif] text-[18px] text-[rgba(74,60,42,0.8)] mb-12">
+        <p className="font-comfortaa text-[18px] text-[rgba(74,60,42,0.8)] mb-12">
           Interactive checkbox built from Figma design with 5 distinct states
         </p>
 
         {/* Five States Demo */}
         <div className="bg-white p-8 rounded-lg shadow-sm mb-8">
-          <h2 className="font-['Comfortaa:Bold',_sans-serif] text-[28px] leading-[36px] text-[#633479] mb-6">
+          <h2 className="font-comfortaa text-[28px] leading-[36px] text-[#633479] mb-6">
             Five Visual States
           </h2>
-          <p className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[rgba(74,60,42,0.8)] mb-8">
+          <p className="font-comfortaa text-[14px] text-[rgba(74,60,42,0.8)] mb-8">
             Hover over, click, or use keyboard to see all state changes
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* State 1: Default */}
             <div className="border-2 border-gray-200 rounded-lg p-6">
-              <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[16px] text-[#4a3c2a] mb-4">
+              <h3 className="font-comfortaa text-[16px] text-[#4a3c2a] mb-4">
                 1. Default
               </h3>
               <div className="bg-gray-50 p-6 rounded flex items-center justify-center mb-4 min-h-[80px]">
                 <Checkbox label="Remember me" />
               </div>
-              <ul className="font-['Comfortaa:Regular',_sans-serif] text-[12px] text-[rgba(74,60,42,0.7)] space-y-1 list-disc list-inside">
+              <ul className="font-comfortaa text-[12px] text-[rgba(74,60,42,0.7)] space-y-1 list-disc list-inside">
                 <li>Gray border #717182</li>
                 <li>Dark text #4a3c2a</li>
                 <li>Unchecked state</li>
@@ -69,13 +69,13 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
 
             {/* State 2: Hover */}
             <div className="border-2 border-gray-200 rounded-lg p-6">
-              <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[16px] text-[#4a3c2a] mb-4">
+              <h3 className="font-comfortaa text-[16px] text-[#4a3c2a] mb-4">
                 2. Hover
               </h3>
               <div className="bg-gray-50 p-6 rounded flex items-center justify-center mb-4 min-h-[80px]">
                 <Checkbox label="Remember me" />
               </div>
-              <ul className="font-['Comfortaa:Regular',_sans-serif] text-[12px] text-[rgba(74,60,42,0.7)] space-y-1 list-disc list-inside">
+              <ul className="font-comfortaa text-[12px] text-[rgba(74,60,42,0.7)] space-y-1 list-disc list-inside">
                 <li>Gray text #717182</li>
                 <li>Hover over to see</li>
                 <li>Smooth transition</li>
@@ -84,13 +84,13 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
 
             {/* State 3: Focus */}
             <div className="border-2 border-blue-200 rounded-lg p-6 bg-blue-50/30">
-              <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[16px] text-[#4a3c2a] mb-4">
+              <h3 className="font-comfortaa text-[16px] text-[#4a3c2a] mb-4">
                 3. Focus
               </h3>
               <div className="bg-gray-50 p-6 rounded flex items-center justify-center mb-4 min-h-[80px]">
                 <Checkbox label="Remember me" defaultChecked />
               </div>
-              <ul className="font-['Comfortaa:Regular',_sans-serif] text-[12px] text-[rgba(74,60,42,0.7)] space-y-1 list-disc list-inside">
+              <ul className="font-comfortaa text-[12px] text-[rgba(74,60,42,0.7)] space-y-1 list-disc list-inside">
                 <li>Blue background #2374ff</li>
                 <li>Tab to focus (when checked)</li>
                 <li>White checkmark</li>
@@ -100,13 +100,13 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
 
             {/* State 4: Active */}
             <div className="border-2 border-orange-200 rounded-lg p-6 bg-orange-50/30">
-              <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[16px] text-[#4a3c2a] mb-4">
+              <h3 className="font-comfortaa text-[16px] text-[#4a3c2a] mb-4">
                 4. Active (Pressed)
               </h3>
               <div className="bg-gray-50 p-6 rounded flex items-center justify-center mb-4 min-h-[80px]">
                 <Checkbox label="Remember me" defaultChecked />
               </div>
-              <ul className="font-['Comfortaa:Regular',_sans-serif] text-[12px] text-[rgba(74,60,42,0.7)] space-y-1 list-disc list-inside">
+              <ul className="font-comfortaa text-[12px] text-[rgba(74,60,42,0.7)] space-y-1 list-disc list-inside">
                 <li>Orange background #de6a07</li>
                 <li>Gradient checkmark</li>
                 <li>Click and hold to see</li>
@@ -115,13 +115,13 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
 
             {/* State 5: Checked */}
             <div className="border-2 border-blue-200 rounded-lg p-6">
-              <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[16px] text-[#4a3c2a] mb-4">
+              <h3 className="font-comfortaa text-[16px] text-[#4a3c2a] mb-4">
                 5. Checked
               </h3>
               <div className="bg-gray-50 p-6 rounded flex items-center justify-center mb-4 min-h-[80px]">
                 <Checkbox label="Remember me" defaultChecked />
               </div>
-              <ul className="font-['Comfortaa:Regular',_sans-serif] text-[12px] text-[rgba(74,60,42,0.7)] space-y-1 list-disc list-inside">
+              <ul className="font-comfortaa text-[12px] text-[rgba(74,60,42,0.7)] space-y-1 list-disc list-inside">
                 <li>Blue background #2374ff</li>
                 <li>White checkmark</li>
                 <li>Dark text #4a3c2a</li>
@@ -131,24 +131,24 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
 
           {/* Instruction Box */}
           <div className="mt-8 p-6 bg-gradient-to-r from-orange-50 to-blue-50 rounded-lg border-2 border-dashed border-gray-300">
-            <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[16px] text-[#4a3c2a] mb-4">
+            <h3 className="font-comfortaa text-[16px] text-[#4a3c2a] mb-4">
               💡 How to See Each State
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 font-['Comfortaa:Regular',_sans-serif] text-[13px] text-[rgba(74,60,42,0.8)]">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 font-comfortaa text-[13px] text-[rgba(74,60,42,0.8)]">
               <div>
-                <p className="font-['Comfortaa:Bold',_sans-serif] text-[#717182] mb-1">
+                <p className="font-comfortaa text-[#717182] mb-1">
                   Default:
                 </p>
                 <p>Initial unchecked state with gray border</p>
               </div>
               <div>
-                <p className="font-['Comfortaa:Bold',_sans-serif] text-[#717182] mb-1">
+                <p className="font-comfortaa text-[#717182] mb-1">
                   Hover:
                 </p>
                 <p>Move mouse over unchecked checkbox</p>
               </div>
               <div>
-                <p className="font-['Comfortaa:Bold',_sans-serif] text-[#2374ff] mb-1">
+                <p className="font-comfortaa text-[#2374ff] mb-1">
                   Focus:
                 </p>
                 <p>
@@ -156,7 +156,7 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
                 </p>
               </div>
               <div>
-                <p className="font-['Comfortaa:Bold',_sans-serif] text-[#de6a07] mb-1">
+                <p className="font-comfortaa text-[#de6a07] mb-1">
                   Active:
                 </p>
                 <p>
@@ -164,14 +164,14 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
                 </p>
               </div>
               <div>
-                <p className="font-['Comfortaa:Bold',_sans-serif] text-[#2374ff] mb-1">
+                <p className="font-comfortaa text-[#2374ff] mb-1">
                   Checked:
                 </p>
                 <p>Click to select checkbox</p>
               </div>
             </div>
             <div className="mt-4 p-3 bg-white rounded border border-gray-200">
-              <p className="font-['Comfortaa:Medium',_sans-serif] text-[12px] text-[#4a3c2a]">
+              <p className="font-comfortaa text-[12px] text-[#4a3c2a]">
                 ⚠️ <strong>注意：</strong>所有状态均
                 <strong>无可见聚焦环</strong>，采用简洁设计风格
               </p>
@@ -181,52 +181,52 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
 
         {/* State Demonstration */}
         <div className="bg-white p-8 rounded-lg shadow-sm mb-8">
-          <h2 className="font-['Comfortaa:Bold',_sans-serif] text-[28px] leading-[36px] text-[#633479] mb-6">
+          <h2 className="font-comfortaa text-[28px] leading-[36px] text-[#633479] mb-6">
             Interactive State Demonstration
           </h2>
-          <p className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
+          <p className="font-comfortaa text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
             Try interacting with these checkboxes to see all states in action
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Mouse Interaction */}
             <div className="border-2 border-gray-200 rounded-lg p-6 hover:border-orange-300 transition-colors">
-              <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[18px] text-[#4a3c2a] mb-4 flex items-center gap-2">
+              <h3 className="font-comfortaa text-[18px] text-[#4a3c2a] mb-4 flex items-center gap-2">
                 🖱️ Mouse Interaction
               </h3>
               <div className="space-y-4 bg-gray-50 p-4 rounded">
                 <Checkbox label="Hover over me" />
                 <Checkbox label="Click and hold me" defaultChecked />
               </div>
-              <p className="font-['Comfortaa:Regular',_sans-serif] text-[12px] text-[rgba(74,60,42,0.6)] mt-4">
+              <p className="font-comfortaa text-[12px] text-[rgba(74,60,42,0.6)] mt-4">
                 Hover for gray text, click & hold checked box for orange
               </p>
             </div>
 
             {/* Keyboard Interaction */}
             <div className="border-2 border-gray-200 rounded-lg p-6 hover:border-blue-300 transition-colors">
-              <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[18px] text-[#4a3c2a] mb-4 flex items-center gap-2">
+              <h3 className="font-comfortaa text-[18px] text-[#4a3c2a] mb-4 flex items-center gap-2">
                 ⌨️ Keyboard Interaction
               </h3>
               <div className="space-y-4 bg-gray-50 p-4 rounded">
                 <Checkbox label="Tab to focus me" defaultChecked />
                 <Checkbox label="Press Space" />
               </div>
-              <p className="font-['Comfortaa:Regular',_sans-serif] text-[12px] text-[rgba(74,60,42,0.6)] mt-4">
+              <p className="font-comfortaa text-[12px] text-[rgba(74,60,42,0.6)] mt-4">
                 Tab to focus, Space to toggle
               </p>
             </div>
 
             {/* All States */}
             <div className="border-2 border-gray-200 rounded-lg p-6 hover:border-purple-300 transition-colors">
-              <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[18px] text-[#4a3c2a] mb-4 flex items-center gap-2">
+              <h3 className="font-comfortaa text-[18px] text-[#4a3c2a] mb-4 flex items-center gap-2">
                 ✨ All States
               </h3>
               <div className="space-y-4 bg-gray-50 p-4 rounded">
                 <Checkbox label="Try everything!" defaultChecked />
                 <Checkbox label="Experiment here" />
               </div>
-              <p className="font-['Comfortaa:Regular',_sans-serif] text-[12px] text-[rgba(74,60,42,0.6)] mt-4">
+              <p className="font-comfortaa text-[12px] text-[rgba(74,60,42,0.6)] mt-4">
                 Mix hover, focus, and active states
               </p>
             </div>
@@ -235,14 +235,14 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
 
         {/* Controlled Components */}
         <div className="bg-white p-8 rounded-lg shadow-sm mb-8">
-          <h2 className="font-['Comfortaa:Bold',_sans-serif] text-[28px] leading-[36px] text-[#633479] mb-6">
+          <h2 className="font-comfortaa text-[28px] leading-[36px] text-[#633479] mb-6">
             Controlled Components
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Controlled Checkbox */}
             <div>
-              <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[21px] leading-[28px] text-[#4a3c2a] mb-4">
+              <h3 className="font-comfortaa text-[21px] leading-[28px] text-[#4a3c2a] mb-4">
                 Controlled Checkbox
               </h3>
               <div className="space-y-4">
@@ -252,7 +252,7 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
                   onCheckedChange={setChecked1}
                 />
                 <div className="p-4 bg-gray-50 rounded">
-                  <p className="font-['Comfortaa:Medium',_sans-serif] text-[14px] text-[#4a3c2a]">
+                  <p className="font-comfortaa text-[14px] text-[#4a3c2a]">
                     State:{" "}
                     <code className="bg-white px-2 py-1 rounded">
                       {checked1 ? "checked" : "unchecked"}
@@ -261,7 +261,7 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
                 </div>
                 <button
                   onClick={() => setChecked1(!checked1)}
-                  className="font-['Comfortaa:Medium',_sans-serif] text-[14px] text-[#2374ff] underline hover:text-[#1a5acc] transition-colors"
+                  className="font-comfortaa text-[14px] text-[#2374ff] underline hover:text-[#1a5acc] transition-colors"
                 >
                   Toggle programmatically
                 </button>
@@ -270,7 +270,7 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
 
             {/* Uncontrolled Checkbox */}
             <div>
-              <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[21px] leading-[28px] text-[#4a3c2a] mb-4">
+              <h3 className="font-comfortaa text-[21px] leading-[28px] text-[#4a3c2a] mb-4">
                 Uncontrolled Checkbox
               </h3>
               <div className="space-y-4">
@@ -282,7 +282,7 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
                   }
                 />
                 <div className="p-4 bg-gray-50 rounded">
-                  <p className="font-['Comfortaa:Regular',_sans-serif] text-[13px] text-[rgba(74,60,42,0.7)]">
+                  <p className="font-comfortaa text-[13px] text-[rgba(74,60,42,0.7)]">
                     Uses defaultChecked prop. Check console for changes.
                   </p>
                 </div>
@@ -293,7 +293,7 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
 
         {/* Form Example */}
         <div className="bg-white p-8 rounded-lg shadow-sm mb-8">
-          <h2 className="font-['Comfortaa:Bold',_sans-serif] text-[28px] leading-[36px] text-[#633479] mb-6">
+          <h2 className="font-comfortaa text-[28px] leading-[36px] text-[#633479] mb-6">
             Form Integration
           </h2>
           <form onSubmit={handleFormSubmit} className="space-y-6">
@@ -334,7 +334,7 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
                     remember: false,
                   })
                 }
-                className="font-['Comfortaa:Medium',_sans-serif] text-[14px] text-[#717182] underline hover:text-[#4a3c2a] transition-colors"
+                className="font-comfortaa text-[14px] text-[#717182] underline hover:text-[#4a3c2a] transition-colors"
               >
                 Clear All
               </button>
@@ -344,17 +344,17 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
 
         {/* Without Label */}
         <div className="bg-white p-8 rounded-lg shadow-sm mb-8">
-          <h2 className="font-['Comfortaa:Bold',_sans-serif] text-[28px] leading-[36px] text-[#633479] mb-6">
+          <h2 className="font-comfortaa text-[28px] leading-[36px] text-[#633479] mb-6">
             Checkbox Without Label
           </h2>
-          <p className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
+          <p className="font-comfortaa text-[14px] text-[rgba(74,60,42,0.8)] mb-6">
             Use for custom layouts or table rows
           </p>
 
           <div className="space-y-6">
             {/* Table-like layout */}
             <div>
-              <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[18px] text-[#4a3c2a] mb-4">
+              <h3 className="font-comfortaa text-[18px] text-[#4a3c2a] mb-4">
                 Task List Example
               </h3>
               <div className="space-y-3">
@@ -374,7 +374,7 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
                       }
                     />
                     <span
-                      className={`font-['Comfortaa:Regular',_sans-serif] text-[14px] ${item.checked ? "line-through text-[rgba(74,60,42,0.5)]" : "text-[#4a3c2a]"}`}
+                      className={`font-comfortaa text-[14px] ${item.checked ? "line-through text-[rgba(74,60,42,0.5)]" : "text-[#4a3c2a]"}`}
                     >
                       {item.task}
                     </span>
@@ -385,7 +385,7 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
 
             {/* Grid layout */}
             <div>
-              <h3 className="font-['Comfortaa:Bold',_sans-serif] text-[18px] text-[#4a3c2a] mb-4">
+              <h3 className="font-comfortaa text-[18px] text-[#4a3c2a] mb-4">
                 Grid Layout Example
               </h3>
               <div className="grid grid-cols-4 gap-4">
@@ -404,7 +404,7 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
 
         {/* Disabled State */}
         <div className="bg-white p-8 rounded-lg shadow-sm mb-8">
-          <h2 className="font-['Comfortaa:Bold',_sans-serif] text-[28px] leading-[36px] text-[#633479] mb-6">
+          <h2 className="font-comfortaa text-[28px] leading-[36px] text-[#633479] mb-6">
             Disabled State
           </h2>
           <div className="space-y-4">
@@ -415,12 +415,12 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
 
         {/* Usage Instructions */}
         <div className="bg-blue-50 p-8 rounded-lg">
-          <h2 className="font-['Comfortaa:Bold',_sans-serif] text-[21px] leading-[28px] text-[#4a3c2a] mb-6">
+          <h2 className="font-comfortaa text-[21px] leading-[28px] text-[#4a3c2a] mb-6">
             Usage Instructions
           </h2>
           <div className="space-y-4">
             <div>
-              <p className="font-['Comfortaa:Bold',_sans-serif] text-[16px] text-[#4a3c2a] mb-2">
+              <p className="font-comfortaa text-[16px] text-[#4a3c2a] mb-2">
                 Basic Usage:
               </p>
               <div className="bg-white p-4 rounded font-mono text-[12px]">
@@ -429,7 +429,7 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
             </div>
 
             <div>
-              <p className="font-['Comfortaa:Bold',_sans-serif] text-[16px] text-[#4a3c2a] mb-2">
+              <p className="font-comfortaa text-[16px] text-[#4a3c2a] mb-2">
                 Controlled Component:
               </p>
               <div className="bg-white p-4 rounded font-mono text-[12px] whitespace-pre-wrap">
@@ -444,10 +444,10 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
             </div>
 
             <div>
-              <p className="font-['Comfortaa:Bold',_sans-serif] text-[16px] text-[#4a3c2a] mb-2">
+              <p className="font-comfortaa text-[16px] text-[#4a3c2a] mb-2">
                 Visual States:
               </p>
-              <ul className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[#4a3c2a] space-y-1 list-disc list-inside ml-4">
+              <ul className="font-comfortaa text-[14px] text-[#4a3c2a] space-y-1 list-disc list-inside ml-4">
                 <li>
                   <strong>Default:</strong> Gray border #717182, dark text
                   #4a3c2a (unchecked)
@@ -475,10 +475,10 @@ export function CheckboxDemo({ onBack }: { onBack: () => void }) {
             </div>
 
             <div>
-              <p className="font-['Comfortaa:Bold',_sans-serif] text-[16px] text-[#4a3c2a] mb-2">
+              <p className="font-comfortaa text-[16px] text-[#4a3c2a] mb-2">
                 Features:
               </p>
-              <ul className="font-['Comfortaa:Regular',_sans-serif] text-[14px] text-[#4a3c2a] space-y-1 list-disc list-inside ml-4">
+              <ul className="font-comfortaa text-[14px] text-[#4a3c2a] space-y-1 list-disc list-inside ml-4">
                 <li>Five distinct visual states with smooth transitions</li>
                 <li>Fully accessible with keyboard support (Tab, Space)</li>
                 <li>Controlled or uncontrolled mode</li>

@@ -103,48 +103,48 @@ export function Step1AddressAndServiceType() {
 
   return (
     <>
-      <div className="content-stretch flex flex-col gap-[16px] items-start relative w-full px-[20px] sm:px-0">
+      <div className="flex flex-col gap-[16px] items-start relative w-full px-[20px] sm:px-0">
         {/* Mobile Step Header */}
-        <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0 w-full sm:hidden">
-          <p className="font-['Comfortaa:Bold',sans-serif] font-bold h-[19px] leading-[17.5px] relative shrink-0 text-[12px] text-black w-full whitespace-pre-wrap">
+        <div className="flex flex-col gap-[12px] items-start relative shrink-0 w-full sm:hidden">
+          <p className="font-comfortaa font-bold h-[19px] leading-[17.5px] relative shrink-0 text-[12px] text-black w-full whitespace-pre-wrap">
             Book your appointment
           </p>
-          <div className="border border-[#4c4c4c] border-solid content-stretch flex h-[24px] items-center justify-center overflow-clip px-[9px] py-[5px] relative rounded-[12px] shrink-0">
-            <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[14px] relative shrink-0 text-[#4c4c4c] text-[10px]">
+          <div className="border border-[#4c4c4c] border-solid flex h-[24px] items-center justify-center overflow-clip px-[9px] py-[5px] relative rounded-[12px] shrink-0">
+            <p className="font-comfortaa font-bold leading-[14px] relative shrink-0 text-[#4c4c4c] text-[10px]">
               Step 1 of 6
             </p>
           </div>
-          <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] min-w-full relative shrink-0 text-[#4a3c2a] text-[16px] w-[min-content] whitespace-pre-wrap">
+          <p className="font-comfortaa font-semibold leading-[28px] min-w-full relative shrink-0 text-[#4a3c2a] text-[16px] w-[min-content] whitespace-pre-wrap">
             Address and service type
           </p>
         </div>
         {/* Form Card */}
-        <div className="bg-white box-border flex flex-col gap-[16px] items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
+        <div className="bg-white flex flex-col gap-[16px] items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
           <div className="flex flex-col gap-[16px] items-start relative w-full">
             {/* Section Header */}
-            <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-              <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold leading-[28px] min-w-full relative shrink-0 text-[#4a3c2a] text-[16px] w-min whitespace-pre-wrap">
+            <div className="flex flex-col items-start relative shrink-0 w-full">
+              <p className="font-comfortaa font-semibold leading-[28px] min-w-full relative shrink-0 text-[#4a3c2a] text-[16px] w-min whitespace-pre-wrap">
                 Tell us your location
               </p>
-              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[#4a5565] text-[12.25px]">
+              <p className="font-comfortaa font-normal leading-[17.5px] relative shrink-0 text-[#4a5565] text-[12.25px]">
                 This helps us find a groomer near you
               </p>
             </div>
 
             {/* Login Section - Only show if user is not logged in */}
             {!user && (
-              <div className="content-stretch flex flex-col items-start justify-end relative shrink-0 w-full">
-                <div className="content-stretch flex gap-[7px] items-center relative shrink-0">
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[14px]">
+              <div className="flex flex-col items-start justify-end relative shrink-0 w-full">
+                <div className="flex gap-[7px] items-center relative shrink-0">
+                  <p className="font-comfortaa font-normal leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[14px]">
                     Have an account already?
                   </p>
                 </div>
                 <LoginModal open={isLoginModalOpen} onOpenChange={setIsLoginModalOpen}>
                   <button
-                    className="bg-neutral-100 border-2 border-[#633479] border-solid box-border content-stretch flex gap-[8px] w-full sm:w-[191px] h-[36px] items-center justify-center px-[30px] py-[16px] relative rounded-[32px] shrink-0 cursor-pointer hover:bg-[#f2dfcf] active:bg-[#f2dfcf] focus-visible:bg-[#f2dfcf] transition-colors"
+                    className="bg-neutral-100 border-2 border-[#633479] border-solid flex gap-[8px] w-full sm:w-[191px] h-[36px] items-center justify-center px-[30px] py-[16px] relative rounded-[32px] shrink-0 cursor-pointer hover:bg-[#f2dfcf] active:bg-[#f2dfcf] focus-visible:bg-[#f2dfcf] transition-colors"
                     onClick={() => setIsLoginModalOpen(true)}
                   >
-                    <p className="font-['Comfortaa:Bold',sans-serif] font-bold leading-[20px] text-[#633479] text-[14px]">
+                    <p className="font-comfortaa font-bold leading-[20px] text-[#633479] text-[14px]">
                       Log in
                     </p>
                   </button>
@@ -154,8 +154,8 @@ export function Step1AddressAndServiceType() {
 
             {/* Info Alert */}
             <div className="bg-[#eff6ff] border border-[#bedbff] border-solid relative rounded-[8px]">
-              <div className="box-border content-stretch flex items-center overflow-clip px-[16px] py-[8px] relative rounded-[inherit]">
-                <div className="content-stretch flex gap-[8px] items-start relative w-full min-w-0">
+              <div className="flex items-center overflow-clip px-[16px] py-[8px] relative rounded-[inherit]">
+                <div className="flex gap-[8px] items-start relative w-full min-w-0">
                   {/* Info Icon */}
                   <div className="relative shrink-0 size-[12px]">
                     <Icon
@@ -164,7 +164,7 @@ export function Step1AddressAndServiceType() {
                       className="block size-full text-[#2374FF]"
                     />
                   </div>
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative text-[#193cb8] text-[10px] whitespace-normal break-words min-w-0">
+                  <p className="font-comfortaa font-normal leading-[12px] relative text-[#193cb8] text-[10px] whitespace-normal break-words min-w-0">
                     {infoText}
                   </p>
                 </div>
@@ -176,13 +176,13 @@ export function Step1AddressAndServiceType() {
               // 已登录用户选择地址（mobile 服务）- 支持下拉选择和手动输入
               <div className="flex flex-col items-start relative w-full sm:w-[320px]">
                 <div className="flex gap-[7px] items-center relative mb-2">
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative text-[#4a3c2a] text-[14px]">
+                  <p className="font-comfortaa font-normal leading-[22.75px] relative text-[#4a3c2a] text-[14px]">
                     Address
                   </p>
                 </div>
                 <div className="relative w-full sm:w-[320px]" ref={addressDropdownRef}>
                   <div className="bg-white border border-gray-200 border-solid h-[36px] relative rounded-[8px] w-full hover:border-[#633479] transition-colors">
-                    <div className="box-border flex h-[36px] items-center overflow-clip px-[12px] py-[4px] relative rounded-[inherit] w-full">
+                    <div className="flex h-[36px] items-center overflow-clip px-[12px] py-[4px] relative rounded-[inherit] w-full">
                       <div className="flex flex-1 items-center relative">
                         <div className="overflow-clip relative shrink-0 size-[24px]">
                           <Icon
@@ -203,7 +203,7 @@ export function Step1AddressAndServiceType() {
                           }}
                           onFocus={() => setIsAddressDropdownOpen(true)}
                           placeholder="Select an address or type"
-                          className="flex-1 font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] relative text-[#717182] text-[12.25px] ml-[4px] bg-transparent border-none outline-none placeholder:text-[#717182]"
+                          className="flex-1 font-comfortaa font-normal leading-[normal] relative text-[#717182] text-[12.25px] ml-[4px] bg-transparent border-none outline-none placeholder:text-[#717182]"
                         />
                         <div 
                           className="relative shrink-0 w-[16px] cursor-pointer"
@@ -237,10 +237,10 @@ export function Step1AddressAndServiceType() {
                             setIsAddressDropdownOpen(false);
                           }}
                         >
-                          <p className="font-['Comfortaa:Regular',sans-serif] text-[12.25px] text-[#4a3c2a]">
+                          <p className="font-comfortaa text-[12.25px] text-[#4a3c2a]">
                             {addr.address}
                           </p>
-                          <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] text-[#717182] mt-1">
+                          <p className="font-comfortaa text-[10px] text-[#717182] mt-1">
                             {addr.city}, {addr.province} {addr.postal_code}
                           </p>
                         </div>
@@ -253,7 +253,7 @@ export function Step1AddressAndServiceType() {
               // 选择门店（in_store 服务）
               <div className="flex flex-col items-start relative w-full sm:w-[320px]">
                 <div className="flex gap-[7px] items-center relative mb-2">
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative text-[#4a3c2a] text-[14px]">
+                  <p className="font-comfortaa font-normal leading-[22.75px] relative text-[#4a3c2a] text-[14px]">
                     Store Location
                   </p>
                 </div>
@@ -262,7 +262,7 @@ export function Step1AddressAndServiceType() {
                     className="bg-white border border-gray-200 border-solid h-[36px] relative rounded-[8px] w-full cursor-pointer hover:border-[#633479] transition-colors"
                     onClick={() => setIsStoreDropdownOpen(!isStoreDropdownOpen)}
                   >
-                    <div className="box-border flex h-[36px] items-center overflow-clip px-[12px] py-[4px] relative rounded-[inherit] w-full">
+                    <div className="flex h-[36px] items-center overflow-clip px-[12px] py-[4px] relative rounded-[inherit] w-full">
                       <div className="flex flex-1 items-center relative">
                         <div className="overflow-clip relative shrink-0 size-[24px]">
                           <Icon
@@ -271,7 +271,7 @@ export function Step1AddressAndServiceType() {
                             className="block size-full text-[#de6a07]"
                           />
                         </div>
-                        <p className="flex-1 font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] relative text-[#717182] text-[12.25px] ml-[4px] truncate">
+                        <p className="flex-1 font-comfortaa font-normal leading-[normal] relative text-[#717182] text-[12.25px] ml-[4px] truncate">
                           {currentStore?.name || "Select a store"}
                         </p>
                         <div className="h-[6.375px] relative shrink-0 w-[11.25px]">
@@ -300,10 +300,10 @@ export function Step1AddressAndServiceType() {
                             setIsStoreDropdownOpen(false);
                           }}
                         >
-                          <p className="font-['Comfortaa:Regular',sans-serif] text-[12.25px] text-[#4a3c2a] font-semibold">
+                          <p className="font-comfortaa text-[12.25px] text-[#4a3c2a] font-semibold">
                             {store.name}
                           </p>
-                          <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] text-[#717182] mt-1">
+                          <p className="font-comfortaa text-[10px] text-[#717182] mt-1">
                             {store.address}, {store.city}, {store.province}{" "}
                             {store.postal_code}
                           </p>
@@ -343,8 +343,8 @@ export function Step1AddressAndServiceType() {
             )}
 
             {/* City and Province */}
-            <div className="content-stretch flex flex-col sm:flex-row gap-[12px] sm:gap-[20px] items-start relative shrink-0 w-full">
-              <div className="content-stretch flex flex-col items-start relative shrink-0 w-full sm:w-[192px]">
+            <div className="flex flex-col sm:flex-row gap-[12px] sm:gap-[20px] items-start relative shrink-0 w-full">
+              <div className="flex flex-col items-start relative shrink-0 w-full sm:w-[192px]">
                 <CustomInput
                   label="City"
                   type="text"
@@ -356,7 +356,7 @@ export function Step1AddressAndServiceType() {
                   inputClassName="text-[#717182] sm:text-[#4a3c2a]"
                 />
               </div>
-              <div className="content-stretch flex flex-col items-start relative shrink-0 w-full sm:w-[95px]">
+              <div className="flex flex-col items-start relative shrink-0 w-full sm:w-[95px]">
                 <CustomInput
                   label="Province"
                   type="text"
@@ -371,8 +371,8 @@ export function Step1AddressAndServiceType() {
             </div>
 
             {/* Post Code */}
-            <div className="content-stretch flex gap-[20px] items-start relative shrink-0 w-full">
-              <div className="content-stretch flex flex-col items-start relative shrink-0 w-full sm:w-[192px]">
+            <div className="flex gap-[20px] items-start relative shrink-0 w-full">
+              <div className="flex flex-col items-start relative shrink-0 w-full sm:w-[192px]">
                 <CustomInput
                   label="Post code"
                   type="text"
@@ -390,7 +390,7 @@ export function Step1AddressAndServiceType() {
             {user && (
               <div className="flex flex-col gap-[8px] items-start relative w-full">
                 <div className="flex gap-[7px] items-center relative w-full">
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative text-[#4a3c2a] text-[14px]">
+                  <p className="font-comfortaa font-normal leading-[22.75px] relative text-[#4a3c2a] text-[14px]">
                     Service type
                   </p>
                 </div>

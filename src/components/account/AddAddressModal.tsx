@@ -149,7 +149,7 @@ export default function AddAddressModal({
             </button>
             
             {/* Title (居中) */}
-            <h2 className="absolute left-1/2 -translate-x-1/2 font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-lg">
+            <h2 className="absolute left-1/2 -translate-x-1/2 font-comfortaa font-semibold text-[#4A3C2A] text-lg">
               Modify address
             </h2>
           </div>
@@ -160,18 +160,18 @@ export default function AddAddressModal({
 
         {/* Content Header - 文字说明 */}
         <div className="flex flex-col">
-          <h3 className="font-['Comfortaa',sans-serif] font-semibold text-[#4A3C2A] text-base">
+          <h3 className="font-comfortaa font-semibold text-[#4A3C2A] text-base">
             Tell us your location
           </h3>
-          <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#717182] text-sm">
+          <p className="font-comfortaa font-normal text-[#717182] text-sm">
             This helps us find a groomer near you.
           </p>
         </div>
 
         {/* Alert - 服务范围提示 - 与 booking step1 保持一致 */}
         <div className="bg-[#eff6ff] border border-[#bedbff] border-solid relative rounded-[8px]">
-          <div className="box-border content-stretch flex items-center overflow-clip px-[16px] py-[8px] relative rounded-[inherit]">
-            <div className="content-stretch flex gap-[8px] items-start relative w-full min-w-0">
+          <div className="flex items-center overflow-clip px-[16px] py-[8px] relative rounded-[inherit]">
+            <div className="flex gap-[8px] items-start relative w-full min-w-0">
               {/* Info Icon */}
               <div className="relative shrink-0 size-[12px]">
                 <Icon
@@ -180,7 +180,7 @@ export default function AddAddressModal({
                   className="block size-full text-[#2374FF]"
                 />
               </div>
-              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[12px] relative text-[#193cb8] text-[10px] whitespace-normal break-words min-w-0">
+              <p className="font-comfortaa font-normal leading-[12px] relative text-[#193cb8] text-[10px] whitespace-normal break-words min-w-0">
                 We currently provide mobile grooming services throughout Grand Vancouver and surrounding areas.
               </p>
             </div>
@@ -213,8 +213,8 @@ export default function AddAddressModal({
           </div>
 
           {/* City and Province - 并排显示，与 booking step1 保持一致 */}
-          <div className="content-stretch flex flex-col sm:flex-row gap-[12px] sm:gap-[20px] items-start relative shrink-0 w-full">
-            <div className="content-stretch flex flex-col items-start relative shrink-0 w-full sm:w-[192px]">
+          <div className="flex flex-col sm:flex-row gap-[12px] sm:gap-[20px] items-start relative shrink-0 w-full">
+            <div className="flex flex-col items-start relative shrink-0 w-full sm:w-[192px]">
               <CustomInput
                 label="City"
                 type="text"
@@ -226,7 +226,7 @@ export default function AddAddressModal({
                 inputClassName="text-[#717182] sm:text-[#4a3c2a]"
               />
             </div>
-            <div className="content-stretch flex flex-col items-start relative shrink-0 w-full sm:w-[95px]">
+            <div className="flex flex-col items-start relative shrink-0 w-full sm:w-[95px]">
               <CustomInput
                 label="Province"
                 type="text"
@@ -241,8 +241,8 @@ export default function AddAddressModal({
           </div>
 
           {/* Post Code - 单独一行，与 booking step1 保持一致 */}
-          <div className="content-stretch flex gap-[20px] items-start relative shrink-0 w-full">
-            <div className="content-stretch flex flex-col items-start relative shrink-0 w-full sm:w-[192px]">
+          <div className="flex gap-[20px] items-start relative shrink-0 w-full">
+            <div className="flex flex-col items-start relative shrink-0 w-full sm:w-[192px]">
               <CustomInput
                 label="Post code"
                 type="text"
@@ -265,7 +265,7 @@ export default function AddAddressModal({
             />
             <label
               htmlFor="set-as-default"
-              className="font-['Comfortaa:Regular',sans-serif] font-normal text-[#4a3c2a] text-[14px] cursor-pointer"
+              className="font-comfortaa font-normal text-[#4a3c2a] text-[14px] cursor-pointer"
             >
               Set as default
             </label>

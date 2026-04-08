@@ -75,7 +75,7 @@ export const PurpleButton = forwardRef<HTMLButtonElement, PurpleButtonProps>(
             {/* Content - invisible when loading but still takes up space */}
             {typeof children === "string" ? (
               <p
-                className={`font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] whitespace-nowrap ${loading ? "invisible" : ""}`}
+                className={`font-comfortaa leading-[20px] text-[14px] whitespace-nowrap ${loading ? "invisible" : ""}`}
               >
                 {children}
               </p>
@@ -105,7 +105,7 @@ export const PurpleButton = forwardRef<HTMLButtonElement, PurpleButtonProps>(
           {/* Content - invisible when loading but still takes up space */}
           {typeof children === "string" ? (
             <p
-              className={`font-['Comfortaa:Bold',_sans-serif] leading-[20px] text-[14px] whitespace-nowrap ${loading ? "invisible" : ""}`}
+              className={`font-comfortaa leading-[20px] text-[14px] whitespace-nowrap ${loading ? "invisible" : ""}`}
             >
               {children}
             </p>

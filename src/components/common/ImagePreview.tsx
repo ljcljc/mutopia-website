@@ -316,8 +316,8 @@ export function ImagePreview({
         
         {/* Header: 关闭按钮、文件名、索引 */}
         <div className="h-[32px] relative shrink-0 w-full">
-          <div className="absolute content-stretch flex flex-col gap-[8px] items-start left-0 top-0 w-full">
-            <div className="content-stretch flex items-center justify-between pl-[12px] pr-[28px] py-0 relative shrink-0 w-full">
+          <div className="absolute flex flex-col gap-[8px] items-start left-0 top-0 w-full">
+            <div className="flex items-center justify-between pl-[12px] pr-[28px] py-0 relative shrink-0 w-full">
               {/* 关闭按钮 */}
               <DialogClose asChild>
                 <button
@@ -335,7 +335,7 @@ export function ImagePreview({
                     </div>
                   </div>
                   <div className="absolute -left-px overflow-clip size-px top-[13px]">
-                    <p className="absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[21px] left-0 text-[#4a3c2a] text-[14px] top-[0.5px] sr-only">
+                    <p className="absolute font-comfortaa font-normal leading-[21px] left-0 text-[#4a3c2a] text-[14px] top-[0.5px] sr-only">
                       Close
                     </p>
                   </div>
@@ -343,15 +343,15 @@ export function ImagePreview({
               </DialogClose>
 
               {/* 文件名（居中） */}
-              <div className="content-stretch flex flex-1 items-center justify-center min-h-px min-w-px relative shrink-0">
-                <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[#4c4c4c] text-[14px] text-center">
+              <div className="flex flex-1 items-center justify-center min-h-px min-w-px relative shrink-0">
+                <p className="font-comfortaa font-normal leading-[22.75px] relative shrink-0 text-[#4c4c4c] text-[14px] text-center">
                   {currentFileName}
                 </p>
               </div>
 
               {/* 当前索引 */}
               <div className="h-[17.5px] relative shrink-0 w-[50px]">
-                <p className="absolute font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] left-0 text-[#101828] text-[12.25px] top-[-0.5px] w-full whitespace-pre-wrap">
+                <p className="absolute font-comfortaa font-normal leading-[17.5px] left-0 text-[#101828] text-[12.25px] top-[-0.5px] w-full whitespace-pre-wrap">
                   {currentIndex + 1} / {totalImages}
                 </p>
               </div>
@@ -458,7 +458,7 @@ export function ImagePreview({
 
                 {/* 缩放百分比显示 */}
                 <div className="flex-1 h-[24.5px] min-h-px min-w-px relative rounded-[16777200px] shrink-0 flex items-center justify-center">
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] text-[#364153] text-[12.25px] text-center">
+                  <p className="font-comfortaa font-normal leading-[17.5px] text-[#364153] text-[12.25px] text-center">
                     {zoom}%
                   </p>
                 </div>
@@ -486,11 +486,11 @@ export function ImagePreview({
 
         {/* 底部缩略图轮播 */}
         {images.length > 1 && (
-          <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0 w-full h-[100px]">
+          <div className="flex flex-col gap-[12px] items-start relative shrink-0 w-full h-[100px]">
             {/* 分隔线 */}
             <div className="bg-[rgba(0,0,0,0.1)] h-px shrink-0 w-full" />
             {/* 缩略图列表 */}
-            <div className="content-stretch flex gap-[16px] items-start justify-center relative shrink-0 w-full overflow-x-auto overflow-y-visible pb-2 py-2">
+            <div className="flex gap-[16px] items-start justify-center relative shrink-0 w-full overflow-x-auto overflow-y-visible pb-2 py-2">
               {images.map((image, index) => {
                 const isSelected = index === currentIndex;
                 return (
@@ -498,7 +498,7 @@ export function ImagePreview({
                     key={index}
                     onClick={() => setCurrentIndex(index)}
                     className={cn(
-                      "content-stretch flex flex-col items-start overflow-hidden relative rounded-[14px] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] shrink-0 transition-all size-[61.6px] cursor-pointer",
+                      "flex flex-col items-start overflow-hidden relative rounded-[14px] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] shrink-0 transition-all size-[61.6px] cursor-pointer",
                       isSelected
                         ? "bg-[rgba(255,255,255,0)] border-2 border-[#de6a07] border-solid p-[2.2px] scale-110 z-10"
                         : "border-2 border-[#d1d5dc] border-solid opacity-70 p-[2.2px] scale-100"

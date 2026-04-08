@@ -61,7 +61,7 @@ function StatusBadge({ status }: { status: string }) {
   if (displayType === "ready") {
     return (
       <div className="bg-[#DCFCE7] rounded-[12px] h-[24px] px-[10px] flex items-center justify-center">
-        <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-[#016630]">
+        <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#016630]">
           Ready for service
         </span>
       </div>
@@ -71,7 +71,7 @@ function StatusBadge({ status }: { status: string }) {
   if (displayType === "canceled") {
     return (
       <div className="border border-[#4C4C4C] rounded-[12px] h-[24px] px-[9px] py-[5px] flex items-center">
-        <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-[#4C4C4C]">
+        <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#4C4C4C]">
           Service canceled
         </span>
       </div>
@@ -80,7 +80,7 @@ function StatusBadge({ status }: { status: string }) {
 
   return (
     <div className="border border-[#4C4C4C] rounded-[12px] h-[24px] px-[9px] py-[5px] flex items-center">
-      <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-[#4C4C4C]">
+      <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#4C4C4C]">
         Pending
       </span>
     </div>
@@ -111,19 +111,19 @@ function BookingItem({ booking }: { booking: BookingListOut }) {
     >
       <div className="flex flex-col gap-[12px]">
         <div className="flex flex-col gap-[8px] pr-[30px]">
-          <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[16px] leading-[28px] text-[#DE6A07]">
+          <p className="font-comfortaa font-bold text-[16px] leading-[28px] text-[#DE6A07]">
             {petName}
           </p>
-          <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
+          <p className="font-comfortaa font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
             {serviceDisplay} {dateTime}
           </p>
         </div>
         <div className="flex flex-col pr-[30px]">
-          <p className="font-['Comfortaa:Medium',sans-serif] font-medium text-[12.25px] leading-[17.5px] text-[#4A3C2A]">
+          <p className="font-comfortaa font-medium text-[12.25px] leading-[17.5px] text-[#4A3C2A]">
             {address.line1}
           </p>
           {address.line2 && (
-            <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[12.25px] leading-[17.5px] text-[#4A3C2A]">
+            <p className="font-comfortaa font-normal text-[12.25px] leading-[17.5px] text-[#4A3C2A]">
               {address.line2}
             </p>
           )}
@@ -269,7 +269,7 @@ export default function DashboardBookingCard() {
             >
               <span
                 ref={upcomingTextRef}
-                className={`whitespace-nowrap font-['Comfortaa',sans-serif] text-[16px] leading-[28px] ${
+                className={`whitespace-nowrap font-comfortaa text-[16px] leading-[28px] ${
                   activeTab === "upcoming"
                     ? "font-bold text-[#4A3C2A]"
                     : "font-normal text-[#4A3C2A]/70"
@@ -292,7 +292,7 @@ export default function DashboardBookingCard() {
             >
               <span
                 ref={historyTextRef}
-                className={`whitespace-nowrap font-['Comfortaa',sans-serif] text-[16px] leading-[28px] ${
+                className={`whitespace-nowrap font-comfortaa text-[16px] leading-[28px] ${
                   activeTab === "history"
                     ? "font-bold text-[#4A3C2A]"
                     : "font-normal text-[#4A3C2A]/70"
@@ -314,13 +314,13 @@ export default function DashboardBookingCard() {
           <div className="absolute left-[-9999px] top-0 opacity-0 pointer-events-none whitespace-nowrap">
             <span
               ref={upcomingMeasureRef}
-              className="font-['Comfortaa',sans-serif] font-bold text-[16px] leading-[28px]"
+              className="font-comfortaa font-bold text-[16px] leading-[28px]"
             >
               Upcoming booking
             </span>
             <span
               ref={historyMeasureRef}
-              className="font-['Comfortaa',sans-serif] font-bold text-[16px] leading-[28px]"
+              className="font-comfortaa font-bold text-[16px] leading-[28px]"
             >
               History booking
             </span>

@@ -93,15 +93,15 @@ export function AutoComplete({
     <div
       ref={containerRef}
       className={cn(
-        "content-stretch flex flex-col gap-[8px] items-start relative",
+        "flex flex-col gap-[8px] items-start relative",
         className?.includes("w-auto") ? "w-auto" : "w-full"
       )}
     >
       {label && (
-        <div className="content-stretch flex gap-[7px] h-[12.25px] items-center relative shrink-0 w-full">
+        <div className="flex gap-[7px] h-[12.25px] items-center relative shrink-0 w-full">
           <p
             className={cn(
-              "font-['Comfortaa:Regular',sans-serif] font-normal leading-[22.75px] relative shrink-0 text-[14px] text-nowrap whitespace-pre",
+              "font-comfortaa font-normal leading-[22.75px] relative shrink-0 text-[14px] text-nowrap whitespace-pre",
               error ? "text-[#de1507]" : "text-[#4a3c2a]"
             )}
           >
@@ -161,7 +161,7 @@ export function AutoComplete({
                   inputRef.current?.blur();
                 }
               }}
-              className="flex-1 font-['Comfortaa:Regular',sans-serif] font-normal leading-[normal] text-[12.25px] text-[#4a3c2a] bg-transparent border-none outline-none placeholder:text-[#717182] w-full disabled:cursor-not-allowed"
+              className="flex-1 font-comfortaa font-normal leading-[normal] text-[12.25px] text-[#4a3c2a] bg-transparent border-none outline-none placeholder:text-[#717182] w-full disabled:cursor-not-allowed"
             />
           </div>
           <button
@@ -205,7 +205,7 @@ export function AutoComplete({
         {isOpen && !disabled && (
           <div className="absolute z-50 mt-[4px] w-full rounded-[8px] border border-[#d6d6d6] bg-white p-[4px] shadow-md max-h-[240px] overflow-y-auto">
             {filteredOptions.length === 0 ? (
-              <div className="px-[8px] py-[8px] font-['Comfortaa:Regular',sans-serif] text-[14px] text-[#6b6b6b]">
+              <div className="px-[8px] py-[8px] font-comfortaa text-[14px] text-[#6b6b6b]">
                 {noResultsText}
               </div>
             ) : (
@@ -219,7 +219,7 @@ export function AutoComplete({
                   onMouseDown={(event) => event.preventDefault()}
                   onClick={() => handleOptionSelect(option)}
                   className={cn(
-                    "flex w-full items-center px-[8px] h-[36px] rounded-[4px] text-left font-['Comfortaa:Regular',sans-serif] text-[14px] hover:bg-amber-50",
+                    "flex w-full items-center px-[8px] h-[36px] rounded-[4px] text-left font-comfortaa text-[14px] hover:bg-amber-50",
                     option === value ? "text-[#de6a07]" : "text-[#6b6b6b]",
                     index === highlightedIndex ? "bg-amber-50" : ""
                   )}

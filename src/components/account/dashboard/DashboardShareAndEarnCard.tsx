@@ -6,20 +6,20 @@ export default function DashboardShareAndEarnCard() {
     <div className="bg-white border-2 border-[#DE6A07] rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[22px] flex flex-col gap-[28px] w-full">
       <div className="flex items-center gap-[8px]">
         <img alt="" className="size-[24px]" src={giftIcon} />
-        <p className="font-['Comfortaa:Medium',sans-serif] font-medium text-[15.75px] leading-[24.5px] text-[#4A3C2A]">
+        <p className="font-comfortaa font-medium text-[15.75px] leading-[24.5px] text-[#4A3C2A]">
           Share & Earn
         </p>
       </div>
 
       <div className="pl-[27px] flex flex-col gap-[24px] text-[#4A5565]">
-        <p className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px] whitespace-pre-wrap">
+        <p className="font-comfortaa text-[14px] leading-[22.75px] whitespace-pre-wrap">
           Invite a friend to book our service and you'll both get {""}
-          <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[#DE6A07]">
+          <span className="font-comfortaa font-bold text-[#DE6A07]">
             $10.00 (2x$5.00) Credit
           </span>
           .
         </p>
-        <p className="font-['Comfortaa:Regular',sans-serif] text-[14px] leading-[22.75px]">
+        <p className="font-comfortaa text-[14px] leading-[22.75px]">
           Copy your unique code below to your friend and enjoy the credit in 3 months.
         </p>
       </div>
@@ -27,13 +27,13 @@ export default function DashboardShareAndEarnCard() {
       <div className="border border-[#8B6357] rounded-[12px] h-[38px] px-[11.5px] flex items-center justify-between">
         <div className="flex items-center gap-[7px]">
           <img alt="" className="size-[16px]" src={codeIcon} />
-          <span className="font-['Comfortaa:Medium',sans-serif] font-medium text-[12.25px] leading-[17.5px] text-[#4A3C2A]">
+          <span className="font-comfortaa font-medium text-[12.25px] leading-[17.5px] text-[#4A3C2A]">
             LEIBI41
           </span>
         </div>
         <button
           type="button"
-          className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] leading-[22.75px] text-[#DE6A07]"
+          className="font-comfortaa font-normal text-[14px] leading-[22.75px] text-[#DE6A07]"
         >
           Copy
         </button>

@@ -48,13 +48,13 @@ export function CommonCheckbox({
     <div
       onClick={handleClick}
       className={cn(
-        "border-2 border-solid box-border content-stretch flex flex-col items-start p-[16px] relative rounded-[14px] shrink-0 transition-all",
+        "border-2 border-solid flex flex-col items-start p-[16px] relative rounded-[14px] shrink-0 transition-all",
         isSelected ? "border-[#de6a07] bg-[#fff3e9]" : "border-gray-200 bg-white",
         disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
         className
       )}
     >
-      <div className="content-stretch flex items-start justify-between gap-[10px] relative shrink-0 w-full">
+      <div className="flex items-start justify-between gap-[10px] relative shrink-0 w-full">
         <div className="flex gap-[8px] items-start flex-1 min-w-0">
           <div
             className="flex items-center shrink-0"
@@ -70,14 +70,14 @@ export function CommonCheckbox({
           <div className="flex flex-col gap-[4px] items-start flex-1 min-w-0">
             <p
               className={cn(
-                "font-['Comfortaa:Medium',sans-serif] font-medium leading-[21px] text-[14px]",
+                "font-comfortaa font-medium leading-[21px] text-[14px]",
                 isSelected ? "text-[#de6a07]" : "text-[#8b6357]"
               )}
             >
               {name}
             </p>
             {description && (
-              <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] text-[#4a5565] text-[12.25px] break-words text-left">
+              <p className="font-comfortaa font-normal leading-[17.5px] text-[#4a5565] text-[12.25px] break-words text-left">
                 {description}
               </p>
             )}
@@ -85,18 +85,18 @@ export function CommonCheckbox({
         </div>
         {(priceText || duration) && (
           <div className="relative shrink-0">
-            <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex flex-col gap-[4px] items-end justify-center relative">
+            <div className="bg-clip-padding border-0 border-transparent border-solid flex flex-col gap-[4px] items-end justify-center relative">
               {priceText && (
-                <p className="font-['Comfortaa:Medium',sans-serif] font-medium leading-[21px] relative shrink-0 text-[14px] text-[#de6a07]">
+                <p className="font-comfortaa font-medium leading-[21px] relative shrink-0 text-[14px] text-[#de6a07]">
                   {priceText}
                 </p>
               )}
               {duration && (
-                <div className="content-stretch flex gap-[7px] h-[17.5px] items-center relative shrink-0">
+                <div className="flex gap-[7px] h-[17.5px] items-center relative shrink-0">
                   <Icon name="clock" size={16} className="text-[rgba(74,60,42,0.6)]" />
                   <div className="relative shrink-0">
-                    <div className="bg-clip-padding border-0 border-transparent border-solid box-border content-stretch flex gap-[10px] items-center justify-center relative">
-                      <p className="font-['Comfortaa:Regular',sans-serif] font-normal leading-[17.5px] relative shrink-0 text-[12.25px] text-[rgba(74,60,42,0.6)]">
+                    <div className="bg-clip-padding border-0 border-transparent border-solid flex gap-[10px] items-center justify-center relative">
+                      <p className="font-comfortaa font-normal leading-[17.5px] relative shrink-0 text-[12.25px] text-[rgba(74,60,42,0.6)]">
                         {duration}
                       </p>
                     </div>
