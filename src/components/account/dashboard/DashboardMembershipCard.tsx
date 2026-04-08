@@ -19,7 +19,7 @@ export default function DashboardMembershipCard() {
     <div className="flex w-full flex-col gap-7 rounded-xl border-2 border-[#754387] bg-white p-[22px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
-          <img alt="" className="h-[24px] w-[21px]" src={membershipIcon} />
+          <img alt="" className="h-6 w-[21px]" src={membershipIcon} />
           <p className="font-comfortaa font-medium text-[15.75px] leading-[24.5px] text-[#4A3C2A]">
             Membership
           </p>
@@ -49,12 +49,12 @@ export default function DashboardMembershipCard() {
       <div className="px-6">
         <button
           type="button"
-          className="flex h-9 w-full items-center justify-center gap-1 rounded-[32px] bg-[#633479]"
+          className="flex h-9 w-full items-center justify-center gap-1 rounded-full bg-[#633479]"
         >
           <span className="font-comfortaa font-medium text-[14px] leading-[17.5px] text-white">
             Go premium
           </span>
-          <img alt="" className="size-[14px]" src={buttonArrow} />
+          <img alt="" className="size-3.5" src={buttonArrow} />
         </button>
       </div>
     </div>

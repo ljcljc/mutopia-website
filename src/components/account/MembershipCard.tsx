@@ -140,7 +140,7 @@ export default function MembershipCard() {
     }
 
     return (
-      <div className="bg-white rounded-[12px] border-2 border-[#754387] sm:border-[#6D28D9] p-[22px] sm:p-5 shadow-[0_8px_12px_0_rgba(0,0,0,0.10)]">
+      <div className="rounded-xl border-2 border-[#754387] bg-white p-[22px] shadow-[0_8px_12px_0_rgba(0,0,0,0.10)] sm:border-[#6D28D9] sm:p-5">
         {/* Header */}
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
@@ -162,17 +162,14 @@ export default function MembershipCard() {
         {isLoadingMembershipPlans || isLoadingMembershipInfo ? (
           <div className="text-[#4A3C2A] text-sm py-4">Loading membership benefits...</div>
         ) : (
-          <div className="flex flex-col gap-[12px] items-center relative shrink-0 w-full mb-6">
-            <div className="flex flex-col gap-[12px] items-start relative shrink-0">
+          <div className="relative mb-6 flex w-full shrink-0 flex-col items-center gap-3">
+            <div className="relative flex shrink-0 flex-col items-start gap-3">
               {displayBenefits.map((benefit: { content: string; is_highlight: boolean; display_order: number }, index: number) => (
-                <div
-                  key={index}
-                  className="flex items-start relative shrink-0"
-                >
+                <div key={index} className="relative flex shrink-0 items-start">
                   <div className="relative shrink-0">
-                    <div className="bg-clip-padding border-0 border-transparent border-solid flex flex-col items-start justify-center relative">
-                      <div className="flex gap-[12px] items-start relative shrink-0">
-                        <div className="relative shrink-0 size-[16.8px]">
+                    <div className="relative flex flex-col items-start justify-center border-0 border-transparent border-solid bg-clip-padding">
+                      <div className="relative flex shrink-0 items-start gap-3">
+                        <div className="relative size-[16.8px] shrink-0">
                           <Icon name="check-green" className="block size-full text-[#00A63E]" />
                         </div>
                         <p
@@ -194,14 +191,14 @@ export default function MembershipCard() {
         )}
 
         {/* Renew Membership Button */}
-        <div className="w-full pt-[8px]">
+        <div className="w-full pt-2">
           <PurpleButton 
             size="medium" 
             fullWidth 
             onClick={handleRenewMembership}
             disabled={isProcessingCheckout || isLoadingMembershipPlans}
           >
-            <div className="flex gap-[4px] items-center">
+            <div className="flex items-center gap-1">
               <p className="font-comfortaa font-medium leading-[17.5px] text-[14px] text-nowrap whitespace-pre">
                 {isProcessingCheckout ? "Processing..." : "Renew Membership"}
               </p>
@@ -217,9 +214,9 @@ export default function MembershipCard() {
 
   // 未购买状态 UI（也作为加载占位）
   return (
-      <div className="bg-white rounded-[12px] border-2 border-[#754387] sm:border-[#6D28D9] p-[22px] sm:p-5 shadow-[0_8px_12px_0_rgba(0,0,0,0.10)]">
+      <div className="rounded-xl border-2 border-[#754387] bg-white p-[22px] shadow-[0_8px_12px_0_rgba(0,0,0,0.10)] sm:border-[#6D28D9] sm:p-5">
       {/* Header */}
-      <div className="flex flex-col gap-[12px] sm:flex-row sm:items-center sm:justify-between mb-4">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <Icon name="logo" className="w-6 h-6 text-[#6D28D9] shrink-0" />
           <h2 className="font-comfortaa font-semibold text-[#4A3C2A] text-[15.75px] sm:text-lg">
@@ -237,17 +234,14 @@ export default function MembershipCard() {
       {isLoadingMembershipPlans ? (
         <div className="text-[#4A3C2A] text-sm py-4">Loading membership benefits...</div>
       ) : (
-        <div className="flex flex-col gap-[12px] items-center relative shrink-0 w-full mb-6">
-          <div className="flex flex-col gap-[12px] items-start relative shrink-0">
+        <div className="relative mb-6 flex w-full shrink-0 flex-col items-center gap-3">
+          <div className="relative flex shrink-0 flex-col items-start gap-3">
             {benefits.map((benefit: { content: string; is_highlight: boolean; display_order: number }, index: number) => (
-              <div
-                key={index}
-                className="flex items-start relative shrink-0"
-              >
+              <div key={index} className="relative flex shrink-0 items-start">
                 <div className="relative shrink-0">
-                  <div className="bg-clip-padding border-0 border-transparent border-solid flex flex-col items-start justify-center relative">
-                    <div className="flex gap-[12px] items-start relative shrink-0">
-                      <div className="relative shrink-0 size-[16.8px]">
+                  <div className="relative flex flex-col items-start justify-center border-0 border-transparent border-solid bg-clip-padding">
+                    <div className="relative flex shrink-0 items-start gap-3">
+                      <div className="relative size-[16.8px] shrink-0">
                         <Icon name="check-green" className="block size-full text-[#00A63E]" />
                       </div>
                       <p
@@ -269,14 +263,14 @@ export default function MembershipCard() {
       )}
 
       {/* Go Premium Button */}
-      <div className="w-full pt-[8px]">
+      <div className="w-full pt-2">
         <PurpleButton 
           size="medium" 
           fullWidth 
           onClick={handleGoPremium}
           disabled={isProcessingCheckout || isLoadingMembershipPlans}
         >
-          <div className="flex gap-[4px] items-center">
+          <div className="flex items-center gap-1">
             <p className="font-comfortaa font-medium leading-[17.5px] text-[14px] text-nowrap whitespace-pre">
               {isProcessingCheckout ? "Processing..." : "Go premium"}
             </p>
