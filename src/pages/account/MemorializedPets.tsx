@@ -166,7 +166,7 @@ export default function MemorializedPets() {
                       key={pet.id}
                       type="button"
                       onClick={() => handleSelectPet(pet.id)}
-                      className="flex min-w-[120px] shrink-0 items-center gap-1 rounded-tl-[14px] rounded-tr-[14px] border-2 border-[rgba(0,0,0,0.12)] bg-white px-4 py-2 text-[rgba(0,0,0,0.12)] cursor-default"
+                      className="flex min-w-[120px] shrink-0 cursor-default items-center gap-1 rounded-tl-[14px] rounded-tr-[14px] border-2 border-[rgba(0,0,0,0.12)] bg-white px-4 py-2 text-[rgba(0,0,0,0.12)]"
                     >
                       <Icon
                         name={pet.pet_type === "cat" ? "cat" : "dog"}
@@ -332,7 +332,7 @@ export default function MemorializedPets() {
             type="button"
             onClick={() => setIsDeleteOpen(true)}
             disabled={!activePet}
-            className="flex items-center gap-2 font-comfortaa text-[12px] leading-[17.5px] text-[#8B6357] transition-colors hover:text-[#DE6A07] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+            className="flex cursor-pointer items-center gap-2 font-comfortaa text-[12px] leading-[17.5px] text-[#8B6357] transition-colors hover:text-[#DE6A07] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Icon name="trash" size={16} />
             Delete pet
