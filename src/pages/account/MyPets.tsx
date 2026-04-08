@@ -628,7 +628,7 @@ export default function MyPets() {
                   }}
                 >
                   <SelectTrigger
-                    className="h-10 min-w-[160px] w-[160px] rounded-tl-[14px] rounded-tr-[14px] border-2 border-[#DE6A07] bg-white px-4 py-2 text-[#DE6A07] [&_svg]:text-[#DE6A07]"
+                    className="h-10 w-40 min-w-40 rounded-tl-[14px] rounded-tr-[14px] border-2 border-[#DE6A07] bg-white px-4 py-2 text-[#DE6A07] [&_svg]:text-[#DE6A07]"
                   >
                     <div className="flex items-center gap-1">
                       <Icon
@@ -642,7 +642,7 @@ export default function MyPets() {
                     </div>
                   </SelectTrigger>
                   <SelectContent
-                    className="rounded-tl-[8px] rounded-tr-[8px] rounded-bl-0 rounded-br-0 border border-[#D6D6D6] bg-white p-2"
+                    className="rounded-t-lg rounded-b-none border border-[#D6D6D6] bg-white p-2"
                     position="popper"
                   >
                     {pets.map((pet) => (
@@ -773,13 +773,13 @@ export default function MyPets() {
               }}
             />
           ) : (
-            <div className="bg-white rounded-[12px] rounded-tr-none border-2 border-[#DE6A07] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[22px] sm:p-[20px]">
+            <div className="rounded-xl rounded-tr-none border-2 border-[#DE6A07] bg-white p-[22px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] sm:p-5">
               {isLoadingPets ? (
                 <div className="text-[#4A3C2A] text-sm">Loading pets...</div>
               ) : activePet ? (
-                <div className="flex gap-[16px]">
+                <div className="flex gap-4">
                   {/* 左侧：头像 */}
-                  <div className="size-[56px] rounded-full overflow-hidden border border-[#E5E7EB] bg-[#8B6357] flex items-center justify-center shrink-0">
+                  <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E5E7EB] bg-[#8B6357]">
                     {activePet.primary_photo ? (
                       <img
                         alt={activePet.name}
@@ -792,45 +792,45 @@ export default function MyPets() {
                   </div>
                   
                   {/* 右侧：其他所有模块 */}
-                  <div className="flex flex-col gap-[8px] flex-1">
+                  <div className="flex flex-1 flex-col gap-2">
                     {/* 上方：信息和编辑icon左右结构 */}
                     <div className="flex items-start justify-between">
-                      <div className="flex flex-col gap-[8px]">
+                      <div className="flex flex-col gap-2">
                         <p className="font-comfortaa font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
                           {activePet.name}
                         </p>
-                        <div className="grid grid-cols-2 gap-x-[40px] gap-y-[16px] text-[#4A3C2A]">
-                          <div className="w-[80px]">
+                        <div className="grid grid-cols-2 gap-x-10 gap-y-4 text-[#4A3C2A]">
+                          <div className="w-20">
                             <p className="font-comfortaa text-[10px] leading-[12px]">Pet type</p>
                             <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
                               {formatLabel(activePet.pet_type)}
                             </p>
                           </div>
-                          <div className="min-w-[80px] max-w-[160px]">
+                          <div className="min-w-20 max-w-40">
                             <p className="font-comfortaa text-[10px] leading-[12px]">Breed</p>
                             <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
                               {activePet.breed || "-"}
                             </p>
                           </div>
-                          <div className="w-[80px]">
+                          <div className="w-20">
                             <p className="font-comfortaa text-[10px] leading-[12px]">Weight</p>
                             <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
                               {formatWeight(activePet.weight_value, activePet.weight_unit)}
                             </p>
                           </div>
-                          <div className="w-[80px]">
+                          <div className="w-20">
                             <p className="font-comfortaa text-[10px] leading-[12px]">Date of birth</p>
                             <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
                               {formatBirthday(activePet.birthday)}
                             </p>
                           </div>
-                          <div className="w-[80px]">
+                          <div className="w-20">
                             <p className="font-comfortaa text-[10px] leading-[12px]">Coat condition</p>
                             <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
                               {formatLabel(activePet.coat_condition)}
                             </p>
                           </div>
-                          <div className="w-[80px]">
+                          <div className="w-20">
                             <p className="font-comfortaa text-[10px] leading-[12px]">Behavior</p>
                             <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
                               {formatBehavior(activePet.behavior)}
@@ -852,7 +852,7 @@ export default function MyPets() {
                     
                     {/* 下方：移动端换行，PC 端同一行 */}
                     <div className="flex flex-col items-start sm:flex-row sm:items-center sm:justify-between">
-                      <div className="w-[80px]">
+                      <div className="w-20">
                         <p className="font-comfortaa text-[10px] leading-[12px]">Frequency</p>
                         <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
                           {formatLabel(activePet.grooming_frequency)}
@@ -861,7 +861,7 @@ export default function MyPets() {
                       <OrangeButton
                         size="compact"
                         showArrow
-                        className="px-[28px] h-[28px] mt-[12px] sm:mt-0"
+                        className="mt-3 h-7 px-7 sm:mt-0"
                         onClick={() => activePet && handleBookForPet(activePet)}
                       >
                         <span className="text-white text-[12px] leading-[17.5px] font-bold">Book for {activePet.name}</span>
@@ -875,9 +875,9 @@ export default function MyPets() {
             </div>
           )}
 
-          <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[14px] sm:p-[24px]">
-            <div className="flex flex-col gap-[24px]">
-              <div className="flex flex-col gap-[8px]">
+          <div className="rounded-xl bg-white p-3.5 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] sm:p-6">
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between">
                   <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
                     Photos
@@ -906,7 +906,7 @@ export default function MyPets() {
 
               <div className="border-t border-[#E5E7EB]" />
 
-              <div className="flex flex-col gap-[8px]">
+              <div className="flex flex-col gap-2">
                 <p className="font-comfortaa font-normal text-[12.25px] leading-[17.5px] text-[#4A3C2A]">
                   Reference photos
                 </p>
@@ -925,12 +925,12 @@ export default function MyPets() {
             </div>
           </div>
 
-          <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[12px] sm:p-[20px]">
-            <div className="flex flex-col gap-[12px]">
+          <div className="rounded-xl bg-white p-3 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] sm:p-5">
+            <div className="flex flex-col gap-3">
               <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
                 Health report
               </p>
-              <div className="border border-[#E5E7EB] rounded-[12px] px-[15px] py-[13px] flex items-center justify-between w-full">
+              <div className="flex w-full items-center justify-between rounded-xl border border-[#E5E7EB] px-[15px] py-[13px]">
                 <div>
                   <p className="font-comfortaa font-normal text-[16px] leading-[28px] text-[#DE6A07]">
                     {activePet?.name || "-"}
@@ -940,7 +940,7 @@ export default function MyPets() {
                   </p>
                 </div>
                 <div className="flex items-center gap-[7px]">
-                  <div className="bg-[#DCFCE7] h-[24px] px-[16px] py-[4px] rounded-[12px] flex items-center">
+                  <div className="flex h-6 items-center rounded-xl bg-[#DCFCE7] px-4 py-1">
                     <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#016630]">
                       Ready
                     </span>
@@ -951,8 +951,8 @@ export default function MyPets() {
             </div>
           </div>
 
-          <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[12px] sm:p-[20px]">
-            <div className="flex flex-col gap-[12px]">
+          <div className="rounded-xl bg-white p-3 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] sm:p-5">
+            <div className="flex flex-col gap-3">
               <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
                 Special instruments or notes
               </p>
@@ -966,7 +966,7 @@ export default function MyPets() {
                 size="compact"
                 onClick={handleSaveNotes}
                 loading={isSaving}
-                className="w-[96px] self-end"
+                className="w-24 self-end"
               >
                 Save
               </OrangeButton>
@@ -977,7 +977,7 @@ export default function MyPets() {
             <OrangeButton
               variant="outlineMuted"
               size="compact"
-              className={`px-[28px] ${isMemorialized ? "border-[#E5E7EB] hover:bg-transparent active:bg-transparent" : ""}`}
+              className={`px-7 ${isMemorialized ? "border-[#E5E7EB] hover:bg-transparent active:bg-transparent" : ""}`}
               onClick={handleMemorializePet}
               loading={isMemorializing}
               disabled={!activePet || isMemorialized}
@@ -988,7 +988,7 @@ export default function MyPets() {
               type="button"
               onClick={() => setIsDeleteOpen(true)}
               disabled={!activePet}
-              className="flex items-center gap-[8px] text-[#8B6357] text-[12px] leading-[17.5px] font-comfortaa hover:text-[#DE6A07] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="flex cursor-pointer items-center gap-2 font-comfortaa text-[12px] leading-[17.5px] text-[#8B6357] transition-colors hover:text-[#DE6A07] disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Icon name="trash" size={16} />
               Delete pet
@@ -998,14 +998,14 @@ export default function MyPets() {
       </div>
 
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <AlertDialogContent className="rounded-[20px] px-0 py-0 max-w-[calc(100%-32px)] sm:max-w-[520px]">
-          <div className="flex flex-col gap-[16px] pb-[32px] pt-[12px]">
-            <AlertDialogHeader className="px-[12px]">
+        <AlertDialogContent className="max-w-[calc(100%-32px)] rounded-[20px] px-0 py-0 sm:max-w-[520px]">
+          <div className="flex flex-col gap-4 pb-8 pt-3">
+            <AlertDialogHeader className="px-3">
               <div className="flex items-center justify-between w-full">
                 <AlertDialogPrimitive.Cancel asChild>
                   <button
                     type="button"
-                    className="h-[16px] w-[16px] p-0 border-0 bg-transparent text-[#4A3C2A] opacity-70 hover:opacity-100"
+                    className="size-4 border-0 bg-transparent p-0 text-[#4A3C2A] opacity-70 hover:opacity-100"
                   >
                     <Icon name="close-arrow" size={16} className="text-[#4A3C2A]" />
                   </button>
@@ -1013,17 +1013,17 @@ export default function MyPets() {
                 <AlertDialogTitle className="flex-1 text-center font-comfortaa font-normal text-[14px] leading-[22.75px] text-[#4C4C4C]">
                   Delete {activePet?.name || "pet"}
                 </AlertDialogTitle>
-                <span className="w-[16px]" />
+                <span className="size-4" />
               </div>
             </AlertDialogHeader>
             <div className="h-px bg-[rgba(0,0,0,0.1)]" />
-            <div className="px-[24px]">
+            <div className="px-6">
               <AlertDialogDescription className="font-comfortaa font-bold text-[14px] leading-[22px] text-[#4A5565] m-0">
                 By deleting this pet’s profile, it will no longer appear in your app. Are you sure you want to continue?
               </AlertDialogDescription>
             </div>
-            <AlertDialogFooter className="px-[24px]">
-              <div className="flex items-center justify-end gap-[10px] w-full">
+            <AlertDialogFooter className="px-6">
+              <div className="flex w-full items-center justify-end gap-2.5">
                 <AlertDialogPrimitive.Cancel asChild>
                   <OrangeButton
                     variant="outline"
