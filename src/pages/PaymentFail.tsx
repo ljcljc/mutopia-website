@@ -28,7 +28,7 @@ export default function PaymentFail() {
         </div>
 
         {/* Error Details Card */}
-        <div className="w-full rounded-xl bg-white p-6 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] md:rounded-2xl md:shadow-lg">
+        <div className="w-full rounded-xl bg-white p-6 shadow-lg md:rounded-2xl md:shadow-lg">
           <div className="flex flex-col gap-4">
             <h2 className="font-comfortaa text-[16px] leading-[28px] font-semibold text-[#4a5565] md:text-xl md:font-bold md:text-[#4a3c2a]">
               What happened?
@@ -36,7 +36,7 @@ export default function PaymentFail() {
             <p className="font-comfortaa text-[12px] leading-[16px] font-bold text-[#4A3C2A] md:text-base md:leading-[24px] md:font-normal">
               We were unable to process your payment. This could be due to:
             </p>
-            <ul className="font-comfortaa list-disc space-y-1 pl-[18px] text-[12px] leading-[16px] font-bold text-[#4A3C2A] md:space-y-2 md:pl-5 md:text-base md:leading-[24px] md:font-normal">
+            <ul className="font-comfortaa list-disc space-y-1 pl-4.5 text-[12px] leading-[16px] font-bold text-[#4A3C2A] md:space-y-2 md:pl-5 md:text-base md:leading-[24px] md:font-normal">
               <li>Insufficient funds in your account</li>
               <li>Card expiration or incorrect card details</li>
               <li>Network connectivity issues</li>

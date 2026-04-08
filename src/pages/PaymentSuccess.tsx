@@ -96,7 +96,7 @@ export default function PaymentSuccess() {
         </div>
 
         {/* Appointment Details Card */}
-        <div className="w-full rounded-xl bg-white p-6 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] md:rounded-2xl md:shadow-lg">
+        <div className="w-full rounded-xl bg-white p-6 shadow-lg md:rounded-2xl md:shadow-lg">
           {/* Title and Savings Badge */}
           <div className="mb-5 flex flex-col items-start gap-1 md:mb-5 md:flex-row md:items-start md:justify-between md:gap-0">
             <h2 className="font-comfortaa text-[16px] leading-[28px] font-semibold text-[#4a5565] md:text-xl md:font-bold md:text-[#4a3c2a]">
@@ -116,7 +116,7 @@ export default function PaymentSuccess() {
               <p className="mb-1 font-comfortaa text-[10px] leading-[12px] font-normal text-[#4A3C2A] md:mb-2 md:text-sm md:leading-[20px] md:text-[#6B7280]">
                 Address
               </p>
-              <div className="font-comfortaa space-y-[2px] text-[12px] leading-[16px] font-bold text-[#4A3C2A] md:space-y-1 md:text-base md:leading-[24px] md:font-normal">
+              <div className="font-comfortaa space-y-0.5 text-[12px] leading-[16px] font-bold text-[#4A3C2A] md:space-y-1 md:text-base md:leading-[24px] md:font-normal">
                 <p>{address}</p>
                 <p>{city} {province} {postCode}</p>
                 <p>CANADA</p>
@@ -128,7 +128,7 @@ export default function PaymentSuccess() {
               <p className="mb-1 font-comfortaa text-[10px] leading-[12px] font-normal text-[#4A3C2A] md:mb-2 md:text-sm md:leading-[20px] md:text-[#6B7280]">
                 Date and time selected
               </p>
-              <div className="font-comfortaa space-y-[2px] text-[12px] leading-[16px] font-bold text-[#4A3C2A] md:space-y-1 md:text-base md:leading-[24px] md:font-normal">
+              <div className="font-comfortaa space-y-0.5 text-[12px] leading-[16px] font-bold text-[#4A3C2A] md:space-y-1 md:text-base md:leading-[24px] md:font-normal">
                 {formattedTimeSlots.map((slot, index) => (
                   <p key={index}>{slot}</p>
                 ))}
@@ -141,7 +141,7 @@ export default function PaymentSuccess() {
             <h3 className="mb-3 font-comfortaa text-[16px] leading-[28px] font-semibold text-[#4a5565] md:mb-4 md:text-xl md:font-bold md:text-[#4A3C2A]">
               Next step
             </h3>
-            <ol className="font-comfortaa list-decimal space-y-1 pl-[18px] text-[12px] leading-[16px] font-bold text-[#4A3C2A] md:space-y-2 md:pl-5 md:text-base md:leading-[24px] md:font-normal">
+            <ol className="font-comfortaa list-decimal space-y-1 pl-4.5 text-[12px] leading-[16px] font-bold text-[#4A3C2A] md:space-y-2 md:pl-5 md:text-base md:leading-[24px] md:font-normal">
               <li>You will receive a confirmation with the date and time within 48 hours.</li>
               <li>The appointment can be confirmed using the link provided in the email.</li>
             </ol>
@@ -163,7 +163,7 @@ export default function PaymentSuccess() {
                 You can still save more*
               </h2>
               
-              <div className="w-full rounded-2xl bg-[rgba(255,255,255,0.96)] px-6 py-8 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] md:mx-auto md:max-w-md md:bg-white md:p-8 md:shadow-lg">
+            <div className="w-full rounded-2xl bg-[rgba(255,255,255,0.96)] px-6 py-8 shadow-lg md:mx-auto md:max-w-md md:bg-white md:p-8 md:shadow-lg">
                 <div className="flex flex-col gap-6">
                   {/* Title and Price */}
                   <div className="flex flex-col items-center gap-1">
