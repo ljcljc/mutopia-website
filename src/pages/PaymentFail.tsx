@@ -15,12 +15,12 @@ export default function PaymentFail() {
   };
 
   return (
-    <div className="relative flex min-h-full w-full flex-col items-center gap-8 bg-[#f9f1e8] px-4 pt-10 pb-[60px] md:gap-[60px] md:px-0 md:pt-[60px] md:pb-[100px]">
+    <div className="relative flex min-h-full w-full flex-col items-center gap-8 bg-[#f9f1e8] px-4 pb-15 pt-10 md:gap-15 md:px-0 md:pt-15 md:pb-25">
       <div className="relative flex w-full max-w-[780px] shrink-0 flex-col items-start gap-8">
         {/* Failure Header */}
-        <div className="flex flex-col items-center w-full">
+        <div className="flex w-full flex-col items-center">
           <div className="mb-1 flex size-10 items-center justify-center rounded-[20px] bg-[#DE1507] md:mb-4 md:size-20 md:rounded-full">
-            <Icon name="alert-error" className="size-[20px] md:size-12 text-white" />
+            <Icon name="alert-error" className="size-5 text-white md:size-12" />
           </div>
           <h1 className="font-comfortaa text-[16px] leading-[28px] font-semibold text-[#4C4C4C] md:text-2xl md:font-bold md:text-[#4a3c2a]">
             Payment was unsuccessful.
@@ -50,7 +50,7 @@ export default function PaymentFail() {
           <OrangeButton
             size="medium"
             onClick={handleGoToAccount}
-            className="flex items-center gap-2 w-full md:w-auto md:h-[48px] md:px-[28px] md:py-[14px]"
+            className="flex w-full items-center gap-2 md:h-12 md:w-auto md:px-7 md:py-3.5"
           >
             <span>Go to My account</span>
           </OrangeButton>
@@ -59,7 +59,7 @@ export default function PaymentFail() {
             variant="primary"
             size="medium"
             onClick={handleRetryPayment}
-            className="w-full md:w-auto md:h-[48px] md:px-[28px] md:py-[14px]"
+            className="w-full md:h-12 md:w-auto md:px-7 md:py-3.5"
           >
             Try again
           </PurpleButton>
