@@ -11,6 +11,14 @@ export default function GroomerLayout() {
   const location = useLocation();
   const user = useAuthStore((state) => state.user);
   const userInfo = useAuthStore((state) => state.userInfo);
+  const groomerRootPaths = new Set([
+    "/groomer/dashboard",
+    "/groomer/account",
+    "/groomer/my-work",
+    "/groomer/earnings",
+    "/groomer/menu",
+  ]);
+  const showBottomNav = groomerRootPaths.has(location.pathname);
   const hasAccessToken =
     typeof window !== "undefined" &&
     !!window.localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
@@ -28,9 +36,9 @@ export default function GroomerLayout() {
       header={<GroomerHeader />}
       footer={<Footer />}
       footerClassName="hidden lg:block"
-      bottomNav={<AccountBottomNav />}
-      bottomNavClassName="lg:hidden"
-      insetClassName="bg-transparent pb-[96px] lg:pb-0"
+      bottomNav={showBottomNav ? <AccountBottomNav /> : null}
+      bottomNavClassName={showBottomNav ? "lg:hidden" : "hidden"}
+      insetClassName={showBottomNav ? "bg-transparent pb-[96px] lg:pb-0" : "bg-transparent pb-0"}
       contentGrow={false}
     />
   );

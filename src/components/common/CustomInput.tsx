@@ -45,7 +45,7 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
             className={`absolute border border-solid inset-0 pointer-events-none rounded-[12px] transition-colors duration-200 ${borderClassName} ${
               error
                 ? "border-[#de1507]"
-                : "border-gray-200 group-hover:border-[#717182] group-focus-within:!border-[#2374ff]"
+                : "border-gray-200 group-hover:border-[#717182] group-focus-within:border-[#2374ff]"
             }`}
           />
         </div>
