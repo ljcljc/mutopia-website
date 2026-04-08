@@ -54,9 +54,9 @@ export default function Booking() {
   };
 
   return (
-    <div className="flex flex-col gap-[60px] items-center pt-[32px] pb-[60px] sm:pt-[60px] sm:pb-[100px] px-0 w-full min-h-full relative bg-[#f9f1e8]">
+    <div className="relative flex min-h-full w-full flex-col items-center gap-[60px] bg-[#f9f1e8] px-0 pt-8 pb-[60px] sm:pt-[60px] sm:pb-[100px]">
       {/* Content */}
-      <div className="flex flex-col gap-[16px] items-start relative shrink-0 w-full max-w-[780px]">
+      <div className="relative flex w-full max-w-[780px] shrink-0 flex-col items-start gap-4">
         {/* Progress Steps */}
         <div className="hidden sm:block w-full">
           <ProgressSteps
@@ -71,14 +71,14 @@ export default function Booking() {
         </div>
 
         {/* Main Form */}
-        <div className="flex flex-col gap-[32px] items-start relative shrink-0 w-full">
+        <div className="relative flex w-full shrink-0 flex-col items-start gap-8">
           {renderStepComponent()}
 
           {/* Continue Button - Only show for Step 1 */}
           {currentStep === 1 && (
-            <div className="flex gap-[20px] items-start relative shrink-0 w-full px-[20px] sm:px-0">
+            <div className="relative flex w-full shrink-0 items-start gap-5 px-5 sm:px-0">
               <OrangeButton size="medium" onClick={nextStep} className="w-full sm:w-auto">
-                <div className="flex gap-[4px] items-center">
+                <div className="flex items-center gap-1">
                   <p className="font-comfortaa font-medium leading-[17.5px] text-[14px] text-white">
                     Continue
                   </p>

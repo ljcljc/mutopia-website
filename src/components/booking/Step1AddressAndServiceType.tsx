@@ -103,24 +103,24 @@ export function Step1AddressAndServiceType() {
 
   return (
     <>
-      <div className="flex flex-col gap-[16px] items-start relative w-full px-[20px] sm:px-0">
+      <div className="relative flex w-full flex-col items-start gap-4 px-5 sm:px-0">
         {/* Mobile Step Header */}
-        <div className="flex flex-col gap-[12px] items-start relative shrink-0 w-full sm:hidden">
-          <p className="font-comfortaa font-bold h-[19px] leading-[17.5px] relative shrink-0 text-[12px] text-black w-full whitespace-pre-wrap">
+        <div className="relative flex w-full shrink-0 flex-col items-start gap-3 sm:hidden">
+          <p className="relative h-[19px] w-full shrink-0 whitespace-pre-wrap font-comfortaa text-[12px] leading-[17.5px] font-bold text-black">
             Book your appointment
           </p>
-          <div className="border border-[#4c4c4c] border-solid flex h-[24px] items-center justify-center overflow-clip px-[9px] py-[5px] relative rounded-[12px] shrink-0">
-            <p className="font-comfortaa font-bold leading-[14px] relative shrink-0 text-[#4c4c4c] text-[10px]">
+          <div className="relative flex h-6 shrink-0 items-center justify-center overflow-clip rounded-xl border border-solid border-[#4c4c4c] px-[9px] py-[5px]">
+            <p className="relative shrink-0 font-comfortaa text-[10px] leading-[14px] font-bold text-[#4c4c4c]">
               Step 1 of 6
             </p>
           </div>
-          <p className="font-comfortaa font-semibold leading-[28px] min-w-full relative shrink-0 text-[#4a3c2a] text-[16px] w-[min-content] whitespace-pre-wrap">
+          <p className="relative w-[min-content] min-w-full shrink-0 whitespace-pre-wrap font-comfortaa text-[16px] leading-[28px] font-semibold text-[#4a3c2a]">
             Address and service type
           </p>
         </div>
         {/* Form Card */}
-        <div className="bg-white flex flex-col gap-[16px] items-start p-[24px] relative rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
-          <div className="flex flex-col gap-[16px] items-start relative w-full">
+        <div className="relative flex w-full flex-col items-start gap-4 rounded-xl bg-white p-6 shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)]">
+          <div className="relative flex w-full flex-col items-start gap-4">
             {/* Section Header */}
             <div className="flex flex-col items-start relative shrink-0 w-full">
               <p className="font-comfortaa font-semibold leading-[28px] min-w-full relative shrink-0 text-[#4a3c2a] text-[16px] w-min whitespace-pre-wrap">
@@ -134,14 +134,14 @@ export function Step1AddressAndServiceType() {
             {/* Login Section - Only show if user is not logged in */}
             {!user && (
               <div className="flex flex-col items-start justify-end relative shrink-0 w-full">
-                <div className="flex gap-[7px] items-center relative shrink-0">
-                  <p className="font-comfortaa font-normal leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[14px]">
+                <div className="relative flex shrink-0 items-center gap-[7px]">
+                  <p className="relative shrink-0 font-comfortaa text-[14px] leading-[22.75px] font-normal text-[#4a3c2a]">
                     Have an account already?
                   </p>
                 </div>
                 <LoginModal open={isLoginModalOpen} onOpenChange={setIsLoginModalOpen}>
                   <button
-                    className="bg-neutral-100 border-2 border-[#633479] border-solid flex gap-[8px] w-full sm:w-[191px] h-[36px] items-center justify-center px-[30px] py-[16px] relative rounded-[32px] shrink-0 cursor-pointer hover:bg-[#f2dfcf] active:bg-[#f2dfcf] focus-visible:bg-[#f2dfcf] transition-colors"
+                    className="relative flex h-9 w-full shrink-0 cursor-pointer items-center justify-center gap-2 rounded-[32px] border-2 border-solid border-[#633479] bg-neutral-100 px-[30px] py-4 transition-colors hover:bg-[#f2dfcf] focus-visible:bg-[#f2dfcf] active:bg-[#f2dfcf] sm:w-[191px]"
                     onClick={() => setIsLoginModalOpen(true)}
                   >
                     <p className="font-comfortaa font-bold leading-[20px] text-[#633479] text-[14px]">
@@ -153,11 +153,11 @@ export function Step1AddressAndServiceType() {
             )}
 
             {/* Info Alert */}
-            <div className="bg-[#eff6ff] border border-[#bedbff] border-solid relative rounded-[8px]">
-              <div className="flex items-center overflow-clip px-[16px] py-[8px] relative rounded-[inherit]">
-                <div className="flex gap-[8px] items-start relative w-full min-w-0">
+            <div className="relative rounded-lg border border-solid border-[#bedbff] bg-[#eff6ff]">
+              <div className="relative flex items-center overflow-clip rounded-[inherit] px-4 py-2">
+                <div className="relative flex min-w-0 w-full items-start gap-2">
                   {/* Info Icon */}
-                  <div className="relative shrink-0 size-[12px]">
+                  <div className="relative size-3 shrink-0">
                     <Icon
                       name="alert-info"
                       aria-label="Info"
@@ -175,16 +175,16 @@ export function Step1AddressAndServiceType() {
             {(serviceType === "mobile" || serviceType === "in_home") && user && addresses.length > 0 ? (
               // 已登录用户选择地址（mobile 服务）- 支持下拉选择和手动输入
               <div className="flex flex-col items-start relative w-full sm:w-[320px]">
-                <div className="flex gap-[7px] items-center relative mb-2">
-                  <p className="font-comfortaa font-normal leading-[22.75px] relative text-[#4a3c2a] text-[14px]">
+                <div className="relative mb-2 flex items-center gap-[7px]">
+                  <p className="relative font-comfortaa text-[14px] leading-[22.75px] font-normal text-[#4a3c2a]">
                     Address
                   </p>
                 </div>
                 <div className="relative w-full sm:w-[320px]" ref={addressDropdownRef}>
-                  <div className="bg-white border border-gray-200 border-solid h-[36px] relative rounded-[8px] w-full hover:border-[#633479] transition-colors">
-                    <div className="flex h-[36px] items-center overflow-clip px-[12px] py-[4px] relative rounded-[inherit] w-full">
-                      <div className="flex flex-1 items-center relative">
-                        <div className="overflow-clip relative shrink-0 size-[24px]">
+                  <div className="relative h-9 w-full rounded-lg border border-solid border-gray-200 bg-white transition-colors hover:border-[#633479]">
+                    <div className="relative flex h-9 w-full items-center overflow-clip rounded-[inherit] px-3 py-1">
+                      <div className="relative flex flex-1 items-center">
+                        <div className="relative size-6 shrink-0 overflow-clip">
                           <Icon
                             name="location"
                             aria-label="Location"
@@ -206,7 +206,7 @@ export function Step1AddressAndServiceType() {
                           className="flex-1 font-comfortaa font-normal leading-[normal] relative text-[#717182] text-[12.25px] ml-[4px] bg-transparent border-none outline-none placeholder:text-[#717182]"
                         />
                         <div 
-                          className="relative shrink-0 w-[16px] cursor-pointer"
+                          className="relative w-4 shrink-0 cursor-pointer"
                           onClick={(e) => {
                             e.stopPropagation();
                             setIsAddressDropdownOpen(!isAddressDropdownOpen);
@@ -225,11 +225,11 @@ export function Step1AddressAndServiceType() {
                   </div>
                   {/* Address Dropdown */}
                   {isAddressDropdownOpen && (
-                    <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-[8px] shadow-lg max-h-[200px] overflow-y-auto">
+                    <div className="absolute z-10 mt-1 max-h-[200px] w-full overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg">
                       {addresses.map((addr) => (
                         <div
                           key={addr.id}
-                          className={`px-[12px] py-[8px] cursor-pointer hover:bg-gray-50 transition-colors ${
+                          className={`cursor-pointer px-3 py-2 transition-colors hover:bg-gray-50 ${
                             selectedAddressId === addr.id ? "bg-blue-50" : ""
                           }`}
                           onClick={() => {

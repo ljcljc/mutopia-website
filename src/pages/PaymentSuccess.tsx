@@ -83,23 +83,23 @@ export default function PaymentSuccess() {
   };
 
   return (
-    <div className="flex flex-col gap-[32px] md:gap-[60px] items-center pb-[60px] md:pb-[100px] pt-[40px] md:pt-[60px] px-[16px] md:px-0 w-full min-h-full relative bg-[#f9f1e8]">
-      <div className="flex flex-col gap-[32px] items-start relative shrink-0 w-full max-w-[780px]">
+    <div className="relative flex min-h-full w-full flex-col items-center gap-8 bg-[#f9f1e8] px-4 pt-10 pb-[60px] md:gap-[60px] md:px-0 md:pt-[60px] md:pb-[100px]">
+      <div className="relative flex w-full max-w-[780px] shrink-0 flex-col items-start gap-8">
         {/* Confirmation Header */}
         <div className="flex flex-col items-center w-full">
-          <div className="w-[40px] h-[40px] md:w-20 md:h-20 bg-[#6AA31C] rounded-[20px] md:rounded-full flex items-center justify-center mb-[4px] md:mb-4">
+          <div className="mb-1 flex size-10 items-center justify-center rounded-[20px] bg-[#6AA31C] md:mb-4 md:size-20 md:rounded-full">
             <Icon name="check" className="size-[20px] md:size-12 text-white" />
           </div>
-          <h1 className="text-[16px] leading-[28px] font-comfortaa font-semibold text-[#4C4C4C] md:text-2xl md:font-comfortaa md:font-bold md:text-[#4a3c2a]">
+          <h1 className="font-comfortaa text-[16px] leading-[28px] font-semibold text-[#4C4C4C] md:text-2xl md:font-bold md:text-[#4a3c2a]">
             Appointment confirmed
           </h1>
         </div>
 
         {/* Appointment Details Card */}
-        <div className="bg-white rounded-[12px] md:rounded-[16px] p-[24px] md:p-6 md:shadow-lg shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] w-full">
+        <div className="w-full rounded-xl bg-white p-6 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] md:rounded-2xl md:shadow-lg">
           {/* Title and Savings Badge */}
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-[4px] md:gap-0 items-start mb-[20px] md:mb-5">
-            <h2 className="text-[16px] leading-[28px] font-comfortaa font-semibold text-[#4a5565] md:text-xl md:font-comfortaa md:font-bold md:text-[#4a3c2a]">
+            <h2 className="font-comfortaa text-[16px] leading-[28px] font-semibold text-[#4a5565] md:text-xl md:font-bold md:text-[#4a3c2a]">
               {serviceName}
             </h2>
             <div className="bg-[#DCFCE7] md:bg-[#D5EDD8] rounded-[12px] px-[16px] md:px-3 py-[4px] md:py-1 h-[24px] flex items-center">
@@ -113,10 +113,10 @@ export default function PaymentSuccess() {
           <div className="flex flex-col md:flex-row justify-between gap-x-12 gap-y-[12px] mb-[20px] md:mb-5">
             {/* Address Section */}
             <div className="flex-1">
-              <p className="text-[10px] leading-[12px] md:text-sm md:leading-[20px] font-comfortaa font-normal text-[#4A3C2A] md:text-[#6B7280] mb-[4px] md:mb-2">
+              <p className="mb-1 font-comfortaa text-[10px] leading-[12px] font-normal text-[#4A3C2A] md:mb-2 md:text-sm md:leading-[20px] md:text-[#6B7280]">
                 Address
               </p>
-              <div className="text-[#4A3C2A] font-comfortaa md:font-comfortaa font-bold md:font-normal text-[12px] md:text-base leading-[16px] md:leading-[24px] space-y-[2px] md:space-y-1">
+              <div className="font-comfortaa space-y-[2px] text-[12px] leading-[16px] font-bold text-[#4A3C2A] md:space-y-1 md:text-base md:leading-[24px] md:font-normal">
                 <p>{address}</p>
                 <p>{city} {province} {postCode}</p>
                 <p>CANADA</p>
@@ -125,10 +125,10 @@ export default function PaymentSuccess() {
 
             {/* Date and Time Section */}
             <div className="flex-1">
-              <p className="text-[10px] leading-[12px] md:text-sm md:leading-[20px] font-comfortaa font-normal text-[#4A3C2A] md:text-[#6B7280] mb-[4px] md:mb-2">
+              <p className="mb-1 font-comfortaa text-[10px] leading-[12px] font-normal text-[#4A3C2A] md:mb-2 md:text-sm md:leading-[20px] md:text-[#6B7280]">
                 Date and time selected
               </p>
-              <div className="text-[#4A3C2A] font-comfortaa md:font-comfortaa font-bold md:font-normal text-[12px] md:text-base leading-[16px] md:leading-[24px] space-y-[2px] md:space-y-1">
+              <div className="font-comfortaa space-y-[2px] text-[12px] leading-[16px] font-bold text-[#4A3C2A] md:space-y-1 md:text-base md:leading-[24px] md:font-normal">
                 {formattedTimeSlots.map((slot, index) => (
                   <p key={index}>{slot}</p>
                 ))}
@@ -138,10 +138,10 @@ export default function PaymentSuccess() {
 
           {/* Next Step Instructions */}
           <div>
-            <h3 className="text-[16px] leading-[28px] font-comfortaa font-semibold text-[#4a5565] mb-[12px] md:text-xl md:font-comfortaa md:font-bold md:text-[#4A3C2A] md:mb-4">
+            <h3 className="mb-3 font-comfortaa text-[16px] leading-[28px] font-semibold text-[#4a5565] md:mb-4 md:text-xl md:font-bold md:text-[#4A3C2A]">
               Next step
             </h3>
-            <ol className="list-decimal pl-[18px] md:pl-5 space-y-[4px] md:space-y-2 text-[12px] md:text-base leading-[16px] md:leading-[24px] text-[#4A3C2A] font-comfortaa md:font-comfortaa font-bold md:font-normal">
+            <ol className="font-comfortaa list-decimal space-y-1 pl-[18px] text-[12px] leading-[16px] font-bold text-[#4A3C2A] md:space-y-2 md:pl-5 md:text-base md:leading-[24px] md:font-normal">
               <li>You will receive a confirmation with the date and time within 48 hours.</li>
               <li>The appointment can be confirmed using the link provided in the email.</li>
             </ol>
@@ -151,7 +151,7 @@ export default function PaymentSuccess() {
         {/* Membership Upsell Section */}
         {/* {!useMembership && membershipPlan && ( */}
         {(
-          <div className="bg-[#633479] rounded-[12px] md:rounded-[16px] p-[24px] md:p-8 relative overflow-hidden w-full">
+          <div className="relative w-full overflow-hidden rounded-xl bg-[#633479] p-6 md:rounded-2xl md:p-8">
             {/* Decorative background circles */}
             <div className="absolute bg-[rgba(255,255,255,0.15)] opacity-30 rounded-full size-[74px] left-[46px] top-[116px]" />
             <div className="absolute bg-[rgba(255,255,255,0.35)] opacity-30 rounded-full size-[42px] left-[108px] top-[86px]" />
@@ -159,7 +159,7 @@ export default function PaymentSuccess() {
             <div className="absolute bg-[rgba(255,255,255,0.15)] opacity-30 rounded-full size-[118px] right-[143px] bottom-[-10px]" />
             
             <div className="relative z-10">
-              <h2 className="text-white text-[16px] leading-[28px] font-comfortaa font-semibold mb-[16px] md:text-xl md:font-comfortaa md:font-bold md:mb-6">
+              <h2 className="mb-4 font-comfortaa text-[16px] leading-[28px] font-semibold text-white md:mb-6 md:text-xl md:font-bold">
                 You can still save more*
               </h2>
               
@@ -168,7 +168,7 @@ export default function PaymentSuccess() {
                   {/* Title and Price */}
                   <div className="flex flex-col items-center gap-[4px]">
                     <div className="flex items-center gap-2">
-                      <p className="font-comfortaa font-bold text-[#633479] text-[20px] leading-[normal] text-center md:text-2xl">
+                      <p className="font-comfortaa text-center text-[20px] leading-[normal] font-bold text-[#633479] md:text-2xl">
                         Premium Plus
                       </p>
                       <p className="font-comfortaa font-bold text-[#633479] text-[24px] md:text-2xl">${membershipPrice}</p>
@@ -176,14 +176,14 @@ export default function PaymentSuccess() {
                     </div>
                     <div className="flex flex-col items-center gap-[4px]">
                       <p className="font-comfortaa font-normal text-[#4a5565] text-[14px] md:text-sm line-through">was ${membershipOriginalPrice}/year</p>
-                      <div className="bg-[#DCFCE7] rounded-full px-[16px] py-[4px] h-[24px] flex items-center">
+                      <div className="flex h-6 items-center rounded-full bg-[#DCFCE7] px-4 py-1">
                         <p className="font-comfortaa font-bold text-[#016630] text-[10px] md:text-xs leading-[14px]">Save ${membershipSavings.toFixed(2)} more</p>
                       </div>
                     </div>
                   </div>
                   
                   {/* Features List */}
-                  <div className="flex flex-col gap-[12px] md:gap-3">
+                  <div className="flex flex-col gap-3">
                     {membershipFeatures.map((feature, index) => (
                       <div key={index} className="flex items-start gap-3">
                         <Icon name="check-green" className="size-[16px] text-[#00A63E] mt-0.5 shrink-0" />
@@ -208,7 +208,7 @@ export default function PaymentSuccess() {
                 </div>
               </div>
 
-              <p className="text-white text-[10px] leading-[12px] md:text-sm md:leading-[20px] font-comfortaa font-normal mt-[16px] md:mt-4 text-center">
+              <p className="mt-4 text-center font-comfortaa text-[10px] leading-[12px] font-normal text-white md:text-sm md:leading-[20px]">
                 * The payment will be based on your benefit for last appointment.
               </p>
             </div>
@@ -216,7 +216,7 @@ export default function PaymentSuccess() {
         )}
 
         {/* Footer Navigation */}
-        <div className="flex flex-col md:flex-row gap-[20px] md:gap-4 md:justify-between w-full">
+        <div className="flex w-full flex-col gap-5 md:flex-row md:justify-between md:gap-4">
           <OrangeButton
             size="medium"
             onClick={handleGoToAccount}

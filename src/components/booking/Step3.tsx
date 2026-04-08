@@ -200,7 +200,7 @@ export function Step3() {
             : "overflow-visible max-h-none"
         )}
       >
-        <div className={cn(isFloating ? "px-[24px] py-[12px]" : "px-0 py-0")}>
+        <div className={cn(isFloating ? "px-6 py-3" : "px-0 py-0")}>
         <div className="bg-[#f4ffde] border border-[#6aa31c] border-solid flex h-[calc(36*var(--px393))] sm:h-[36px] items-center overflow-clip px-[calc(16*var(--px393))] py-[calc(4*var(--px393))] sm:px-[16px] sm:py-[4px] relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] shrink-0 ">
           <div className="flex gap-[calc(8*var(--px393))] sm:gap-[8px] items-center relative shrink-0">
             <Icon
@@ -252,13 +252,13 @@ export function Step3() {
   );
 
   return (
-    <div className="flex flex-col gap-[calc(16*var(--px393))] sm:gap-[32px] items-start relative w-full px-[calc(20*var(--px393))] sm:px-0">
+    <div className="relative flex w-full flex-col items-start gap-[calc(16*var(--px393))] px-[calc(20*var(--px393))] sm:gap-8 sm:px-0">
       {/* Mobile Step Header */}
-      <div className="flex flex-col gap-[calc(12*var(--px393))] sm:gap-[12px] items-start relative shrink-0 w-full sm:hidden">
+      <div className="relative flex w-full shrink-0 flex-col items-start gap-[calc(12*var(--px393))] sm:hidden sm:gap-3">
         <p className="font-comfortaa font-bold leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[calc(12*var(--px393))] sm:text-[12px] text-black w-full whitespace-pre-wrap">
           Book your appointment
         </p>
-        <div className="border border-[#4c4c4c] border-solid flex h-[calc(24*var(--px393))] sm:h-[24px] items-center justify-center overflow-clip px-[calc(9*var(--px393))] py-[calc(5*var(--px393))] sm:px-[9px] sm:py-[5px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shrink-0">
+        <div className="relative flex h-[calc(24*var(--px393))] shrink-0 items-center justify-center overflow-clip rounded-[calc(12*var(--px393))] border border-solid border-[#4c4c4c] px-[calc(9*var(--px393))] py-[calc(5*var(--px393))] sm:h-6 sm:rounded-xl sm:px-[9px] sm:py-[5px]">
           <p className="font-comfortaa font-bold leading-[calc(14*var(--px393))] sm:leading-[14px] relative shrink-0 text-[#4c4c4c] text-[calc(10*var(--px393))] sm:text-[10px]">
             Step 3 of 6
           </p>
@@ -267,9 +267,9 @@ export function Step3() {
           {petName ? `${petName} - package and add-on` : "Package and add-on"}
         </p>
       </div>
-      <div className="flex flex-col gap-[calc(32*var(--px393))] sm:gap-[32px] items-start relative w-full">
+      <div className="relative flex w-full flex-col items-start gap-[calc(32*var(--px393))] sm:gap-8">
       {/* Service Package Selection */}
-      <div className="bg-white flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">
+      <div className="relative flex w-full flex-col items-start gap-[calc(20*var(--px393))] rounded-[calc(12*var(--px393))] bg-white p-[calc(20*var(--px393))] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] sm:gap-5 sm:rounded-xl sm:p-6">
           <div className="flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full">
             <div className="flex flex-col gap-[calc(4*var(--px393))] sm:gap-[4px] items-start relative shrink-0 w-full">
               <div className="flex gap-[7px] items-center relative shrink-0 w-full">
@@ -315,7 +315,7 @@ export function Step3() {
       {/* Add-ons Selection */}
       <div
         ref={addOnSectionRef}
-        className="bg-white flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full"
+        className="relative flex w-full shrink-0 flex-col items-start gap-[calc(20*var(--px393))] rounded-[calc(12*var(--px393))] bg-white p-[calc(20*var(--px393))] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] sm:gap-5 sm:rounded-xl sm:p-6"
       >
           <div className="flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full">
             <div className="flex flex-col gap-[calc(4*var(--px393))] sm:gap-[4px] items-start relative shrink-0 w-full">

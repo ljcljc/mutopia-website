@@ -246,13 +246,13 @@ export function Step4() {
   const estimationTextColor = isMemberEstimation ? "text-[#633479]" : "text-[#4A5565]";
 
   return (
-    <div className="flex flex-col gap-[calc(16*var(--px393))] sm:gap-[32px] items-start relative w-full px-[calc(20*var(--px393))] sm:px-0">
+    <div className="relative flex w-full flex-col items-start gap-[calc(16*var(--px393))] px-[calc(20*var(--px393))] sm:gap-8 sm:px-0">
       {/* Mobile Step Header */}
-      <div className="flex flex-col gap-[calc(12*var(--px393))] items-start relative shrink-0 w-full sm:hidden">
+      <div className="relative flex w-full shrink-0 flex-col items-start gap-[calc(12*var(--px393))] sm:hidden">
         <p className="font-comfortaa font-bold h-[calc(19*var(--px393))] leading-[calc(17.5*var(--px393))] relative shrink-0 text-[calc(12*var(--px393))] text-black w-full whitespace-pre-wrap">
           Book your appointment
         </p>
-        <div className="border border-[#4c4c4c] border-solid flex h-[calc(24*var(--px393))] items-center justify-center overflow-clip px-[calc(9*var(--px393))] py-[calc(5*var(--px393))] relative rounded-[calc(12*var(--px393))] shrink-0">
+        <div className="relative flex h-[calc(24*var(--px393))] shrink-0 items-center justify-center overflow-clip rounded-[calc(12*var(--px393))] border border-solid border-[#4c4c4c] px-[calc(9*var(--px393))] py-[calc(5*var(--px393))]">
           <p className="font-comfortaa font-bold leading-[calc(14*var(--px393))] relative shrink-0 text-[#4c4c4c] text-[calc(10*var(--px393))]">
             Step 4 of 6
           </p>
@@ -265,8 +265,8 @@ export function Step4() {
       </div>
 
       {/* Mobile Layout */}
-      <div className="flex flex-col gap-[calc(16*var(--px393))] items-start relative shrink-0 w-full sm:hidden">
-        <div className="bg-[#8760a0] flex flex-col items-start p-[calc(24*var(--px393))] relative rounded-[calc(12*var(--px393))] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] shrink-0 w-full">
+      <div className="relative flex w-full shrink-0 flex-col items-start gap-[calc(16*var(--px393))] sm:hidden">
+        <div className="relative flex w-full shrink-0 flex-col items-start rounded-[calc(12*var(--px393))] bg-[#8760a0] p-[calc(24*var(--px393))] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
           <div className="flex flex-col gap-[calc(14*var(--px393))] items-center relative shrink-0 w-full">
             <div className="flex flex-col gap-[calc(3.5*var(--px393))] items-center relative shrink-0 w-full">
               <div className="flex items-center justify-center relative shrink-0 w-full">
@@ -345,7 +345,7 @@ export function Step4() {
           </div>
         </div>
 
-        <div className="bg-white flex flex-col items-start justify-between p-[calc(24*var(--px393))] relative rounded-[calc(12*var(--px393))] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] shrink-0 w-full">
+        <div className="relative flex w-full shrink-0 flex-col items-start justify-between rounded-[calc(12*var(--px393))] bg-white p-[calc(24*var(--px393))] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
           <div className="flex flex-col gap-[calc(12*var(--px393))] items-start relative shrink-0 w-full">
             <div className="flex flex-col gap-[calc(4*var(--px393))] items-start relative shrink-0 w-full">
               <div className="flex gap-[calc(4*var(--px393))] items-start relative shrink-0 w-full">

@@ -1141,7 +1141,7 @@ export function Step6() {
 
       {/* Annual membership card */}
       {useMembership && membershipPlan && (
-        <div className="bg-[#6e3d81] flex flex-col items-start p-[calc(24*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full overflow-hidden">
+        <div className="relative flex w-full shrink-0 flex-col items-start overflow-hidden rounded-[calc(12*var(--px393))] bg-[#6e3d81] p-[calc(24*var(--px393))] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] sm:rounded-xl sm:p-6">
           {/* Decorative background circles */}
           <div className="absolute bg-[rgba(255,255,255,0.15)] opacity-30 rounded-full size-[74px] left-1/2 top-[43px]" style={{ transform: 'translateX(calc(-50% - 30px))' }} />
           <div className="absolute bg-[rgba(255,255,255,0.35)] opacity-30 rounded-full size-[42px] left-1/2 top-[13px]" style={{ transform: 'translateX(calc(-50% + 30px))' }} />
@@ -1157,7 +1157,7 @@ export function Step6() {
               </div>
               <div className="flex flex-[1_0_0] items-center justify-end min-h-px min-w-px relative shrink-0">
                 <div className="flex items-center justify-end relative shrink-0">
-                  <div className="border border-solid border-white flex h-[24px] items-center justify-center overflow-clip px-[17px] py-[5px] relative rounded-[12px] shrink-0">
+                  <div className="relative flex h-6 shrink-0 items-center justify-center overflow-clip rounded-xl border border-solid border-white px-[17px] py-[5px]">
                     <p className="font-comfortaa font-bold leading-[14px] relative shrink-0 text-[10px] text-white">
                       Selected $ {membershipPrice} / year
                     </p>
@@ -1183,7 +1183,7 @@ export function Step6() {
 
       {/* Annual membership promotion card - shown when user hasn't selected membership */}
       {!useMembership && membershipPlan && userInfo?.is_member !== true && (
-        <div className="bg-[#6e3d81] flex flex-col items-start p-[calc(24*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full overflow-hidden">
+        <div className="relative flex w-full shrink-0 flex-col items-start overflow-hidden rounded-[calc(12*var(--px393))] bg-[#6e3d81] p-[calc(24*var(--px393))] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] sm:rounded-xl sm:p-6">
           {/* Decorative background circles */}
           <div className="absolute bg-[rgba(255,255,255,0.15)] opacity-30 rounded-full size-[74px] left-[46px] top-[116px]" />
           <div className="absolute bg-[rgba(255,255,255,0.35)] opacity-30 rounded-full size-[42px] left-[108px] top-[86px]" />
@@ -1191,7 +1191,7 @@ export function Step6() {
           <div className="absolute bg-[rgba(255,255,255,0.15)] opacity-30 rounded-full size-[118px] right-[143px] bottom-[-10px]" />
           
           {/* Title */}
-          <div className="flex items-start relative shrink-0 w-full mb-[16px] z-10">
+          <div className="relative z-10 mb-4 flex w-full shrink-0 items-start">
             <p className="font-comfortaa font-semibold leading-[28px] relative shrink-0 text-[16px] text-white whitespace-pre-wrap">
               Annuel membership
             </p>
@@ -1219,8 +1219,8 @@ export function Step6() {
       )}
 
       {/* Date and time period card */}
-      <div className="bg-white flex flex-col items-start p-[calc(24*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full">
-        <div className="flex flex-col gap-[8px] items-start relative shrink-0 w-full">
+      <div className="relative flex w-full shrink-0 flex-col items-start rounded-[calc(12*var(--px393))] bg-white p-[calc(24*var(--px393))] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] sm:rounded-xl sm:p-6">
+        <div className="relative flex w-full shrink-0 flex-col items-start gap-2">
           <p className="font-comfortaa font-semibold leading-[28px] relative shrink-0 text-[#4a3c2a] text-[16px] w-full whitespace-pre-wrap">
             Date and time period
           </p>
@@ -1257,7 +1257,7 @@ export function Step6() {
       </div>
 
       {/* Total estimation card */}
-      <div className="bg-white border-2 border-[#de6a07] border-solid flex flex-col gap-[calc(16*var(--px393))] sm:flex-row sm:gap-[8px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] shrink-0 w-full">
+      <div className="relative flex w-full shrink-0 flex-col items-start gap-[calc(16*var(--px393))] rounded-[calc(12*var(--px393))] border-2 border-solid border-[#de6a07] bg-white p-[calc(20*var(--px393))] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] sm:flex-row sm:gap-2 sm:rounded-xl sm:p-6">
         {/* Left side: Title and subtitle */}
         <div className="flex flex-[1_0_0] flex-col gap-[calc(4*var(--px393))] sm:gap-[4px] items-start relative shrink-0">
           <p className="font-comfortaa font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px]">
