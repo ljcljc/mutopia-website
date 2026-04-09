@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { OrangeButton } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
-import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from "@/components/ui/drawer";
+import { GroomerLinkButton } from "@/modules/groomer/components/GroomerLinkButton";
+import { GroomerPrimaryActionButton } from "@/modules/groomer/components/GroomerPrimaryActionButton";
 import { PerformanceRadarChart } from "@/modules/groomer/components/PerformanceRadarChart";
+import { ReportReviewModal } from "@/modules/groomer/components/ReportReviewModal";
 import { useNavigate } from "react-router-dom";
 
 const REVIEW_AVATAR_URL = "https://www.figma.com/api/mcp/asset/2d6c06cd-b66a-4365-9ebb-501b695cd90d";
@@ -295,12 +297,18 @@ function ScoreCardView({ card }: { card: ScoreCard }) {
 
 export default function GroomerPerformancePage() {
   const navigate = useNavigate();
-  const [isPerformanceRadarOpen, setIsPerformanceRadarOpen] = useState(true);
+  const [isPerformanceRadarOpen, setIsPerformanceRadarOpen] = useState(false);
   const [isReplying, setIsReplying] = useState(false);
   const [replyText, setReplyText] = useState("");
   const [isReportReviewOpen, setIsReportReviewOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportEvidenceName, setReportEvidenceName] = useState("");
+
+  const resetReportReviewForm = () => {
+    setIsReportReviewOpen(false);
+    setReportReason("");
+    setReportEvidenceName("");
+  };
 
   return (
     <>
@@ -371,28 +379,25 @@ export default function GroomerPerformancePage() {
                     />
                   </div>
                   <div className="mt-4 w-[266px]">
-                    <OrangeButton
-                      type="button"
-                      variant="secondary"
-                      size="standard"
+                    <GroomerPrimaryActionButton
+                      fullWidth
                       onClick={() => {
                         setIsReplying(false);
                         setReplyText("");
                       }}
-                      className="w-full bg-[#8B6357] shadow-[0px_4px_12px_rgba(139,99,87,0.3)] hover:bg-[#8B6357] active:bg-[#8B6357] focus-visible:bg-[#8B6357]"
                     >
-                      <span className="font-comfortaa text-[15px] font-bold leading-[22.5px] text-white">Send</span>
-                    </OrangeButton>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsReplying(false);
-                        setReplyText("");
-                      }}
-                      className="mt-[10px] block h-12 w-full text-center font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357] underline"
-                    >
-                      Cancel
-                    </button>
+                      Send
+                    </GroomerPrimaryActionButton>
+                    <div className="mt-[10px] flex h-12 items-center justify-center">
+                      <GroomerLinkButton
+                        onClick={() => {
+                          setIsReplying(false);
+                          setReplyText("");
+                        }}
+                      >
+                        <span className="font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357] underline">Cancel</span>
+                      </GroomerLinkButton>
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -400,11 +405,11 @@ export default function GroomerPerformancePage() {
                   <OrangeButton
                     type="button"
                     variant="outline"
-                    size="medium"
+                    size="standard"
                     onClick={() => setIsReplying(true)}
-                    className="mt-[20px] w-full"
+                    className="mt-[20px] h-[48px] w-full"
                   >
-                    <span className="flex items-center justify-center gap-2 font-comfortaa text-[14px] font-bold leading-[21px] text-[#E67E22]">
+                    <span className="flex items-center justify-center gap-2 font-comfortaa text-[15px] font-bold leading-[22.5px] text-[#E67E22]">
                       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                         <path
                           d="M6 5L3 8L6 11M3.5 8H9.25C11.3211 8 13 9.67893 13 11.75V12"
@@ -418,13 +423,13 @@ export default function GroomerPerformancePage() {
                     </span>
                   </OrangeButton>
 
-                  <button
-                    type="button"
-                    onClick={() => setIsReportReviewOpen(true)}
-                    className="mt-[11px] block w-full text-center font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357] underline decoration-from-font transition-colors hover:text-[#6E4F46] focus-visible:text-[#6E4F46]"
-                  >
-                    Report review
-                  </button>
+                  <div className="mt-[11px] flex justify-center">
+                    <GroomerLinkButton type="button" onClick={() => setIsReportReviewOpen(true)}>
+                      <span className="font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357] underline decoration-from-font">
+                        Report review
+                      </span>
+                    </GroomerLinkButton>
+                  </div>
                 </>
               )}
             </article>
@@ -432,95 +437,14 @@ export default function GroomerPerformancePage() {
         </div>
       </div>
 
-      <Drawer open={isReportReviewOpen} onOpenChange={setIsReportReviewOpen} direction="bottom" shouldScaleBackground={false}>
-        <DrawerContent className="mx-auto w-[calc(100%-24px)] max-w-[393px] rounded-t-[32px] border-0 bg-white px-5 pb-6 pt-5">
-          <DrawerTitle className="sr-only">Report review</DrawerTitle>
-          <DrawerDescription className="sr-only">Submit a review report with a reason and optional evidence.</DrawerDescription>
-
-          <div className="mx-auto h-1.5 w-[72px] rounded-full bg-[#D9D9D9]" />
-
-          <div className="mt-6 flex items-start justify-between gap-4">
-            <div>
-              <p className="font-comfortaa text-[12px] leading-[18px] text-[#8B6357]">Account &gt; performance details</p>
-              <h3 className="mt-2 font-comfortaa text-[24px] font-bold leading-[26.4px] text-[#4A2C55]">Report review</h3>
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsReportReviewOpen(false)}
-              className="flex size-8 items-center justify-center rounded-full text-[#8B6357] transition-colors hover:bg-[#F7F1EC] hover:text-[#6E4F46]"
-              aria-label="Close report review dialog"
-            >
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                <path d="M4.5 4.5L13.5 13.5M13.5 4.5L4.5 13.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
-            </button>
-          </div>
-
-          <div className="mt-6">
-            <p className="font-comfortaa text-[18px] font-bold leading-[27px] text-[#4A2C55]">Tell us your experience</p>
-            <p className="mt-1 font-comfortaa text-[14px] leading-[21px] text-[#8B6357]">Why would you report this review</p>
-            <textarea
-              value={reportReason}
-              onChange={(event) => setReportReason(event.target.value)}
-              placeholder="Share your reasons"
-              className="mt-4 h-[126px] w-full resize-none rounded-[20px] border border-[#DE6A07] bg-white px-4 py-3 font-comfortaa text-[14px] leading-[21px] text-[#4A2C55] outline-none placeholder:text-[#9E9E9E]"
-            />
-          </div>
-
-          <div className="mt-6">
-            <p className="font-comfortaa text-[18px] font-bold leading-[27px] text-[#4A2C55]">Upload evidence (optional)</p>
-            <label
-              htmlFor="report-review-evidence"
-              className="mt-4 flex h-[120px] w-full cursor-pointer flex-col items-center justify-center rounded-[20px] border border-dashed border-[#CBBDB5] bg-[#FCFAF8] px-4 text-center transition-colors hover:border-[#DE6A07] hover:bg-[#FFF8F1]"
-            >
-              <span className="flex size-10 items-center justify-center rounded-full bg-[#FFF0E4] text-[#DE6A07]">
-                <Icon name="add" className="size-[18px] text-[#DE6A07]" aria-hidden="true" />
-              </span>
-              <span className="mt-3 font-comfortaa text-[14px] font-bold leading-[21px] text-[#4A2C55]">
-                {reportEvidenceName || "Click to upload"}
-              </span>
-              <span className="mt-1 font-comfortaa text-[12px] leading-[18px] text-[#8B6357]">JPG, JPEG, PNG less than 10MB</span>
-            </label>
-            <input
-              id="report-review-evidence"
-              type="file"
-              accept=".jpg,.jpeg,.png,image/jpeg,image/png"
-              className="sr-only"
-              onChange={(event) => {
-                const file = event.target.files?.[0];
-                setReportEvidenceName(file?.name ?? "");
-              }}
-            />
-          </div>
-
-          <div className="mt-8">
-            <OrangeButton
-              type="button"
-              variant="secondary"
-              size="standard"
-              onClick={() => {
-                setIsReportReviewOpen(false);
-                setReportReason("");
-                setReportEvidenceName("");
-              }}
-              className="w-full bg-[#8B6357] shadow-[0px_4px_12px_rgba(139,99,87,0.3)] hover:bg-[#8B6357] active:bg-[#8B6357] focus-visible:bg-[#8B6357]"
-            >
-              <span className="font-comfortaa text-[15px] font-bold leading-[22.5px] text-white">Send</span>
-            </OrangeButton>
-            <button
-              type="button"
-              onClick={() => {
-                setIsReportReviewOpen(false);
-                setReportReason("");
-                setReportEvidenceName("");
-              }}
-              className="mt-3 block h-12 w-full text-center font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357] underline"
-            >
-              Cancel
-            </button>
-          </div>
-        </DrawerContent>
-      </Drawer>
+      <ReportReviewModal
+        open={isReportReviewOpen}
+        reason={reportReason}
+        evidenceName={reportEvidenceName}
+        onReasonChange={setReportReason}
+        onEvidenceChange={setReportEvidenceName}
+        onClose={resetReportReviewForm}
+      />
     </>
   );
 }
