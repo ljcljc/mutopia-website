@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { OrangeButton } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
 import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from "@/components/ui/drawer";
@@ -144,6 +144,8 @@ const scoreCards: ScoreCard[] = [
   },
 ];
 
+const COLLAPSE_DURATION_MS = 300;
+
 function ScoreRing() {
   return (
     <div className="relative flex size-[140px] items-center justify-center rounded-full bg-[conic-gradient(#F08A12_306deg,#E7DED8_306deg_360deg)]">
@@ -170,6 +172,57 @@ function PerformanceBadge() {
 }
 
 function PerformanceRadarCard({ isOpen, onToggle }: { isOpen: boolean; onToggle: () => void }) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const timeoutRef = useRef<number | null>(null);
+  const [panelHeight, setPanelHeight] = useState<number | "auto">(isOpen ? "auto" : 0);
+
+  useEffect(() => {
+    const panelElement = panelRef.current;
+
+    if (!panelElement) {
+      return;
+    }
+
+    const clearPendingAnimation = () => {
+      if (animationFrameRef.current !== null) {
+        window.cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+
+      if (timeoutRef.current !== null) {
+        window.clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    };
+
+    clearPendingAnimation();
+
+    const nextHeight = panelElement.scrollHeight;
+
+    if (isOpen) {
+      setPanelHeight(0);
+      animationFrameRef.current = window.requestAnimationFrame(() => {
+        setPanelHeight(nextHeight);
+        timeoutRef.current = window.setTimeout(() => {
+          setPanelHeight("auto");
+        }, COLLAPSE_DURATION_MS);
+      });
+    } else {
+      const startingHeight = panelElement.scrollHeight;
+      setPanelHeight(startingHeight);
+      animationFrameRef.current = window.requestAnimationFrame(() => {
+        animationFrameRef.current = window.requestAnimationFrame(() => {
+          setPanelHeight(0);
+        });
+      });
+    }
+
+    return () => {
+      clearPendingAnimation();
+    };
+  }, [isOpen]);
+
   return (
     <article className="mt-6 rounded-[16px] bg-white p-5 shadow-[0px_8px_24px_rgba(0,0,0,0.15)]">
       <button
@@ -191,17 +244,26 @@ function PerformanceRadarCard({ isOpen, onToggle }: { isOpen: boolean; onToggle:
         <div className="mt-0.5 flex size-5 shrink-0 items-center justify-center text-[#8B6357]">
           <Icon
             name="chevron-down"
-            className={`size-5 text-[#8B6357] transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+            className={`size-5 origin-center transform-gpu text-[#8B6357] transition-transform duration-300 ease-in-out ${isOpen ? "rotate-180" : ""}`}
             aria-hidden="true"
           />
         </div>
       </button>
 
-      {isOpen ? (
-        <div id="performance-radar-panel" className="mt-4 flex justify-center">
-          <PerformanceRadarChart metrics={radarMetrics.map((metric) => ({ ...metric }))} />
+      <div
+        id="performance-radar-panel"
+        ref={panelRef}
+        style={{ height: panelHeight === "auto" ? "auto" : `${panelHeight}px` }}
+        className={`overflow-hidden transition-[height,opacity,margin] duration-300 ease-in-out ${
+          isOpen ? "mt-4 opacity-100" : "mt-0 opacity-0"
+        }`}
+      >
+        <div>
+          <div className={`flex justify-center ${isOpen ? "pointer-events-auto" : "pointer-events-none"}`}>
+            <PerformanceRadarChart metrics={radarMetrics.map((metric) => ({ ...metric }))} />
+          </div>
         </div>
-      ) : null}
+      </div>
     </article>
   );
 }
