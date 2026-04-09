@@ -20,11 +20,11 @@ type ScoreCard = {
 };
 
 const radarMetrics = [
-  { label: "User\nRating", value: 18, color: "#E67E22" },
-  { label: "Confirm\nTime", value: 20, color: "#22C55E" },
+  { label: "Ratings", value: 18, color: "#E67E22" },
+  { label: "Response", value: 20, color: "#22C55E" },
   { label: "Punctuality", value: 15, color: "#D97706" },
-  { label: "Reports", value: 20, color: "#60A5FA" },
-  { label: "Technical\nSkill", value: 19, color: "#A855F7" },
+  { label: "Completion", value: 20, color: "#60A5FA" },
+  { label: "Technical", value: 19, color: "#A855F7" },
 ] as const;
 
 const scoreCards: ScoreCard[] = [
@@ -171,38 +171,35 @@ function PerformanceBadge() {
 
 function PerformanceRadarCard({ isOpen, onToggle }: { isOpen: boolean; onToggle: () => void }) {
   return (
-    <article className="mt-6 overflow-hidden rounded-[16px] bg-white shadow-[0px_8px_24px_rgba(0,0,0,0.15)]">
+    <article className="mt-6 rounded-[16px] bg-white p-5 shadow-[0px_8px_24px_rgba(0,0,0,0.15)]">
       <button
         type="button"
         onClick={onToggle}
-        className="flex h-16 w-full items-center justify-between px-5 text-left"
+        className="flex w-full items-start justify-between gap-4 text-left"
         aria-expanded={isOpen}
         aria-controls="performance-radar-panel"
+        aria-label={isOpen ? "Collapse performance radar" : "Expand performance radar"}
       >
-        <span className="font-comfortaa text-[16px] font-bold leading-6 text-[#4A2C55]">Performance Radar</span>
-        <Icon
-          name="chevron-down"
-          className={`size-4 text-[#8B6357] transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
-          aria-hidden="true"
-        />
+        <div className="min-w-0 flex-1">
+          <p className="font-comfortaa text-[16px] font-bold leading-6 text-[#4A2C55]">Performance Radar</p>
+          {isOpen ? (
+            <p className="mt-[7px] font-comfortaa text-[13px] font-normal leading-[19.5px] text-[#8B6357]">
+              Your strengths across 5 key areas
+            </p>
+          ) : null}
+        </div>
+        <div className="mt-0.5 flex size-5 shrink-0 items-center justify-center text-[#8B6357]">
+          <Icon
+            name="chevron-down"
+            className={`size-5 text-[#8B6357] transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+            aria-hidden="true"
+          />
+        </div>
       </button>
 
       {isOpen ? (
-        <div id="performance-radar-panel" className="border-t border-[#F0E8E3] px-4 pb-5 pt-4">
-          <div className="rounded-[20px] bg-[#FAF9F7] px-3 pb-4 pt-5">
-            <div className="flex justify-center">
-              <PerformanceRadarChart metrics={radarMetrics.map((metric) => ({ ...metric }))} />
-            </div>
-
-            <div className="mt-1 grid grid-cols-2 gap-x-3 gap-y-2 rounded-[16px] bg-white px-4 py-4">
-              {radarMetrics.map((metric) => (
-                <div key={metric.label} className="flex items-center gap-2">
-                  <span className="size-2.5 rounded-full" style={{ backgroundColor: metric.color }} />
-                  <span className="font-comfortaa text-[12px] leading-[18px] text-[#4A2C55]">{metric.label.replace("\n", " ")}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+        <div id="performance-radar-panel" className="mt-4 flex justify-center">
+          <PerformanceRadarChart metrics={radarMetrics.map((metric) => ({ ...metric }))} />
         </div>
       ) : null}
     </article>
@@ -236,7 +233,7 @@ function ScoreCardView({ card }: { card: ScoreCard }) {
 
 export default function GroomerPerformancePage() {
   const navigate = useNavigate();
-  const [isPerformanceRadarOpen, setIsPerformanceRadarOpen] = useState(false);
+  const [isPerformanceRadarOpen, setIsPerformanceRadarOpen] = useState(true);
   const [isReplying, setIsReplying] = useState(false);
   const [replyText, setReplyText] = useState("");
   const [isReportReviewOpen, setIsReportReviewOpen] = useState(false);

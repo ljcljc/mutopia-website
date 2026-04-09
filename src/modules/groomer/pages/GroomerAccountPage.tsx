@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { PurpleButton } from "@/components/common";
+import { OrangeButton } from "@/components/common";
 import { Icon, type IconName } from "@/components/common/Icon";
 import { useIsMobile } from "@/components/ui/use-mobile";
 import { useNavigate } from "react-router-dom";
@@ -214,7 +214,7 @@ export default function GroomerAccountPage() {
       badgeIconName: "star-3",
       badgeIconClassName: "size-[12px]",
       benefitTone: "neutral",
-      buttonText: "View your goals",
+      buttonText: "View your performance",
       benefits: [
         { title: "70% payout share", description: "Higher earnings per job" },
         { title: "Priority client matching", description: "Get bookings first" },
@@ -227,7 +227,7 @@ export default function GroomerAccountPage() {
       badgeText: "Premium groomer",
       showStars: false,
       benefitTone: "neutral",
-      buttonText: "View your goals",
+      buttonText: "View your performance",
       benefits: [{ title: "60% payout share", description: "Higher earnings per job" }],
     },
   };
@@ -277,19 +277,7 @@ export default function GroomerAccountPage() {
 
           <PayoutCard bankName="TD Bank Checking" bankMask="**** **** **** 5678" className="lg:h-[152px]" />
 
-          <section
-            role="button"
-            tabIndex={0}
-            onClick={() => navigate("/groomer/account/performance")}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                navigate("/groomer/account/performance");
-              }
-            }}
-            className="cursor-pointer rounded-[20px] border-[1.47px] border-[#4A2C55] bg-white px-5 pb-5 pt-[19px] shadow-[0px_4px_12px_rgba(0,0,0,0.08)] transition-transform duration-150 hover:-translate-y-0.5 lg:h-[332px]"
-            aria-label="View performance details"
-          >
+          <section className="rounded-[20px] border-[1.47px] border-[#4A2C55] bg-white px-5 pb-5 pt-[19px] shadow-[0px_4px_12px_rgba(0,0,0,0.08)] lg:h-[332px]">
             <div className="mb-[14px] flex items-center justify-between">
               <h2 className="font-comfortaa text-[16px] font-bold leading-6 text-[#4A2C55]">Performance</h2>
               <div className={selectedPerformance.badgeClassName}>
@@ -323,20 +311,17 @@ export default function GroomerAccountPage() {
                 />
               ))}
             </ul>
-            <PurpleButton
+            <OrangeButton
               type="button"
-              variant="outlinePurple"
+              variant="outline"
               size="medium"
-              className="mt-6 w-full shadow-[0_4px_12px_0_rgba(74,44,85,0.30)] lg:w-[247px]"
-              onClick={(event) => {
-                event.stopPropagation();
-                navigate("/groomer/account/performance");
-              }}
+              className="mt-6 w-full border-[#633479]! text-[#633479]! shadow-[0_4px_12px_0_rgba(74,44,85,0.30)] hover:bg-[rgba(99,52,121,0.12)]! active:!bg-[rgba(99,52,121,0.12)] focus-visible:!bg-[rgba(99,52,121,0.12)] focus-visible:!border-[#633479] active:!border-[#633479] lg:w-[247px]"
+              onClick={() => navigate("/groomer/account/performance")}
             >
               <span className="text-center font-comfortaa text-[15px] font-bold leading-[22.5px] text-[#633479]">
                 {selectedPerformance.buttonText}
               </span>
-            </PurpleButton>
+            </OrangeButton>
           </section>
         </div>
       </div>

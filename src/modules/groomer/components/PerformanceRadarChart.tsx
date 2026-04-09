@@ -9,20 +9,25 @@ type PerformanceRadarChartProps = {
 };
 
 export function PerformanceRadarChart({ metrics }: PerformanceRadarChartProps) {
-  const size = 232;
-  const center = size / 2;
+  const width = 338;
+  const height = 274;
+  const centerX = width / 2;
+  const centerY = 140;
   const levels = [0.25, 0.5, 0.75, 1];
-  const labelRadius = 126;
+  const outerRadius = 76;
+  const labelRadius = 106;
 
   const getPoint = (index: number, scale: number) => {
     const angle = -Math.PI / 2 + (Math.PI * 2 * index) / metrics.length;
-    const radius = 82 * scale;
+    const radius = outerRadius * scale;
 
     return {
-      x: center + Math.cos(angle) * radius,
-      y: center + Math.sin(angle) * radius,
+      x: centerX + Math.cos(angle) * radius,
+      y: centerY + Math.sin(angle) * radius,
     };
   };
+
+  const punctualityIndex = metrics.findIndex((metric) => metric.label === "Punctuality");
 
   const polygonPath = metrics
     .map((metric, index) => {
@@ -31,8 +36,16 @@ export function PerformanceRadarChart({ metrics }: PerformanceRadarChartProps) {
     })
     .join(" ");
 
+  const labelOffsetByLabel: Record<string, { dx: number; dy: number }> = {
+    Ratings: { dx: 0, dy: 0 },
+    Response: { dx: 2, dy: 0 },
+    Punctuality: { dx: 4, dy: 3 },
+    Completion: { dx: -4, dy: 3 },
+    Technical: { dx: -2, dy: 0 },
+  };
+
   return (
-    <svg viewBox={`0 0 ${size} ${size}`} className="h-[232px] w-[232px]" aria-hidden="true">
+    <svg viewBox={`0 0 ${width} ${height}`} className="h-auto w-full max-w-[314px] overflow-visible" aria-hidden="true">
       {levels.map((level) => (
         <polygon
           key={level}
@@ -50,38 +63,40 @@ export function PerformanceRadarChart({ metrics }: PerformanceRadarChartProps) {
 
       {metrics.map((_, index) => {
         const point = getPoint(index, 1);
-        return <line key={index} x1={center} y1={center} x2={point.x} y2={point.y} stroke="#E7DED8" strokeWidth="1" />;
+        return <line key={index} x1={centerX} y1={centerY} x2={point.x} y2={point.y} stroke="#E7DED8" strokeWidth="1" />;
       })}
 
-      <polygon points={polygonPath} fill="rgba(99,52,121,0.16)" stroke="#633479" strokeWidth="2.5" />
+      <polygon points={polygonPath} fill="rgba(99,52,121,0.22)" stroke="#7F627F" strokeWidth="1.4" />
 
-      {metrics.map((metric, index) => {
-        const point = getPoint(index, metric.value / 20);
-        return <circle key={metric.label} cx={point.x} cy={point.y} r="5" fill={metric.color} stroke="white" strokeWidth="2" />;
-      })}
+      {punctualityIndex >= 0 ? (
+        <circle
+          cx={getPoint(punctualityIndex, metrics[punctualityIndex].value / 20).x}
+          cy={getPoint(punctualityIndex, metrics[punctualityIndex].value / 20).y}
+          r="6"
+          fill="#DE6A07"
+        />
+      ) : null}
 
       {metrics.map((metric, index) => {
         const angle = -Math.PI / 2 + (Math.PI * 2 * index) / metrics.length;
-        const x = center + Math.cos(angle) * labelRadius;
-        const y = center + Math.sin(angle) * labelRadius;
-        const lines = metric.label.split("\n");
+        const x = centerX + Math.cos(angle) * labelRadius;
+        const y = centerY + Math.sin(angle) * labelRadius;
+        const { dx, dy } = labelOffsetByLabel[metric.label] ?? { dx: 0, dy: 0 };
 
         return (
           <text
-            key={`${metric.label}-label`}
-            x={x}
-            y={y}
-            textAnchor={x < center - 8 ? "end" : x > center + 8 ? "start" : "middle"}
-            dominantBaseline={y < center - 8 ? "auto" : y > center + 8 ? "hanging" : "middle"}
-            fill="#8B6357"
+            key={metric.label}
+            x={x + dx}
+            y={y + dy}
+            textAnchor={x < centerX - 8 ? "end" : x > centerX + 8 ? "start" : "middle"}
+            dominantBaseline="middle"
+            fill="#4A2C55"
             fontSize="11"
             fontWeight="700"
+            fontFamily="Comfortaa, sans-serif"
+            letterSpacing="0"
           >
-            {lines.map((line, lineIndex) => (
-              <tspan key={`${metric.label}-${line}`} x={x} dy={lineIndex === 0 ? 0 : 13}>
-                {line}
-              </tspan>
-            ))}
+            {metric.label}
           </text>
         );
       })}
