@@ -14,7 +14,7 @@ export interface CalendarProps {
   allowToggle?: boolean; // 是否允许取消选择（Step5需要，DatePicker不需要）
   disabled?: boolean;
   className?: string;
-  variant?: "default" | "mobile";
+  variant?: "default" | "mobile" | "compact";
   showYearPicker?: boolean;
   showMonthPicker?: boolean;
   onShowYearPickerChange?: (show: boolean) => void;
@@ -39,6 +39,7 @@ export function Calendar({
   onShowMonthPickerChange,
 }: CalendarProps) {
   const isMobileVariant = variant === "mobile";
+  const isCompactVariant = variant === "compact";
   const calendar = useCalendar({
     initialDate: currentDate,
     minDate,
@@ -148,19 +149,27 @@ export function Calendar({
   return (
     <div
       ref={calendar.calendarRef}
+      onClick={() => {
+        if (showYearPicker || showMonthPicker) {
+          setShowYearPicker(false);
+          setShowMonthPicker(false);
+        }
+      }}
       className={cn(
         "bg-white flex flex-col items-start relative shrink-0",
         isMobileVariant
           ? "gap-[calc(20*var(--px393))] p-0 rounded-[calc(16*var(--px393))] w-full"
-          : "gap-[20px] p-[24px] rounded-[16px]",
+          : isCompactVariant
+            ? "gap-[12px] p-0 rounded-[16px] w-full"
+            : "gap-[20px] p-[24px] rounded-[16px]",
         disabled && "opacity-60 cursor-not-allowed",
         className
       )}
     >
       {/* Calendar Header */}
-      <div className={cn("flex items-center w-full", isMobileVariant ? "gap-[calc(8*var(--px393))]" : "gap-[8px]")}>
+      <div className={cn("flex items-center w-full", isMobileVariant ? "gap-[calc(8*var(--px393))]" : isCompactVariant ? "gap-[6px]" : "gap-[8px]")}>
         {/* Year Section - clickable to show picker, with next year arrow */}
-        <div className={cn("flex items-center w-full", isMobileVariant ? "gap-[calc(8*var(--px393))]" : "gap-[8px]")}>
+        <div className={cn("flex items-center w-full", isMobileVariant ? "gap-[calc(8*var(--px393))]" : isCompactVariant ? "gap-[6px]" : "gap-[8px]")}>
           <button
             onClick={(e) => {
               if (disabled) return;
@@ -194,7 +203,9 @@ export function Calendar({
               "font-poppins font-bold not-italic text-black text-nowrap whitespace-pre hover:opacity-80 transition-opacity cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed",
               isMobileVariant
                 ? "leading-[calc(24*var(--px393))] text-[calc(20*var(--px393))] tracking-[calc(0.38*var(--px393))]"
-                : "leading-[24px] text-[20px] tracking-[0.38px]"
+                : isCompactVariant
+                  ? "leading-[26px] text-[18px] tracking-[0.2px]"
+                  : "leading-[24px] text-[20px] tracking-[0.38px]"
             )}
           >
             {calendar.currentYear}
@@ -226,7 +237,7 @@ export function Calendar({
         <div className="flex-1" />
 
         {/* Month Section - with navigation arrows and clickable to show picker */}
-        <div className={cn("flex items-center", isMobileVariant ? "gap-[calc(8*var(--px393))]" : "gap-[8px]")}>
+        <div className={cn("flex items-center", isMobileVariant ? "gap-[calc(8*var(--px393))]" : isCompactVariant ? "gap-[6px]" : "gap-[8px]")}>
           {/* Previous Month Arrow */}
           <button
             onClick={(e) => {
@@ -264,7 +275,9 @@ export function Calendar({
               "font-poppins font-bold not-italic text-black text-nowrap whitespace-pre tracking-[0.38px] hover:opacity-80 transition-opacity cursor-pointer w-[120px] text-center disabled:opacity-60 disabled:cursor-not-allowed",
               isMobileVariant
                 ? "leading-[calc(24*var(--px393))] text-[calc(20*var(--px393))] tracking-[calc(0.38*var(--px393))]"
-                : "leading-[24px] text-[20px] tracking-[0.38px]"
+                : isCompactVariant
+                  ? "w-[104px] leading-[26px] text-[18px] tracking-[0.2px]"
+                  : "leading-[24px] text-[20px] tracking-[0.38px]"
             )}
           >
             {calendar.MONTHS[calendar.currentMonth]}
@@ -299,7 +312,12 @@ export function Calendar({
       {showYearPicker && (
         <div
           ref={calendar.yearScrollRef}
-          className="absolute bg-white max-h-[400px] rounded-[8px] top-[16px] left-[16px] w-[68px] z-60 py-[10px] overflow-y-auto shadow-[0px_30px_84px_0px_rgba(19,10,46,0.08),0px_8px_32px_0px_rgba(19,10,46,0.07),0px_3px_14px_0px_rgba(19,10,46,0.03),0px_1px_3px_0px_rgba(19,10,46,0.13)]"
+          className={cn(
+            "absolute bg-white rounded-[8px] z-60 overflow-y-auto shadow-[0px_30px_84px_0px_rgba(19,10,46,0.08),0px_8px_32px_0px_rgba(19,10,46,0.07),0px_3px_14px_0px_rgba(19,10,46,0.03),0px_1px_3px_0px_rgba(19,10,46,0.13)]",
+            isCompactVariant
+              ? "top-[12px] left-[12px] max-h-[280px] w-[64px] py-[6px]"
+              : "top-[16px] left-[16px] max-h-[400px] w-[68px] py-[10px]"
+          )}
           style={{
             scrollbarWidth: "thin",
             scrollbarColor: "#d1d5db transparent",
@@ -331,7 +349,8 @@ export function Calendar({
                   }}
                   disabled={isDisabled}
                   className={cn(
-                    "flex gap-[8px] items-start overflow-clip px-[16px] py-[4px] w-full transition-colors relative cursor-pointer",
+                    "flex items-start overflow-clip w-full transition-colors relative cursor-pointer",
+                    isCompactVariant ? "gap-[6px] px-[12px] py-[3px]" : "gap-[8px] px-[16px] py-[4px]",
                     isDisabled
                       ? "opacity-30 cursor-not-allowed"
                       : isSelected
@@ -341,7 +360,8 @@ export function Calendar({
                 >
                   <p
                     className={cn(
-                      "basis-0 font-['Inter:Semi_Bold',sans-serif] grow leading-[24px] min-h-px min-w-px not-italic relative shrink-0 text-[14px]",
+                      "basis-0 font-['Inter:Semi_Bold',sans-serif] grow min-h-px min-w-px not-italic relative shrink-0",
+                      isCompactVariant ? "text-[13px] leading-[20px]" : "text-[14px] leading-[24px]",
                       isSelected
                         ? "text-[#f8f7fa] font-semibold"
                         : "text-[#19181a] font-normal group-hover:text-[#333333] group-hover:font-semibold"
@@ -365,11 +385,14 @@ export function Calendar({
       {/* Month Picker (Overlay) */}
       {showMonthPicker && (
         <div
-          className="absolute bg-white rounded-[8px] top-[44px] right-0 w-[140px] z-60 shadow-[0px_30px_84px_0px_rgba(19,10,46,0.08),0px_8px_32px_0px_rgba(19,10,46,0.07),0px_3px_14px_0px_rgba(19,10,46,0.03),0px_1px_3px_0px_rgba(19,10,46,0.13)]"
+          className={cn(
+            "absolute bg-white rounded-[8px] right-0 z-60 shadow-[0px_30px_84px_0px_rgba(19,10,46,0.08),0px_8px_32px_0px_rgba(19,10,46,0.07),0px_3px_14px_0px_rgba(19,10,46,0.03),0px_1px_3px_0px_rgba(19,10,46,0.13)]",
+            isCompactVariant ? "top-[34px] w-[124px]" : "top-[44px] w-[140px]"
+          )}
           onMouseDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="relative flex flex-col items-start px-0 py-[8px]">
+          <div className={cn("relative flex flex-col items-start px-0", isCompactVariant ? "py-[6px]" : "py-[8px]")}>
             {calendar.MONTHS.map((month, index) => {
               const isSelected = index === calendar.currentMonth;
               const isDisabled = calendar.isMonthDisabled(index);
@@ -393,10 +416,11 @@ export function Calendar({
                   )}
                 >
                   <div className="overflow-clip rounded-[inherit] size-full">
-                    <div className="flex gap-[8px] items-start px-[16px] py-[4px] relative w-full">
+                    <div className={cn("flex items-start relative w-full", isCompactVariant ? "gap-[6px] px-[12px] py-[3px]" : "gap-[8px] px-[16px] py-[4px]")}>
                       <p
                         className={cn(
-                          "basis-0 font-['Inter:Semi_Bold',sans-serif] grow leading-[24px] min-h-px min-w-px not-italic relative shrink-0 text-[14px]",
+                          "basis-0 font-['Inter:Semi_Bold',sans-serif] grow min-h-px min-w-px not-italic relative shrink-0",
+                          isCompactVariant ? "text-[13px] leading-[20px]" : "text-[14px] leading-[24px]",
                           isSelected
                             ? "text-[#f8f7fa] font-semibold"
                             : "text-[#19181a] font-normal"
@@ -425,7 +449,9 @@ export function Calendar({
           "flex items-center leading-0 relative shrink-0 text-[rgba(60,60,67,0.6)] text-center whitespace-nowrap w-full",
           isMobileVariant
             ? "font-comfortaa font-bold text-[calc(12*var(--px393))]"
-            : "font-comfortaa font-medium text-[12px]"
+            : isCompactVariant
+              ? "font-comfortaa font-medium text-[11px]"
+              : "font-comfortaa font-medium text-[12px]"
         )}
       >
         {calendar.DAYS.map((day) => (
@@ -435,10 +461,12 @@ export function Calendar({
               "flex flex-col justify-center relative shrink-0 flex-1",
               isMobileVariant
                 ? "h-[calc(38.286*var(--px393))]"
-                : "h-[38.286px]"
+                : isCompactVariant
+                  ? "h-[34px]"
+                  : "h-[38.286px]"
             )}
           >
-            <p className={cn(isMobileVariant ? "leading-[calc(17.5*var(--px393))]" : "leading-[17.5px]")}>{day}</p>
+            <p className={cn(isMobileVariant ? "leading-[calc(17.5*var(--px393))]" : isCompactVariant ? "leading-[16px]" : "leading-[17.5px]")}>{day}</p>
           </div>
         ))}
       </div>
@@ -455,7 +483,7 @@ export function Calendar({
               key={`row-${rowIndex}`}
               className={cn(
                 "flex font-comfortaa font-normal items-center leading-0 overflow-clip relative shrink-0 text-center w-full",
-                isMobileVariant ? "text-[calc(16*var(--px393))]" : "text-[16px]",
+                isMobileVariant ? "text-[calc(16*var(--px393))]" : isCompactVariant ? "text-[15px]" : "text-[16px]",
                 rowDays[0]?.isCurrentMonth ? "text-black" : "text-[grey]"
               )}
             >
@@ -466,23 +494,32 @@ export function Calendar({
                 return (
                   <div
                     key={`${dayInfo.isCurrentMonth ? "current" : dayInfo.isNextMonth ? "next" : "prev"}-${dayInfo.day}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (showYearPicker || showMonthPicker) {
+                        setShowYearPicker(false);
+                        setShowMonthPicker(false);
+                      }
+                      handleDateClick(dayInfo);
+                    }}
                     className={cn(
                       "flex flex-col justify-center leading-0 relative shrink-0 text-center flex-1",
                       isMobileVariant
                         ? "h-[calc(38.286*var(--px393))] text-[calc(16*var(--px393))]"
-                        : "h-[38.286px] text-[16px]",
+                        : isCompactVariant
+                          ? "h-[34px] text-[15px]"
+                          : "h-[38.286px] text-[16px]",
                       dayInfo.isCurrentMonth && !isDisabled && "cursor-pointer",
                       isDisabled && "cursor-not-allowed",
                       isSelected && (isMobileVariant ? "bg-[#de6a07] rounded-[calc(8*var(--px393))] text-white" : "bg-[#de6a07] rounded-[8px] text-white"),
                       !dayInfo.isCurrentMonth && "text-[grey]",
                       isDisabled && "text-[grey] opacity-50"
                     )}
-                    onClick={() => handleDateClick(dayInfo)}
                   >
                     <p
                       className={cn(
                         "whitespace-pre-wrap font-comfortaa font-normal",
-                        isMobileVariant ? "leading-[calc(28*var(--px393))]" : "leading-[28px]"
+                        isMobileVariant ? "leading-[calc(28*var(--px393))]" : isCompactVariant ? "leading-[24px]" : "leading-[28px]"
                       )}
                     >
                       {dayInfo.day}
