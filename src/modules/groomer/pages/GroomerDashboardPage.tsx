@@ -123,18 +123,21 @@ function DailyGoalProgressCard() {
         <div className="h-full rounded-full bg-[#00A63E]" style={{ width: progress }} />
       </div>
       <div className="mt-3 inline-flex rounded-full bg-[#DCFCE7] px-[10px] py-[2px]">
-        <span className="font-comfortaa text-[10px] font-bold leading-[15px] text-[#16A34A]">
-          {dailyGoal.completed} of {dailyGoal.total} jobs completed
-        </span>
+        <div className="flex items-center gap-1.5">
+          <Icon name="target" className="size-4 text-[#16A34A]" aria-hidden="true" />
+          <span className="font-comfortaa text-[10px] font-bold leading-[15px] text-[#16A34A]">
+            {dailyGoal.completed} of {dailyGoal.total} jobs completed
+          </span>
+        </div>
       </div>
       <div className="mt-3 rounded-[12px] border border-[#BBF7D0] bg-[#F0FDF4] px-3 py-3">
         <div className="flex items-start gap-2">
-          <div className="mt-0.5 flex size-5 items-center justify-center rounded-full bg-[#06AF3D]">
-            <Icon name="target" className="size-3 text-white" aria-hidden="true" />
+          <div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-[#00A63E]">
+            <Icon name="star-2" className="size-4 text-white" aria-hidden="true" />
           </div>
           <div>
-            <p className="font-comfortaa text-[13px] leading-[19.5px] text-[#16A34A]">
-              You&apos;re {dailyGoal.remainingAmount} away from your daily goal!
+            <p className="font-comfortaa text-[13px] leading-[19.5px] text-[#166534]">
+              You&apos;re <span className="text-[#00A63E]">{dailyGoal.remainingAmount}</span> away from your daily goal!
             </p>
             <p className="mt-0.5 font-comfortaa text-[10px] leading-[15px] text-[#16A34A]">
               Goal: {dailyGoal.goalAmount} • Current: {dailyGoal.currentAmount}
