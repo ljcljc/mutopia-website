@@ -33,10 +33,13 @@ function DialogClose({
 
 const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
->(({ className, ...props }, ref) => {
-  // Use scroll lock hook to prevent body scroll and layout shift
-  useScrollLock(true);
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay> & {
+    lockScroll?: boolean;
+  }
+>(({ className, lockScroll = true, ...props }, ref) => {
+  // Use scroll lock hook to prevent body scroll and layout shift.
+  // Some non-modal sheets need to preserve the page's sticky header behavior.
+  useScrollLock(lockScroll);
 
   return (
     <DialogPrimitive.Overlay
@@ -52,17 +55,46 @@ const DialogOverlay = React.forwardRef<
 });
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
+function ManualDialogOverlay({
+  className,
+  lockScroll = true,
+}: {
+  className?: string;
+  lockScroll?: boolean;
+}) {
+  useScrollLock(lockScroll);
+
+  return (
+    <div
+      data-slot="dialog-overlay"
+      data-state="open"
+      className={cn(
+        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50",
+        className
+      )}
+    />
+  );
+}
+
 function DialogContent({
   overlayClassName,
+  lockScroll = true,
+  showOverlayWhenNonModal = false,
   className,
   children,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   overlayClassName?: string;
+  lockScroll?: boolean;
+  showOverlayWhenNonModal?: boolean;
 }) {
   return (
     <DialogPortal data-slot="dialog-portal">
-      <DialogOverlay className={overlayClassName} />
+      {showOverlayWhenNonModal ? (
+        <ManualDialogOverlay className={overlayClassName} lockScroll={lockScroll} />
+      ) : (
+        <DialogOverlay className={overlayClassName} lockScroll={lockScroll} />
+      )}
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(

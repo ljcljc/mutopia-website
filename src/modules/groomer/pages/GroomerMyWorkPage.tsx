@@ -71,7 +71,7 @@ const scheduleMockEntries: ScheduleMockEntry[] = [
     dayOffset: 0,
     petName: "Max",
     breed: "Golden retriever",
-    avatarUrl: "https://images.dog.ceo/breeds/retriever-golden/n02099601_3004.jpg",
+    avatarUrl: "https://www.figma.com/api/mcp/asset/bfdce912-7cc8-4331-88f4-642b1f2b1b5f",
     owner: "Emma Johnson",
     address: "565 West 207th Street",
     service: "Full Groom Package",
@@ -545,6 +545,8 @@ function PendingTravelCard({
         <div className="mt-3 rounded-[16px] bg-white px-[16px] py-[14px] shadow-[0px_4px_16px_rgba(139,99,87,0.06)]">
           <BookingRequestContent
             request={appointment}
+            passAppointmentContextLabel="MY WORK > BOOKING REQUEST"
+            passAppointmentReturnLabel="Back to my work"
             accessory={
               <button
                 type="button"

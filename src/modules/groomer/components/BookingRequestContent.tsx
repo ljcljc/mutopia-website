@@ -2,6 +2,8 @@ import { useState, type ReactNode } from "react";
 import { CustomSelect, CustomSelectItem } from "@/components/common/CustomSelect";
 import { Icon } from "@/components/common/Icon";
 import { cn } from "@/components/ui/utils";
+import { PassAppointmentModal } from "@/modules/groomer/components/PassAppointmentModal";
+import { ProposeNewTimeModal } from "@/modules/groomer/components/ProposeNewTimeModal";
 
 export type BookingRequestContentData = {
   petName: string;
@@ -20,6 +22,8 @@ type BookingRequestContentProps = {
   eyebrow?: string;
   title?: string;
   className?: string;
+  passAppointmentContextLabel?: string;
+  passAppointmentReturnLabel?: string;
 };
 
 const DEFAULT_PROPOSAL_SLOTS = ["2026.05.24 AM", "2026.05.26 PM", "2026.05.29 AM"] as const;
@@ -32,9 +36,13 @@ export function BookingRequestContent({
   eyebrow = "BOOKING REQUEST",
   title = "Confirm appointment",
   className,
+  passAppointmentContextLabel = "BOOKING REQUEST",
+  passAppointmentReturnLabel = "Go back",
 }: BookingRequestContentProps) {
   const [selectedProposalSlot, setSelectedProposalSlot] = useState(proposalSlots[0] ?? "");
   const [availableTimeBySlot, setAvailableTimeBySlot] = useState<Record<string, string>>({});
+  const [isProposeModalOpen, setIsProposeModalOpen] = useState(false);
+  const [isPassModalOpen, setIsPassModalOpen] = useState(false);
 
   return (
     <div className={cn(className)}>
@@ -140,6 +148,7 @@ export function BookingRequestContent({
           </button>
           <button
             type="button"
+            onClick={() => setIsProposeModalOpen(true)}
             className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-[#F08A12] bg-white px-4 font-comfortaa text-[16px] font-bold leading-6 text-[#F08A12] transition-[transform,background-color] duration-150 active:scale-[0.98] active:bg-[#FFF7ED]"
           >
             <Icon name="calendar" className="size-5 text-[#F08A12]" aria-hidden="true" />
@@ -147,12 +156,25 @@ export function BookingRequestContent({
           </button>
           <button
             type="button"
+            onClick={() => setIsPassModalOpen(true)}
             className="font-comfortaa text-[12px] leading-[18px] text-[#8B6357] underline underline-offset-[2px]"
           >
             Pass appointment
           </button>
         </div>
       </div>
+
+      <PassAppointmentModal
+        open={isPassModalOpen}
+        onClose={() => setIsPassModalOpen(false)}
+        contextLabel={passAppointmentContextLabel}
+        returnLabel={passAppointmentReturnLabel}
+      />
+      <ProposeNewTimeModal
+        open={isProposeModalOpen}
+        onClose={() => setIsProposeModalOpen(false)}
+        initialServiceSlot={selectedProposalSlot || proposalSlots[0]}
+      />
     </div>
   );
 }

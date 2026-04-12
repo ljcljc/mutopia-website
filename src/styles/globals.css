@@ -47,6 +47,17 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+body.modal-open header.sticky.top-0 {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+body.modal-open header.sticky.top-0 + div {
+  padding-top: 65px;
+}
+
 @keyframes image-preview-slide-in {
   from {
     transform: translate3d(0, 100%, 0);

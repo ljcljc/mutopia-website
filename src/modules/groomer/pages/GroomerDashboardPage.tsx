@@ -14,7 +14,7 @@ const nextAppointment: DashboardAppointment = {
   petName: "Max",
   breed: "Golden retriever",
   owner: "Emma Johnson",
-  avatarUrl: "https://images.dog.ceo/breeds/retriever-golden/n02099601_3004.jpg",
+  avatarUrl: "https://www.figma.com/api/mcp/asset/bfdce912-7cc8-4331-88f4-642b1f2b1b5f",
   address: "565 West 207th Street",
   service: "Full Groom Package",
   duration: "Est. duration: 90 minutes",
@@ -66,6 +66,8 @@ function BookingRequestCard({ request }: { request: BookingRequest }) {
       {isExpanded ? (
         <BookingRequestContent
           request={request}
+          passAppointmentContextLabel="DASHBOARD > BOOKING REQUEST"
+          passAppointmentReturnLabel="Back to dashboard"
           accessory={
             <button
               type="button"
