@@ -5,7 +5,7 @@ import { RevenueBreakdownItem } from "@/modules/groomer/components/earnings/Reve
 import { RecentTransactionItem } from "@/modules/groomer/components/earnings/RecentTransactionItem";
 import { TimeframeSelectorDialog } from "@/modules/groomer/components/earnings/TimeframeSelectorDialog";
 import { CustomRangeModal } from "@/modules/groomer/components/earnings/CustomRangeModal";
-import { formatRangeDate } from "@/modules/groomer/components/earnings/utils";
+import { formatRangeDate, getDateRangeForTimeframe } from "@/modules/groomer/components/earnings/utils";
 
 const revenueItems = [
   {
@@ -59,8 +59,9 @@ function RevenueBreakdownCard() {
   const [selectedTimeframe, setSelectedTimeframe] = useState("This week");
   const [isTimeframeOpen, setIsTimeframeOpen] = useState(false);
   const [isCustomRangeOpen, setIsCustomRangeOpen] = useState(false);
-  const [customRangeStartDate, setCustomRangeStartDate] = useState(new Date(2025, 2, 4));
-  const [customRangeEndDate, setCustomRangeEndDate] = useState(new Date(2025, 10, 5));
+  const initialRange = getDateRangeForTimeframe("This week")!;
+  const [customRangeStartDate, setCustomRangeStartDate] = useState(initialRange.startDate);
+  const [customRangeEndDate, setCustomRangeEndDate] = useState(initialRange.endDate);
   const customRangeLabel = `${formatRangeDate(customRangeStartDate)}-${formatRangeDate(customRangeEndDate)}`;
 
   return (
@@ -102,6 +103,15 @@ function RevenueBreakdownCard() {
           setIsTimeframeOpen(false);
         }}
         onSelectCustomRange={() => {
+          if (selectedTimeframe !== "Custom range") {
+            const nextRange = getDateRangeForTimeframe(selectedTimeframe);
+
+            if (nextRange) {
+              setCustomRangeStartDate(nextRange.startDate);
+              setCustomRangeEndDate(nextRange.endDate);
+            }
+          }
+
           setIsTimeframeOpen(false);
           setIsCustomRangeOpen(true);
         }}

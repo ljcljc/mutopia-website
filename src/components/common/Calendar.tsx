@@ -7,6 +7,8 @@ export interface CalendarProps {
   currentDate: Date;
   onDateChange: (date: Date) => void;
   selectedDate?: Date | null;
+  rangeStartDate?: Date | null;
+  rangeEndDate?: Date | null;
   minDate?: Date;
   maxDate?: Date;
   yearRange?: { min: number; max: number };
@@ -25,6 +27,8 @@ export function Calendar({
   currentDate,
   onDateChange,
   selectedDate,
+  rangeStartDate,
+  rangeEndDate,
   minDate,
   maxDate,
   yearRange,
@@ -144,6 +148,26 @@ export function Calendar({
     } else {
       calendar.handleDateClick(dayInfo.date);
     }
+  };
+
+  const isSameDate = (left?: Date | null, right?: Date | null) => {
+    if (!left || !right) return false;
+
+    return (
+      left.getDate() === right.getDate() &&
+      left.getMonth() === right.getMonth() &&
+      left.getFullYear() === right.getFullYear()
+    );
+  };
+
+  const isDateWithinRange = (date: Date) => {
+    if (!rangeStartDate || !rangeEndDate) return false;
+
+    const start = new Date(rangeStartDate.getFullYear(), rangeStartDate.getMonth(), rangeStartDate.getDate()).getTime();
+    const end = new Date(rangeEndDate.getFullYear(), rangeEndDate.getMonth(), rangeEndDate.getDate()).getTime();
+    const current = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+
+    return current >= Math.min(start, end) && current <= Math.max(start, end);
   };
 
   return (
@@ -489,6 +513,10 @@ export function Calendar({
             >
               {rowDays.map((dayInfo) => {
                 const isSelected = dayInfo.isCurrentMonth && calendar.isDateSelected(dayInfo.date);
+                const isRangeStart = dayInfo.isCurrentMonth && isSameDate(dayInfo.date, rangeStartDate);
+                const isRangeEnd = dayInfo.isCurrentMonth && isSameDate(dayInfo.date, rangeEndDate);
+                const isRangeBoundary = isRangeStart || isRangeEnd;
+                const isInRange = dayInfo.isCurrentMonth && isDateWithinRange(dayInfo.date);
                 const isDisabled = disabled || (dayInfo.isCurrentMonth && calendar.isDateDisabled(dayInfo.date));
                 
                 return (
@@ -511,7 +539,10 @@ export function Calendar({
                           : "h-[38.286px] text-[16px]",
                       dayInfo.isCurrentMonth && !isDisabled && "cursor-pointer",
                       isDisabled && "cursor-not-allowed",
+                      isInRange && !isRangeBoundary && (isMobileVariant ? "bg-[#FDE8D6]" : "bg-[#FDE8D6]"),
                       isSelected && (isMobileVariant ? "bg-[#de6a07] rounded-[calc(8*var(--px393))] text-white" : "bg-[#de6a07] rounded-[8px] text-white"),
+                      isRangeBoundary && (isMobileVariant ? "bg-[#de6a07] rounded-[calc(8*var(--px393))] text-white" : "bg-[#de6a07] rounded-[8px] text-white"),
+                      isInRange && !isRangeBoundary && "text-[#4A2C55]",
                       !dayInfo.isCurrentMonth && "text-[grey]",
                       isDisabled && "text-[grey] opacity-50"
                     )}

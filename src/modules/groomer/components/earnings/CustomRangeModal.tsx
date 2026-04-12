@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Calendar } from "@/components/common/Calendar";
 import { GroomerLinkButton } from "@/modules/groomer/components/GroomerLinkButton";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -33,6 +33,18 @@ export function CustomRangeModal({
     setShowYearPicker(false);
     setShowMonthPicker(false);
   };
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    setDraftStartDate(startDate);
+    setDraftEndDate(endDate);
+    setActiveField("start");
+    setCalendarDate(startDate);
+    closeCalendarPickers();
+  }, [open, startDate, endDate]);
 
   const handleDateChange = (date: Date) => {
     setCalendarDate(date);
@@ -103,7 +115,9 @@ export function CustomRangeModal({
                 <div className="mt-3 rounded-[16px] bg-white px-4 py-3" onClick={(event) => event.stopPropagation()}>
                   <Calendar
                     currentDate={calendarDate}
-                    selectedDate={activeField === "start" ? draftStartDate : draftEndDate}
+                    selectedDate={calendarDate}
+                    rangeStartDate={draftStartDate}
+                    rangeEndDate={draftEndDate}
                     onDateChange={handleDateChange}
                     onMonthChange={(year, month) => setCalendarDate(new Date(year, month, 1))}
                     showYearPicker={showYearPicker}
