@@ -1,22 +1,15 @@
 import { useMemo, useState } from "react";
 import { Icon } from "@/components/common/Icon";
-import { CustomSelect, CustomSelectItem } from "@/components/common/CustomSelect";
 import { cn } from "@/components/ui/utils";
+import { BookingRequestContent } from "@/modules/groomer/components/BookingRequestContent";
 import { HistoryDetailsModal, type HistoryDetailsAppointment } from "@/modules/groomer/components/HistoryDetailsModal";
+import { GroomerUpNextCard, type GroomerUpNextAppointment } from "@/modules/groomer/components/GroomerUpNextCard";
 
 type WorkTab = "schedule" | "history";
 type CalendarMode = "collapsed" | "week" | "month";
 
-type AppointmentCard = {
+type AppointmentCard = GroomerUpNextAppointment & {
   id: string;
-  petName: string;
-  breed: string;
-  avatarUrl: string;
-  owner: string;
-  address: string;
-  service: string;
-  duration: string;
-  time: string;
   showStartTravel?: boolean;
 };
 
@@ -536,9 +529,6 @@ function PendingTravelCard({
   isExpanded: boolean;
   onToggleExpanded: () => void;
 }) {
-  const proposalSlots = ["2026.05.24 AM", "2026.05.26 PM", "2026.05.29 AM"] as const;
-  const [selectedProposalSlot, setSelectedProposalSlot] = useState("2026.05.24 AM");
-
   return (
     <article className="relative overflow-hidden rounded-[14px] bg-[#A86140] px-[18px] pb-5 pt-4 shadow-[0px_10px_18px_rgba(0,0,0,0.16)]">
       <span className="absolute inset-y-0 left-0 w-1 bg-[#F08A12]" aria-hidden="true" />
@@ -551,152 +541,49 @@ function PendingTravelCard({
         </div>
       </div>
 
-      <div className="mt-3 rounded-[16px] bg-white px-[16px] py-[14px] shadow-[0px_4px_16px_rgba(139,99,87,0.06)]">
-        {isExpanded ? (
-          <div>
-            <p className="font-comfortaa text-[11px] leading-[16.5px] tracking-[0.5px] text-[#A07D72]">BOOKING REQUEST</p>
-            <h3 className="mt-1 font-comfortaa text-[18px] leading-[27px] text-[#4A2C55]">Confirm appointment</h3>
-
-            <div className="mt-4 rounded-[14px] border border-[#D9D2E8] px-3 py-3">
-              <div className="flex items-center gap-3">
-                <img src={appointment.avatarUrl} alt={appointment.petName} className="size-[48px] rounded-full object-cover" />
-                <div className="min-w-0 flex-1">
-                  <p className="font-comfortaa text-[14px] leading-[21px] text-[#4A2C55]">
-                    {appointment.petName} - {appointment.breed}
-                  </p>
-                  <p className="mt-0.5 font-comfortaa text-[11px] leading-[16.5px] text-[#15A34A]">
-                    <span aria-hidden="true">• </span>
-                    Owner: {appointment.owner}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={onToggleExpanded}
-                  aria-expanded={isExpanded}
-                  aria-label="Collapse pending appointment"
-                  className="flex size-6 shrink-0 items-center justify-center rounded-full self-start"
-                >
-                  <Icon name="chevron-down" size={14} className="rotate-180 text-[#8B6357]" aria-hidden="true" />
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-4 space-y-4">
-              <div className="flex items-start gap-2.5">
-                <Icon name="location" className="mt-[2px] size-4 text-[#15A34A]" aria-hidden="true" />
-                <div>
-                  <p className="font-comfortaa text-[11px] leading-[16.5px] text-[#A07D72]">ADDRESS</p>
-                  <p className="mt-0.5 font-comfortaa text-[14px] leading-[21px] text-[#15A34A]">{appointment.address}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2.5">
-                <Icon name="calendar" className="mt-[2px] size-4 text-[#15A34A]" aria-hidden="true" />
-                <div>
-                  <p className="font-comfortaa text-[11px] leading-[16.5px] text-[#A07D72]">SERVICE</p>
-                  <p className="mt-0.5 font-comfortaa text-[15px] leading-[22.5px] text-[#4A2C55]">{appointment.service}</p>
-                  <p className="mt-0.5 font-comfortaa text-[13px] leading-[19.5px] text-[#A07D72]">{appointment.duration}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 rounded-[14px] border border-[#CDEFD7] bg-[#F3FCF6] px-3 py-3">
-              <p className="font-comfortaa text-[12px] leading-[18px] text-[#15A34A]">
-                Specify your available time from one date
+      {isExpanded ? (
+        <div className="mt-3 rounded-[16px] bg-white px-[16px] py-[14px] shadow-[0px_4px_16px_rgba(139,99,87,0.06)]">
+          <BookingRequestContent
+            request={appointment}
+            accessory={
+              <button
+                type="button"
+                onClick={onToggleExpanded}
+                aria-expanded={isExpanded}
+                aria-label="Collapse pending appointment"
+                className="flex size-6 shrink-0 items-center justify-center rounded-full self-start"
+              >
+                <Icon name="chevron-down" size={14} className="rotate-180 text-[#8B6357]" aria-hidden="true" />
+              </button>
+            }
+          />
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={onToggleExpanded}
+          aria-expanded={isExpanded}
+          aria-label="Expand pending appointment"
+          className="mt-3 w-full rounded-[10px] bg-[#F8F7F3] px-3 py-[11px] text-left"
+        >
+          <div className="flex items-center gap-3">
+            <img src={appointment.avatarUrl} alt={appointment.petName} className="size-[50px] rounded-full object-cover" />
+            <div className="min-w-0 flex-1">
+              <p className="font-comfortaa text-[14px] leading-[21px] text-[#4A2C55]">
+                {appointment.petName} - {appointment.breed}
               </p>
-
-              <div className="mt-3 space-y-3">
-                {proposalSlots.map((slot) => (
-                  <div key={slot}>
-                    <label className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedProposalSlot(slot)}
-                        className={cn(
-                          "flex size-4 items-center justify-center rounded-full border",
-                          selectedProposalSlot === slot ? "border-[#8B6357]" : "border-[#A8A29E]",
-                        )}
-                        aria-label={`Select ${slot}`}
-                      >
-                        <span
-                          className={cn(
-                            "size-2 rounded-full",
-                            selectedProposalSlot === slot ? "bg-[#F08A12]" : "bg-transparent",
-                          )}
-                        />
-                      </button>
-                      <span className="font-comfortaa text-[12px] leading-[18px] text-[#4A2C55]">{slot}</span>
-                    </label>
-
-                    {selectedProposalSlot === slot ? (
-                      <div className="mt-2">
-                        <p className="font-comfortaa text-[12px] leading-[18px] text-[#4A2C55]">Available time</p>
-                        <CustomSelect
-                          value=""
-                          placeholder="Select or type time"
-                          className="rounded-[10px] border-[#D9D2E8] text-[12px] text-[#8B6357]"
-                        >
-                          <CustomSelectItem value="09:00 AM">09:00 AM</CustomSelectItem>
-                          <CustomSelectItem value="10:30 AM">10:30 AM</CustomSelectItem>
-                          <CustomSelectItem value="01:00 PM">01:00 PM</CustomSelectItem>
-                        </CustomSelect>
-                      </div>
-                    ) : null}
-                  </div>
-                ))}
+              <p className="mt-0.5 font-comfortaa text-[11px] leading-[16.5px] text-[#15A34A]">
+                <span aria-hidden="true">• </span>
+                Owner: {appointment.owner}
+              </p>
+              <div className="mt-[7px] inline-flex rounded-full border border-[#DE1507] px-[10px] py-[4px]">
+                <span className="font-comfortaa text-[11px] leading-[16.5px] text-[#DE1507]">Expired in 24 hours</span>
               </div>
             </div>
-
-            <div className="mt-4 flex flex-col gap-3">
-              <button
-                type="button"
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#06AF3D] px-4 font-comfortaa text-[16px] font-bold leading-6 text-white shadow-[0px_8px_18px_rgba(6,175,61,0.22)]"
-              >
-                <Icon name="check-green" className="size-5" aria-hidden="true" />
-                Confirm
-              </button>
-              <button
-                type="button"
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-[#F08A12] bg-white px-4 font-comfortaa text-[16px] leading-6 text-[#F08A12]"
-              >
-                <Icon name="calendar" className="size-5 text-[#F08A12]" aria-hidden="true" />
-                Propose new time
-              </button>
-              <button
-                type="button"
-                className="font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357] underline underline-offset-[2px]"
-              >
-                Pass appointment
-              </button>
-            </div>
+            <Icon name="chevron-down" size={14} className="text-[#8B6357]" aria-hidden="true" />
           </div>
-        ) : (
-          <button
-            type="button"
-            onClick={onToggleExpanded}
-            aria-expanded={isExpanded}
-            aria-label="Expand pending appointment"
-            className="mt-4 w-full rounded-[10px] bg-[#F8F7F3] px-3 py-[11px] text-left"
-          >
-            <div className="flex items-center gap-3">
-              <img src={appointment.avatarUrl} alt={appointment.petName} className="size-[50px] rounded-full object-cover" />
-              <div className="min-w-0 flex-1">
-                <p className="font-comfortaa text-[14px] leading-[21px] text-[#4A2C55]">
-                  {appointment.petName} - {appointment.breed}
-                </p>
-                <p className="mt-0.5 font-comfortaa text-[11px] leading-[16.5px] text-[#15A34A]">
-                  <span aria-hidden="true">• </span>
-                  Owner: {appointment.owner}
-                </p>
-                <div className="mt-[7px] inline-flex rounded-full border border-[#DE1507] px-[10px] py-[4px]">
-                  <span className="font-comfortaa text-[11px] leading-[16.5px] text-[#DE1507]">Expired in 24 hours</span>
-                </div>
-              </div>
-              <Icon name="chevron-down" size={14} className="text-[#8B6357]" aria-hidden="true" />
-            </div>
-          </button>
-        )}
-      </div>
+        </button>
+      )}
     </article>
   );
 }
@@ -709,70 +596,32 @@ function AppointmentItem({
   onCancel: () => void;
 }) {
   return (
-    <article className="rounded-[12px] bg-white px-4 py-4 shadow-[0px_4px_12px_rgba(0,0,0,0.08)]">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="font-comfortaa text-[11px] font-bold leading-[16.5px] tracking-[0.6px] text-[#C7A297]">UP NEXT</p>
-          <h2 className="mt-1 font-comfortaa text-[18px] font-bold leading-[27px] text-[#4A2C55]">Next appointment</h2>
-        </div>
-        <div className="rounded-[12px] bg-[#FFF5EC] px-4 py-[7px]">
-          <span className="font-comfortaa text-[15px] font-bold leading-[22.5px] text-[#F08A12]">{appointment.time}</span>
-        </div>
-      </div>
+    <GroomerUpNextCard
+      appointment={appointment}
+      footer={
+        <>
+          {appointment.showStartTravel ? (
+            <button
+              type="button"
+              className="flex h-[38px] w-full items-center justify-center rounded-full bg-[linear-gradient(180deg,#F7A01B_0%,#F08A12_100%)] font-comfortaa text-[14px] font-bold leading-[21px] text-white shadow-[0px_10px_18px_rgba(240,138,18,0.28)] transition-transform hover:scale-[0.99]"
+            >
+              Start Travel
+            </button>
+          ) : null}
 
-      <div className="mt-4 rounded-[10px] bg-[#F8F7F3] px-3 py-[13px]">
-        <div className="flex items-center gap-3">
-          <img src={appointment.avatarUrl} alt={appointment.petName} className="size-[52px] rounded-full object-cover" />
-          <div className="min-w-0">
-            <p className="font-comfortaa text-[15px] font-bold leading-[22.5px] text-[#4A2C55]">{appointment.petName}</p>
-            <p className="mt-0.5 font-comfortaa text-[13px] leading-[19.5px] text-[#A07D72]">{appointment.breed}</p>
-            <p className="mt-0.5 font-comfortaa text-[12px] leading-[18px] text-[#15A34A]">
-              <span aria-hidden="true">• </span>
-              Owner: {appointment.owner}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-4 space-y-3">
-        <div className="flex items-start gap-2.5">
-          <Icon name="location" className="mt-[2px] size-4 text-[#F08A12]" aria-hidden="true" />
-          <div>
-            <p className="font-comfortaa text-[11px] leading-[16.5px] text-[#A07D72]">ADDRESS</p>
-            <p className="mt-0.5 font-comfortaa text-[14px] leading-[21px] text-[#F08A12] underline underline-offset-[2px]">{appointment.address}</p>
-          </div>
-        </div>
-
-        <div className="flex items-start gap-2.5">
-          <Icon name="calendar" className="mt-[2px] size-4 text-[#F08A12]" aria-hidden="true" />
-          <div>
-            <p className="font-comfortaa text-[11px] leading-[16.5px] text-[#A07D72]">SERVICE</p>
-            <p className="mt-0.5 font-comfortaa text-[15px] leading-[22.5px] text-[#4A2C55]">{appointment.service}</p>
-            <p className="mt-0.5 font-comfortaa text-[13px] leading-[19.5px] text-[#A07D72]">{appointment.duration}</p>
-          </div>
-        </div>
-      </div>
-
-      {appointment.showStartTravel ? (
-        <button
-          type="button"
-          className="mt-5 flex h-[38px] w-full items-center justify-center rounded-full bg-[linear-gradient(180deg,#F7A01B_0%,#F08A12_100%)] font-comfortaa text-[14px] font-bold leading-[21px] text-white shadow-[0px_10px_18px_rgba(240,138,18,0.28)] transition-transform hover:scale-[0.99]"
-        >
-          Start Travel
-        </button>
-      ) : null}
-
-      <button
-        type="button"
-        onClick={onCancel}
-        className={cn(
-          "mx-auto mt-5 block font-comfortaa text-[12px] leading-[18px] text-[#A07D72] underline underline-offset-[2px]",
-          appointment.showStartTravel ? "" : "mt-4",
-        )}
-      >
-        Cancel appointment
-      </button>
-    </article>
+          <button
+            type="button"
+            onClick={onCancel}
+            className={cn(
+              "mx-auto block font-comfortaa text-[12px] leading-[18px] text-[#A07D72] underline underline-offset-[2px]",
+              appointment.showStartTravel ? "mt-5" : "mt-0",
+            )}
+          >
+            Cancel appointment
+          </button>
+        </>
+      }
+    />
   );
 }
 
