@@ -5,6 +5,7 @@ import { RevenueBreakdownItem } from "@/modules/groomer/components/earnings/Reve
 import { RecentTransactionItem } from "@/modules/groomer/components/earnings/RecentTransactionItem";
 import { TimeframeSelectorDialog } from "@/modules/groomer/components/earnings/TimeframeSelectorDialog";
 import { CustomRangeModal } from "@/modules/groomer/components/earnings/CustomRangeModal";
+import { EarningsEmptyState } from "@/modules/groomer/components/earnings/EarningsEmptyState";
 import { formatRangeDate, getDateRangeForTimeframe } from "@/modules/groomer/components/earnings/utils";
 
 const revenueItems = [
@@ -86,11 +87,17 @@ function RevenueBreakdownCard() {
           ) : null}
         </div>
 
-        <div className="mt-4 space-y-3">
-          {revenueItems.map((item) => (
-            <RevenueBreakdownItem key={item.title} {...item} />
-          ))}
-        </div>
+        {revenueItems.length > 0 ? (
+          <div className="mt-4 space-y-3">
+            {revenueItems.map((item) => (
+              <RevenueBreakdownItem key={item.title} {...item} />
+            ))}
+          </div>
+        ) : (
+          <div className="mt-2">
+            <EarningsEmptyState title="No record" description="Select another timeframe" />
+          </div>
+        )}
       </section>
 
       <TimeframeSelectorDialog
@@ -147,11 +154,17 @@ function RecentTransactionCard() {
         </button>
       </div>
 
-      <div className="mt-4 space-y-3">
-        {transactionItems.map((item) => (
-          <RecentTransactionItem key={`${item.title}-${item.subtitle}`} {...item} />
-        ))}
-      </div>
+      {transactionItems.length > 0 ? (
+        <div className="mt-4 space-y-3">
+          {transactionItems.map((item) => (
+            <RecentTransactionItem key={`${item.title}-${item.subtitle}`} {...item} />
+          ))}
+        </div>
+      ) : (
+        <div className="mt-2">
+          <EarningsEmptyState title="No record" description="Ready to start your work?" />
+        </div>
+      )}
     </section>
   );
 }
