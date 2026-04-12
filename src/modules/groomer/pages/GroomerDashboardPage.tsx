@@ -49,7 +49,7 @@ export default function GroomerDashboardPage() {
   const firstName = userInfo?.first_name?.trim() || "Lei";
 
   return (
-    <div className="mx-auto min-h-[calc(100vh-64px)] w-full max-w-[393px] bg-[#633479] px-5 pb-28 pt-8">
+    <div className="mx-auto min-h-[calc(100vh-64px)] w-full max-w-[393px] bg-[#633479] px-5 pb-28 pt-2">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="font-comfortaa text-[20px] font-bold leading-[22px] text-white">Dashboard</h1>
         <div className="flex items-center gap-3">

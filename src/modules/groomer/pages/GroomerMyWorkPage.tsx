@@ -297,11 +297,6 @@ const historySections: HistorySection[] = [
       },
     ],
   },
-  {
-    id: "history-tomorrow",
-    label: "TOMORROW - TUESDAY, MAR 17",
-    appointments: [],
-  },
 ];
 
 function SegmentControl({
@@ -392,7 +387,7 @@ function HistoryAppointmentItem({ appointment }: { appointment: HistoryAppointme
         <div className="min-w-0">
           <p className="font-comfortaa text-[13px] font-bold leading-[19.5px] text-[rgba(139,99,87,0.6)]">{appointment.date}</p>
           <h3 className="mt-1 font-comfortaa text-[18px] font-bold leading-[22.5px] text-[#8B6357]">
-            <span className="underline underline-offset-[2px]">{appointment.petName}</span>
+            <span className="underline underline-offset-2">{appointment.petName}</span>
             <span className="font-medium text-[rgba(139,99,87,0.6)]">{` (${appointment.breed})`}</span>
           </h3>
         </div>
@@ -853,7 +848,7 @@ export default function GroomerMyWorkPage() {
   };
 
   return (
-    <div className="mx-auto min-h-[calc(100vh-64px)] w-full max-w-[393px] bg-[#633479] px-5 pb-28 pt-5">
+    <div className="mx-auto min-h-[calc(100vh-64px)] w-full max-w-[393px] bg-[#633479] px-5 pb-28 pt-2">
       <div className="space-y-4">
         <SegmentControl activeTab={activeTab} onChange={handleTabChange} />
 

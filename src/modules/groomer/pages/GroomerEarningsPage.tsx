@@ -171,7 +171,7 @@ function RecentTransactionCard() {
 
 export default function GroomerEarningsPage() {
   return (
-    <div className="mx-auto min-h-[calc(100vh-64px)] w-full max-w-[393px] bg-[#633479] px-5 pb-28 pt-3">
+    <div className="mx-auto min-h-[calc(100vh-64px)] w-full max-w-[393px] bg-[#633479] px-5 pb-28 pt-2">
       <div className="space-y-4">
         <header>
           <h1 className="font-comfortaa text-[20px] font-bold leading-[22px] text-white">Earnings</h1>

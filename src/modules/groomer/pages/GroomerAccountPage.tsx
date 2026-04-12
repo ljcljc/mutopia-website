@@ -236,7 +236,7 @@ export default function GroomerAccountPage() {
 
   return (
     <>
-      <div className="mx-auto min-h-[calc(100vh-64px)] w-full max-w-[393px] bg-[#633479] px-5 pb-[36px] pt-1 lg:min-h-0 lg:max-w-[944px] lg:px-0 lg:pb-4 lg:pt-1">
+      <div className="mx-auto min-h-[calc(100vh-64px)] w-full max-w-[393px] bg-[#633479] px-5 pb-[36px] pt-2 lg:min-h-0 lg:max-w-[944px] lg:px-0 lg:pb-4 lg:pt-1">
         <div className="mb-4 flex items-center justify-between sm:mb-5">
           <h1 className="font-comfortaa text-[20px] font-bold leading-[22px] text-white">My account</h1>
           <div className="flex items-center gap-3">
