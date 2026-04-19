@@ -1,17 +1,42 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Icon } from "@/components/common/Icon";
 import { OrangeButton, PurpleButton } from "@/components/common";
+import { createDepositSession } from "@/lib/api";
+import { toast } from "sonner";
+import { useState } from "react";
 
 export default function PaymentFail() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [isRetrying, setIsRetrying] = useState(false);
 
-  const handleRetryPayment = () => {
-    // Navigate back to booking flow or payment page
-    navigate("/booking");
+  const handleRetryPayment = async () => {
+    if (isRetrying) return;
+
+    const bookingIdFromQuery = searchParams.get("booking_id");
+    const persistedBookingId = sessionStorage.getItem("pendingDepositBookingId");
+    const bookingId = Number(bookingIdFromQuery ?? persistedBookingId);
+
+    if (!Number.isFinite(bookingId) || bookingId <= 0) {
+      toast.error("Booking not found. Please start payment again from booking detail.");
+      navigate("/account/dashboard");
+      return;
+    }
+
+    try {
+      setIsRetrying(true);
+      const paymentSession = await createDepositSession(bookingId);
+      window.location.assign(paymentSession.url);
+    } catch (error) {
+      console.error("Failed to retry payment:", error);
+      toast.error("Failed to restart payment. Please try again.");
+    } finally {
+      setIsRetrying(false);
+    }
   };
 
   const handleGoToAccount = () => {
-    navigate("/account");
+    navigate("/account/dashboard");
   };
 
   return (
@@ -59,6 +84,7 @@ export default function PaymentFail() {
             variant="primary"
             size="medium"
             onClick={handleRetryPayment}
+            loading={isRetrying}
             className="w-full md:h-12 md:w-auto md:px-7 md:py-3.5"
           >
             Try again

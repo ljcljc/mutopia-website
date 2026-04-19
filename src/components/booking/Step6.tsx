@@ -762,10 +762,13 @@ export function Step6() {
       // Create deposit payment session (Stripe Checkout)
       const paymentSession = await createDepositSession(booking.id);
       console.log("Payment session created:", paymentSession);
+
+      sessionStorage.setItem("pendingDepositBookingId", String(booking.id));
       
-      // Redirect to Stripe Checkout page
-      // Stripe will handle the payment and redirect back to success page
-      window.location.href = paymentSession.url;
+      // Replace the current booking history entry so browser back from Stripe
+      // returns to dashboard instead of reopening step 6.
+      window.history.replaceState(window.history.state, "", "/account/dashboard");
+      window.location.assign(paymentSession.url);
       
       toast.success("Redirecting to payment...");
     } catch (error) {
