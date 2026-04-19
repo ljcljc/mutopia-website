@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { OrangeButton } from "@/components/common";
+import { CustomTextarea } from "@/components/common/CustomTextarea";
 import { Icon } from "@/components/common/Icon";
 import { useAccountStore } from "@/components/account/accountStore";
 import {
@@ -17,12 +18,13 @@ import ModifyAddressModal from "@/components/account/ModifyAddressModal";
 import {
   AlertDialog,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
+import { XIcon } from "lucide-react";
 
 function formatDateTime(dateString?: string | null): string {
   if (!dateString) return "";
@@ -176,10 +178,11 @@ export default function BookingDetail() {
   const { bookingId } = useParams();
   const navigate = useNavigate();
   const [detail, setDetail] = useState<BookingDetailOut | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isPackageExpanded, setIsPackageExpanded] = useState(true);
   const [isCanceling, setIsCanceling] = useState(false);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isModifyOpen, setIsModifyOpen] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
@@ -406,6 +409,13 @@ export default function BookingDetail() {
   const serviceSummary = detailCardConfig.subtitleIncludesScheduled
     ? `${serviceName} - ${serviceTypeLabel} ${scheduledDisplay}`
     : `${serviceName} - ${serviceTypeLabel}`;
+  const rawCanceledReason =
+    typeof detail?.notes === "string" ? detail.notes.trim() : "";
+  const canceledReason =
+    (normalizedStatus === "canceled" || normalizedStatus === "cancelled") &&
+    rawCanceledReason
+      ? rawCanceledReason.replace(/^cancel\s+reason:\s*/i, "").trim()
+      : "";
   const canModifyAddress = normalizedStatus === "pending_assignment";
   
   // 价格信息（需要在 useMemo 之前定义）
@@ -486,6 +496,7 @@ export default function BookingDetail() {
     "confirmed",
     "traveling",
   ].includes(normalizedStatus);
+  const isInitialLoading = isLoading && !detail && !error;
 
   const handleConfirmProposedTime = async () => {
     if (!detail?.id) return;
@@ -527,8 +538,9 @@ export default function BookingDetail() {
 
     setIsCanceling(true);
     try {
-      await cancelBooking(detail.id);
+      await cancelBooking(detail.id, cancelReason.trim());
       setIsCancelDialogOpen(false);
+      setCancelReason("");
       toast.success("Booking canceled successfully");
       // 刷新数据或跳转回 dashboard
       navigate("/account/dashboard");
@@ -553,10 +565,58 @@ export default function BookingDetail() {
                 Dashboard
               </Link>
               <span aria-hidden="true">{" > "}</span>
-              <span>Upcoming booking - {petName}</span>
+              <span>{isInitialLoading ? "Upcoming booking" : `Upcoming booking - ${petName}`}</span>
             </nav>
           </div>
 
+          {isInitialLoading ? (
+            <>
+              <div className="rounded-[12px] bg-white p-6 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
+                <div className="flex flex-col gap-5">
+                  <div className="flex items-end justify-between gap-[14px]">
+                    <div className="flex min-w-0 flex-1 flex-col gap-[14px]">
+                      <div className="flex items-start justify-between gap-[14px]">
+                        <div className="flex min-w-0 flex-1 flex-col gap-2">
+                          <Skeleton className="h-7 w-32 rounded-md" />
+                          <Skeleton className="h-[18px] w-56 rounded-md" />
+                        </div>
+                        <Skeleton className="h-3 w-16 rounded-md" />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Skeleton className="h-2 w-full rounded-[8px]" />
+                        <Skeleton className="h-6 w-[180px] rounded-xl" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex min-w-[220px] flex-1 flex-col gap-1">
+                      <Skeleton className="h-3 w-16 rounded-md" />
+                      <Skeleton className="h-4 w-40 rounded-md" />
+                    </div>
+                    <Skeleton className="h-9 w-[136px] rounded-[32px]" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl bg-white p-6 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
+                <div className="flex flex-col gap-4">
+                  <Skeleton className="h-7 w-48 rounded-md" />
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="flex flex-col gap-2">
+                      <Skeleton className="h-3 w-14 rounded-md" />
+                      <Skeleton className="h-4 w-full max-w-[240px] rounded-md" />
+                      <Skeleton className="h-4 w-full max-w-[180px] rounded-md" />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Skeleton className="h-3 w-20 rounded-md" />
+                      <Skeleton className="h-4 w-24 rounded-md" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
           <div className="rounded-[12px] bg-white p-6 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
             <div className="flex flex-col gap-5">
               <div className="flex items-end justify-between gap-[14px]">
@@ -656,6 +716,17 @@ export default function BookingDetail() {
                       </p>
                       <p className="font-comfortaa text-[12px] font-bold leading-[16px]">
                         {detailCardConfig.nextStep}
+                      </p>
+                    </div>
+                  ) : null}
+
+                  {canceledReason ? (
+                    <div className="flex min-w-[220px] flex-1 flex-col gap-1 text-[#4A3C2A]">
+                      <p className="font-comfortaa text-[10px] font-normal leading-[12px]">
+                        Canceled reason
+                      </p>
+                      <p className="font-comfortaa text-[12px] font-bold leading-[16px] break-words">
+                        {canceledReason}
                       </p>
                     </div>
                   ) : null}
@@ -761,226 +832,300 @@ export default function BookingDetail() {
               ) : null}
             </div>
           </div>
+            </>
+          )}
 
-          <div className="rounded-xl bg-white p-6 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
-            <div className="flex flex-col gap-3.5">
-              <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
-                Package and add-on
-              </p>
-              <div className="flex items-center justify-between">
-                <p className="font-comfortaa font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
-                  Total estimation for the service
-                </p>
-                <div className="flex items-center gap-2">
-                  <span className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#DE6A07]">
-                    {totalEstimation}
-                  </span>
+          {isInitialLoading ? (
+            <>
+              <div className="rounded-xl bg-white p-6 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
+                <div className="flex flex-col gap-3.5">
+                  <Skeleton className="h-7 w-40 rounded-md" />
+                  <div className="flex items-center justify-between gap-4">
+                    <Skeleton className="h-4 w-40 rounded-md" />
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-7 w-20 rounded-md" />
+                      <Skeleton className="size-5 rounded-md" />
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Skeleton className="h-3 w-28 rounded-md" />
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between gap-4">
+                        <Skeleton className="h-4 w-36 rounded-md" />
+                        <Skeleton className="h-4 w-14 rounded-md" />
+                      </div>
+                      <div className="flex items-center justify-between gap-4">
+                        <Skeleton className="h-4 w-24 rounded-md" />
+                        <Skeleton className="h-4 w-14 rounded-md" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border-2 border-[#DE6A07] bg-white p-6 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
+                <div className="flex flex-col gap-5">
+                  <div className="flex items-start justify-between gap-3.5">
+                    <div className="flex flex-col gap-2">
+                      <Skeleton className="h-7 w-48 rounded-md" />
+                      <Skeleton className="h-4 w-44 rounded-md" />
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <Skeleton className="h-7 w-20 rounded-md" />
+                      <Skeleton className="h-6 w-20 rounded-xl" />
+                      <Skeleton className="h-3 w-16 rounded-md" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="rounded-xl bg-white p-6 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
+                <div className="flex flex-col gap-3.5">
+                  <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
+                    Package and add-on
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className="font-comfortaa font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
+                      Total estimation for the service
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <span className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#DE6A07]">
+                        {totalEstimation}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setIsPackageExpanded((value) => !value)}
+                        className="flex size-5 items-center justify-center rounded-lg hover:border hover:border-[#8B6357] transition-colors"
+                        aria-expanded={isPackageExpanded}
+                        aria-label="Toggle package and add-on details"
+                      >
+                        <Icon
+                          name="chevron-down"
+                          className={`size-5 text-[#4A3C2A] transition-transform ${isPackageExpanded ? "rotate-180" : ""}`}
+                        />
+                      </button>
+                    </div>
+                  </div>
+
+                  {isPackageExpanded ? (
+                    <>
+                      {packageItems.length > 0 && (
+                        <div className="flex flex-col gap-1">
+                          <p className="font-comfortaa font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
+                            {serviceName} package
+                          </p>
+                          <div className="flex flex-col gap-1">
+                            {packageItems.map((item, index) => (
+                              <div key={`package-${index}`} className="flex items-center justify-between">
+                                <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                                  {item.label}
+                                </p>
+                                <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                                  {item.amount}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="my-1 border-t border-[#E5E7EB]" />
+                          <div className="flex items-center justify-between">
+                            <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                              Subtotal
+                            </p>
+                            <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                              {packageSubtotal}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {addOnItems.length > 0 && (
+                        <div className="flex flex-col gap-1">
+                          <p className="font-comfortaa font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
+                            Add-on
+                          </p>
+                          <div className="flex flex-col gap-1">
+                            {addOnItems.map((item, index) => (
+                              <div key={`addon-${index}`} className="flex items-center justify-between">
+                                <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                                  {item.label}
+                                </p>
+                                <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                                  {item.amount}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="my-1 border-t border-[#E5E7EB]" />
+                          <div className="flex items-center justify-between">
+                            <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                              Subtotal
+                            </p>
+                            <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                              {addOnSubtotal}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : null}
+                </div>
+              </div>
+
+              <div className="rounded-xl border-2 border-[#DE6A07] bg-white p-6 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
+                <div className="flex flex-col gap-5">
+                  <div className="flex items-start justify-between gap-3.5">
+                    <div>
+                      <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
+                        Total estimation for the service
+                      </p>
+                      <p className="font-comfortaa font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
+                        Our groomer will evaluate the final price
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#DE6A07]">
+                        {totalEstimation}
+                      </p>
+                      {discountRate > 0 && (
+                        <div className="mt-1 flex items-center justify-end gap-2">
+                          <span className="h-6 rounded-xl bg-[#DCFCE7] px-4 py-1 text-[10px] leading-[14px] font-comfortaa font-bold text-[#016630]">
+                            {discountRate}% OFF
+                          </span>
+                        </div>
+                      )}
+                      <p className="mt-1 font-comfortaa font-bold text-[10px] leading-[14px] text-[#4A5565]">
+                        tax included
+                      </p>
+                    </div>
+                  </div>
+
+                  {(hasMembership || hasCoupon || couponAmount !== "$0.00" || discountAmount !== "$0.00") && (
+                    <>
+                      <div className="border-t border-[#E5E7EB]" />
+
+                      <div className="flex flex-col gap-3">
+                        {hasMembership && membershipFee !== "$0.00" && (
+                          <div className="flex items-center justify-between">
+                            <p className="font-comfortaa font-bold text-[12px] leading-[17.5px] text-[#4A3C2A]">
+                              Membership discount
+                            </p>
+                            <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                              -{membershipFee}
+                            </p>
+                          </div>
+                        )}
+
+                        {hasCoupon && couponAmount !== "$0.00" && (
+                          <div className="flex items-center justify-between">
+                            <p className="font-comfortaa font-bold text-[12px] leading-[17.5px] text-[#4A3C2A]">
+                              Coupon discount
+                            </p>
+                            <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                              -{couponAmount}
+                            </p>
+                          </div>
+                        )}
+
+                        {discountAmount !== "$0.00" && (
+                          <div className="flex items-center justify-between">
+                            <p className="font-comfortaa font-bold text-[12px] leading-[17.5px] text-[#4A3C2A]">
+                              Discount
+                            </p>
+                            <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                              -{discountAmount}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {canCancel && detailCardConfig.actionKind !== "cancel" && detailCardConfig.actionKind !== "confirm" && (
+                <div className="flex justify-end">
                   <button
                     type="button"
-                    onClick={() => setIsPackageExpanded((value) => !value)}
-                    className="flex size-5 items-center justify-center rounded-lg hover:border hover:border-[#8B6357] transition-colors"
-                    aria-expanded={isPackageExpanded}
-                    aria-label="Toggle package and add-on details"
+                    onClick={() => setIsCancelDialogOpen(true)}
+                    disabled={isCanceling}
+                    className="flex cursor-pointer items-center justify-center gap-2 font-comfortaa text-[12px] leading-[17.5px] text-[#8B6357] transition-colors hover:text-[#DE6A07] disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <Icon
-                      name="chevron-down"
-                      className={`size-5 text-[#4A3C2A] transition-transform ${isPackageExpanded ? "rotate-180" : ""}`}
-                    />
+                    <Icon name="trash" size={16} className="text-current" />
+                    {isCanceling ? "Canceling..." : "Cancel booking"}
                   </button>
                 </div>
-              </div>
-
-              {isPackageExpanded ? (
-                <>
-                  {packageItems.length > 0 && (
-                    <div className="flex flex-col gap-1">
-                      <p className="font-comfortaa font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
-                        {serviceName} package
-                      </p>
-                      <div className="flex flex-col gap-1">
-                        {packageItems.map((item, index) => (
-                          <div key={`package-${index}`} className="flex items-center justify-between">
-                            <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                              {item.label}
-                            </p>
-                            <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                              {item.amount}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="my-1 border-t border-[#E5E7EB]" />
-                      <div className="flex items-center justify-between">
-                        <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                          Subtotal
-                        </p>
-                        <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                          {packageSubtotal}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {addOnItems.length > 0 && (
-                    <div className="flex flex-col gap-1">
-                      <p className="font-comfortaa font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
-                        Add-on
-                      </p>
-                      <div className="flex flex-col gap-1">
-                        {addOnItems.map((item, index) => (
-                          <div key={`addon-${index}`} className="flex items-center justify-between">
-                            <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                              {item.label}
-                            </p>
-                            <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                              {item.amount}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="my-1 border-t border-[#E5E7EB]" />
-                      <div className="flex items-center justify-between">
-                        <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                          Subtotal
-                        </p>
-                        <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                          {addOnSubtotal}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="rounded-xl border-2 border-[#DE6A07] bg-white p-6 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
-            <div className="flex flex-col gap-5">
-              <div className="flex items-start justify-between gap-3.5">
-                <div>
-                  <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
-                    Total estimation for the service
-                  </p>
-                  <p className="font-comfortaa font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
-                    Our groomer will evaluate the final price
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#DE6A07]">
-                    {totalEstimation}
-                  </p>
-                  {discountRate > 0 && (
-                    <div className="mt-1 flex items-center justify-end gap-2">
-                      <span className="h-6 rounded-xl bg-[#DCFCE7] px-4 py-1 text-[10px] leading-[14px] font-comfortaa font-bold text-[#016630]">
-                        {discountRate}% OFF
-                      </span>
-                    </div>
-                  )}
-                  <p className="mt-1 font-comfortaa font-bold text-[10px] leading-[14px] text-[#4A5565]">
-                    tax included
-                  </p>
-                </div>
-              </div>
-
-              {(hasMembership || hasCoupon || couponAmount !== "$0.00" || discountAmount !== "$0.00") && (
-                <>
-                  <div className="border-t border-[#E5E7EB]" />
-
-                  <div className="flex flex-col gap-3">
-                    {hasMembership && membershipFee !== "$0.00" && (
-                      <div className="flex items-center justify-between">
-                        <p className="font-comfortaa font-bold text-[12px] leading-[17.5px] text-[#4A3C2A]">
-                          Membership discount
-                        </p>
-                        <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                          -{membershipFee}
-                        </p>
-                      </div>
-                    )}
-
-                    {hasCoupon && couponAmount !== "$0.00" && (
-                      <div className="flex items-center justify-between">
-                        <p className="font-comfortaa font-bold text-[12px] leading-[17.5px] text-[#4A3C2A]">
-                          Coupon discount
-                        </p>
-                        <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                          -{couponAmount}
-                        </p>
-                      </div>
-                    )}
-
-                    {discountAmount !== "$0.00" && (
-                      <div className="flex items-center justify-between">
-                        <p className="font-comfortaa font-bold text-[12px] leading-[17.5px] text-[#4A3C2A]">
-                          Discount
-                        </p>
-                        <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                          -{discountAmount}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </>
               )}
-            </div>
-          </div>
-
-          {canCancel && detailCardConfig.actionKind !== "cancel" && detailCardConfig.actionKind !== "confirm" && (
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={() => setIsCancelDialogOpen(true)}
-                disabled={isCanceling}
-                className="flex cursor-pointer items-center justify-center gap-2 font-comfortaa text-[12px] leading-[17.5px] text-[#8B6357] transition-colors hover:text-[#DE6A07] disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <Icon name="trash" size={16} className="text-current" />
-                {isCanceling ? "Canceling..." : "Cancel booking"}
-              </button>
-            </div>
+            </>
           )}
         </div>
       </div>
 
       <AlertDialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
-        <AlertDialogContent className="max-w-[calc(100%-32px)] rounded-[20px] px-0 py-0 sm:max-w-[520px]">
+        <AlertDialogContent className="max-w-[calc(100%-32px)] rounded-[20px] border-[rgba(0,0,0,0.2)] px-0 py-0 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] sm:max-w-[520px]">
           <div className="flex flex-col gap-4 pb-8 pt-3">
-            <AlertDialogHeader className="px-3">
+            <AlertDialogHeader className="gap-2 px-3">
               <div className="flex items-center justify-between w-full">
                 <AlertDialogPrimitive.Cancel asChild>
                   <button
                     type="button"
-                    className="size-4 border-0 bg-transparent p-0 text-[#4A3C2A] opacity-70 hover:opacity-100"
+                    className="flex size-4 items-center justify-center border-0 bg-transparent p-0 text-[#4A3C2A] opacity-70 hover:opacity-100"
+                    onClick={() => setCancelReason("")}
+                    aria-label="Close cancel booking dialog"
                   >
-                    <Icon name="close-arrow" size={16} className="text-[#4A3C2A]" />
+                    <XIcon className="size-4 stroke-[1.5]" />
                   </button>
                 </AlertDialogPrimitive.Cancel>
                 <AlertDialogTitle className="flex-1 text-center font-comfortaa font-normal text-[14px] leading-[22.75px] text-[#4C4C4C]">
-                  Cancel booking for {petName}
+                  Cancel booking
                 </AlertDialogTitle>
                 <span className="size-4" />
               </div>
             </AlertDialogHeader>
             <div className="h-px bg-[rgba(0,0,0,0.1)]" />
-            <div className="px-6">
-              <AlertDialogDescription className="font-comfortaa font-bold text-[14px] leading-[22px] text-[#4A5565] m-0">
-                By canceling this booking, it will no longer appear in your upcoming bookings. Are you sure you want to continue?
-              </AlertDialogDescription>
+            <div className="flex flex-col gap-4 px-6">
+              <div className="flex flex-col text-[#4A5565]">
+                <p className="font-comfortaa text-[14px] font-bold leading-[22px]">
+                  Are you sure you want to cancel booking?
+                </p>
+                <p className="font-comfortaa text-[12.25px] font-normal leading-[17.5px]">
+                  Share your reason for cancellation, maybe we can help
+                </p>
+              </div>
+              <CustomTextarea
+                label=""
+                placeholder="Share your reason"
+                value={cancelReason}
+                onChange={(event) => setCancelReason(event.target.value)}
+                className="text-[#4A5565]"
+                helperTextClassName="hidden"
+                labelClassName="hidden"
+              />
             </div>
             <AlertDialogFooter className="px-6">
               <div className="flex w-full items-center justify-end gap-2.5">
                 <AlertDialogPrimitive.Cancel asChild>
-                  <OrangeButton variant="outline" size="medium">
-                    No, Keep booking
+                  <OrangeButton
+                    variant="outline"
+                    size="medium"
+                    textSize={14}
+                    className="min-w-[136px]"
+                    onClick={() => setCancelReason("")}
+                  >
+                    No, Keep it
                   </OrangeButton>
                 </AlertDialogPrimitive.Cancel>
                 <AlertDialogPrimitive.Action asChild>
                   <OrangeButton
                     variant="primary"
                     size="medium"
+                    textSize={14}
+                    className="min-w-[177px]"
                     onClick={handleCancelBooking}
                     loading={isCanceling}
                   >
-                    Yes, Cancel
+                    Yes, send request
                   </OrangeButton>
                 </AlertDialogPrimitive.Action>
               </div>

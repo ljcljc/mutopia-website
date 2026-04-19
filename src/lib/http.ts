@@ -41,6 +41,13 @@ export interface HttpResponse<T = unknown> {
   headers: Headers;
 }
 
+const inFlightGetRequests = new Map<string, Promise<HttpResponse<unknown>>>();
+
+function getGetRequestKey(url: string, config?: RequestConfig): string {
+  const skipAuth = config?.skipAuth ? "skip-auth" : "with-auth";
+  return `GET:${url}:${skipAuth}`;
+}
+
 // HTTP 错误类
 export class HttpError extends Error {
   status: number;
@@ -406,7 +413,22 @@ export const http = {
     url: string,
     config?: RequestConfig
   ): Promise<HttpResponse<T>> => {
-    return request<T>(url, { ...config, method: "GET" });
+    const requestKey = getGetRequestKey(url, config);
+    const inFlightRequest = inFlightGetRequests.get(requestKey);
+    if (inFlightRequest) {
+      return inFlightRequest as Promise<HttpResponse<T>>;
+    }
+
+    const requestPromise = request<T>(url, { ...config, method: "GET" }).finally(() => {
+      inFlightGetRequests.delete(requestKey);
+    });
+
+    inFlightGetRequests.set(
+      requestKey,
+      requestPromise as Promise<HttpResponse<unknown>>
+    );
+
+    return requestPromise;
   },
 
   /**
