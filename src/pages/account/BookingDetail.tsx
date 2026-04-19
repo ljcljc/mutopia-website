@@ -3,7 +3,14 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { OrangeButton } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
 import { useAccountStore } from "@/components/account/accountStore";
-import { getBookingDetail, cancelBooking, type AddressOut, type BookingDetailOut } from "@/lib/api";
+import {
+  cancelBooking,
+  clientConfirmBookingTime,
+  createDepositSession,
+  getBookingDetail,
+  type AddressOut,
+  type BookingDetailOut,
+} from "@/lib/api";
 import { toast } from "sonner";
 import AddAddressModal from "@/components/account/AddAddressModal";
 import ModifyAddressModal from "@/components/account/ModifyAddressModal";
@@ -38,15 +45,132 @@ function formatAmount(value: number | string | undefined, fallback: string) {
   return trimmed.startsWith("$") ? trimmed : `$${trimmed}`;
 }
 
-function getStatusLabel(status?: string | null) {
-  const statusLower = status?.toLowerCase() ?? "";
-  if (statusLower.includes("ready") || statusLower.includes("checked_in")) {
-    return "Ready for service";
-  }
-  if (statusLower.includes("cancel")) return "Service canceled";
-  return "Pending";
+function normalizeBookingStatus(status?: string | null) {
+  return status?.trim().toLowerCase().replace(/[\s-]+/g, "_") ?? "";
 }
 
+function formatServiceTypeLabel(serviceType?: string | null) {
+  if (!serviceType) return "";
+  return serviceType.charAt(0).toUpperCase() + serviceType.slice(1);
+}
+
+function addHoursToDateTime(dateString?: string | null, hours: number = 1) {
+  if (!dateString) return "";
+  try {
+    const date = new Date(dateString);
+    date.setHours(date.getHours() + hours);
+    return formatDateTime(date.toISOString());
+  } catch {
+    return "";
+  }
+}
+
+function extractTimeLabel(dateTime?: string | null) {
+  if (!dateTime) return "";
+  const [, timeLabel] = dateTime.split(" at ");
+  return timeLabel ?? dateTime;
+}
+
+function formatProposedTimeOption(option: unknown): string | null {
+  if (!option) return null;
+
+  if (typeof option === "string") {
+    return formatDateTime(option) || option;
+  }
+
+  if (typeof option !== "object") return null;
+
+  const record = option as Record<string, unknown>;
+  const proposedTime =
+    (record.proposed_time as string | undefined) ??
+    (record.datetime as string | undefined) ??
+    (record.scheduled_time as string | undefined);
+  if (proposedTime) {
+    return formatDateTime(proposedTime) || proposedTime;
+  }
+
+  const date = (record.date as string | undefined) ?? (record.service_date as string | undefined);
+  const time = (record.time as string | undefined) ?? (record.slot as string | undefined);
+  if (date && time) {
+    return `${date} at ${time}`;
+  }
+
+  return null;
+}
+
+type DetailBadgeTone = "orange" | "green" | "purple" | "outlined";
+
+type DetailCardConfig = {
+  subtitleIncludesScheduled: boolean;
+  progressColor: string;
+  progressWidth: number;
+  badgeLabel: string;
+  badgeTone: DetailBadgeTone;
+  nextStep?: string;
+  showNextStep: boolean;
+  actionKind: "none" | "cancel" | "confirm" | "review" | "comment" | "pay";
+};
+
+function StatusBadge({ label, tone }: { label: string; tone: DetailBadgeTone }) {
+  if (tone === "green") {
+    return (
+      <div className="inline-flex h-6 w-fit items-center gap-1 rounded-xl bg-[#DCFCE7] px-4 py-1">
+        <Icon name="check-green" size={12} className="text-[#00A63E]" />
+        <span className="font-comfortaa text-[10px] font-bold leading-[14px] text-[#00A63E]">
+          {label}
+        </span>
+      </div>
+    );
+  }
+
+  if (tone === "purple") {
+    return (
+      <div className="inline-flex h-6 w-fit items-center rounded-xl bg-[#633479] px-4 py-1">
+        <span className="font-comfortaa text-[10px] font-bold leading-[14px] text-white">
+          {label}
+        </span>
+      </div>
+    );
+  }
+
+  if (tone === "outlined") {
+    return (
+      <div className="inline-flex h-6 w-fit items-center rounded-xl border border-[#8B8B8B] bg-white px-3 py-1">
+        <span className="font-comfortaa text-[10px] font-bold leading-[14px] text-[#4C4C4C]">
+          {label}
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="inline-flex h-6 w-fit items-center rounded-xl bg-[#DE6A07] px-3 py-1">
+      <span className="font-comfortaa text-[10px] font-bold leading-[14px] text-white">
+        {label}
+      </span>
+    </div>
+  );
+}
+
+function getRefundedBadgeLabel(normalizedStatus: string, notes?: string | null) {
+  const notesLower = notes?.toLowerCase() ?? "";
+
+  if (
+    normalizedStatus.includes("terminated") ||
+    notesLower.includes("terminate")
+  ) {
+    return "Service terminated and refunded";
+  }
+
+  if (
+    normalizedStatus.includes("cancel") ||
+    notesLower.includes("cancel")
+  ) {
+    return "Service canceled and refunded";
+  }
+
+  return "Refunded";
+}
 
 export default function BookingDetail() {
   const { bookingId } = useParams();
@@ -61,6 +185,8 @@ export default function BookingDetail() {
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
   const [addressOverride, setAddressOverride] = useState<AddressOut | null>(null);
   const [isAddAddressOpen, setIsAddAddressOpen] = useState(false);
+  const [selectedProposedTime, setSelectedProposedTime] = useState<string>("");
+  const [isCardActionLoading, setIsCardActionLoading] = useState(false);
   const { addresses, isLoadingAddresses, fetchAddresses } = useAccountStore();
 
   useEffect(() => {
@@ -97,7 +223,10 @@ export default function BookingDetail() {
     (packageSnapshot.service_type as string | undefined) ??
     (packageSnapshot.type as string | undefined) ??
     "Mobile";
+  const serviceTypeLabel = formatServiceTypeLabel(serviceType);
   const scheduledDisplay = formatDateTime(detail?.scheduled_time) || "2026-04-03 at 10H";
+  const estimatedCompletionDisplay =
+    addHoursToDateTime(detail?.scheduled_time, 1) || "Estimated completion soon";
 
   const addressLine1 =
     addressOverride?.address ??
@@ -112,46 +241,172 @@ export default function BookingDetail() {
       .filter(Boolean)
       .join(" ") || "MIRAMICHI NB E1N 2E5";
 
-  const statusLabel = getStatusLabel(detail?.status);
-  const statusLower = detail?.status?.toLowerCase() ?? "";
-  const isPending = statusLower.includes("pending");
-  const progressVariant =
-    statusLower.includes("confirm") || statusLower.includes("proposed")
-      ? "confirm"
-      : statusLower.includes("ready") || statusLower.includes("checked_in")
-      ? "ready"
-      : "waiting";
+  const normalizedStatus = normalizeBookingStatus(detail?.status);
 
-  const progressConfig = {
-    waiting: {
-      barColor: "#DE6A07",
-      barWidth: 40,
-      badgeText: "Waiting for groomer match",
-      badgeBg: "#DE6A07",
-      badgeTextColor: "#FFFFFF",
-      nextStep: "Waiting for groomer response",
-    },
-    confirm: {
-      barColor: "#DE6A07",
-      barWidth: 40,
-      badgeText: "Waiting for your confirmation",
-      badgeBg: "#DE6A07",
-      badgeTextColor: "#FFFFFF",
-      nextStep: "Confirm for new time proposed",
-    },
-    ready: {
-      barColor: "#388B5E",
-      barWidth: 70,
-      badgeText: statusLabel,
-      badgeBg: "#DCFCE7",
-      badgeTextColor: "#016630",
-      nextStep: `Upcoming booking ${scheduledDisplay}`,
-    },
-  } as const;
+  const proposedTimeOptions = useMemo(() => {
+    const options =
+      detail?.preferred_time_slots
+        ?.map((option) => formatProposedTimeOption(option))
+        .filter((option): option is string => Boolean(option)) ?? [];
 
-  const activeProgress = progressConfig[progressVariant];
-  const canModifyAddress = isPending || progressVariant === "waiting";
-  const proposedTimeDisplay = "2026-04-03 at 11H";
+    if (options.length > 0) return options;
+
+    return [
+      "2026-04-02 at 11H",
+      "2026-04-03 at 12H",
+      "2026-04-03 at 13H",
+    ];
+  }, [detail?.preferred_time_slots]);
+
+  useEffect(() => {
+    if (!proposedTimeOptions.length) return;
+    setSelectedProposedTime((current) => current || proposedTimeOptions[0]);
+  }, [proposedTimeOptions]);
+
+  const detailCardConfig = useMemo<DetailCardConfig>(() => {
+    switch (normalizedStatus) {
+      case "pending":
+      case "pending_assignment":
+        return {
+          subtitleIncludesScheduled: false,
+          progressColor: "#DE6A07",
+          progressWidth: 43.7,
+          badgeLabel: "Waiting for groomer match",
+          badgeTone: "orange",
+          nextStep: "Waiting for groomer response",
+          showNextStep: true,
+          actionKind: "cancel",
+        };
+      case "awaiting_client_confirmation":
+        return {
+          subtitleIncludesScheduled: false,
+          progressColor: "#DE6A07",
+          progressWidth: 43.7,
+          badgeLabel: "Waiting for your confirmation",
+          badgeTone: "orange",
+          nextStep: "Confirm for new time proposed in 24 hours",
+          showNextStep: true,
+          actionKind: "confirm",
+        };
+      case "confirmed":
+        return {
+          subtitleIncludesScheduled: true,
+          progressColor: "#388B5E",
+          progressWidth: 74,
+          badgeLabel: "Ready for service",
+          badgeTone: "green",
+          nextStep: `Check in: ${scheduledDisplay}`,
+          showNextStep: true,
+          actionKind: "cancel",
+        };
+      case "traveling":
+        return {
+          subtitleIncludesScheduled: true,
+          progressColor: "#388B5E",
+          progressWidth: 74,
+          badgeLabel: "Traveling",
+          badgeTone: "green",
+          nextStep: `Check in: ${scheduledDisplay}`,
+          showNextStep: true,
+          actionKind: "cancel",
+        };
+      case "checked_in":
+        return {
+          subtitleIncludesScheduled: true,
+          progressColor: "#633479",
+          progressWidth: 83.1,
+          badgeLabel: "Groomer checked in",
+          badgeTone: "purple",
+          nextStep: "Service will be started soon",
+          showNextStep: true,
+          actionKind: "none",
+        };
+      case "in_progress":
+        return {
+          subtitleIncludesScheduled: true,
+          progressColor: "#633479",
+          progressWidth: 93.3,
+          badgeLabel: "Service started",
+          badgeTone: "purple",
+          nextStep: `Estimated completion at ${extractTimeLabel(estimatedCompletionDisplay) || "soon"}`,
+          showNextStep: true,
+          actionKind: "none",
+        };
+      case "completed":
+        return {
+          subtitleIncludesScheduled: true,
+          progressColor: "#633479",
+          progressWidth: 98.5,
+          badgeLabel: "Service completed",
+          badgeTone: "purple",
+          nextStep: "Pending review",
+          showNextStep: true,
+          actionKind: "review",
+        };
+      case "terminated":
+        return {
+          subtitleIncludesScheduled: true,
+          progressColor: "#EAB308",
+          progressWidth: 98.5,
+          badgeLabel: "Service Terminated",
+          badgeTone: "outlined",
+          nextStep: "Sorry, we’ll contact you shortly.",
+          showNextStep: true,
+          actionKind: "comment",
+        };
+      case "canceled":
+      case "cancelled":
+        return {
+          subtitleIncludesScheduled: true,
+          progressColor: "#EAB308",
+          progressWidth: 98.5,
+          badgeLabel: "Service canceled",
+          badgeTone: "outlined",
+          showNextStep: false,
+          actionKind: "none",
+        };
+      case "terminated_and_refunded":
+      case "canceled_and_refunded":
+      case "cancelled_and_refunded":
+      case "refunded":
+        return {
+          subtitleIncludesScheduled: true,
+          progressColor: "#EAB308",
+          progressWidth: 98.5,
+          badgeLabel: getRefundedBadgeLabel(normalizedStatus, detail?.notes),
+          badgeTone: "outlined",
+          showNextStep: false,
+          actionKind: "none",
+        };
+      case "awaiting_payment":
+        return {
+          subtitleIncludesScheduled: false,
+          progressColor: "#DE6A07",
+          progressWidth: 37.1,
+          badgeLabel: "Waiting for payment",
+          badgeTone: "orange",
+          nextStep: "Waiting for groomer match",
+          showNextStep: true,
+          actionKind: "pay",
+        };
+      default:
+        return {
+          subtitleIncludesScheduled: Boolean(detail?.scheduled_time),
+          progressColor: "#DE6A07",
+          progressWidth: 43.7,
+          badgeLabel: detail?.status || "Waiting for groomer match",
+          badgeTone: "orange",
+          nextStep: "Waiting for groomer response",
+          showNextStep: true,
+          actionKind: "none",
+        };
+    }
+  }, [detail?.notes, detail?.scheduled_time, detail?.status, estimatedCompletionDisplay, normalizedStatus, scheduledDisplay]);
+
+  const serviceSummary = detailCardConfig.subtitleIncludesScheduled
+    ? `${serviceName} - ${serviceTypeLabel} ${scheduledDisplay}`
+    : `${serviceName} - ${serviceTypeLabel}`;
+  const canModifyAddress = normalizedStatus === "pending_assignment";
   
   // 价格信息（需要在 useMemo 之前定义）
   const totalEstimation = formatAmount(detail?.final_amount, "$0.00");
@@ -225,9 +480,46 @@ export default function BookingDetail() {
   const hasMembership = Object.keys(membershipSnapshot).length > 0;
   const hasCoupon = Object.keys(couponSnapshot).length > 0;
   
-  // 判断是否可以取消预约
-  const statusLowerForCancel = detail?.status?.toLowerCase() ?? "";
-  const canCancel = !statusLowerForCancel.includes("cancel") && !statusLowerForCancel.includes("completed") && !statusLowerForCancel.includes("refunded");
+  const canCancel = [
+    "pending_assignment",
+    "awaiting_client_confirmation",
+    "confirmed",
+    "traveling",
+  ].includes(normalizedStatus);
+
+  const handleConfirmProposedTime = async () => {
+    if (!detail?.id) return;
+
+    setIsCardActionLoading(true);
+    try {
+      await clientConfirmBookingTime(detail.id, true);
+      setDetail((current) => (current ? { ...current, status: "confirmed" } : current));
+      toast.success("Booking confirmed");
+    } catch (actionError) {
+      console.error("Failed to confirm booking time:", actionError);
+      toast.error("Failed to confirm booking time");
+    } finally {
+      setIsCardActionLoading(false);
+    }
+  };
+
+  const handleGoPay = async () => {
+    if (!detail?.id) return;
+
+    setIsCardActionLoading(true);
+    try {
+      const session = await createDepositSession(detail.id);
+      window.location.assign(session.url);
+    } catch (actionError) {
+      console.error("Failed to create payment session:", actionError);
+      toast.error("Failed to start payment");
+      setIsCardActionLoading(false);
+    }
+  };
+
+  const handlePendingAction = (message: string) => {
+    toast(message);
+  };
   
   // 处理取消预约
   const handleCancelBooking = async () => {
@@ -265,86 +557,172 @@ export default function BookingDetail() {
             </nav>
           </div>
 
-          <div className="rounded-xl bg-white p-6 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
-            <div className="flex items-start justify-between">
-              <div className="flex flex-1 flex-col gap-3.5">
-                <div className="flex items-start justify-between gap-3.5">
-                  <div className="flex flex-col gap-1">
-                    <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#DE6A07]">
-                      {petName}
-                    </p>
-                    <p className="font-comfortaa font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
-                      {serviceName} - {serviceType} {scheduledDisplay}
-                    </p>
-                  </div>
-                  <p className="font-comfortaa font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
-                    {bookingCode}
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <div className="relative h-2 w-full rounded-lg bg-[#D9D9D9]">
-                    <div
-                      className="absolute left-0 top-0 h-full rounded-lg transition-all duration-300"
-                      style={{
-                        width: `${activeProgress.barWidth}%`,
-                        backgroundColor: activeProgress.barColor,
-                      }}
-                    />
-                  </div>
-                  {progressVariant === "ready" ? (
-                    <div className="flex h-6 w-fit items-center rounded-xl bg-[#DCFCE7] px-4 py-1">
-                      <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#016630]">
-                        {activeProgress.badgeText}
-                      </span>
+          <div className="rounded-[12px] bg-white p-6 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
+            <div className="flex flex-col gap-5">
+              <div className="flex items-end justify-between gap-[14px]">
+                <div className="flex min-w-0 flex-1 flex-col gap-[14px]">
+                  <div className="flex items-start justify-between gap-[14px]">
+                    <div className="flex min-w-0 flex-1 flex-col gap-1">
+                      <p className="font-comfortaa text-[16px] font-semibold leading-[28px] text-[#DE6A07]">
+                        {petName}
+                      </p>
+                      <p className="font-comfortaa text-[12.25px] font-normal leading-[17.5px] text-[#4A5565]">
+                        {serviceSummary}
+                      </p>
                     </div>
-                  ) : (
+                    <p className="font-comfortaa text-[10px] font-normal leading-[12px] text-[#4A3C2A]">
+                      {bookingCode}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <div className="relative h-2 w-full rounded-[8px] bg-[#D9D9D9]">
+                      <div
+                        className="absolute left-0 top-0 h-full rounded-[8px] transition-all duration-300"
+                        style={{
+                          width: `${detailCardConfig.progressWidth}%`,
+                          backgroundColor: detailCardConfig.progressColor,
+                        }}
+                      />
+                    </div>
+                    <StatusBadge label={detailCardConfig.badgeLabel} tone={detailCardConfig.badgeTone} />
+                  </div>
+                </div>
+              </div>
+
+              {detailCardConfig.actionKind === "confirm" ? (
+                <>
+                  {detailCardConfig.showNextStep ? (
+                    <div className="flex items-start">
+                      <div className="flex min-w-0 flex-1 flex-col gap-1 text-[#4A3C2A]">
+                        <p className="font-comfortaa text-[10px] font-normal leading-[12px]">
+                          Next step
+                        </p>
+                        <p className="font-comfortaa text-[12px] font-bold leading-[16px]">
+                          {detailCardConfig.nextStep}
+                        </p>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div className="flex w-full flex-wrap items-center gap-2">
+                    <div className="flex min-w-[220px] flex-1 flex-col gap-1">
+                      <p className="font-comfortaa text-[10px] font-normal leading-[12px] text-[#4A3C2A]">
+                        Select new time proposed by groomer
+                      </p>
+                      <div className="flex flex-col gap-2">
+                        {proposedTimeOptions.map((option) => (
+                          <label key={option} className="flex items-center gap-2">
+                            <input
+                              type="radio"
+                              name="proposed-time"
+                              value={option}
+                              checked={selectedProposedTime === option}
+                              onChange={() => setSelectedProposedTime(option)}
+                              className="size-4 border-[#8B6357] text-[#8B6357] focus:ring-[#8B6357]"
+                            />
+                            <span className="font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#4A3C2A]">
+                              {option}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
                     <OrangeButton
+                      type="button"
+                      variant="secondary"
                       size="compact"
-                      variant="primary"
-                      showArrow={false}
-                      className="cursor-default h-6 w-[190px] gap-1 bg-[#DE6A07] px-4 py-1 hover:bg-[#DE6A07] active:bg-[#DE6A07] focus-visible:bg-[#DE6A07]"
+                      onClick={() => setIsCancelDialogOpen(true)}
                     >
-                      {activeProgress.badgeText}
+                      Cancel
                     </OrangeButton>
-                  )}
+                    <OrangeButton
+                      type="button"
+                      variant="primary"
+                      size="compact"
+                      loading={isCardActionLoading}
+                      onClick={handleConfirmProposedTime}
+                    >
+                      Confirm
+                    </OrangeButton>
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-wrap items-center gap-2">
+                  {detailCardConfig.showNextStep ? (
+                    <div className="flex min-w-[220px] flex-1 flex-col gap-1 text-[#4A3C2A]">
+                      <p className="font-comfortaa text-[10px] font-normal leading-[12px]">
+                        Next step
+                      </p>
+                      <p className="font-comfortaa text-[12px] font-bold leading-[16px]">
+                        {detailCardConfig.nextStep}
+                      </p>
+                    </div>
+                  ) : null}
+
+                  {detailCardConfig.actionKind === "cancel" ? (
+                    <OrangeButton
+                      type="button"
+                      variant="secondary"
+                      size="compact"
+                      onClick={() => setIsCancelDialogOpen(true)}
+                    >
+                      Cancel
+                    </OrangeButton>
+                  ) : null}
+
+                  {detailCardConfig.actionKind === "review" ? (
+                    <>
+                      <OrangeButton
+                        type="button"
+                        variant="secondary"
+                        size="compact"
+                        onClick={() => handlePendingAction("Receipt is not available yet")}
+                      >
+                        Receipt
+                      </OrangeButton>
+                      <button
+                        type="button"
+                        className="inline-flex h-[28px] items-center justify-center rounded-[32px] bg-[#633479] px-[28px] py-[16px] font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#FFF7ED] transition-all duration-200 hover:opacity-90"
+                        onClick={() => handlePendingAction("Review flow is not available yet")}
+                      >
+                        Review
+                      </button>
+                    </>
+                  ) : null}
+
+                  {detailCardConfig.actionKind === "comment" ? (
+                    <OrangeButton
+                      type="button"
+                      variant="secondary"
+                      size="compact"
+                      onClick={() => handlePendingAction("Comment flow is not available yet")}
+                    >
+                      Comment
+                    </OrangeButton>
+                  ) : null}
+
+                  {detailCardConfig.actionKind === "pay" ? (
+                    <OrangeButton
+                      type="button"
+                      variant="primary"
+                      size="compact"
+                      showArrow
+                      loading={isCardActionLoading}
+                      onClick={handleGoPay}
+                    >
+                      Go pay
+                    </OrangeButton>
+                  ) : null}
                 </div>
-              </div>
+              )}
+
+              {isLoading ? (
+                <p className="text-[10px] text-[#8B6357]">Loading booking detail...</p>
+              ) : error ? (
+                <p className="text-[10px] text-red-600">{error}</p>
+              ) : null}
             </div>
-
-            <div className="mt-5">
-              <p className="font-comfortaa font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
-                Next step
-              </p>
-              <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                {activeProgress.nextStep}
-              </p>
-            </div>
-
-            {isLoading ? (
-              <p className="mt-3 text-[10px] text-[#8B6357]">Loading booking detail...</p>
-            ) : error ? (
-              <p className="mt-3 text-[10px] text-red-600">{error}</p>
-            ) : null}
-
-            {progressVariant === "confirm" ? (
-              <div className="mt-4 flex flex-wrap items-center gap-2">
-                <div className="flex min-w-[200px] flex-1 flex-col gap-1 text-[#4A3C2A]">
-                  <p className="font-comfortaa font-normal text-[10px] leading-[12px]">
-                    New time proposed by groomer
-                  </p>
-                  <p className="font-comfortaa font-bold text-[12px] leading-[16px]">
-                    {proposedTimeDisplay}
-                  </p>
-                </div>
-                <OrangeButton variant="secondary" size="compact" className="w-[209px]">
-                  Cancel booking
-                </OrangeButton>
-                <OrangeButton variant="primary" size="compact" showArrow>
-                  Confirm
-                </OrangeButton>
-              </div>
-            ) : null}
           </div>
 
           <div className="rounded-xl bg-white p-6 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
@@ -547,7 +925,7 @@ export default function BookingDetail() {
             </div>
           </div>
 
-          {canCancel && (
+          {canCancel && detailCardConfig.actionKind !== "cancel" && detailCardConfig.actionKind !== "confirm" && (
             <div className="flex justify-end">
               <button
                 type="button"

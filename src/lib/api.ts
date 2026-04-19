@@ -1601,6 +1601,20 @@ export async function groomerConfirmBooking(
 }
 
 /**
+ * 客户确认美容师建议的时间
+ */
+export async function clientConfirmBookingTime(
+  bookingId: number,
+  accept: boolean = true
+): Promise<OkOut> {
+  const response = await http.post<OkOut>(
+    `/api/bookings/${bookingId}/client_confirm_time`,
+    { accept }
+  );
+  return response.data;
+}
+
+/**
  * 创建附加服务请求
  */
 export async function createAddOnRequest(

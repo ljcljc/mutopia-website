@@ -40,48 +40,84 @@ function parseAddress(address?: string | null): { line1: string; line2: string }
   return { line1: address, line2: "" };
 }
 
-/**
- * 判断预约状态显示类型
- */
-function getStatusDisplayType(status: string): "ready" | "pending" | "canceled" {
-  const statusLower = status.toLowerCase();
-  if (statusLower.includes("cancel") || statusLower === "cancelled") {
-    return "canceled";
-  }
-  if (statusLower.includes("ready") || statusLower.includes("confirmed") || statusLower.includes("checked_in")) {
-    return "ready";
-  }
-  return "pending";
+type BookingStatusTone = "orange" | "green" | "purple" | "outlined";
+
+function normalizeBookingStatus(status: string): string {
+  return status.trim().toLowerCase().replace(/[\s-]+/g, "_");
 }
 
+function getStatusBadgeConfig(status: string): { label: string; tone: BookingStatusTone } {
+  const normalized = normalizeBookingStatus(status);
+
+  switch (normalized) {
+    case "pending":
+      return { label: "Waiting for groomer match", tone: "orange" };
+    case "awaiting_client_confirmation":
+      return { label: "Waiting for your confirmation", tone: "orange" };
+    case "confirmed":
+      return { label: "Ready for service", tone: "green" };
+    case "traveling":
+      return { label: "Traveling", tone: "green" };
+    case "checked_in":
+      return { label: "Groomer checked in", tone: "purple" };
+    case "in_progress":
+      return { label: "Service started", tone: "purple" };
+    case "awaiting_payment":
+      return { label: "Waiting for payment", tone: "orange" };
+    case "awaiting_final_payment":
+      return { label: "Waiting for final payment", tone: "orange" };
+    case "completed":
+      return { label: "Service completed", tone: "purple" };
+    case "terminated":
+      return { label: "Service terminated", tone: "outlined" };
+    case "canceled":
+    case "cancelled":
+      return { label: "Service canceled", tone: "outlined" };
+    case "refunded":
+      return { label: "Refunded", tone: "outlined" };
+    default:
+      return { label: status || "Waiting for groomer match", tone: "orange" };
+  }
+}
 
 function StatusBadge({ status }: { status: string }) {
-  const displayType = getStatusDisplayType(status);
+  const { label, tone } = getStatusBadgeConfig(status);
   
-  if (displayType === "ready") {
+  if (tone === "green") {
     return (
-      <div className="flex h-6 items-center justify-center rounded-xl bg-[#DCFCE7] px-2.5">
-        <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#016630]">
-          Ready for service
+      <div className="inline-flex h-6 w-fit items-center gap-1 rounded-xl bg-[#DCFCE7] px-4 py-1">
+        <Icon name="check-green" size={12} className="text-[#00A63E]" />
+        <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#00A63E]">
+          {label}
         </span>
       </div>
     );
   }
 
-  if (displayType === "canceled") {
+  if (tone === "purple") {
     return (
-      <div className="flex h-6 items-center rounded-xl border border-[#4C4C4C] px-[9px] py-[5px]">
+      <div className="inline-flex h-6 w-fit items-center rounded-xl bg-[#633479] px-4 py-1">
+        <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-white">
+          {label}
+        </span>
+      </div>
+    );
+  }
+
+  if (tone === "outlined") {
+    return (
+      <div className="inline-flex h-6 w-fit items-center rounded-xl border border-[#8B8B8B] bg-white px-3 py-1">
         <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#4C4C4C]">
-          Service canceled
+          {label}
         </span>
       </div>
     );
   }
 
   return (
-    <div className="flex h-6 items-center rounded-xl border border-[#4C4C4C] px-[9px] py-[5px]">
-      <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#4C4C4C]">
-        Pending
+    <div className="inline-flex h-6 w-fit items-center rounded-xl bg-[#DE6A07] px-3 py-1">
+      <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-white">
+        {label}
       </span>
     </div>
   );
