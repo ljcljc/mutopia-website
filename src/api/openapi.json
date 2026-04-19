@@ -1148,6 +1148,30 @@
         },
         "tags": ["bookings"],
         "security": [{ "JWTAuth": [] }]
+      },
+      "delete": {
+        "operationId": "api_bookings_delete_booking",
+        "summary": "Delete Booking",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "schema": { "title": "Booking Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OkOut" }
+              }
+            }
+          }
+        },
+        "tags": ["bookings"],
+        "security": [{ "JWTAuth": [] }]
       }
     },
     "/api/bookings/{booking_id}/groomer_confirm": {
@@ -1177,6 +1201,42 @@
           "content": {
             "application/json": {
               "schema": { "$ref": "#/components/schemas/GroomerConfirmIn" }
+            }
+          },
+          "required": true
+        },
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/bookings/{booking_id}/client_confirm_time": {
+      "post": {
+        "operationId": "api_bookings_client_confirm_time",
+        "summary": "Client Confirm Time",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "schema": { "title": "Booking Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OkOut" }
+              }
+            }
+          }
+        },
+        "tags": ["bookings"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClientInvitationDecisionIn"
+              }
             }
           },
           "required": true
@@ -1427,6 +1487,33 @@
           }
         },
         "tags": ["payments"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/payments/payments/create_tip_session": {
+      "post": {
+        "operationId": "api_payments_create_tip_session",
+        "summary": "Create Tip Session",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PaymentSessionOut" }
+              }
+            }
+          }
+        },
+        "tags": ["payments"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/TipSessionIn" }
+            }
+          },
+          "required": true
+        },
         "security": [{ "JWTAuth": [] }]
       }
     },
@@ -1887,6 +1974,590 @@
           },
           "required": true
         }
+      }
+    },
+    "/api/groomers/profile": {
+      "get": {
+        "operationId": "api_groomer_portal_groomer_profile",
+        "summary": "Groomer Profile",
+        "parameters": [],
+        "responses": { "200": { "description": "OK" } },
+        "tags": ["groomer-portal"],
+        "security": [{ "JWTAuth": [] }]
+      },
+      "patch": {
+        "operationId": "api_groomer_portal_update_groomer_profile",
+        "summary": "Update Groomer Profile",
+        "parameters": [],
+        "responses": { "200": { "description": "OK" } },
+        "tags": ["groomer-portal"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GroomerProfileUpdateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/groomers/payout": {
+      "get": {
+        "operationId": "api_groomer_portal_groomer_payout_summary",
+        "summary": "Groomer Payout Summary",
+        "parameters": [],
+        "responses": { "200": { "description": "OK" } },
+        "tags": ["groomer-portal"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/groomers/payout/onboarding_link": {
+      "post": {
+        "operationId": "api_groomer_portal_create_payout_onboarding_link",
+        "summary": "Create Payout Onboarding Link",
+        "parameters": [],
+        "responses": { "200": { "description": "OK" } },
+        "tags": ["groomer-portal"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/groomers/payout/login_link": {
+      "post": {
+        "operationId": "api_groomer_portal_create_payout_login_link",
+        "summary": "Create Payout Login Link",
+        "parameters": [],
+        "responses": { "200": { "description": "OK" } },
+        "tags": ["groomer-portal"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/groomers/performance": {
+      "get": {
+        "operationId": "api_groomer_portal_groomer_performance",
+        "summary": "Groomer Performance",
+        "parameters": [],
+        "responses": { "200": { "description": "OK" } },
+        "tags": ["groomer-portal"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/groomers/reviews/{review_id}/reply": {
+      "post": {
+        "operationId": "api_groomer_portal_reply_review",
+        "summary": "Reply Review",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "review_id",
+            "schema": { "title": "Review Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OkOut" }
+              }
+            }
+          }
+        },
+        "tags": ["groomer-portal"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ReviewReplyIn" }
+            }
+          },
+          "required": true
+        },
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/groomers/reviews/{review_id}/report": {
+      "post": {
+        "operationId": "api_groomer_portal_report_review",
+        "summary": "Report Review",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "review_id",
+            "schema": { "title": "Review Id", "type": "integer" },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "why",
+            "schema": { "title": "Why", "type": "string" },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "evidence",
+            "schema": {
+              "anyOf": [
+                { "format": "binary", "type": "string" },
+                { "type": "null" }
+              ],
+              "title": "Evidence"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OkOut" }
+              }
+            }
+          }
+        },
+        "tags": ["groomer-portal"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/groomers/dashboard/summary": {
+      "get": {
+        "operationId": "api_groomer_portal_groomer_dashboard_summary",
+        "summary": "Groomer Dashboard Summary",
+        "parameters": [],
+        "responses": { "200": { "description": "OK" } },
+        "tags": ["groomer-portal"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/groomers/dashboard/current_booking": {
+      "get": {
+        "operationId": "api_groomer_portal_current_booking",
+        "summary": "Current Booking",
+        "parameters": [],
+        "responses": { "200": { "description": "OK" } },
+        "tags": ["groomer-portal"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/groomers/bookings/pending": {
+      "get": {
+        "operationId": "api_groomer_portal_pending_booking_invitations",
+        "summary": "Pending Booking Invitations",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": { "default": 1, "title": "Page", "type": "integer" },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "schema": {
+              "default": 20,
+              "title": "Page Size",
+              "type": "integer"
+            },
+            "required": false
+          }
+        ],
+        "responses": { "200": { "description": "OK" } },
+        "tags": ["groomer-portal"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/groomers/bookings/invitations/{invitation_id}/decision": {
+      "post": {
+        "operationId": "api_groomer_portal_decide_invitation",
+        "summary": "Decide Invitation",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "invitation_id",
+            "schema": { "title": "Invitation Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": { "200": { "description": "OK" } },
+        "tags": ["groomer-portal"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/InvitationDecisionIn" }
+            }
+          },
+          "required": true
+        },
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/groomers/bookings/{booking_id}/start_travel": {
+      "post": {
+        "operationId": "api_groomer_portal_start_travel",
+        "summary": "Start Travel",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "schema": { "title": "Booking Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OkOut" }
+              }
+            }
+          }
+        },
+        "tags": ["groomer-portal"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/groomers/bookings/{booking_id}/cancel_travel": {
+      "post": {
+        "operationId": "api_groomer_portal_cancel_travel",
+        "summary": "Cancel Travel",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "schema": { "title": "Booking Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OkOut" }
+              }
+            }
+          }
+        },
+        "tags": ["groomer-portal"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/groomers/bookings/{booking_id}/check_in": {
+      "post": {
+        "operationId": "api_groomer_portal_groomer_check_in",
+        "summary": "Groomer Check In",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "schema": { "title": "Booking Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OkOut" }
+              }
+            }
+          }
+        },
+        "tags": ["groomer-portal"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/groomers/bookings/{booking_id}/check_up": {
+      "post": {
+        "operationId": "api_groomer_portal_groomer_check_up",
+        "summary": "Groomer Check Up",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "schema": { "title": "Booking Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": { "200": { "description": "OK" } },
+        "tags": ["groomer-portal"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/GroomerCheckUpIn" }
+            }
+          },
+          "required": true
+        },
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/groomers/bookings/{booking_id}/start_grooming": {
+      "post": {
+        "operationId": "api_groomer_portal_start_grooming",
+        "summary": "Start Grooming",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "schema": { "title": "Booking Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OkOut" }
+              }
+            }
+          }
+        },
+        "tags": ["groomer-portal"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/groomers/bookings/{booking_id}/complete_service": {
+      "post": {
+        "operationId": "api_groomer_portal_complete_service",
+        "summary": "Complete Service",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "schema": { "title": "Booking Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": { "200": { "description": "OK" } },
+        "tags": ["groomer-portal"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/groomers/bookings/{booking_id}/terminate_service": {
+      "post": {
+        "operationId": "api_groomer_portal_terminate_service",
+        "summary": "Terminate Service",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "schema": { "title": "Booking Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": { "200": { "description": "OK" } },
+        "tags": ["groomer-portal"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/TerminateServiceIn" }
+            }
+          },
+          "required": true
+        },
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/groomers/bookings/{booking_id}/health_report": {
+      "post": {
+        "operationId": "api_groomer_portal_submit_health_report",
+        "summary": "Submit Health Report",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "schema": { "title": "Booking Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OkOut" }
+              }
+            }
+          }
+        },
+        "tags": ["groomer-portal"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/HealthReportIn" }
+            }
+          },
+          "required": true
+        },
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/groomers/earnings/summary": {
+      "get": {
+        "operationId": "api_groomer_portal_earnings_summary",
+        "summary": "Earnings Summary",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "date_from",
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Date From"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "date_to",
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Date To"
+            },
+            "required": false
+          }
+        ],
+        "responses": { "200": { "description": "OK" } },
+        "tags": ["groomer-portal"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/groomers/earnings/transactions": {
+      "get": {
+        "operationId": "api_groomer_portal_earning_transactions",
+        "summary": "Earning Transactions",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": { "default": 1, "title": "Page", "type": "integer" },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "schema": {
+              "default": 20,
+              "title": "Page Size",
+              "type": "integer"
+            },
+            "required": false
+          }
+        ],
+        "responses": { "200": { "description": "OK" } },
+        "tags": ["groomer-portal"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/groomers/earnings/cash_out": {
+      "post": {
+        "operationId": "api_groomer_portal_cash_out",
+        "summary": "Cash Out",
+        "parameters": [],
+        "responses": { "200": { "description": "OK" } },
+        "tags": ["groomer-portal"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CashOutIn" }
+            }
+          },
+          "required": true
+        },
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/groomers/schedule": {
+      "get": {
+        "operationId": "api_groomer_portal_groomer_schedule",
+        "summary": "Groomer Schedule",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "service_date",
+            "schema": { "title": "Service Date", "type": "string" },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": { "default": 1, "title": "Page", "type": "integer" },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "schema": {
+              "default": 20,
+              "title": "Page Size",
+              "type": "integer"
+            },
+            "required": false
+          }
+        ],
+        "responses": { "200": { "description": "OK" } },
+        "tags": ["groomer-portal"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/groomers/history": {
+      "get": {
+        "operationId": "api_groomer_portal_groomer_history",
+        "summary": "Groomer History",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pet_name",
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Pet Name"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "date_from",
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Date From"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "date_to",
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Date To"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": { "default": 1, "title": "Page", "type": "integer" },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "schema": {
+              "default": 20,
+              "title": "Page Size",
+              "type": "integer"
+            },
+            "required": false
+          }
+        ],
+        "responses": { "200": { "description": "OK" } },
+        "tags": ["groomer-portal"],
+        "security": [{ "JWTAuth": [] }]
       }
     }
   },
@@ -3243,6 +3914,45 @@
         "title": "BookingPageOut",
         "type": "object"
       },
+      "BookingAdjustmentOut": {
+        "properties": {
+          "id": { "title": "Id", "type": "integer" },
+          "kind": { "title": "Kind", "type": "string" },
+          "amount": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "title": "Amount"
+          },
+          "status": { "title": "Status", "type": "string" },
+          "description": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Description"
+          },
+          "details": {
+            "additionalProperties": true,
+            "default": {},
+            "title": "Details",
+            "type": "object"
+          },
+          "created_at": { "title": "Created At", "type": "string" },
+          "decided_at": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Decided At"
+          },
+          "paid_at": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Paid At"
+          }
+        },
+        "required": ["id", "kind", "amount", "status", "created_at"],
+        "title": "BookingAdjustmentOut",
+        "type": "object"
+      },
       "BookingDetailOut": {
         "properties": {
           "id": { "title": "Id", "type": "integer" },
@@ -3392,6 +4102,18 @@
             "items": { "$ref": "#/components/schemas/BookingPaymentOut" },
             "title": "Payments",
             "type": "array"
+          },
+          "adjustments": {
+            "default": [],
+            "items": { "$ref": "#/components/schemas/BookingAdjustmentOut" },
+            "title": "Adjustments",
+            "type": "array"
+          },
+          "review": {
+            "anyOf": [
+              { "$ref": "#/components/schemas/ReviewSummaryOut" },
+              { "type": "null" }
+            ]
           }
         },
         "required": [
@@ -3482,11 +4204,66 @@
         "title": "PaymentMethodOut",
         "type": "object"
       },
+      "ReviewSummaryOut": {
+        "properties": {
+          "id": { "title": "Id", "type": "integer" },
+          "rating": { "title": "Rating", "type": "integer" },
+          "technical_rating": {
+            "default": 0,
+            "title": "Technical Rating",
+            "type": "integer"
+          },
+          "attitude_rating": {
+            "default": 0,
+            "title": "Attitude Rating",
+            "type": "integer"
+          },
+          "environment_rating": {
+            "default": 0,
+            "title": "Environment Rating",
+            "type": "integer"
+          },
+          "comment": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Comment"
+          },
+          "groomer_reply": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Groomer Reply"
+          },
+          "groomer_replied_at": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Groomer Replied At"
+          },
+          "tip_amount": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "default": "0",
+            "title": "Tip Amount"
+          },
+          "created_at": { "title": "Created At", "type": "string" }
+        },
+        "required": ["id", "rating", "created_at"],
+        "title": "ReviewSummaryOut",
+        "type": "object"
+      },
       "GroomerConfirmIn": {
         "properties": {
           "confirm": { "default": true, "title": "Confirm", "type": "boolean" }
         },
         "title": "GroomerConfirmIn",
+        "type": "object"
+      },
+      "ClientInvitationDecisionIn": {
+        "properties": {
+          "accept": { "default": true, "title": "Accept", "type": "boolean" }
+        },
+        "title": "ClientInvitationDecisionIn",
         "type": "object"
       },
       "AddOnRequestOut": {
@@ -3523,7 +4300,19 @@
       "ReviewCreateIn": {
         "properties": {
           "rating": { "title": "Rating", "type": "integer" },
-          "comment": { "default": "", "title": "Comment", "type": "string" }
+          "comment": { "default": "", "title": "Comment", "type": "string" },
+          "technical_rating": {
+            "anyOf": [{ "type": "integer" }, { "type": "null" }],
+            "title": "Technical Rating"
+          },
+          "attitude_rating": {
+            "anyOf": [{ "type": "integer" }, { "type": "null" }],
+            "title": "Attitude Rating"
+          },
+          "environment_rating": {
+            "anyOf": [{ "type": "integer" }, { "type": "null" }],
+            "title": "Environment Rating"
+          }
         },
         "required": ["rating"],
         "title": "ReviewCreateIn",
@@ -3560,6 +4349,24 @@
         },
         "required": ["url", "session_id", "payment_id"],
         "title": "PaymentSessionOut",
+        "type": "object"
+      },
+      "TipSessionIn": {
+        "properties": {
+          "booking_id": { "title": "Booking Id", "type": "integer" },
+          "amount": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "title": "Amount"
+          }
+        },
+        "required": ["booking_id", "amount"],
+        "title": "TipSessionIn",
         "type": "object"
       },
       "PaymentMethodPageOut": {
@@ -4022,6 +4829,159 @@
           "hear_about_us"
         ],
         "title": "ApplySubmitIn",
+        "type": "object"
+      },
+      "GroomerProfileUpdateIn": {
+        "properties": {
+          "first_name": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "First Name"
+          },
+          "last_name": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Last Name"
+          },
+          "birthday": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Birthday"
+          },
+          "phone": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Phone"
+          }
+        },
+        "title": "GroomerProfileUpdateIn",
+        "type": "object"
+      },
+      "ReviewReplyIn": {
+        "properties": { "reply": { "title": "Reply", "type": "string" } },
+        "required": ["reply"],
+        "title": "ReviewReplyIn",
+        "type": "object"
+      },
+      "InvitationDecisionIn": {
+        "properties": {
+          "accept": { "default": true, "title": "Accept", "type": "boolean" },
+          "selected_slot": {
+            "anyOf": [
+              { "additionalProperties": true, "type": "object" },
+              { "type": "null" }
+            ],
+            "title": "Selected Slot"
+          },
+          "proposed_time": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Proposed Time"
+          },
+          "note": { "default": "", "title": "Note", "type": "string" }
+        },
+        "title": "InvitationDecisionIn",
+        "type": "object"
+      },
+      "GroomerCheckUpIn": {
+        "properties": {
+          "kind": { "title": "Kind", "type": "string" },
+          "weight_value": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              { "type": "null" }
+            ],
+            "title": "Weight Value"
+          },
+          "weight_unit": {
+            "default": "kg",
+            "title": "Weight Unit",
+            "type": "string"
+          },
+          "add_on_ids": {
+            "default": [],
+            "items": { "type": "integer" },
+            "title": "Add On Ids",
+            "type": "array"
+          },
+          "personalization": {
+            "additionalProperties": true,
+            "default": {},
+            "title": "Personalization",
+            "type": "object"
+          },
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          }
+        },
+        "required": ["kind"],
+        "title": "GroomerCheckUpIn",
+        "type": "object"
+      },
+      "TerminateServiceIn": {
+        "properties": {
+          "reason": { "title": "Reason", "type": "string" },
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          },
+          "refundable_service_fee": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "default": "0",
+            "title": "Refundable Service Fee"
+          },
+          "resolution": { "title": "Resolution", "type": "string" }
+        },
+        "required": ["reason", "resolution"],
+        "title": "TerminateServiceIn",
+        "type": "object"
+      },
+      "HealthReportIn": {
+        "properties": {
+          "summary": { "title": "Summary", "type": "string" },
+          "pet_condition": {
+            "default": "",
+            "title": "Pet Condition",
+            "type": "string"
+          },
+          "behavior_notes": {
+            "default": "",
+            "title": "Behavior Notes",
+            "type": "string"
+          },
+          "recommendations": {
+            "default": "",
+            "title": "Recommendations",
+            "type": "string"
+          }
+        },
+        "required": ["summary"],
+        "title": "HealthReportIn",
+        "type": "object"
+      },
+      "CashOutIn": {
+        "properties": {
+          "amount": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "title": "Amount"
+          }
+        },
+        "required": ["amount"],
+        "title": "CashOutIn",
         "type": "object"
       }
     },

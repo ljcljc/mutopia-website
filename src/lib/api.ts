@@ -125,6 +125,15 @@ export interface OkOut {
   ok?: boolean;
 }
 
+export type UnknownObjectOut = Record<string, unknown>;
+
+export interface UnknownPageOut<T = UnknownObjectOut> {
+  total: number;
+  page: number;
+  page_size: number;
+  items: T[];
+}
+
 // 服务目录类型
 export interface ServiceItemOut {
   id: number;
@@ -1471,6 +1480,112 @@ export interface CheckOutOut {
   status: string;
 }
 
+export interface GroomerProfileUpdateIn {
+  first_name?: string | null;
+  last_name?: string | null;
+  birthday?: string | null;
+  phone?: string | null;
+}
+
+export interface ReviewReplyIn {
+  reply: string;
+}
+
+export interface ReviewReportIn {
+  why: string;
+  evidence?: string | null;
+}
+
+export interface InvitationDecisionIn {
+  accept?: boolean;
+  selected_slot?: Record<string, unknown> | null;
+  proposed_time?: string | null;
+  note?: string;
+}
+
+export interface GroomerCheckUpIn {
+  kind: string;
+  weight_value?: number | string | null;
+  weight_unit?: string;
+  add_on_ids?: number[];
+  personalization?: Record<string, unknown>;
+  description?: string;
+}
+
+export interface TerminateServiceIn {
+  reason: string;
+  description?: string;
+  refundable_service_fee?: number | string;
+  resolution: string;
+}
+
+export interface HealthReportIn {
+  summary: string;
+  pet_condition?: string;
+  behavior_notes?: string;
+  recommendations?: string;
+}
+
+export interface CashOutIn {
+  amount: number | string;
+}
+
+export interface GroomerPendingBookingsIn {
+  page?: number;
+  page_size?: number;
+}
+
+export interface GroomerEarningsSummaryIn {
+  date_from?: string | null;
+  date_to?: string | null;
+}
+
+export interface GroomerEarningTransactionsIn {
+  page?: number;
+  page_size?: number;
+}
+
+export interface GroomerScheduleIn {
+  service_date: string;
+  page?: number;
+  page_size?: number;
+}
+
+export interface GroomerHistoryIn {
+  pet_name?: string | null;
+  date_from?: string | null;
+  date_to?: string | null;
+  page?: number;
+  page_size?: number;
+}
+
+export type GroomerProfileOut = UnknownObjectOut;
+export type GroomerPayoutSummaryOut = UnknownObjectOut;
+export type GroomerPayoutLinkOut = UnknownObjectOut;
+export type GroomerPerformanceOut = UnknownObjectOut;
+export type GroomerDashboardSummaryOut = UnknownObjectOut;
+export type GroomerCurrentBookingOut = UnknownObjectOut | null;
+export type GroomerPendingInvitationOut = UnknownObjectOut;
+export type GroomerPendingInvitationListOut =
+  | UnknownPageOut<GroomerPendingInvitationOut>
+  | GroomerPendingInvitationOut[];
+export type InvitationDecisionOut = UnknownObjectOut;
+export type GroomerCheckUpOut = UnknownObjectOut;
+export type GroomerCompleteServiceOut = UnknownObjectOut;
+export type GroomerTerminateServiceOut = UnknownObjectOut;
+export type GroomerEarningsSummaryOut = UnknownObjectOut;
+export type GroomerEarningTransactionOut = UnknownObjectOut;
+export type GroomerEarningTransactionListOut =
+  | UnknownPageOut<GroomerEarningTransactionOut>
+  | GroomerEarningTransactionOut[];
+export type GroomerCashOutOut = UnknownObjectOut;
+export type GroomerScheduleOut =
+  | UnknownPageOut<UnknownObjectOut>
+  | UnknownObjectOut[];
+export type GroomerHistoryOut =
+  | UnknownPageOut<UnknownObjectOut>
+  | UnknownObjectOut[];
+
 /**
  * 美容师确认预约
  */
@@ -1563,6 +1678,322 @@ export async function cancelBooking(
     `/api/bookings/${bookingId}/cancel`,
     { reason } satisfies CancelBookingIn
   );
+  return response.data;
+}
+
+/**
+ * 获取美容师资料
+ */
+export async function getGroomerProfile(): Promise<GroomerProfileOut> {
+  const response = await http.get<GroomerProfileOut>("/api/groomers/profile");
+  return response.data;
+}
+
+/**
+ * 更新美容师资料
+ */
+export async function updateGroomerProfile(
+  data: GroomerProfileUpdateIn
+): Promise<GroomerProfileOut> {
+  const response = await http.patch<GroomerProfileOut>(
+    "/api/groomers/profile",
+    data
+  );
+  return response.data;
+}
+
+/**
+ * 获取美容师打款摘要
+ */
+export async function getGroomerPayoutSummary(): Promise<GroomerPayoutSummaryOut> {
+  const response = await http.get<GroomerPayoutSummaryOut>("/api/groomers/payout");
+  return response.data;
+}
+
+/**
+ * 创建美容师打款 onboarding link
+ */
+export async function createGroomerPayoutOnboardingLink(): Promise<GroomerPayoutLinkOut> {
+  const response = await http.post<GroomerPayoutLinkOut>(
+    "/api/groomers/payout/onboarding_link",
+    undefined
+  );
+  return response.data;
+}
+
+/**
+ * 创建美容师打款登录 link
+ */
+export async function createGroomerPayoutLoginLink(): Promise<GroomerPayoutLinkOut> {
+  const response = await http.post<GroomerPayoutLinkOut>(
+    "/api/groomers/payout/login_link",
+    undefined
+  );
+  return response.data;
+}
+
+/**
+ * 获取美容师表现数据
+ */
+export async function getGroomerPerformance(): Promise<GroomerPerformanceOut> {
+  const response = await http.get<GroomerPerformanceOut>("/api/groomers/performance");
+  return response.data;
+}
+
+/**
+ * 回复评价
+ */
+export async function replyGroomerReview(
+  reviewId: number,
+  data: ReviewReplyIn | string
+): Promise<OkOut> {
+  const payload = typeof data === "string" ? { reply: data } : data;
+  const response = await http.post<OkOut>(
+    `/api/groomers/reviews/${reviewId}/reply`,
+    payload
+  );
+  return response.data;
+}
+
+/**
+ * 举报评价
+ */
+export async function reportGroomerReview(
+  reviewId: number,
+  data: ReviewReportIn
+): Promise<OkOut> {
+  const queryParams = new URLSearchParams();
+  queryParams.append("why", data.why);
+  if (data.evidence) queryParams.append("evidence", data.evidence);
+
+  const response = await http.post<OkOut>(
+    `/api/groomers/reviews/${reviewId}/report?${queryParams.toString()}`,
+    undefined
+  );
+  return response.data;
+}
+
+/**
+ * 获取美容师仪表盘摘要
+ */
+export async function getGroomerDashboardSummary(): Promise<GroomerDashboardSummaryOut> {
+  const response = await http.get<GroomerDashboardSummaryOut>(
+    "/api/groomers/dashboard/summary"
+  );
+  return response.data;
+}
+
+/**
+ * 获取美容师当前服务中的预约
+ */
+export async function getGroomerCurrentBooking(): Promise<GroomerCurrentBookingOut> {
+  const response = await http.get<GroomerCurrentBookingOut>(
+    "/api/groomers/dashboard/current_booking"
+  );
+  return response.data;
+}
+
+/**
+ * 获取待处理预约邀请
+ */
+export async function getGroomerPendingBookingInvitations(
+  params?: GroomerPendingBookingsIn
+): Promise<GroomerPendingInvitationListOut> {
+  const queryParams = new URLSearchParams();
+  if (params?.page) queryParams.append("page", String(params.page));
+  if (params?.page_size) queryParams.append("page_size", String(params.page_size));
+
+  const url = `/api/groomers/bookings/pending${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+  const response = await http.get<GroomerPendingInvitationListOut>(url);
+  return response.data;
+}
+
+/**
+ * 处理预约邀请
+ */
+export async function decideGroomerInvitation(
+  invitationId: number,
+  data: InvitationDecisionIn
+): Promise<InvitationDecisionOut> {
+  const response = await http.post<InvitationDecisionOut>(
+    `/api/groomers/bookings/invitations/${invitationId}/decision`,
+    data
+  );
+  return response.data;
+}
+
+/**
+ * 开始前往服务地点
+ */
+export async function startGroomerTravel(bookingId: number): Promise<OkOut> {
+  const response = await http.post<OkOut>(
+    `/api/groomers/bookings/${bookingId}/start_travel`,
+    undefined
+  );
+  return response.data;
+}
+
+/**
+ * 取消前往服务地点
+ */
+export async function cancelGroomerTravel(bookingId: number): Promise<OkOut> {
+  const response = await http.post<OkOut>(
+    `/api/groomers/bookings/${bookingId}/cancel_travel`,
+    undefined
+  );
+  return response.data;
+}
+
+/**
+ * 美容师签到（portal）
+ */
+export async function groomerPortalCheckIn(bookingId: number): Promise<OkOut> {
+  const response = await http.post<OkOut>(
+    `/api/groomers/bookings/${bookingId}/check_in`,
+    undefined
+  );
+  return response.data;
+}
+
+/**
+ * 提交 check-up
+ */
+export async function submitGroomerCheckUp(
+  bookingId: number,
+  data: GroomerCheckUpIn
+): Promise<GroomerCheckUpOut> {
+  const response = await http.post<GroomerCheckUpOut>(
+    `/api/groomers/bookings/${bookingId}/check_up`,
+    data
+  );
+  return response.data;
+}
+
+/**
+ * 开始 grooming
+ */
+export async function startGroomerGrooming(bookingId: number): Promise<OkOut> {
+  const response = await http.post<OkOut>(
+    `/api/groomers/bookings/${bookingId}/start_grooming`,
+    undefined
+  );
+  return response.data;
+}
+
+/**
+ * 完成服务
+ */
+export async function completeGroomerService(
+  bookingId: number
+): Promise<GroomerCompleteServiceOut> {
+  const response = await http.post<GroomerCompleteServiceOut>(
+    `/api/groomers/bookings/${bookingId}/complete_service`,
+    undefined
+  );
+  return response.data;
+}
+
+/**
+ * 终止服务
+ */
+export async function terminateGroomerService(
+  bookingId: number,
+  data: TerminateServiceIn
+): Promise<GroomerTerminateServiceOut> {
+  const response = await http.post<GroomerTerminateServiceOut>(
+    `/api/groomers/bookings/${bookingId}/terminate_service`,
+    data
+  );
+  return response.data;
+}
+
+/**
+ * 提交健康报告
+ */
+export async function submitGroomerHealthReport(
+  bookingId: number,
+  data: HealthReportIn
+): Promise<OkOut> {
+  const response = await http.post<OkOut>(
+    `/api/groomers/bookings/${bookingId}/health_report`,
+    data
+  );
+  return response.data;
+}
+
+/**
+ * 获取收入摘要
+ */
+export async function getGroomerEarningsSummary(
+  params?: GroomerEarningsSummaryIn
+): Promise<GroomerEarningsSummaryOut> {
+  const queryParams = new URLSearchParams();
+  if (params?.date_from) queryParams.append("date_from", params.date_from);
+  if (params?.date_to) queryParams.append("date_to", params.date_to);
+
+  const url = `/api/groomers/earnings/summary${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+  const response = await http.get<GroomerEarningsSummaryOut>(url);
+  return response.data;
+}
+
+/**
+ * 获取收入流水
+ */
+export async function getGroomerEarningTransactions(
+  params?: GroomerEarningTransactionsIn
+): Promise<GroomerEarningTransactionListOut> {
+  const queryParams = new URLSearchParams();
+  if (params?.page) queryParams.append("page", String(params.page));
+  if (params?.page_size) queryParams.append("page_size", String(params.page_size));
+
+  const url = `/api/groomers/earnings/transactions${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+  const response = await http.get<GroomerEarningTransactionListOut>(url);
+  return response.data;
+}
+
+/**
+ * 发起提现
+ */
+export async function groomerCashOut(data: CashOutIn): Promise<GroomerCashOutOut> {
+  const response = await http.post<GroomerCashOutOut>(
+    "/api/groomers/earnings/cash_out",
+    data
+  );
+  return response.data;
+}
+
+/**
+ * 获取排班
+ */
+export async function getGroomerSchedule(
+  params: GroomerScheduleIn
+): Promise<GroomerScheduleOut> {
+  const queryParams = new URLSearchParams();
+  queryParams.append("service_date", params.service_date);
+  if (params.page) queryParams.append("page", String(params.page));
+  if (params.page_size) queryParams.append("page_size", String(params.page_size));
+
+  const response = await http.get<GroomerScheduleOut>(
+    `/api/groomers/schedule?${queryParams.toString()}`
+  );
+  return response.data;
+}
+
+/**
+ * 获取历史记录
+ */
+export async function getGroomerHistory(
+  params?: GroomerHistoryIn
+): Promise<GroomerHistoryOut> {
+  const queryParams = new URLSearchParams();
+  if (params?.pet_name) queryParams.append("pet_name", params.pet_name);
+  if (params?.date_from) queryParams.append("date_from", params.date_from);
+  if (params?.date_to) queryParams.append("date_to", params.date_to);
+  if (params?.page) queryParams.append("page", String(params.page));
+  if (params?.page_size) queryParams.append("page_size", String(params.page_size));
+
+  const url = `/api/groomers/history${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+  const response = await http.get<GroomerHistoryOut>(url);
   return response.data;
 }
 
