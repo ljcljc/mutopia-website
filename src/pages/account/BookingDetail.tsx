@@ -56,6 +56,12 @@ function formatServiceTypeLabel(serviceType?: string | null) {
   return serviceType.charAt(0).toUpperCase() + serviceType.slice(1);
 }
 
+function formatBookingCode(orderCode?: string | null, bookingId?: number | null) {
+  if (orderCode && orderCode.trim()) return orderCode.trim();
+  if (bookingId) return `#${bookingId}`;
+  return "";
+}
+
 function addHoursToDateTime(dateString?: string | null, hours: number = 1) {
   if (!dateString) return "";
   try {
@@ -220,7 +226,7 @@ export default function BookingDetail() {
   const packageSnapshot = (detail?.package_snapshot as Record<string, unknown> | undefined) ?? {};
 
   const petName = (petSnapshot.name as string | undefined) ?? "Duke";
-  const bookingCode = `Tkf-${detail?.id ?? "4485"}`;
+  const bookingCode = formatBookingCode(detail?.order_code, detail?.id);
   const serviceName = (packageSnapshot.name as string | undefined) ?? "Full grooming";
   const serviceType =
     (packageSnapshot.service_type as string | undefined) ??

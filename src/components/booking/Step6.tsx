@@ -764,6 +764,9 @@ export function Step6() {
       console.log("Payment session created:", paymentSession);
 
       sessionStorage.setItem("pendingDepositBookingId", String(booking.id));
+      if (booking.order_code) {
+        sessionStorage.setItem("pendingDepositOrderCode", booking.order_code);
+      }
       
       // Replace the current booking history entry so browser back from Stripe
       // returns to dashboard instead of reopening step 6.

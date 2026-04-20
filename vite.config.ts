@@ -14,8 +14,9 @@ export default defineConfig(({ mode }) => {
   const root = fileURLToPath(new URL(".", import.meta.url));
   const env = loadEnv(mode, root, '');
   
-  // 获取 API 基础 URL，如果没有配置则使用默认值
-  const apiBaseUrl = env.VITE_API_BASE_URL || 'https://api.mutopia.ca';
+  // API 请求走本地/指定后端；媒体资源可单独指定，方便本地代码联调生产文件
+  const apiBaseUrl = env.VITE_API_BASE_URL;
+  const mediaBaseUrl = env.VITE_MEDIA_BASE_URL;
   
   return {
     plugins: [
@@ -81,7 +82,7 @@ export default defineConfig(({ mode }) => {
         },
         // 代理图片资源请求，解决 CORS 和缓存问题
         '/media': {
-          target: apiBaseUrl,
+          target: mediaBaseUrl,
           changeOrigin: true,
           secure: true,
         },

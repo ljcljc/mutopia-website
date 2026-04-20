@@ -288,6 +288,7 @@ export interface PetCreateIn extends CreatePetParams {
 // 预约管理类型
 export interface BookingOut {
   id: number;
+  order_code?: string | null;
   status: string;
   scheduled_time?: string | null;
   deposit_amount: number | string;
@@ -408,6 +409,7 @@ export interface BookingPriceBreakdown {
 
 export interface BookingListOut {
   id: number;
+  order_code?: string | null;
   status: string;
   pet_name?: string | null;
   service_name?: string | null;
@@ -434,6 +436,7 @@ export interface BookingPaymentOut {
 
 export interface BookingDetailOut {
   id: number;
+  order_code?: string | null;
   status: string;
   scheduled_time?: string | null;
   notes?: string | null;
