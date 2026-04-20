@@ -23,14 +23,14 @@ export default function AccountLayout() {
     <BaseAccountLayoutShell
       rootClassName="bg-[#F9F1E8]"
       contentBackgroundClassName="bg-[#F9F1E8]"
-      contentContainerClassName="w-full sm:w-7xl mx-auto flex flex-1 overflow-hidden gap-6 my-6 sm:my-14"
-      sidebar={<AccountSidebar className="hidden sm:block" />}
+      contentContainerClassName="w-full max-w-[1248px] mx-auto flex flex-1 overflow-hidden gap-6 my-6 lg:my-14"
+      sidebar={<AccountSidebar className="hidden lg:block" />}
       header={<HeaderApp />}
       footer={<Footer />}
-      footerClassName="hidden sm:block"
+      footerClassName="hidden md:block"
       bottomNav={<AccountBottomNav />}
-      bottomNavClassName="sm:hidden"
-      insetClassName="bg-[#F9F1E8] pb-[96px] sm:pb-0"
+      bottomNavClassName="lg:hidden"
+      insetClassName="bg-[#F9F1E8] pb-[96px] lg:pb-0"
     />
   );
 }

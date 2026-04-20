@@ -303,7 +303,7 @@ export default function MemorializedPets() {
                       Ready
                     </span>
                   </div>
-                  <Icon name="nav-next" className="text-[#8B6357]" size={16} />
+                  <Icon name="nav-next" className="text-[#99A1AF]" size={16} />
                 </div>
               </div>
             </div>

@@ -187,11 +187,11 @@ export default function HeaderApp() {
       {/* Right side: User info (only if logged in) */}
       {user && (
         <>
-          <div className="flex items-center gap-[10.5px] sm:hidden">
+          <div className="flex items-center gap-[10.5px] lg:hidden">
             <CreditsBadge />
             <NotificationsPopover />
           </div>
-          <div className="hidden sm:flex items-center gap-[10.5px]">
+          <div className="hidden lg:flex items-center gap-[10.5px]">
             <CreditsBadge />
             <AccountDropdown
               userInfo={userInfo ?? undefined}

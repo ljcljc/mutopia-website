@@ -605,113 +605,112 @@ export default function MyPets() {
   };
 
   return (
-    <div className="flex min-h-full w-full flex-col">
-      <div className="mx-auto flex w-full max-w-none flex-1 px-5 pb-5 sm:max-w-[944px] sm:px-6 sm:pb-8">
-        <div className="flex w-full flex-col gap-5">
-          <div className="mb-[-2px] flex w-full flex-col gap-5">
-            <div className="flex w-full flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-12">
-              <h1 className="shrink-0 font-comfortaa font-bold text-[20px] leading-[28px] text-[#4A3C2A]">
-                My pets
-              </h1>
-              {isLoadingPets ? null : (
-                isPetSelectDropdown ? (
-                  <Select
-                    value={activePetId ? String(activePetId) : ""}
-                    onValueChange={(value) => {
-                      if (value === "__add__") {
-                        navigate("/account/pets/new", { state: { from: "my-pets" } });
-                        return;
-                      }
-                      const nextId = Number.parseInt(value, 10);
-                      if (Number.isFinite(nextId)) {
-                        handleSelectPet(nextId);
-                      }
-                    }}
+    <div className="w-full min-h-full flex flex-col">
+      <div className="w-full max-w-none sm:max-w-[944px] mx-auto px-[20px] sm:px-6 pb-[20px] sm:pb-8 flex-1">
+        <div className="flex flex-col gap-[16px] mb-[-2px]">
+          <div className="flex flex-col gap-[16px] sm:gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <h1 className="font-['Comfortaa:Bold',sans-serif] font-bold text-[20px] text-[#4A3C2A]">
+              My pets
+            </h1>
+            {isLoadingPets ? null : (
+              isPetSelectDropdown ? (
+                <Select
+                  value={activePetId ? String(activePetId) : ""}
+                  onValueChange={(value) => {
+                    if (value === "__add__") {
+                      navigate("/account/pets/new", { state: { from: "my-pets" } });
+                      return;
+                    }
+                    const nextId = Number.parseInt(value, 10);
+                    if (Number.isFinite(nextId)) {
+                      handleSelectPet(nextId);
+                    }
+                  }}
+                >
+                  <SelectTrigger
+                    className="w-[160px] min-w-[160px] h-[40px] px-[16px] py-[8px] border-2 border-[#DE6A07] rounded-tl-[14px] rounded-tr-[14px] bg-white text-[#DE6A07] [&_svg]:text-[#DE6A07]"
                   >
-                    <SelectTrigger
-                      className="relative z-10 h-10 w-40 min-w-40 rounded-tl-[14px] rounded-tr-[14px] border-2 border-[#DE6A07] bg-white px-4 py-2 text-[#DE6A07] [&_svg]:text-[#DE6A07]"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Icon
-                          name={activePet?.pet_type === "cat" ? "cat" : "dog"}
-                          className="text-[#DE6A07]"
-                          size={24}
-                        />
-                        <span className="font-comfortaa font-bold text-[14px] leading-[21px]">
-                          {activePet?.name ?? "Select pet"}
-                        </span>
-                      </div>
-                    </SelectTrigger>
-                    <SelectContent
-                      className="rounded-t-lg rounded-b-none border border-[#D6D6D6] bg-white p-2"
-                      position="popper"
-                    >
-                      {pets.map((pet) => (
-                        <SelectItem
-                          key={pet.id}
-                          value={String(pet.id)}
-                          className="h-9 rounded px-3 py-3 font-poppins text-[14px] leading-[20px] text-[#6B6B6B] data-highlighted:bg-[#FFFBEB] data-[state=checked]:bg-white data-[state=checked]:text-[#DE6A07] [&_svg]:text-[#6B6B6B] data-[state=checked]:[&_svg]:text-[#DE6A07] [&>span:first-child]:hidden [&>span:last-child]:flex [&>span:last-child]:items-center [&>span:last-child]:gap-3"
-                        >
-                          <div className="flex items-center gap-3">
-                            <Icon name={pet.pet_type === "cat" ? "cat" : "dog"} size={20} className="text-[#DE6A07]" />
-                            <span>{pet.name}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
+                    <div className="flex items-center gap-[4px]">
+                      <Icon
+                        name={activePet?.pet_type === "cat" ? "cat" : "dog"}
+                        className="text-[#DE6A07]"
+                        size={24}
+                      />
+                      <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[14px] leading-[21px]">
+                        {activePet?.name ?? "Select pet"}
+                      </span>
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent
+                    className="border border-[#D6D6D6] rounded-tl-[8px] rounded-tr-[8px] rounded-bl-0 rounded-br-0 bg-white p-[8px]"
+                    position="popper"
+                  >
+                    {pets.map((pet) => (
                       <SelectItem
-                        value="__add__"
-                        className="h-9 rounded px-3 py-3 font-poppins text-[14px] leading-[20px] text-[#6B6B6B] data-highlighted:bg-[#FFFBEB] [&>span:first-child]:hidden [&>span:last-child]:flex [&>span:last-child]:items-center [&>span:last-child]:gap-3"
+                        key={pet.id}
+                        value={String(pet.id)}
+                        className="h-[36px] px-[12px] py-[12px] rounded-[4px] text-[14px] leading-[20px] font-['Poppins:Regular',sans-serif] text-[#6B6B6B] data-highlighted:bg-[#FFFBEB] data-[state=checked]:text-[#DE6A07] data-[state=checked]:bg-white [&_svg]:text-[#6B6B6B] data-[state=checked]:[&_svg]:text-[#DE6A07] [&>span:first-child]:hidden [&>span:last-child]:flex [&>span:last-child]:items-center [&>span:last-child]:gap-[12px]"
                       >
-                        <div className="flex items-center gap-3">
-                          <Icon name="add-2" size={20} className="text-[#DE6A07]" />
-                          <span>Add pet</span>
+                        <div className="flex items-center gap-[12px]">
+                          <Icon name={pet.pet_type === "cat" ? "cat" : "dog"} size={20} className="text-[#DE6A07]" />
+                          <span>{pet.name}</span>
                         </div>
                       </SelectItem>
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <div className="relative z-10 flex w-full items-end justify-end overflow-x-auto pl-0.5 lg:w-auto lg:max-w-[calc(100%-180px)] lg:justify-end">
-                    {pets.map((pet) => {
-                      const isActive = pet.id === activePetId;
-                      return (
-                        <button
-                          key={pet.id}
-                          type="button"
-                          onClick={() => handleSelectPet(pet.id)}
-                          className={`flex h-10 min-w-[88px] shrink-0 items-center justify-center gap-1 rounded-tl-[14px] rounded-tr-[14px] border-2 bg-white px-4 py-2 sm:min-w-[120px] ${
-                            isActive
-                              ? "border-[#DE6A07] text-[#DE6A07]"
-                              : "border-[#E5E7EB] text-[#8B6357]"
-                          }`}
-                        >
-                          <Icon
-                            name={pet.pet_type === "cat" ? "cat" : "dog"}
-                            className={isActive ? "text-[#DE6A07]" : "text-[#8B6357]"}
-                            size={24}
-                          />
-                          <span className="truncate font-comfortaa font-bold text-[14px] leading-[21px]">
-                            {pet.name}
-                          </span>
-                        </button>
-                      );
-                    })}
-                    <button
-                      type="button"
-                      onClick={() => navigate("/account/pets/new", { state: { from: "my-pets" } })}
-                      className="flex h-10 min-w-[88px] shrink-0 items-center justify-center gap-1 rounded-tl-[14px] rounded-tr-[14px] border-2 border-[#E5E7EB] bg-white px-4 py-2 text-[#8B6357] cursor-pointer sm:min-w-[120px]"
+                    ))}
+                    <SelectItem
+                      value="__add__"
+                      className="h-[36px] px-[12px] py-[12px] rounded-[4px] text-[14px] leading-[20px] font-['Poppins:Regular',sans-serif] text-[#6B6B6B] data-highlighted:bg-[#FFFBEB] [&>span:first-child]:hidden [&>span:last-child]:flex [&>span:last-child]:items-center [&>span:last-child]:gap-[12px]"
                     >
-                      <Icon name="add-2" className="text-[#8B6357]" size={20} />
-                      <span className="font-comfortaa font-bold text-[14px] leading-[21px]">
-                        Add pet
-                      </span>
-                    </button>
-                  </div>
-                )
-              )}
-            </div>
+                      <div className="flex items-center gap-[12px]">
+                        <Icon name="add-2" size={20} className="text-[#DE6A07]" />
+                        <span>Add pet</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="flex justify-end items-center overflow-x-auto max-w-[520px] pl-[2px]">
+                  {pets.map((pet) => {
+                    const isActive = pet.id === activePetId;
+                    return (
+                      <button
+                        key={pet.id}
+                        type="button"
+                        onClick={() => handleSelectPet(pet.id)}
+                        className={`border-2 rounded-tl-[14px] rounded-tr-[14px] px-[16px] py-[8px] min-w-[88px] sm:min-w-[120px] flex items-center gap-[4px] shrink-0 ${
+                          isActive
+                            ? "border-[#DE6A07] text-[#DE6A07]"
+                            : "border-[#E5E7EB] text-[#8B6357]"
+                        }`}
+                      >
+                        <Icon
+                          name={pet.pet_type === "cat" ? "cat" : "dog"}
+                          className={isActive ? "text-[#DE6A07]" : "text-[#8B6357]"}
+                          size={24}
+                        />
+                        <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[14px] leading-[21px]">
+                          {pet.name}
+                        </span>
+                      </button>
+                    );
+                  })}
+                  <button
+                    type="button"
+                    onClick={() => navigate("/account/pets/new", { state: { from: "my-pets" } })}
+                    className="border-2 rounded-tl-[14px] rounded-tr-[14px] px-[16px] py-[8px] min-w-[88px] flex items-center gap-[4px] shrink-0 border-[#E5E7EB] text-[#8B6357] cursor-pointer"
+                  >
+                    <Icon name="add-2" className="text-[#8B6357]" size={20} />
+                    <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[14px] leading-[21px]">
+                      Add pet
+                    </span>
+                  </button>
+                </div>
+              )
+            )}
           </div>
+        </div>
 
-          <div className="relative z-1 flex w-full flex-col gap-[21px]">
+        <div className="flex flex-col gap-[21px] relative z-1">
           {isEditing ? (
             <PetForm
               petName={petName}
@@ -774,12 +773,13 @@ export default function MyPets() {
               }}
             />
           ) : (
-            <div className="rounded-[12px] border-2 border-[#DE6A07] bg-white px-5 py-5 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] sm:px-7 sm:py-6">
+            <div className="bg-white rounded-[12px] rounded-tr-none border-2 border-[#DE6A07] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[22px] sm:p-[20px]">
               {isLoadingPets ? (
                 <div className="text-[#4A3C2A] text-sm">Loading pets...</div>
               ) : activePet ? (
-                <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
-                  <div className="flex size-[80px] shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E5E7EB] bg-[#8B6357]">
+                <div className="flex gap-[16px]">
+                  {/* 左侧：头像 */}
+                  <div className="size-[56px] rounded-full overflow-hidden border border-[#E5E7EB] bg-[#8B6357] flex items-center justify-center shrink-0">
                     {activePet.primary_photo ? (
                       <img
                         alt={activePet.name}
@@ -790,47 +790,49 @@ export default function MyPets() {
                       <Icon name="pet" className="size-6 text-white" />
                     )}
                   </div>
-
-                  <div className="flex flex-1 flex-col gap-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex min-w-0 flex-1 flex-col gap-4">
-                        <p className="font-comfortaa font-medium text-[16px] leading-[28px] text-[#4A3C2A]">
+                  
+                  {/* 右侧：其他所有模块 */}
+                  <div className="flex flex-col gap-[8px] flex-1">
+                    {/* 上方：信息和编辑icon左右结构 */}
+                    <div className="flex items-start justify-between">
+                      <div className="flex flex-col gap-[8px]">
+                        <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
                           {activePet.name}
                         </p>
-                        <div className="grid grid-cols-2 gap-x-8 gap-y-5 text-[#4A3C2A] sm:gap-x-14">
-                          <div className="min-w-0">
-                            <p className="font-comfortaa text-[14px] leading-[20px] text-[#6B5A45]">Pet type</p>
-                            <p className="mt-1 font-comfortaa text-[12px] leading-[18px] font-bold">
+                        <div className="grid grid-cols-2 gap-x-[40px] gap-y-[16px] text-[#4A3C2A]">
+                          <div className="w-[80px]">
+                            <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Pet type</p>
+                            <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
                               {formatLabel(activePet.pet_type)}
                             </p>
                           </div>
-                          <div className="min-w-0">
-                            <p className="font-comfortaa text-[14px] leading-[20px] text-[#6B5A45]">Breed</p>
-                            <p className="mt-1 font-comfortaa text-[12px] leading-[18px] font-bold">
+                          <div className="min-w-[80px] max-w-[160px]">
+                            <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Breed</p>
+                            <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
                               {activePet.breed || "-"}
                             </p>
                           </div>
-                          <div className="min-w-0">
-                            <p className="font-comfortaa text-[14px] leading-[20px] text-[#6B5A45]">Weight</p>
-                            <p className="mt-1 font-comfortaa text-[12px] leading-[18px] font-bold">
+                          <div className="w-[80px]">
+                            <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Weight</p>
+                            <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
                               {formatWeight(activePet.weight_value, activePet.weight_unit)}
                             </p>
                           </div>
-                          <div className="min-w-0">
-                            <p className="font-comfortaa text-[14px] leading-[20px] text-[#6B5A45]">Date of birth</p>
-                            <p className="mt-1 font-comfortaa text-[12px] leading-[18px] font-bold">
+                          <div className="w-[80px]">
+                            <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Date of birth</p>
+                            <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
                               {formatBirthday(activePet.birthday)}
                             </p>
                           </div>
-                          <div className="min-w-0">
-                            <p className="font-comfortaa text-[14px] leading-[20px] text-[#6B5A45]">Coat condition</p>
-                            <p className="mt-1 font-comfortaa text-[12px] leading-[18px] font-bold">
+                          <div className="w-[80px]">
+                            <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Coat condition</p>
+                            <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
                               {formatLabel(activePet.coat_condition)}
                             </p>
                           </div>
-                          <div className="min-w-0">
-                            <p className="font-comfortaa text-[14px] leading-[20px] text-[#6B5A45]">Behavior</p>
-                            <p className="mt-1 font-comfortaa text-[12px] leading-[18px] font-bold">
+                          <div className="w-[80px]">
+                            <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Behavior</p>
+                            <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
                               {formatBehavior(activePet.behavior)}
                             </p>
                           </div>
@@ -838,26 +840,28 @@ export default function MyPets() {
                       </div>
                       <button
                         type="button"
-                        className="shrink-0 text-[#8B6357] hover:text-[#DE6A07] cursor-pointer"
+                        className="text-[#8B6357] hover:text-[#DE6A07] cursor-pointer"
                         onClick={() => setIsEditing(true)}
                       >
                         <Icon name="pencil" size={20} />
                       </button>
                     </div>
-
-                    <div className="h-px w-full bg-[#E5E7EB]" />
-
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="min-w-0">
-                        <p className="font-comfortaa text-[14px] leading-[20px] text-[#6B5A45]">Frequency</p>
-                        <p className="mt-1 font-comfortaa text-[12px] leading-[18px] font-bold text-[#4A3C2A]">
+                    
+                    {/* 分割线 */}
+                    <div className="border-t border-[#E5E7EB] w-full" />
+                    
+                    {/* 下方：移动端换行，PC 端同一行 */}
+                    <div className="flex flex-col items-start sm:flex-row sm:items-center sm:justify-between">
+                      <div className="w-[80px]">
+                        <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Frequency</p>
+                        <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
                           {formatLabel(activePet.grooming_frequency)}
                         </p>
                       </div>
                       <OrangeButton
                         size="compact"
                         showArrow
-                        className="h-[40px] min-w-[176px] px-7 sm:h-[40px]"
+                        className="px-[28px] h-[28px] mt-[12px] sm:mt-0"
                         onClick={() => activePet && handleBookForPet(activePet)}
                       >
                         <span className="text-white text-[12px] leading-[17.5px] font-bold">Book for {activePet.name}</span>
@@ -871,11 +875,11 @@ export default function MyPets() {
             </div>
           )}
 
-          <div className="rounded-[12px] bg-white p-5 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] sm:p-6">
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col gap-2">
+          <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[14px] sm:p-[24px]">
+            <div className="flex flex-col gap-[24px]">
+              <div className="flex flex-col gap-[8px]">
                 <div className="flex items-center justify-between">
-                  <p className="font-comfortaa font-medium text-[16px] leading-[28px] text-[#4A3C2A]">
+                  <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
                     Photos
                   </p>
                   {isSavingPhotos ? (
@@ -884,7 +888,7 @@ export default function MyPets() {
                     </span>
                   ) : null}
                 </div>
-                <p className="font-comfortaa font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
+                <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
                   Pet photos
                 </p>
                 <FileUpload
@@ -902,8 +906,8 @@ export default function MyPets() {
 
               <div className="border-t border-[#E5E7EB]" />
 
-              <div className="flex flex-col gap-2">
-                <p className="font-comfortaa font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
+              <div className="flex flex-col gap-[8px]">
+                <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[12.25px] leading-[17.5px] text-[#4A3C2A]">
                   Reference photos
                 </p>
                 <FileUpload
@@ -921,61 +925,35 @@ export default function MyPets() {
             </div>
           </div>
 
-          <div className="rounded-[12px] bg-white p-5 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
-            <div className="flex flex-col gap-3">
-              <p className="font-comfortaa font-medium text-[16px] leading-[28px] text-[#4A3C2A]">
+          <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[12px] sm:p-[20px]">
+            <div className="flex flex-col gap-[12px]">
+              <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
                 Health report
               </p>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="flex w-full items-center justify-between rounded-xl border border-[#E5E7EB] px-[15px] py-[13px]">
-                  <div>
-                    <p className="font-comfortaa font-normal text-[16px] leading-[28px] text-[#DE6A07]">
-                      {activePet?.name || "-"}
-                    </p>
-                    <p className="font-comfortaa font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
-                      Updated: 2026-04-03
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-[7px]">
-                    <div className="flex h-6 items-center rounded-xl bg-[#DCFCE7] px-4 py-1">
-                      <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#016630]">
-                        Ready
-                      </span>
-                    </div>
-                    <Icon name="nav-next" className="text-[#8B6357]" size={16} />
-                  </div>
+              <div className="border border-[#E5E7EB] rounded-[12px] px-[15px] py-[13px] flex items-center justify-between w-full">
+                <div>
+                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[16px] leading-[28px] text-[#DE6A07]">
+                    {activePet?.name || "-"}
+                  </p>
+                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
+                    2026-04-03 at 10H
+                  </p>
                 </div>
-                <div className="hidden sm:flex w-full items-center justify-between rounded-xl border border-[#E5E7EB] px-[15px] py-[13px]">
-                  <div>
-                    <p className="font-comfortaa font-normal text-[16px] leading-[28px] text-[#DE6A07]">
-                      {activePet?.name || "-"}
-                    </p>
-                    <p className="font-comfortaa font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
-                      Updated: 2025-04-03
-                    </p>
+                <div className="flex items-center gap-[7px]">
+                  <div className="bg-[#DCFCE7] h-[24px] px-[16px] py-[4px] rounded-[12px] flex items-center">
+                    <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-[#016630]">
+                      Ready
+                    </span>
                   </div>
-                  <div className="flex items-center gap-[7px]">
-                    <div className="flex h-6 items-center rounded-xl bg-[#DCFCE7] px-4 py-1">
-                      <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#016630]">
-                        Ready
-                      </span>
-                    </div>
-                    <Icon name="nav-next" className="text-[#8B6357]" size={16} />
-                  </div>
+                  <Icon name="nav-next" className="text-[#8B6357]" size={16} />
                 </div>
               </div>
-              <button
-                type="button"
-                className="self-center font-comfortaa text-[12px] font-bold leading-[18px] text-[#8B6357] underline decoration-solid underline-offset-2"
-              >
-                See all the reports
-              </button>
             </div>
           </div>
 
-          <div className="rounded-[12px] bg-white p-5 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
-            <div className="flex flex-col gap-3">
-              <p className="font-comfortaa font-medium text-[16px] leading-[28px] text-[#4A3C2A]">
+          <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[12px] sm:p-[20px]">
+            <div className="flex flex-col gap-[12px]">
+              <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
                 Special instruments or notes
               </p>
               <CustomTextarea
@@ -988,18 +966,18 @@ export default function MyPets() {
                 size="compact"
                 onClick={handleSaveNotes}
                 loading={isSaving}
-                className="w-[72px] self-end"
+                className="w-[96px] self-end"
               >
                 Save
               </OrangeButton>
             </div>
           </div>
 
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between">
             <OrangeButton
               variant="outlineMuted"
               size="compact"
-              className={`px-7 ${isMemorialized ? "border-[#E5E7EB] hover:bg-transparent active:bg-transparent" : ""}`}
+              className={`px-[28px] ${isMemorialized ? "border-[#E5E7EB] hover:bg-transparent active:bg-transparent" : ""}`}
               onClick={handleMemorializePet}
               loading={isMemorializing}
               disabled={!activePet || isMemorialized}
@@ -1010,43 +988,42 @@ export default function MyPets() {
               type="button"
               onClick={() => setIsDeleteOpen(true)}
               disabled={!activePet}
-              className="flex cursor-pointer items-center gap-2 font-comfortaa text-[12px] leading-[17.5px] text-[#8B6357] transition-colors hover:text-[#DE6A07] disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center gap-[8px] text-[#8B6357] text-[12px] leading-[17.5px] font-['Comfortaa:Bold',sans-serif] hover:text-[#DE6A07] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               <Icon name="trash" size={16} />
               Delete pet
             </button>
           </div>
         </div>
-        </div>
       </div>
 
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <AlertDialogContent className="max-w-[calc(100%-32px)] rounded-[20px] px-0 py-0 sm:max-w-[520px]">
-          <div className="flex flex-col gap-4 pb-8 pt-3">
-            <AlertDialogHeader className="px-3">
+        <AlertDialogContent className="rounded-[20px] px-0 py-0 max-w-[calc(100%-32px)] sm:max-w-[520px]">
+          <div className="flex flex-col gap-[16px] pb-[32px] pt-[12px]">
+            <AlertDialogHeader className="px-[12px]">
               <div className="flex items-center justify-between w-full">
                 <AlertDialogPrimitive.Cancel asChild>
                   <button
                     type="button"
-                    className="size-4 border-0 bg-transparent p-0 text-[#4A3C2A] opacity-70 hover:opacity-100"
+                    className="h-[16px] w-[16px] p-0 border-0 bg-transparent text-[#4A3C2A] opacity-70 hover:opacity-100"
                   >
                     <Icon name="close-arrow" size={16} className="text-[#4A3C2A]" />
                   </button>
                 </AlertDialogPrimitive.Cancel>
-                <AlertDialogTitle className="flex-1 text-center font-comfortaa font-normal text-[14px] leading-[22.75px] text-[#4C4C4C]">
+                <AlertDialogTitle className="flex-1 text-center font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] leading-[22.75px] text-[#4C4C4C]">
                   Delete {activePet?.name || "pet"}
                 </AlertDialogTitle>
-                <span className="size-4" />
+                <span className="w-[16px]" />
               </div>
             </AlertDialogHeader>
             <div className="h-px bg-[rgba(0,0,0,0.1)]" />
-            <div className="px-6">
-              <AlertDialogDescription className="font-comfortaa font-bold text-[14px] leading-[22px] text-[#4A5565] m-0">
+            <div className="px-[24px]">
+              <AlertDialogDescription className="font-['Comfortaa:Bold',sans-serif] font-bold text-[14px] leading-[22px] text-[#4A5565] m-0">
                 By deleting this pet’s profile, it will no longer appear in your app. Are you sure you want to continue?
               </AlertDialogDescription>
             </div>
-            <AlertDialogFooter className="px-6">
-              <div className="flex w-full items-center justify-end gap-2.5">
+            <AlertDialogFooter className="px-[24px]">
+              <div className="flex items-center justify-end gap-[10px] w-full">
                 <AlertDialogPrimitive.Cancel asChild>
                   <OrangeButton
                     variant="outline"

@@ -123,42 +123,41 @@ export default function AccountBottomNav() {
 
   return (
     <div className="account-bottom-nav fixed bottom-0 left-0 right-0 z-50 sm:hidden">
-      <div className="relative mx-auto h-[71px] max-w-[393px] bg-white">
+      <div className="relative h-[71px] w-full bg-white">
         <div aria-hidden="true" className="nav-bridge" />
-        <div className="relative h-full">
-          {items.slice(0, 2).map((item) => {
-            const active = isActiveRoute(location.pathname, item.path, mode, from);
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => navigate(item.path)}
-                aria-label={item.label}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "nav-item absolute top-[12px] h-[43px] transition-colors duration-200",
-                  `nav-item-${item.id}`
-                )}
-              >
-                <Icon
-                  name={item.iconName}
-                  className={cn(
-                    "nav-item-icon size-6 transition-colors duration-200",
-                    active ? "text-[#E67E22]" : "text-[#9CA3AF]"
-                  )}
-                  aria-hidden="true"
-                />
-                <span
-                  className={cn(
-                    "nav-item-text whitespace-nowrap font-comfortaa text-[10px] leading-[15px] transition-colors duration-200",
-                    active ? "font-bold text-[#E67E22]" : "font-normal text-[#9CA3AF]"
-                  )}
+        <div className="relative flex h-full items-start justify-between px-4 pt-[12px]">
+          <div className="flex w-[calc(50%-40px)] items-start justify-around">
+            {items.slice(0, 2).map((item) => {
+              const active = isActiveRoute(location.pathname, item.path, mode, from);
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => navigate(item.path)}
+                  aria-label={item.label}
+                  aria-current={active ? "page" : undefined}
+                  className="nav-item relative h-[43px] min-w-[48px] transition-colors duration-200"
                 >
-                  {item.label}
-                </span>
-              </button>
-            );
-          })}
+                  <Icon
+                    name={item.iconName}
+                    className={cn(
+                      "nav-item-icon size-6 transition-colors duration-200",
+                      active ? "text-[#E67E22]" : "text-[#9CA3AF]"
+                    )}
+                    aria-hidden="true"
+                  />
+                  <span
+                    className={cn(
+                      "nav-item-text whitespace-nowrap font-comfortaa text-[10px] leading-[15px] transition-colors duration-200",
+                      active ? "font-bold text-[#E67E22]" : "font-normal text-[#9CA3AF]"
+                    )}
+                  >
+                    {item.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
 
           <div className="absolute left-1/2 top-[-9px] -translate-x-1/2">
             <button
@@ -185,39 +184,38 @@ export default function AccountBottomNav() {
             </button>
           </div>
 
-          {items.slice(2).map((item) => {
-            const active = isActiveRoute(location.pathname, item.path, mode, from);
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => navigate(item.path)}
-                aria-label={item.label}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "nav-item absolute top-[12px] h-[43px] transition-colors duration-200",
-                  `nav-item-${item.id}`
-                )}
-              >
-                <Icon
-                  name={item.iconName}
-                  className={cn(
-                    "nav-item-icon size-6 transition-colors duration-200",
-                    active ? "text-[#E67E22]" : "text-[#9CA3AF]"
-                  )}
-                  aria-hidden="true"
-                />
-                <span
-                  className={cn(
-                    "nav-item-text whitespace-nowrap font-comfortaa text-[10px] leading-[15px] transition-colors duration-200",
-                    active ? "font-bold text-[#E67E22]" : "font-normal text-[#9CA3AF]"
-                  )}
+          <div className="flex w-[calc(50%-40px)] items-start justify-around">
+            {items.slice(2).map((item) => {
+              const active = isActiveRoute(location.pathname, item.path, mode, from);
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => navigate(item.path)}
+                  aria-label={item.label}
+                  aria-current={active ? "page" : undefined}
+                  className="nav-item relative h-[43px] min-w-[48px] transition-colors duration-200"
                 >
-                  {item.label}
-                </span>
-              </button>
-            );
-          })}
+                  <Icon
+                    name={item.iconName}
+                    className={cn(
+                      "nav-item-icon size-6 transition-colors duration-200",
+                      active ? "text-[#E67E22]" : "text-[#9CA3AF]"
+                    )}
+                    aria-hidden="true"
+                  />
+                  <span
+                    className={cn(
+                      "nav-item-text whitespace-nowrap font-comfortaa text-[10px] leading-[15px] transition-colors duration-200",
+                      active ? "font-bold text-[#E67E22]" : "font-normal text-[#9CA3AF]"
+                    )}
+                  >
+                    {item.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
       <style>{`
@@ -230,35 +228,6 @@ export default function AccountBottomNav() {
           transform: translateX(-50%);
           border-radius: 39px 39px 0 0;
           background: #ffffff;
-        }
-        .account-bottom-nav .nav-item-dashboard {
-          left: 34.39px;
-          width: 30.81px;
-        }
-        .account-bottom-nav .nav-item-my-pets {
-          left: 94px;
-          width: 48px;
-        }
-        .account-bottom-nav .nav-item-my-work {
-          left: 22px;
-          width: 37.55px;
-        }
-        .account-bottom-nav .nav-item-earnings {
-          left: 86px;
-          width: 46.84px;
-        }
-        .account-bottom-nav .nav-item-account {
-          left: 260px;
-          width: 43.23px;
-        }
-        .account-bottom-nav .nav-item-dashboard ~ .nav-item-account,
-        .account-bottom-nav .nav-item-my-pets ~ .nav-item-account {
-          left: 253.16px;
-          width: 46.84px;
-        }
-        .account-bottom-nav .nav-item-more {
-          left: 328.8px;
-          width: 29.47px;
         }
         .account-bottom-nav .nav-item-icon {
           position: absolute;
