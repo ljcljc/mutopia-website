@@ -607,110 +607,111 @@ export default function MyPets() {
   return (
     <div className="flex min-h-full w-full flex-col">
       <div className="mx-auto flex w-full max-w-none flex-1 px-5 pb-5 sm:max-w-[944px] sm:px-6 sm:pb-8">
-        <div className="mb-[-2px] flex flex-col gap-4">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-            <h1 className="font-comfortaa font-bold text-[20px] text-[#4A3C2A]">
-              My pets
-            </h1>
-            {isLoadingPets ? null : (
-              isPetSelectDropdown ? (
-                <Select
-                  value={activePetId ? String(activePetId) : ""}
-                  onValueChange={(value) => {
-                    if (value === "__add__") {
-                      navigate("/account/pets/new", { state: { from: "my-pets" } });
-                      return;
-                    }
-                    const nextId = Number.parseInt(value, 10);
-                    if (Number.isFinite(nextId)) {
-                      handleSelectPet(nextId);
-                    }
-                  }}
-                >
-                  <SelectTrigger
-                    className="h-10 w-40 min-w-40 rounded-tl-[14px] rounded-tr-[14px] border-2 border-[#DE6A07] bg-white px-4 py-2 text-[#DE6A07] [&_svg]:text-[#DE6A07]"
+        <div className="flex w-full flex-col gap-5">
+          <div className="mb-[-2px] flex w-full flex-col gap-5">
+            <div className="flex w-full flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-12">
+              <h1 className="shrink-0 font-comfortaa font-bold text-[20px] leading-[28px] text-[#4A3C2A]">
+                My pets
+              </h1>
+              {isLoadingPets ? null : (
+                isPetSelectDropdown ? (
+                  <Select
+                    value={activePetId ? String(activePetId) : ""}
+                    onValueChange={(value) => {
+                      if (value === "__add__") {
+                        navigate("/account/pets/new", { state: { from: "my-pets" } });
+                        return;
+                      }
+                      const nextId = Number.parseInt(value, 10);
+                      if (Number.isFinite(nextId)) {
+                        handleSelectPet(nextId);
+                      }
+                    }}
                   >
-                    <div className="flex items-center gap-1">
-                      <Icon
-                        name={activePet?.pet_type === "cat" ? "cat" : "dog"}
-                        className="text-[#DE6A07]"
-                        size={24}
-                      />
-                      <span className="font-comfortaa font-bold text-[14px] leading-[21px]">
-                        {activePet?.name ?? "Select pet"}
-                      </span>
-                    </div>
-                  </SelectTrigger>
-                  <SelectContent
-                    className="rounded-t-lg rounded-b-none border border-[#D6D6D6] bg-white p-2"
-                    position="popper"
-                  >
-                    {pets.map((pet) => (
-                      <SelectItem
-                        key={pet.id}
-                        value={String(pet.id)}
-                        className="h-9 rounded px-3 py-3 font-poppins text-[14px] leading-[20px] text-[#6B6B6B] data-highlighted:bg-[#FFFBEB] data-[state=checked]:bg-white data-[state=checked]:text-[#DE6A07] [&_svg]:text-[#6B6B6B] data-[state=checked]:[&_svg]:text-[#DE6A07] [&>span:first-child]:hidden [&>span:last-child]:flex [&>span:last-child]:items-center [&>span:last-child]:gap-3"
-                      >
-                        <div className="flex items-center gap-3">
-                          <Icon name={pet.pet_type === "cat" ? "cat" : "dog"} size={20} className="text-[#DE6A07]" />
-                          <span>{pet.name}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                    <SelectItem
-                      value="__add__"
-                      className="h-9 rounded px-3 py-3 font-poppins text-[14px] leading-[20px] text-[#6B6B6B] data-highlighted:bg-[#FFFBEB] [&>span:first-child]:hidden [&>span:last-child]:flex [&>span:last-child]:items-center [&>span:last-child]:gap-3"
+                    <SelectTrigger
+                      className="relative z-10 h-10 w-40 min-w-40 rounded-tl-[14px] rounded-tr-[14px] border-2 border-[#DE6A07] bg-white px-4 py-2 text-[#DE6A07] [&_svg]:text-[#DE6A07]"
                     >
-                      <div className="flex items-center gap-3">
-                        <Icon name="add-2" size={20} className="text-[#DE6A07]" />
-                        <span>Add pet</span>
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              ) : (
-                <div className="flex max-w-[520px] items-center justify-end overflow-x-auto pl-0.5">
-                  {pets.map((pet) => {
-                    const isActive = pet.id === activePetId;
-                    return (
-                      <button
-                        key={pet.id}
-                        type="button"
-                        onClick={() => handleSelectPet(pet.id)}
-                        className={`flex min-w-[88px] shrink-0 items-center gap-1 rounded-tl-[14px] rounded-tr-[14px] border-2 px-4 py-2 sm:min-w-[120px] ${
-                          isActive
-                            ? "border-[#DE6A07] text-[#DE6A07]"
-                            : "border-[#E5E7EB] text-[#8B6357]"
-                        }`}
-                      >
+                      <div className="flex items-center gap-2">
                         <Icon
-                          name={pet.pet_type === "cat" ? "cat" : "dog"}
-                          className={isActive ? "text-[#DE6A07]" : "text-[#8B6357]"}
+                          name={activePet?.pet_type === "cat" ? "cat" : "dog"}
+                          className="text-[#DE6A07]"
                           size={24}
                         />
                         <span className="font-comfortaa font-bold text-[14px] leading-[21px]">
-                          {pet.name}
+                          {activePet?.name ?? "Select pet"}
                         </span>
-                      </button>
-                    );
-                  })}
-                  <button
-                    type="button"
-                    onClick={() => navigate("/account/pets/new", { state: { from: "my-pets" } })}
-                    className="flex min-w-[88px] shrink-0 items-center gap-1 rounded-tl-[14px] rounded-tr-[14px] border-2 border-[#E5E7EB] px-4 py-2 text-[#8B6357] cursor-pointer"
-                  >
-                    <Icon name="add-2" className="text-[#8B6357]" size={20} />
-                    <span className="font-comfortaa font-bold text-[14px] leading-[21px]">
-                      Add pet
-                    </span>
-                  </button>
-                </div>
-              )
-            )}
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent
+                      className="rounded-t-lg rounded-b-none border border-[#D6D6D6] bg-white p-2"
+                      position="popper"
+                    >
+                      {pets.map((pet) => (
+                        <SelectItem
+                          key={pet.id}
+                          value={String(pet.id)}
+                          className="h-9 rounded px-3 py-3 font-poppins text-[14px] leading-[20px] text-[#6B6B6B] data-highlighted:bg-[#FFFBEB] data-[state=checked]:bg-white data-[state=checked]:text-[#DE6A07] [&_svg]:text-[#6B6B6B] data-[state=checked]:[&_svg]:text-[#DE6A07] [&>span:first-child]:hidden [&>span:last-child]:flex [&>span:last-child]:items-center [&>span:last-child]:gap-3"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Icon name={pet.pet_type === "cat" ? "cat" : "dog"} size={20} className="text-[#DE6A07]" />
+                            <span>{pet.name}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                      <SelectItem
+                        value="__add__"
+                        className="h-9 rounded px-3 py-3 font-poppins text-[14px] leading-[20px] text-[#6B6B6B] data-highlighted:bg-[#FFFBEB] [&>span:first-child]:hidden [&>span:last-child]:flex [&>span:last-child]:items-center [&>span:last-child]:gap-3"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Icon name="add-2" size={20} className="text-[#DE6A07]" />
+                          <span>Add pet</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <div className="relative z-10 flex w-full items-end justify-end overflow-x-auto pl-0.5 lg:w-auto lg:max-w-[calc(100%-180px)] lg:justify-end">
+                    {pets.map((pet) => {
+                      const isActive = pet.id === activePetId;
+                      return (
+                        <button
+                          key={pet.id}
+                          type="button"
+                          onClick={() => handleSelectPet(pet.id)}
+                          className={`flex h-10 min-w-[88px] shrink-0 items-center justify-center gap-1 rounded-tl-[14px] rounded-tr-[14px] border-2 bg-white px-4 py-2 sm:min-w-[120px] ${
+                            isActive
+                              ? "border-[#DE6A07] text-[#DE6A07]"
+                              : "border-[#E5E7EB] text-[#8B6357]"
+                          }`}
+                        >
+                          <Icon
+                            name={pet.pet_type === "cat" ? "cat" : "dog"}
+                            className={isActive ? "text-[#DE6A07]" : "text-[#8B6357]"}
+                            size={24}
+                          />
+                          <span className="truncate font-comfortaa font-bold text-[14px] leading-[21px]">
+                            {pet.name}
+                          </span>
+                        </button>
+                      );
+                    })}
+                    <button
+                      type="button"
+                      onClick={() => navigate("/account/pets/new", { state: { from: "my-pets" } })}
+                      className="flex h-10 min-w-[88px] shrink-0 items-center justify-center gap-1 rounded-tl-[14px] rounded-tr-[14px] border-2 border-[#E5E7EB] bg-white px-4 py-2 text-[#8B6357] cursor-pointer sm:min-w-[120px]"
+                    >
+                      <Icon name="add-2" className="text-[#8B6357]" size={20} />
+                      <span className="font-comfortaa font-bold text-[14px] leading-[21px]">
+                        Add pet
+                      </span>
+                    </button>
+                  </div>
+                )
+              )}
+            </div>
           </div>
-        </div>
 
-        <div className="relative z-1 flex flex-col gap-[21px]">
+          <div className="relative z-1 flex w-full flex-col gap-[21px]">
           {isEditing ? (
             <PetForm
               petName={petName}
@@ -773,13 +774,12 @@ export default function MyPets() {
               }}
             />
           ) : (
-            <div className="rounded-xl rounded-tr-none border-2 border-[#DE6A07] bg-white p-[22px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] sm:p-5">
+            <div className="rounded-[12px] border-2 border-[#DE6A07] bg-white px-5 py-5 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] sm:px-7 sm:py-6">
               {isLoadingPets ? (
                 <div className="text-[#4A3C2A] text-sm">Loading pets...</div>
               ) : activePet ? (
-                <div className="flex gap-4">
-                  {/* 左侧：头像 */}
-                  <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E5E7EB] bg-[#8B6357]">
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
+                  <div className="flex size-[80px] shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E5E7EB] bg-[#8B6357]">
                     {activePet.primary_photo ? (
                       <img
                         alt={activePet.name}
@@ -790,49 +790,47 @@ export default function MyPets() {
                       <Icon name="pet" className="size-6 text-white" />
                     )}
                   </div>
-                  
-                  {/* 右侧：其他所有模块 */}
-                  <div className="flex flex-1 flex-col gap-2">
-                    {/* 上方：信息和编辑icon左右结构 */}
-                    <div className="flex items-start justify-between">
-                      <div className="flex flex-col gap-2">
-                        <p className="font-comfortaa font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
+
+                  <div className="flex flex-1 flex-col gap-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex min-w-0 flex-1 flex-col gap-4">
+                        <p className="font-comfortaa font-medium text-[16px] leading-[28px] text-[#4A3C2A]">
                           {activePet.name}
                         </p>
-                        <div className="grid grid-cols-2 gap-x-10 gap-y-4 text-[#4A3C2A]">
-                          <div className="w-20">
-                            <p className="font-comfortaa text-[10px] leading-[12px]">Pet type</p>
-                            <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
+                        <div className="grid grid-cols-2 gap-x-8 gap-y-5 text-[#4A3C2A] sm:gap-x-14">
+                          <div className="min-w-0">
+                            <p className="font-comfortaa text-[14px] leading-[20px] text-[#6B5A45]">Pet type</p>
+                            <p className="mt-1 font-comfortaa text-[12px] leading-[18px] font-bold">
                               {formatLabel(activePet.pet_type)}
                             </p>
                           </div>
-                          <div className="min-w-20 max-w-40">
-                            <p className="font-comfortaa text-[10px] leading-[12px]">Breed</p>
-                            <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
+                          <div className="min-w-0">
+                            <p className="font-comfortaa text-[14px] leading-[20px] text-[#6B5A45]">Breed</p>
+                            <p className="mt-1 font-comfortaa text-[12px] leading-[18px] font-bold">
                               {activePet.breed || "-"}
                             </p>
                           </div>
-                          <div className="w-20">
-                            <p className="font-comfortaa text-[10px] leading-[12px]">Weight</p>
-                            <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
+                          <div className="min-w-0">
+                            <p className="font-comfortaa text-[14px] leading-[20px] text-[#6B5A45]">Weight</p>
+                            <p className="mt-1 font-comfortaa text-[12px] leading-[18px] font-bold">
                               {formatWeight(activePet.weight_value, activePet.weight_unit)}
                             </p>
                           </div>
-                          <div className="w-20">
-                            <p className="font-comfortaa text-[10px] leading-[12px]">Date of birth</p>
-                            <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
+                          <div className="min-w-0">
+                            <p className="font-comfortaa text-[14px] leading-[20px] text-[#6B5A45]">Date of birth</p>
+                            <p className="mt-1 font-comfortaa text-[12px] leading-[18px] font-bold">
                               {formatBirthday(activePet.birthday)}
                             </p>
                           </div>
-                          <div className="w-20">
-                            <p className="font-comfortaa text-[10px] leading-[12px]">Coat condition</p>
-                            <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
+                          <div className="min-w-0">
+                            <p className="font-comfortaa text-[14px] leading-[20px] text-[#6B5A45]">Coat condition</p>
+                            <p className="mt-1 font-comfortaa text-[12px] leading-[18px] font-bold">
                               {formatLabel(activePet.coat_condition)}
                             </p>
                           </div>
-                          <div className="w-20">
-                            <p className="font-comfortaa text-[10px] leading-[12px]">Behavior</p>
-                            <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
+                          <div className="min-w-0">
+                            <p className="font-comfortaa text-[14px] leading-[20px] text-[#6B5A45]">Behavior</p>
+                            <p className="mt-1 font-comfortaa text-[12px] leading-[18px] font-bold">
                               {formatBehavior(activePet.behavior)}
                             </p>
                           </div>
@@ -840,28 +838,26 @@ export default function MyPets() {
                       </div>
                       <button
                         type="button"
-                        className="text-[#8B6357] hover:text-[#DE6A07] cursor-pointer"
+                        className="shrink-0 text-[#8B6357] hover:text-[#DE6A07] cursor-pointer"
                         onClick={() => setIsEditing(true)}
                       >
                         <Icon name="pencil" size={20} />
                       </button>
                     </div>
-                    
-                    {/* 分割线 */}
-                    <div className="border-t border-[#E5E7EB] w-full" />
-                    
-                    {/* 下方：移动端换行，PC 端同一行 */}
-                    <div className="flex flex-col items-start sm:flex-row sm:items-center sm:justify-between">
-                      <div className="w-20">
-                        <p className="font-comfortaa text-[10px] leading-[12px]">Frequency</p>
-                        <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
+
+                    <div className="h-px w-full bg-[#E5E7EB]" />
+
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="min-w-0">
+                        <p className="font-comfortaa text-[14px] leading-[20px] text-[#6B5A45]">Frequency</p>
+                        <p className="mt-1 font-comfortaa text-[12px] leading-[18px] font-bold text-[#4A3C2A]">
                           {formatLabel(activePet.grooming_frequency)}
                         </p>
                       </div>
                       <OrangeButton
                         size="compact"
                         showArrow
-                        className="mt-3 h-7 px-7 sm:mt-0"
+                        className="h-[40px] min-w-[176px] px-7 sm:h-[40px]"
                         onClick={() => activePet && handleBookForPet(activePet)}
                       >
                         <span className="text-white text-[12px] leading-[17.5px] font-bold">Book for {activePet.name}</span>
@@ -875,11 +871,11 @@ export default function MyPets() {
             </div>
           )}
 
-          <div className="rounded-xl bg-white p-3.5 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] sm:p-6">
+          <div className="rounded-[12px] bg-white p-5 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] sm:p-6">
             <div className="flex flex-col gap-6">
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between">
-                  <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
+                  <p className="font-comfortaa font-medium text-[16px] leading-[28px] text-[#4A3C2A]">
                     Photos
                   </p>
                   {isSavingPhotos ? (
@@ -888,7 +884,7 @@ export default function MyPets() {
                     </span>
                   ) : null}
                 </div>
-                <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
+                <p className="font-comfortaa font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
                   Pet photos
                 </p>
                 <FileUpload
@@ -907,7 +903,7 @@ export default function MyPets() {
               <div className="border-t border-[#E5E7EB]" />
 
               <div className="flex flex-col gap-2">
-                <p className="font-comfortaa font-normal text-[12.25px] leading-[17.5px] text-[#4A3C2A]">
+                <p className="font-comfortaa font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
                   Reference photos
                 </p>
                 <FileUpload
@@ -925,35 +921,61 @@ export default function MyPets() {
             </div>
           </div>
 
-          <div className="rounded-xl bg-white p-3 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] sm:p-5">
+          <div className="rounded-[12px] bg-white p-5 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
             <div className="flex flex-col gap-3">
-              <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
+              <p className="font-comfortaa font-medium text-[16px] leading-[28px] text-[#4A3C2A]">
                 Health report
               </p>
-              <div className="flex w-full items-center justify-between rounded-xl border border-[#E5E7EB] px-[15px] py-[13px]">
-                <div>
-                  <p className="font-comfortaa font-normal text-[16px] leading-[28px] text-[#DE6A07]">
-                    {activePet?.name || "-"}
-                  </p>
-                  <p className="font-comfortaa font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
-                    2026-04-03 at 10H
-                  </p>
-                </div>
-                <div className="flex items-center gap-[7px]">
-                  <div className="flex h-6 items-center rounded-xl bg-[#DCFCE7] px-4 py-1">
-                    <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#016630]">
-                      Ready
-                    </span>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="flex w-full items-center justify-between rounded-xl border border-[#E5E7EB] px-[15px] py-[13px]">
+                  <div>
+                    <p className="font-comfortaa font-normal text-[16px] leading-[28px] text-[#DE6A07]">
+                      {activePet?.name || "-"}
+                    </p>
+                    <p className="font-comfortaa font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
+                      Updated: 2026-04-03
+                    </p>
                   </div>
-                  <Icon name="nav-next" className="text-[#8B6357]" size={16} />
+                  <div className="flex items-center gap-[7px]">
+                    <div className="flex h-6 items-center rounded-xl bg-[#DCFCE7] px-4 py-1">
+                      <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#016630]">
+                        Ready
+                      </span>
+                    </div>
+                    <Icon name="nav-next" className="text-[#8B6357]" size={16} />
+                  </div>
+                </div>
+                <div className="hidden sm:flex w-full items-center justify-between rounded-xl border border-[#E5E7EB] px-[15px] py-[13px]">
+                  <div>
+                    <p className="font-comfortaa font-normal text-[16px] leading-[28px] text-[#DE6A07]">
+                      {activePet?.name || "-"}
+                    </p>
+                    <p className="font-comfortaa font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
+                      Updated: 2025-04-03
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-[7px]">
+                    <div className="flex h-6 items-center rounded-xl bg-[#DCFCE7] px-4 py-1">
+                      <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#016630]">
+                        Ready
+                      </span>
+                    </div>
+                    <Icon name="nav-next" className="text-[#8B6357]" size={16} />
+                  </div>
                 </div>
               </div>
+              <button
+                type="button"
+                className="self-center font-comfortaa text-[12px] font-bold leading-[18px] text-[#8B6357] underline decoration-solid underline-offset-2"
+              >
+                See all the reports
+              </button>
             </div>
           </div>
 
-          <div className="rounded-xl bg-white p-3 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] sm:p-5">
+          <div className="rounded-[12px] bg-white p-5 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
             <div className="flex flex-col gap-3">
-              <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
+              <p className="font-comfortaa font-medium text-[16px] leading-[28px] text-[#4A3C2A]">
                 Special instruments or notes
               </p>
               <CustomTextarea
@@ -966,14 +988,14 @@ export default function MyPets() {
                 size="compact"
                 onClick={handleSaveNotes}
                 loading={isSaving}
-                className="w-24 self-end"
+                className="w-[72px] self-end"
               >
                 Save
               </OrangeButton>
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <OrangeButton
               variant="outlineMuted"
               size="compact"
@@ -994,6 +1016,7 @@ export default function MyPets() {
               Delete pet
             </button>
           </div>
+        </div>
         </div>
       </div>
 
