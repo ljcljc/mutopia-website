@@ -34,14 +34,14 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className="flex min-h-full w-full flex-col">
+    <div className="w-full min-h-full flex flex-col">
       <div
-        className="mx-auto flex w-full max-w-none flex-1 px-[calc(20*var(--px493))] pb-[calc(20*var(--px493))] sm:max-w-[944px] sm:px-6 sm:pb-8"
+        className="w-full max-w-none sm:max-w-[944px] mx-auto px-[calc(20*var(--px493))] sm:px-6 pb-[calc(20*var(--px493))] sm:pb-8 flex-1"
         style={{ ["--px493" as never]: "calc(100vw / 493)" }}
       >
-        <div className="flex flex-col gap-[calc(16*var(--px493))] sm:gap-5">
+        <div className="flex flex-col gap-[calc(16*var(--px493))] sm:gap-[20px]">
           <div className="h-auto sm:h-[27px]">
-            <h1 className="font-comfortaa font-bold text-[20px] text-[#4A3C2A]">
+            <h1 className="font-['Comfortaa:Bold',sans-serif] font-bold text-[20px] text-[#4A3C2A]">
               Dashboard
             </h1>
           </div>
@@ -51,7 +51,7 @@ export default function Dashboard() {
           <DashboardMyPetsCard />
           <DashboardMyCreditCard />
 
-          <div className="grid grid-cols-1 gap-[calc(20*var(--px493))] md:grid-cols-2 sm:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-[calc(20*var(--px493))] sm:gap-6">
             <ShareAndEarnCard />
             <MembershipCard />
           </div>

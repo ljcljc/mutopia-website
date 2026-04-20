@@ -85,9 +85,9 @@ function StatusBadge({ status }: { status: string }) {
   
   if (tone === "green") {
     return (
-      <div className="inline-flex h-6 w-fit items-center gap-1 rounded-xl bg-[#DCFCE7] px-4 py-1">
-        <Icon name="check-green" size={12} className="text-[#00A63E]" />
-        <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#00A63E]">
+      <div className="inline-flex w-fit items-center justify-center rounded-[12px] bg-[#DCFCE7] px-[12px] py-[5px]">
+        <Icon name="check-green" size={12} className="mr-1 text-[#00A63E]" />
+        <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-[#00A63E]">
           {label}
         </span>
       </div>
@@ -96,8 +96,8 @@ function StatusBadge({ status }: { status: string }) {
 
   if (tone === "purple") {
     return (
-      <div className="inline-flex h-6 w-fit items-center rounded-xl bg-[#633479] px-4 py-1">
-        <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-white">
+      <div className="inline-flex h-6 w-fit items-center rounded-[12px] bg-[#633479] px-[12px] py-[5px]">
+        <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-white">
           {label}
         </span>
       </div>
@@ -106,8 +106,8 @@ function StatusBadge({ status }: { status: string }) {
 
   if (tone === "outlined") {
     return (
-      <div className="inline-flex h-6 w-fit items-center rounded-xl border border-[#8B8B8B] bg-white px-3 py-1">
-        <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#4C4C4C]">
+      <div className="inline-flex h-6 w-fit items-center rounded-[12px] border border-[#4C4C4C] bg-white px-[9px] py-[5px]">
+        <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-[#4C4C4C]">
           {label}
         </span>
       </div>
@@ -115,8 +115,8 @@ function StatusBadge({ status }: { status: string }) {
   }
 
   return (
-    <div className="inline-flex h-6 w-fit items-center rounded-xl bg-[#DE6A07] px-3 py-1">
-      <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-white">
+    <div className="inline-flex h-6 w-fit items-center rounded-[12px] bg-[#DE6A07] px-[12px] py-[5px]">
+      <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-white">
         {label}
       </span>
     </div>
@@ -134,7 +134,7 @@ function BookingItem({ booking }: { booking: BookingListOut }) {
 
   return (
     <div
-      className="flex cursor-pointer items-center justify-between rounded-[14px] border border-[#E5E7EB] p-[13px] transition-colors duration-200 hover:bg-[#F9FAFB]"
+      className="border border-[#E5E7EB] rounded-[14px] p-[13px] transition-colors duration-200 hover:bg-[#F9FAFB] cursor-pointer"
       role="button"
       tabIndex={0}
       onClick={() => navigate(`/account/bookings/${booking.id}`)}
@@ -145,29 +145,31 @@ function BookingItem({ booking }: { booking: BookingListOut }) {
         }
       }}
     >
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-col gap-2 pr-[30px]">
-          <p className="font-comfortaa font-bold text-[16px] leading-[28px] text-[#DE6A07]">
-            {petName}
-          </p>
-          <p className="font-comfortaa font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
-            {serviceDisplay} {dateTime}
-          </p>
-        </div>
-        <div className="flex flex-col pr-[30px]">
-          <p className="font-comfortaa font-medium text-[12.25px] leading-[17.5px] text-[#4A3C2A]">
-            {address.line1}
-          </p>
-          {address.line2 && (
-            <p className="font-comfortaa font-normal text-[12.25px] leading-[17.5px] text-[#4A3C2A]">
-              {address.line2}
-            </p>
-          )}
-        </div>
-      </div>
-      <div className="flex items-center gap-[7px]">
+      <div className="flex flex-col gap-[12px]">
         <StatusBadge status={booking.status} />
-        <Icon name="nav-next" className="size-4 text-[#99A1AF]" />
+        <div className="flex items-center justify-between gap-[12px]">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-col gap-[8px]">
+              <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[16px] leading-[28px] text-[#DE6A07]">
+                {petName}
+              </p>
+              <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
+                {serviceDisplay} {dateTime}
+              </p>
+            </div>
+            <div className="mt-[12px] flex flex-col">
+              <p className="font-['Comfortaa:Medium',sans-serif] font-medium text-[12.25px] leading-[17.5px] text-[#4A3C2A]">
+                {address.line1}
+              </p>
+              {address.line2 && (
+                <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[12.25px] leading-[17.5px] text-[#4A3C2A]">
+                  {address.line2}
+                </p>
+              )}
+            </div>
+          </div>
+          <Icon name="nav-next" className="size-[16px] shrink-0 text-[#99A1AF]" />
+        </div>
       </div>
     </div>
   );
@@ -289,13 +291,13 @@ export default function DashboardBookingCard() {
   }, []);
 
   return (
-    <div className="rounded-xl bg-white p-5 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
-      <div className="flex flex-col gap-6">
-        <div ref={tabsRef} className="relative ml-[-20px] flex items-start whitespace-nowrap pb-1">
+    <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[20px]">
+      <div className="flex flex-col gap-[24px]">
+        <div ref={tabsRef} className="relative flex items-start pb-[4px] whitespace-nowrap ml-[-20px]">
           <button
             type="button"
             onClick={() => setActiveTab("upcoming")}
-            className="flex cursor-pointer flex-col items-end whitespace-nowrap px-3"
+            className="flex flex-col items-end px-[12px] whitespace-nowrap cursor-pointer"
             aria-pressed={activeTab === "upcoming"}
           >
             <span
@@ -305,7 +307,7 @@ export default function DashboardBookingCard() {
             >
               <span
                 ref={upcomingTextRef}
-                className={`whitespace-nowrap font-comfortaa text-[16px] leading-[28px] ${
+                className={`whitespace-nowrap font-['Comfortaa',sans-serif] text-[16px] leading-[28px] ${
                   activeTab === "upcoming"
                     ? "font-bold text-[#4A3C2A]"
                     : "font-normal text-[#4A3C2A]/70"
@@ -318,7 +320,7 @@ export default function DashboardBookingCard() {
           <button
             type="button"
             onClick={() => setActiveTab("history")}
-            className="flex cursor-pointer flex-col items-end whitespace-nowrap px-3"
+            className="flex flex-col items-end px-[12px] whitespace-nowrap cursor-pointer"
             aria-pressed={activeTab === "history"}
           >
             <span
@@ -328,7 +330,7 @@ export default function DashboardBookingCard() {
             >
               <span
                 ref={historyTextRef}
-                className={`whitespace-nowrap font-comfortaa text-[16px] leading-[28px] ${
+                className={`whitespace-nowrap font-['Comfortaa',sans-serif] text-[16px] leading-[28px] ${
                   activeTab === "history"
                     ? "font-bold text-[#4A3C2A]"
                     : "font-normal text-[#4A3C2A]/70"
@@ -339,7 +341,7 @@ export default function DashboardBookingCard() {
             </span>
           </button>
           <div
-            className="pointer-events-none absolute bottom-0 h-[2px] bg-[#DE6A07] transition-[transform,width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+            className="absolute bottom-0 h-[2px] bg-[#DE6A07] pointer-events-none transition-[transform,width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
             style={{
               width: `${underlineStyle.width}px`,
               transform: underlineStyle.transform,
@@ -347,16 +349,16 @@ export default function DashboardBookingCard() {
             }}
           />
 
-          <div className="pointer-events-none absolute left-[-9999px] top-0 whitespace-nowrap opacity-0">
+          <div className="absolute left-[-9999px] top-0 opacity-0 pointer-events-none whitespace-nowrap">
             <span
               ref={upcomingMeasureRef}
-              className="font-comfortaa font-bold text-[16px] leading-[28px]"
+              className="font-['Comfortaa',sans-serif] font-bold text-[16px] leading-[28px]"
             >
               Upcoming booking
             </span>
             <span
               ref={historyMeasureRef}
-              className="font-comfortaa font-bold text-[16px] leading-[28px]"
+              className="font-['Comfortaa',sans-serif] font-bold text-[16px] leading-[28px]"
             >
               History booking
             </span>
@@ -369,7 +371,7 @@ export default function DashboardBookingCard() {
             No {activeTab === "upcoming" ? "upcoming" : "history"} bookings.
           </div>
         ) : (
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-[24px]">
             {filteredBookings.map((booking) => (
               <BookingItem key={booking.id} booking={booking} />
             ))}
