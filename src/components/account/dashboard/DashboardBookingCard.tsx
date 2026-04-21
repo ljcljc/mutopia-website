@@ -145,7 +145,7 @@ function BookingItem({ booking }: { booking: BookingListOut }) {
         }
       }}
     >
-      <div className="flex flex-col gap-[12px]">
+      <div className="flex flex-col gap-[12px] sm:hidden">
         <StatusBadge status={booking.status} />
         <div className="flex items-center justify-between gap-[12px]">
           <div className="min-w-0 flex-1">
@@ -169,6 +169,32 @@ function BookingItem({ booking }: { booking: BookingListOut }) {
             </div>
           </div>
           <Icon name="nav-next" className="size-[16px] shrink-0 text-[#99A1AF]" />
+        </div>
+      </div>
+      <div className="hidden items-center justify-between sm:flex">
+        <div className="flex flex-col gap-[12px]">
+          <div className="flex flex-col gap-[8px] pr-[30px]">
+            <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[16px] leading-[28px] text-[#DE6A07]">
+              {petName}
+            </p>
+            <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
+              {serviceDisplay} {dateTime}
+            </p>
+          </div>
+          <div className="flex flex-col pr-[30px]">
+            <p className="font-['Comfortaa:Medium',sans-serif] font-medium text-[12.25px] leading-[17.5px] text-[#4A3C2A]">
+              {address.line1}
+            </p>
+            {address.line2 && (
+              <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[12.25px] leading-[17.5px] text-[#4A3C2A]">
+                {address.line2}
+              </p>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-[7px]">
+          <StatusBadge status={booking.status} />
+          <Icon name="nav-next" className="size-[16px] text-[#99A1AF]" />
         </div>
       </div>
     </div>
