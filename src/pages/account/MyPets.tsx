@@ -42,14 +42,6 @@ function formatWeight(weightValue?: number | string | null, weightUnit?: string 
   return `${weightValue} ${unit}`;
 }
 
-function formatBehavior(behavior?: string | null): string {
-  if (!behavior) return "-";
-  return behavior
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
-
 function formatLabel(value?: string | null): string {
   if (!value) return "-";
   return value
@@ -799,16 +791,16 @@ export default function MyPets() {
                         <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
                           {activePet.name}
                         </p>
-                        <div className="grid grid-cols-2 gap-x-[40px] gap-y-[16px] text-[#4A3C2A]">
+                        <div className="grid grid-cols-2 gap-x-[40px] gap-y-[16px] text-[#4A3C2A] sm:grid-cols-4">
                           <div className="w-[80px]">
                             <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Pet type</p>
                             <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
                               {formatLabel(activePet.pet_type)}
                             </p>
                           </div>
-                          <div className="min-w-[80px] max-w-[160px]">
+                          <div className="min-w-[80px] max-w-[180px]">
                             <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Breed</p>
-                            <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
+                            <p className="mt-1 whitespace-nowrap font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
                               {activePet.breed || "-"}
                             </p>
                           </div>
@@ -822,18 +814,6 @@ export default function MyPets() {
                             <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Date of birth</p>
                             <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
                               {formatBirthday(activePet.birthday)}
-                            </p>
-                          </div>
-                          <div className="w-[80px]">
-                            <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Coat condition</p>
-                            <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
-                              {formatLabel(activePet.coat_condition)}
-                            </p>
-                          </div>
-                          <div className="w-[80px]">
-                            <p className="font-['Comfortaa:Regular',sans-serif] text-[10px] leading-[12px]">Behavior</p>
-                            <p className="mt-1 font-['Comfortaa:Bold',sans-serif] text-[12px] leading-[16px] font-bold">
-                              {formatBehavior(activePet.behavior)}
                             </p>
                           </div>
                         </div>

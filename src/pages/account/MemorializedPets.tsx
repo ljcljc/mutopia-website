@@ -37,14 +37,6 @@ function formatWeight(weightValue?: number | string | null, weightUnit?: string 
   return `${weightValue} ${unit}`;
 }
 
-function formatBehavior(behavior?: string | null): string {
-  if (!behavior) return "-";
-  return behavior
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
-
 function formatLabel(value?: string | null): string {
   if (!value) return "-";
   return value
@@ -147,12 +139,12 @@ export default function MemorializedPets() {
 
   return (
     <div className="flex min-h-full w-full flex-col">
-      <div className="mx-auto flex w-full max-w-[944px] flex-1 px-6">
+      <div className="mx-auto w-full max-w-[944px] flex-1 px-5 sm:px-6">
       <div className="mb-[-2px] flex flex-col gap-2">
-            <div className="flex justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
             <nav
             aria-label="Breadcrumb"
-            className="flex gap-1.5 font-comfortaa text-[20px] font-bold text-[#4A3C2A]"
+            className="flex flex-wrap gap-1.5 font-comfortaa text-[20px] font-bold text-[#4A3C2A]"
           >
             <Link to="/account/pets" className="hover:text-[#DE6A07] transition-colors">
             My pets
@@ -160,7 +152,7 @@ export default function MemorializedPets() {
             <span aria-hidden="true">{" > "}</span>
             <span>Memorialized pets</span>
           </nav>
-              <div className="flex max-w-[520px] items-center gap-2 overflow-x-auto px-0.5">
+              <div className="flex max-w-full items-center justify-end overflow-x-auto px-0.5 sm:max-w-[520px]">
                 {memorializedPets.map((pet) => (
                     <button
                       key={pet.id}
@@ -186,7 +178,7 @@ export default function MemorializedPets() {
             {isLoadingMemorializedPets ? (
               <div className="text-[#4A3C2A] text-sm">Loading memorialized pets...</div>
             ) : activePet ? (
-              <div className="flex gap-4">
+              <div className="flex gap-2 sm:gap-4">
                 <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E5E7EB] bg-[#8B6357]">
                   {activePet.primary_photo ? (
                     <img
@@ -198,22 +190,22 @@ export default function MemorializedPets() {
                     <Icon name="pet" className="size-6 text-white" />
                   )}
                 </div>
-                <div className="flex flex-1 flex-col gap-2">
+                <div className="flex min-w-0 flex-1 flex-col gap-2">
                   <div className="flex items-start justify-between">
-                    <div className="flex flex-col gap-2">
+                    <div className="flex min-w-0 flex-col gap-2">
                       <p className="font-comfortaa font-normal text-[14px] leading-[22.75px] text-[#4A3C2A]">
                         {activePet.name}
                       </p>
-                      <div className="grid grid-cols-3 gap-x-10 gap-y-4 text-[#4A3C2A]">
+                      <div className="grid grid-cols-2 gap-x-10 gap-y-4 text-[#4A3C2A] sm:grid-cols-4">
                         <div className="w-20">
                           <p className="font-comfortaa text-[10px] leading-[12px]">Pet type</p>
                           <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
                             {formatLabel(activePet.pet_type)}
                           </p>
                         </div>
-                        <div className="w-20">
+                        <div className="min-w-[80px] max-w-[180px]">
                           <p className="font-comfortaa text-[10px] leading-[12px]">Breed</p>
-                          <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
+                          <p className="mt-1 whitespace-nowrap font-comfortaa text-[12px] leading-[16px] font-bold">
                             {activePet.breed || "-"}
                           </p>
                         </div>
@@ -227,18 +219,6 @@ export default function MemorializedPets() {
                           <p className="font-comfortaa text-[10px] leading-[12px]">Weight</p>
                           <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
                             {formatWeight(activePet.weight_value, activePet.weight_unit)}
-                          </p>
-                        </div>
-                        <div className="w-20">
-                          <p className="font-comfortaa text-[10px] leading-[12px]">Coat condition</p>
-                          <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
-                            {formatLabel(activePet.coat_condition)}
-                          </p>
-                        </div>
-                        <div className="w-20">
-                          <p className="font-comfortaa text-[10px] leading-[12px]">Behavior</p>
-                          <p className="mt-1 font-comfortaa text-[12px] leading-[16px] font-bold">
-                            {formatBehavior(activePet.behavior)}
                           </p>
                         </div>
                       </div>
