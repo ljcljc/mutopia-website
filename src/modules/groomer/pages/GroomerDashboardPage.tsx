@@ -183,6 +183,7 @@ export default function GroomerDashboardPage() {
     () => metrics.partnerScore !== "—" || metrics.rating !== "—",
     [metrics.partnerScore, metrics.rating],
   );
+  const showDailyGoalCard = dailyGoal.total > 0;
 
   return (
     <div className="mx-auto min-h-[calc(100vh-64px)] w-full max-w-[393px] bg-[#633479] px-5 pb-28 pt-2">
@@ -199,7 +200,7 @@ export default function GroomerDashboardPage() {
 
         {bookingRequests.length > 0 ? <BookingRequestCard requests={bookingRequests} /> : null}
 
-        <DailyGoalProgressCard dailyGoal={dailyGoal} />
+        {showDailyGoalCard ? <DailyGoalProgressCard dailyGoal={dailyGoal} /> : null}
 
         {showMetricCards ? (
           <div className="grid grid-cols-2 gap-3">
