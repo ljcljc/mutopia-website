@@ -13,14 +13,18 @@ export type BookingRequestContentData = {
   address: string;
   service: string;
   duration: string;
+  proposalSlots?: string[];
+  expiresInLabel?: string;
 };
 
 type BookingRequestContentProps = {
   request: BookingRequestContentData;
   proposalSlots?: string[];
   accessory?: ReactNode;
+  expanded?: boolean;
   eyebrow?: string;
   title?: string;
+  showHeader?: boolean;
   className?: string;
   passAppointmentContextLabel?: string;
   passAppointmentReturnLabel?: string;
@@ -31,10 +35,12 @@ const DEFAULT_TIME_OPTIONS = ["09:00 AM", "10:30 AM", "01:00 PM"] as const;
 
 export function BookingRequestContent({
   request,
-  proposalSlots = [...DEFAULT_PROPOSAL_SLOTS],
+  proposalSlots = request.proposalSlots?.length ? request.proposalSlots : [...DEFAULT_PROPOSAL_SLOTS],
   accessory,
+  expanded = true,
   eyebrow = "BOOKING REQUEST",
   title = "Confirm appointment",
+  showHeader = true,
   className,
   passAppointmentContextLabel = "BOOKING REQUEST",
   passAppointmentReturnLabel = "Go back",
@@ -43,125 +49,149 @@ export function BookingRequestContent({
   const [availableTimeBySlot, setAvailableTimeBySlot] = useState<Record<string, string>>({});
   const [isProposeModalOpen, setIsProposeModalOpen] = useState(false);
   const [isPassModalOpen, setIsPassModalOpen] = useState(false);
+  const expiryBadgeColor = request.expiresInLabel === "Expired" ? "#DE1507" : "#DE6A07";
 
   return (
     <div className={cn(className)}>
-      <p className="font-comfortaa text-[11px] leading-[16.5px] tracking-[0.5px] text-[#A07D72]">{eyebrow}</p>
-      <h3 className="mt-1 font-comfortaa text-[18px] leading-[27px] text-[#4A2C55]">{title}</h3>
+      {showHeader ? (
+        <>
+          <p className="font-comfortaa text-[12px] leading-[18px] tracking-[0.5px] text-[#8B6357]">{eyebrow}</p>
+          <h3 className="mt-1 font-comfortaa text-[20px] font-bold leading-[30px] text-[#4A2C55]">{title}</h3>
+        </>
+      ) : null}
 
-      <div className="mt-4 rounded-[16px] border border-[#E5E7EB] bg-[#FAF9F7] px-3 py-3">
-        <div className="rounded-[16px] bg-[#FAF9F7]">
-          <div className="flex items-center gap-3">
-            <img src={request.avatarUrl} alt={request.petName} className="size-[48px] rounded-full object-cover" />
+      <div className={cn("rounded-[16px] border border-[#E5E7EB] bg-[#FAF9F7] px-4 pb-4", showHeader ? "mt-4" : "")}>
+        <div className="rounded-[16px] bg-[#FAF9F7] py-3">
+          <div className="flex items-center gap-5">
+            <img src={request.avatarUrl} alt={request.petName} className="size-[42px] rounded-full object-cover" />
             <div className="min-w-0 flex-1">
-              <p className="font-comfortaa text-[14px] leading-[21px] text-[#4A2C55]">
-                {request.petName} - {request.breed}
+              <p className="font-comfortaa text-[14px] leading-[20px] text-[#4A2C55]">
+                <span className="font-bold">{request.petName} - </span>
+                <span>{request.breed}</span>
               </p>
-              <p className="mt-0.5 font-comfortaa text-[11px] leading-[16.5px] text-[#15A34A]">
-                <span aria-hidden="true">• </span>
-                Owner: {request.owner}
-              </p>
+              <div className="mt-0.5 flex items-center gap-1">
+                <span className="size-[6px] rounded-full bg-[#00A63E]" aria-hidden="true" />
+                <p className="font-comfortaa text-[11px] leading-[16.5px] text-[#00A63E]">Owner: {request.owner}</p>
+              </div>
+              {request.expiresInLabel ? (
+                <div
+                  className="mt-[7px] inline-flex rounded-full border px-[10px] py-[4px]"
+                  style={{ borderColor: expiryBadgeColor }}
+                >
+                  <span
+                    className="font-comfortaa text-[11px] leading-[16.5px]"
+                    style={{ color: expiryBadgeColor }}
+                  >
+                    {request.expiresInLabel}
+                  </span>
+                </div>
+              ) : null}
             </div>
             {accessory}
           </div>
         </div>
 
-        <div className="mt-4 space-y-4">
-          <div className="flex items-start gap-2.5">
-            <Icon name="location" className="mt-[2px] size-4 text-[#15A34A]" aria-hidden="true" />
-            <div>
-              <p className="font-comfortaa text-[11px] leading-[16.5px] text-[#A07D72]">ADDRESS</p>
-              <p className="mt-0.5 font-comfortaa text-[14px] leading-[21px] text-[#15A34A]">{request.address}</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-2.5">
-            <Icon name="full-grooming" className="mt-[2px] size-4 text-[#15A34A]" aria-hidden="true" />
-            <div>
-              <p className="font-comfortaa text-[11px] leading-[16.5px] text-[#A07D72]">SERVICE</p>
-              <p className="mt-0.5 font-comfortaa text-[15px] leading-[22.5px] text-[#4A2C55]">{request.service}</p>
-              <p className="mt-0.5 font-comfortaa text-[13px] leading-[19.5px] text-[#A07D72]">{request.duration}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-4 rounded-[14px] border border-[#CDEFD7] bg-[#F3FCF6] px-3 py-3">
-          <p className="font-comfortaa text-[12px] leading-[18px] text-[#15A34A]">Specify your available time from one date</p>
-
-          <div className="mt-3 space-y-3">
-            {proposalSlots.map((slot) => (
-              <div key={slot}>
-                <label className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedProposalSlot(slot)}
-                    className={cn(
-                      "flex size-4 items-center justify-center rounded-full border",
-                      selectedProposalSlot === slot ? "border-[#8B6357]" : "border-[#A8A29E]",
-                    )}
-                    aria-label={`Select ${slot}`}
-                  >
-                    <span
-                      className={cn(
-                        "size-2 rounded-full",
-                        selectedProposalSlot === slot ? "bg-[#F08A12]" : "bg-transparent",
-                      )}
-                    />
-                  </button>
-                  <span className="font-comfortaa text-[12px] leading-[18px] text-[#4A2C55]">{slot}</span>
-                </label>
-
-                {selectedProposalSlot === slot ? (
-                  <div className="mt-2">
-                    <p className="font-comfortaa text-[12px] leading-[18px] text-[#4A2C55]">Available time</p>
-                    <CustomSelect
-                      value={availableTimeBySlot[slot] ?? ""}
-                      onValueChange={(value) =>
-                        setAvailableTimeBySlot((current) => ({
-                          ...current,
-                          [slot]: value,
-                        }))
-                      }
-                      placeholder="Select or type time"
-                      className="rounded-[10px] border-[#D9D2E8] text-[12px] text-[#8B6357]"
-                    >
-                      {DEFAULT_TIME_OPTIONS.map((time) => (
-                        <CustomSelectItem key={time} value={time}>
-                          {time}
-                        </CustomSelectItem>
-                      ))}
-                    </CustomSelect>
-                  </div>
-                ) : null}
+        {expanded ? (
+          <>
+            <div className="mt-4 flex flex-wrap gap-x-6 gap-y-4">
+              <div className="flex items-start gap-3">
+                <Icon name="location" className="size-[18px] text-[#00A63E]" aria-hidden="true" />
+                <div>
+                  <p className="font-comfortaa text-[11px] leading-[16.5px] text-[#8B6357]">ADDRESS</p>
+                  <p className="mt-1 font-comfortaa text-[14px] font-medium leading-[21px] text-[#00A63E]">{request.address}</p>
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
 
-        <div className="mt-4 flex flex-col gap-3">
-          <button
-            type="button"
-            className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#06AF3D] px-4 font-comfortaa text-[16px] font-bold leading-6 text-white shadow-[0px_8px_18px_rgba(6,175,61,0.22)] transition-[transform,filter] duration-150 active:scale-[0.98] active:brightness-95"
-          >
-            <Icon name="target" className="size-5 text-white" aria-hidden="true" />
-            Confirm
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsProposeModalOpen(true)}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-[#F08A12] bg-white px-4 font-comfortaa text-[16px] font-bold leading-6 text-[#F08A12] transition-[transform,background-color] duration-150 active:scale-[0.98] active:bg-[#FFF7ED]"
-          >
-            <Icon name="calendar" className="size-5 text-[#F08A12]" aria-hidden="true" />
-            Propose new time
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsPassModalOpen(true)}
-            className="font-comfortaa text-[12px] leading-[18px] text-[#8B6357] underline underline-offset-[2px]"
-          >
-            Pass appointment
-          </button>
-        </div>
+              <div className="flex items-start gap-3">
+                <Icon name="calendar" className="mt-[2px] size-[18px] text-[#00A63E]" aria-hidden="true" />
+                <div>
+                  <p className="font-comfortaa text-[11px] leading-[16.5px] text-[#8B6357]">SERVICE</p>
+                  <p className="mt-0.5 font-comfortaa text-[14px] font-medium leading-[21px] text-[#4A2C55]">{request.service}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-[12px] border border-[#BBF7D0] bg-[#F0FDF4] p-3">
+              <p className="font-comfortaa text-[11px] font-medium leading-[16.5px] text-[#166534]">Specify your available time from one date</p>
+
+              <div className="mt-2 space-y-2.5">
+                {proposalSlots.map((slot) => (
+                  <div key={slot}>
+                    <label className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedProposalSlot(slot)}
+                        className={cn(
+                          "flex size-4 items-center justify-center rounded-full border",
+                          selectedProposalSlot === slot ? "border-[#8B6357]" : "border-[#A8A29E]",
+                        )}
+                        aria-label={`Select ${slot}`}
+                      >
+                        <span
+                          className={cn(
+                            "size-2 rounded-full",
+                            selectedProposalSlot === slot ? "bg-[#F08A12]" : "bg-transparent",
+                          )}
+                        />
+                      </button>
+                      <span className="font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#4A3C2A]">{slot}</span>
+                    </label>
+
+                    {selectedProposalSlot === slot ? (
+                      <div className="mt-1">
+                        <p className="font-comfortaa text-[12px] font-bold leading-4 text-[#4A3C2A]">Available time</p>
+                        <div className="mt-1 w-[167px]">
+                          <CustomSelect
+                            value={availableTimeBySlot[slot] ?? ""}
+                            onValueChange={(value) =>
+                              setAvailableTimeBySlot((current) => ({
+                                ...current,
+                                [slot]: value,
+                              }))
+                            }
+                            placeholder="Select or type time"
+                            className="rounded-[8px] border-[#E5E7EB] text-[12.25px] text-[#717182]"
+                          >
+                            {DEFAULT_TIME_OPTIONS.map((time) => (
+                              <CustomSelectItem key={time} value={time}>
+                                {time}
+                              </CustomSelectItem>
+                            ))}
+                          </CustomSelect>
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-4 flex flex-col gap-[10px]">
+              <button
+                type="button"
+                className="inline-flex h-12 items-center justify-center gap-3 rounded-full bg-[#00A63E] px-4 font-comfortaa text-[16px] font-bold leading-6 text-white shadow-[0px_4px_12px_rgba(0,166,62,0.3)] transition-[transform,filter] duration-150 active:scale-[0.98] active:brightness-95"
+              >
+                <Icon name="target" className="size-5 text-white" aria-hidden="true" />
+                Confirm
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsProposeModalOpen(true)}
+                className="inline-flex h-12 items-center justify-center gap-[11px] rounded-full border-[1.5px] border-[#F59E0B] bg-white px-4 font-comfortaa text-[15px] font-bold leading-[22.5px] text-[#F59E0B] transition-[transform,background-color] duration-150 active:scale-[0.98] active:bg-[#FFF7ED]"
+              >
+                <Icon name="calendar" className="size-5 text-[#F59E0B]" aria-hidden="true" />
+                Propose new time
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsPassModalOpen(true)}
+                className="py-[7px] font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357] underline underline-offset-2"
+              >
+                Pass appointment
+              </button>
+            </div>
+          </>
+        ) : null}
       </div>
 
       <PassAppointmentModal

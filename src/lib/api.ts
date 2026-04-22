@@ -1568,7 +1568,25 @@ export type GroomerPayoutLinkOut = UnknownObjectOut;
 export type GroomerPerformanceOut = UnknownObjectOut;
 export type GroomerDashboardSummaryOut = UnknownObjectOut;
 export type GroomerCurrentBookingOut = UnknownObjectOut | null;
-export type GroomerPendingInvitationOut = UnknownObjectOut;
+export interface GroomerPendingTimeSlotOut {
+  date: string;
+  slot: string;
+}
+
+export interface GroomerPendingInvitationOut {
+  invitation_id: number;
+  booking_id: number;
+  created_at: string;
+  preferred_time_slots: GroomerPendingTimeSlotOut[];
+  owner_name: string;
+  pet_name: string;
+  pet_breed: string;
+  pet_avatar: string;
+  service_name: string;
+  service_address: string;
+  price: string;
+}
+
 export type GroomerPendingInvitationListOut =
   | UnknownPageOut<GroomerPendingInvitationOut>
   | GroomerPendingInvitationOut[];

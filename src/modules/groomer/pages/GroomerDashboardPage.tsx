@@ -1,47 +1,26 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Icon } from "@/components/common/Icon";
 import { BookingRequestContent } from "@/modules/groomer/components/BookingRequestContent";
-import { GroomerUpNextCard, type GroomerUpNextAppointment } from "@/modules/groomer/components/GroomerUpNextCard";
-
-type DashboardAppointment = GroomerUpNextAppointment & {
-  id: string;
-};
+import { cn } from "@/components/ui/utils";
+import { GroomerUpNextCard } from "@/modules/groomer/components/GroomerUpNextCard";
+import {
+  useGroomerDashboardStore,
+  type DashboardAppointment,
+  type DashboardGoal,
+} from "@/modules/groomer/groomerStore";
+import { toast } from "sonner";
 
 type BookingRequest = DashboardAppointment;
 
-const nextAppointment: DashboardAppointment = {
-  id: "next-max",
-  petName: "Max",
-  breed: "Golden retriever",
-  owner: "Emma Johnson",
-  avatarUrl: "https://www.figma.com/api/mcp/asset/bfdce912-7cc8-4331-88f4-642b1f2b1b5f",
-  address: "565 West 207th Street",
-  service: "Full Groom Package",
-  duration: "Est. duration: 90 minutes",
-  time: "2:00 PM",
-};
-
-const bookingRequest: BookingRequest | null = {
-  id: "request-max",
-  petName: "Max",
-  breed: "Golden Retriever",
-  owner: "Emma Johnson",
-  avatarUrl: "https://images.dog.ceo/breeds/retriever-golden/n02099601_3004.jpg",
-  address: "565 West 207th Street",
-  service: "Full Groom Package",
-  duration: "Est. duration: 90 minutes",
-  time: "2:00 PM",
-};
-
-const dailyGoal = {
-  completed: 3,
-  total: 5,
-  remainingAmount: "$55",
-  goalAmount: "$200",
-  currentAmount: "$145",
-};
-
-function AppointmentSummaryCard({ appointment }: { appointment: DashboardAppointment }) {
+function AppointmentSummaryCard({
+  appointment,
+  isStartingTravel,
+  onStartTravel,
+}: {
+  appointment: DashboardAppointment;
+  isStartingTravel: boolean;
+  onStartTravel: () => void;
+}) {
   return (
     <GroomerUpNextCard
       appointment={appointment}
@@ -49,74 +28,64 @@ function AppointmentSummaryCard({ appointment }: { appointment: DashboardAppoint
       footer={
         <button
           type="button"
+          onClick={onStartTravel}
+          disabled={isStartingTravel}
           className="flex h-[38px] w-full items-center justify-center rounded-full bg-[linear-gradient(180deg,#F7A01B_0%,#F08A12_100%)] font-comfortaa text-[14px] font-bold leading-[21px] text-white shadow-[0px_10px_18px_rgba(240,138,18,0.28)] transition-transform active:scale-[0.99]"
         >
-          Start Travel
+          {isStartingTravel ? "Starting..." : "Start Travel"}
         </button>
       }
     />
   );
 }
 
-function BookingRequestCard({ request }: { request: BookingRequest }) {
+function BookingRequestItem({ request }: { request: BookingRequest }) {
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
-    <article className="rounded-[16px] bg-white px-4 py-4 shadow-[0px_4px_14px_rgba(0,0,0,0.1)]">
-      {isExpanded ? (
-        <BookingRequestContent
-          request={request}
-          passAppointmentContextLabel="DASHBOARD > BOOKING REQUEST"
-          passAppointmentReturnLabel="Back to dashboard"
-          accessory={
-            <button
-              type="button"
-              onClick={() => setIsExpanded(false)}
-              aria-expanded={isExpanded}
-              aria-label="Collapse booking request"
-              className="flex size-6 shrink-0 items-center justify-center rounded-full self-start"
-            >
-              <Icon name="chevron-down" className="size-4 rotate-180 text-[#8B6357]" aria-hidden="true" />
-            </button>
-          }
-        />
-      ) : (
-        <div>
-          <p className="font-comfortaa text-[11px] leading-[16.5px] tracking-[0.5px] text-[#A07D72]">BOOKING REQUEST</p>
-          <h3 className="mt-1 font-comfortaa text-[18px] leading-[27px] text-[#4A2C55]">Confirm appointment</h3>
+    <BookingRequestContent
+      request={request}
+      showHeader={false}
+      expanded={isExpanded}
+      passAppointmentContextLabel="DASHBOARD > BOOKING REQUEST"
+      passAppointmentReturnLabel="Back to dashboard"
+      accessory={
+        <button
+          type="button"
+          onClick={() => setIsExpanded((current) => !current)}
+          aria-expanded={isExpanded}
+          aria-label={isExpanded ? "Collapse booking request" : "Expand booking request"}
+          className="flex size-6 shrink-0 items-center justify-center rounded-full self-start"
+        >
+          <Icon
+            name="chevron-down"
+            className={cn("size-4 text-[#717182]", isExpanded ? "rotate-180" : "")}
+            aria-hidden="true"
+          />
+        </button>
+      }
+    />
+  );
+}
 
-          <button
-            type="button"
-            onClick={() => setIsExpanded(true)}
-            aria-expanded={isExpanded}
-            aria-label="Expand booking request"
-            className="mt-4 w-full rounded-[10px] bg-[#F8F7F3] px-3 py-[11px] text-left"
-          >
-            <div className="flex items-center gap-3">
-              <img src={request.avatarUrl} alt={request.petName} className="size-[50px] rounded-full object-cover" />
-              <div className="min-w-0 flex-1">
-                <p className="font-comfortaa text-[14px] leading-[21px] text-[#4A2C55]">
-                  {request.petName} - {request.breed}
-                </p>
-                <p className="mt-0.5 font-comfortaa text-[11px] leading-[16.5px] text-[#15A34A]">
-                  <span aria-hidden="true">• </span>
-                  Owner: {request.owner}
-                </p>
-                <div className="mt-[7px] inline-flex rounded-full border border-[#DE1507] px-[10px] py-[4px]">
-                  <span className="font-comfortaa text-[11px] leading-[16.5px] text-[#DE1507]">Expired in 24 hours</span>
-                </div>
-              </div>
-              <Icon name="chevron-down" size={14} className="text-[#8B6357]" aria-hidden="true" />
-            </div>
-          </button>
-        </div>
-      )}
+function BookingRequestCard({ requests }: { requests: BookingRequest[] }) {
+  return (
+    <article className="rounded-[16px] bg-white px-5 py-5 shadow-[0px_4px_12px_rgba(0,0,0,0.08)]">
+      <p className="font-comfortaa text-[12px] leading-[18px] tracking-[0.5px] text-[#8B6357]">BOOKING REQUEST</p>
+      <h3 className="mt-1 font-comfortaa text-[20px] font-bold leading-[30px] text-[#4A2C55]">Confirm appointment</h3>
+
+      <div className="mt-4 flex flex-col gap-4">
+        {requests.map((request) => (
+          <BookingRequestItem key={request.id} request={request} />
+        ))}
+      </div>
     </article>
   );
 }
 
-function DailyGoalProgressCard() {
-  const progress = `${(dailyGoal.completed / dailyGoal.total) * 100}%`;
+function DailyGoalProgressCard({ dailyGoal }: { dailyGoal: DashboardGoal }) {
+  const safeTotal = dailyGoal.total > 0 ? dailyGoal.total : 1;
+  const progress = `${Math.min((dailyGoal.completed / safeTotal) * 100, 100)}%`;
 
   return (
     <article className="rounded-[16px] bg-white px-4 py-4 shadow-[0px_4px_12px_rgba(0,0,0,0.08)]">
@@ -178,21 +147,72 @@ function DashboardMetricCard({
 }
 
 export default function GroomerDashboardPage() {
+  const {
+    nextAppointment,
+    bookingRequests,
+    dailyGoal,
+    metrics,
+    isLoadingDashboard,
+    isStartingTravel,
+    fetchDashboard,
+    startTravel,
+  } = useGroomerDashboardStore();
+
+  useEffect(() => {
+    fetchDashboard().catch((error) => {
+      console.error("Failed to load groomer dashboard:", error);
+    });
+  }, [fetchDashboard]);
+
+  const handleStartTravel = async () => {
+    if (!nextAppointment?.id || isStartingTravel) return;
+
+    const bookingId = Number(nextAppointment.id);
+    if (!Number.isFinite(bookingId)) return;
+
+    try {
+      await startTravel(bookingId);
+      toast.success("Travel started");
+    } catch (error) {
+      console.error("Failed to start travel:", error);
+      toast.error("Failed to start travel");
+    }
+  };
+
+  const showMetricCards = useMemo(
+    () => metrics.partnerScore !== "—" || metrics.rating !== "—",
+    [metrics.partnerScore, metrics.rating],
+  );
+
   return (
-    <div className="mx-auto min-h-[calc(100vh-64px)] w-full max-w-[393px] bg-[#633479] px-4 pb-28 pt-2">
+    <div className="mx-auto min-h-[calc(100vh-64px)] w-full max-w-[393px] bg-[#633479] px-5 pb-28 pt-2">
       <div className="space-y-3.5">
         <h1 className="font-comfortaa text-[20px] font-bold leading-[22px] text-white">Dashboard</h1>
 
-        <AppointmentSummaryCard appointment={nextAppointment} />
+        {nextAppointment ? (
+          <AppointmentSummaryCard
+            appointment={nextAppointment}
+            isStartingTravel={isStartingTravel}
+            onStartTravel={handleStartTravel}
+          />
+        ) : null}
 
-        {bookingRequest ? <BookingRequestCard request={bookingRequest} /> : null}
+        {bookingRequests.length > 0 ? <BookingRequestCard requests={bookingRequests} /> : null}
 
-        <DailyGoalProgressCard />
+        <DailyGoalProgressCard dailyGoal={dailyGoal} />
 
-        <div className="grid grid-cols-2 gap-3">
-          <DashboardMetricCard icon="logo-mark" value="89/100" label="Mutopia partner score" />
-          <DashboardMetricCard icon="star-2" value="4.9" label="Rating" />
-        </div>
+        {showMetricCards ? (
+          <div className="grid grid-cols-2 gap-3">
+            <DashboardMetricCard icon="logo-mark" value={metrics.partnerScore} label="Mutopia partner score" />
+            <DashboardMetricCard icon="star-2" value={metrics.rating} label="Rating" />
+          </div>
+        ) : null}
+
+        {isLoadingDashboard ? (
+          <div className="rounded-[16px] bg-white px-4 py-4 shadow-[0px_4px_12px_rgba(0,0,0,0.08)]">
+            <p className="font-comfortaa text-[12px] leading-[18px] text-[#8B6357]">Loading dashboard...</p>
+          </div>
+        ) : null}
       </div>
     </div>
   );
