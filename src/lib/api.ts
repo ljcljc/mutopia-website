@@ -441,6 +441,7 @@ export interface BookingDetailOut {
   scheduled_time?: string | null;
   notes?: string | null;
   preferred_time_slots?: Record<string, unknown>[];
+  time_options?: InvitationDecisionTimeOptionIn[];
   address_snapshot?: Record<string, unknown>;
   pet_snapshot?: Record<string, unknown>;
   package_snapshot?: Record<string, unknown>;
@@ -1511,6 +1512,11 @@ export interface InvitationDecisionTimeOptionIn {
   time: string;
 }
 
+export interface ClientInvitationDecisionIn {
+  accept?: boolean;
+  selected_time?: InvitationDecisionTimeOptionIn | null;
+}
+
 export interface GroomerCheckUpIn {
   kind: string;
   weight_value?: number | string | null;
@@ -1631,11 +1637,12 @@ export async function groomerConfirmBooking(
  */
 export async function clientConfirmBookingTime(
   bookingId: number,
-  accept: boolean = true
+  data: ClientInvitationDecisionIn | boolean = true
 ): Promise<OkOut> {
+  const payload = typeof data === "boolean" ? { accept: data } : data;
   const response = await http.post<OkOut>(
     `/api/bookings/${bookingId}/client_confirm_time`,
-    { accept }
+    payload
   );
   return response.data;
 }

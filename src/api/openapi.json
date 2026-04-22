@@ -4261,7 +4261,14 @@
       },
       "ClientInvitationDecisionIn": {
         "properties": {
-          "accept": { "default": true, "title": "Accept", "type": "boolean" }
+          "accept": { "default": true, "title": "Accept", "type": "boolean" },
+          "selected_time": {
+            "anyOf": [
+              { "additionalProperties": true, "type": "object" },
+              { "type": "null" }
+            ],
+            "title": "Selected Time"
+          }
         },
         "title": "ClientInvitationDecisionIn",
         "type": "object"

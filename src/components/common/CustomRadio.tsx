@@ -7,7 +7,7 @@ export interface CustomRadioProps {
   label: string;
   icon?: "dog" | "cat" | "pet" | "van" | "shop" | "home";
   description?: string; // For tiles with description (like GroomingFrequencyTile)
-  variant?: "simple" | "with-description" | "package"; // Layout variant
+  variant?: "simple" | "with-description" | "package" | "inline"; // Layout variant
   isSelected?: boolean;
   onClick?: () => void;
   className?: string;
@@ -110,6 +110,34 @@ export function CustomRadio({
     disabled && disabledClasses,
     className
   );
+
+  if (variant === "inline") {
+    return (
+      <button
+        type="button"
+        onClick={handleChange}
+        disabled={disabled}
+        className={cn(
+          "flex items-center gap-2 text-left outline-none transition-opacity focus-visible:ring-2 focus-visible:ring-[#2374ff] focus-visible:ring-offset-2",
+          disabled && disabledClasses,
+          className,
+        )}
+      >
+        <span
+          className={cn(
+            "relative mt-[2.5px] size-4 shrink-0 rounded-full border border-solid bg-white transition-colors",
+            isSelected ? "border-[#DE6A07]" : "border-[#717182]",
+          )}
+          aria-hidden="true"
+        >
+          {isSelected ? (
+            <span className="absolute left-1/2 top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#DE6A07]" />
+          ) : null}
+        </span>
+        <span className="font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#4A3C2A]">{label}</span>
+      </button>
+    );
+  }
 
   if (variant === "package") {
     const priceText = typeof price === "number" ? `$${price}` : price;

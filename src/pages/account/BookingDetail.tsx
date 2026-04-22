@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { OrangeButton } from "@/components/common";
+import { CustomRadio, OrangeButton } from "@/components/common";
 import { CustomTextarea } from "@/components/common/CustomTextarea";
 import { Icon } from "@/components/common/Icon";
 import { useAccountStore } from "@/components/account/accountStore";
@@ -11,6 +11,7 @@ import {
   getBookingDetail,
   type AddressOut,
   type BookingDetailOut,
+  type InvitationDecisionTimeOptionIn,
 } from "@/lib/api";
 import { toast } from "sonner";
 import AddAddressModal from "@/components/account/AddAddressModal";
@@ -18,6 +19,7 @@ import ModifyAddressModal from "@/components/account/ModifyAddressModal";
 import {
   AlertDialog,
   AlertDialogContent,
+  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -79,31 +81,23 @@ function extractTimeLabel(dateTime?: string | null) {
   return timeLabel ?? dateTime;
 }
 
-function formatProposedTimeOption(option: unknown): string | null {
-  if (!option) return null;
+type ProposedTimeOption = InvitationDecisionTimeOptionIn & {
+  key: string;
+  label: string;
+};
 
-  if (typeof option === "string") {
-    return formatDateTime(option) || option;
-  }
+function formatTimeOptionLabel(option: InvitationDecisionTimeOptionIn): string {
+  return `${option.date} at ${option.time}`;
+}
 
-  if (typeof option !== "object") return null;
+function normalizeProposedTimeOption(option: InvitationDecisionTimeOptionIn, index: number): ProposedTimeOption | null {
+  if (!option.date || !option.slot || !option.time) return null;
 
-  const record = option as Record<string, unknown>;
-  const proposedTime =
-    (record.proposed_time as string | undefined) ??
-    (record.datetime as string | undefined) ??
-    (record.scheduled_time as string | undefined);
-  if (proposedTime) {
-    return formatDateTime(proposedTime) || proposedTime;
-  }
-
-  const date = (record.date as string | undefined) ?? (record.service_date as string | undefined);
-  const time = (record.time as string | undefined) ?? (record.slot as string | undefined);
-  if (date && time) {
-    return `${date} at ${time}`;
-  }
-
-  return null;
+  return {
+    ...option,
+    key: `${option.date}-${option.slot}-${option.time}-${index}`,
+    label: formatTimeOptionLabel(option),
+  };
 }
 
 type DetailBadgeTone = "orange" | "green" | "purple" | "outlined";
@@ -194,7 +188,7 @@ export default function BookingDetail() {
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
   const [addressOverride, setAddressOverride] = useState<AddressOut | null>(null);
   const [isAddAddressOpen, setIsAddAddressOpen] = useState(false);
-  const [selectedProposedTime, setSelectedProposedTime] = useState<string>("");
+  const [selectedProposedTimeKey, setSelectedProposedTimeKey] = useState<string>("");
   const [isCardActionLoading, setIsCardActionLoading] = useState(false);
   const { addresses, isLoadingAddresses, fetchAddresses } = useAccountStore();
 
@@ -253,23 +247,21 @@ export default function BookingDetail() {
   const normalizedStatus = normalizeBookingStatus(detail?.status);
 
   const proposedTimeOptions = useMemo(() => {
-    const options =
-      detail?.preferred_time_slots
-        ?.map((option) => formatProposedTimeOption(option))
-        .filter((option): option is string => Boolean(option)) ?? [];
-
-    if (options.length > 0) return options;
-
-    return [
-      "2026-04-02 at 11H",
-      "2026-04-03 at 12H",
-      "2026-04-03 at 13H",
-    ];
-  }, [detail?.preferred_time_slots]);
+    return (
+      detail?.time_options
+        ?.map((option, index) => normalizeProposedTimeOption(option, index))
+        .filter((option): option is ProposedTimeOption => Boolean(option)) ?? []
+    );
+  }, [detail?.time_options]);
 
   useEffect(() => {
-    if (!proposedTimeOptions.length) return;
-    setSelectedProposedTime((current) => current || proposedTimeOptions[0]);
+    if (!proposedTimeOptions.length) {
+      setSelectedProposedTimeKey("");
+      return;
+    }
+    setSelectedProposedTimeKey((current) =>
+      proposedTimeOptions.some((option) => option.key === current) ? current : proposedTimeOptions[0].key,
+    );
   }, [proposedTimeOptions]);
 
   const detailCardConfig = useMemo<DetailCardConfig>(() => {
@@ -507,9 +499,22 @@ export default function BookingDetail() {
   const handleConfirmProposedTime = async () => {
     if (!detail?.id) return;
 
+    const selectedTime = proposedTimeOptions.find((option) => option.key === selectedProposedTimeKey);
+    if (!selectedTime) {
+      toast.error("Please select a proposed time");
+      return;
+    }
+
     setIsCardActionLoading(true);
     try {
-      await clientConfirmBookingTime(detail.id, true);
+      await clientConfirmBookingTime(detail.id, {
+        accept: true,
+        selected_time: {
+          date: selectedTime.date,
+          slot: selectedTime.slot,
+          time: selectedTime.time,
+        },
+      });
       setDetail((current) => (current ? { ...current, status: "confirmed" } : current));
       toast.success("Booking confirmed");
     } catch (actionError) {
@@ -678,19 +683,13 @@ export default function BookingDetail() {
                       </p>
                       <div className="flex flex-col gap-2">
                         {proposedTimeOptions.map((option) => (
-                          <label key={option} className="flex items-center gap-2">
-                            <input
-                              type="radio"
-                              name="proposed-time"
-                              value={option}
-                              checked={selectedProposedTime === option}
-                              onChange={() => setSelectedProposedTime(option)}
-                              className="size-4 border-[#8B6357] text-[#8B6357] focus:ring-[#8B6357]"
-                            />
-                            <span className="font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#4A3C2A]">
-                              {option}
-                            </span>
-                          </label>
+                          <CustomRadio
+                            key={option.key}
+                            label={option.label}
+                            variant="inline"
+                            isSelected={selectedProposedTimeKey === option.key}
+                            onClick={() => setSelectedProposedTimeKey(option.key)}
+                          />
                         ))}
                       </div>
                     </div>
@@ -698,6 +697,7 @@ export default function BookingDetail() {
                       type="button"
                       variant="secondary"
                       size="compact"
+                      className="min-w-[100px]"
                       onClick={() => setIsCancelDialogOpen(true)}
                     >
                       Cancel
@@ -706,6 +706,7 @@ export default function BookingDetail() {
                       type="button"
                       variant="primary"
                       size="compact"
+                      className="min-w-[100px]"
                       loading={isCardActionLoading}
                       onClick={handleConfirmProposedTime}
                     >
@@ -742,6 +743,7 @@ export default function BookingDetail() {
                       type="button"
                       variant="secondary"
                       size="compact"
+                      className="min-w-[100px]"
                       onClick={() => setIsCancelDialogOpen(true)}
                     >
                       Cancel
@@ -754,13 +756,14 @@ export default function BookingDetail() {
                         type="button"
                         variant="secondary"
                         size="compact"
+                        className="min-w-[100px]"
                         onClick={() => handlePendingAction("Receipt is not available yet")}
                       >
                         Receipt
                       </OrangeButton>
                       <button
                         type="button"
-                        className="inline-flex h-[28px] items-center justify-center rounded-[32px] bg-[#633479] px-[28px] py-[16px] font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#FFF7ED] transition-all duration-200 hover:opacity-90"
+                        className="inline-flex h-[28px] min-w-[100px] items-center justify-center rounded-[32px] bg-[#633479] px-[28px] py-[16px] font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#FFF7ED] transition-all duration-200 hover:opacity-90"
                         onClick={() => handlePendingAction("Review flow is not available yet")}
                       >
                         Review
@@ -773,6 +776,7 @@ export default function BookingDetail() {
                       type="button"
                       variant="secondary"
                       size="compact"
+                      className="min-w-[100px]"
                       onClick={() => handlePendingAction("Comment flow is not available yet")}
                     >
                       Comment
@@ -784,6 +788,7 @@ export default function BookingDetail() {
                       type="button"
                       variant="primary"
                       size="compact"
+                      className="min-w-[100px]"
                       showArrow
                       loading={isCardActionLoading}
                       onClick={handleGoPay}
@@ -1091,14 +1096,14 @@ export default function BookingDetail() {
             </AlertDialogHeader>
             <div className="h-px bg-[rgba(0,0,0,0.1)]" />
             <div className="flex flex-col gap-4 px-6">
-              <div className="flex flex-col text-[#4A5565]">
+              <AlertDialogDescription className="flex flex-col text-[#4A5565]">
                 <p className="font-comfortaa text-[14px] font-bold leading-[22px]">
                   Are you sure you want to cancel booking?
                 </p>
                 <p className="font-comfortaa text-[12.25px] font-normal leading-[17.5px]">
                   Share your reason for cancellation, maybe we can help
                 </p>
-              </div>
+              </AlertDialogDescription>
               <CustomTextarea
                 label=""
                 placeholder="Share your reason"
