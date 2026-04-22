@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Icon } from "@/components/common/Icon";
-import { BookingRequestContent } from "@/modules/groomer/components/BookingRequestContent";
+import {
+  BookingRequestContent,
+  type BookingRequestDecisionTimeOption,
+} from "@/modules/groomer/components/BookingRequestContent";
 import { cn } from "@/components/ui/utils";
 import { GroomerUpNextCard } from "@/modules/groomer/components/GroomerUpNextCard";
 import {
@@ -8,6 +11,7 @@ import {
   type DashboardAppointment,
   type DashboardGoal,
 } from "@/modules/groomer/groomerStore";
+import { decideGroomerInvitation } from "@/lib/api";
 import { toast } from "sonner";
 
 type BookingRequest = DashboardAppointment;
@@ -39,7 +43,13 @@ function AppointmentSummaryCard({
   );
 }
 
-function BookingRequestItem({ request }: { request: BookingRequest }) {
+function BookingRequestItem({
+  request,
+  onConfirm,
+}: {
+  request: BookingRequest;
+  onConfirm: (request: BookingRequest, timeOptions: BookingRequestDecisionTimeOption[]) => Promise<void>;
+}) {
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
@@ -49,6 +59,7 @@ function BookingRequestItem({ request }: { request: BookingRequest }) {
       expanded={isExpanded}
       passAppointmentContextLabel="DASHBOARD > BOOKING REQUEST"
       passAppointmentReturnLabel="Back to dashboard"
+      onConfirmAppointment={(timeOption) => onConfirm(request, timeOption)}
       accessory={
         <button
           type="button"
@@ -68,7 +79,13 @@ function BookingRequestItem({ request }: { request: BookingRequest }) {
   );
 }
 
-function BookingRequestCard({ requests }: { requests: BookingRequest[] }) {
+function BookingRequestCard({
+  requests,
+  onConfirm,
+}: {
+  requests: BookingRequest[];
+  onConfirm: (request: BookingRequest, timeOptions: BookingRequestDecisionTimeOption[]) => Promise<void>;
+}) {
   return (
     <article className="rounded-[16px] bg-white px-5 py-5 shadow-[0px_4px_12px_rgba(0,0,0,0.08)]">
       <p className="font-comfortaa text-[12px] leading-[18px] tracking-[0.5px] text-[#8B6357]">BOOKING REQUEST</p>
@@ -76,7 +93,7 @@ function BookingRequestCard({ requests }: { requests: BookingRequest[] }) {
 
       <div className="mt-4 flex flex-col gap-4">
         {requests.map((request) => (
-          <BookingRequestItem key={request.id} request={request} />
+          <BookingRequestItem key={request.invitationId ?? request.id} request={request} onConfirm={onConfirm} />
         ))}
       </div>
     </article>
@@ -179,6 +196,30 @@ export default function GroomerDashboardPage() {
     }
   };
 
+  const handleConfirmBookingRequest = async (
+    request: BookingRequest,
+    timeOptions: BookingRequestDecisionTimeOption[],
+  ) => {
+    if (!request.invitationId || !Number.isFinite(request.invitationId)) {
+      toast.error("Missing booking invitation");
+      return;
+    }
+
+    try {
+      await decideGroomerInvitation(request.invitationId, {
+        accept: true,
+        time_options: timeOptions,
+        note: "",
+      });
+      toast.success("Appointment confirmed");
+      await fetchDashboard();
+    } catch (error) {
+      console.error("Failed to confirm booking invitation:", error);
+      toast.error("Failed to confirm appointment");
+      throw error;
+    }
+  };
+
   const showMetricCards = useMemo(
     () => metrics.partnerScore !== "—" || metrics.rating !== "—",
     [metrics.partnerScore, metrics.rating],
@@ -198,7 +239,9 @@ export default function GroomerDashboardPage() {
           />
         ) : null}
 
-        {bookingRequests.length > 0 ? <BookingRequestCard requests={bookingRequests} /> : null}
+        {bookingRequests.length > 0 ? (
+          <BookingRequestCard requests={bookingRequests} onConfirm={handleConfirmBookingRequest} />
+        ) : null}
 
         {showDailyGoalCard ? <DailyGoalProgressCard dailyGoal={dailyGoal} /> : null}
 

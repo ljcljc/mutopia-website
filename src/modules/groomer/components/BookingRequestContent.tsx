@@ -4,6 +4,7 @@ import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
 import { cn } from "@/components/ui/utils";
 import { PassAppointmentModal } from "@/modules/groomer/components/PassAppointmentModal";
 import { ProposeNewTimeModal } from "@/modules/groomer/components/ProposeNewTimeModal";
+import { toast } from "sonner";
 
 export type BookingRequestContentData = {
   petName: string;
@@ -17,6 +18,12 @@ export type BookingRequestContentData = {
   expiresInLabel?: string;
 };
 
+export type BookingRequestDecisionTimeOption = {
+  date: string;
+  slot: "am" | "pm";
+  time: string;
+};
+
 type BookingRequestContentProps = {
   request: BookingRequestContentData;
   proposalSlots?: string[];
@@ -28,6 +35,7 @@ type BookingRequestContentProps = {
   className?: string;
   passAppointmentContextLabel?: string;
   passAppointmentReturnLabel?: string;
+  onConfirmAppointment?: (timeOptions: BookingRequestDecisionTimeOption[]) => Promise<void> | void;
 };
 
 const DEFAULT_PROPOSAL_SLOTS = ["2026.05.24 AM", "2026.05.26 PM", "2026.05.29 AM"] as const;
@@ -46,13 +54,43 @@ function buildHalfHourOptions(startMinutes: number, endMinutes: number): string[
   return options;
 }
 
-const AM_TIME_OPTIONS = buildHalfHourOptions(8 * 60, 12 * 60);
-const PM_TIME_OPTIONS = buildHalfHourOptions(12 * 60 + 30, 18 * 60);
+const AM_TIME_OPTIONS = buildHalfHourOptions(8 * 60, 11 * 60 + 30);
+const PM_TIME_OPTIONS = buildHalfHourOptions(12 * 60, 18 * 60);
 
 function getAvailableTimeOptions(slot: string): string[] {
   const normalizedSlot = slot.trim().toUpperCase();
   if (normalizedSlot.endsWith("PM")) return PM_TIME_OPTIONS;
   return AM_TIME_OPTIONS;
+}
+
+function normalizeTimeInput(value: string): string | null {
+  const match = value.trim().match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) return null;
+
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (!Number.isInteger(hours) || !Number.isInteger(minutes)) return null;
+  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null;
+
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+
+function buildDecisionTimeOption(slot: string, time: string): BookingRequestDecisionTimeOption | null {
+  const [dateValue, periodValue] = slot.trim().split(/\s+/);
+  const normalizedTime = normalizeTimeInput(time);
+  const normalizedPeriod = periodValue?.toLowerCase();
+
+  if (!dateValue || !normalizedTime || (normalizedPeriod !== "am" && normalizedPeriod !== "pm")) return null;
+
+  const selectedHour = Number(normalizedTime.split(":")[0]);
+  if (normalizedPeriod === "am" && selectedHour >= 12) return null;
+  if (normalizedPeriod === "pm" && selectedHour < 12) return null;
+
+  return {
+    date: dateValue.replace(/\./g, "-"),
+    slot: normalizedPeriod,
+    time: normalizedTime,
+  };
 }
 
 function AvailableTimeCombobox({
@@ -137,12 +175,35 @@ export function BookingRequestContent({
   className,
   passAppointmentContextLabel = "BOOKING REQUEST",
   passAppointmentReturnLabel = "Go back",
+  onConfirmAppointment,
 }: BookingRequestContentProps) {
   const [selectedProposalSlot, setSelectedProposalSlot] = useState(proposalSlots[0] ?? "");
   const [availableTimeBySlot, setAvailableTimeBySlot] = useState<Record<string, string>>({});
   const [isProposeModalOpen, setIsProposeModalOpen] = useState(false);
   const [isPassModalOpen, setIsPassModalOpen] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
   const expiryBadgeColor = request.expiresInLabel === "Expired" ? "#DE1507" : "#DE6A07";
+
+  const handleConfirmAppointment = async () => {
+    if (!onConfirmAppointment) return;
+
+    const validTimeOptions = proposalSlots
+      .map((slot) => buildDecisionTimeOption(slot, availableTimeBySlot[slot] ?? ""))
+      .filter(
+      (timeOption): timeOption is BookingRequestDecisionTimeOption => Boolean(timeOption),
+    );
+    if (!validTimeOptions.length) {
+      toast.error("Please select or type at least one available time");
+      return;
+    }
+
+    setIsConfirming(true);
+    try {
+      await onConfirmAppointment(validTimeOptions);
+    } finally {
+      setIsConfirming(false);
+    }
+  };
 
   return (
     <div className={cn(className)}>
@@ -255,10 +316,12 @@ export function BookingRequestContent({
             <div className="mt-4 flex flex-col gap-[10px]">
               <button
                 type="button"
-                className="inline-flex h-12 items-center justify-center gap-3 rounded-full bg-[#00A63E] px-4 font-comfortaa text-[16px] font-bold leading-6 text-white shadow-[0px_4px_12px_rgba(0,166,62,0.3)] transition-[transform,filter] duration-150 active:scale-[0.98] active:brightness-95"
+                onClick={handleConfirmAppointment}
+                disabled={isConfirming}
+                className="inline-flex h-12 items-center justify-center gap-3 rounded-full bg-[#00A63E] px-4 font-comfortaa text-[16px] font-bold leading-6 text-white shadow-[0px_4px_12px_rgba(0,166,62,0.3)] transition-[transform,filter] duration-150 active:scale-[0.98] active:brightness-95 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 <Icon name="target" className="size-5 text-white" aria-hidden="true" />
-                Confirm
+                {isConfirming ? "Confirming..." : "Confirm"}
               </button>
               <button
                 type="button"

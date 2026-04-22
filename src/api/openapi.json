@@ -4862,16 +4862,10 @@
       "InvitationDecisionIn": {
         "properties": {
           "accept": { "default": true, "title": "Accept", "type": "boolean" },
-          "selected_slot": {
-            "anyOf": [
-              { "additionalProperties": true, "type": "object" },
-              { "type": "null" }
-            ],
-            "title": "Selected Slot"
-          },
-          "proposed_time": {
-            "anyOf": [{ "type": "string" }, { "type": "null" }],
-            "title": "Proposed Time"
+          "time_options": {
+            "items": { "additionalProperties": true, "type": "object" },
+            "title": "Time Options",
+            "type": "array"
           },
           "note": { "default": "", "title": "Note", "type": "string" }
         },

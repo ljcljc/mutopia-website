@@ -1501,9 +1501,14 @@ export interface ReviewReportIn {
 
 export interface InvitationDecisionIn {
   accept?: boolean;
-  selected_slot?: Record<string, unknown> | null;
-  proposed_time?: string | null;
+  time_options?: InvitationDecisionTimeOptionIn[];
   note?: string;
+}
+
+export interface InvitationDecisionTimeOptionIn {
+  date: string;
+  slot: string;
+  time: string;
 }
 
 export interface GroomerCheckUpIn {

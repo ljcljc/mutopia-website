@@ -10,6 +10,7 @@ import type { GroomerUpNextAppointment } from "@/modules/groomer/components/Groo
 
 export type DashboardAppointment = GroomerUpNextAppointment & {
   id: number | string;
+  invitationId?: number;
   proposalSlots?: string[];
   expiresInLabel?: string;
 };
@@ -188,6 +189,7 @@ function mapPendingBookingRequest(raw: unknown): DashboardAppointment | null {
 
   return {
     id: getNumber(record, ["booking_id"], Number.NaN),
+    invitationId: getNumber(record, ["invitation_id"], Number.NaN),
     petName: getString(record, ["pet_name"]),
     breed: getString(record, ["pet_breed"]),
     owner: getString(record, ["owner_name"]),
