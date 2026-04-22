@@ -525,6 +525,23 @@ export default function BookingDetail() {
     }
   };
 
+  const handleRejectProposedTime = async () => {
+    if (!detail?.id) return;
+
+    setIsCardActionLoading(true);
+    try {
+      await clientConfirmBookingTime(detail.id, { accept: false });
+      const updatedDetail = await getBookingDetail(detail.id);
+      setDetail(updatedDetail);
+      toast.success("Proposed time declined");
+    } catch (actionError) {
+      console.error("Failed to decline booking time:", actionError);
+      toast.error("Failed to decline booking time");
+    } finally {
+      setIsCardActionLoading(false);
+    }
+  };
+
   const handleGoPay = async () => {
     if (!detail?.id) return;
 
@@ -546,10 +563,15 @@ export default function BookingDetail() {
   // 处理取消预约
   const handleCancelBooking = async () => {
     if (!detail?.id) return;
+    const reason = cancelReason.trim();
+    if (!reason) {
+      toast.error("Please share your reason for cancellation");
+      return;
+    }
 
     setIsCanceling(true);
     try {
-      await cancelBooking(detail.id, cancelReason.trim());
+      await cancelBooking(detail.id, reason);
       setIsCancelDialogOpen(false);
       setCancelReason("");
       toast.success("Booking canceled successfully");
@@ -698,7 +720,8 @@ export default function BookingDetail() {
                       variant="secondary"
                       size="compact"
                       className="min-w-[100px]"
-                      onClick={() => setIsCancelDialogOpen(true)}
+                      loading={isCardActionLoading}
+                      onClick={handleRejectProposedTime}
                     >
                       Cancel
                     </OrangeButton>
@@ -1127,18 +1150,17 @@ export default function BookingDetail() {
                     No, Keep it
                   </OrangeButton>
                 </AlertDialogPrimitive.Cancel>
-                <AlertDialogPrimitive.Action asChild>
-                  <OrangeButton
-                    variant="primary"
-                    size="medium"
-                    textSize={14}
-                    className="min-w-[177px]"
-                    onClick={handleCancelBooking}
-                    loading={isCanceling}
-                  >
-                    Yes, send request
-                  </OrangeButton>
-                </AlertDialogPrimitive.Action>
+                <OrangeButton
+                  variant="primary"
+                  size="medium"
+                  textSize={14}
+                  className="min-w-[177px]"
+                  onClick={handleCancelBooking}
+                  loading={isCanceling}
+                  disabled={!cancelReason.trim()}
+                >
+                  Yes, send request
+                </OrangeButton>
               </div>
             </AlertDialogFooter>
           </div>
