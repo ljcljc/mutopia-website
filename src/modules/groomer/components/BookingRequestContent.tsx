@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Icon } from "@/components/common/Icon";
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
 import { cn } from "@/components/ui/utils";
@@ -182,7 +182,50 @@ export function BookingRequestContent({
   const [isProposeModalOpen, setIsProposeModalOpen] = useState(false);
   const [isPassModalOpen, setIsPassModalOpen] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
+  const [contentHeight, setContentHeight] = useState<string>(expanded ? "auto" : "0px");
+  const collapseContentRef = useRef<HTMLDivElement | null>(null);
   const expiryBadgeColor = request.expiresInLabel === "Expired" ? "#DE1507" : "#DE6A07";
+
+  useEffect(() => {
+    const element = collapseContentRef.current;
+    if (!element) return;
+
+    const nextHeight = `${element.scrollHeight}px`;
+
+    if (expanded) {
+      setContentHeight(nextHeight);
+      const timeoutId = window.setTimeout(() => {
+        setContentHeight("auto");
+      }, 300);
+      return () => window.clearTimeout(timeoutId);
+    }
+
+    if (contentHeight === "auto") {
+      setContentHeight(nextHeight);
+      const frameId = window.requestAnimationFrame(() => {
+        setContentHeight("0px");
+      });
+      return () => window.cancelAnimationFrame(frameId);
+    }
+
+    setContentHeight("0px");
+  }, [contentHeight, expanded]);
+
+  useEffect(() => {
+    if (!expanded || contentHeight !== "auto") return;
+    const element = collapseContentRef.current;
+    if (!element) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      setContentHeight(`${element.scrollHeight}px`);
+      window.requestAnimationFrame(() => {
+        setContentHeight("auto");
+      });
+    });
+
+    resizeObserver.observe(element);
+    return () => resizeObserver.disconnect();
+  }, [contentHeight, expanded]);
 
   const handleConfirmAppointment = async () => {
     if (!onConfirmAppointment) return;
@@ -218,36 +261,47 @@ export function BookingRequestContent({
         <div className="rounded-[16px] bg-[#FAF9F7] py-3">
           <div className="flex items-center gap-5">
             <img src={request.avatarUrl} alt={request.petName} className="size-[42px] rounded-full object-cover" />
-            <div className="min-w-0 flex-1">
-              <p className="font-comfortaa text-[14px] leading-[20px] text-[#4A2C55]">
-                <span className="font-bold">{request.petName} - </span>
-                <span>{request.breed}</span>
-              </p>
-              <div className="mt-0.5 flex items-center gap-1">
-                <span className="size-[6px] rounded-full bg-[#00A63E]" aria-hidden="true" />
-                <p className="font-comfortaa text-[11px] leading-[16.5px] text-[#00A63E]">Owner: {request.owner}</p>
-              </div>
-              {request.expiresInLabel ? (
-                <div
-                  className="mt-[7px] inline-flex rounded-full border px-[10px] py-[4px]"
-                  style={{ borderColor: expiryBadgeColor }}
-                >
-                  <span
-                    className="font-comfortaa text-[11px] leading-[16.5px]"
-                    style={{ color: expiryBadgeColor }}
-                  >
-                    {request.expiresInLabel}
-                  </span>
+            <div className="flex min-w-0 flex-1">
+              <div className="flex-1">
+                <p className="font-comfortaa text-[14px] leading-[20px] text-[#4A2C55]">
+                  <span className="font-bold">{request.petName} - </span>
+                  <span>{request.breed}</span>
+                </p>
+                <div className="mt-0.5 flex items-center gap-1">
+                  <span className="size-[6px] rounded-full bg-[#00A63E]" aria-hidden="true" />
+                  <p className="font-comfortaa text-[11px] leading-[16.5px] text-[#00A63E]">Owner: {request.owner}</p>
                 </div>
-              ) : null}
+                {request.expiresInLabel ? (
+                  <div
+                    className="mt-[7px] inline-flex rounded-full border px-[10px] py-[4px]"
+                    style={{ borderColor: expiryBadgeColor }}
+                  >
+                    <span
+                      className="font-comfortaa text-[11px] leading-[16.5px]"
+                      style={{ color: expiryBadgeColor }}
+                    >
+                      {request.expiresInLabel}
+                    </span>
+                  </div>
+                ) : null}
+              </div>
+              {accessory}
             </div>
-            {accessory}
           </div>
         </div>
 
-        {expanded ? (
-          <>
-            <div className="mt-4 flex flex-wrap gap-x-6 gap-y-4">
+        <div
+          className={cn(
+            "overflow-hidden transition-[height,opacity,margin] duration-300 ease-in-out will-change-[height,opacity]",
+            expanded ? "mt-4 opacity-100" : "mt-0 opacity-0",
+          )}
+          style={{ height: contentHeight }}
+        >
+          <div
+            ref={collapseContentRef}
+            className={cn(expanded ? "pointer-events-auto" : "pointer-events-none")}
+          >
+            <div className="flex flex-wrap gap-x-6 gap-y-4">
               <div className="flex items-start gap-3">
                 <Icon name="location" className="size-[18px] text-[#00A63E]" aria-hidden="true" />
                 <div>
@@ -339,8 +393,8 @@ export function BookingRequestContent({
                 Pass appointment
               </button>
             </div>
-          </>
-        ) : null}
+          </div>
+        </div>
       </div>
 
       <PassAppointmentModal
