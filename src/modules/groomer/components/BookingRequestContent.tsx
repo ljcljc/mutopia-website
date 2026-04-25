@@ -55,7 +55,7 @@ function buildHalfHourOptions(startMinutes: number, endMinutes: number): string[
 }
 
 const AM_TIME_OPTIONS = buildHalfHourOptions(8 * 60, 11 * 60 + 30);
-const PM_TIME_OPTIONS = buildHalfHourOptions(12 * 60, 18 * 60);
+const PM_TIME_OPTIONS = buildHalfHourOptions(12 * 60, 17 * 60);
 
 function getAvailableTimeOptions(slot: string): string[] {
   const normalizedSlot = slot.trim().toUpperCase();
