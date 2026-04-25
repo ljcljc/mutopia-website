@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Icon } from "@/components/common/Icon";
+import { Spinner } from "@/components/common/Spinner";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { useIsMobile } from "@/components/ui/use-mobile";
 import { cn } from "@/components/ui/utils";
@@ -26,6 +27,12 @@ interface HistoryDetailsBreakdown {
 interface HistoryDetailsContent {
   timeline: HistoryDetailsTimelineItem[];
   breakdown: HistoryDetailsBreakdown;
+  termination?: {
+    reason: string;
+    description: string;
+    refundedAmount: string;
+    resolutionLabel: string;
+  } | null;
 }
 
 export interface HistoryDetailsAppointment {
@@ -37,6 +44,8 @@ export interface HistoryDetailsAppointment {
 
 interface HistoryDetailsModalProps {
   appointment: HistoryDetailsAppointment | null;
+  detail?: Record<string, unknown> | null;
+  isLoading?: boolean;
   onClose: () => void;
   open: boolean;
 }
@@ -67,32 +76,99 @@ const detailsByAppointmentId: Record<string, HistoryDetailsContent> = {
   },
 };
 
-const fallbackDetails: HistoryDetailsContent = {
-  timeline: [
-    { label: "Start travel", value: "1:10 PM" },
-    { label: "Check in", value: "1:42 PM" },
-    { label: "Start service", value: "1:55 PM" },
-    { label: "Complete service", value: "3:28 PM" },
-  ],
+const emptyDetails: HistoryDetailsContent = {
+  timeline: [],
   breakdown: {
-    packageLabel: "Full rooming package",
-    packageItems: [
-      { label: "Full grooming", amount: "$58.50" },
-      { label: "Mobile van service", amount: "$27.00" },
-      { label: "Safety insurance", amount: "$11.00" },
-    ],
-    packageSubtotal: "$96.50",
-    addOnItems: [
-      { label: "Teeth brushing", amount: "$13.50" },
-      { label: "Ear cleaning", amount: "$11.70" },
-    ],
-    addOnSubtotal: "$25.20",
-    total: "$121.70",
+    packageLabel: "Package",
+    packageItems: [],
+    packageSubtotal: "$0",
+    addOnItems: [],
+    addOnSubtotal: "$0",
+    total: "$0",
   },
 };
 
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
+}
+
+function getString(source: Record<string, unknown>, keys: string[], fallback: string = ""): string {
+  for (const key of keys) {
+    const value = source[key];
+    if (typeof value === "string" && value.trim()) return value.trim();
+    if (typeof value === "number") return String(value);
+  }
+  return fallback;
+}
+
+function getArray(source: Record<string, unknown>, key: string): Record<string, unknown>[] {
+  const value = source[key];
+  return Array.isArray(value) ? value.map(asRecord) : [];
+}
+
+function formatAmount(value: unknown, fallback = "$0") {
+  if (value === null || value === undefined || value === "") return fallback;
+  const raw = typeof value === "number" ? value.toFixed(2) : String(value);
+  return raw.startsWith("$") ? raw : `$${raw}`;
+}
+
+function mapSnapshotItems(items: Record<string, unknown>[]): HistoryDetailsLineItem[] {
+  return items.map((item, index) => ({
+    label: getString(item, ["name", "label", "title"], `Item ${index + 1}`),
+    amount: formatAmount(getString(item, ["amount", "price", "total", "subtotal"], "0")),
+  }));
+}
+
+function buildDetailsFromApi(detail: Record<string, unknown> | null | undefined): HistoryDetailsContent | null {
+  if (!detail || Object.keys(detail).length === 0) return null;
+
+  const timelineRecord = asRecord(detail.timeline);
+  const timelineMap: Array<[string, string]> = [
+    ["Start travel", "start_travel"],
+    ["Check in", "check_in"],
+    ["Start service", "start_service"],
+    ["Complete service", "complete_service"],
+    ["Termination", "termination"],
+  ];
+  const timeline = timelineMap
+    .map(([label, key]) => ({ label, value: getString(timelineRecord, [key]) }))
+    .filter((item) => item.value);
+
+  const packageSnapshot = asRecord(detail.package_snapshot);
+  const addonSnapshot = detail.addons_snapshot;
+  const price = asRecord(detail.price);
+  const packageItems = mapSnapshotItems(getArray(packageSnapshot, "items"));
+  const addOnItems = Array.isArray(addonSnapshot) ? mapSnapshotItems(addonSnapshot.map(asRecord)) : [];
+  const packageAmount = getString(price, ["package_amount", "payable_amount", "final_amount"], "0");
+  const addOnsAmount = getString(price, ["addons_amount"], "0");
+  const totalAmount = getString(price, ["final_amount", "paid_total", "payable_amount"], "0");
+  const termination = asRecord(detail.termination);
+
+  return {
+    timeline,
+    breakdown: {
+      packageLabel: getString(packageSnapshot, ["name", "label"], getString(detail, ["service_name"], "Package")),
+      packageItems: packageItems.length > 0 ? packageItems : [{ label: getString(detail, ["service_name"], "Service"), amount: formatAmount(packageAmount) }],
+      packageSubtotal: formatAmount(packageAmount),
+      addOnItems,
+      addOnSubtotal: formatAmount(addOnsAmount),
+      total: formatAmount(totalAmount),
+    },
+    termination: Object.keys(termination).length
+      ? {
+          reason: getString(termination, ["reason"], "-"),
+          description: getString(termination, ["description"], "-"),
+          refundedAmount: formatAmount(getString(termination, ["refunded_amount"], "0")),
+          resolutionLabel: getString(termination, ["resolution_label", "resolution"], "-"),
+        }
+      : null,
+  };
+}
+
 export function HistoryDetailsModal({
   appointment,
+  detail,
+  isLoading = false,
   onClose,
   open,
 }: HistoryDetailsModalProps) {
@@ -100,12 +176,15 @@ export function HistoryDetailsModal({
   const [isBreakdownExpanded, setIsBreakdownExpanded] = useState(true);
 
   const details = useMemo(() => {
+    const apiDetails = buildDetailsFromApi(detail);
+    if (apiDetails) return apiDetails;
+
     if (!appointment) {
-      return fallbackDetails;
+      return emptyDetails;
     }
 
-    return detailsByAppointmentId[appointment.id] ?? fallbackDetails;
-  }, [appointment]);
+    return detailsByAppointmentId[appointment.id] ?? emptyDetails;
+  }, [appointment, detail]);
 
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
@@ -146,13 +225,33 @@ export function HistoryDetailsModal({
                 </h3>
               </div>
 
-              <div className="space-y-[1px] font-comfortaa text-[16px] leading-[27px] text-[#4A3C2A]">
-                {details.timeline.map((item) => (
-                  <p key={item.label}>
-                    {item.label}: <span className="text-[#6B7280]">{item.value}</span>
-                  </p>
-                ))}
-              </div>
+              {isLoading ? (
+                <div className="flex min-h-[96px] flex-col items-center justify-center gap-3 rounded-[12px] bg-white px-4 py-4">
+                  <Spinner size={32} color="#DE6A07" showTrack trackOpacity={0.22} />
+                  <p className="font-comfortaa text-[13px] font-medium leading-5 text-[#8B6357]">Loading details...</p>
+                </div>
+              ) : null}
+
+              {details.timeline.length > 0 ? (
+                <div className="space-y-[1px] font-comfortaa text-[16px] leading-[27px] text-[#4A3C2A]">
+                  {details.timeline.map((item) => (
+                    <p key={item.label}>
+                      {item.label}: <span className="text-[#6B7280]">{item.value}</span>
+                    </p>
+                  ))}
+                </div>
+              ) : null}
+              {details.termination ? (
+                <section className="rounded-[12px] bg-white px-5 py-4 shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.10)]">
+                  <h4 className="font-comfortaa text-[15px] font-semibold leading-6 text-[#4A3C2A]">Termination</h4>
+                  <div className="mt-2 space-y-1 font-comfortaa text-[12px] leading-5 text-[#6B7280]">
+                    <p>Reason: <span className="text-[#4A3C2A]">{details.termination.reason}</span></p>
+                    <p>Description: <span className="text-[#4A3C2A]">{details.termination.description}</span></p>
+                    <p>Resolution: <span className="text-[#4A3C2A]">{details.termination.resolutionLabel}</span></p>
+                    <p>Refunded: <span className="text-[#DE6A07]">{details.termination.refundedAmount}</span></p>
+                  </div>
+                </section>
+              ) : null}
               <section className="rounded-[12px] bg-white px-6 py-6 shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.10)]">
                 <button
                   type="button"
@@ -180,12 +279,14 @@ export function HistoryDetailsModal({
                   <div className="mt-3">
                     <p className="mb-[2px] font-comfortaa text-[10px] leading-[18px] text-[#8B6357]">{details.breakdown.packageLabel}</p>
                     <div className="space-y-px">
-                      {details.breakdown.packageItems.map((item) => (
+                      {details.breakdown.packageItems.length > 0 ? details.breakdown.packageItems.map((item) => (
                         <div key={item.label} className="flex items-end justify-between gap-4">
                           <p className="font-comfortaa text-[12px] leading-5 text-[#4A3C2A]">{item.label}</p>
                           <p className="shrink-0 font-comfortaa text-[12px] leading-5 text-[#4A3C2A]">{item.amount}</p>
                         </div>
-                      ))}
+                      )) : (
+                        <p className="font-comfortaa text-[13px] leading-5 text-[#6B7280]">No package details</p>
+                      )}
                     </div>
 
                     <div className="mt-2 border-t border-[#2F2A26] pt-[7px]">
@@ -198,12 +299,14 @@ export function HistoryDetailsModal({
                     <div className="mt-[2px]">
                       <p className="font-comfortaa text-[12px] leading-[18px] text-[#8B6357]">Add-on</p>
                       <div className="mt-[2px] space-y-px">
-                        {details.breakdown.addOnItems.map((item) => (
+                        {details.breakdown.addOnItems.length > 0 ? details.breakdown.addOnItems.map((item) => (
                           <div key={item.label} className="flex items-end justify-between gap-4">
                             <p className="font-comfortaa text-[13px] leading-5 text-[#4A3C2A]">{item.label}</p>
                             <p className="shrink-0 font-comfortaa text-[13px] leading-5 text-[#4A3C2A]">{item.amount}</p>
                           </div>
-                        ))}
+                        )) : (
+                          <p className="font-comfortaa text-[13px] leading-5 text-[#6B7280]">No add-ons</p>
+                        )}
                       </div>
                     </div>
 

@@ -17,11 +17,13 @@ export function GroomerUpNextCard({
   footer,
   timeBadgeTone = "orange",
   serviceIconName = "full-grooming",
+  showDuration = true,
 }: {
   appointment: GroomerUpNextAppointment;
   footer?: ReactNode;
   timeBadgeTone?: "orange" | "blue";
   serviceIconName?: IconName;
+  showDuration?: boolean;
 }) {
   const isBlueTone = timeBadgeTone === "blue";
 
@@ -67,7 +69,9 @@ export function GroomerUpNextCard({
           <div>
             <p className="font-comfortaa text-[11px] leading-[16.5px] text-[#A07D72]">SERVICE</p>
             <p className="mt-0.5 font-comfortaa text-[15px] leading-[22.5px] text-[#4A2C55]">{appointment.service}</p>
-            <p className="mt-0.5 font-comfortaa text-[13px] leading-[19.5px] text-[#A07D72]">{appointment.duration}</p>
+            {showDuration ? (
+              <p className="mt-0.5 font-comfortaa text-[13px] leading-[19.5px] text-[#A07D72]">{appointment.duration}</p>
+            ) : null}
           </div>
         </div>
       </div>

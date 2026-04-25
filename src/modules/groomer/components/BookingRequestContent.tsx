@@ -27,6 +27,23 @@ export type BookingRequestDecisionTimeOption = {
   time: string;
 };
 
+export type BookingRequestInteractionProps<TRequest extends BookingRequestContentData> = {
+  request: TRequest;
+  expanded?: boolean;
+  passAppointmentContextLabel: string;
+  passAppointmentReturnLabel: string;
+  onToggleExpanded?: () => void;
+  onConfirmOriginalTime: (
+    request: TRequest,
+    confirmedTime: BookingRequestDecisionTimeOption,
+  ) => Promise<void>;
+  onProposeNewTime: (
+    request: TRequest,
+    timeOptions: BookingRequestDecisionTimeOption[],
+  ) => Promise<void>;
+  onDecline: (request: TRequest) => Promise<void>;
+};
+
 type BookingRequestContentProps = {
   request: BookingRequestContentData;
   proposalSlots?: string[];
@@ -360,5 +377,48 @@ export function BookingRequestContent({
         isSubmitting={isSubmittingAction === "propose" || isSubmittingAction === "decline"}
       />
     </div>
+  );
+}
+
+export function BookingRequestInteraction<TRequest extends BookingRequestContentData>({
+  request,
+  expanded,
+  passAppointmentContextLabel,
+  passAppointmentReturnLabel,
+  onToggleExpanded,
+  onConfirmOriginalTime,
+  onProposeNewTime,
+  onDecline,
+}: BookingRequestInteractionProps<TRequest>) {
+  const [internalExpanded, setInternalExpanded] = useState(false);
+  const isExpanded = expanded ?? internalExpanded;
+  const handleToggleExpanded = onToggleExpanded ?? (() => setInternalExpanded((current) => !current));
+
+  return (
+    <BookingRequestContent
+      request={request}
+      showHeader={false}
+      expanded={isExpanded}
+      passAppointmentContextLabel={passAppointmentContextLabel}
+      passAppointmentReturnLabel={passAppointmentReturnLabel}
+      onConfirmOriginalTime={(confirmedTime) => onConfirmOriginalTime(request, confirmedTime)}
+      onProposeNewTime={(timeOptions) => onProposeNewTime(request, timeOptions)}
+      onDecline={() => onDecline(request)}
+      accessory={
+        <button
+          type="button"
+          onClick={handleToggleExpanded}
+          aria-expanded={isExpanded}
+          aria-label={isExpanded ? "Collapse booking request" : "Expand booking request"}
+          className="flex size-6 shrink-0 items-center justify-center rounded-full self-start"
+        >
+          <Icon
+            name="chevron-down"
+            className={cn("size-4 text-[#717182]", isExpanded ? "rotate-180" : "")}
+            aria-hidden="true"
+          />
+        </button>
+      }
+    />
   );
 }

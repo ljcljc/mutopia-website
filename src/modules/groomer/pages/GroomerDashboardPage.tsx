@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Icon } from "@/components/common/Icon";
+import { Spinner } from "@/components/common/Spinner";
 import {
-  BookingRequestContent,
+  BookingRequestInteraction,
   type BookingRequestDecisionTimeOption,
 } from "@/modules/groomer/components/BookingRequestContent";
-import { cn } from "@/components/ui/utils";
 import { GroomerUpNextCard } from "@/modules/groomer/components/GroomerUpNextCard";
 import {
   useGroomerDashboardStore,
@@ -16,6 +16,15 @@ import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
 
 type BookingRequest = DashboardAppointment;
+
+function LoadingStateCard() {
+  return (
+    <div className="flex min-h-[112px] flex-col items-center justify-center gap-3 rounded-[16px] bg-white px-4 py-5 shadow-[0px_4px_12px_rgba(0,0,0,0.08)]">
+      <Spinner size={36} color="#DE6A07" showTrack trackOpacity={0.22} />
+      <p className="font-comfortaa text-[13px] font-medium leading-5 text-[#8B6357]">Loading dashboard...</p>
+    </div>
+  );
+}
 
 function AppointmentSummaryCard({
   appointment,
@@ -61,33 +70,14 @@ function BookingRequestItem({
   ) => Promise<void>;
   onDecline: (request: BookingRequest) => Promise<void>;
 }) {
-  const [isExpanded, setIsExpanded] = useState(false);
-
   return (
-    <BookingRequestContent
+    <BookingRequestInteraction
       request={request}
-      showHeader={false}
-      expanded={isExpanded}
       passAppointmentContextLabel="DASHBOARD > BOOKING REQUEST"
       passAppointmentReturnLabel="Back to dashboard"
-      onConfirmOriginalTime={(confirmedTime) => onConfirmOriginalTime(request, confirmedTime)}
-      onProposeNewTime={(timeOptions) => onProposeNewTime(request, timeOptions)}
-      onDecline={() => onDecline(request)}
-      accessory={
-        <button
-          type="button"
-          onClick={() => setIsExpanded((current) => !current)}
-          aria-expanded={isExpanded}
-          aria-label={isExpanded ? "Collapse booking request" : "Expand booking request"}
-          className="flex size-6 shrink-0 items-center justify-center rounded-full self-start"
-        >
-          <Icon
-            name="chevron-down"
-            className={cn("size-4 text-[#717182]", isExpanded ? "rotate-180" : "")}
-            aria-hidden="true"
-          />
-        </button>
-      }
+      onConfirmOriginalTime={onConfirmOriginalTime}
+      onProposeNewTime={onProposeNewTime}
+      onDecline={onDecline}
     />
   );
 }
@@ -333,9 +323,7 @@ export default function GroomerDashboardPage() {
         <h1 className="font-comfortaa text-[20px] font-bold leading-[22px] text-white">Dashboard</h1>
 
         {showInitialLoading ? (
-          <div className="rounded-[16px] bg-white px-4 py-4 shadow-[0px_4px_12px_rgba(0,0,0,0.08)]">
-            <p className="font-comfortaa text-[12px] leading-[18px] text-[#8B6357]">Loading dashboard...</p>
-          </div>
+          <LoadingStateCard />
         ) : (
           <>
             {nextAppointment ? (

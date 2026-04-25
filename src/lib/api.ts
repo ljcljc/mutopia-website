@@ -1665,6 +1665,10 @@ export type GroomerScheduleOut =
 export type GroomerHistoryOut =
   | UnknownPageOut<UnknownObjectOut>
   | UnknownObjectOut[];
+export type GroomerMyWorkOut = UnknownObjectOut;
+export type GroomerMyWorkCalendarOut = UnknownObjectOut;
+export type GroomerMyWorkScheduleOut = UnknownObjectOut;
+export type GroomerHistoryDetailOut = UnknownObjectOut;
 
 /**
  * 美容师确认预约
@@ -2101,6 +2105,42 @@ export async function getGroomerHistory(
 
   const url = `/api/groomers/history${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
   const response = await http.get<GroomerHistoryOut>(url);
+  return response.data;
+}
+
+/**
+ * 获取 My Work 汇总（当前月日历 + schedule sections）
+ */
+export async function getGroomerMyWork(): Promise<GroomerMyWorkOut> {
+  const response = await http.get<GroomerMyWorkOut>("/api/groomers/my_work");
+  return response.data;
+}
+
+/**
+ * 获取 My Work 当月日历计数
+ */
+export async function getGroomerMyWorkCalendar(): Promise<GroomerMyWorkCalendarOut> {
+  const response = await http.get<GroomerMyWorkCalendarOut>("/api/groomers/my_work/calendar");
+  return response.data;
+}
+
+/**
+ * 获取 My Work schedule sections
+ */
+export async function getGroomerMyWorkSchedule(): Promise<GroomerMyWorkScheduleOut> {
+  const response = await http.get<GroomerMyWorkScheduleOut>("/api/groomers/my_work/schedule");
+  return response.data;
+}
+
+/**
+ * 获取历史记录详情
+ */
+export async function getGroomerHistoryDetail(
+  bookingId: number
+): Promise<GroomerHistoryDetailOut> {
+  const response = await http.get<GroomerHistoryDetailOut>(
+    `/api/groomers/history/${bookingId}`
+  );
   return response.data;
 }
 
