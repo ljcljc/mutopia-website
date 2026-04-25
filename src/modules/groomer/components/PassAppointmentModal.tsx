@@ -7,6 +7,8 @@ interface PassAppointmentModalProps {
   onClose: () => void;
   contextLabel: string;
   returnLabel: string;
+  onConfirm?: () => Promise<void> | void;
+  isSubmitting?: boolean;
 }
 
 export function PassAppointmentModal({
@@ -14,6 +16,8 @@ export function PassAppointmentModal({
   onClose,
   contextLabel,
   returnLabel,
+  onConfirm,
+  isSubmitting = false,
 }: PassAppointmentModalProps) {
   const isMobile = useIsMobile();
 
@@ -50,9 +54,11 @@ export function PassAppointmentModal({
             <div className="mt-6 flex flex-col gap-3">
               <button
                 type="button"
+                onClick={onConfirm}
+                disabled={isSubmitting}
                 className="inline-flex h-12 items-center justify-center rounded-full bg-[#06AF3D] px-4 font-comfortaa text-[16px] leading-6 text-white shadow-[0px_8px_18px_rgba(6,175,61,0.22)]"
               >
-                Pass appointment
+                {isSubmitting ? "Passing..." : "Pass appointment"}
               </button>
               <button
                 type="button"

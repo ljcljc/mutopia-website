@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Icon } from "@/components/common/Icon";
-import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
 import { cn } from "@/components/ui/utils";
+import {
+  AvailableTimeCombobox,
+  getAvailableTimeOptions,
+} from "@/modules/groomer/components/AvailableTimeCombobox";
 import { PassAppointmentModal } from "@/modules/groomer/components/PassAppointmentModal";
 import { ProposeNewTimeModal } from "@/modules/groomer/components/ProposeNewTimeModal";
 import { toast } from "sonner";
@@ -35,33 +38,12 @@ type BookingRequestContentProps = {
   className?: string;
   passAppointmentContextLabel?: string;
   passAppointmentReturnLabel?: string;
-  onConfirmAppointment?: (timeOptions: BookingRequestDecisionTimeOption[]) => Promise<void> | void;
+  onConfirmOriginalTime?: (confirmedTime: BookingRequestDecisionTimeOption) => Promise<void> | void;
+  onProposeNewTime?: (timeOptions: BookingRequestDecisionTimeOption[]) => Promise<void> | void;
+  onDecline?: () => Promise<void> | void;
 };
 
 const DEFAULT_PROPOSAL_SLOTS = ["2026.05.24 AM", "2026.05.26 PM", "2026.05.29 AM"] as const;
-
-function formatTimeOption(totalMinutes: number): string {
-  const hours24 = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  return `${String(hours24).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
-}
-
-function buildHalfHourOptions(startMinutes: number, endMinutes: number): string[] {
-  const options: string[] = [];
-  for (let minutes = startMinutes; minutes <= endMinutes; minutes += 30) {
-    options.push(formatTimeOption(minutes));
-  }
-  return options;
-}
-
-const AM_TIME_OPTIONS = buildHalfHourOptions(8 * 60, 11 * 60 + 30);
-const PM_TIME_OPTIONS = buildHalfHourOptions(12 * 60, 17 * 60);
-
-function getAvailableTimeOptions(slot: string): string[] {
-  const normalizedSlot = slot.trim().toUpperCase();
-  if (normalizedSlot.endsWith("PM")) return PM_TIME_OPTIONS;
-  return AM_TIME_OPTIONS;
-}
 
 function normalizeTimeInput(value: string): string | null {
   const match = value.trim().match(/^(\d{1,2}):(\d{2})$/);
@@ -93,77 +75,6 @@ function buildDecisionTimeOption(slot: string, time: string): BookingRequestDeci
   };
 }
 
-function AvailableTimeCombobox({
-  value,
-  onValueChange,
-  options,
-}: {
-  value: string;
-  onValueChange: (value: string) => void;
-  options: string[];
-}) {
-  const [open, setOpen] = useState(false);
-  const filteredOptions = value
-    ? options.filter((option) => option.toLowerCase().includes(value.toLowerCase()))
-    : options;
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverAnchor asChild>
-        <div className="relative h-9 w-full rounded-[8px] bg-white">
-          <input
-            value={value}
-            onChange={(event) => {
-              onValueChange(event.target.value);
-              setOpen(true);
-            }}
-            onFocus={() => setOpen(true)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") setOpen(false);
-            }}
-            placeholder="Select or type time"
-            className="h-9 w-full rounded-[8px] border border-[#E5E7EB] bg-transparent px-3 pr-8 font-comfortaa text-[12.25px] text-[#4A3C2A] outline-none placeholder:text-[#717182] focus:border-[#2374FF]"
-          />
-          <button
-            type="button"
-            onClick={() => setOpen((current) => !current)}
-            aria-label="Toggle available time options"
-            className="absolute inset-y-0 right-0 flex w-8 items-center justify-center rounded-r-[8px]"
-          >
-            <Icon name="chevron-down" className="h-[12px] w-[12px] text-[#717182]" aria-hidden="true" />
-          </button>
-        </div>
-      </PopoverAnchor>
-      <PopoverContent
-        align="start"
-        className="max-h-[220px] w-[167px] overflow-y-auto rounded-[8px] border border-[#D6D6D6] bg-white p-1 shadow-md"
-        onOpenAutoFocus={(event) => event.preventDefault()}
-      >
-        {filteredOptions.length > 0 ? (
-          filteredOptions.map((option) => (
-            <button
-              key={option}
-              type="button"
-              onClick={() => {
-                onValueChange(option);
-                setOpen(false);
-              }}
-              className={cn(
-                "flex h-9 w-full items-center rounded-[4px] px-2 text-left font-comfortaa text-[14px] leading-5 text-[#6B6B6B] hover:bg-amber-50",
-                value === option ? "text-[#DE6A07]" : "",
-              )}
-            >
-              {option}
-            </button>
-          ))
-        ) : (
-          <div className="px-2 py-2 font-comfortaa text-[12px] text-[#717182]">Type a custom time</div>
-        )}
-      </PopoverContent>
-    </Popover>
-  );
-}
-
 export function BookingRequestContent({
   request,
   proposalSlots = request.proposalSlots?.length ? request.proposalSlots : [...DEFAULT_PROPOSAL_SLOTS],
@@ -175,13 +86,15 @@ export function BookingRequestContent({
   className,
   passAppointmentContextLabel = "BOOKING REQUEST",
   passAppointmentReturnLabel = "Go back",
-  onConfirmAppointment,
+  onConfirmOriginalTime,
+  onProposeNewTime,
+  onDecline,
 }: BookingRequestContentProps) {
   const [selectedProposalSlot, setSelectedProposalSlot] = useState(proposalSlots[0] ?? "");
   const [availableTimeBySlot, setAvailableTimeBySlot] = useState<Record<string, string>>({});
   const [isProposeModalOpen, setIsProposeModalOpen] = useState(false);
   const [isPassModalOpen, setIsPassModalOpen] = useState(false);
-  const [isConfirming, setIsConfirming] = useState(false);
+  const [isSubmittingAction, setIsSubmittingAction] = useState<"confirm" | "propose" | "decline" | null>(null);
   const [contentHeight, setContentHeight] = useState<string>(expanded ? "auto" : "0px");
   const collapseContentRef = useRef<HTMLDivElement | null>(null);
   const expiryBadgeColor = request.expiresInLabel === "Expired" ? "#DE1507" : "#DE6A07";
@@ -228,23 +141,47 @@ export function BookingRequestContent({
   }, [contentHeight, expanded]);
 
   const handleConfirmAppointment = async () => {
-    if (!onConfirmAppointment) return;
+    if (!onConfirmOriginalTime || !selectedProposalSlot) return;
 
-    const validTimeOptions = proposalSlots
-      .map((slot) => buildDecisionTimeOption(slot, availableTimeBySlot[slot] ?? ""))
-      .filter(
-      (timeOption): timeOption is BookingRequestDecisionTimeOption => Boolean(timeOption),
+    const confirmedTime = buildDecisionTimeOption(
+      selectedProposalSlot,
+      availableTimeBySlot[selectedProposalSlot] ?? "",
     );
-    if (!validTimeOptions.length) {
-      toast.error("Please select or type at least one available time");
+    if (!confirmedTime) {
+      toast.error("Please choose one valid time within the selected requested slot");
       return;
     }
 
-    setIsConfirming(true);
+    setIsSubmittingAction("confirm");
     try {
-      await onConfirmAppointment(validTimeOptions);
+      await onConfirmOriginalTime(confirmedTime);
     } finally {
-      setIsConfirming(false);
+      setIsSubmittingAction(null);
+    }
+  };
+
+  const handleProposeNewTime = async (timeOptions: BookingRequestDecisionTimeOption[]) => {
+    if (!onProposeNewTime) return;
+
+    setIsSubmittingAction("propose");
+    try {
+      await onProposeNewTime(timeOptions);
+      setIsProposeModalOpen(false);
+    } finally {
+      setIsSubmittingAction(null);
+    }
+  };
+
+  const handleDecline = async () => {
+    if (!onDecline) return;
+
+    setIsSubmittingAction("decline");
+    try {
+      await onDecline();
+      setIsPassModalOpen(false);
+      setIsProposeModalOpen(false);
+    } finally {
+      setIsSubmittingAction(null);
     }
   };
 
@@ -325,7 +262,7 @@ export function BookingRequestContent({
               <div className="mt-2 space-y-2.5">
                 {proposalSlots.map((slot) => (
                   <div key={slot}>
-                    <label className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                       <button
                         type="button"
                         onClick={() => setSelectedProposalSlot(slot)}
@@ -339,11 +276,17 @@ export function BookingRequestContent({
                           className={cn(
                             "size-2 rounded-full",
                             selectedProposalSlot === slot ? "bg-[#F08A12]" : "bg-transparent",
-                          )}
-                        />
+                        )}
+                      />
                       </button>
-                      <span className="font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#4A3C2A]">{slot}</span>
-                    </label>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedProposalSlot(slot)}
+                        className="font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#4A3C2A]"
+                      >
+                        {slot}
+                      </button>
+                    </div>
 
                     {selectedProposalSlot === slot ? (
                       <div className="mt-1">
@@ -371,15 +314,16 @@ export function BookingRequestContent({
               <button
                 type="button"
                 onClick={handleConfirmAppointment}
-                disabled={isConfirming}
+                disabled={isSubmittingAction !== null}
                 className="inline-flex h-12 items-center justify-center gap-3 rounded-full bg-[#00A63E] px-4 font-comfortaa text-[16px] font-bold leading-6 text-white shadow-[0px_4px_12px_rgba(0,166,62,0.3)] transition-[transform,filter] duration-150 active:scale-[0.98] active:brightness-95 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 <Icon name="target" className="size-5 text-white" aria-hidden="true" />
-                {isConfirming ? "Confirming..." : "Confirm"}
+                {isSubmittingAction === "confirm" ? "Confirming..." : "Confirm"}
               </button>
               <button
                 type="button"
                 onClick={() => setIsProposeModalOpen(true)}
+                disabled={isSubmittingAction !== null}
                 className="inline-flex h-12 items-center justify-center gap-[11px] rounded-full border-[1.5px] border-[#F59E0B] bg-white px-4 font-comfortaa text-[15px] font-bold leading-[22.5px] text-[#F59E0B] transition-[transform,background-color] duration-150 active:scale-[0.98] active:bg-[#FFF7ED]"
               >
                 <Icon name="calendar" className="size-5 text-[#F59E0B]" aria-hidden="true" />
@@ -388,6 +332,7 @@ export function BookingRequestContent({
               <button
                 type="button"
                 onClick={() => setIsPassModalOpen(true)}
+                disabled={isSubmittingAction !== null}
                 className="py-[7px] font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357] underline underline-offset-2"
               >
                 Pass appointment
@@ -402,11 +347,17 @@ export function BookingRequestContent({
         onClose={() => setIsPassModalOpen(false)}
         contextLabel={passAppointmentContextLabel}
         returnLabel={passAppointmentReturnLabel}
+        onConfirm={handleDecline}
+        isSubmitting={isSubmittingAction === "decline"}
       />
       <ProposeNewTimeModal
         open={isProposeModalOpen}
         onClose={() => setIsProposeModalOpen(false)}
-        initialServiceSlot={selectedProposalSlot || proposalSlots[0]}
+        initialServiceSlot={request.proposalSlots?.includes(selectedProposalSlot) ? selectedProposalSlot : undefined}
+        initialServiceSlots={request.proposalSlots ?? []}
+        onSubmit={handleProposeNewTime}
+        onPassAppointment={handleDecline}
+        isSubmitting={isSubmittingAction === "propose" || isSubmittingAction === "decline"}
       />
     </div>
   );

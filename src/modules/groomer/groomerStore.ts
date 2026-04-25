@@ -146,8 +146,8 @@ function formatPreferredTimeSlotLabel(slot: Record<string, unknown>): string {
   if (!date) return "";
 
   const dateLabel = date.split("-").join(".");
-  if (slotName === "morning") return `${dateLabel} AM`;
-  if (slotName === "afternoon") return `${dateLabel} PM`;
+  if (slotName === "morning" || slotName === "am") return `${dateLabel} AM`;
+  if (slotName === "afternoon" || slotName === "pm") return `${dateLabel} PM`;
   if (slotName === "evening") return `${dateLabel} PM`;
   return slotName ? `${dateLabel} ${slotName}` : dateLabel;
 }
@@ -224,6 +224,12 @@ function getPendingItems(data: unknown): Record<string, unknown>[] {
   return [];
 }
 
+function mapPendingBookingRequests(data: unknown): DashboardAppointment[] {
+  return getPendingItems(data)
+    .map((item) => mapPendingBookingRequest(item))
+    .filter((request): request is DashboardAppointment => Boolean(request));
+}
+
 function mapDashboardGoal(summary: Record<string, unknown>): DashboardGoal {
   const completed = getOptionalNumber(summary, ["completed_jobs", "jobs_completed", "completed", "done_jobs"]);
   const total = getOptionalNumber(summary, ["daily_goal_jobs", "goal_jobs", "daily_goal_total", "total"]);
@@ -265,6 +271,7 @@ interface GroomerDashboardState {
   hasLoadedDashboard: boolean;
   isStartingTravel: boolean;
   fetchDashboard: () => Promise<void>;
+  fetchPendingBookingRequests: () => Promise<void>;
   startTravel: (bookingId: number) => Promise<void>;
 }
 
@@ -309,10 +316,7 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
     }
 
     if (pendingResult.status === "fulfilled") {
-      const pendingItems = getPendingItems(pendingResult.value);
-      const bookingRequests = pendingItems
-        .map((item) => mapPendingBookingRequest(item))
-        .filter((request): request is DashboardAppointment => Boolean(request));
+      const bookingRequests = mapPendingBookingRequests(pendingResult.value);
       set({ bookingRequest: bookingRequests[0] ?? null, bookingRequests });
     } else {
       console.error("Failed to load groomer pending invitations:", pendingResult.reason);
@@ -320,6 +324,12 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
     }
 
     set({ isLoadingDashboard: false, hasLoadedDashboard: true });
+  },
+
+  fetchPendingBookingRequests: async () => {
+    const pendingResult = await getGroomerPendingBookingInvitations();
+    const bookingRequests = mapPendingBookingRequests(pendingResult);
+    set({ bookingRequest: bookingRequests[0] ?? null, bookingRequests });
   },
 
   startTravel: async (bookingId: number) => {

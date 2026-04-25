@@ -1501,7 +1501,9 @@ export interface ReviewReportIn {
 }
 
 export interface InvitationDecisionIn {
+  action?: "confirm_original_time" | "propose_new_time" | "decline";
   accept?: boolean;
+  confirmed_time?: InvitationDecisionTimeOptionIn | null;
   time_options?: InvitationDecisionTimeOptionIn[];
   note?: string;
 }

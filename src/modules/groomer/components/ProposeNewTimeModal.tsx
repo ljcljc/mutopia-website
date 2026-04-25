@@ -1,46 +1,39 @@
 import { useEffect, useMemo, useState } from "react";
 import { Calendar } from "@/components/common/Calendar";
-import { CustomSelect, CustomSelectItem } from "@/components/common/CustomSelect";
 import { Icon } from "@/components/common/Icon";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { useIsMobile } from "@/components/ui/use-mobile";
 import { cn } from "@/components/ui/utils";
+import {
+  ALL_AVAILABLE_TIME_OPTIONS,
+  AvailableTimeCombobox,
+} from "@/modules/groomer/components/AvailableTimeCombobox";
+import type { BookingRequestDecisionTimeOption } from "@/modules/groomer/components/BookingRequestContent";
 
 interface ProposeNewTimeModalProps {
   open: boolean;
   onClose: () => void;
   initialServiceSlot?: string;
+  initialServiceSlots?: string[];
+  onSubmit?: (timeOptions: BookingRequestDecisionTimeOption[]) => Promise<void> | void;
+  onPassAppointment?: () => Promise<void> | void;
+  isSubmitting?: boolean;
 }
 
 type SelectedTimeEntry = {
   date: string;
-  time: string;
+  suffix: "AM" | "PM";
+  time: string | null;
 };
 
+type TimeSuffix = SelectedTimeEntry["suffix"];
+
 const MAX_ENTRIES = 6;
-const TIME_OPTIONS = [
-  {
-    value: "Morning AM",
-    label: "Morning AM",
-    description: "8:00 AM - 12:00 PM",
-  },
-  {
-    value: "Afternoon PM",
-    label: "Afternoon PM",
-    description: "12:00 PM - 5:00 PM",
-  },
-] as const;
 
-function getTimeOption(value: string) {
-  return TIME_OPTIONS.find((option) => option.value === value);
-}
-
-function getTimeSuffix(value: string) {
-  return value.includes("AM") ? "AM" : value.includes("PM") ? "PM" : value;
-}
-
-function getTimeOptionValue(value: string) {
-  return getTimeSuffix(value) === "PM" ? "Afternoon PM" : "Morning AM";
+function isPmTime(value: string) {
+  const normalized = normalizeTimeInput(value);
+  if (!normalized) return false;
+  return Number(normalized.split(":")[0]) >= 12;
 }
 
 function parseServiceSlot(serviceSlot?: string) {
@@ -53,60 +46,27 @@ function parseServiceSlot(serviceSlot?: string) {
 
   return {
     date: new Date(Number(year), Number(month) - 1, Number(day)),
-    suffix,
+    suffix: suffix as TimeSuffix,
   };
 }
 
-function getSlotStartTime(date: Date, suffix: string) {
-  return new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-    suffix === "PM" ? 12 : 8,
-    0,
-    0,
-    0,
-  );
-}
-
-function getFutureSlotDate(preferredDate: Date, suffix: string, now: Date) {
-  const normalized = new Date(preferredDate.getFullYear(), preferredDate.getMonth(), preferredDate.getDate());
-  const slotStart = getSlotStartTime(normalized, suffix);
-
-  if (slotStart.getTime() > now.getTime()) {
-    return normalized;
-  }
-
-  const fallback = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const todaySlotStart = getSlotStartTime(fallback, suffix);
-
-  if (todaySlotStart.getTime() > now.getTime()) {
-    return fallback;
-  }
-
-  fallback.setDate(fallback.getDate() + 1);
-  return fallback;
-}
-
-function buildInitialModalState(initialServiceSlot?: string) {
+function buildInitialModalState(initialServiceSlots: string[]) {
   const now = new Date();
-  const parsedSlot = parseServiceSlot(initialServiceSlot);
-  const baseSuffix = parsedSlot?.suffix ?? "AM";
-  const baseDate = getFutureSlotDate(parsedSlot?.date ?? now, baseSuffix, now);
-  const alternateSuffix = baseSuffix === "AM" ? "PM" : "AM";
-  const secondDate = getFutureSlotDate(new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate() + 1), alternateSuffix, now);
-  const thirdDate = getFutureSlotDate(new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate() + 2), baseSuffix, now);
+  const parsedSlots = initialServiceSlots
+    .map((slot) => parseServiceSlot(slot))
+    .filter((slot): slot is NonNullable<typeof slot> => Boolean(slot))
+    .sort((left, right) => left.date.getTime() - right.date.getTime());
+  const parsedSlot = parsedSlots[0] ?? null;
+  const baseDate = parsedSlot?.date ?? now;
 
   return {
     selectedDate: baseDate,
     currentDate: new Date(baseDate.getFullYear(), baseDate.getMonth(), 1),
-    selectedEntries: [
-      { date: formatDateToISO(baseDate), time: getTimeOptionValue(baseSuffix) },
-      { date: formatDateToISO(secondDate), time: getTimeOptionValue(alternateSuffix) },
-      { date: formatDateToISO(thirdDate), time: getTimeOptionValue(baseSuffix) },
-    ],
-    minDate: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
-    maxDate: new Date(now.getFullYear(), now.getMonth() + 2, 0, 23, 59, 59, 999),
+    selectedEntries: parsedSlots.slice(0, MAX_ENTRIES).map((slot) => ({
+      date: formatDateToISO(slot.date),
+      suffix: slot.suffix,
+      time: null,
+    })),
   };
 }
 
@@ -129,10 +89,50 @@ function formatDateForTag(date: Date): string {
 }
 
 function formatTimeForTag(time: string): string {
-  return getTimeSuffix(getTimeOption(time)?.label ?? time);
+  const normalized = normalizeTimeInput(time);
+  if (!normalized) return time;
+
+  const [hoursText, minutes] = normalized.split(":");
+  const hours24 = Number(hoursText);
+  const suffix = hours24 >= 12 ? "PM" : "AM";
+  const hours12 = hours24 % 12 || 12;
+  return `${hours12}:${minutes} ${suffix}`;
 }
 
-export function ProposeNewTimeModal({ open, onClose, initialServiceSlot }: ProposeNewTimeModalProps) {
+function normalizeTimeInput(value: string): string | null {
+  const match = value.trim().match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) return null;
+
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (!Number.isInteger(hours) || !Number.isInteger(minutes)) return null;
+  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null;
+
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+
+function buildDecisionTimeOption(entry: SelectedTimeEntry): BookingRequestDecisionTimeOption | null {
+  if (!entry.time) return null;
+
+  const normalizedTime = normalizeTimeInput(entry.time);
+  if (!normalizedTime) return null;
+
+  return {
+    date: entry.date,
+    slot: entry.suffix.toLowerCase() as "am" | "pm",
+    time: normalizedTime,
+  };
+}
+
+export function ProposeNewTimeModal({
+  open,
+  onClose,
+  initialServiceSlot,
+  initialServiceSlots,
+  onSubmit,
+  onPassAppointment,
+  isSubmitting = false,
+}: ProposeNewTimeModalProps) {
   const isMobile = useIsMobile();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [currentDate, setCurrentDate] = useState(() => new Date());
@@ -151,17 +151,20 @@ export function ProposeNewTimeModal({ open, onClose, initialServiceSlot }: Propo
       return;
     }
 
-    const initialState = buildInitialModalState(initialServiceSlot);
+    const initialState = buildInitialModalState(
+      initialServiceSlots?.length ? initialServiceSlots : initialServiceSlot ? [initialServiceSlot] : [],
+    );
 
     setSelectedDate(initialState.selectedDate);
     setCurrentDate(initialState.currentDate);
     setSelectedEntries(initialState.selectedEntries);
     setPendingTime("");
     closeCalendarPickers();
-  }, [initialServiceSlot, open]);
+  }, [initialServiceSlot, initialServiceSlots, open]);
 
   const remainingSlots = Math.max(0, MAX_ENTRIES - selectedEntries.length);
   const isMaxReached = selectedEntries.length >= MAX_ENTRIES;
+  const calendarKey = `${currentDate.getFullYear()}-${currentDate.getMonth()}`;
 
   const minDate = useMemo(() => {
     const now = new Date();
@@ -174,33 +177,71 @@ export function ProposeNewTimeModal({ open, onClose, initialServiceSlot }: Propo
 
   const handleDateChange = (date: Date) => {
     setSelectedDate(date);
+    const dateKey = formatDateToISO(date);
+    const existingEntry = selectedEntries.find((entry) => entry.date === dateKey && entry.time);
+    setPendingTime(existingEntry?.time ?? "");
   };
 
   const handleAddTime = (value: string) => {
-    if (!selectedDate || !value || isMaxReached) {
+    setPendingTime(value);
+
+    if (!selectedDate || !value) {
       return;
     }
 
+    const normalizedTime = normalizeTimeInput(value);
+    if (!normalizedTime) return;
+
     const nextEntry = {
       date: formatDateToISO(selectedDate),
-      time: value,
+      suffix: (isPmTime(normalizedTime) ? "PM" : "AM") as TimeSuffix,
+      time: normalizedTime,
     };
 
     const alreadySelected = selectedEntries.some((entry) => entry.date === nextEntry.date && entry.time === nextEntry.time);
 
     if (alreadySelected) {
-      setPendingTime("");
+      setPendingTime(normalizedTime);
       return;
     }
 
-    setSelectedEntries((current) => [...current, nextEntry].slice(0, MAX_ENTRIES));
-    setPendingTime("");
+    setSelectedEntries((current) => {
+      const emptyDateEntryIndex = current.findIndex(
+        (entry) => entry.date === nextEntry.date && entry.suffix === nextEntry.suffix && !entry.time,
+      );
+      if (emptyDateEntryIndex !== -1) {
+        return current.map((entry, index) => (index === emptyDateEntryIndex ? nextEntry : entry));
+      }
+
+      if (current.length >= MAX_ENTRIES) return current;
+
+      return [...current, nextEntry];
+    });
+    setPendingTime(normalizedTime);
   };
 
   const handleRemoveEntry = (entryToRemove: SelectedTimeEntry) => {
     setSelectedEntries((current) =>
-      current.filter((entry) => !(entry.date === entryToRemove.date && entry.time === entryToRemove.time)),
+      current.filter(
+        (entry) =>
+          !(
+            entry.date === entryToRemove.date &&
+            entry.suffix === entryToRemove.suffix &&
+            entry.time === entryToRemove.time
+          ),
+      ),
     );
+  };
+
+  const handleSubmit = async () => {
+    if (!onSubmit) return;
+
+    const timeOptions = selectedEntries
+      .map((entry) => buildDecisionTimeOption(entry))
+      .filter((entry): entry is BookingRequestDecisionTimeOption => Boolean(entry));
+
+    if (!timeOptions.length) return;
+    await onSubmit(timeOptions);
   };
 
   return (
@@ -249,6 +290,7 @@ export function ProposeNewTimeModal({ open, onClose, initialServiceSlot }: Propo
 
               <div className="mt-3 rounded-[16px] bg-white px-4 py-3" onClick={(event) => event.stopPropagation()}>
                 <Calendar
+                  key={calendarKey}
                   currentDate={currentDate}
                   onDateChange={handleDateChange}
                   selectedDate={selectedDate}
@@ -266,19 +308,11 @@ export function ProposeNewTimeModal({ open, onClose, initialServiceSlot }: Propo
 
               <div className="mt-3 w-[167px]">
                 <p className="mb-2 font-comfortaa text-[12px] font-bold leading-4 text-[#4A3C2A]">Available time (multiple)</p>
-                <CustomSelect
+                <AvailableTimeCombobox
                   value={pendingTime}
-                  displayValue={getTimeOption(pendingTime)?.label}
                   onValueChange={handleAddTime}
-                  placeholder="Select time period"
-                  className="w-[167px] rounded-[10px] border-[#D9D2E8] text-[12px] text-[#8B6357]"
-                >
-                  {TIME_OPTIONS.map((timeOption) => (
-                    <CustomSelectItem key={timeOption.value} value={timeOption.value}>
-                      {timeOption.label}
-                    </CustomSelectItem>
-                  ))}
-                </CustomSelect>
+                  options={ALL_AVAILABLE_TIME_OPTIONS}
+                />
               </div>
 
               {selectedEntries.length > 0 ? (
@@ -299,11 +333,13 @@ export function ProposeNewTimeModal({ open, onClose, initialServiceSlot }: Propo
                   <div className="mt-3 flex flex-wrap gap-2">
                     {selectedEntries.map((entry) => {
                       const parsedDate = parseISODate(entry.date);
-                      const tagLabel = `${formatDateForTag(parsedDate)} ${formatTimeForTag(entry.time)}`;
+                      const tagLabel = entry.time
+                        ? `${formatDateForTag(parsedDate)} ${formatTimeForTag(entry.time)}`
+                        : `${formatDateForTag(parsedDate)} ${entry.suffix}`;
 
                       return (
                         <div
-                          key={`${entry.date}-${entry.time}`}
+                          key={`${entry.date}-${entry.suffix}-${entry.time ?? "pending"}`}
                           className="inline-flex h-6 items-center gap-1 rounded-[12px] border border-[#4C4C4C] bg-white pl-[9px] pr-[5px]"
                         >
                           <span className="font-comfortaa text-[14px] font-bold leading-5 text-[#4C4C4C]">{tagLabel}</span>
@@ -326,13 +362,17 @@ export function ProposeNewTimeModal({ open, onClose, initialServiceSlot }: Propo
             <div className="mt-4">
               <button
                 type="button"
+                onClick={handleSubmit}
+                disabled={isSubmitting || selectedEntries.length === 0}
                 className="h-12 w-full rounded-[32px] bg-[#00A63E] font-comfortaa text-[15px] font-bold leading-[22.5px] text-white shadow-[0px_4px_12px_rgba(0,166,62,0.3)] transition-colors hover:bg-[#009638] active:bg-[#008730]"
               >
-                Send new time
+                {isSubmitting ? "Sending..." : "Send new time"}
               </button>
 
               <button
                 type="button"
+                onClick={onPassAppointment}
+                disabled={isSubmitting}
                 className="mt-[10px] flex h-12 w-full items-center justify-center font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357] underline underline-offset-[2px]"
               >
                 Pass appointment

@@ -12,6 +12,7 @@ import {
   type DashboardGoal,
 } from "@/modules/groomer/groomerStore";
 import { decideGroomerInvitation } from "@/lib/api";
+import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
 
 type BookingRequest = DashboardAppointment;
@@ -45,10 +46,20 @@ function AppointmentSummaryCard({
 
 function BookingRequestItem({
   request,
-  onConfirm,
+  onConfirmOriginalTime,
+  onProposeNewTime,
+  onDecline,
 }: {
   request: BookingRequest;
-  onConfirm: (request: BookingRequest, timeOptions: BookingRequestDecisionTimeOption[]) => Promise<void>;
+  onConfirmOriginalTime: (
+    request: BookingRequest,
+    confirmedTime: BookingRequestDecisionTimeOption,
+  ) => Promise<void>;
+  onProposeNewTime: (
+    request: BookingRequest,
+    timeOptions: BookingRequestDecisionTimeOption[],
+  ) => Promise<void>;
+  onDecline: (request: BookingRequest) => Promise<void>;
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -59,7 +70,9 @@ function BookingRequestItem({
       expanded={isExpanded}
       passAppointmentContextLabel="DASHBOARD > BOOKING REQUEST"
       passAppointmentReturnLabel="Back to dashboard"
-      onConfirmAppointment={(timeOption) => onConfirm(request, timeOption)}
+      onConfirmOriginalTime={(confirmedTime) => onConfirmOriginalTime(request, confirmedTime)}
+      onProposeNewTime={(timeOptions) => onProposeNewTime(request, timeOptions)}
+      onDecline={() => onDecline(request)}
       accessory={
         <button
           type="button"
@@ -81,10 +94,20 @@ function BookingRequestItem({
 
 function BookingRequestCard({
   requests,
-  onConfirm,
+  onConfirmOriginalTime,
+  onProposeNewTime,
+  onDecline,
 }: {
   requests: BookingRequest[];
-  onConfirm: (request: BookingRequest, timeOptions: BookingRequestDecisionTimeOption[]) => Promise<void>;
+  onConfirmOriginalTime: (
+    request: BookingRequest,
+    confirmedTime: BookingRequestDecisionTimeOption,
+  ) => Promise<void>;
+  onProposeNewTime: (
+    request: BookingRequest,
+    timeOptions: BookingRequestDecisionTimeOption[],
+  ) => Promise<void>;
+  onDecline: (request: BookingRequest) => Promise<void>;
 }) {
   return (
     <article className="rounded-[16px] bg-white px-5 py-5 shadow-[0px_4px_12px_rgba(0,0,0,0.08)]">
@@ -93,11 +116,30 @@ function BookingRequestCard({
 
       <div className="mt-4 flex flex-col gap-4">
         {requests.map((request) => (
-          <BookingRequestItem key={request.invitationId ?? request.id} request={request} onConfirm={onConfirm} />
+          <BookingRequestItem
+            key={request.invitationId ?? request.id}
+            request={request}
+            onConfirmOriginalTime={onConfirmOriginalTime}
+            onProposeNewTime={onProposeNewTime}
+            onDecline={onDecline}
+          />
         ))}
       </div>
     </article>
   );
+}
+
+function getInvitationErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof HttpError) {
+    const data =
+      error.data && typeof error.data === "object" && !Array.isArray(error.data)
+        ? (error.data as { error?: string })
+        : null;
+    if (typeof data?.error === "string" && data.error.trim()) return data.error.trim();
+    if (error.message.trim()) return error.message.trim();
+  }
+
+  return fallback;
 }
 
 function DailyGoalProgressCard({ dailyGoal }: { dailyGoal: DashboardGoal }) {
@@ -166,6 +208,19 @@ function DashboardMetricCard({
   );
 }
 
+function NoUpcomingAppointmentsCard() {
+  return (
+    <article className="flex h-[213px] flex-col items-center justify-center rounded-[16px] bg-white px-5 shadow-[0px_4px_6px_rgba(0,0,0,0.08)]">
+      <div className="flex size-16 items-center justify-center rounded-full bg-[#F3F1EE]">
+        <Icon name="clock" className="size-8 text-[#9B6F5F]" aria-hidden="true" />
+      </div>
+      <p className="mt-5 text-center font-comfortaa text-[18px] font-bold leading-[27px] text-[#4A2C55]">
+        No upcoming appointments
+      </p>
+    </article>
+  );
+}
+
 export default function GroomerDashboardPage() {
   const {
     nextAppointment,
@@ -176,6 +231,7 @@ export default function GroomerDashboardPage() {
     hasLoadedDashboard,
     isStartingTravel,
     fetchDashboard,
+    fetchPendingBookingRequests,
     startTravel,
   } = useGroomerDashboardStore();
 
@@ -200,7 +256,31 @@ export default function GroomerDashboardPage() {
     }
   };
 
-  const handleConfirmBookingRequest = async (
+  const handleConfirmOriginalTime = async (
+    request: BookingRequest,
+    confirmedTime: BookingRequestDecisionTimeOption,
+  ) => {
+    if (!request.invitationId || !Number.isFinite(request.invitationId)) {
+      toast.error("Missing booking invitation");
+      return;
+    }
+
+    try {
+      await decideGroomerInvitation(request.invitationId, {
+        action: "confirm_original_time",
+        confirmed_time: confirmedTime,
+        note: "",
+      });
+      toast.success("Appointment confirmed");
+      await fetchPendingBookingRequests();
+    } catch (error) {
+      console.error("Failed to confirm booking invitation:", error);
+      toast.error(getInvitationErrorMessage(error, "Failed to confirm appointment"));
+      throw error;
+    }
+  };
+
+  const handleProposeNewTime = async (
     request: BookingRequest,
     timeOptions: BookingRequestDecisionTimeOption[],
   ) => {
@@ -211,20 +291,41 @@ export default function GroomerDashboardPage() {
 
     try {
       await decideGroomerInvitation(request.invitationId, {
-        accept: true,
+        action: "propose_new_time",
         time_options: timeOptions,
         note: "",
       });
-      toast.success("Appointment confirmed");
-      await fetchDashboard();
+      toast.success("New time proposed");
+      await fetchPendingBookingRequests();
     } catch (error) {
-      console.error("Failed to confirm booking invitation:", error);
-      toast.error("Failed to confirm appointment");
+      console.error("Failed to propose new time:", error);
+      toast.error(getInvitationErrorMessage(error, "Failed to propose new time"));
+      throw error;
+    }
+  };
+
+  const handleDeclineBookingRequest = async (request: BookingRequest) => {
+    if (!request.invitationId || !Number.isFinite(request.invitationId)) {
+      toast.error("Missing booking invitation");
+      return;
+    }
+
+    try {
+      await decideGroomerInvitation(request.invitationId, {
+        action: "decline",
+        note: "",
+      });
+      toast.success("Appointment passed");
+      await fetchPendingBookingRequests();
+    } catch (error) {
+      console.error("Failed to pass booking invitation:", error);
+      toast.error(getInvitationErrorMessage(error, "Failed to pass appointment"));
       throw error;
     }
   };
 
   const showInitialLoading = isLoadingDashboard && !hasLoadedDashboard;
+  const hasUpcomingAppointmentContent = Boolean(nextAppointment) || bookingRequests.length > 0;
 
   return (
     <div className="mx-auto min-h-[calc(100vh-64px)] w-full max-w-[393px] bg-[#633479] px-5 pb-28 pt-2">
@@ -246,8 +347,15 @@ export default function GroomerDashboardPage() {
             ) : null}
 
             {bookingRequests.length > 0 ? (
-              <BookingRequestCard requests={bookingRequests} onConfirm={handleConfirmBookingRequest} />
+              <BookingRequestCard
+                requests={bookingRequests}
+                onConfirmOriginalTime={handleConfirmOriginalTime}
+                onProposeNewTime={handleProposeNewTime}
+                onDecline={handleDeclineBookingRequest}
+              />
             ) : null}
+
+            {!hasUpcomingAppointmentContent ? <NoUpcomingAppointmentsCard /> : null}
 
             <DailyGoalProgressCard dailyGoal={dailyGoal} />
 
