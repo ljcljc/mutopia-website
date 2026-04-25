@@ -1,9 +1,10 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { LoginModal } from "@/components/auth/LoginModal";
 import { Icon } from "@/components/common/Icon";
-import { CustomInput, CustomRadio } from "@/components/common";
+import { CustomInput, CustomRadio, CustomSelect, CustomSelectItem } from "@/components/common";
 import { useAuthStore } from "@/components/auth/authStore";
 import { useBookingStore } from "./bookingStore";
+import { getServiceAreaProvinces, getServiceAreas, type ProvinceOut, type ServiceAreaOut } from "@/lib/api";
 
 export function Step1AddressAndServiceType() {
   const user = useAuthStore((state) => state.user);
@@ -13,6 +14,7 @@ export function Step1AddressAndServiceType() {
     city,
     province,
     postCode,
+    selectedServiceAreaId,
     isLoginModalOpen,
     selectedAddressId,
     selectedStoreId,
@@ -23,6 +25,7 @@ export function Step1AddressAndServiceType() {
     setCity,
     setProvince,
     setPostCode,
+    setSelectedServiceAreaId,
     setSelectedAddressId,
     setSelectedStoreId,
     loadAddresses,
@@ -32,8 +35,16 @@ export function Step1AddressAndServiceType() {
 
   const [isAddressDropdownOpen, setIsAddressDropdownOpen] = useState(false);
   const [isStoreDropdownOpen, setIsStoreDropdownOpen] = useState(false);
+  const [provinces, setProvinces] = useState<ProvinceOut[]>([]);
+  const [serviceAreas, setServiceAreas] = useState<ServiceAreaOut[]>([]);
+  const [isLoadingAreas, setIsLoadingAreas] = useState(false);
   const addressDropdownRef = useRef<HTMLDivElement>(null);
   const storeDropdownRef = useRef<HTMLDivElement>(null);
+  const cityRef = useRef(city);
+
+  useEffect(() => {
+    cityRef.current = city;
+  }, [city]);
 
   // 点击外部关闭下拉菜单
   useEffect(() => {
@@ -73,6 +84,58 @@ export function Step1AddressAndServiceType() {
     }
   }, [serviceType, loadStores]);
 
+  useEffect(() => {
+    let cancelled = false;
+    const loadProvinces = async () => {
+      try {
+        const data = await getServiceAreaProvinces();
+        if (!cancelled) {
+          setProvinces(data);
+        }
+      } catch (error) {
+        console.error("Failed to load provinces:", error);
+      }
+    };
+    void loadProvinces();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!province) {
+      setServiceAreas([]);
+      return;
+    }
+    let cancelled = false;
+    const loadAreas = async () => {
+      setIsLoadingAreas(true);
+      try {
+        const data = await getServiceAreas({ province_code: province });
+        if (!cancelled) {
+          setServiceAreas(data);
+          if (cityRef.current && !data.some((item) => item.city === cityRef.current)) {
+            setCity("");
+            setSelectedServiceAreaId(null);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load service areas:", error);
+        if (!cancelled) {
+          setServiceAreas([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoadingAreas(false);
+        }
+      }
+    };
+    void loadAreas();
+    return () => {
+      cancelled = true;
+    };
+  }, [province, setCity, setSelectedServiceAreaId]);
+
   // 当服务类型改变时，重置选择
   useEffect(() => {
     if (serviceType === "mobile" || serviceType === "in_home") {
@@ -97,6 +160,31 @@ export function Step1AddressAndServiceType() {
     serviceType === "in_store" && selectedStoreId
       ? stores.find((store) => store.id === selectedStoreId)
       : null;
+
+  const selectedProvinceName = useMemo(
+    () => provinces.find((item) => item.code === province)?.name ?? province,
+    [province, provinces],
+  );
+
+  const handleProvinceChange = (value: string) => {
+    setProvince(value);
+    setCity("");
+    setSelectedServiceAreaId(null);
+    if (selectedAddressId !== null) {
+      setSelectedAddressId(null);
+    }
+  };
+
+  const handleCityChange = (value: string) => {
+    const selectedArea = serviceAreas.find((item) => item.id === Number(value));
+    if (!selectedArea) return;
+    setSelectedServiceAreaId(selectedArea.id);
+    setCity(selectedArea.city);
+    setProvince(selectedArea.province_code);
+    if (selectedAddressId !== null) {
+      setSelectedAddressId(null);
+    }
+  };
 
   // displayCity, displayProvince, displayPostCode are no longer needed
   // as the input fields now directly use city, province, postCode from store
@@ -345,28 +433,36 @@ export function Step1AddressAndServiceType() {
             {/* City and Province */}
             <div className="flex flex-col sm:flex-row gap-[12px] sm:gap-[20px] items-start relative shrink-0 w-full">
               <div className="flex flex-col items-start relative shrink-0 w-full sm:w-[192px]">
-                <CustomInput
+                <CustomSelect
                   label="City"
-                  type="text"
-                  placeholder="Autofilled"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  containerClassName="bg-[#e5e7eb] sm:bg-white"
-                  borderClassName="border-[#e5e7eb] sm:border-gray-200"
-                  inputClassName="text-[#717182] sm:text-[#4a3c2a]"
-                />
+                  placeholder={province ? "Select city" : "Select province first"}
+                  value={selectedServiceAreaId ? String(selectedServiceAreaId) : ""}
+                  displayValue={city || undefined}
+                  onValueChange={handleCityChange}
+                  disabled={!province || isLoadingAreas || serviceType === "in_store"}
+                >
+                  {serviceAreas.map((item) => (
+                    <CustomSelectItem key={item.id} value={String(item.id)}>
+                      {item.city}
+                    </CustomSelectItem>
+                  ))}
+                </CustomSelect>
               </div>
-              <div className="flex flex-col items-start relative shrink-0 w-full sm:w-[95px]">
-                <CustomInput
+              <div className="flex flex-col items-start relative shrink-0 w-full sm:w-[160px]">
+                <CustomSelect
                   label="Province"
-                  type="text"
-                  placeholder="Autofilled"
+                  placeholder="Select province"
                   value={province}
-                  onChange={(e) => setProvince(e.target.value)}
-                  containerClassName="bg-[#e5e7eb] sm:bg-white"
-                  borderClassName="border-[#e5e7eb] sm:border-gray-200"
-                  inputClassName="text-[#717182] sm:text-[#4a3c2a]"
-                />
+                  displayValue={selectedProvinceName}
+                  onValueChange={handleProvinceChange}
+                  disabled={serviceType === "in_store"}
+                >
+                  {provinces.map((item) => (
+                    <CustomSelectItem key={item.code} value={item.code}>
+                      {item.name}
+                    </CustomSelectItem>
+                  ))}
+                </CustomSelect>
               </div>
             </div>
 
@@ -376,12 +472,9 @@ export function Step1AddressAndServiceType() {
                 <CustomInput
                   label="Post code"
                   type="text"
-                  placeholder="Autofilled"
+                  placeholder="Enter post code"
                   value={postCode}
                   onChange={(e) => setPostCode(e.target.value)}
-                  containerClassName="bg-[#e5e7eb] sm:bg-white"
-                  borderClassName="border-[#e5e7eb] sm:border-gray-200"
-                  inputClassName="text-[#717182] sm:text-[#4a3c2a]"
                 />
               </div>
             </div>

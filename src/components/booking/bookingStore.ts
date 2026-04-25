@@ -46,6 +46,7 @@ interface BookingState {
   city: string;
   province: string;
   postCode: string;
+  selectedServiceAreaId: number | null;
   selectedAddressId: number | null; // 选中的地址 ID
   selectedStoreId: number | null; // 选中的门店 ID（用于 in_store 服务）
   addresses: AddressOut[]; // 用户已保存的地址列表
@@ -130,6 +131,7 @@ interface BookingState {
   setCity: (city: string) => void;
   setProvince: (province: string) => void;
   setPostCode: (postCode: string) => void;
+  setSelectedServiceAreaId: (id: number | null) => void;
   setSelectedAddressId: (id: number | null) => void;
   setSelectedStoreId: (id: number | null) => void;
   loadAddresses: () => Promise<void>;
@@ -189,6 +191,7 @@ const initialState = {
   city: "",
   province: "",
   postCode: "",
+  selectedServiceAreaId: null as number | null,
   selectedAddressId: null as number | null,
   selectedStoreId: null as number | null,
   addresses: [] as AddressOut[],
@@ -275,11 +278,14 @@ export const useBookingStore = create<BookingState>((set) => ({
 
   setPostCode: (postCode) => set({ postCode }),
 
+  setSelectedServiceAreaId: (id) => set({ selectedServiceAreaId: id }),
+
   setSelectedAddressId: (id) =>
     set((state) => {
       const selectedAddress = state.addresses.find((addr) => addr.id === id);
       if (selectedAddress) {
         return {
+          selectedServiceAreaId: selectedAddress.service_area_id ?? null,
           selectedAddressId: id,
           address: selectedAddress.address,
           city: selectedAddress.city,
@@ -295,6 +301,7 @@ export const useBookingStore = create<BookingState>((set) => ({
       const selectedStore = state.stores.find((store) => store.id === id);
       if (selectedStore) {
         return {
+          selectedServiceAreaId: null,
           selectedStoreId: id,
           address: selectedStore.address,
           city: selectedStore.city,
@@ -435,6 +442,7 @@ export const useBookingStore = create<BookingState>((set) => ({
       if (selectedAddress) {
         return {
           id: selectedAddress.id,
+          service_area_id: selectedAddress.service_area_id ?? null,
           address: selectedAddress.address,
           city: selectedAddress.city,
           province: selectedAddress.province,
@@ -448,11 +456,12 @@ export const useBookingStore = create<BookingState>((set) => ({
     if (state.selectedStoreId) {
       const selectedStore = state.stores.find((store) => store.id === state.selectedStoreId);
       if (selectedStore) {
-        return {
-          id: null,
-          address: selectedStore.address,
-          city: selectedStore.city,
-          province: selectedStore.province,
+      return {
+        id: null,
+        service_area_id: null,
+        address: selectedStore.address,
+        city: selectedStore.city,
+        province: selectedStore.province,
           postal_code: selectedStore.postal_code,
           service_type: state.serviceType,
         };
@@ -462,6 +471,7 @@ export const useBookingStore = create<BookingState>((set) => ({
     // 否则使用手动输入的地址
     return {
       id: null,
+      service_area_id: state.selectedServiceAreaId,
       address: state.address,
       city: state.city,
       province: state.province,

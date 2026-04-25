@@ -313,10 +313,13 @@ export interface AddressOut {
   service_type: string;
   is_default: boolean;
   label?: string | null;
+  service_area_id?: number | null;
+  service_area_label?: string | null;
 }
 
 export interface AddressIn {
   id?: number | null;
+  service_area_id?: number | null;
   address: string;
   city: string;
   province: string;
@@ -325,6 +328,7 @@ export interface AddressIn {
 }
 
 export interface AddressManageIn {
+  service_area_id?: number | null;
   address: string;
   city: string;
   province: string;
@@ -335,6 +339,7 @@ export interface AddressManageIn {
 }
 
 export interface AddressUpdateIn {
+  service_area_id?: number | null;
   address?: string | null;
   city?: string | null;
   province?: string | null;
@@ -349,6 +354,32 @@ export interface AddressPageOut {
   page: number;
   page_size: number;
   items: AddressOut[];
+}
+
+export interface ProvinceOut {
+  code: string;
+  name: string;
+}
+
+export interface ServiceAreaOut {
+  id: number;
+  province_code: string;
+  province_name: string;
+  city: string;
+  label: string;
+}
+
+export interface GroomerServiceAreaOut {
+  id: number;
+  service_area_id: number;
+  province_code: string;
+  province_name: string;
+  city: string;
+  label: string;
+}
+
+export interface GroomerServiceAreaManageIn {
+  service_area_ids: number[];
 }
 
 // Booking submit types
@@ -1335,6 +1366,21 @@ export async function getAddresses(params?: {
   return response.data;
 }
 
+export async function getServiceAreaProvinces(): Promise<ProvinceOut[]> {
+  const response = await http.get<ProvinceOut[]>("/api/bookings/service_areas/provinces");
+  return response.data;
+}
+
+export async function getServiceAreas(params?: {
+  province_code?: string;
+}): Promise<ServiceAreaOut[]> {
+  const queryParams = new URLSearchParams();
+  if (params?.province_code) queryParams.append("province_code", params.province_code);
+  const url = `/api/bookings/service_areas${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+  const response = await http.get<ServiceAreaOut[]>(url);
+  return response.data;
+}
+
 /**
  * 创建地址
  */
@@ -1854,6 +1900,18 @@ export async function getGroomerPendingBookingInvitations(
 
   const url = `/api/groomers/bookings/pending${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
   const response = await http.get<GroomerPendingInvitationListOut>(url);
+  return response.data;
+}
+
+export async function getGroomerServiceAreas(): Promise<GroomerServiceAreaOut[]> {
+  const response = await http.get<GroomerServiceAreaOut[]>("/api/groomers/service_areas");
+  return response.data;
+}
+
+export async function saveGroomerServiceAreas(
+  data: GroomerServiceAreaManageIn
+): Promise<OkOut> {
+  const response = await http.put<OkOut>("/api/groomers/service_areas", data);
   return response.data;
 }
 

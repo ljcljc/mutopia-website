@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { OrangeButton } from "@/components/common";
@@ -15,47 +15,31 @@ import {
   accountCenterTheme,
   type AccountListRow,
 } from "@/components/account-center";
+import {
+  getGroomerServiceAreas,
+  getServiceAreaProvinces,
+  getServiceAreas,
+  saveGroomerServiceAreas,
+  type GroomerServiceAreaOut,
+  type ProvinceOut,
+  type ServiceAreaOut,
+} from "@/lib/api";
 
 type PerformanceTier = "gold" | "silver" | "premium";
-const SERVICE_AREA_OPTIONS = [
-  "Burnaby",
-  "Coquitlam",
-  "Delta",
-  "New Westminster",
-  "North Vancouver City",
-  "Richmond",
-  "Surrey",
-  "Vancouver",
-  "West Vancouver",
-] as const;
-
-const SERVICE_AREA_ORDER = new Map(SERVICE_AREA_OPTIONS.map((area, index) => [area.toLowerCase(), index]));
 
 function createServiceRow(label: string, index: number): AccountListRow {
   return {
     id: label.toLowerCase().replace(/\s+/g, "-"),
     label,
-    rightIcon: index === 0 ? undefined : "trash",
-    rightIconColor: index === 0 ? undefined : "text-[#EF4444]",
-    rightIconClassName:
-      index === 0
-        ? undefined
-        : "transition-colors duration-150 hover:text-[#DC2626]",
     heightClassName: index === 0 ? "h-[48px]" : "h-[52px]",
-    rowClickable: index !== 0,
+    rowClickable: false,
   };
 }
 
-function sortServiceAreas(labels: string[]) {
-  return [...labels].sort((left, right) => {
-    const leftIndex = SERVICE_AREA_ORDER.get(left.toLowerCase()) ?? Number.MAX_SAFE_INTEGER;
-    const rightIndex = SERVICE_AREA_ORDER.get(right.toLowerCase()) ?? Number.MAX_SAFE_INTEGER;
-    return leftIndex - rightIndex;
-  });
-}
-
 function createServiceRows(labels: string[]) {
-  return sortServiceAreas(labels).map((label, index) => createServiceRow(label, index));
+  return [...labels]
+    .sort((left, right) => left.localeCompare(right))
+    .map((label, index) => createServiceRow(label, index));
 }
 
 function ToastStatusIcon({ type }: { type: "check" | "warning" }) {
@@ -72,10 +56,13 @@ function ToastStatusIcon({ type }: { type: "check" | "warning" }) {
 
 export default function GroomerAccountPage() {
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
+  useIsMobile();
   const [isAddAreaModalOpen, setIsAddAreaModalOpen] = useState(false);
-  const [editingRowId, setEditingRowId] = useState<string | null>(null);
-  const [serviceRows, setServiceRows] = useState<AccountListRow[]>(() => createServiceRows(["Vancouver", "Richmond"]));
+  const [isLoadingAreas, setIsLoadingAreas] = useState(false);
+  const [isSavingAreas, setIsSavingAreas] = useState(false);
+  const [provinces, setProvinces] = useState<ProvinceOut[]>([]);
+  const [serviceAreaOptions, setServiceAreaOptions] = useState<ServiceAreaOut[]>([]);
+  const [selectedServiceAreas, setSelectedServiceAreas] = useState<GroomerServiceAreaOut[]>([]);
 
   const showServiceAreaToast = (
     message: string,
@@ -86,94 +73,56 @@ export default function GroomerAccountPage() {
     });
   };
 
-  const handleAddArea = (areaName: string) => {
-    const exists = serviceRows.some((row) => row.label.toLowerCase() === areaName.toLowerCase());
-    if (exists) {
-      toast.error("This service area already exists");
-      return;
-    }
-
-    setServiceRows((previous) => createServiceRows([...previous.map((row) => row.label), areaName]));
-    showServiceAreaToast(`${areaName} added to service areas`, "check");
-  };
-
-  const handleEditArea = (areaName: string) => {
-    if (!editingRowId) return;
-
-    const exists = serviceRows.some(
-      (row) => row.id !== editingRowId && row.label.toLowerCase() === areaName.toLowerCase(),
-    );
-    if (exists) {
-      toast.error("This service area already exists");
-      return;
-    }
-
-    setServiceRows((previous) =>
-      createServiceRows(previous.map((row) => (row.id === editingRowId ? areaName : row.label))),
-    );
-    setEditingRowId(null);
-    showServiceAreaToast(`${areaName} added to service areas`, "check");
-  };
-
-  const handleMobileToggleArea = (areaName: string) => {
-    const isSelected = serviceRows.some((row) => row.label.toLowerCase() === areaName.toLowerCase());
-
-    if (isSelected) {
-      if (serviceRows.length === 1) {
-        showServiceAreaToast("At least one service area is required", "warning");
-        return;
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      setIsLoadingAreas(true);
+      try {
+        const [provinceList, areaList, selectedList] = await Promise.all([
+          getServiceAreaProvinces(),
+          getServiceAreas(),
+          getGroomerServiceAreas(),
+        ]);
+        if (cancelled) return;
+        setProvinces(provinceList);
+        setServiceAreaOptions(areaList);
+        setSelectedServiceAreas(selectedList);
+      } catch (error) {
+        console.error("Failed to load groomer service areas:", error);
+        toast.error("Failed to load service areas");
+      } finally {
+        if (!cancelled) {
+          setIsLoadingAreas(false);
+        }
       }
+    };
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-      setServiceRows((previous) =>
-        createServiceRows(previous.filter((row) => row.label.toLowerCase() !== areaName.toLowerCase()).map((row) => row.label)),
-      );
-      showServiceAreaToast(`${areaName} removed from service areas`, "check");
-      return;
+  const serviceRows: AccountListRow[] = useMemo(
+    () => createServiceRows(selectedServiceAreas.map((item) => item.label)),
+    [selectedServiceAreas],
+  );
+
+  const handleSaveAreas = async (serviceAreaIds: number[]) => {
+    setIsSavingAreas(true);
+    try {
+      await saveGroomerServiceAreas({ service_area_ids: serviceAreaIds });
+      const selectedList = await getGroomerServiceAreas();
+      setSelectedServiceAreas(selectedList);
+      setIsAddAreaModalOpen(false);
+      showServiceAreaToast("Service areas updated", "check");
+    } catch (error) {
+      console.error("Failed to save groomer service areas:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to save service areas");
+    } finally {
+      setIsSavingAreas(false);
     }
-
-    setServiceRows((previous) => createServiceRows([...previous.map((row) => row.label), areaName]));
-    showServiceAreaToast(`${areaName} added to service areas`, "check");
   };
 
-  const handleRemoveArea = (row: AccountListRow) => {
-    if (serviceRows.length === 1) {
-      showServiceAreaToast("At least one service area is required", "warning");
-      return;
-    }
-
-    setServiceRows((previous) =>
-      createServiceRows(previous.filter((item) => item.id !== row.id).map((item) => item.label)),
-    );
-    showServiceAreaToast(`${row.label} removed from service areas`, "check");
-  };
-
-  const handleServiceRowClick = (row: AccountListRow) => {
-    if (isMobile) {
-      setEditingRowId(null);
-      setIsAddAreaModalOpen(true);
-      return;
-    }
-
-    if (row.rightIcon === "pencil") {
-      setEditingRowId(row.id);
-      setIsAddAreaModalOpen(true);
-      return;
-    }
-    if (row.rightIcon !== "trash") return;
-
-    handleRemoveArea(row);
-  };
-
-  const editingRow = serviceRows.find((row) => row.id === editingRowId) ?? null;
-  const isEditMode = Boolean(editingRow);
-  const selectableServiceAreas = SERVICE_AREA_OPTIONS.filter((option) => {
-    const normalizedOption = option.toLowerCase();
-    const isCurrentEditingValue = editingRow?.label.toLowerCase() === normalizedOption;
-
-    if (isCurrentEditingValue) return true;
-
-    return !serviceRows.some((row) => row.label.toLowerCase() === normalizedOption);
-  });
   const performanceTier: PerformanceTier = "premium";
 
   const performanceConfig: Record<
@@ -265,14 +214,10 @@ export default function GroomerAccountPage() {
             title="Service areas"
             titleIcon="location"
             actionText="Modify"
-            onActionClick={() => {
-              setEditingRowId(null);
-              setIsAddAreaModalOpen(true);
-            }}
+            onActionClick={() => setIsAddAreaModalOpen(true)}
             actionButtonClassName={accountCenterTheme.actionInteractiveClassName}
             rows={serviceRows}
-            onRowClick={handleServiceRowClick}
-            onRightIconClick={handleRemoveArea}
+            emptyText={isLoadingAreas ? "Loading service areas..." : "No service areas saved yet."}
           />
 
           <PayoutCard bankName="TD Bank Checking" bankMask="**** **** **** 5678" className="lg:h-[152px]" />
@@ -327,15 +272,12 @@ export default function GroomerAccountPage() {
       </div>
       <AddServiceAreaModal
         open={isAddAreaModalOpen}
-        onOpenChange={(open) => {
-          setIsAddAreaModalOpen(open);
-          if (!open) setEditingRowId(null);
-        }}
-        initialValue={editingRow?.label ?? ""}
-        options={isMobile ? [...SERVICE_AREA_OPTIONS] : selectableServiceAreas}
-        selectedValues={serviceRows.map((row) => row.label)}
-        onSubmit={isEditMode ? handleEditArea : handleAddArea}
-        onMobileToggle={handleMobileToggleArea}
+        onOpenChange={setIsAddAreaModalOpen}
+        provinces={provinces}
+        areaOptions={serviceAreaOptions}
+        selectedAreaIds={selectedServiceAreas.map((item) => item.service_area_id)}
+        isSaving={isSavingAreas}
+        onSave={handleSaveAreas}
       />
     </>
   );

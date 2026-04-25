@@ -14,6 +14,7 @@ interface SimpleListCardProps {
   onRightIconClick?: (row: AccountListRow) => void;
   rowClassName?: string;
   className?: string;
+  emptyText?: string;
 }
 
 export default function SimpleListCard({
@@ -27,6 +28,7 @@ export default function SimpleListCard({
   onRightIconClick,
   rowClassName,
   className = "",
+  emptyText,
 }: SimpleListCardProps) {
   return (
     <SectionCard className={`px-5 pb-5 pt-5 ${className}`}>
@@ -46,6 +48,9 @@ export default function SimpleListCard({
         ) : null}
       </div>
       <div className="space-y-3">
+        {rows.length === 0 && emptyText ? (
+          <p className="font-comfortaa text-[13px] leading-[19.5px] text-[#6B7280]">{emptyText}</p>
+        ) : null}
         {rows.map((row) => {
           const isRowInteractive = Boolean(onRowClick) && row.rowClickable !== false;
 
