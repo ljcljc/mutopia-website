@@ -4,6 +4,7 @@ import { CustomRadio, OrangeButton } from "@/components/common";
 import { CustomTextarea } from "@/components/common/CustomTextarea";
 import { Icon } from "@/components/common/Icon";
 import { useAccountStore } from "@/components/account/accountStore";
+import { HttpError } from "@/lib/http";
 import {
   cancelBooking,
   clientConfirmBookingTime,
@@ -190,7 +191,11 @@ export default function BookingDetail() {
   const [isAddAddressOpen, setIsAddAddressOpen] = useState(false);
   const [selectedProposedTimeKey, setSelectedProposedTimeKey] = useState<string>("");
   const [isCardActionLoading, setIsCardActionLoading] = useState(false);
+  const [isConfirmingProposedTime, setIsConfirmingProposedTime] = useState(false);
+  const [isRejectingProposedTime, setIsRejectingProposedTime] = useState(false);
   const { addresses, isLoadingAddresses, fetchAddresses } = useAccountStore();
+
+  const isForbiddenError = (error: unknown) => error instanceof HttpError && error.status === 403;
 
   useEffect(() => {
     const id = Number(bookingId);
@@ -505,7 +510,7 @@ export default function BookingDetail() {
       return;
     }
 
-    setIsCardActionLoading(true);
+    setIsConfirmingProposedTime(true);
     try {
       await clientConfirmBookingTime(detail.id, {
         accept: true,
@@ -515,20 +520,25 @@ export default function BookingDetail() {
           time: selectedTime.time,
         },
       });
-      setDetail((current) => (current ? { ...current, status: "confirmed" } : current));
+      const updatedDetail = await getBookingDetail(detail.id);
+      setDetail(updatedDetail);
       toast.success("Booking confirmed");
     } catch (actionError) {
       console.error("Failed to confirm booking time:", actionError);
-      toast.error("Failed to confirm booking time");
+      if (isForbiddenError(actionError)) {
+        toast.error("You are not allowed to confirm this booking time");
+      } else {
+        toast.error("Failed to confirm booking time");
+      }
     } finally {
-      setIsCardActionLoading(false);
+      setIsConfirmingProposedTime(false);
     }
   };
 
   const handleRejectProposedTime = async () => {
     if (!detail?.id) return;
 
-    setIsCardActionLoading(true);
+    setIsRejectingProposedTime(true);
     try {
       await clientConfirmBookingTime(detail.id, { accept: false });
       const updatedDetail = await getBookingDetail(detail.id);
@@ -536,9 +546,13 @@ export default function BookingDetail() {
       toast.success("Proposed time declined");
     } catch (actionError) {
       console.error("Failed to decline booking time:", actionError);
-      toast.error("Failed to decline booking time");
+      if (isForbiddenError(actionError)) {
+        toast.error("You are not allowed to decline this booking time");
+      } else {
+        toast.error("Failed to decline booking time");
+      }
     } finally {
-      setIsCardActionLoading(false);
+      setIsRejectingProposedTime(false);
     }
   };
 
@@ -720,7 +734,8 @@ export default function BookingDetail() {
                       variant="secondary"
                       size="compact"
                       className="min-w-[100px]"
-                      loading={isCardActionLoading}
+                      loading={isRejectingProposedTime}
+                      disabled={isConfirmingProposedTime || isRejectingProposedTime}
                       onClick={handleRejectProposedTime}
                     >
                       Cancel
@@ -730,7 +745,8 @@ export default function BookingDetail() {
                       variant="primary"
                       size="compact"
                       className="min-w-[100px]"
-                      loading={isCardActionLoading}
+                      loading={isConfirmingProposedTime}
+                      disabled={isConfirmingProposedTime || isRejectingProposedTime}
                       onClick={handleConfirmProposedTime}
                     >
                       Confirm

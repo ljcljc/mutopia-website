@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "@/components/common/Icon";
 import {
   BookingRequestContent,
@@ -50,7 +50,7 @@ function BookingRequestItem({
   request: BookingRequest;
   onConfirm: (request: BookingRequest, timeOptions: BookingRequestDecisionTimeOption[]) => Promise<void>;
 }) {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   return (
     <BookingRequestContent
@@ -101,8 +101,11 @@ function BookingRequestCard({
 }
 
 function DailyGoalProgressCard({ dailyGoal }: { dailyGoal: DashboardGoal }) {
-  const safeTotal = dailyGoal.total > 0 ? dailyGoal.total : 1;
-  const progress = `${Math.min((dailyGoal.completed / safeTotal) * 100, 100)}%`;
+  const hasJobProgress = dailyGoal.completed !== null && dailyGoal.total !== null;
+  const safeTotal = dailyGoal.total && dailyGoal.total > 0 ? dailyGoal.total : 1;
+  const progress = hasJobProgress ? `${Math.min(((dailyGoal.completed ?? 0) / safeTotal) * 100, 100)}%` : "0%";
+  const completedLabel = dailyGoal.completed === null ? "-" : String(dailyGoal.completed);
+  const totalLabel = dailyGoal.total === null ? "-" : String(dailyGoal.total);
 
   return (
     <article className="rounded-[16px] bg-white px-4 py-4 shadow-[0px_4px_12px_rgba(0,0,0,0.08)]">
@@ -114,7 +117,7 @@ function DailyGoalProgressCard({ dailyGoal }: { dailyGoal: DashboardGoal }) {
         <div className="flex items-center gap-1.5">
           <Icon name="target" className="size-4 text-[#16A34A]" aria-hidden="true" />
           <span className="font-comfortaa text-[10px] font-bold leading-[15px] text-[#16A34A]">
-            {dailyGoal.completed} of {dailyGoal.total} jobs completed
+            {completedLabel} of {totalLabel} jobs completed
           </span>
         </div>
       </div>
@@ -170,6 +173,7 @@ export default function GroomerDashboardPage() {
     dailyGoal,
     metrics,
     isLoadingDashboard,
+    hasLoadedDashboard,
     isStartingTravel,
     fetchDashboard,
     startTravel,
@@ -220,43 +224,39 @@ export default function GroomerDashboardPage() {
     }
   };
 
-  const showMetricCards = useMemo(
-    () => metrics.partnerScore !== "—" || metrics.rating !== "—",
-    [metrics.partnerScore, metrics.rating],
-  );
-  const showDailyGoalCard = dailyGoal.total > 0;
+  const showInitialLoading = isLoadingDashboard && !hasLoadedDashboard;
 
   return (
     <div className="mx-auto min-h-[calc(100vh-64px)] w-full max-w-[393px] bg-[#633479] px-5 pb-28 pt-2">
       <div className="space-y-3.5">
         <h1 className="font-comfortaa text-[20px] font-bold leading-[22px] text-white">Dashboard</h1>
 
-        {nextAppointment ? (
-          <AppointmentSummaryCard
-            appointment={nextAppointment}
-            isStartingTravel={isStartingTravel}
-            onStartTravel={handleStartTravel}
-          />
-        ) : null}
-
-        {bookingRequests.length > 0 ? (
-          <BookingRequestCard requests={bookingRequests} onConfirm={handleConfirmBookingRequest} />
-        ) : null}
-
-        {showDailyGoalCard ? <DailyGoalProgressCard dailyGoal={dailyGoal} /> : null}
-
-        {showMetricCards ? (
-          <div className="grid grid-cols-2 gap-3">
-            <DashboardMetricCard icon="logo-mark" value={metrics.partnerScore} label="Mutopia partner score" />
-            <DashboardMetricCard icon="star-2" value={metrics.rating} label="Rating" />
-          </div>
-        ) : null}
-
-        {isLoadingDashboard ? (
+        {showInitialLoading ? (
           <div className="rounded-[16px] bg-white px-4 py-4 shadow-[0px_4px_12px_rgba(0,0,0,0.08)]">
             <p className="font-comfortaa text-[12px] leading-[18px] text-[#8B6357]">Loading dashboard...</p>
           </div>
-        ) : null}
+        ) : (
+          <>
+            {nextAppointment ? (
+              <AppointmentSummaryCard
+                appointment={nextAppointment}
+                isStartingTravel={isStartingTravel}
+                onStartTravel={handleStartTravel}
+              />
+            ) : null}
+
+            {bookingRequests.length > 0 ? (
+              <BookingRequestCard requests={bookingRequests} onConfirm={handleConfirmBookingRequest} />
+            ) : null}
+
+            <DailyGoalProgressCard dailyGoal={dailyGoal} />
+
+            <div className="grid grid-cols-2 gap-3">
+              <DashboardMetricCard icon="logo-mark" value={metrics.partnerScore} label="Mutopia partner score" />
+              <DashboardMetricCard icon="star-2" value={metrics.rating} label="Rating" />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

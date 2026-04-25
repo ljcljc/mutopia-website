@@ -16,8 +16,8 @@ export type DashboardAppointment = GroomerUpNextAppointment & {
 };
 
 export type DashboardGoal = {
-  completed: number;
-  total: number;
+  completed: number | null;
+  total: number | null;
   remainingAmount: string;
   goalAmount: string;
   currentAmount: string;
@@ -37,8 +37,8 @@ const EMPTY_GOAL: DashboardGoal = {
 };
 
 const EMPTY_METRICS: DashboardMetrics = {
-  partnerScore: "—",
-  rating: "—",
+  partnerScore: "-",
+  rating: "-",
 };
 
 const BOOKING_REQUEST_EXPIRES_IN_MS = 7 * 24 * 60 * 60 * 1000;
@@ -70,6 +70,20 @@ function getNumber(source: Record<string, unknown>, keys: string[], fallback: nu
     }
   }
   return fallback;
+}
+
+function getOptionalNumber(source: Record<string, unknown>, keys: string[]): number | null {
+  for (const key of keys) {
+    if (!Object.prototype.hasOwnProperty.call(source, key)) continue;
+
+    const value = source[key];
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (typeof value === "string" && value.trim()) {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+  }
+  return null;
 }
 
 function getNestedRecord(source: Record<string, unknown>, keys: string[]): Record<string, unknown> {
@@ -211,17 +225,21 @@ function getPendingItems(data: unknown): Record<string, unknown>[] {
 }
 
 function mapDashboardGoal(summary: Record<string, unknown>): DashboardGoal {
-  const completed = getNumber(summary, ["completed_jobs", "jobs_completed", "completed", "done_jobs"]);
-  const total = getNumber(summary, ["daily_goal_jobs", "goal_jobs", "daily_goal_total", "total"]);
-  const goalAmountRaw = getString(summary, ["daily_goal_amount", "goal_amount", "target_amount"], "0");
-  const currentAmountRaw = getString(summary, ["current_amount", "earned_amount", "today_earnings"], "0");
-  const goalAmountNumber = Number(goalAmountRaw.replace(/[^0-9.-]/g, "")) || 0;
-  const currentAmountNumber = Number(currentAmountRaw.replace(/[^0-9.-]/g, "")) || 0;
-  const remainingAmountNumber = Math.max(goalAmountNumber - currentAmountNumber, 0);
+  const completed = getOptionalNumber(summary, ["completed_jobs", "jobs_completed", "completed", "done_jobs"]);
+  const total = getOptionalNumber(summary, ["daily_goal_jobs", "goal_jobs", "daily_goal_total", "total"]);
+  const goalAmountRaw = getString(summary, ["daily_goal_amount", "goal_amount", "target_amount"]);
+  const currentAmountRaw = getString(summary, ["current_amount", "earned_amount", "today_earnings"]);
+  const goalAmountNumber = Number(goalAmountRaw.replace(/[^0-9.-]/g, ""));
+  const currentAmountNumber = Number(currentAmountRaw.replace(/[^0-9.-]/g, ""));
+  const hasRemainingAmount = goalAmountRaw && currentAmountRaw;
+  const remainingAmountNumber =
+    hasRemainingAmount && Number.isFinite(goalAmountNumber) && Number.isFinite(currentAmountNumber)
+      ? Math.max(goalAmountNumber - currentAmountNumber, 0)
+      : undefined;
 
   return {
-    completed,
-    total,
+    completed: completed ?? 0,
+    total: total ?? 0,
     remainingAmount: formatCurrency(remainingAmountNumber, "$0"),
     goalAmount: formatCurrency(goalAmountRaw, "$0"),
     currentAmount: formatCurrency(currentAmountRaw, "$0"),
@@ -229,9 +247,11 @@ function mapDashboardGoal(summary: Record<string, unknown>): DashboardGoal {
 }
 
 function mapDashboardMetrics(summary: Record<string, unknown>): DashboardMetrics {
+  const partnerScore = getString(summary, ["partner_score", "mutopia_partner_score", "score"], "-");
+
   return {
-    partnerScore: getString(summary, ["partner_score", "mutopia_partner_score", "score"], "—"),
-    rating: getString(summary, ["rating", "average_rating"], "—"),
+    partnerScore: partnerScore.includes("/") ? partnerScore : `${partnerScore}/100`,
+    rating: getString(summary, ["rating", "average_rating"], "-"),
   };
 }
 
@@ -242,6 +262,7 @@ interface GroomerDashboardState {
   dailyGoal: DashboardGoal;
   metrics: DashboardMetrics;
   isLoadingDashboard: boolean;
+  hasLoadedDashboard: boolean;
   isStartingTravel: boolean;
   fetchDashboard: () => Promise<void>;
   startTravel: (bookingId: number) => Promise<void>;
@@ -254,6 +275,7 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
   dailyGoal: EMPTY_GOAL,
   metrics: EMPTY_METRICS,
   isLoadingDashboard: false,
+  hasLoadedDashboard: false,
   isStartingTravel: false,
 
   fetchDashboard: async () => {
@@ -297,7 +319,7 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
       set({ bookingRequest: null, bookingRequests: [] });
     }
 
-    set({ isLoadingDashboard: false });
+    set({ isLoadingDashboard: false, hasLoadedDashboard: true });
   },
 
   startTravel: async (bookingId: number) => {

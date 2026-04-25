@@ -1,15 +1,17 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Icon } from "@/components/common/Icon";
 import { cn } from "@/components/ui/utils";
 import { BookingRequestContent } from "@/modules/groomer/components/BookingRequestContent";
 import { HistoryDetailsModal, type HistoryDetailsAppointment } from "@/modules/groomer/components/HistoryDetailsModal";
 import { GroomerUpNextCard, type GroomerUpNextAppointment } from "@/modules/groomer/components/GroomerUpNextCard";
+import { buildImageUrl, getGroomerHistory, getGroomerSchedule } from "@/lib/api";
 
 type WorkTab = "schedule" | "history";
 type CalendarMode = "collapsed" | "week" | "month";
 
 type AppointmentCard = GroomerUpNextAppointment & {
   id: string;
+  bookingId: number;
   showStartTravel?: boolean;
 };
 
@@ -29,6 +31,7 @@ type CalendarMonthDay = {
 type AppointmentSection = {
   id: string;
   label: string;
+  dateKey: string;
   appointments: AppointmentCard[];
 };
 
@@ -41,13 +44,12 @@ type HistoryBadge = {
 
 type HistoryAppointmentCard = {
   id: string;
+  bookingId: number;
   date: string;
   petName: string;
   breed: string;
   amount: string;
   badges: HistoryBadge[];
-  tip?: string;
-  timeline?: string[];
 };
 
 type HistorySection = {
@@ -56,73 +58,51 @@ type HistorySection = {
   appointments: HistoryAppointmentCard[];
 };
 
-type ScheduleMockEntry = AppointmentCard & {
-  dayOffset: number;
-  dotColors?: string[];
-};
-
 const WEEKDAY_SHORT_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 const WEEKDAY_FULL_LABELS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"] as const;
 const MONTH_SHORT_LABELS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"] as const;
+const CALENDAR_DOT_COLOR = "#F59E0B";
+const SCHEDULE_PAGE_SIZE = 20;
+const HISTORY_PAGE_SIZE = 20;
+const SCHEDULE_DAY_OFFSETS = [0, 1] as const;
+const DEFAULT_PET_AVATAR = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" fill="none">
+    <rect width="96" height="96" rx="48" fill="#F6E8DA"/>
+    <circle cx="48" cy="39" r="16" fill="#C58D6A"/>
+    <ellipse cx="48" cy="66" rx="22" ry="14" fill="#D9A37D"/>
+  </svg>`,
+)}`;
 
-const scheduleMockEntries: ScheduleMockEntry[] = [
-  {
-    id: "max",
-    dayOffset: 0,
-    petName: "Max",
-    breed: "Golden retriever",
-    avatarUrl: "https://www.figma.com/api/mcp/asset/bfdce912-7cc8-4331-88f4-642b1f2b1b5f",
-    owner: "Emma Johnson",
-    address: "565 West 207th Street",
-    service: "Full Groom Package",
-    duration: "Est. duration: 90 minutes",
-    time: "2:00 PM",
-    showStartTravel: true,
-    dotColors: ["#00A63E", "#59C36A"],
-  },
-  {
-    id: "charlie",
-    dayOffset: 0,
-    petName: "Charlie",
-    breed: "Shih Tzu",
-    avatarUrl: "https://placedog.net/160/160?id=7",
-    owner: "Jean Johnson",
-    address: "320 East 54th Street",
-    service: "Bath & Brush",
-    duration: "Est. duration: 60 minutes",
-    time: "4:30 PM",
-    dotColors: ["#F59E0B"],
-  },
-  {
-    id: "bella",
-    dayOffset: 1,
-    petName: "Bella",
-    breed: "Poodle",
-    avatarUrl: "https://images.dog.ceo/breeds/poodle-toy/n02113624_9550.jpg",
-    owner: "Angela Reed",
-    address: "210 Riverside Blvd",
-    service: "Bath & Brush",
-    duration: "Est. duration: 55 minutes",
-    time: "11:00 AM",
-    dotColors: ["#00A63E", "#F59E0B"],
-  },
-  {
-    id: "luna",
-    dayOffset: 1,
-    petName: "Luna",
-    breed: "French Bulldog",
-    avatarUrl: "https://images.dog.ceo/breeds/bulldog-french/n02108915_5306.jpg",
-    owner: "Mia Carter",
-    address: "88 Columbus Avenue",
-    service: "Bath & Nails",
-    duration: "Est. duration: 45 minutes",
-    time: "3:15 PM",
-    dotColors: ["#59C36A"],
-  },
-];
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
+}
 
-function formatMonthYear(date: Date) {
-  return `${MONTH_SHORT_LABELS[date.getMonth()].charAt(0)}${MONTH_SHORT_LABELS[date.getMonth()].slice(1).toLowerCase()} ${date.getFullYear()}`;
+function getItems(data: unknown): Record<string, unknown>[] {
+  if (Array.isArray(data)) return data.map(asRecord);
+  const record = asRecord(data);
+  if (Array.isArray(record.items)) return record.items.map(asRecord);
+  return [];
+}
+
+function getString(source: Record<string, unknown>, keys: string[], fallback: string = ""): string {
+  for (const key of keys) {
+    const value = source[key];
+    if (typeof value === "string" && value.trim()) return value.trim();
+    if (typeof value === "number") return String(value);
+  }
+  return fallback;
+}
+
+function getNumber(source: Record<string, unknown>, keys: string[], fallback: number = 0): number {
+  for (const key of keys) {
+    const value = source[key];
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (typeof value === "string") {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+  }
+  return fallback;
 }
 
 function getMondayFirstWeekIndex(date: Date) {
@@ -136,6 +116,12 @@ function getStartOfWeek(date: Date) {
   return start;
 }
 
+function addDays(date: Date, days: number) {
+  const next = new Date(date);
+  next.setDate(date.getDate() + days);
+  return next;
+}
+
 function isSameDay(left: Date, right: Date) {
   return (
     left.getFullYear() === right.getFullYear() &&
@@ -144,10 +130,21 @@ function isSameDay(left: Date, right: Date) {
   );
 }
 
-function addDays(date: Date, days: number) {
-  const next = new Date(date);
-  next.setDate(date.getDate() + days);
-  return next;
+function toDateKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function parseDate(value: string): Date | null {
+  if (!value) return null;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function formatMonthYear(date: Date) {
+  return `${MONTH_SHORT_LABELS[date.getMonth()].charAt(0)}${MONTH_SHORT_LABELS[date.getMonth()].slice(1).toLowerCase()} ${date.getFullYear()}`;
 }
 
 function formatScheduleSectionLabel(date: Date, today: Date) {
@@ -155,39 +152,74 @@ function formatScheduleSectionLabel(date: Date, today: Date) {
   const month = MONTH_SHORT_LABELS[date.getMonth()];
   const base = `${weekday}, ${month} ${date.getDate()}`;
 
-  if (isSameDay(date, today)) {
-    return `TODAY - ${base}`;
-  }
-
-  if (isSameDay(date, addDays(today, 1))) {
-    return `TOMORROW - ${base}`;
-  }
-
+  if (isSameDay(date, today)) return `TODAY - ${base}`;
+  if (isSameDay(date, addDays(today, 1))) return `TOMORROW - ${base}`;
   return base;
 }
 
-function getDotColorsForEntries(entries: ScheduleMockEntry[]) {
-  return Array.from(new Set(entries.flatMap((entry) => entry.dotColors ?? [])));
+function formatTimeLabel(value: string): string {
+  const parsed = parseDate(value);
+  if (!parsed) return value || "--";
+  return parsed.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
-function buildCalendarWeekDays(today: Date, entries: ScheduleMockEntry[]): CalendarWeekDay[] {
+function formatShortDate(value: string): string {
+  const parsed = parseDate(value);
+  if (!parsed) return value || "—";
+  return parsed.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function formatMonthSectionLabel(date: Date): string {
+  return date.toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  }).toUpperCase();
+}
+
+function formatAmountLabel(source: Record<string, unknown>): string {
+  const raw = getString(source, ["amount", "final_amount", "payable_amount", "deposit_amount"]);
+  if (!raw) return "—";
+  return raw.startsWith("$") ? raw : `$${raw}`;
+}
+
+function formatStatusLabel(status: string): string {
+  if (!status) return "Unknown";
+  return status
+    .split(/[_\s-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(" ");
+}
+
+function getStatusTone(status: string): HistoryBadgeTone {
+  const normalized = status.toLowerCase();
+  if (normalized.includes("complete") || normalized.includes("confirm") || normalized.includes("success")) return "success";
+  if (normalized.includes("pending") || normalized.includes("cancel") || normalized.includes("terminate")) return "warning";
+  return "neutral";
+}
+
+function buildCalendarWeekDays(today: Date, occupiedDateKeys: Set<string>): CalendarWeekDay[] {
   const startOfWeek = getStartOfWeek(today);
 
   return Array.from({ length: 7 }, (_, index) => {
     const date = addDays(startOfWeek, index);
-    const dayEntries = entries.filter((entry) => isSameDay(addDays(today, entry.dayOffset), date));
-    const dots = getDotColorsForEntries(dayEntries);
-
+    const dateKey = toDateKey(date);
     return {
       label: WEEKDAY_SHORT_LABELS[index],
       date: String(date.getDate()),
       active: isSameDay(date, today),
-      dots: dots.length > 0 ? dots : undefined,
+      dots: occupiedDateKeys.has(dateKey) ? [CALENDAR_DOT_COLOR] : undefined,
     };
   });
 }
 
-function buildMonthCalendarDays(today: Date, entries: ScheduleMockEntry[]): Array<CalendarMonthDay | null> {
+function buildMonthCalendarDays(today: Date, occupiedDateKeys: Set<string>): Array<CalendarMonthDay | null> {
   const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
   const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
   const leadingEmptyDays = getMondayFirstWeekIndex(firstDayOfMonth);
@@ -195,102 +227,82 @@ function buildMonthCalendarDays(today: Date, entries: ScheduleMockEntry[]): Arra
 
   for (let day = 1; day <= lastDayOfMonth.getDate(); day += 1) {
     const date = new Date(today.getFullYear(), today.getMonth(), day);
-    const dayEntries = entries.filter((entry) => isSameDay(addDays(today, entry.dayOffset), date));
-    const dots = getDotColorsForEntries(dayEntries);
+    const dateKey = toDateKey(date);
 
     days.push({
       date: String(day),
       active: isSameDay(date, today),
-      dots: dots.length > 0 ? dots : undefined,
+      dots: occupiedDateKeys.has(dateKey) ? [CALENDAR_DOT_COLOR] : undefined,
     });
   }
 
   return days;
 }
 
-function buildVisibleScheduleSections(today: Date, entries: ScheduleMockEntry[]): AppointmentSection[] {
-  return [0, 1].map((offset) => {
-    const date = addDays(today, offset);
-    const dayAppointments = entries
-      .filter((entry) => entry.dayOffset === offset)
-      .map(({ dayOffset: _dayOffset, dotColors: _dotColors, ...appointment }) => appointment);
+function mapScheduleAppointment(item: Record<string, unknown>, dateKey: string, todayDateKey: string): AppointmentCard {
+  const bookingId = getNumber(item, ["id", "booking_id"], 0);
+  const petName = getString(item, ["pet_name"], "Pet");
+  const avatarUrl = buildImageUrl(getString(item, ["pet_avatar", "avatar", "avatar_url"])) || DEFAULT_PET_AVATAR;
+  const serviceName = getString(item, ["service_name"], getString(item, ["service_type"], "Service"));
 
-    return {
-      id: `visible-day-${offset}`,
-      label: formatScheduleSectionLabel(date, today),
-      appointments: dayAppointments,
-    };
-  });
+  return {
+    id: String(bookingId || `${dateKey}-${petName}`),
+    bookingId,
+    petName,
+    breed: getString(item, ["pet_breed", "breed"], "Breed"),
+    owner: getString(item, ["owner_name"], "Pet owner"),
+    avatarUrl,
+    address: getString(item, ["service_address", "address"], "Address unavailable"),
+    service: serviceName,
+    duration: getString(item, ["duration", "duration_text", "estimated_duration"], "Est. duration: --"),
+    time: formatTimeLabel(getString(item, ["scheduled_time", "appointment_time", "time"])),
+    showStartTravel: dateKey === todayDateKey,
+  };
 }
 
-const historySections: HistorySection[] = [
-  {
-    id: "history-mar-2026",
-    label: "MARCH 2026",
-    appointments: [
-      {
-        id: "history-max",
-        date: "Mar 12",
-        petName: "Max",
-        breed: "Golden Retriever",
-        amount: "$105.00",
-        timeline: ["Start travel:", "Check in:", "Start service:"],
-        badges: [
-          { label: "Full Groom", tone: "service" },
-          { label: "Confirmed", tone: "success" },
-        ],
-        tip: "+$20.00 Tip",
-      },
-      {
-        id: "history-bella",
-        date: "Mar 12",
-        petName: "Bella",
-        breed: "Poodle",
-        amount: "$85.00",
-        badges: [
-          { label: "Bath & Brush", tone: "service" },
-          { label: "Pending confirmation", tone: "warning" },
-        ],
-        tip: "+$20.00 Tip",
-      },
-      {
-        id: "history-charlie",
-        date: "Mar 9",
-        petName: "Charlie",
-        breed: "Shih Tzu",
-        amount: "$95.00",
-        badges: [
-          { label: "Full Groom", tone: "service" },
-          { label: "Confirmed", tone: "success" },
-        ],
-        tip: "+$15.00 Tip",
-      },
-      {
-        id: "history-luna",
-        date: "Mar 8",
-        petName: "Luna",
-        breed: "French Bulldog",
-        amount: "$65.00",
-        badges: [
-          { label: "Confirmed Handshake", tone: "success" },
-          { label: "Bath & Nails", tone: "neutral" },
-        ],
-        tip: "+$10.00 Tip",
-      },
-      {
-        id: "history-cooper",
-        date: "Mar 7",
-        petName: "Cooper",
-        breed: "Labrador",
-        amount: "$110.00",
-        badges: [
-          { label: "Confirmed Handshake", tone: "success" },
-          { label: "Full Groom", tone: "neutral" },
-        ],
-      },
+function mapHistoryAppointment(item: Record<string, unknown>): HistoryAppointmentCard {
+  const bookingId = getNumber(item, ["id", "booking_id"], 0);
+  const scheduledTime = getString(item, ["scheduled_time", "created_at"]);
+  const serviceLabel = getString(item, ["service_name"], getString(item, ["service_type"], "Service"));
+  const statusLabel = formatStatusLabel(getString(item, ["status"], "Unknown"));
+
+  return {
+    id: `history-${bookingId || Math.random().toString(36).slice(2)}`,
+    bookingId,
+    date: formatShortDate(scheduledTime),
+    petName: getString(item, ["pet_name"], "Pet"),
+    breed: getString(item, ["pet_breed", "breed"], "Breed"),
+    amount: formatAmountLabel(item),
+    badges: [
+      { label: serviceLabel, tone: "service" },
+      { label: statusLabel, tone: getStatusTone(statusLabel) },
     ],
-  },
-];
+  };
+}
+
+function groupHistoryAppointments(items: HistoryAppointmentCard[], sourceRecords: Record<string, unknown>[]): HistorySection[] {
+  const grouped = new Map<string, HistorySection>();
+
+  items.forEach((appointment, index) => {
+    const source = sourceRecords[index] ?? {};
+    const parsed = parseDate(getString(source, ["scheduled_time", "created_at"]));
+    const label = parsed ? formatMonthSectionLabel(parsed) : "HISTORY";
+    const section = grouped.get(label);
+
+    if (section) {
+      section.appointments.push(appointment);
+      return;
+    }
+
+    grouped.set(label, {
+      id: `history-section-${label.toLowerCase().replace(/\s+/g, "-")}`,
+      label,
+      appointments: [appointment],
+    });
+  });
+
+  return Array.from(grouped.values());
+}
 
 function SegmentControl({
   activeTab,
@@ -349,7 +361,7 @@ function HistorySearchField({
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        placeholder="Search past work by pet name, date..."
+        placeholder="Search past work by pet name..."
         className="w-full bg-transparent font-comfortaa text-[14px] leading-[21px] text-white outline-none placeholder:text-white"
       />
     </label>
@@ -387,26 +399,11 @@ function HistoryAppointmentItem({ appointment }: { appointment: HistoryAppointme
         <p className="shrink-0 font-comfortaa text-[20px] font-bold leading-[30px] text-[#DE6A07]">{appointment.amount}</p>
       </div>
 
-      {appointment.timeline ? (
-        <div className="mt-3 flex flex-col gap-1 font-comfortaa text-[10px] leading-[12px] text-[#4A3C2A]">
-          {appointment.timeline.map((item) => (
-            <p key={item}>{item}</p>
-          ))}
-        </div>
-      ) : null}
-
       <div className="mt-3 flex flex-wrap gap-3">
         {appointment.badges.map((badge) => (
           <HistoryBadgeView key={`${appointment.id}-${badge.label}`} badge={badge} />
         ))}
       </div>
-
-      {appointment.tip ? (
-        <div className="mt-3 inline-flex h-7 items-center gap-[6px] rounded-[12px] border border-[rgba(222,106,7,0.1)] bg-[rgba(222,106,7,0.1)] px-[14px]">
-          <Icon name="gift" className="size-[14px] text-[#DE6A07]" aria-hidden="true" />
-          <span className="font-comfortaa text-[13px] font-bold leading-[19.5px] text-[#DE6A07]">{appointment.tip}</span>
-        </div>
-      ) : null}
     </article>
   );
 }
@@ -579,7 +576,7 @@ function PendingTravelCard({
                 Owner: {appointment.owner}
               </p>
               <div className="mt-[7px] inline-flex rounded-full border border-[#DE1507] px-[10px] py-[4px]">
-                <span className="font-comfortaa text-[11px] leading-[16.5px] text-[#DE1507]">Expired in 24 hours</span>
+                <span className="font-comfortaa text-[11px] leading-[16.5px] text-[#DE1507]">Moved from schedule</span>
               </div>
             </div>
             <Icon name="chevron-down" size={14} className="text-[#8B6357]" aria-hidden="true" />
@@ -627,43 +624,153 @@ function AppointmentItem({
   );
 }
 
+function StatusCard({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="rounded-[16px] bg-[rgba(255,255,255,0.12)] px-4 py-4 text-white">
+      <p className="font-comfortaa text-[16px] font-bold leading-6">{title}</p>
+      <p className="mt-2 font-comfortaa text-[13px] leading-5 text-[rgba(255,255,255,0.8)]">{description}</p>
+    </div>
+  );
+}
+
 export default function GroomerMyWorkPage() {
   const today = useMemo(() => new Date(), []);
+  const todayDateKey = useMemo(() => toDateKey(today), [today]);
   const [activeTab, setActiveTab] = useState<WorkTab>("schedule");
   const [calendarMode, setCalendarMode] = useState<CalendarMode>("collapsed");
   const [historySearchValue, setHistorySearchValue] = useState("");
+  const [debouncedHistorySearch, setDebouncedHistorySearch] = useState("");
   const [selectedHistoryAppointment, setSelectedHistoryAppointment] = useState<HistoryDetailsAppointment | null>(null);
   const [pendingAppointmentIds, setPendingAppointmentIds] = useState<string[]>([]);
   const [expandedPendingAppointmentIds, setExpandedPendingAppointmentIds] = useState<string[]>([]);
-  const calendarWeekDays = useMemo(() => buildCalendarWeekDays(today, scheduleMockEntries), [today]);
-  const monthCalendarDays = useMemo(() => buildMonthCalendarDays(today, scheduleMockEntries), [today]);
-  const visibleScheduleSections = useMemo(() => buildVisibleScheduleSections(today, scheduleMockEntries), [today]);
-  const monthLabel = useMemo(() => formatMonthYear(today), [today]);
-  const filteredHistorySections = useMemo(() => {
-    const keyword = historySearchValue.trim().toLowerCase();
+  const [scheduleSections, setScheduleSections] = useState<AppointmentSection[]>([]);
+  const [historySections, setHistorySections] = useState<HistorySection[]>([]);
+  const [isLoadingSchedule, setIsLoadingSchedule] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [scheduleError, setScheduleError] = useState("");
+  const [historyError, setHistoryError] = useState("");
 
-    if (!keyword) {
-      return historySections;
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedHistorySearch(historySearchValue.trim());
+    }, 300);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [historySearchValue]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadSchedule() {
+      setIsLoadingSchedule(true);
+      setScheduleError("");
+
+      const results = await Promise.allSettled(
+        SCHEDULE_DAY_OFFSETS.map(async (offset) => {
+          const date = addDays(today, offset);
+          const dateKey = toDateKey(date);
+          const response = await getGroomerSchedule({
+            service_date: dateKey,
+            page: 1,
+            page_size: SCHEDULE_PAGE_SIZE,
+          });
+
+          const appointments = getItems(response).map((item) => mapScheduleAppointment(item, dateKey, todayDateKey));
+          return {
+            id: `visible-day-${offset}`,
+            label: formatScheduleSectionLabel(date, today),
+            dateKey,
+            appointments,
+          } satisfies AppointmentSection;
+        }),
+      );
+
+      if (cancelled) return;
+
+      const fulfilledSections = results
+        .filter((result): result is PromiseFulfilledResult<AppointmentSection> => result.status === "fulfilled")
+        .map((result) => result.value);
+
+      setScheduleSections(fulfilledSections);
+      setScheduleError(fulfilledSections.length === 0 ? "Failed to load schedule." : "");
+      setIsLoadingSchedule(false);
     }
 
-    return historySections.map((section) => ({
-      ...section,
-      appointments: section.appointments.filter((appointment) =>
-        [appointment.petName, appointment.breed, appointment.date].some((field) => field.toLowerCase().includes(keyword)),
-      ),
-    }));
-  }, [historySearchValue]);
+    void loadSchedule();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [today, todayDateKey]);
+
+  useEffect(() => {
+    if (activeTab !== "history") return;
+
+    let cancelled = false;
+
+    async function loadHistory() {
+      setIsLoadingHistory(true);
+      setHistoryError("");
+
+      try {
+        const response = await getGroomerHistory({
+          pet_name: debouncedHistorySearch || undefined,
+          date_to: todayDateKey,
+          page: 1,
+          page_size: HISTORY_PAGE_SIZE,
+        });
+
+        if (cancelled) return;
+
+        const items = getItems(response);
+        const sortedItems = [...items].sort((left, right) => {
+          const leftTime = parseDate(getString(left, ["scheduled_time", "created_at"]))?.getTime() ?? 0;
+          const rightTime = parseDate(getString(right, ["scheduled_time", "created_at"]))?.getTime() ?? 0;
+          return rightTime - leftTime;
+        });
+        const mappedAppointments = sortedItems.map((item) => mapHistoryAppointment(item));
+
+        setHistorySections(groupHistoryAppointments(mappedAppointments, sortedItems));
+      } catch (error) {
+        if (cancelled) return;
+        console.error("Failed to load groomer history:", error);
+        setHistorySections([]);
+        setHistoryError("Failed to load history.");
+      } finally {
+        if (!cancelled) setIsLoadingHistory(false);
+      }
+    }
+
+    void loadHistory();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTab, debouncedHistorySearch, todayDateKey]);
+
+  const occupiedDateKeys = useMemo(
+    () => new Set(scheduleSections.filter((section) => section.appointments.length > 0).map((section) => section.dateKey)),
+    [scheduleSections],
+  );
+  const calendarWeekDays = useMemo(() => buildCalendarWeekDays(today, occupiedDateKeys), [occupiedDateKeys, today]);
+  const monthCalendarDays = useMemo(() => buildMonthCalendarDays(today, occupiedDateKeys), [occupiedDateKeys, today]);
+  const monthLabel = useMemo(() => formatMonthYear(today), [today]);
+  const visibleScheduleSections = useMemo(() => scheduleSections, [scheduleSections]);
 
   const handleTabChange = (tab: WorkTab) => {
     setActiveTab(tab);
-    if (tab !== "schedule") {
-      setCalendarMode("collapsed");
-    }
+    if (tab !== "schedule") setCalendarMode("collapsed");
   };
 
   const openHistoryDetails = (appointment: HistoryAppointmentCard) => {
     setSelectedHistoryAppointment({
-      id: appointment.id,
+      id: String(appointment.bookingId),
       petName: appointment.petName,
       breed: appointment.breed,
       serviceLabel: appointment.badges[0]?.label,
@@ -697,6 +804,9 @@ export default function GroomerMyWorkPage() {
       />
     );
   };
+
+  const hasScheduleAppointments = visibleScheduleSections.some((section) => section.appointments.length > 0);
+  const hasHistoryAppointments = historySections.some((section) => section.appointments.length > 0);
 
   return (
     <div className="mx-auto min-h-[calc(100vh-64px)] w-full max-w-[393px] bg-[#633479] px-5 pb-28 pt-2">
@@ -732,50 +842,80 @@ export default function GroomerMyWorkPage() {
                 onExpandMonth={() => setCalendarMode("month")}
                 onShowWeek={() => setCalendarMode("week")}
               />
-              <section className="space-y-4">
-                <DateSectionHeader label={visibleScheduleSections[0]?.label ?? ""} />
-                <div className="space-y-3">
-                  {visibleScheduleSections[0]?.appointments.map(renderScheduleAppointment)}
-                </div>
-              </section>
 
-              {visibleScheduleSections.slice(1).map((section) => (
-                <section key={section.id} className="space-y-4">
-                  <DateSectionHeader label={section.label} />
-                  {section.appointments.length > 0 ? <div className="space-y-3">{section.appointments.map(renderScheduleAppointment)}</div> : null}
-                </section>
-              ))}
-            </>
-          ) : (
-            <>
-              {activeTab === "history"
-                ? filteredHistorySections.map((section) => (
-                    <section key={section.id} className="space-y-4">
-                      <DateSectionHeader label={section.label} />
-                      {section.appointments.length > 0 ? (
-                        <div className="space-y-4">
-                          {section.appointments.map((appointment) => (
-                            <button
-                              key={appointment.id}
-                              type="button"
-                              onClick={() => openHistoryDetails(appointment)}
-                              className="block w-full text-left transition-transform active:scale-[0.99]"
-                            >
-                              <HistoryAppointmentItem appointment={appointment} />
-                            </button>
-                          ))}
-                        </div>
-                      ) : null}
-                    </section>
-                  ))
-                : visibleScheduleSections.map((section) => (
+              {isLoadingSchedule ? <StatusCard title="Loading schedule" description="Fetching today and upcoming bookings." /> : null}
+              {!isLoadingSchedule && scheduleError ? <StatusCard title="Schedule unavailable" description={scheduleError} /> : null}
+              {!isLoadingSchedule && !scheduleError && !hasScheduleAppointments ? (
+                <StatusCard title="No schedule found" description="There are no bookings for today or tomorrow yet." />
+              ) : null}
+
+              {!isLoadingSchedule && !scheduleError
+                ? visibleScheduleSections.map((section) => (
                     <section key={section.id} className="space-y-4">
                       <DateSectionHeader label={section.label} />
                       {section.appointments.length > 0 ? (
                         <div className="space-y-3">{section.appointments.map(renderScheduleAppointment)}</div>
-                      ) : null}
+                      ) : (
+                        <StatusCard title="No bookings" description="No appointments are scheduled for this date." />
+                      )}
                     </section>
-                  ))}
+                  ))
+                : null}
+            </>
+          ) : (
+            <>
+              {activeTab === "history" ? (
+                <>
+                  {isLoadingHistory ? <StatusCard title="Loading history" description="Fetching completed and past bookings." /> : null}
+                  {!isLoadingHistory && historyError ? <StatusCard title="History unavailable" description={historyError} /> : null}
+                  {!isLoadingHistory && !historyError && !hasHistoryAppointments ? (
+                    <StatusCard title="No history found" description="No past bookings match the current filter." />
+                  ) : null}
+
+                  {!isLoadingHistory && !historyError
+                    ? historySections.map((section) => (
+                        <section key={section.id} className="space-y-4">
+                          <DateSectionHeader label={section.label} />
+                          {section.appointments.length > 0 ? (
+                            <div className="space-y-4">
+                              {section.appointments.map((appointment) => (
+                                <button
+                                  key={appointment.id}
+                                  type="button"
+                                  onClick={() => openHistoryDetails(appointment)}
+                                  className="block w-full text-left transition-transform active:scale-[0.99]"
+                                >
+                                  <HistoryAppointmentItem appointment={appointment} />
+                                </button>
+                              ))}
+                            </div>
+                          ) : null}
+                        </section>
+                      ))
+                    : null}
+                </>
+              ) : (
+                <>
+                  {isLoadingSchedule ? <StatusCard title="Loading schedule" description="Fetching today and upcoming bookings." /> : null}
+                  {!isLoadingSchedule && scheduleError ? <StatusCard title="Schedule unavailable" description={scheduleError} /> : null}
+                  {!isLoadingSchedule && !scheduleError && !hasScheduleAppointments ? (
+                    <StatusCard title="No schedule found" description="There are no bookings for today or tomorrow yet." />
+                  ) : null}
+
+                  {!isLoadingSchedule && !scheduleError
+                    ? visibleScheduleSections.map((section) => (
+                        <section key={section.id} className="space-y-4">
+                          <DateSectionHeader label={section.label} />
+                          {section.appointments.length > 0 ? (
+                            <div className="space-y-3">{section.appointments.map(renderScheduleAppointment)}</div>
+                          ) : (
+                            <StatusCard title="No bookings" description="No appointments are scheduled for this date." />
+                          )}
+                        </section>
+                      ))
+                    : null}
+                </>
+              )}
             </>
           )}
         </div>
