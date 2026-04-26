@@ -7,6 +7,7 @@ import {
   startGroomerTravel,
 } from "@/lib/api";
 import type { GroomerUpNextAppointment } from "@/modules/groomer/components/GroomerUpNextCard";
+import { formatGroomerTimeLabel } from "@/modules/groomer/utils/time";
 
 export type DashboardAppointment = GroomerUpNextAppointment & {
   id: number | string;
@@ -113,13 +114,7 @@ function formatCurrency(value: number | string | undefined, fallback: string = "
 }
 
 function formatTimeLabel(value: string): string {
-  if (!value) return "";
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return value;
-  return parsed.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  });
+  return formatGroomerTimeLabel(value);
 }
 
 function formatDurationLabel(source: Record<string, unknown>): string {

@@ -10,6 +10,7 @@ import {
 import { HistoryDetailsModal, type HistoryDetailsAppointment } from "@/modules/groomer/components/HistoryDetailsModal";
 import { GroomerUpNextCard, type GroomerUpNextAppointment } from "@/modules/groomer/components/GroomerUpNextCard";
 import { useGroomerMyWorkStore } from "@/modules/groomer/stores/myWorkStore";
+import { formatGroomerTimeLabel } from "@/modules/groomer/utils/time";
 import { buildImageUrl } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 
@@ -194,9 +195,7 @@ function formatMonthSectionLabel(date: Date): string {
 }
 
 function formatTimeLabel(value: string): string {
-  const parsed = parseDate(value);
-  if (!parsed) return value || "--";
-  return parsed.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  return formatGroomerTimeLabel(value, "--");
 }
 
 function formatAmount(value: unknown, fallback = "-") {
