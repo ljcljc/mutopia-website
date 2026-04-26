@@ -6,11 +6,26 @@
 
 ```
 functions/
+  api/
+    [[path]].ts      # 代理 /api/* 请求到 API 服务器
   media/
     [[path]].ts    # 代理 /media/* 请求到 API 服务器
 ```
 
 ## 功能说明
+
+### `/api/[[path]].ts`
+
+代理所有 `/api/*` 路径的请求到后端 API 服务器（`https://api.mutopia.ca`）。
+
+**功能：**
+- 让生产环境前端使用同源 `/api/*` 请求
+- 避免浏览器直接跨域请求 `https://api.mutopia.ca`
+- 转发认证请求头和请求体
+- 支持所有 HTTP 方法
+
+**环境变量：**
+- `API_BASE_URL`：API 服务器地址（可选，默认为 `https://api.mutopia.ca`）
 
 ### `/media/[[path]].ts`
 
