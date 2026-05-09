@@ -183,7 +183,7 @@ function mapDashboardAppointment(raw: unknown): DashboardAppointment | null {
     id: Number.isNaN(Number(appointmentId)) ? String(appointmentId || "") : Number(appointmentId),
     petName: getString(record, ["pet_name"], getString(pet, ["name"], "Pet")),
     breed: getString(record, ["breed", "pet_breed"], getString(pet, ["breed", "pet_breed"], "Breed")),
-    owner: getString(record, ["owner_name"]),
+    owner: getString(record, ["user_name", "owner_name"]),
     avatarUrl: buildImageUrl(getString(record, ["pet_avatar"])),
     address: getString(record, ["service_address"]),
     service: getString(record, ["service_name"]),

@@ -447,6 +447,10 @@ export interface BookingListOut {
   address?: string | null;
   service_type?: string | null;
   scheduled_time?: string | null;
+  payment_due_at?: string | null;
+  canceled_at?: string | null;
+  cancel_reason?: string | null;
+  canceled_by?: string | null;
 }
 
 export interface BookingPageOut {
@@ -470,6 +474,10 @@ export interface BookingDetailOut {
   order_code?: string | null;
   status: string;
   scheduled_time?: string | null;
+  payment_due_at?: string | null;
+  canceled_at?: string | null;
+  cancel_reason?: string | null;
+  canceled_by?: string | null;
   notes?: string | null;
   preferred_time_slots?: Record<string, unknown>[];
   time_options?: InvitationDecisionTimeOptionIn[];
@@ -489,6 +497,10 @@ export interface BookingDetailOut {
   deposit_amount: number | string;
   final_amount: number | string;
   payments?: BookingPaymentOut[];
+}
+
+export interface BookingUpdateOut extends BookingOut {
+  payment_due_at?: string | null;
 }
 
 // 门店相关类型
@@ -1467,6 +1479,20 @@ export async function submitBooking(
 }
 
 /**
+ * 更新未支付预约。后端应限制仅 awaiting_payment 状态可更新，并同步 Stripe 订单金额/metadata。
+ */
+export async function updateAwaitingPaymentBooking(
+  bookingId: number,
+  params: BookingSubmitIn
+): Promise<BookingUpdateOut> {
+  const response = await http.patch<BookingUpdateOut>(
+    `/api/bookings/${bookingId}`,
+    params
+  );
+  return response.data;
+}
+
+/**
  * 获取我的预约列表（分页）
  */
 export async function getMyBookings(params?: {
@@ -1558,6 +1584,7 @@ export interface InvitationDecisionTimeOptionIn {
   date: string;
   slot: string;
   time: string;
+  datetime_utc?: string;
 }
 
 export interface ClientInvitationDecisionIn {

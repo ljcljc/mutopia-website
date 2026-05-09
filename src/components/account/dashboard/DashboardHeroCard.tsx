@@ -1,23 +1,7 @@
 import { useMemo } from "react";
 import { Icon } from "@/components/common/Icon";
+import { formatApiLocalDateTime } from "@/lib/localDateTime";
 import { useAccountStore } from "../accountStore";
-
-/**
- * 格式化日期时间显示（YYYY-MM-DDTHH:mm:ss -> YYYY-MM-DD at HH:mm）
- */
-function formatDateTime(dateString?: string | null): string {
-  if (!dateString) return "";
-  try {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    return `${year}-${month}-${day} at ${hours}H`;
-  } catch {
-    return dateString;
-  }
-}
 
 /**
  * 解析地址字符串
@@ -62,7 +46,7 @@ export default function DashboardHeroCard() {
   }
 
   const petName = checkedInBooking.pet_name || "-";
-  const dateTime = formatDateTime(checkedInBooking.scheduled_time);
+  const dateTime = formatApiLocalDateTime(checkedInBooking.scheduled_time);
   const address = parseAddress(checkedInBooking.address);
 
   return (

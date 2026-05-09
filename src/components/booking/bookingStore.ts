@@ -19,6 +19,7 @@ import {
   type CouponOut,
   type CouponPageOut,
   type BookingSubmitIn,
+  type BookingDetailOut,
   type TimeSlotIn,
 } from "@/lib/api";
 import { useAuthStore } from "@/components/auth/authStore";
@@ -125,6 +126,10 @@ interface BookingState {
   // Additional fields
   notes: string; // Additional notes for booking
 
+  // Editing an unpaid booking
+  editingBookingId: number | null;
+  editingOrderCode: string | null;
+
   // Actions
   setAddress: (address: string) => void;
   setServiceType: (serviceType: ServiceType) => void;
@@ -180,8 +185,72 @@ interface BookingState {
   getPetPayload: () => PetPayload; // 转换为 PetPayload 格式
   getAddressPayload: () => AddressIn; // 转换为 AddressIn 格式
   getBookingSubmitPayload: () => BookingSubmitIn; // 转换为 BookingSubmitIn 格式
+  loadBookingDetailForEdit: (detail: BookingDetailOut) => void;
+  clearEditingBooking: () => void;
   reset: () => void;
   hasFormData: () => boolean; // 检查表单是否有内容
+}
+
+function getStringValue(record: Record<string, unknown>, keys: string[], fallback = ""): string {
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === "string" && value.trim()) return value;
+    if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  }
+  return fallback;
+}
+
+function getNumberValue(record: Record<string, unknown>, keys: string[]): number | null {
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (typeof value === "string" && value.trim()) {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+  }
+  return null;
+}
+
+function getBooleanValue(record: Record<string, unknown>, keys: string[], fallback = false): boolean {
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === "boolean") return value;
+  }
+  return fallback;
+}
+
+function normalizeServiceType(value: string): ServiceType {
+  if (value === "in_store" || value === "in_home" || value === "mobile") return value;
+  return "mobile";
+}
+
+function normalizePetType(value: string): PetType {
+  if (value === "dog" || value === "cat" || value === "other") return value;
+  return "dog";
+}
+
+function normalizeWeightUnit(value: string): WeightUnit {
+  return value === "kg" ? "kg" : "lbs";
+}
+
+function inferServicePackage(name: string): ServicePackage | "" {
+  const normalized = name.toLowerCase();
+  if (normalized.includes("full")) return "full-grooming";
+  if (normalized.includes("bath") || normalized.includes("premium")) return "premium-bath";
+  return "";
+}
+
+function normalizeTimeSlots(slots?: Record<string, unknown>[]): TimeSlotIn[] {
+  return (
+    slots
+      ?.map((slot) => {
+        const date = getStringValue(slot, ["date"]);
+        const slotId = getStringValue(slot, ["slot"]);
+        return date && slotId ? { date, slot: slotId } : null;
+      })
+      .filter((slot): slot is TimeSlotIn => Boolean(slot)) ?? []
+  );
 }
 
 const initialState = {
@@ -243,6 +312,8 @@ const initialState = {
   couponType: null as "cash" | "invite" | null,
   selectedTimeSlots: [] as TimeSlotIn[],
   notes: "",
+  editingBookingId: null as number | null,
+  editingOrderCode: null as string | null,
 };
 
 export const useBookingStore = create<BookingState>((set) => ({
@@ -531,6 +602,76 @@ export const useBookingStore = create<BookingState>((set) => ({
       store_id: state.serviceType === "in_store" ? state.selectedStoreId : null,
     };
   },
+
+  loadBookingDetailForEdit: (detail) => {
+    const addressSnapshot = (detail.address_snapshot as Record<string, unknown> | undefined) ?? {};
+    const petSnapshot = (detail.pet_snapshot as Record<string, unknown> | undefined) ?? {};
+    const packageSnapshot = (detail.package_snapshot as Record<string, unknown> | undefined) ?? {};
+    const membershipSnapshot = (detail.membership_snapshot as Record<string, unknown> | undefined) ?? {};
+    const couponSnapshot = (detail.coupon_snapshot as Record<string, unknown> | undefined) ?? {};
+    const serviceType = normalizeServiceType(getStringValue(addressSnapshot, ["service_type"], getStringValue(packageSnapshot, ["service_type", "type"], "mobile")));
+    const serviceId = getNumberValue(packageSnapshot, ["service_id", "id", "package_id"]);
+    const packageName = getStringValue(packageSnapshot, ["name", "label"]);
+    const addOns = (detail.addons_snapshot ?? [])
+      .map((addon) => getNumberValue(addon, ["id", "add_on_id", "addon_id"]))
+      .filter((id): id is number => id !== null);
+    const usedCouponIds = Array.isArray(couponSnapshot.used_coupon_ids)
+      ? couponSnapshot.used_coupon_ids.filter((id): id is number => typeof id === "number")
+      : [];
+    const couponId = getNumberValue(couponSnapshot, ["id", "coupon_id"]);
+    const selectedCouponIds = usedCouponIds.length > 0 ? usedCouponIds : couponId ? [couponId] : [];
+    const membershipPlanId = getNumberValue(membershipSnapshot, ["plan_id", "membership_plan_id", "id"]);
+
+    set({
+      currentStep: 6,
+      editingBookingId: detail.id,
+      editingOrderCode: detail.order_code ?? null,
+      address: getStringValue(addressSnapshot, ["address"]),
+      city: getStringValue(addressSnapshot, ["city"]),
+      province: getStringValue(addressSnapshot, ["province"]),
+      postCode: getStringValue(addressSnapshot, ["postal_code", "post_code"]),
+      serviceType,
+      selectedServiceAreaId: getNumberValue(addressSnapshot, ["service_area_id"]),
+      selectedAddressId: getNumberValue(addressSnapshot, ["id", "address_id"]),
+      selectedStoreId: serviceType === "in_store" ? getNumberValue(addressSnapshot, ["store_id"]) : null,
+      petName: getStringValue(petSnapshot, ["name"]),
+      selectedPetId: getNumberValue(petSnapshot, ["id", "pet_id"]),
+      petType: normalizePetType(getStringValue(petSnapshot, ["pet_type"], "dog")),
+      breed: getStringValue(petSnapshot, ["breed"]),
+      isMixedBreed: getBooleanValue(petSnapshot, ["mixed_breed", "is_mixed_breed"]),
+      precisePetType: getStringValue(petSnapshot, ["precise_type"]),
+      dateOfBirth: getStringValue(petSnapshot, ["birthday", "date_of_birth"]),
+      gender: getStringValue(petSnapshot, ["gender"]) as Gender | "",
+      weight: getStringValue(petSnapshot, ["weight_value", "weight"]),
+      weightUnit: normalizeWeightUnit(getStringValue(petSnapshot, ["weight_unit"], "lbs")),
+      coatCondition: getStringValue(petSnapshot, ["coat_condition"]) as CoatCondition | "",
+      approveShave: typeof petSnapshot.approve_shave === "boolean" ? petSnapshot.approve_shave : null,
+      behavior: getStringValue(petSnapshot, ["behavior"]) as Behavior | "",
+      groomingFrequency: getStringValue(petSnapshot, ["grooming_frequency"]) as GroomingFrequency | "",
+      specialNotes: getStringValue(petSnapshot, ["special_notes"]),
+      photoIds: Array.isArray(petSnapshot.photo_ids) ? petSnapshot.photo_ids.filter((id): id is number => typeof id === "number") : [],
+      referencePhotoIds: Array.isArray(petSnapshot.reference_photo_ids)
+        ? petSnapshot.reference_photo_ids.filter((id): id is number => typeof id === "number")
+        : [],
+      photoUrls: Array.isArray(petSnapshot.photos) ? petSnapshot.photos.filter((url): url is string => typeof url === "string") : [],
+      referencePhotoUrls: Array.isArray(petSnapshot.reference_photos)
+        ? petSnapshot.reference_photos.filter((url): url is string => typeof url === "string")
+        : [],
+      serviceId,
+      servicePackage: inferServicePackage(packageName),
+      addOns,
+      useMembership: membershipPlanId !== null,
+      membershipPlanId,
+      selectedCouponIds,
+      useCashCoupon: selectedCouponIds.length > 0,
+      useMembershipDiscount: selectedCouponIds.length > 0 || membershipPlanId !== null,
+      couponType: selectedCouponIds.length > 0 ? "cash" : null,
+      selectedTimeSlots: normalizeTimeSlots(detail.preferred_time_slots),
+      notes: detail.notes ?? "",
+    });
+  },
+
+  clearEditingBooking: () => set({ editingBookingId: null, editingOrderCode: null }),
 
   loadUserInfo: async () => {
     const state = useBookingStore.getState();

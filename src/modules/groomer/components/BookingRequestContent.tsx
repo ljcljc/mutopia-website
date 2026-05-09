@@ -7,6 +7,7 @@ import {
 } from "@/modules/groomer/components/AvailableTimeCombobox";
 import { PassAppointmentModal } from "@/modules/groomer/components/PassAppointmentModal";
 import { ProposeNewTimeModal } from "@/modules/groomer/components/ProposeNewTimeModal";
+import { toUtcIsoFromLocalDateTime } from "@/lib/localDateTime";
 import { toast } from "sonner";
 
 export type BookingRequestContentData = {
@@ -25,6 +26,7 @@ export type BookingRequestDecisionTimeOption = {
   date: string;
   slot: "am" | "pm";
   time: string;
+  datetime_utc: string;
 };
 
 export type BookingRequestInteractionProps<TRequest extends BookingRequestContentData> = {
@@ -85,10 +87,15 @@ function buildDecisionTimeOption(slot: string, time: string): BookingRequestDeci
   if (normalizedPeriod === "am" && selectedHour >= 12) return null;
   if (normalizedPeriod === "pm" && selectedHour < 12) return null;
 
+  const normalizedDate = dateValue.replace(/\./g, "-");
+  const datetimeUtc = toUtcIsoFromLocalDateTime(normalizedDate, normalizedTime);
+  if (!datetimeUtc) return null;
+
   return {
-    date: dateValue.replace(/\./g, "-"),
+    date: normalizedDate,
     slot: normalizedPeriod,
     time: normalizedTime,
+    datetime_utc: datetimeUtc,
   };
 }
 

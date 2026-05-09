@@ -4,6 +4,7 @@ import { CustomRadio, OrangeButton } from "@/components/common";
 import { CustomTextarea } from "@/components/common/CustomTextarea";
 import { Icon } from "@/components/common/Icon";
 import { useAccountStore } from "@/components/account/accountStore";
+import { useBookingStore } from "@/components/booking/bookingStore";
 import { HttpError } from "@/lib/http";
 import {
   cancelBooking,
@@ -28,20 +29,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 import { XIcon } from "lucide-react";
-
-function formatDateTime(dateString?: string | null): string {
-  if (!dateString) return "";
-  try {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    return `${year}-${month}-${day} at ${hours}H`;
-  } catch {
-    return dateString;
-  }
-}
+import { addHoursToApiLocalDateTime, formatApiLocalDateTime } from "@/lib/localDateTime";
+import { TIME_PERIODS } from "@/constants/calendar";
 
 function formatAmount(value: number | string | undefined, fallback: string) {
   if (value === undefined || value === null || value === "") return fallback;
@@ -65,21 +54,61 @@ function formatBookingCode(orderCode?: string | null, bookingId?: number | null)
   return "";
 }
 
-function addHoursToDateTime(dateString?: string | null, hours: number = 1) {
-  if (!dateString) return "";
-  try {
-    const date = new Date(dateString);
-    date.setHours(date.getHours() + hours);
-    return formatDateTime(date.toISOString());
-  } catch {
-    return "";
-  }
-}
-
 function extractTimeLabel(dateTime?: string | null) {
   if (!dateTime) return "";
   const [, timeLabel] = dateTime.split(" at ");
   return timeLabel ?? dateTime;
+}
+
+function getHttpErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message.toLowerCase() : "";
+}
+
+function isPaymentExpiredError(error: unknown) {
+  if (!(error instanceof HttpError)) return false;
+  const message = getHttpErrorMessage(error);
+
+  return (
+    error.status === 409 ||
+    message.includes("expired") ||
+    message.includes("canceled") ||
+    message.includes("cancelled")
+  );
+}
+
+function formatDateWithWeekday(date: string): string {
+  const parsed = new Date(`${date}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) return date;
+
+  const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const weekday = weekdays[parsed.getDay()];
+  const year = parsed.getFullYear();
+  const month = String(parsed.getMonth() + 1).padStart(2, "0");
+  const day = String(parsed.getDate()).padStart(2, "0");
+
+  return `${weekday}, ${year}.${month}.${day}`;
+}
+
+function formatPreferredTimeSlot(slot: Record<string, unknown>): string | null {
+  const date = typeof slot.date === "string" ? slot.date : "";
+  const slotId = typeof slot.slot === "string" ? slot.slot : "";
+  if (!date || !slotId) return null;
+
+  const period = TIME_PERIODS.find((item) => item.id === slotId);
+  const periodSuffix = period?.label.includes("AM") ? "AM" : "PM";
+
+  return `${formatDateWithWeekday(date)} ${periodSuffix}`;
+}
+
+function formatCompactPreferredTimeSlot(slot: Record<string, unknown>): string | null {
+  const date = typeof slot.date === "string" ? slot.date : "";
+  const slotId = typeof slot.slot === "string" ? slot.slot : "";
+  if (!date || !slotId) return null;
+
+  const period = TIME_PERIODS.find((item) => item.id === slotId);
+  const periodSuffix = period?.label.includes("AM") ? "AM" : "PM";
+
+  return `${date} ${periodSuffix}`;
 }
 
 type ProposedTimeOption = InvitationDecisionTimeOptionIn & {
@@ -194,6 +223,7 @@ export default function BookingDetail() {
   const [isConfirmingProposedTime, setIsConfirmingProposedTime] = useState(false);
   const [isRejectingProposedTime, setIsRejectingProposedTime] = useState(false);
   const { addresses, isLoadingAddresses, fetchAddresses } = useAccountStore();
+  const loadBookingDetailForEdit = useBookingStore((state) => state.loadBookingDetailForEdit);
 
   const isForbiddenError = (error: unknown) => error instanceof HttpError && error.status === 403;
 
@@ -232,9 +262,10 @@ export default function BookingDetail() {
     (packageSnapshot.type as string | undefined) ??
     "Mobile";
   const serviceTypeLabel = formatServiceTypeLabel(serviceType);
-  const scheduledDisplay = formatDateTime(detail?.scheduled_time) || "2026-04-03 at 10H";
+  const scheduledDisplay = formatApiLocalDateTime(detail?.scheduled_time) || "2026-04-03 at 10:00";
   const estimatedCompletionDisplay =
-    addHoursToDateTime(detail?.scheduled_time, 1) || "Estimated completion soon";
+    addHoursToApiLocalDateTime(detail?.scheduled_time, 1) || "Estimated completion soon";
+  const paymentDueDisplay = formatApiLocalDateTime(detail?.payment_due_at);
 
   const addressLine1 =
     addressOverride?.address ??
@@ -258,6 +289,22 @@ export default function BookingDetail() {
         .filter((option): option is ProposedTimeOption => Boolean(option)) ?? []
     );
   }, [detail?.time_options]);
+
+  const preferredTimeSlotLabels = useMemo(() => {
+    return (
+      detail?.preferred_time_slots
+        ?.map(formatPreferredTimeSlot)
+        .filter((label): label is string => Boolean(label)) ?? []
+    );
+  }, [detail?.preferred_time_slots]);
+
+  const compactPreferredTimeSlotLabels = useMemo(() => {
+    return (
+      detail?.preferred_time_slots
+        ?.map(formatCompactPreferredTimeSlot)
+        .filter((label): label is string => Boolean(label)) ?? []
+    );
+  }, [detail?.preferred_time_slots]);
 
   useEffect(() => {
     if (!proposedTimeOptions.length) {
@@ -362,6 +409,7 @@ export default function BookingDetail() {
         };
       case "canceled":
       case "cancelled":
+      case "booking_canceled":
         return {
           subtitleIncludesScheduled: true,
           progressColor: "#EAB308",
@@ -386,12 +434,12 @@ export default function BookingDetail() {
         };
       case "awaiting_payment":
         return {
-          subtitleIncludesScheduled: false,
+          subtitleIncludesScheduled: Boolean(detail?.scheduled_time),
           progressColor: "#DE6A07",
           progressWidth: 37.1,
           badgeLabel: "Waiting for payment",
           badgeTone: "orange",
-          nextStep: "Waiting for groomer match",
+          nextStep: paymentDueDisplay ? `Pay before ${paymentDueDisplay}` : "Complete payment to continue",
           showNextStep: true,
           actionKind: "pay",
         };
@@ -407,15 +455,19 @@ export default function BookingDetail() {
           actionKind: "none",
         };
     }
-  }, [detail?.notes, detail?.scheduled_time, detail?.status, estimatedCompletionDisplay, normalizedStatus, scheduledDisplay]);
+  }, [detail?.notes, detail?.scheduled_time, detail?.status, estimatedCompletionDisplay, normalizedStatus, paymentDueDisplay, scheduledDisplay]);
 
   const serviceSummary = detailCardConfig.subtitleIncludesScheduled
     ? `${serviceName} - ${serviceTypeLabel} ${scheduledDisplay}`
     : `${serviceName} - ${serviceTypeLabel}`;
   const rawCanceledReason =
-    typeof detail?.notes === "string" ? detail.notes.trim() : "";
+    typeof detail?.cancel_reason === "string" && detail.cancel_reason.trim()
+      ? detail.cancel_reason.trim()
+      : typeof detail?.notes === "string"
+        ? detail.notes.trim()
+        : "";
   const canceledReason =
-    (normalizedStatus === "canceled" || normalizedStatus === "cancelled") &&
+    (normalizedStatus === "canceled" || normalizedStatus === "cancelled" || normalizedStatus === "booking_canceled") &&
     rawCanceledReason
       ? rawCanceledReason.replace(/^cancel\s+reason:\s*/i, "").trim()
       : "";
@@ -565,13 +617,25 @@ export default function BookingDetail() {
       window.location.assign(session.url);
     } catch (actionError) {
       console.error("Failed to create payment session:", actionError);
-      toast.error("Failed to start payment");
+      if (isPaymentExpiredError(actionError)) {
+        const updatedDetail = await getBookingDetail(detail.id);
+        setDetail(updatedDetail);
+        toast.error("This booking has expired and was canceled.");
+      } else {
+        toast.error("Failed to start payment");
+      }
       setIsCardActionLoading(false);
     }
   };
 
   const handlePendingAction = (message: string) => {
     toast(message);
+  };
+
+  const handleEditAwaitingPaymentBooking = () => {
+    if (!detail) return;
+    loadBookingDetailForEdit(detail);
+    navigate("/booking");
   };
   
   // 处理取消预约
@@ -754,6 +818,33 @@ export default function BookingDetail() {
                   </div>
                 </>
               ) : (
+                <div className="flex flex-col gap-5">
+                  {detailCardConfig.actionKind === "pay" && compactPreferredTimeSlotLabels.length > 0 ? (
+                    <div className="flex flex-col gap-1 text-[#4A3C2A]">
+                      <p className="font-comfortaa text-[10px] font-normal leading-[12px]">
+                        Time selected
+                      </p>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                        <p className="font-comfortaa text-[12px] font-bold leading-[17.5px]">
+                          {compactPreferredTimeSlotLabels.map((label, index) => (
+                            <span key={label}>
+                              {label}
+                              {index < compactPreferredTimeSlotLabels.length - 1 ? " | " : ""}
+                            </span>
+                          ))}
+                        </p>
+                        <button
+                          type="button"
+                          className="flex size-5 items-center justify-center rounded-full text-[#8B6357] transition-colors hover:bg-[#F9F1E8]"
+                          aria-label="Edit booking"
+                          onClick={handleEditAwaitingPaymentBooking}
+                        >
+                          <Icon name="pencil" className="size-4 text-current" />
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
+
                 <div className="flex flex-wrap items-center gap-2">
                   {detailCardConfig.showNextStep ? (
                     <div className="flex min-w-[220px] flex-1 flex-col gap-1 text-[#4A3C2A]">
@@ -836,6 +927,7 @@ export default function BookingDetail() {
                     </OrangeButton>
                   ) : null}
                 </div>
+                </div>
               )}
 
               {isLoading ? (
@@ -882,6 +974,26 @@ export default function BookingDetail() {
               ) : null}
             </div>
           </div>
+
+          {preferredTimeSlotLabels.length > 0 && detailCardConfig.actionKind !== "pay" ? (
+            <div className="rounded-xl bg-white p-6 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
+              <div className="flex flex-col gap-2">
+                <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
+                  Date and time period
+                </p>
+                <div className="flex flex-col gap-1 text-[#4A3C2A]">
+                  <p className="font-comfortaa text-[10px] font-normal leading-[12px]">
+                    Date and time selected
+                  </p>
+                  <div className="font-comfortaa text-[12px] font-bold leading-[16px]">
+                    {preferredTimeSlotLabels.map((label) => (
+                      <p key={label}>{label}</p>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
             </>
           )}
 

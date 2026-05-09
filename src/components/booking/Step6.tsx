@@ -5,7 +5,7 @@ import { useBookingStore } from "./bookingStore";
 import { useAuthStore } from "@/components/auth/authStore";
 import { cn } from "@/components/ui/utils";
 import { TIME_PERIODS } from "@/constants/calendar";
-import { buildImageUrl, submitBooking, createDepositSession, type CouponOut } from "@/lib/api";
+import { buildImageUrl, submitBooking, updateAwaitingPaymentBooking, createDepositSession, type CouponOut } from "@/lib/api";
 import { toast } from "sonner";
 import { getServicePrice } from "@/lib/pricing";
 
@@ -172,6 +172,12 @@ export function Step6() {
     setMembershipPlanId,
     userInfo,
     getBookingSubmitPayload,
+    editingBookingId,
+    editingOrderCode,
+    clearEditingBooking,
+    loadServices,
+    loadAddOns,
+    loadMembershipPlans,
   } = useBookingStore();
 
   const [isTotalExpanded, setIsTotalExpanded] = useState(true);
@@ -190,6 +196,12 @@ export function Step6() {
       });
     }
   }, [isLoggedIn, loadCoupons]);
+
+  useEffect(() => {
+    loadServices();
+    loadAddOns();
+    loadMembershipPlans();
+  }, [loadAddOns, loadMembershipPlans, loadServices]);
 
   // Get selected service
   const selectedService = services.find((s) => s.id === serviceId);
@@ -755,9 +767,10 @@ export function Step6() {
       console.log(JSON.stringify(submitData, null, 2));
       console.log("===========================");
       
-      // Submit the booking
-      const booking = await submitBooking(submitData);
-      console.log("Booking created:", booking);
+      const booking = editingBookingId
+        ? await updateAwaitingPaymentBooking(editingBookingId, submitData)
+        : await submitBooking(submitData);
+      console.log(editingBookingId ? "Booking updated:" : "Booking created:", booking);
       
       // Create deposit payment session (Stripe Checkout)
       const paymentSession = await createDepositSession(booking.id);
@@ -766,7 +779,10 @@ export function Step6() {
       sessionStorage.setItem("pendingDepositBookingId", String(booking.id));
       if (booking.order_code) {
         sessionStorage.setItem("pendingDepositOrderCode", booking.order_code);
+      } else if (editingOrderCode) {
+        sessionStorage.setItem("pendingDepositOrderCode", editingOrderCode);
       }
+      clearEditingBooking();
       
       // Replace the current booking history entry so browser back from Stripe
       // returns to dashboard instead of reopening step 6.

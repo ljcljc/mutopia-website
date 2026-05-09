@@ -730,7 +730,7 @@ function UpNextAppointmentItem({
               disabled={isStartingTravel}
               className="flex h-[38px] w-full items-center justify-center rounded-full bg-[linear-gradient(180deg,#F7A01B_0%,#F08A12_100%)] font-comfortaa text-[14px] font-bold leading-[21px] text-white shadow-[0px_10px_18px_rgba(240,138,18,0.28)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {isStartingTravel ? "Starting..." : "Start Travel"}
+              {isStartingTravel ? <Spinner size="small" color="white" /> : "Start Travel"}
             </button>
           ) : null}
         </>

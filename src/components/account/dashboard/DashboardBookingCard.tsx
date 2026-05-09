@@ -1,25 +1,9 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@/components/common/Icon";
+import { formatApiLocalDateTime } from "@/lib/localDateTime";
 import { useAccountStore } from "../accountStore";
 import type { BookingListOut } from "@/lib/api";
-
-/**
- * 格式化日期时间显示（YYYY-MM-DDTHH:mm:ss -> YYYY-MM-DD at HH:mm）
- */
-function formatDateTime(dateString?: string | null): string {
-  if (!dateString) return "";
-  try {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    return `${year}-${month}-${day} at ${hours}H`;
-  } catch {
-    return dateString;
-  }
-}
 
 /**
  * 解析地址字符串（假设格式为 "address, city, province postal_code" 或类似格式）
@@ -72,6 +56,7 @@ function getStatusBadgeConfig(status: string): { label: string; tone: BookingSta
       return { label: "Service terminated", tone: "outlined" };
     case "canceled":
     case "cancelled":
+    case "booking_canceled":
       return { label: "Service canceled", tone: "outlined" };
     case "refunded":
       return { label: "Refunded", tone: "outlined" };
@@ -129,7 +114,7 @@ function BookingItem({ booking }: { booking: BookingListOut }) {
   const serviceName = booking.service_name || "-";
   const serviceType = booking.service_type || "";
   const serviceDisplay = serviceType ? `${serviceName} - ${serviceType.charAt(0).toUpperCase() + serviceType.slice(1)}` : serviceName;
-  const dateTime = formatDateTime(booking.scheduled_time);
+  const dateTime = formatApiLocalDateTime(booking.scheduled_time);
   const address = parseAddress(booking.address);
 
   return (
