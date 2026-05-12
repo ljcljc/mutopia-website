@@ -11,6 +11,7 @@ import {
   clientConfirmBookingTime,
   createDepositSession,
   getBookingDetail,
+  getPaymentSessionRedirectUrl,
   type AddressOut,
   type BookingDetailOut,
   type InvitationDecisionTimeOptionIn,
@@ -614,7 +615,11 @@ export default function BookingDetail() {
     setIsCardActionLoading(true);
     try {
       const session = await createDepositSession(detail.id);
-      window.location.assign(session.url);
+      const redirectUrl = getPaymentSessionRedirectUrl(session);
+      if (!redirectUrl) {
+        throw new Error(`Invalid payment redirect URL: ${session.url}`);
+      }
+      window.location.assign(redirectUrl);
     } catch (actionError) {
       console.error("Failed to create payment session:", actionError);
       if (isPaymentExpiredError(actionError)) {
@@ -835,7 +840,7 @@ export default function BookingDetail() {
                         </p>
                         <button
                           type="button"
-                          className="flex size-5 items-center justify-center rounded-full text-[#8B6357] transition-colors hover:bg-[#F9F1E8]"
+                          className="flex size-5 cursor-pointer items-center justify-center rounded-full text-[#8B6357] transition-colors hover:bg-[#F9F1E8]"
                           aria-label="Edit booking"
                           onClick={handleEditAwaitingPaymentBooking}
                         >

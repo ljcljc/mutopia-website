@@ -1149,6 +1149,38 @@
         "tags": ["bookings"],
         "security": [{ "JWTAuth": [] }]
       },
+      "patch": {
+        "operationId": "api_bookings_update_unpaid_booking",
+        "summary": "Update Unpaid Booking",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "schema": { "title": "Booking Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BookingOut" }
+              }
+            }
+          }
+        },
+        "tags": ["bookings"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/BookingSubmitIn" }
+            }
+          },
+          "required": true
+        },
+        "security": [{ "JWTAuth": [] }]
+      },
       "delete": {
         "operationId": "api_bookings_delete_booking",
         "summary": "Delete Booking",
@@ -3648,6 +3680,10 @@
       "BookingOut": {
         "properties": {
           "id": { "title": "Id", "type": "integer" },
+          "order_code": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Order Code"
+          },
           "status": { "title": "Status", "type": "string" },
           "scheduled_time": {
             "anyOf": [{ "type": "string" }, { "type": "null" }],

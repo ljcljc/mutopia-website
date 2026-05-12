@@ -5,7 +5,14 @@ import { useBookingStore } from "./bookingStore";
 import { useAuthStore } from "@/components/auth/authStore";
 import { cn } from "@/components/ui/utils";
 import { TIME_PERIODS } from "@/constants/calendar";
-import { buildImageUrl, submitBooking, updateAwaitingPaymentBooking, createDepositSession, type CouponOut } from "@/lib/api";
+import {
+  buildImageUrl,
+  submitBooking,
+  updateAwaitingPaymentBooking,
+  createDepositSession,
+  getPaymentSessionRedirectUrl,
+  type CouponOut,
+} from "@/lib/api";
 import { toast } from "sonner";
 import { getServicePrice } from "@/lib/pricing";
 
@@ -170,10 +177,15 @@ export function Step6() {
     selectedStoreId,
     setUseMembership,
     setMembershipPlanId,
+    setUseMembershipDiscount,
+    setUseCashCoupon,
+    setSelectedCouponIds,
     userInfo,
     getBookingSubmitPayload,
     editingBookingId,
     editingOrderCode,
+    editingOriginalPayload,
+    editingHasExistingMembershipBenefit,
     clearEditingBooking,
     loadServices,
     loadAddOns,
@@ -186,6 +198,10 @@ export function Step6() {
   // Check if user is logged in
   const user = useAuthStore((state) => state.user);
   const isLoggedIn = userInfo !== null || user !== null;
+  const hasMembershipBenefit =
+    useMembership ||
+    userInfo?.is_member === true ||
+    editingHasExistingMembershipBenefit;
   
   // Load coupons when user is logged in
   useEffect(() => {
@@ -217,7 +233,7 @@ export function Step6() {
         if (addOn) {
           let price = typeof addOn.price === "string" ? parseFloat(addOn.price) : addOn.price;
           // If included_in_membership is true and user has membership, price is 0
-          if (addOn.included_in_membership === true && useMembership) {
+          if (addOn.included_in_membership === true && hasMembershipBenefit) {
             price = 0;
           }
           return { ...addOn, price };
@@ -225,7 +241,7 @@ export function Step6() {
         return null;
       })
       .filter((item): item is NonNullable<typeof item> => item !== null);
-  }, [selectedAddOns, addOnsList, useMembership]);
+  }, [selectedAddOns, addOnsList, hasMembershipBenefit]);
 
   // Get membership plan
   const membershipPlan = membershipPlans.length > 0 ? membershipPlans[0] : null;
@@ -706,7 +722,7 @@ export function Step6() {
   const savingsPercentage = originalTotal > 0 ? Math.round((totalSavings / originalTotal) * 100) : 0;
 
   // Check if user is a member or purchasing membership
-  const isMemberOrPurchasing = useMembership || userInfo?.is_member === true;
+  const isMemberOrPurchasing = hasMembershipBenefit;
 
   // Get current address or store for display
   const currentAddress = selectedAddressId
@@ -748,8 +764,12 @@ export function Step6() {
 
   // Handle remove membership button
   const handleRemoveMembership = () => {
+    const remainingCouponIds = selectedCouponIds.filter((couponId) => couponId > 0);
     setUseMembership(false);
     setMembershipPlanId(null);
+    setUseMembershipDiscount(false);
+    setSelectedCouponIds(remainingCouponIds);
+    setUseCashCoupon(remainingCouponIds.length > 0);
   };
 
   // Handle proceed to payment
@@ -767,14 +787,35 @@ export function Step6() {
       console.log(JSON.stringify(submitData, null, 2));
       console.log("===========================");
       
+      const hasEditedBookingChanges =
+        editingBookingId !== null && editingOriginalPayload !== JSON.stringify(submitData);
       const booking = editingBookingId
-        ? await updateAwaitingPaymentBooking(editingBookingId, submitData)
+        ? hasEditedBookingChanges
+          ? await updateAwaitingPaymentBooking(editingBookingId, submitData)
+          : {
+              id: editingBookingId,
+              order_code: editingOrderCode,
+              status: "awaiting_payment",
+              deposit_amount: 0,
+              final_amount: 0,
+            }
         : await submitBooking(submitData);
-      console.log(editingBookingId ? "Booking updated:" : "Booking created:", booking);
+      console.log(
+        editingBookingId
+          ? hasEditedBookingChanges
+            ? "Booking updated:"
+            : "Booking unchanged:"
+          : "Booking created:",
+        booking
+      );
       
       // Create deposit payment session (Stripe Checkout)
       const paymentSession = await createDepositSession(booking.id);
       console.log("Payment session created:", paymentSession);
+      const redirectUrl = getPaymentSessionRedirectUrl(paymentSession);
+      if (!redirectUrl) {
+        throw new Error(`Invalid payment redirect URL: ${paymentSession.url}`);
+      }
 
       sessionStorage.setItem("pendingDepositBookingId", String(booking.id));
       if (booking.order_code) {
@@ -787,7 +828,7 @@ export function Step6() {
       // Replace the current booking history entry so browser back from Stripe
       // returns to dashboard instead of reopening step 6.
       window.history.replaceState(window.history.state, "", "/account/dashboard");
-      window.location.assign(paymentSession.url);
+      window.location.assign(redirectUrl);
       
       toast.success("Redirecting to payment...");
     } catch (error) {
@@ -1204,7 +1245,7 @@ export function Step6() {
       )}
 
       {/* Annual membership promotion card - shown when user hasn't selected membership */}
-      {!useMembership && membershipPlan && userInfo?.is_member !== true && (
+      {!hasMembershipBenefit && membershipPlan && (
         <div className="relative flex w-full shrink-0 flex-col items-start overflow-hidden rounded-[calc(12*var(--px393))] bg-[#6e3d81] p-[calc(24*var(--px393))] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] sm:rounded-xl sm:p-6">
           {/* Decorative background circles */}
           <div className="absolute bg-[rgba(255,255,255,0.15)] opacity-30 rounded-full size-[74px] left-[46px] top-[116px]" />
@@ -1506,7 +1547,6 @@ export function Step6() {
                   // For "special_gift", use checkbox style (default checked)
                   const isSpecialGift = filteredGroup.groupKey === "special_gift";
                   const hasSelectedCoupon = filteredGroup.coupons.some((c) => selectedCouponIds.includes(c.id));
-                  const selectedCoupon = filteredGroup.coupons.find((c) => selectedCouponIds.includes(c.id));
                   const bestCoupon = filteredGroup.coupons[0]; // Already sorted: expiring soon first, then earliest valid_from
                   
                   // Debug log for Special gift state
@@ -1527,10 +1567,6 @@ export function Step6() {
                     }
 
                     // Special gift: Checkbox style with nested radio buttons for individual coupons
-                    const selectedAmount = selectedCoupon 
-                      ? (typeof selectedCoupon.amount === "string" ? parseFloat(selectedCoupon.amount) : selectedCoupon.amount)
-                      : null;
-                    
                     // Handle Special gift toggle (similar to general coupons)
                     const handleSpecialGiftToggle = (checked: boolean) => {
                       console.log('[Special gift toggle]', {
@@ -1588,15 +1624,10 @@ export function Step6() {
                             label={filteredGroup.groupName}
                             containerClassName="relative shrink-0"
                           />
-                          {hasSelectedCoupon && selectedAmount !== null && (
-                            <span className="font-comfortaa font-normal leading-[calc(12*var(--px393))] sm:leading-[12px] relative shrink-0 text-[#4a3c2a] text-[calc(10*var(--px393))] sm:text-[10px]">
-                              -${selectedAmount.toFixed(2)}
-                            </span>
-                          )}
                         </div>
                         {/* Coupons in group - Radio buttons */}
                         {hasSelectedCoupon && (
-                          <div className="flex flex-col gap-[calc(4*var(--px393))] sm:gap-[4px] items-end relative shrink-0 w-full ml-[calc(24*var(--px393))] sm:ml-[24px]">
+                          <div className="flex flex-col gap-[calc(4*var(--px393))] sm:gap-[4px] items-start relative shrink-0 w-full">
                             {availableSpecialCoupons.map((coupon, index) => {
                                 const isSelected = selectedCouponIds.includes(coupon.id);
                                 const couponAmount = typeof coupon.amount === "string" ? parseFloat(coupon.amount) : coupon.amount;
@@ -1625,31 +1656,33 @@ export function Step6() {
                                 });
                                 
                                 return (
-                                  <div key={coupon.id} className="flex items-center gap-[calc(8*var(--px393))] sm:gap-[8px] relative shrink-0">
-                                    {/* Expiration tag */}
-                                    {expirationText && expirationText !== "Expired" && (
-                                      <div className="bg-white border border-[#4C4C4C] border-solid flex h-[calc(20*var(--px393))] sm:h-[20px] items-center justify-center overflow-clip px-[calc(8*var(--px393))] sm:px-[8px] py-[calc(2*var(--px393))] sm:py-[2px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shrink-0">
-                                        <p className="font-comfortaa font-normal leading-[calc(12*var(--px393))] sm:leading-[12px] relative shrink-0 text-[#4C4C4C] text-[calc(10*var(--px393))] sm:text-[10px]">
-                                          {expirationText}
-                                        </p>
-                                      </div>
-                                    )}
-                                    <label className="flex items-center gap-[calc(8*var(--px393))] sm:gap-[8px] relative shrink-0 cursor-pointer">
-                                      <input
-                                        type="radio"
-                                        name={`special-coupon-${filteredGroup.groupKey}`}
-                                        checked={isSelected}
-                                        onChange={() => handleSpecialCouponSelect(coupon.id, filteredGroup.groupKey)}
-                                        className="sr-only"
-                                      />
-                                      <RadioButton isChecked={isSelected} />
-                                      <span className="font-comfortaa font-normal leading-[calc(12*var(--px393))] sm:leading-[12px] relative shrink-0 text-[#4a3c2a] text-[calc(10*var(--px393))] sm:text-[10px]">
-                                        {displayName}
-                                      </span>
-                                      <span className="font-comfortaa font-normal leading-[calc(12*var(--px393))] sm:leading-[12px] relative shrink-0 text-[#4a3c2a] text-[calc(10*var(--px393))] sm:text-[10px]">
-                                        -${couponAmount.toFixed(2)}
-                                      </span>
-                                    </label>
+                                  <div key={coupon.id} className="flex w-full items-center justify-between gap-[calc(8*var(--px393))] sm:gap-[8px] relative shrink-0">
+                                    <div className="flex min-w-0 items-center gap-[calc(8*var(--px393))] sm:gap-[8px] pl-[calc(24*var(--px393))] sm:pl-[24px]">
+                                      {/* Expiration tag */}
+                                      {expirationText && expirationText !== "Expired" && (
+                                        <div className="bg-white border border-[#4C4C4C] border-solid flex h-[calc(20*var(--px393))] sm:h-[20px] items-center justify-center overflow-clip px-[calc(8*var(--px393))] sm:px-[8px] py-[calc(2*var(--px393))] sm:py-[2px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shrink-0">
+                                          <p className="font-comfortaa font-normal leading-[calc(12*var(--px393))] sm:leading-[12px] relative shrink-0 text-[#4C4C4C] text-[calc(10*var(--px393))] sm:text-[10px]">
+                                            {expirationText}
+                                          </p>
+                                        </div>
+                                      )}
+                                      <label className="flex min-w-0 items-center gap-[calc(8*var(--px393))] sm:gap-[8px] relative shrink cursor-pointer">
+                                        <input
+                                          type="radio"
+                                          name={`special-coupon-${filteredGroup.groupKey}`}
+                                          checked={isSelected}
+                                          onChange={() => handleSpecialCouponSelect(coupon.id, filteredGroup.groupKey)}
+                                          className="sr-only"
+                                        />
+                                        <RadioButton isChecked={isSelected} />
+                                        <span className="font-comfortaa font-normal leading-[calc(12*var(--px393))] sm:leading-[12px] relative min-w-0 truncate text-[#4a3c2a] text-[calc(10*var(--px393))] sm:text-[10px]">
+                                          {displayName}
+                                        </span>
+                                      </label>
+                                    </div>
+                                    <span className="font-comfortaa font-normal leading-[calc(12*var(--px393))] sm:leading-[12px] relative shrink-0 text-[#4a3c2a] text-[calc(10*var(--px393))] sm:text-[10px]">
+                                      -${couponAmount.toFixed(2)}
+                                    </span>
                                   </div>
                                 );
                               })}

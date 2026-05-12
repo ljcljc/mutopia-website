@@ -129,6 +129,8 @@ interface BookingState {
   // Editing an unpaid booking
   editingBookingId: number | null;
   editingOrderCode: string | null;
+  editingOriginalPayload: string | null;
+  editingHasExistingMembershipBenefit: boolean;
 
   // Actions
   setAddress: (address: string) => void;
@@ -218,6 +220,11 @@ function getBooleanValue(record: Record<string, unknown>, keys: string[], fallba
     if (typeof value === "boolean") return value;
   }
   return fallback;
+}
+
+function getRecordValue(record: Record<string, unknown>, key: string): Record<string, unknown> {
+  const value = record[key];
+  return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
 }
 
 function normalizeServiceType(value: string): ServiceType {
@@ -314,6 +321,8 @@ const initialState = {
   notes: "",
   editingBookingId: null as number | null,
   editingOrderCode: null as string | null,
+  editingOriginalPayload: null as string | null,
+  editingHasExistingMembershipBenefit: false,
 };
 
 export const useBookingStore = create<BookingState>((set) => ({
@@ -621,11 +630,18 @@ export const useBookingStore = create<BookingState>((set) => ({
     const couponId = getNumberValue(couponSnapshot, ["id", "coupon_id"]);
     const selectedCouponIds = usedCouponIds.length > 0 ? usedCouponIds : couponId ? [couponId] : [];
     const membershipPlanId = getNumberValue(membershipSnapshot, ["plan_id", "membership_plan_id", "id"]);
+    const membershipId = getNumberValue(membershipSnapshot, ["membership_id"]);
+    const isNewMembership = getBooleanValue(membershipSnapshot, ["is_new"]);
+    const hasExistingMembershipBenefit = (membershipPlanId !== null || membershipId !== null) && !isNewMembership;
+    const storeSnapshot = getRecordValue(addressSnapshot, "store");
+    const selectedStoreId = getNumberValue(addressSnapshot, ["store_id"]) ?? getNumberValue(storeSnapshot, ["id"]);
 
     set({
       currentStep: 6,
       editingBookingId: detail.id,
       editingOrderCode: detail.order_code ?? null,
+      editingOriginalPayload: null,
+      editingHasExistingMembershipBenefit: hasExistingMembershipBenefit,
       address: getStringValue(addressSnapshot, ["address"]),
       city: getStringValue(addressSnapshot, ["city"]),
       province: getStringValue(addressSnapshot, ["province"]),
@@ -633,7 +649,7 @@ export const useBookingStore = create<BookingState>((set) => ({
       serviceType,
       selectedServiceAreaId: getNumberValue(addressSnapshot, ["service_area_id"]),
       selectedAddressId: getNumberValue(addressSnapshot, ["id", "address_id"]),
-      selectedStoreId: serviceType === "in_store" ? getNumberValue(addressSnapshot, ["store_id"]) : null,
+      selectedStoreId: serviceType === "in_store" ? selectedStoreId : null,
       petName: getStringValue(petSnapshot, ["name"]),
       selectedPetId: getNumberValue(petSnapshot, ["id", "pet_id"]),
       petType: normalizePetType(getStringValue(petSnapshot, ["pet_type"], "dog")),
@@ -660,7 +676,7 @@ export const useBookingStore = create<BookingState>((set) => ({
       serviceId,
       servicePackage: inferServicePackage(packageName),
       addOns,
-      useMembership: membershipPlanId !== null,
+      useMembership: isNewMembership,
       membershipPlanId,
       selectedCouponIds,
       useCashCoupon: selectedCouponIds.length > 0,
@@ -669,9 +685,19 @@ export const useBookingStore = create<BookingState>((set) => ({
       selectedTimeSlots: normalizeTimeSlots(detail.preferred_time_slots),
       notes: detail.notes ?? "",
     });
+
+    set({
+      editingOriginalPayload: JSON.stringify(useBookingStore.getState().getBookingSubmitPayload()),
+    });
   },
 
-  clearEditingBooking: () => set({ editingBookingId: null, editingOrderCode: null }),
+  clearEditingBooking: () =>
+    set({
+      editingBookingId: null,
+      editingOrderCode: null,
+      editingOriginalPayload: null,
+      editingHasExistingMembershipBenefit: false,
+    }),
 
   loadUserInfo: async () => {
     const state = useBookingStore.getState();

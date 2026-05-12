@@ -2184,6 +2184,15 @@ export interface PaymentSessionOut {
   payment_id: number;
 }
 
+export function getPaymentSessionRedirectUrl(session: PaymentSessionOut): string | null {
+  try {
+    const parsedUrl = new URL(session.url);
+    return parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:" ? parsedUrl.href : null;
+  } catch {
+    return null;
+  }
+}
+
 export interface PaymentMethodOut {
   id: number;
   method_type?: string | null;

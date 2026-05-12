@@ -1,7 +1,7 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Icon } from "@/components/common/Icon";
 import { OrangeButton, PurpleButton } from "@/components/common";
-import { createDepositSession } from "@/lib/api";
+import { createDepositSession, getPaymentSessionRedirectUrl } from "@/lib/api";
 import { toast } from "sonner";
 import { useState } from "react";
 
@@ -26,7 +26,11 @@ export default function PaymentFail() {
     try {
       setIsRetrying(true);
       const paymentSession = await createDepositSession(bookingId);
-      window.location.assign(paymentSession.url);
+      const redirectUrl = getPaymentSessionRedirectUrl(paymentSession);
+      if (!redirectUrl) {
+        throw new Error(`Invalid payment redirect URL: ${paymentSession.url}`);
+      }
+      window.location.assign(redirectUrl);
     } catch (error) {
       console.error("Failed to retry payment:", error);
       toast.error("Failed to restart payment. Please try again.");

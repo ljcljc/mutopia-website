@@ -347,10 +347,9 @@ export function Step5() {
               {/* Alert - Selected Time Slots Count */}
               <div className="bg-[#f4ffde] border border-[#6aa31c] border-solid flex h-[calc(36*var(--px393))] items-center overflow-clip px-[calc(16*var(--px393))] py-[calc(4*var(--px393))] rounded-[calc(8*var(--px393))] w-full">
                 <div className="flex gap-[calc(8*var(--px393))] items-center w-full min-w-0">
-                  <Icon
-                    name="alert-success"
-                    className="relative shrink-0 size-[calc(12*var(--px393))] text-[#6aa31c]"
-                  />
+                  <span className="flex size-[calc(12*var(--px393))] shrink-0 items-center justify-center rounded-full bg-[#6aa31c]">
+                    <Icon name="check" className="size-[calc(8*var(--px393))] text-white" />
+                  </span>
                   <p className="font-comfortaa font-normal leading-[calc(12*var(--px393))] relative text-[#467900] text-[calc(10*var(--px393))] whitespace-normal break-words w-full min-w-0">
                     {isMaxSlotsReached
                       ? "Maximum of 6 periods selected, our groomer will confirm by email."
@@ -504,10 +503,9 @@ export function Step5() {
                 {selectedDate && selectedTimeSlots.length > 0 && (
                   <div className="bg-[#f4ffde] border border-[#6aa31c] border-solid flex max-w-[343px] h-[36px] items-center overflow-clip px-[16px] py-[4px] relative rounded-[8px] shrink-0">
                     <div className="flex gap-[8px] items-center relative w-full min-w-0">
-                      <Icon
-                        name="alert-success"
-                        className="relative shrink-0 size-[12px] text-[#6aa31c]"
-                      />
+                      <span className="flex size-[12px] shrink-0 items-center justify-center rounded-full bg-[#6aa31c]">
+                        <Icon name="check" className="size-[8px] text-white" />
+                      </span>
                       <p className="font-comfortaa font-normal leading-[12px] relative text-[#467900] text-[10px] whitespace-normal break-words w-full min-w-0">
                         {isMaxSlotsReached
                           ? "Maximum of 6 periods selected, our groomer will confirm by email."
