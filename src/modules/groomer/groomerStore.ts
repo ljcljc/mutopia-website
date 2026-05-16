@@ -1,16 +1,30 @@
 import { create } from "zustand";
 import {
   buildImageUrl,
+  cancelGroomerTravel,
   getGroomerCurrentBooking,
   getGroomerDashboardSummary,
   getGroomerPendingBookingInvitations,
+  groomerPortalCheckIn,
   startGroomerTravel,
 } from "@/lib/api";
 import type { GroomerUpNextAppointment } from "@/modules/groomer/components/GroomerUpNextCard";
-import { formatGroomerTimeLabel } from "@/modules/groomer/utils/time";
+import {
+  formatGroomerTimeLabel,
+  isGroomerDateTimeWithinNextHours,
+  parseGroomerDateTime,
+} from "@/modules/groomer/utils/time";
+import { formatPreferredTimeSlotLocal } from "@/lib/localDateTime";
 
 export type DashboardAppointment = GroomerUpNextAppointment & {
   id: number | string;
+  scheduledTime?: string;
+  status?: string;
+  phone: string;
+  totalEstimate: string;
+  originalEstimate?: string;
+  savingsLabel?: string;
+  estimateBreakdown?: string;
   invitationId?: number;
   proposalSlots?: string[];
   expiresInLabel?: string;
@@ -107,10 +121,47 @@ function unwrapAppointmentRecord(raw: unknown): Record<string, unknown> {
   return record;
 }
 
+function getAppointmentItems(raw: unknown): Record<string, unknown>[] {
+  if (Array.isArray(raw)) return raw.map(unwrapAppointmentRecord).filter((item) => Object.keys(item).length > 0);
+
+  const record = asRecord(raw);
+  for (const key of ["items", "bookings", "appointments", "up_next"]) {
+    const value = record[key];
+    if (Array.isArray(value)) {
+      return value.map(unwrapAppointmentRecord).filter((item) => Object.keys(item).length > 0);
+    }
+  }
+
+  const item = unwrapAppointmentRecord(raw);
+  return Object.keys(item).length ? [item] : [];
+}
+
 function formatCurrency(value: number | string | undefined, fallback: string = "$0"): string {
   if (value === undefined || value === null || value === "") return fallback;
   if (typeof value === "number") return `$${value}`;
   return value.startsWith("$") ? value : `$${value}`;
+}
+
+function formatAmount(value: unknown, fallback = "-"): string {
+  if (value === undefined || value === null || value === "") return fallback;
+  const raw = typeof value === "number" ? value.toFixed(2) : String(value);
+  return raw.startsWith("$") ? raw : `$${raw}`;
+}
+
+function getAmount(source: Record<string, unknown>, keys: string[]): unknown {
+  for (const key of keys) {
+    const value = source[key];
+    if (value !== undefined && value !== null && value !== "") return value;
+  }
+  return undefined;
+}
+
+function normalizeStatus(status: string): string {
+  return status.trim().toLowerCase().replace(/[\s-]+/g, "_");
+}
+
+function isTravelActionStatus(status: string): boolean {
+  return ["traveling", "travel_started", "en_route", "on_the_way", "checked_in"].includes(normalizeStatus(status));
 }
 
 function formatTimeLabel(value: string): string {
@@ -136,15 +187,7 @@ function formatDurationLabel(source: Record<string, unknown>): string {
 }
 
 function formatPreferredTimeSlotLabel(slot: Record<string, unknown>): string {
-  const date = getString(slot, ["date"]);
-  const slotName = getString(slot, ["slot"]).toLowerCase();
-  if (!date) return "";
-
-  const dateLabel = date.split("-").join(".");
-  if (slotName === "morning" || slotName === "am") return `${dateLabel} AM`;
-  if (slotName === "afternoon" || slotName === "pm") return `${dateLabel} PM`;
-  if (slotName === "evening") return `${dateLabel} PM`;
-  return slotName ? `${dateLabel} ${slotName}` : dateLabel;
+  return formatPreferredTimeSlotLocal(slot) ?? "";
 }
 
 function getPreferredTimeSlotLabels(record: Record<string, unknown>): string[] {
@@ -174,6 +217,14 @@ function mapDashboardAppointment(raw: unknown): DashboardAppointment | null {
 
   const pet = getNestedRecord(record, ["pet", "pet_snapshot"]);
   const service = getNestedRecord(record, ["service_detail", "service", "package", "package_snapshot"]);
+  const price = getNestedRecord(record, ["price", "price_snapshot"]);
+  const scheduledTime = getString(record, ["scheduled_time", "appointment_time", "time"]);
+  const totalAmount = getAmount(record, ["final_amount", "payable_amount", "total_amount", "estimated_total"]) ??
+    getAmount(price, ["final_amount", "payable_amount", "total_amount", "estimated_total"]);
+  const originalAmount = getAmount(record, ["original_amount", "original_total", "subtotal_amount"]) ??
+    getAmount(price, ["original_amount", "original_total", "subtotal_amount"]);
+  const discountAmount = getAmount(record, ["discount_amount", "coupon_amount", "savings_amount"]) ??
+    getAmount(price, ["discount_amount", "coupon_amount", "savings_amount"]);
 
   const appointmentId =
     getNumber(record, ["id", "booking_id"], Number.NaN) ||
@@ -186,10 +237,34 @@ function mapDashboardAppointment(raw: unknown): DashboardAppointment | null {
     owner: getString(record, ["user_name", "owner_name"]),
     avatarUrl: buildImageUrl(getString(record, ["pet_avatar"])),
     address: getString(record, ["service_address"]),
+    phone: getString(record, ["phone", "owner_phone", "user_phone", "contact_phone"]),
     service: getString(record, ["service_name"]),
     duration: formatDurationLabel({ ...service, ...record }),
-    time: formatTimeLabel(getString(record, ["scheduled_time", "appointment_time", "time"])),
+    time: formatTimeLabel(scheduledTime),
+    scheduledTime,
+    status: getString(record, ["status"]),
+    totalEstimate: formatAmount(totalAmount),
+    originalEstimate: originalAmount ? formatAmount(originalAmount) : undefined,
+    savingsLabel: discountAmount ? `${formatAmount(discountAmount)} OFF` : undefined,
+    estimateBreakdown: getString(record, ["estimate_breakdown"]) || getString(price, ["estimate_breakdown"]),
   };
+}
+
+function mapNearestDashboardAppointment(raw: unknown): DashboardAppointment | null {
+  const now = new Date();
+  const nearestRecord = getAppointmentItems(raw)
+    .filter((record) => {
+      const status = getString(record, ["status"]);
+      const scheduledTime = getString(record, ["scheduled_time", "appointment_time", "time"]);
+      return isTravelActionStatus(status) || isGroomerDateTimeWithinNextHours(scheduledTime, 24, now);
+    })
+    .sort((a, b) => {
+      const aTime = parseGroomerDateTime(getString(a, ["scheduled_time", "appointment_time", "time"]))?.getTime() ?? Number.MAX_SAFE_INTEGER;
+      const bTime = parseGroomerDateTime(getString(b, ["scheduled_time", "appointment_time", "time"]))?.getTime() ?? Number.MAX_SAFE_INTEGER;
+      return aTime - bTime;
+    })[0];
+
+  return nearestRecord ? mapDashboardAppointment(nearestRecord) : null;
 }
 
 function mapPendingBookingRequest(raw: unknown): DashboardAppointment | null {
@@ -204,9 +279,11 @@ function mapPendingBookingRequest(raw: unknown): DashboardAppointment | null {
     owner: getString(record, ["owner_name"]),
     avatarUrl: buildImageUrl(getString(record, ["pet_avatar"])),
     address: getString(record, ["service_address"]),
+    phone: getString(record, ["phone", "owner_phone", "user_phone", "contact_phone"]),
     service: getString(record, ["service_name"]),
     duration: formatDurationLabel(record),
     time: "",
+    totalEstimate: "-",
     proposalSlots: getPreferredTimeSlotLabels(record),
     expiresInLabel: getBookingRequestExpiresInLabel(getString(record, ["created_at"])),
   };
@@ -265,9 +342,13 @@ interface GroomerDashboardState {
   isLoadingDashboard: boolean;
   hasLoadedDashboard: boolean;
   isStartingTravel: boolean;
+  isCancelingTravel: boolean;
+  isCheckingIn: boolean;
   fetchDashboard: () => Promise<void>;
   fetchPendingBookingRequests: () => Promise<void>;
   startTravel: (bookingId: number) => Promise<void>;
+  cancelTravel: (bookingId: number) => Promise<void>;
+  checkIn: (bookingId: number) => Promise<void>;
 }
 
 export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => ({
@@ -279,6 +360,8 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
   isLoadingDashboard: false,
   hasLoadedDashboard: false,
   isStartingTravel: false,
+  isCancelingTravel: false,
+  isCheckingIn: false,
 
   fetchDashboard: async () => {
     set({ isLoadingDashboard: true });
@@ -304,7 +387,7 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
     }
 
     if (currentBookingResult.status === "fulfilled") {
-      set({ nextAppointment: mapDashboardAppointment(currentBookingResult.value) });
+      set({ nextAppointment: mapNearestDashboardAppointment(currentBookingResult.value) });
     } else {
       console.error("Failed to load groomer current booking:", currentBookingResult.reason);
       set({ nextAppointment: null });
@@ -331,8 +414,41 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
     set({ isStartingTravel: true });
     try {
       await startGroomerTravel(bookingId);
+      set((state) => ({
+        nextAppointment: state.nextAppointment && Number(state.nextAppointment.id) === bookingId
+          ? { ...state.nextAppointment, status: "traveling" }
+          : state.nextAppointment,
+      }));
     } finally {
       set({ isStartingTravel: false });
+    }
+  },
+
+  cancelTravel: async (bookingId: number) => {
+    set({ isCancelingTravel: true });
+    try {
+      await cancelGroomerTravel(bookingId);
+      set((state) => ({
+        nextAppointment: state.nextAppointment && Number(state.nextAppointment.id) === bookingId
+          ? { ...state.nextAppointment, status: "confirmed" }
+          : state.nextAppointment,
+      }));
+    } finally {
+      set({ isCancelingTravel: false });
+    }
+  },
+
+  checkIn: async (bookingId: number) => {
+    set({ isCheckingIn: true });
+    try {
+      await groomerPortalCheckIn(bookingId);
+      set((state) => ({
+        nextAppointment: state.nextAppointment && Number(state.nextAppointment.id) === bookingId
+          ? { ...state.nextAppointment, status: "checked_in" }
+          : state.nextAppointment,
+      }));
+    } finally {
+      set({ isCheckingIn: false });
     }
   },
 }));

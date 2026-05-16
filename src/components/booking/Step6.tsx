@@ -4,7 +4,6 @@ import { OrangeButton, MembershipCard, Checkbox, BrownOutlineButton, type Featur
 import { useBookingStore } from "./bookingStore";
 import { useAuthStore } from "@/components/auth/authStore";
 import { cn } from "@/components/ui/utils";
-import { TIME_PERIODS } from "@/constants/calendar";
 import {
   buildImageUrl,
   submitBooking,
@@ -15,6 +14,7 @@ import {
 } from "@/lib/api";
 import { toast } from "sonner";
 import { getServicePrice } from "@/lib/pricing";
+import { formatPreferredTimeSlotLocal } from "@/lib/localDateTime";
 
 // Radio button component matching CustomRadio.tsx
 function RadioButton({ isChecked, className }: { isChecked: boolean; className?: string }) {
@@ -28,17 +28,6 @@ function RadioButton({ isChecked, className }: { isChecked: boolean; className?:
     </div>
   );
 }
-
-// Format date to "Friday, 2025.10.31" format
-const formatDateWithWeekday = (date: Date | string): string => {
-  const dateObj = typeof date === "string" ? new Date(date + "T00:00:00") : date;
-  const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  const weekday = weekdays[dateObj.getDay()];
-  const year = dateObj.getFullYear();
-  const month = String(dateObj.getMonth() + 1).padStart(2, "0");
-  const day = String(dateObj.getDate()).padStart(2, "0");
-  return `${weekday}, ${year}.${month}.${day}`;
-};
 
 // Format coat condition for display
 const formatCoatCondition = (condition: string): string => {
@@ -1294,12 +1283,11 @@ export function Step6() {
             {selectedTimeSlots.length > 0 ? (
               <div className="font-comfortaa font-bold leading-[calc(16*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[12px] w-full whitespace-pre-wrap">
                 {selectedTimeSlots.map((slot, index) => {
-                  const period = TIME_PERIODS.find((p) => p.id === slot.slot);
-                  const periodSuffix = period?.label.includes("AM") ? "AM" : "PM";
                   const isLast = index === selectedTimeSlots.length - 1;
+                  const label = formatPreferredTimeSlotLocal(slot, { includeWeekday: true });
                   return (
                     <p key={`${slot.date}-${slot.slot}-${index}`} className={isLast ? "" : "mb-0"}>
-                      {formatDateWithWeekday(slot.date)} {periodSuffix}{" "}
+                      {label ?? "Invalid time slot"}{" "}
                     </p>
                   );
                 })}

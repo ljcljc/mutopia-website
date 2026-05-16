@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import BookingDetail from "./BookingDetail";
-import { createDepositSession, getBookingDetail, type BookingDetailOut } from "@/lib/api";
+import { clientConfirmBookingTime, createDepositSession, getBookingDetail, type BookingDetailOut } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
 import { useBookingStore } from "@/components/booking/bookingStore";
@@ -12,6 +12,7 @@ vi.mock("@/lib/api", async (importOriginal) => {
 
   return {
     ...actual,
+    clientConfirmBookingTime: vi.fn(),
     createDepositSession: vi.fn(),
     getBookingDetail: vi.fn(),
   };
@@ -145,6 +146,72 @@ describe("BookingDetail", () => {
     expect(
       await screen.findByText(`Full grooming - Mobile ${expectedLocalLabel(scheduledTime)}`),
     ).toBeInTheDocument();
+  });
+
+  it("sends the proposed time with a local datetime string when confirming", async () => {
+    const initialBooking: BookingDetailOut = {
+      id: 126,
+      order_code: "ORDER-126",
+      status: "awaiting_client_confirmation",
+      scheduled_time: null,
+      time_options: [
+        {
+          date: "2026-05-17",
+          slot: "am",
+          time: "08:00",
+          datetime_local: "2026-05-17 08:00",
+        },
+      ],
+      pet_snapshot: { name: "Momo" },
+      package_snapshot: {
+        name: "Full grooming",
+        service_type: "Mobile",
+        price: "80.00",
+      },
+      address_snapshot: {
+        address: "100 Vancouver Cres",
+        city: "Miramichi",
+        province: "NB",
+        postal_code: "E1N 2E5",
+      },
+      addons_snapshot: [],
+      membership_snapshot: {},
+      coupon_snapshot: {},
+      package_amount: "80.00",
+      addons_amount: "0.00",
+      membership_fee: "0.00",
+      discount_rate: "0",
+      discount_amount: "0.00",
+      coupon_amount: "0.00",
+      payable_amount: "80.00",
+      deposit_amount: "20.00",
+      final_amount: "80.00",
+    };
+
+    vi.mocked(getBookingDetail).mockResolvedValue(initialBooking);
+    vi.mocked(clientConfirmBookingTime).mockResolvedValue({ ok: true });
+
+    render(
+      <MemoryRouter initialEntries={["/account/bookings/126"]}>
+        <Routes>
+          <Route path="/account/bookings/:bookingId" element={<BookingDetail />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "Confirm" }));
+
+    await waitFor(() => {
+      expect(clientConfirmBookingTime).toHaveBeenCalledWith(126, {
+        accept: true,
+        selected_time: {
+          date: "2026-05-17",
+          slot: "am",
+          time: "08:00",
+          datetime_local: "2026-05-17 08:00",
+        },
+      });
+    });
   });
 
   it("refreshes the detail when starting payment fails because the booking expired", async () => {

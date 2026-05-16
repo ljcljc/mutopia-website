@@ -1584,7 +1584,7 @@ export interface InvitationDecisionTimeOptionIn {
   date: string;
   slot: string;
   time: string;
-  datetime_utc?: string;
+  datetime_local?: string;
 }
 
 export interface ClientInvitationDecisionIn {

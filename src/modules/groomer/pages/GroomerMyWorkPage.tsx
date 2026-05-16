@@ -10,9 +10,10 @@ import {
 import { HistoryDetailsModal, type HistoryDetailsAppointment } from "@/modules/groomer/components/HistoryDetailsModal";
 import { GroomerUpNextCard, type GroomerUpNextAppointment } from "@/modules/groomer/components/GroomerUpNextCard";
 import { useGroomerMyWorkStore } from "@/modules/groomer/stores/myWorkStore";
-import { formatGroomerTimeLabel } from "@/modules/groomer/utils/time";
+import { formatGroomerTimeLabel, shouldShowStartTravel } from "@/modules/groomer/utils/time";
 import { buildImageUrl } from "@/lib/api";
 import { HttpError } from "@/lib/http";
+import { formatPreferredTimeSlotLocal } from "@/lib/localDateTime";
 
 type WorkTab = "schedule" | "history";
 type CalendarMode = "collapsed" | "week" | "month";
@@ -39,6 +40,7 @@ type PendingJobCard = GroomerUpNextAppointment & {
 type UpNextCard = GroomerUpNextAppointment & {
   id: string;
   bookingId: number;
+  scheduledTime: string;
   showStartTravel: boolean;
 };
 
@@ -237,13 +239,7 @@ function getStatusTone(label: string): HistoryBadgeTone {
 }
 
 function formatPreferredTimeSlotLabel(slot: Record<string, unknown>): string {
-  const date = getString(slot, ["date"]);
-  const slotName = getString(slot, ["slot"]).toLowerCase();
-  if (!date) return "";
-  const dateLabel = date.split("-").join(".");
-  if (slotName === "morning" || slotName === "am") return `${dateLabel} AM`;
-  if (slotName === "afternoon" || slotName === "pm" || slotName === "evening") return `${dateLabel} PM`;
-  return slotName ? `${dateLabel} ${slotName}` : dateLabel;
+  return formatPreferredTimeSlotLocal(slot) ?? "";
 }
 
 function getBookingRequestExpiresInLabel(createdAt: string): string | undefined {
@@ -283,6 +279,7 @@ function mapPendingJob(item: Record<string, unknown>, dateKey: string): PendingJ
 function mapUpNext(item: Record<string, unknown>, dateKey: string, todayDateKey: string): UpNextCard {
   const bookingId = getNumber(item, ["id", "booking_id"], 0);
   const petName = getString(item, ["pet_name"], "Pet");
+  const scheduledTime = getString(item, ["scheduled_time", "appointment_time", "time"]);
   return {
     id: `upnext-${bookingId || `${dateKey}-${petName}`}`,
     bookingId,
@@ -293,8 +290,9 @@ function mapUpNext(item: Record<string, unknown>, dateKey: string, todayDateKey:
     address: getString(item, ["service_address", "address"], "Address unavailable"),
     service: getString(item, ["service_name", "service_type"], "Service"),
     duration: formatDurationLabel(item),
-    time: formatTimeLabel(getString(item, ["scheduled_time", "appointment_time", "time"])),
-    showStartTravel: dateKey === todayDateKey,
+    time: formatTimeLabel(scheduledTime),
+    scheduledTime,
+    showStartTravel: dateKey === todayDateKey && shouldShowStartTravel(scheduledTime),
   };
 }
 
@@ -710,20 +708,26 @@ function BookingRequestCard({
 
 function UpNextAppointmentItem({
   appointment,
+  now,
   isStartingTravel,
   onStartTravel,
 }: {
   appointment: UpNextCard;
+  now: Date;
   isStartingTravel: boolean;
   onStartTravel: (appointment: UpNextCard) => void;
 }) {
+  const showStartTravel = appointment.scheduledTime
+    ? shouldShowStartTravel(appointment.scheduledTime, now)
+    : appointment.showStartTravel;
+
   return (
     <GroomerUpNextCard
       appointment={appointment}
       showDuration={false}
       footer={
         <>
-          {appointment.showStartTravel ? (
+          {showStartTravel ? (
             <button
               type="button"
               onClick={() => onStartTravel(appointment)}
@@ -760,6 +764,7 @@ function LoadingStateCard({ label }: { label: string }) {
 export default function GroomerMyWorkPage() {
   const today = useMemo(() => new Date(), []);
   const todayDateKey = useMemo(() => toDateKey(today), [today]);
+  const [now, setNow] = useState(() => new Date());
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const [selectedCalendarDateKey, setSelectedCalendarDateKey] = useState(todayDateKey);
   const {
@@ -791,6 +796,11 @@ export default function GroomerMyWorkPage() {
       setScheduleError("Failed to load schedule.");
     });
   }, [fetchMyWork]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 60 * 1000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => setDebouncedHistorySearch(historySearchValue.trim()), 300);
@@ -900,7 +910,7 @@ export default function GroomerMyWorkPage() {
   };
 
   const handleStartTravel = async (appointment: UpNextCard) => {
-    if (!appointment.bookingId || isStartingTravel) return;
+    if (!appointment.bookingId || isStartingTravel || !shouldShowStartTravel(appointment.scheduledTime, now)) return;
     try {
       await startTravel(appointment.bookingId);
       toast.success("Travel started");
@@ -1004,6 +1014,7 @@ export default function GroomerMyWorkPage() {
                             <UpNextAppointmentItem
                               key={appointment.id}
                               appointment={appointment}
+                              now={now}
                               isStartingTravel={isStartingTravel}
                               onStartTravel={handleStartTravel}
                             />

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "@/components/common/Icon";
 import { Spinner } from "@/components/common/Spinner";
 import {
@@ -11,11 +11,16 @@ import {
   type DashboardAppointment,
   type DashboardGoal,
 } from "@/modules/groomer/groomerStore";
+import { shouldShowStartTravel } from "@/modules/groomer/utils/time";
 import { decideGroomerInvitation } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
 
 type BookingRequest = DashboardAppointment;
+
+function normalizeStatus(status?: string): string {
+  return (status ?? "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+}
 
 function LoadingStateCard() {
   return (
@@ -28,10 +33,12 @@ function LoadingStateCard() {
 
 function AppointmentSummaryCard({
   appointment,
+  showStartTravel,
   isStartingTravel,
   onStartTravel,
 }: {
   appointment: DashboardAppointment;
+  showStartTravel: boolean;
   isStartingTravel: boolean;
   onStartTravel: () => void;
 }) {
@@ -40,7 +47,7 @@ function AppointmentSummaryCard({
       appointment={appointment}
       timeBadgeTone="blue"
       showDuration={false}
-      footer={
+      footer={showStartTravel ? (
         <button
           type="button"
           onClick={onStartTravel}
@@ -49,8 +56,143 @@ function AppointmentSummaryCard({
         >
           {isStartingTravel ? <Spinner size="small" color="white" /> : "Start Travel"}
         </button>
-      }
+      ) : null}
     />
+  );
+}
+
+function TravelMapCard({
+  appointment,
+  isCheckingIn,
+  isCancelingTravel,
+  onCheckIn,
+  onCancelTravel,
+}: {
+  appointment: DashboardAppointment;
+  isCheckingIn: boolean;
+  isCancelingTravel: boolean;
+  onCheckIn: () => void;
+  onCancelTravel: () => void;
+}) {
+  const isCheckedIn = normalizeStatus(appointment.status) === "checked_in";
+
+  return (
+    <article className="rounded-[16px] bg-white px-5 py-5 shadow-[0px_4px_14px_rgba(0,0,0,0.1)]">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="font-comfortaa text-[11px] leading-[16.5px] tracking-[0.5px] text-[#A07D72]">UP NEXT</p>
+          <h2 className="mt-1 font-comfortaa text-[20px] leading-[30px] text-[#4A2C55]">Check In</h2>
+        </div>
+        <div className="rounded-full bg-[#DDEBFF] px-3.5 py-[7px]">
+          <span className="font-comfortaa text-[14px] font-bold leading-[21px] text-[#5B7FE8]">{appointment.time}</span>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-[14px] bg-[#FAF8F4] px-3 py-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <img src={appointment.avatarUrl} alt={appointment.petName} className="size-[56px] rounded-full object-cover" />
+          <div className="min-w-0">
+            <p className="font-comfortaa text-[16px] leading-6 text-[#4A2C55]">{appointment.petName}</p>
+            <p className="font-comfortaa text-[12px] leading-[18px] text-[#8B6357]">{appointment.breed}</p>
+            <p className="font-comfortaa text-[11px] leading-[16.5px] text-[#15A34A]">
+              <span aria-hidden="true">• </span>
+              Owner: {appointment.owner}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="relative mt-4 h-[145px] overflow-hidden rounded-[12px] bg-[#E8EFE5]">
+        <div className="absolute inset-0 opacity-75 [background-image:linear-gradient(0deg,rgba(255,255,255,0.72)_2px,transparent_2px),linear-gradient(90deg,rgba(255,255,255,0.72)_2px,transparent_2px)] [background-size:24px_24px]" />
+        <div className="absolute left-[-28px] top-[50px] h-[20px] w-[210px] rotate-[2deg] bg-white/80" />
+        <div className="absolute right-[-20px] top-[64px] h-[20px] w-[190px] rotate-[-1deg] bg-white/80" />
+        <div className="absolute left-[126px] top-[-20px] h-[190px] w-[70px] bg-white/80" />
+        <div className="absolute left-[118px] top-[13px] size-[104px] rounded-full bg-[#D99A36]/22" />
+        <div className="absolute left-[153px] top-[48px] flex size-9 items-center justify-center rounded-full bg-[#F08A12] text-white shadow-[0px_8px_16px_rgba(240,138,18,0.25)]">
+          <Icon name="location" className="size-5" aria-hidden="true" />
+        </div>
+      </div>
+
+      <div className="mt-4 space-y-3">
+        <div className="flex items-start gap-2.5">
+          <Icon name="location" className="mt-[2px] size-4 text-[#F08A12]" aria-hidden="true" />
+          <div className="min-w-0">
+            <p className="font-comfortaa text-[11px] leading-[16.5px] text-[#A07D72]">ADDRESS</p>
+            <p className="mt-0.5 font-comfortaa text-[14px] leading-[21px] text-[#F08A12] underline underline-offset-[2px]">{appointment.address}</p>
+          </div>
+        </div>
+        {appointment.phone ? (
+          <div className="flex items-center gap-2.5">
+            <Icon name="phone" className="size-4 text-[#F08A12]" aria-hidden="true" />
+            <p className="font-comfortaa text-[13px] leading-[19.5px] text-[#5B6EA8] underline underline-offset-[2px]">{appointment.phone}</p>
+          </div>
+        ) : null}
+      </div>
+
+      <div className="mt-4 rounded-[10px] border border-[#BBD3FF] bg-[#EEF6FF] px-3 py-3 text-center">
+        <p className="font-comfortaa text-[12px] leading-[18px] text-[#2F5FD4]">
+          Are you arrived? Ready to start grooming?
+        </p>
+      </div>
+
+      <div className="mt-4">
+        <button
+          type="button"
+          onClick={onCheckIn}
+          disabled={isCheckingIn || isCancelingTravel || isCheckedIn}
+          className="flex h-[48px] w-full items-center justify-center gap-2 rounded-full bg-[#3B82F6] font-comfortaa text-[16px] font-bold leading-6 text-white shadow-[0px_10px_18px_rgba(59,130,246,0.28)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          {isCheckingIn ? (
+            <Spinner size="small" color="white" />
+          ) : (
+            <>
+              <Icon name="check" className="size-5" aria-hidden="true" />
+              {isCheckedIn ? "Checked in" : "Check in"}
+            </>
+          )}
+        </button>
+        <button
+          type="button"
+          onClick={onCancelTravel}
+          disabled={isCheckingIn || isCancelingTravel || isCheckedIn}
+          className="mt-4 flex w-full items-center justify-center font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357] underline underline-offset-[3px] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isCancelingTravel ? <Spinner size="small" color="#8B6357" /> : "Cancel appointment"}
+        </button>
+      </div>
+    </article>
+  );
+}
+
+function TotalEstimationCard({ appointment }: { appointment: DashboardAppointment }) {
+  return (
+    <article className="rounded-[12px] bg-white px-6 py-6 shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.10)]">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h2 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">Total estimation for the service</h2>
+          <p className="mt-0.5 font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A3C2A]">
+            Our groomer will evaluate the final price
+          </p>
+        </div>
+        <div className="shrink-0 text-right">
+          {appointment.originalEstimate ? (
+            <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A3C2A]">was {appointment.originalEstimate}</p>
+          ) : null}
+          <p className="font-comfortaa text-[16px] font-bold leading-6 text-[#DE6A07]">{appointment.totalEstimate}</p>
+        </div>
+      </div>
+      <div className="mt-2 flex flex-wrap items-center justify-end gap-2">
+        {appointment.savingsLabel ? (
+          <span className="inline-flex h-6 items-center rounded-full bg-[#DCFCE7] px-3 font-comfortaa text-[10px] font-bold leading-[14px] text-[#00A63E]">
+            {appointment.savingsLabel}
+          </span>
+        ) : null}
+        {appointment.estimateBreakdown ? (
+          <span className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#DE6A07]">{appointment.estimateBreakdown}</span>
+        ) : null}
+        <span className="font-comfortaa text-[10px] leading-3 text-[#4A5565]">tax included</span>
+      </div>
+    </article>
   );
 }
 
@@ -213,6 +355,7 @@ function NoUpcomingAppointmentsCard() {
 }
 
 export default function GroomerDashboardPage() {
+  const [now, setNow] = useState(() => new Date());
   const {
     nextAppointment,
     bookingRequests,
@@ -221,9 +364,13 @@ export default function GroomerDashboardPage() {
     isLoadingDashboard,
     hasLoadedDashboard,
     isStartingTravel,
+    isCancelingTravel,
+    isCheckingIn,
     fetchDashboard,
     fetchPendingBookingRequests,
     startTravel,
+    cancelTravel,
+    checkIn,
   } = useGroomerDashboardStore();
 
   useEffect(() => {
@@ -232,8 +379,21 @@ export default function GroomerDashboardPage() {
     });
   }, [fetchDashboard]);
 
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 60 * 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const showStartTravel = nextAppointment?.scheduledTime
+    ? shouldShowStartTravel(nextAppointment.scheduledTime, now)
+    : false;
+  const normalizedAppointmentStatus = normalizeStatus(nextAppointment?.status);
+  const showTravelActions = ["traveling", "travel_started", "en_route", "on_the_way", "checked_in"].includes(
+    normalizedAppointmentStatus,
+  );
+
   const handleStartTravel = async () => {
-    if (!nextAppointment?.id || isStartingTravel) return;
+    if (!nextAppointment?.id || isStartingTravel || !showStartTravel) return;
 
     const bookingId = Number(nextAppointment.id);
     if (!Number.isFinite(bookingId)) return;
@@ -244,6 +404,36 @@ export default function GroomerDashboardPage() {
     } catch (error) {
       console.error("Failed to start travel:", error);
       toast.error("Failed to start travel");
+    }
+  };
+
+  const handleCancelTravel = async () => {
+    if (!nextAppointment?.id || isCancelingTravel) return;
+
+    const bookingId = Number(nextAppointment.id);
+    if (!Number.isFinite(bookingId)) return;
+
+    try {
+      await cancelTravel(bookingId);
+      toast.success("Appointment canceled");
+    } catch (error) {
+      console.error("Failed to cancel appointment:", error);
+      toast.error("Failed to cancel appointment");
+    }
+  };
+
+  const handleCheckIn = async () => {
+    if (!nextAppointment?.id || isCheckingIn) return;
+
+    const bookingId = Number(nextAppointment.id);
+    if (!Number.isFinite(bookingId)) return;
+
+    try {
+      await checkIn(bookingId);
+      toast.success("Checked in");
+    } catch (error) {
+      console.error("Failed to check in:", error);
+      toast.error("Failed to check in");
     }
   };
 
@@ -327,9 +517,21 @@ export default function GroomerDashboardPage() {
           <LoadingStateCard />
         ) : (
           <>
-            {nextAppointment ? (
+            {nextAppointment && showTravelActions ? (
+              <>
+                <TravelMapCard
+                  appointment={nextAppointment}
+                  isCheckingIn={isCheckingIn}
+                  isCancelingTravel={isCancelingTravel}
+                  onCheckIn={handleCheckIn}
+                  onCancelTravel={handleCancelTravel}
+                />
+                <TotalEstimationCard appointment={nextAppointment} />
+              </>
+            ) : nextAppointment ? (
               <AppointmentSummaryCard
                 appointment={nextAppointment}
+                showStartTravel={showStartTravel}
                 isStartingTravel={isStartingTravel}
                 onStartTravel={handleStartTravel}
               />

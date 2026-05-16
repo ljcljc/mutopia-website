@@ -3,18 +3,7 @@ import { Icon } from "@/components/common/Icon";
 import { OrangeButton, PurpleButton, type FeatureItem } from "@/components/common";
 import { useBookingStore } from "@/components/booking/bookingStore";
 import { useMemo } from "react";
-import { TIME_PERIODS } from "@/constants/calendar";
-
-// Format date to "Friday, 2025.10.31" format
-const formatDateWithWeekday = (date: Date | string): string => {
-  const dateObj = typeof date === "string" ? new Date(date + "T00:00:00") : date;
-  const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  const weekday = weekdays[dateObj.getDay()];
-  const year = dateObj.getFullYear();
-  const month = String(dateObj.getMonth() + 1).padStart(2, "0");
-  const day = String(dateObj.getDate()).padStart(2, "0");
-  return `${weekday}, ${year}.${month}.${day}`;
-};
+import { formatPreferredTimeSlotLocal } from "@/lib/localDateTime";
 
 export default function PaymentSuccess() {
   const navigate = useNavigate();
@@ -37,13 +26,9 @@ export default function PaymentSuccess() {
 
   // Format date and time slots
   const formattedTimeSlots = useMemo(() => {
-    return selectedTimeSlots.map((slot) => {
-      const date = new Date(slot.date);
-      const formattedDate = formatDateWithWeekday(date);
-      const timePeriod = TIME_PERIODS.find((p) => p.id === slot.slot);
-      const period = timePeriod?.label.split(" ")[1] || (slot.slot === "morning" ? "AM" : "PM");
-      return `${formattedDate} ${period}`;
-    });
+    return selectedTimeSlots
+      .map((slot) => formatPreferredTimeSlotLocal(slot, { includeWeekday: true }))
+      .filter((slot): slot is string => Boolean(slot));
   }, [selectedTimeSlots]);
 
   // Calculate savings (mock data for now)

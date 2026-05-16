@@ -9,7 +9,7 @@ import {
   AvailableTimeCombobox,
 } from "@/modules/groomer/components/AvailableTimeCombobox";
 import type { BookingRequestDecisionTimeOption } from "@/modules/groomer/components/BookingRequestContent";
-import { toUtcIsoFromLocalDateTime } from "@/lib/localDateTime";
+import { toLocalDateTimeString } from "@/lib/localDateTime";
 
 interface ProposeNewTimeModalProps {
   open: boolean;
@@ -118,14 +118,11 @@ function buildDecisionTimeOption(entry: SelectedTimeEntry): BookingRequestDecisi
   const normalizedTime = normalizeTimeInput(entry.time);
   if (!normalizedTime) return null;
 
-  const datetimeUtc = toUtcIsoFromLocalDateTime(entry.date, normalizedTime);
-  if (!datetimeUtc) return null;
-
   return {
     date: entry.date,
     slot: entry.suffix.toLowerCase() as "am" | "pm",
     time: normalizedTime,
-    datetime_utc: datetimeUtc,
+    datetime_local: toLocalDateTimeString(entry.date, normalizedTime),
   };
 }
 

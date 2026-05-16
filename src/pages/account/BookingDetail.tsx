@@ -30,8 +30,12 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 import { XIcon } from "lucide-react";
-import { addHoursToApiLocalDateTime, formatApiLocalDateTime } from "@/lib/localDateTime";
-import { TIME_PERIODS } from "@/constants/calendar";
+import {
+  addHoursToApiLocalDateTime,
+  formatApiLocalDateTime,
+  formatPreferredTimeSlotLocal,
+  toLocalDateTimeString,
+} from "@/lib/localDateTime";
 
 function formatAmount(value: number | string | undefined, fallback: string) {
   if (value === undefined || value === null || value === "") return fallback;
@@ -77,39 +81,12 @@ function isPaymentExpiredError(error: unknown) {
   );
 }
 
-function formatDateWithWeekday(date: string): string {
-  const parsed = new Date(`${date}T00:00:00`);
-  if (Number.isNaN(parsed.getTime())) return date;
-
-  const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  const weekday = weekdays[parsed.getDay()];
-  const year = parsed.getFullYear();
-  const month = String(parsed.getMonth() + 1).padStart(2, "0");
-  const day = String(parsed.getDate()).padStart(2, "0");
-
-  return `${weekday}, ${year}.${month}.${day}`;
-}
-
 function formatPreferredTimeSlot(slot: Record<string, unknown>): string | null {
-  const date = typeof slot.date === "string" ? slot.date : "";
-  const slotId = typeof slot.slot === "string" ? slot.slot : "";
-  if (!date || !slotId) return null;
-
-  const period = TIME_PERIODS.find((item) => item.id === slotId);
-  const periodSuffix = period?.label.includes("AM") ? "AM" : "PM";
-
-  return `${formatDateWithWeekday(date)} ${periodSuffix}`;
+  return formatPreferredTimeSlotLocal(slot, { includeWeekday: true });
 }
 
 function formatCompactPreferredTimeSlot(slot: Record<string, unknown>): string | null {
-  const date = typeof slot.date === "string" ? slot.date : "";
-  const slotId = typeof slot.slot === "string" ? slot.slot : "";
-  if (!date || !slotId) return null;
-
-  const period = TIME_PERIODS.find((item) => item.id === slotId);
-  const periodSuffix = period?.label.includes("AM") ? "AM" : "PM";
-
-  return `${date} ${periodSuffix}`;
+  return formatPreferredTimeSlotLocal(slot, { dateSeparator: "-" });
 }
 
 type ProposedTimeOption = InvitationDecisionTimeOptionIn & {
@@ -565,12 +542,14 @@ export default function BookingDetail() {
 
     setIsConfirmingProposedTime(true);
     try {
+      const datetimeLocal = selectedTime.datetime_local ?? toLocalDateTimeString(selectedTime.date, selectedTime.time);
       await clientConfirmBookingTime(detail.id, {
         accept: true,
         selected_time: {
           date: selectedTime.date,
           slot: selectedTime.slot,
           time: selectedTime.time,
+          datetime_local: datetimeLocal,
         },
       });
       const updatedDetail = await getBookingDetail(detail.id);

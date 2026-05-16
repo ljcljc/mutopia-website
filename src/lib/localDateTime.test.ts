@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { addHoursToApiLocalDateTime, formatApiLocalDateTime, toUtcIsoFromLocalDateTime } from "./localDateTime";
+import {
+  addHoursToApiLocalDateTime,
+  formatApiLocalDateTime,
+  formatPreferredTimeSlotLocal,
+} from "./localDateTime";
 
 function expectedLocalLabel(value: string) {
   const parsed = new Date(value);
@@ -20,7 +24,33 @@ describe("local API date time formatting", () => {
     expect(addHoursToApiLocalDateTime(value, 1)).toBe(expectedLocalLabel(expected.toISOString()));
   });
 
-  it("converts a selected local date and time to a UTC ISO instant", () => {
-    expect(toUtcIsoFromLocalDateTime("2026-04-26", "09:30")).toBe(new Date("2026-04-26T09:30:00").toISOString());
+  it("formats API local date time strings without timezone conversion", () => {
+    expect(formatApiLocalDateTime("2026-05-17 08:00")).toBe("2026-05-17 at 08:00");
+    expect(formatApiLocalDateTime("2026-05-17 08:00:30")).toBe("2026-05-17 at 08:00");
+  });
+
+  it("formats preferred booking slots from local date fields without UTC date shifting", () => {
+    expect(formatPreferredTimeSlotLocal({ date: "2026-05-16", slot: "afternoon" }, { includeWeekday: true })).toBe(
+      "Saturday, 2026.05.16 PM",
+    );
+  });
+
+  it("formats preferred booking slots from local date time strings", () => {
+    expect(
+      formatPreferredTimeSlotLocal({
+        date: "2026-05-16",
+        slot: "pm",
+        datetime_local: "2026-05-16 13:30",
+      }),
+    ).toBe("2026.05.16 PM");
+  });
+
+  it("formats preferred booking slots from local date time strings with seconds", () => {
+    expect(
+      formatPreferredTimeSlotLocal({
+        date: "2026-05-16",
+        datetime_local: "2026-05-16 08:30:15",
+      }),
+    ).toBe("2026.05.16 AM");
   });
 });
