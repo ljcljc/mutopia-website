@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { OrangeButton } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
 import { Spinner } from "@/components/common/Spinner";
 import {
@@ -9,6 +10,7 @@ import { GroomerUpNextCard } from "@/modules/groomer/components/GroomerUpNextCar
 import {
   useGroomerDashboardStore,
   type DashboardAppointment,
+  type DashboardAmountLine,
   type DashboardGoal,
 } from "@/modules/groomer/groomerStore";
 import { shouldShowStartTravel } from "@/modules/groomer/utils/time";
@@ -164,6 +166,65 @@ function TravelMapCard({
   );
 }
 
+function getStartServiceLabel(service: string): string {
+  return service.toLowerCase().includes("bath") ? "Start bathing" : "Start grooming";
+}
+
+function CurrentJobCard({
+  appointment,
+  isStartingGrooming,
+  onStartGrooming,
+}: {
+  appointment: DashboardAppointment;
+  isStartingGrooming: boolean;
+  onStartGrooming: () => void;
+}) {
+  const isInProgress = normalizeStatus(appointment.status) === "in_progress";
+
+  return (
+    <article className="rounded-[16px] bg-white p-5 shadow-[0px_4px_6px_rgba(0,0,0,0.08)]">
+      <div>
+        <p className="font-comfortaa text-[12px] leading-[18px] text-[#8B6357]">CURRENT JOB</p>
+        <h2 className="mt-1 font-comfortaa text-[20px] font-bold leading-[30px] text-[#4A2C55]">
+          Checking {appointment.petName}
+        </h2>
+      </div>
+
+      <div className="mt-4 rounded-[12px] bg-[#FAF9F7] px-3 py-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <img src={appointment.avatarUrl} alt={appointment.petName} className="size-14 rounded-full object-cover" />
+          <div className="min-w-0">
+            <p className="truncate font-comfortaa text-[16px] leading-6 text-[#4A2C55]">{appointment.petName}</p>
+            <p className="truncate font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357]">{appointment.breed}</p>
+            <p className="truncate font-comfortaa text-[11px] leading-[16.5px] text-[#00A63E]">
+              <span aria-hidden="true">• </span>
+              Owner: {appointment.owner}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={onStartGrooming}
+        disabled={isStartingGrooming || isInProgress}
+        className="mt-4 flex h-12 w-full items-center justify-center gap-3 rounded-full bg-[#3B82F6] font-comfortaa text-[16px] font-bold leading-6 text-white shadow-[0px_4px_6px_rgba(59,130,246,0.30)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
+      >
+        {isStartingGrooming ? (
+          <Spinner size="small" color="white" />
+        ) : (
+          <>
+            <span className="flex size-5 items-center justify-center rounded-full border-2 border-white" aria-hidden="true">
+              <Icon name="check" className="size-3 text-white" />
+            </span>
+            {isInProgress ? "Service in progress" : getStartServiceLabel(appointment.service)}
+          </>
+        )}
+      </button>
+    </article>
+  );
+}
+
 function TotalEstimationCard({ appointment }: { appointment: DashboardAppointment }) {
   return (
     <article className="rounded-[12px] bg-white p-6 shadow-[0px_8px_6px_rgba(0,0,0,0.10)]">
@@ -202,6 +263,85 @@ function TotalEstimationCard({ appointment }: { appointment: DashboardAppointmen
           </div>
           <Icon name="chevron-down" className="mt-1 size-5 rotate-180 text-[#8B6357]" aria-hidden="true" />
         </div>
+      </div>
+    </article>
+  );
+}
+
+function AmountRow({ line }: { line: DashboardAmountLine }) {
+  return (
+    <div className="flex items-start justify-between gap-3 font-comfortaa text-[12px] font-bold leading-4 text-[#4A3C2A]">
+      <p className="min-w-0 flex-1 break-words">{line.label}</p>
+      {line.amount ? <p className="shrink-0 text-right">{line.amount}</p> : null}
+    </div>
+  );
+}
+
+function PackageAndAddonCard({ appointment }: { appointment: DashboardAppointment }) {
+  const hasAddons = appointment.addonLines.length > 0;
+
+  return (
+    <article className="rounded-[12px] bg-white p-6 shadow-[0px_8px_6px_rgba(0,0,0,0.10)]">
+      <div className="flex flex-col gap-3">
+        <h2 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">
+          Verify package and add-on
+        </h2>
+
+        <div className="flex items-start justify-between gap-3">
+          <p className="min-w-0 flex-1 font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
+            Total estimation for the service
+          </p>
+          <div className="flex shrink-0 items-start gap-2">
+            <p className="text-right font-comfortaa text-[16px] font-semibold leading-7 text-[#DE6A07]">
+              {appointment.totalEstimate}
+            </p>
+            <Icon name="chevron-down" className="mt-1 size-5 rotate-180 text-[#8B6357]" aria-hidden="true" />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <p className="font-comfortaa text-[10px] leading-3 text-[#4A3C2A]">{appointment.packageLabel}</p>
+          <div>
+            {appointment.packageLines.map((line) => (
+              <AmountRow key={`${line.label}-${line.amount}`} line={line} />
+            ))}
+          </div>
+          <div className="border-t border-[#4A3C2A] pt-1">
+            <AmountRow line={{ label: "Subtotal", amount: appointment.packageSubtotal }} />
+          </div>
+        </div>
+
+        {hasAddons ? (
+          <div className="flex flex-col gap-1">
+            <p className="font-comfortaa text-[10px] leading-3 text-[#4A3C2A]">Add-on</p>
+            <div>
+              {appointment.addonLines.map((line) => (
+                <AmountRow key={`${line.label}-${line.amount}`} line={line} />
+              ))}
+            </div>
+            <div className="border-t border-[#4A3C2A] pt-1">
+              <AmountRow line={{ label: "Subtotal", amount: appointment.addonSubtotal }} />
+            </div>
+          </div>
+        ) : null}
+
+        {appointment.priceAdjustmentLines.length > 0 ? (
+          <div className="border-t border-[#4A3C2A] pt-1">
+            {appointment.priceAdjustmentLines.map((line) => (
+              <AmountRow key={`${line.label}-${line.amount}`} line={line} />
+            ))}
+          </div>
+        ) : null}
+
+        <OrangeButton
+          type="button"
+          variant="secondary"
+          size="compact"
+          className="mt-1 w-[100px] disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:active:bg-transparent disabled:focus-visible:bg-transparent"
+          disabled
+        >
+          Modify
+        </OrangeButton>
       </div>
     </article>
   );
@@ -367,7 +507,7 @@ function NoUpcomingAppointmentsCard() {
 
 export default function GroomerDashboardPage() {
   const [now, setNow] = useState(() => new Date());
-  const [devTravelStatus, setDevTravelStatus] = useState<"" | "traveling" | "checked_in">("");
+  const [devTravelStatus, setDevTravelStatus] = useState<"" | "traveling" | "checked_in" | "in_progress">("");
   const {
     nextAppointment,
     bookingRequests,
@@ -378,11 +518,13 @@ export default function GroomerDashboardPage() {
     isStartingTravel,
     isCancelingTravel,
     isCheckingIn,
+    isStartingGrooming,
     fetchDashboard,
     fetchPendingBookingRequests,
     startTravel,
     cancelTravel,
     checkIn,
+    startGrooming,
   } = useGroomerDashboardStore();
 
   useEffect(() => {
@@ -408,6 +550,7 @@ export default function GroomerDashboardPage() {
   const showTravelActions = ["traveling", "travel_started", "en_route", "on_the_way", "checked_in"].includes(
     normalizedAppointmentStatus,
   );
+  const showCurrentJob = ["checked_in", "in_progress"].includes(normalizedAppointmentStatus);
 
   const handleStartTravel = async () => {
     if (!effectiveAppointment?.id || isStartingTravel || !showStartTravel) return;
@@ -466,6 +609,26 @@ export default function GroomerDashboardPage() {
     } catch (error) {
       console.error("Failed to check in:", error);
       toast.error("Failed to check in");
+    }
+  };
+
+  const handleStartGrooming = async () => {
+    if (!effectiveAppointment?.id || isStartingGrooming || normalizedAppointmentStatus !== "checked_in") return;
+
+    const bookingId = Number(effectiveAppointment.id);
+    if (!Number.isFinite(bookingId)) return;
+
+    try {
+      if (enableDevTravelTest) {
+        setDevTravelStatus("in_progress");
+        toast.success("Service started");
+        return;
+      }
+      await startGrooming(bookingId);
+      toast.success("Service started");
+    } catch (error) {
+      console.error("Failed to start grooming:", error);
+      toast.error("Failed to start service");
     }
   };
 
@@ -549,7 +712,16 @@ export default function GroomerDashboardPage() {
           <LoadingStateCard />
         ) : (
           <>
-            {effectiveAppointment && showTravelActions ? (
+            {effectiveAppointment && showCurrentJob ? (
+              <>
+                <PackageAndAddonCard appointment={effectiveAppointment} />
+                <CurrentJobCard
+                  appointment={effectiveAppointment}
+                  isStartingGrooming={isStartingGrooming}
+                  onStartGrooming={handleStartGrooming}
+                />
+              </>
+            ) : effectiveAppointment && showTravelActions ? (
               <>
                 <TravelMapCard
                   appointment={effectiveAppointment}

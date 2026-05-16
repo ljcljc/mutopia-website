@@ -7,6 +7,7 @@ import {
   getGroomerDashboardSummary,
   getGroomerPendingBookingInvitations,
   groomerPortalCheckIn,
+  startGroomerGrooming,
   startGroomerTravel,
 } from "@/lib/api";
 import type { GroomerUpNextAppointment } from "@/modules/groomer/components/GroomerUpNextCard";
@@ -26,9 +27,20 @@ export type DashboardAppointment = GroomerUpNextAppointment & {
   originalEstimate?: string;
   savingsLabel?: string;
   estimateBreakdown?: string;
+  packageLabel: string;
+  packageLines: DashboardAmountLine[];
+  packageSubtotal: string;
+  addonLines: DashboardAmountLine[];
+  addonSubtotal: string;
+  priceAdjustmentLines: DashboardAmountLine[];
   invitationId?: number;
   proposalSlots?: string[];
   expiresInLabel?: string;
+};
+
+export type DashboardAmountLine = {
+  label: string;
+  amount?: string;
 };
 
 export type DashboardGoal = {
@@ -112,6 +124,14 @@ function getNestedRecord(source: Record<string, unknown>, keys: string[]): Recor
   return {};
 }
 
+function getRecordArray(source: Record<string, unknown>, keys: string[]): Record<string, unknown>[] {
+  for (const key of keys) {
+    const value = source[key];
+    if (Array.isArray(value)) return value.map(asRecord).filter((item) => Object.keys(item).length > 0);
+  }
+  return [];
+}
+
 function unwrapAppointmentRecord(raw: unknown): Record<string, unknown> {
   const record = asRecord(raw);
   for (const key of ["booking", "current_booking", "appointment"]) {
@@ -156,6 +176,16 @@ function parseAmount(value: unknown): number | null {
     return Number.isFinite(parsed) ? parsed : null;
   }
   return null;
+}
+
+function formatBreakdownAmount(value: unknown, fallback = "$0.00"): string {
+  const parsed = parseAmount(value);
+  return parsed === null ? fallback : `$${parsed.toFixed(2)}`;
+}
+
+function formatNegativeBreakdownAmount(value: unknown): string {
+  const parsed = parseAmount(value) ?? 0;
+  return parsed > 0 ? `-$${parsed.toFixed(2)}` : "$0.00";
 }
 
 function sumAmounts(...values: unknown[]): number {
@@ -213,12 +243,60 @@ function mapEstimateFromPrice(price: Record<string, unknown>) {
   };
 }
 
+function mapAmountLines(items: Record<string, unknown>[]): DashboardAmountLine[] {
+  return items.reduce<DashboardAmountLine[]>((lines, item) => {
+    const label = getString(item, ["name", "label", "service_name"]);
+    if (!label || label.toLowerCase() === "package total") return lines;
+
+    const rawAmount = getAmount(item, ["price", "amount", "total"]);
+    const amount = parseAmount(rawAmount) === null ? undefined : formatBreakdownAmount(rawAmount);
+    lines.push({ label, amount });
+    return lines;
+  }, []);
+}
+
+function mapPackageAndAddonBreakdown(record: Record<string, unknown>) {
+  const packageSnapshot = getNestedRecord(record, ["package_snapshot", "package", "service_detail", "service"]);
+  const packageItems = getRecordArray(packageSnapshot, ["items", "package_items"]);
+  const packageName = getString(packageSnapshot, ["service_name", "name"], getString(record, ["service_name"], "Package"));
+  const packageAmount = getAmount(record, ["package_amount"]) ?? getAmount(packageSnapshot, ["price"]);
+  const packageLines = mapAmountLines(packageItems);
+  const addonLines = mapAmountLines(getRecordArray(record, ["addons_snapshot", "addons", "add_ons"]));
+  const membershipFee = parseAmount(getAmount(record, ["membership_fee"])) ?? 0;
+  const discountAmount = parseAmount(getAmount(record, ["discount_amount"])) ?? 0;
+  const couponAmount = parseAmount(getAmount(record, ["coupon_amount"])) ?? 0;
+  const priceAdjustmentLines: DashboardAmountLine[] = [];
+
+  if (membershipFee > 0) {
+    priceAdjustmentLines.push({ label: "Membership", amount: formatBreakdownAmount(membershipFee) });
+  }
+  if (discountAmount > 0) {
+    priceAdjustmentLines.push({ label: "Discount", amount: formatNegativeBreakdownAmount(discountAmount) });
+  }
+  if (couponAmount > 0) {
+    priceAdjustmentLines.push({ label: "Coupon", amount: formatNegativeBreakdownAmount(couponAmount) });
+  }
+
+  return {
+    packageLabel: `${packageName} package`,
+    packageLines: packageLines.length > 0
+      ? packageLines
+      : [{ label: packageName, amount: formatBreakdownAmount(packageAmount) }],
+    packageSubtotal: formatBreakdownAmount(packageAmount),
+    addonLines,
+    addonSubtotal: formatBreakdownAmount(getAmount(record, ["addons_amount"])),
+    priceAdjustmentLines,
+  };
+}
+
 function normalizeStatus(status: string): string {
   return status.trim().toLowerCase().replace(/[\s-]+/g, "_");
 }
 
 function isTravelActionStatus(status: string): boolean {
-  return ["traveling", "travel_started", "en_route", "on_the_way", "checked_in"].includes(normalizeStatus(status));
+  return ["traveling", "travel_started", "en_route", "on_the_way", "checked_in", "in_progress"].includes(
+    normalizeStatus(status),
+  );
 }
 
 function formatTimeLabel(value: string): string {
@@ -277,6 +355,7 @@ function mapDashboardAppointment(raw: unknown): DashboardAppointment | null {
   const price = getNestedRecord(record, ["price", "price_snapshot"]);
   const scheduledTime = getString(record, ["scheduled_time", "appointment_time", "time"]);
   const estimate = mapEstimateFromPrice({ ...price, ...record });
+  const packageAndAddonBreakdown = mapPackageAndAddonBreakdown({ ...price, ...record });
 
   const appointmentId =
     getNumber(record, ["id", "booking_id"], Number.NaN) ||
@@ -296,6 +375,7 @@ function mapDashboardAppointment(raw: unknown): DashboardAppointment | null {
     scheduledTime,
     status: getString(record, ["status"]),
     ...estimate,
+    ...packageAndAddonBreakdown,
     estimateBreakdown: getString(record, ["estimate_breakdown"]) || getString(price, ["estimate_breakdown"]) || estimate.estimateBreakdown,
   };
 }
@@ -334,6 +414,12 @@ function mapPendingBookingRequest(raw: unknown): DashboardAppointment | null {
     duration: formatDurationLabel(record),
     time: "",
     totalEstimate: "-",
+    packageLabel: "Package",
+    packageLines: [],
+    packageSubtotal: "$0.00",
+    addonLines: [],
+    addonSubtotal: "$0.00",
+    priceAdjustmentLines: [],
     proposalSlots: getPreferredTimeSlotLabels(record),
     expiresInLabel: getBookingRequestExpiresInLabel(getString(record, ["created_at"])),
   };
@@ -394,11 +480,13 @@ interface GroomerDashboardState {
   isStartingTravel: boolean;
   isCancelingTravel: boolean;
   isCheckingIn: boolean;
+  isStartingGrooming: boolean;
   fetchDashboard: () => Promise<void>;
   fetchPendingBookingRequests: () => Promise<void>;
   startTravel: (bookingId: number) => Promise<void>;
   cancelTravel: (bookingId: number) => Promise<void>;
   checkIn: (bookingId: number) => Promise<void>;
+  startGrooming: (bookingId: number) => Promise<void>;
 }
 
 export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => ({
@@ -412,6 +500,7 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
   isStartingTravel: false,
   isCancelingTravel: false,
   isCheckingIn: false,
+  isStartingGrooming: false,
 
   fetchDashboard: async () => {
     set({ isLoadingDashboard: true });
@@ -444,13 +533,16 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
         try {
           const bookingDetail = await getGroomerBookingDetail(bookingId);
           const price = getNestedRecord(asRecord(bookingDetail), ["price", "price_snapshot"]);
-          const estimate = mapEstimateFromPrice({ ...price, ...asRecord(bookingDetail) });
+          const detailRecord = { ...price, ...asRecord(bookingDetail) };
+          const estimate = mapEstimateFromPrice(detailRecord);
+          const packageAndAddonBreakdown = mapPackageAndAddonBreakdown(detailRecord);
           nextAppointment = {
             ...nextAppointment,
             totalEstimate: estimate.totalEstimate,
             originalEstimate: estimate.originalEstimate ?? nextAppointment.originalEstimate,
             savingsLabel: estimate.savingsLabel ?? nextAppointment.savingsLabel,
             estimateBreakdown: estimate.estimateBreakdown ?? nextAppointment.estimateBreakdown,
+            ...packageAndAddonBreakdown,
           };
         } catch (error) {
           console.error("Failed to load groomer current booking detail:", error);
@@ -519,6 +611,20 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
       }));
     } finally {
       set({ isCheckingIn: false });
+    }
+  },
+
+  startGrooming: async (bookingId: number) => {
+    set({ isStartingGrooming: true });
+    try {
+      await startGroomerGrooming(bookingId);
+      set((state) => ({
+        nextAppointment: state.nextAppointment && Number(state.nextAppointment.id) === bookingId
+          ? { ...state.nextAppointment, status: "in_progress" }
+          : state.nextAppointment,
+      }));
+    } finally {
+      set({ isStartingGrooming: false });
     }
   },
 }));
