@@ -1611,8 +1611,8 @@ export function Step6() {
                       availableCouponsCount: availableSpecialCoupons.length,
                     });
                     
-                    return (
-                      <div key={filteredGroup.groupKey} className="flex flex-col gap-[4px] items-end relative shrink-0 w-full">
+	                    return (
+	                      <div key={filteredGroup.groupKey} className="flex w-full flex-col gap-[4px] items-start relative shrink-0">
                         {/* Group header - Checkbox */}
                         <div className="flex items-center justify-between relative shrink-0 w-full">
                           <Checkbox
@@ -1627,7 +1627,7 @@ export function Step6() {
                         </div>
                         {/* Coupons in group - Radio buttons */}
                         {hasSelectedCoupon && (
-                          <div className="flex flex-col gap-[calc(4*var(--px393))] sm:gap-[4px] items-start relative shrink-0 w-full">
+	                          <div className="flex flex-col gap-[calc(4*var(--px393))] sm:gap-[4px] items-start relative shrink-0 w-full">
                             {availableSpecialCoupons.map((coupon, index) => {
                                 const isSelected = selectedCouponIds.includes(coupon.id);
                                 const couponAmount = typeof coupon.amount === "string" ? parseFloat(coupon.amount) : coupon.amount;
@@ -1656,8 +1656,8 @@ export function Step6() {
                                 });
                                 
                                 return (
-                                  <div key={coupon.id} className="flex w-full items-center justify-between gap-[calc(8*var(--px393))] sm:gap-[8px] relative shrink-0">
-                                    <div className="flex min-w-0 items-center gap-[calc(8*var(--px393))] sm:gap-[8px] pl-[calc(24*var(--px393))] sm:pl-[24px]">
+	                                  <div key={coupon.id} className="flex w-full items-center justify-between gap-[calc(8*var(--px393))] sm:gap-[8px] relative shrink-0 pl-[calc(24*var(--px393))] sm:pl-[24px]">
+	                                    <div className="flex min-w-0 items-center gap-[calc(8*var(--px393))] sm:gap-[8px]">
                                       {/* Expiration tag */}
                                       {expirationText && expirationText !== "Expired" && (
                                         <div className="bg-white border border-[#4C4C4C] border-solid flex h-[calc(20*var(--px393))] sm:h-[20px] items-center justify-center overflow-clip px-[calc(8*var(--px393))] sm:px-[8px] py-[calc(2*var(--px393))] sm:py-[2px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shrink-0">
