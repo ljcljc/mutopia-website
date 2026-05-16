@@ -83,7 +83,7 @@ function TravelMapCard({
           <p className="font-comfortaa text-[11px] leading-[16.5px] tracking-[0.5px] text-[#A07D72]">UP NEXT</p>
           <h2 className="mt-1 font-comfortaa text-[20px] leading-[30px] text-[#4A2C55]">Check In</h2>
         </div>
-        <div className="rounded-full bg-[#DDEBFF] px-3.5 py-[7px]">
+        <div className="rounded-[12px] bg-[#DBEAFE] px-3.5 py-[7px]">
           <span className="font-comfortaa text-[14px] font-bold leading-[21px] text-[#5B7FE8]">{appointment.time}</span>
         </div>
       </div>
@@ -124,7 +124,7 @@ function TravelMapCard({
         {appointment.phone ? (
           <div className="flex items-center gap-2.5">
             <Icon name="phone" className="size-4 text-[#F08A12]" aria-hidden="true" />
-            <p className="font-comfortaa text-[13px] leading-[19.5px] text-[#5B6EA8] underline underline-offset-[2px]">{appointment.phone}</p>
+            <p className="font-comfortaa text-[13px] leading-[19.5px] text-[#4A5565] underline underline-offset-[2px]">{appointment.phone}</p>
           </div>
         ) : null}
       </div>
@@ -146,7 +146,7 @@ function TravelMapCard({
             <Spinner size="small" color="white" />
           ) : (
             <>
-              <Icon name="check" className="size-5" aria-hidden="true" />
+              <Icon name="target" className="size-5" aria-hidden="true" />
               {isCheckedIn ? "Checked in" : "Check in"}
             </>
           )}
@@ -166,31 +166,42 @@ function TravelMapCard({
 
 function TotalEstimationCard({ appointment }: { appointment: DashboardAppointment }) {
   return (
-    <article className="rounded-[12px] bg-white px-6 py-6 shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.10)]">
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <h2 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">Total estimation for the service</h2>
-          <p className="mt-0.5 font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A3C2A]">
+    <article className="rounded-[12px] bg-white p-6 shadow-[0px_8px_6px_rgba(0,0,0,0.10)]">
+      <div className="flex flex-col gap-3.5">
+        <div>
+          <h2 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">
+            Total estimation for the service
+          </h2>
+          <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
             Our groomer will evaluate the final price
           </p>
         </div>
-        <div className="shrink-0 text-right">
-          {appointment.originalEstimate ? (
-            <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A3C2A]">was {appointment.originalEstimate}</p>
-          ) : null}
-          <p className="font-comfortaa text-[16px] font-bold leading-6 text-[#DE6A07]">{appointment.totalEstimate}</p>
+
+        <div className="flex items-start gap-2">
+          <div className="flex min-w-0 flex-1 flex-col items-end">
+            <p className="text-right font-comfortaa text-[16px] font-semibold leading-7 text-[#DE6A07]">
+              {appointment.originalEstimate ? (
+                <span className="font-normal leading-[22.75px] text-[#4A5565]">was {appointment.originalEstimate} </span>
+              ) : null}
+              {appointment.totalEstimate}
+            </p>
+            <div className="flex flex-wrap items-end justify-end gap-2">
+              {appointment.savingsLabel ? (
+                <span className="inline-flex h-6 items-center gap-1 rounded-full bg-[#DCFCE7] px-3 py-1 font-comfortaa text-[10px] font-bold leading-[14px] text-[#27AE60]">
+                  <Icon name="check-green" className="size-3.5" aria-hidden="true" />
+                  {appointment.savingsLabel}
+                </span>
+              ) : null}
+              {appointment.estimateBreakdown ? (
+                <span className="font-comfortaa text-[14px] leading-[22.75px] text-[#DE6A07]">
+                  {appointment.estimateBreakdown}
+                </span>
+              ) : null}
+            </div>
+            <span className="font-comfortaa text-[10px] font-bold leading-[14px] text-[#4A5565]">tax included</span>
+          </div>
+          <Icon name="chevron-down" className="mt-1 size-5 rotate-180 text-[#8B6357]" aria-hidden="true" />
         </div>
-      </div>
-      <div className="mt-2 flex flex-wrap items-center justify-end gap-2">
-        {appointment.savingsLabel ? (
-          <span className="inline-flex h-6 items-center rounded-full bg-[#DCFCE7] px-3 font-comfortaa text-[10px] font-bold leading-[14px] text-[#00A63E]">
-            {appointment.savingsLabel}
-          </span>
-        ) : null}
-        {appointment.estimateBreakdown ? (
-          <span className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#DE6A07]">{appointment.estimateBreakdown}</span>
-        ) : null}
-        <span className="font-comfortaa text-[10px] leading-3 text-[#4A5565]">tax included</span>
       </div>
     </article>
   );
@@ -356,6 +367,7 @@ function NoUpcomingAppointmentsCard() {
 
 export default function GroomerDashboardPage() {
   const [now, setNow] = useState(() => new Date());
+  const [devTravelStatus, setDevTravelStatus] = useState<"" | "traveling" | "checked_in">("");
   const {
     nextAppointment,
     bookingRequests,
@@ -384,21 +396,31 @@ export default function GroomerDashboardPage() {
     return () => window.clearInterval(timer);
   }, []);
 
-  const showStartTravel = nextAppointment?.scheduledTime
-    ? shouldShowStartTravel(nextAppointment.scheduledTime, now)
-    : false;
-  const normalizedAppointmentStatus = normalizeStatus(nextAppointment?.status);
+  const enableDevTravelTest =
+    import.meta.env.DEV && new URLSearchParams(window.location.search).get("devTravelTest") === "1";
+  const effectiveAppointment = nextAppointment && devTravelStatus
+    ? { ...nextAppointment, status: devTravelStatus }
+    : nextAppointment;
+  const showStartTravel = enableDevTravelTest || (effectiveAppointment?.scheduledTime
+    ? shouldShowStartTravel(effectiveAppointment.scheduledTime, now)
+    : false);
+  const normalizedAppointmentStatus = normalizeStatus(effectiveAppointment?.status);
   const showTravelActions = ["traveling", "travel_started", "en_route", "on_the_way", "checked_in"].includes(
     normalizedAppointmentStatus,
   );
 
   const handleStartTravel = async () => {
-    if (!nextAppointment?.id || isStartingTravel || !showStartTravel) return;
+    if (!effectiveAppointment?.id || isStartingTravel || !showStartTravel) return;
 
-    const bookingId = Number(nextAppointment.id);
+    const bookingId = Number(effectiveAppointment.id);
     if (!Number.isFinite(bookingId)) return;
 
     try {
+      if (enableDevTravelTest) {
+        setDevTravelStatus("traveling");
+        toast.success("Travel started");
+        return;
+      }
       await startTravel(bookingId);
       toast.success("Travel started");
     } catch (error) {
@@ -408,12 +430,17 @@ export default function GroomerDashboardPage() {
   };
 
   const handleCancelTravel = async () => {
-    if (!nextAppointment?.id || isCancelingTravel) return;
+    if (!effectiveAppointment?.id || isCancelingTravel) return;
 
-    const bookingId = Number(nextAppointment.id);
+    const bookingId = Number(effectiveAppointment.id);
     if (!Number.isFinite(bookingId)) return;
 
     try {
+      if (enableDevTravelTest) {
+        setDevTravelStatus("");
+        toast.success("Appointment canceled");
+        return;
+      }
       await cancelTravel(bookingId);
       toast.success("Appointment canceled");
     } catch (error) {
@@ -423,12 +450,17 @@ export default function GroomerDashboardPage() {
   };
 
   const handleCheckIn = async () => {
-    if (!nextAppointment?.id || isCheckingIn) return;
+    if (!effectiveAppointment?.id || isCheckingIn) return;
 
-    const bookingId = Number(nextAppointment.id);
+    const bookingId = Number(effectiveAppointment.id);
     if (!Number.isFinite(bookingId)) return;
 
     try {
+      if (enableDevTravelTest) {
+        setDevTravelStatus("checked_in");
+        toast.success("Checked in");
+        return;
+      }
       await checkIn(bookingId);
       toast.success("Checked in");
     } catch (error) {
@@ -517,20 +549,20 @@ export default function GroomerDashboardPage() {
           <LoadingStateCard />
         ) : (
           <>
-            {nextAppointment && showTravelActions ? (
+            {effectiveAppointment && showTravelActions ? (
               <>
                 <TravelMapCard
-                  appointment={nextAppointment}
+                  appointment={effectiveAppointment}
                   isCheckingIn={isCheckingIn}
                   isCancelingTravel={isCancelingTravel}
                   onCheckIn={handleCheckIn}
                   onCancelTravel={handleCancelTravel}
                 />
-                <TotalEstimationCard appointment={nextAppointment} />
+                <TotalEstimationCard appointment={effectiveAppointment} />
               </>
-            ) : nextAppointment ? (
+            ) : effectiveAppointment ? (
               <AppointmentSummaryCard
-                appointment={nextAppointment}
+                appointment={effectiveAppointment}
                 showStartTravel={showStartTravel}
                 isStartingTravel={isStartingTravel}
                 onStartTravel={handleStartTravel}

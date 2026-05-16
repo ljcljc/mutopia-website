@@ -2,6 +2,7 @@ import { create } from "zustand";
 import {
   buildImageUrl,
   cancelGroomerTravel,
+  getGroomerBookingDetail,
   getGroomerCurrentBooking,
   getGroomerDashboardSummary,
   getGroomerPendingBookingInvitations,
@@ -148,12 +149,69 @@ function formatAmount(value: unknown, fallback = "-"): string {
   return raw.startsWith("$") ? raw : `$${raw}`;
 }
 
+function parseAmount(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && value.trim()) {
+    const parsed = Number(value.replace(/[^0-9.-]/g, ""));
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
+function sumAmounts(...values: unknown[]): number {
+  return values.reduce<number>((total, value) => total + (parseAmount(value) ?? 0), 0);
+}
+
 function getAmount(source: Record<string, unknown>, keys: string[]): unknown {
   for (const key of keys) {
     const value = source[key];
     if (value !== undefined && value !== null && value !== "") return value;
   }
   return undefined;
+}
+
+function buildEstimateBreakdown(price: Record<string, unknown>): string | undefined {
+  const serviceAmount = getAmount(price, ["payable_amount", "final_amount"]);
+  const membershipFee = getAmount(price, ["membership_fee"]);
+  const membershipFeeNumber = parseAmount(membershipFee);
+
+  if (serviceAmount === undefined) return undefined;
+  if (!membershipFeeNumber || membershipFeeNumber <= 0) return `(${formatAmount(serviceAmount)})`;
+  return `(${formatAmount(serviceAmount)} + ${formatAmount(membershipFee)})`;
+}
+
+function formatDiscountRate(value: number): string {
+  const percentage = value > 0 && value <= 1 ? value * 100 : value;
+  return Number.isInteger(percentage) ? String(percentage) : percentage.toFixed(2).replace(/\.?0+$/, "");
+}
+
+function buildSavingsLabel(price: Record<string, unknown>): string | undefined {
+  const discountRate = parseAmount(getAmount(price, ["discount_rate"]));
+  if (discountRate && discountRate > 0) return `${formatDiscountRate(discountRate)}% OFF`;
+
+  const savingsAmount = sumAmounts(getAmount(price, ["discount_amount"]), getAmount(price, ["coupon_amount"]));
+  return savingsAmount > 0 ? `${formatAmount(savingsAmount)} OFF` : undefined;
+}
+
+function mapEstimateFromPrice(price: Record<string, unknown>) {
+  const serviceSubtotal = sumAmounts(getAmount(price, ["package_amount"]), getAmount(price, ["addons_amount"]));
+  const membershipFee = parseAmount(getAmount(price, ["membership_fee"])) ?? 0;
+  const explicitTotal = parseAmount(getAmount(price, ["total_amount", "estimated_total"]));
+  const serviceTotal =
+    parseAmount(getAmount(price, ["payable_amount", "final_amount"])) ??
+    Math.max(
+      serviceSubtotal -
+        sumAmounts(getAmount(price, ["discount_amount"]), getAmount(price, ["coupon_amount"])),
+      0,
+    );
+  const totalAmount = explicitTotal ?? serviceTotal + membershipFee;
+
+  return {
+    totalEstimate: formatAmount(totalAmount),
+    originalEstimate: serviceSubtotal > 0 ? formatAmount(serviceSubtotal) : undefined,
+    savingsLabel: buildSavingsLabel(price),
+    estimateBreakdown: buildEstimateBreakdown(price),
+  };
 }
 
 function normalizeStatus(status: string): string {
@@ -219,12 +277,7 @@ function mapDashboardAppointment(raw: unknown): DashboardAppointment | null {
   const service = getNestedRecord(record, ["service_detail", "service", "package", "package_snapshot"]);
   const price = getNestedRecord(record, ["price", "price_snapshot"]);
   const scheduledTime = getString(record, ["scheduled_time", "appointment_time", "time"]);
-  const totalAmount = getAmount(record, ["final_amount", "payable_amount", "total_amount", "estimated_total"]) ??
-    getAmount(price, ["final_amount", "payable_amount", "total_amount", "estimated_total"]);
-  const originalAmount = getAmount(record, ["original_amount", "original_total", "subtotal_amount"]) ??
-    getAmount(price, ["original_amount", "original_total", "subtotal_amount"]);
-  const discountAmount = getAmount(record, ["discount_amount", "coupon_amount", "savings_amount"]) ??
-    getAmount(price, ["discount_amount", "coupon_amount", "savings_amount"]);
+  const estimate = mapEstimateFromPrice({ ...price, ...record });
 
   const appointmentId =
     getNumber(record, ["id", "booking_id"], Number.NaN) ||
@@ -243,10 +296,8 @@ function mapDashboardAppointment(raw: unknown): DashboardAppointment | null {
     time: formatTimeLabel(scheduledTime),
     scheduledTime,
     status: getString(record, ["status"]),
-    totalEstimate: formatAmount(totalAmount),
-    originalEstimate: originalAmount ? formatAmount(originalAmount) : undefined,
-    savingsLabel: discountAmount ? `${formatAmount(discountAmount)} OFF` : undefined,
-    estimateBreakdown: getString(record, ["estimate_breakdown"]) || getString(price, ["estimate_breakdown"]),
+    ...estimate,
+    estimateBreakdown: getString(record, ["estimate_breakdown"]) || getString(price, ["estimate_breakdown"]) || estimate.estimateBreakdown,
   };
 }
 
@@ -387,7 +438,27 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
     }
 
     if (currentBookingResult.status === "fulfilled") {
-      set({ nextAppointment: mapNearestDashboardAppointment(currentBookingResult.value) });
+      let nextAppointment = mapNearestDashboardAppointment(currentBookingResult.value);
+      const bookingId = Number(nextAppointment?.id);
+
+      if (nextAppointment && Number.isFinite(bookingId)) {
+        try {
+          const bookingDetail = await getGroomerBookingDetail(bookingId);
+          const price = getNestedRecord(asRecord(bookingDetail), ["price", "price_snapshot"]);
+          const estimate = mapEstimateFromPrice({ ...price, ...asRecord(bookingDetail) });
+          nextAppointment = {
+            ...nextAppointment,
+            totalEstimate: estimate.totalEstimate,
+            originalEstimate: estimate.originalEstimate ?? nextAppointment.originalEstimate,
+            savingsLabel: estimate.savingsLabel ?? nextAppointment.savingsLabel,
+            estimateBreakdown: estimate.estimateBreakdown ?? nextAppointment.estimateBreakdown,
+          };
+        } catch (error) {
+          console.error("Failed to load groomer current booking detail:", error);
+        }
+      }
+
+      set({ nextAppointment });
     } else {
       console.error("Failed to load groomer current booking:", currentBookingResult.reason);
       set({ nextAppointment: null });

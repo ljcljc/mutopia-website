@@ -1654,6 +1654,7 @@ export type GroomerPayoutLinkOut = UnknownObjectOut;
 export type GroomerPerformanceOut = UnknownObjectOut;
 export type GroomerDashboardSummaryOut = UnknownObjectOut;
 export type GroomerCurrentBookingOut = UnknownObjectOut | null;
+export type GroomerBookingDetailOut = BookingDetailOut;
 export interface GroomerPendingTimeSlotOut {
   date: string;
   slot: string;
@@ -1915,6 +1916,16 @@ export async function getGroomerDashboardSummary(): Promise<GroomerDashboardSumm
 export async function getGroomerCurrentBooking(): Promise<GroomerCurrentBookingOut> {
   const response = await http.get<GroomerCurrentBookingOut>(
     "/api/groomers/dashboard/current_booking"
+  );
+  return response.data;
+}
+
+/**
+ * 获取美容师订单详情
+ */
+export async function getGroomerBookingDetail(bookingId: number): Promise<GroomerBookingDetailOut> {
+  const response = await http.get<GroomerBookingDetailOut>(
+    `/api/groomers/bookings/${bookingId}`
   );
   return response.data;
 }
