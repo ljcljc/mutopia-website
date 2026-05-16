@@ -34,7 +34,7 @@ export function GroomerUpNextCard({
           <p className="font-comfortaa text-[11px] leading-[16.5px] tracking-[0.5px] text-[#A07D72]">UP NEXT</p>
           <h2 className="mt-1 font-comfortaa text-[18px] leading-[27px] text-[#4A2C55]">Next appointment</h2>
         </div>
-        <div className={isBlueTone ? "rounded-full bg-[#DDEBFF] px-3.5 py-[7px]" : "rounded-full bg-[#FFF5EC] px-3.5 py-[7px]"}>
+        <div className={isBlueTone ? "rounded-[12px] bg-[#DBEAFE] px-3.5 py-[7px]" : "rounded-full bg-[#FFF5EC] px-3.5 py-[7px]"}>
           <span className={isBlueTone ? "font-comfortaa text-[14px] font-bold leading-[21px] text-[#5B7FE8]" : "font-comfortaa text-[14px] font-bold leading-[21px] text-[#F08A12]"}>
             {appointment.time}
           </span>

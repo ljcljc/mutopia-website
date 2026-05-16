@@ -181,8 +181,7 @@ function buildEstimateBreakdown(price: Record<string, unknown>): string | undefi
 }
 
 function formatDiscountRate(value: number): string {
-  const percentage = value > 0 && value <= 1 ? value * 100 : value;
-  return Number.isInteger(percentage) ? String(percentage) : percentage.toFixed(2).replace(/\.?0+$/, "");
+  return Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/\.?0+$/, "");
 }
 
 function buildSavingsLabel(price: Record<string, unknown>): string | undefined {

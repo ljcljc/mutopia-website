@@ -188,7 +188,7 @@ function TotalEstimationCard({ appointment }: { appointment: DashboardAppointmen
             <div className="flex flex-wrap items-end justify-end gap-2">
               {appointment.savingsLabel ? (
                 <span className="inline-flex h-6 items-center gap-1 rounded-full bg-[#DCFCE7] px-3 py-1 font-comfortaa text-[10px] font-bold leading-[14px] text-[#27AE60]">
-                  <Icon name="check-green" className="size-3.5" aria-hidden="true" />
+                  <Icon name="target" className="size-3.5" aria-hidden="true" />
                   {appointment.savingsLabel}
                 </span>
               ) : null}
