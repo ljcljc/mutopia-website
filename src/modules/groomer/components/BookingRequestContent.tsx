@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Icon } from "@/components/common/Icon";
 import { cn } from "@/components/ui/utils";
 import {
@@ -7,6 +7,7 @@ import {
 } from "@/modules/groomer/components/AvailableTimeCombobox";
 import { PassAppointmentModal } from "@/modules/groomer/components/PassAppointmentModal";
 import { ProposeNewTimeModal } from "@/modules/groomer/components/ProposeNewTimeModal";
+import { getGroomerScheduleNearestConflict } from "@/lib/api";
 import { toLocalDateTimeString } from "@/lib/localDateTime";
 import { toast } from "sonner";
 
@@ -64,24 +65,28 @@ type BookingRequestContentProps = {
 
 const DEFAULT_PROPOSAL_SLOTS = ["2026.05.24 AM", "2026.05.26 PM", "2026.05.29 AM"] as const;
 
-function normalizeTimeInput(value: string): string | null {
+function normalizeTimeInput(value: string, period?: "am" | "pm"): string | null {
   const match = value.trim().match(/^(\d{1,2}):(\d{2})$/);
   if (!match) return null;
 
-  const hours = Number(match[1]);
+  let hours = Number(match[1]);
   const minutes = Number(match[2]);
   if (!Number.isInteger(hours) || !Number.isInteger(minutes)) return null;
   if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null;
+  if (period === "pm" && hours > 0 && hours < 12) hours += 12;
+  if (period === "am" && hours === 12) hours = 0;
 
   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 }
 
 function buildDecisionTimeOption(slot: string, time: string): BookingRequestDecisionTimeOption | null {
   const [dateValue, periodValue] = slot.trim().split(/\s+/);
-  const normalizedTime = normalizeTimeInput(time);
   const normalizedPeriod = periodValue?.toLowerCase();
 
-  if (!dateValue || !normalizedTime || (normalizedPeriod !== "am" && normalizedPeriod !== "pm")) return null;
+  if (!dateValue || (normalizedPeriod !== "am" && normalizedPeriod !== "pm")) return null;
+
+  const normalizedTime = normalizeTimeInput(time, normalizedPeriod);
+  if (!normalizedTime) return null;
 
   const selectedHour = Number(normalizedTime.split(":")[0]);
   if (normalizedPeriod === "am" && selectedHour >= 12) return null;
@@ -117,9 +122,15 @@ export function BookingRequestContent({
   const [isProposeModalOpen, setIsProposeModalOpen] = useState(false);
   const [isPassModalOpen, setIsPassModalOpen] = useState(false);
   const [isSubmittingAction, setIsSubmittingAction] = useState<"confirm" | "propose" | "decline" | null>(null);
+  const [confirmedAppointmentWarning, setConfirmedAppointmentWarning] = useState<string | null>(null);
   const [contentHeight, setContentHeight] = useState<string>(expanded ? "auto" : "0px");
   const collapseContentRef = useRef<HTMLDivElement | null>(null);
   const expiryBadgeColor = request.expiresInLabel === "Expired" ? "#DE1507" : "#DE6A07";
+  const selectedAvailableTime = selectedProposalSlot ? availableTimeBySlot[selectedProposalSlot] ?? "" : "";
+  const selectedTimeOption = useMemo(
+    () => (selectedProposalSlot ? buildDecisionTimeOption(selectedProposalSlot, selectedAvailableTime) : null),
+    [selectedAvailableTime, selectedProposalSlot],
+  );
 
   useEffect(() => {
     const element = collapseContentRef.current;
@@ -161,6 +172,33 @@ export function BookingRequestContent({
     resizeObserver.observe(element);
     return () => resizeObserver.disconnect();
   }, [contentHeight, expanded]);
+
+  useEffect(() => {
+    if (!selectedTimeOption) {
+      setConfirmedAppointmentWarning(null);
+      return;
+    }
+
+    let isCurrent = true;
+    setConfirmedAppointmentWarning(null);
+
+    getGroomerScheduleNearestConflict({
+      datetime_local: selectedTimeOption.datetime_local,
+    })
+      .then((result) => {
+        if (!isCurrent) return;
+        setConfirmedAppointmentWarning(result.should_warn ? result.message : null);
+      })
+      .catch((error) => {
+        if (!isCurrent) return;
+        console.error("Failed to validate groomer schedule spacing:", error);
+        setConfirmedAppointmentWarning(null);
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [selectedTimeOption]);
 
   const handleConfirmAppointment = async () => {
     if (!onConfirmOriginalTime || !selectedProposalSlot) return;
@@ -325,6 +363,14 @@ export function BookingRequestContent({
                             options={getAvailableTimeOptions(slot)}
                           />
                         </div>
+                        {confirmedAppointmentWarning ? (
+                          <div className="mt-2 flex items-center gap-2 rounded-[8px] border border-[#BEDBFF] bg-[#EFF6FF] px-4 py-1">
+                            <Icon name="alert-info" className="size-3 shrink-0 text-[#2563EB]" aria-hidden="true" />
+                            <p className="font-comfortaa text-[12px] font-bold leading-4 text-[#193CB8]">
+                              {confirmedAppointmentWarning}
+                            </p>
+                          </div>
+                        ) : null}
                       </div>
                     ) : null}
                   </div>

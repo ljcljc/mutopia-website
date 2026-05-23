@@ -2575,6 +2575,44 @@
         "security": [{ "JWTAuth": [] }]
       }
     },
+    "/api/groomers/schedule/nearest_conflict": {
+      "get": {
+        "operationId": "api_groomer_portal_groomer_schedule_nearest_conflict",
+        "summary": "Groomer Schedule Nearest Conflict",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "datetime_local",
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Datetime Local"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "exclude_booking_id",
+            "schema": {
+              "anyOf": [{ "type": "integer" }, { "type": "null" }],
+              "title": "Exclude Booking Id"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GroomerScheduleNearestConflictOut" }
+              }
+            }
+          }
+        },
+        "tags": ["groomer-portal"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
     "/api/groomers/history": {
       "get": {
         "operationId": "api_groomer_portal_groomer_history",
@@ -4450,6 +4488,42 @@
         },
         "required": ["payload"],
         "title": "GroomerCancelBookingMultipartIn",
+        "type": "object"
+      },
+      "GroomerScheduleNearestConflictOut": {
+        "properties": {
+          "ok": { "title": "Ok", "type": "boolean" },
+          "should_warn": { "title": "Should Warn", "type": "boolean" },
+          "threshold_minutes": { "title": "Threshold Minutes", "type": "integer" },
+          "nearest_booking_id": {
+            "anyOf": [{ "type": "integer" }, { "type": "null" }],
+            "title": "Nearest Booking Id"
+          },
+          "nearest_scheduled_time": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Nearest Scheduled Time"
+          },
+          "nearest_scheduled_time_display": {
+            "title": "Nearest Scheduled Time Display",
+            "type": "string"
+          },
+          "gap_minutes": {
+            "anyOf": [{ "type": "integer" }, { "type": "null" }],
+            "title": "Gap Minutes"
+          },
+          "message": { "title": "Message", "type": "string" }
+        },
+        "required": [
+          "ok",
+          "should_warn",
+          "threshold_minutes",
+          "nearest_booking_id",
+          "nearest_scheduled_time",
+          "nearest_scheduled_time_display",
+          "gap_minutes",
+          "message"
+        ],
+        "title": "GroomerScheduleNearestConflictOut",
         "type": "object"
       },
       "PaymentSessionOut": {

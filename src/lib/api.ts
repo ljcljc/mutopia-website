@@ -1653,6 +1653,11 @@ export interface GroomerScheduleIn {
   page_size?: number;
 }
 
+export interface GroomerScheduleNearestConflictIn {
+  datetime_local: string;
+  exclude_booking_id?: number | null;
+}
+
 export interface GroomerHistoryIn {
   pet_name?: string | null;
   date_from?: string | null;
@@ -1703,6 +1708,16 @@ export type GroomerCashOutOut = UnknownObjectOut;
 export type GroomerScheduleOut =
   | UnknownPageOut<UnknownObjectOut>
   | UnknownObjectOut[];
+export interface GroomerScheduleNearestConflictOut {
+  ok: boolean;
+  should_warn: boolean;
+  threshold_minutes: number;
+  nearest_booking_id: number | null;
+  nearest_scheduled_time: string | null;
+  nearest_scheduled_time_display: string;
+  gap_minutes: number | null;
+  message: string;
+}
 export type GroomerHistoryOut =
   | UnknownPageOut<UnknownObjectOut>
   | UnknownObjectOut[];
@@ -2166,6 +2181,22 @@ export async function getGroomerSchedule(
 
   const response = await http.get<GroomerScheduleOut>(
     `/api/groomers/schedule?${queryParams.toString()}`
+  );
+  return response.data;
+}
+
+/**
+ * 校验美容师输入时间附近是否已有日程
+ */
+export async function getGroomerScheduleNearestConflict(
+  params: GroomerScheduleNearestConflictIn
+): Promise<GroomerScheduleNearestConflictOut> {
+  const queryParams = new URLSearchParams();
+  queryParams.append("datetime_local", params.datetime_local);
+  if (params.exclude_booking_id) queryParams.append("exclude_booking_id", String(params.exclude_booking_id));
+
+  const response = await http.get<GroomerScheduleNearestConflictOut>(
+    `/api/groomers/schedule/nearest_conflict?${queryParams.toString()}`
   );
   return response.data;
 }
