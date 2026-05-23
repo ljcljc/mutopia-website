@@ -80,6 +80,10 @@ export function toLocalDateTimeString(date: string, time: string): string {
   return `${date} ${time}`;
 }
 
+export function formatLocalDateTimeForApi(date = new Date()): string {
+  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())} ${pad2(date.getHours())}:${pad2(date.getMinutes())}`;
+}
+
 export function formatPreferredTimeSlotLocal(
   slot: object,
   options: { includeWeekday?: boolean; dateSeparator?: "." | "-" } = {},

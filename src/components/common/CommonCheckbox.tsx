@@ -48,7 +48,7 @@ export function CommonCheckbox({
     <div
       onClick={handleClick}
       className={cn(
-        "border-2 border-solid flex flex-col items-start p-[16px] relative rounded-[14px] shrink-0 transition-all",
+        "border-2 border-solid flex flex-col items-start p-[16px] relative rounded-[14px] shrink-0 transition-all hover:border-[#E5A56E]",
         isSelected ? "border-[#de6a07] bg-[#fff3e9]" : "border-gray-200 bg-white",
         disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
         className
@@ -110,4 +110,3 @@ export function CommonCheckbox({
     </div>
   );
 }
-

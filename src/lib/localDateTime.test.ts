@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   addHoursToApiLocalDateTime,
   formatApiLocalDateTime,
+  formatLocalDateTimeForApi,
   formatPreferredTimeSlotLocal,
 } from "./localDateTime";
 
@@ -27,6 +28,10 @@ describe("local API date time formatting", () => {
   it("formats API local date time strings without timezone conversion", () => {
     expect(formatApiLocalDateTime("2026-05-17 08:00")).toBe("2026-05-17 at 08:00");
     expect(formatApiLocalDateTime("2026-05-17 08:00:30")).toBe("2026-05-17 at 08:00");
+  });
+
+  it("formats the browser local date time for API query parameters", () => {
+    expect(formatLocalDateTimeForApi(new Date(2026, 4, 24, 0, 6))).toBe("2026-05-24 00:06");
   });
 
   it("formats preferred booking slots from local date fields without UTC date shifting", () => {

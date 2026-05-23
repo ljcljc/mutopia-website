@@ -4,6 +4,7 @@ interface CustomInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "className"> {
   label?: string;
   error?: string;
+  leftElement?: ReactNode;
   rightElement?: ReactNode;
   containerClassName?: string;
   inputClassName?: string;
@@ -11,7 +12,7 @@ interface CustomInputProps
 }
 
 export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
-  ({ label, error, rightElement, containerClassName = "", inputClassName = "", borderClassName = "", ...props }, ref) => {
+  ({ label, error, leftElement, rightElement, containerClassName = "", inputClassName = "", borderClassName = "", ...props }, ref) => {
     return (
       <div className="flex flex-col gap-[8px] items-start relative w-full">
         {/* Label */}
@@ -30,6 +31,7 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
           <div className="flex flex-row items-center overflow-clip rounded-[inherit] size-full">
             <div className="flex h-[36px] items-center px-[16px] py-[4px] relative w-full">
               <div className="basis-0 flex grow items-center min-h-px min-w-px relative shrink-0">
+                {leftElement}
                 <input
                   ref={ref}
                   {...props}

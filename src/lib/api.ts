@@ -2,6 +2,7 @@
 import { http, setAuthToken, setRefreshToken, clearAuthTokens } from "./http";
 import { getEncryptedItem } from "./encryption";
 import { STORAGE_KEYS } from "./storageKeys";
+import { formatLocalDateTimeForApi } from "./localDateTime";
 
 // ==================== 类型定义 ====================
 
@@ -1946,8 +1947,11 @@ export async function getGroomerDashboardSummary(): Promise<GroomerDashboardSumm
  * 获取美容师当前服务中的预约
  */
 export async function getGroomerCurrentBooking(): Promise<GroomerCurrentBookingOut> {
+  const queryParams = new URLSearchParams({
+    local_now: formatLocalDateTimeForApi(),
+  });
   const response = await http.get<GroomerCurrentBookingOut>(
-    "/api/groomers/dashboard/current_booking"
+    `/api/groomers/dashboard/current_booking?${queryParams.toString()}`
   );
   return response.data;
 }

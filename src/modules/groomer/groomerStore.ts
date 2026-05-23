@@ -26,6 +26,8 @@ export type DashboardAppointment = GroomerUpNextAppointment & {
   id: number | string;
   scheduledTime?: string;
   status?: string;
+  weightValue?: string;
+  weightUnit?: string;
   phone: string;
   totalEstimate: string;
   originalEstimate?: string;
@@ -405,6 +407,8 @@ function mapDashboardAppointment(raw: unknown): DashboardAppointment | null {
     time: formatTimeLabel(scheduledTime),
     scheduledTime,
     status: getString(record, ["status"]),
+    weightValue: getString(record, ["weight_value", "weight_kg", "weight"], getString(pet, ["weight_value", "weight_kg", "weight"])),
+    weightUnit: getString(record, ["weight_unit"], getString(pet, ["weight_unit"])),
     ...estimate,
     ...packageAndAddonBreakdown,
     estimateBreakdown: getString(record, ["estimate_breakdown"]) || getString(price, ["estimate_breakdown"]) || estimate.estimateBreakdown,
@@ -578,10 +582,13 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
           const bookingDetail = await getGroomerBookingDetail(bookingId);
           const price = getNestedRecord(asRecord(bookingDetail), ["price", "price_snapshot"]);
           const detailRecord = { ...price, ...asRecord(bookingDetail) };
+          const detailAppointment = mapDashboardAppointment(bookingDetail);
           const estimate = mapEstimateFromPrice(detailRecord);
           const packageAndAddonBreakdown = mapPackageAndAddonBreakdown(detailRecord);
           nextAppointment = {
             ...nextAppointment,
+            weightValue: detailAppointment?.weightValue || nextAppointment.weightValue,
+            weightUnit: detailAppointment?.weightUnit || nextAppointment.weightUnit,
             totalEstimate: estimate.totalEstimate,
             originalEstimate: estimate.originalEstimate ?? nextAppointment.originalEstimate,
             savingsLabel: estimate.savingsLabel ?? nextAppointment.savingsLabel,

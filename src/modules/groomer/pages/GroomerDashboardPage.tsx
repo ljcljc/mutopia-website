@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { CommonCheckbox, OrangeButton } from "@/components/common";
+import { CommonCheckbox, CustomInput, CustomSelect, CustomSelectItem, CustomTextarea, OrangeButton } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
 import { Spinner } from "@/components/common/Spinner";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -527,6 +527,12 @@ function formatAddOnPrice(value: number | string): string {
   return Number.isInteger(raw) ? `$${raw}` : `$${raw.toFixed(2)}`;
 }
 
+function normalizeCheckUpWeightUnit(value?: string): string {
+  const normalizedValue = value?.trim().toLowerCase();
+  if (normalizedValue === "kg") return "kg";
+  return "lb";
+}
+
 function CheckUpTabBadge({
   tab,
   activeTab,
@@ -547,7 +553,7 @@ function CheckUpTabBadge({
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex h-6 items-center gap-1 rounded-xl border px-[9px] py-[5px] font-comfortaa text-[10px] font-bold leading-[14px] ${
+      className={`inline-flex h-6 cursor-pointer items-center gap-1 rounded-xl border px-[9px] py-[5px] font-comfortaa text-[10px] font-bold leading-[14px] ${
         isActive ? "border-[#DE6A07] text-[#DE6A07]" : "border-[#4C4C4C] text-[#4C4C4C]"
       }`}
     >
@@ -567,21 +573,16 @@ function PriceInput({
   onChange: (value: string) => void;
 }) {
   return (
-    <label className="flex flex-col gap-1 font-comfortaa text-[14px] leading-[22.75px] text-[#4A3C2A]">
-      {label}
-      <span className="flex h-9 items-center rounded-[12px] border border-[#E5E7EB] bg-white px-4">
-        <span className="mr-1 text-[12.25px] text-[#717182]">$</span>
-        <input
-          type="number"
-          min="0"
-          step="0.01"
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          placeholder="Enter price"
-          className="min-w-0 flex-1 bg-transparent font-comfortaa text-[12.25px] text-[#717182] outline-none placeholder:text-[#717182]"
-        />
-      </span>
-    </label>
+    <CustomInput
+      label={label}
+      type="number"
+      min="0"
+      step="0.01"
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      placeholder="Enter price"
+      leftElement={<span className="mr-1 font-comfortaa text-[12.25px] text-[#717182]">$</span>}
+    />
   );
 }
 
@@ -607,8 +608,8 @@ function GroomerCheckUpModal({
   useEffect(() => {
     if (!open) return;
     setActiveTab("add-ons");
-    setWeightValue("60");
-    setWeightUnit("lbs");
+    setWeightValue(appointment?.weightValue || "60");
+    setWeightUnit(normalizeCheckUpWeightUnit(appointment?.weightUnit));
     setSelectedAddOnIds([]);
     setPersonalization({});
     setDescription("");
@@ -623,7 +624,7 @@ function GroomerCheckUpModal({
         console.error("Failed to load add-ons:", error);
         setAddOns(FALLBACK_ADD_ONS);
       });
-  }, [open]);
+  }, [appointment?.weightUnit, appointment?.weightValue, open]);
 
   const toggleAddOn = (id: number, checked: boolean) => {
     setSelectedAddOnIds((current) => checked ? [...new Set([...current, id])] : current.filter((itemId) => itemId !== id));
@@ -672,102 +673,128 @@ function GroomerCheckUpModal({
       >
         <DialogTitle className="sr-only">Groomer check up</DialogTitle>
         <DialogDescription className="sr-only">Confirm with pet owner before add extra service.</DialogDescription>
-        <div className="min-h-0 overflow-y-auto px-[calc(24*var(--px393))] pb-[max(calc(24*var(--px393)),env(safe-area-inset-bottom))] pt-[calc(24*var(--px393))] sm:px-6 sm:pb-[max(24px,env(safe-area-inset-bottom))] sm:pt-6">
-          <div className="flex flex-col gap-[14px]">
-            <div>
-              <h2 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">Groomer check up</h2>
-              <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
-                Confirm with pet owner before add extra service
-              </p>
-            </div>
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="shrink-0 px-[calc(24*var(--px393))] pb-[calc(12*var(--px393))] pt-[calc(24*var(--px393))] sm:px-6 sm:pb-3 sm:pt-6">
+            <div className="flex flex-col gap-[14px]">
+              <div>
+                <h2 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">Groomer check up</h2>
+                <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
+                  Confirm with pet owner before add extra service
+                </p>
+              </div>
 
-            <div className="flex flex-wrap gap-2">
-              {(["weight", "add-ons", "personalization"] as CheckUpTab[]).map((tab) => (
-                <CheckUpTabBadge key={tab} tab={tab} activeTab={activeTab} onClick={() => setActiveTab(tab)} />
-              ))}
+              <div className="flex flex-wrap gap-2">
+                {(["weight", "add-ons", "personalization"] as CheckUpTab[]).map((tab) => (
+                  <CheckUpTabBadge key={tab} tab={tab} activeTab={activeTab} onClick={() => setActiveTab(tab)} />
+                ))}
+              </div>
             </div>
+          </div>
 
-            {activeTab === "weight" ? (
-              <div className="flex min-h-[130px] flex-col gap-3">
-                <p className="font-comfortaa text-[14px] font-bold leading-5 text-[#DE6A07]">Verify weight with pet owner</p>
-                <label className="flex flex-col gap-1 font-comfortaa text-[14px] leading-[22.75px] text-[#4A3C2A]">
-                  Weight (lbs or kg)
-                  <span className="flex h-9 w-[200px] items-center">
-                    <input
-                      type="number"
-                      value={weightValue}
-                      onChange={(event) => setWeightValue(event.target.value)}
-                      className="h-9 min-w-0 flex-1 rounded-l-[12px] border border-[#E5E7EB] px-4 font-comfortaa text-[12.25px] text-[#717182] outline-none"
+          <div className="min-h-0 flex-1 overflow-y-auto px-[calc(24*var(--px393))] pb-[max(calc(24*var(--px393)),env(safe-area-inset-bottom))] sm:px-6 sm:pb-[max(24px,env(safe-area-inset-bottom))]">
+            <div className="flex flex-col gap-[14px]">
+              {activeTab === "weight" ? (
+                <div className="flex min-h-[130px] flex-col gap-3 rounded-[12px] bg-white p-5 shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)]">
+                  <p className="font-comfortaa text-[14px] font-bold leading-5 text-[#DE6A07]">Verify weight with pet owner</p>
+                  <div className="flex w-full flex-col items-start gap-2">
+                    <div className="flex h-[12.25px] w-full items-center gap-[7px]">
+                      <p className="font-comfortaa text-[14px] leading-[22.75px] text-[#4a3c2a]">Weight (lb or kg)</p>
+                    </div>
+                    <div className="group flex w-full items-start sm:w-[200px]">
+                      <div className="relative h-9 flex-1 shrink-0 rounded-bl-[12px] rounded-tl-[12px] bg-white">
+                        <div className="flex size-full items-center overflow-clip rounded-[inherit] px-4 py-1">
+                          <input
+                            type="text"
+                            placeholder="Enter weight"
+                            value={weightValue}
+                            onChange={(event) => setWeightValue(event.target.value)}
+                            className="flex-1 border-none bg-transparent font-comfortaa text-[12.25px] text-[#717182] outline-none placeholder:text-[#717182]"
+                          />
+                        </div>
+                        <div
+                          aria-hidden="true"
+                          className="pointer-events-none absolute inset-0 rounded-bl-[12px] rounded-tl-[12px] border border-solid border-gray-200 transition-colors duration-200 group-hover:border-[#717182] group-focus-within:!border-[#2374ff]"
+                        />
+                      </div>
+                      <div className="shrink-0 opacity-80">
+                        <CustomSelect
+                          placeholder="Select"
+                          value={weightUnit}
+                          onValueChange={(value) => setWeightUnit(value)}
+                          className="w-auto"
+                          noLeftRadius
+                        >
+                          <CustomSelectItem value="kg">kg</CustomSelectItem>
+                          <CustomSelectItem value="lb">lb</CustomSelectItem>
+                        </CustomSelect>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+
+              {activeTab === "add-ons" ? (
+                <div className="flex w-full flex-col items-start gap-5 rounded-[12px] bg-white p-t-0 p-5 shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)]">
+                  <div className="flex w-full flex-col items-start gap-1">
+                    <p className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4a3c2a]">Most popular add-ons</p>
+                    <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4a5565]">Add extra pampering for your furry friend</p>
+                  </div>
+                  <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
+                    {addOns.map((addOn) => (
+                      <CommonCheckbox
+                        key={addOn.id}
+                        name={addOn.name}
+                        description={addOn.description ?? undefined}
+                        price={formatAddOnPrice(addOn.price)}
+                        duration={addOn.service_time || undefined}
+                        checked={selectedAddOnIds.includes(addOn.id)}
+                        onCheckedChange={(checked) => toggleAddOn(addOn.id, checked)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {activeTab === "personalization" ? (
+                <div className="flex flex-col gap-3">
+                  <p className="font-comfortaa text-[14px] font-bold leading-5 text-[#DE6A07]">Personalized service</p>
+                  {PERSONALIZATION_FIELDS.map((field) => (
+                    <PriceInput
+                      key={field.key}
+                      label={field.label}
+                      value={personalization[field.key] ?? ""}
+                      onChange={(value) => setPersonalization((current) => ({ ...current, [field.key]: value }))}
                     />
-                    <select
-                      value={weightUnit}
-                      onChange={(event) => setWeightUnit(event.target.value)}
-                      className="h-9 rounded-r-[8px] border border-l-0 border-[#E5E7EB] bg-white px-3 font-comfortaa text-[12.25px] text-[#717182] outline-none"
-                    >
-                      <option value="lbs">lbs</option>
-                      <option value="kg">kg</option>
-                    </select>
-                  </span>
-                </label>
-              </div>
-            ) : null}
-
-            {activeTab === "add-ons" ? (
-              <div className="flex flex-col gap-4">
-                <p className="font-comfortaa text-[14px] font-bold leading-5 text-[#DE6A07]">Most popular add-ons</p>
-                {addOns.map((addOn) => (
-                  <CommonCheckbox
-                    key={addOn.id}
-                    name={addOn.name}
-                    description={addOn.description ?? undefined}
-                    price={formatAddOnPrice(addOn.price)}
-                    checked={selectedAddOnIds.includes(addOn.id)}
-                    onCheckedChange={(checked) => toggleAddOn(addOn.id, checked)}
-                  />
-                ))}
-              </div>
-            ) : null}
-
-            {activeTab === "personalization" ? (
-              <div className="flex flex-col gap-3">
-                <p className="font-comfortaa text-[14px] font-bold leading-5 text-[#DE6A07]">Personalized service</p>
-                {PERSONALIZATION_FIELDS.map((field) => (
-                  <PriceInput
-                    key={field.key}
-                    label={field.label}
-                    value={personalization[field.key] ?? ""}
-                    onChange={(value) => setPersonalization((current) => ({ ...current, [field.key]: value }))}
-                  />
-                ))}
-                <label className="flex flex-col gap-2 font-comfortaa text-[14px] leading-[22.75px] text-[#4A3C2A]">
-                  Description
-                  <textarea
+                  ))}
+                  <CustomTextarea
+                    label="Description"
                     value={description}
                     onChange={(event) => setDescription(event.target.value)}
                     placeholder="Enter your note"
-                    className="min-h-[82px] resize-none rounded-[12px] border border-[#E5E7EB] px-4 py-3 font-comfortaa text-[12.25px] text-[#717182] outline-none placeholder:text-[#717182]"
+                    showResizeHandle={false}
+                    className="min-h-[82px]"
                   />
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setIsApproved((current) => !current)}
-                  className="flex items-center gap-2 text-left font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#4A3C2A]"
-                >
-                  <span className={`flex size-4 items-center justify-center border ${isApproved ? "border-[#DE6A07] bg-[#DE6A07]" : "border-[#717182] bg-white"}`}>
-                    {isApproved ? <Icon name="check" className="size-3 text-white" aria-hidden="true" /> : null}
-                  </span>
-                  Service and price approved by pet owner
-                </button>
-              </div>
-            ) : null}
+                  <button
+                    type="button"
+                    onClick={() => setIsApproved((current) => !current)}
+                    className="flex items-center gap-2 text-left font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#4A3C2A]"
+                  >
+                    <span className={`flex size-4 items-center justify-center border ${isApproved ? "border-[#DE6A07] bg-[#DE6A07]" : "border-[#717182] bg-white"}`}>
+                      {isApproved ? <Icon name="check" className="size-3 text-white" aria-hidden="true" /> : null}
+                    </span>
+                    Service and price approved by pet owner
+                  </button>
+                </div>
+              ) : null}
 
-            <div className="flex flex-col gap-[10px]">
-              <OrangeButton type="button" fullWidth textSize={14} loading={isSubmitting} onClick={handleNext}>
-                {activeTab === "personalization" ? "Submit" : "Next"}
-              </OrangeButton>
-              <OrangeButton type="button" variant="outline" fullWidth textSize={14} onClick={onClose}>
-                Cancel
-              </OrangeButton>
+              <div className="flex flex-col gap-[10px]">
+                <OrangeButton type="button" fullWidth textSize={14} loading={isSubmitting} onClick={handleNext}>
+                  {activeTab === "personalization" ? "Submit" : "Next"}
+                </OrangeButton>
+                <OrangeButton type="button" variant="outline" fullWidth textSize={14} onClick={onClose}>
+                  Cancel
+                </OrangeButton>
+              </div>
             </div>
           </div>
         </div>
@@ -792,7 +819,7 @@ function PackageAndAddonCard({
           Verify package and add-on
         </h2>
 
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center justify-between gap-3">
           <p className="min-w-0 flex-1 font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
             Total estimation for the service
           </p>
