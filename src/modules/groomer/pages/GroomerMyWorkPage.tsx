@@ -38,6 +38,9 @@ type PendingJobCard = GroomerUpNextAppointment & {
   bookingId: number;
   invitationId: number;
   proposalSlots: string[];
+  proposedTimeOptions: BookingRequestDecisionTimeOption[];
+  invitationStatus: string;
+  receivedAtLabel: string;
   expiresInLabel?: string;
 };
 
@@ -104,6 +107,19 @@ function getItems(data: unknown): Record<string, unknown>[] {
 function getArray(source: Record<string, unknown>, key: string): Record<string, unknown>[] {
   const value = source[key];
   return Array.isArray(value) ? value.map(asRecord) : [];
+}
+
+function getDecisionTimeOptions(source: Record<string, unknown>): BookingRequestDecisionTimeOption[] {
+  return getArray(source, "time_options")
+    .map((option) => {
+      const date = getString(option, ["date"]);
+      const slot = getString(option, ["slot"]).toLowerCase();
+      const time = getString(option, ["time"]);
+      const datetimeLocal = getString(option, ["datetime_local"]) || (date && time ? `${date} ${time}` : "");
+      if (!date || (slot !== "am" && slot !== "pm") || !time) return null;
+      return { date, slot, time, datetime_local: datetimeLocal };
+    })
+    .filter((option): option is BookingRequestDecisionTimeOption => Boolean(option));
 }
 
 function getString(source: Record<string, unknown>, keys: string[], fallback: string = ""): string {
@@ -205,6 +221,13 @@ function formatTimeLabel(value: string): string {
   return formatGroomerTimeLabel(value, "--");
 }
 
+function formatReceivedAtLabel(value: string): string {
+  if (!value) return "--";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "--";
+  return parsed.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+}
+
 function formatAmount(value: unknown, fallback = "-") {
   if (value === null || value === undefined || value === "") return fallback;
   const raw = typeof value === "number" ? value.toFixed(2) : String(value);
@@ -272,6 +295,7 @@ function mapPendingJob(item: Record<string, unknown>, dateKey: string): PendingJ
   const invitationId = getNumber(item, ["invitation_id"], 0);
   const petName = getString(item, ["pet_name"], "Pet");
   const proposalSlots = getArray(item, "preferred_time_slots").map(formatPreferredTimeSlotLabel).filter(Boolean);
+  const createdAt = getString(item, ["created_at"]);
 
   return {
     id: `pending-${invitationId || bookingId || `${dateKey}-${petName}`}`,
@@ -286,7 +310,10 @@ function mapPendingJob(item: Record<string, unknown>, dateKey: string): PendingJ
     duration: formatDurationLabel(item),
     time: "Pending",
     proposalSlots,
-    expiresInLabel: getBookingRequestExpiresInLabel(getString(item, ["created_at"])),
+    proposedTimeOptions: getDecisionTimeOptions(item),
+    invitationStatus: getString(item, ["invitation_status", "status"]),
+    receivedAtLabel: formatReceivedAtLabel(createdAt),
+    expiresInLabel: getBookingRequestExpiresInLabel(createdAt),
   };
 }
 
@@ -661,14 +688,16 @@ function BookingRequestCard({
   onDecline: (request: PendingJobCard) => Promise<void>;
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const headerLabel = request.time && request.time !== "Pending" ? request.time : "Booking request";
 
   return (
     <article className="relative overflow-hidden rounded-[14px] bg-[#A86140] px-[18px] pb-5 pt-4 shadow-[0px_10px_18px_rgba(0,0,0,0.16)]">
       <span className="absolute inset-y-0 left-0 w-[6px] bg-[#DE6A07]" aria-hidden="true" />
 
       <div className="flex items-start justify-between gap-3">
-        <p className="font-comfortaa text-[18px] font-bold leading-[27px] text-white">{headerLabel}</p>
+        <div className="font-comfortaa font-bold">
+          <p className="text-[12px] leading-[14px] text-white/70">Received at</p>
+          <p className="text-[16px] leading-[20px] text-white">{request.receivedAtLabel}</p>
+        </div>
         <div className="inline-flex items-center gap-1 rounded-full bg-white px-[12px] py-[6px] shadow-[0px_4px_8px_rgba(255,255,255,0.12)]">
           <Icon name="clock" size={12} className="text-[#F08A12]" aria-hidden="true" />
           <span className="font-comfortaa text-[11px] font-bold leading-[16.5px] text-[#DE6A07]">Pending</span>
@@ -976,6 +1005,7 @@ export default function GroomerMyWorkPage() {
   const openHistoryDetails = async (appointment: HistoryAppointmentCard) => {
     setSelectedHistoryAppointment({
       id: String(appointment.bookingId),
+      date: appointment.date,
       petName: appointment.petName,
       breed: appointment.breed,
       serviceLabel: appointment.badges[0]?.label,

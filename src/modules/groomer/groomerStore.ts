@@ -39,6 +39,8 @@ export type DashboardAppointment = GroomerUpNextAppointment & {
   priceAdjustmentLines: DashboardAmountLine[];
   invitationId?: number;
   proposalSlots?: string[];
+  proposedTimeOptions?: Array<{ date: string; slot: "am" | "pm"; time: string; datetime_local: string }>;
+  invitationStatus?: string;
   expiresInLabel?: string;
 };
 
@@ -134,6 +136,19 @@ function getRecordArray(source: Record<string, unknown>, keys: string[]): Record
     if (Array.isArray(value)) return value.map(asRecord).filter((item) => Object.keys(item).length > 0);
   }
   return [];
+}
+
+function getDecisionTimeOptions(source: Record<string, unknown>): Array<{ date: string; slot: "am" | "pm"; time: string; datetime_local: string }> {
+  return getRecordArray(source, ["time_options"])
+    .map((option) => {
+      const date = getString(option, ["date"]);
+      const slot = getString(option, ["slot"]).toLowerCase();
+      const time = getString(option, ["time"]);
+      const datetimeLocal = getString(option, ["datetime_local"]) || (date && time ? `${date} ${time}` : "");
+      if (!date || (slot !== "am" && slot !== "pm") || !time) return null;
+      return { date, slot, time, datetime_local: datetimeLocal };
+    })
+    .filter((option): option is { date: string; slot: "am" | "pm"; time: string; datetime_local: string } => Boolean(option));
 }
 
 function unwrapAppointmentRecord(raw: unknown): Record<string, unknown> {
@@ -442,6 +457,8 @@ function mapPendingBookingRequest(raw: unknown): DashboardAppointment | null {
     addonSubtotal: "$0.00",
     priceAdjustmentLines: [],
     proposalSlots: getPreferredTimeSlotLabels(record),
+    proposedTimeOptions: getDecisionTimeOptions(record),
+    invitationStatus: getString(record, ["invitation_status", "status"]),
     expiresInLabel: getBookingRequestExpiresInLabel(getString(record, ["created_at"])),
   };
 }

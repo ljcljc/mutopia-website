@@ -20,6 +20,8 @@ export type BookingRequestContentData = {
   service: string;
   duration: string;
   proposalSlots?: string[];
+  proposedTimeOptions?: BookingRequestDecisionTimeOption[];
+  invitationStatus?: string;
   expiresInLabel?: string;
 };
 
@@ -64,6 +66,31 @@ type BookingRequestContentProps = {
 };
 
 const DEFAULT_PROPOSAL_SLOTS = ["2026.05.24 AM", "2026.05.26 PM", "2026.05.29 AM"] as const;
+
+function normalizeInvitationStatus(status?: string): string {
+  return (status ?? "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+}
+
+function isProposedInvitation(request: BookingRequestContentData): boolean {
+  return normalizeInvitationStatus(request.invitationStatus) === "accepted" && Boolean(request.proposedTimeOptions?.length);
+}
+
+function formatProposedTimeOption(option: BookingRequestDecisionTimeOption): string {
+  const parsedDate = option.date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const dateLabel = parsedDate ? `${parsedDate[1]}.${parsedDate[2]}.${parsedDate[3]}` : option.date;
+  const [hoursText = "", minutes = ""] = option.time.split(":");
+  const hours = Number(hoursText);
+  if (!Number.isFinite(hours) || !minutes) return `${dateLabel} ${option.time}`;
+  const suffix = hours >= 12 ? "PM" : "AM";
+  const hours12 = hours % 12 || 12;
+  return `${dateLabel} ${hours12}:${minutes} ${suffix}`;
+}
+
+function getProposalSlotLabelFromOption(option: BookingRequestDecisionTimeOption): string {
+  const parsedDate = option.date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const dateLabel = parsedDate ? `${parsedDate[1]}.${parsedDate[2]}.${parsedDate[3]}` : option.date.replace(/-/g, ".");
+  return `${dateLabel} ${option.slot.toUpperCase()}`;
+}
 
 function normalizeTimeInput(value: string, period?: "am" | "pm"): string | null {
   const match = value.trim().match(/^(\d{1,2}):(\d{2})$/);
@@ -122,10 +149,13 @@ export function BookingRequestContent({
   const [isProposeModalOpen, setIsProposeModalOpen] = useState(false);
   const [isPassModalOpen, setIsPassModalOpen] = useState(false);
   const [isSubmittingAction, setIsSubmittingAction] = useState<"confirm" | "propose" | "decline" | null>(null);
+  const [isModifyingProposedTime, setIsModifyingProposedTime] = useState(false);
   const [confirmedAppointmentWarning, setConfirmedAppointmentWarning] = useState<string | null>(null);
   const [contentHeight, setContentHeight] = useState<string>(expanded ? "auto" : "0px");
   const collapseContentRef = useRef<HTMLDivElement | null>(null);
   const expiryBadgeColor = request.expiresInLabel === "Expired" ? "#DE1507" : "#DE6A07";
+  const hasProposedTime = isProposedInvitation(request);
+  const showModifyActions = hasProposedTime && !isModifyingProposedTime;
   const selectedAvailableTime = selectedProposalSlot ? availableTimeBySlot[selectedProposalSlot] ?? "" : "";
   const selectedTimeOption = useMemo(
     () => (selectedProposalSlot ? buildDecisionTimeOption(selectedProposalSlot, selectedAvailableTime) : null),
@@ -200,6 +230,25 @@ export function BookingRequestContent({
     };
   }, [selectedTimeOption]);
 
+  useEffect(() => {
+    setIsModifyingProposedTime(false);
+  }, [request.invitationStatus, request.proposedTimeOptions]);
+
+  const handleModifyProposedTime = () => {
+    const firstOption = request.proposedTimeOptions?.[0];
+    if (firstOption) {
+      const slotLabel = getProposalSlotLabelFromOption(firstOption);
+      if (proposalSlots.includes(slotLabel)) {
+        setSelectedProposalSlot(slotLabel);
+        setAvailableTimeBySlot((current) => ({
+          ...current,
+          [slotLabel]: firstOption.time,
+        }));
+      }
+    }
+    setIsModifyingProposedTime(true);
+  };
+
   const handleConfirmAppointment = async () => {
     if (!onConfirmOriginalTime || !selectedProposalSlot) return;
 
@@ -227,6 +276,7 @@ export function BookingRequestContent({
     try {
       await onProposeNewTime(timeOptions);
       setIsProposeModalOpen(false);
+      setIsModifyingProposedTime(false);
     } finally {
       setIsSubmittingAction(null);
     }
@@ -317,86 +367,115 @@ export function BookingRequestContent({
             </div>
 
             <div className="mt-4 rounded-[12px] border border-[#BBF7D0] bg-[#F0FDF4] p-3">
-              <p className="font-comfortaa text-[11px] font-medium leading-[16.5px] text-[#166534]">Specify your available time from one date</p>
+              <p className="font-comfortaa text-[11px] font-medium leading-[16.5px] text-[#166534]">
+                {showModifyActions ? "Waiting for pet owner confirmation" : "Specify your available time from one date"}
+              </p>
 
-              <div className="mt-2 space-y-2.5">
-                {proposalSlots.map((slot) => (
-                  <div key={slot}>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedProposalSlot(slot)}
-                        className={cn(
-                          "flex size-4 items-center justify-center rounded-full border",
-                          selectedProposalSlot === slot ? "border-[#8B6357]" : "border-[#A8A29E]",
-                        )}
-                        aria-label={`Select ${slot}`}
-                      >
-                        <span
+              {showModifyActions ? (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {request.proposedTimeOptions?.map((option) => (
+                    <span
+                      key={`${option.date}-${option.slot}-${option.time}`}
+                      className="inline-flex min-h-6 items-center rounded-[12px] border border-[#4C4C4C] bg-white px-[9px] font-comfortaa text-[12px] font-bold leading-5 text-[#4C4C4C]"
+                    >
+                      {formatProposedTimeOption(option)}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <div className="mt-2 space-y-2.5">
+                  {proposalSlots.map((slot) => (
+                    <div key={slot}>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedProposalSlot(slot)}
                           className={cn(
-                            "size-2 rounded-full",
-                            selectedProposalSlot === slot ? "bg-[#F08A12]" : "bg-transparent",
-                        )}
-                      />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedProposalSlot(slot)}
-                        className="font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#4A3C2A]"
-                      >
-                        {slot}
-                      </button>
-                    </div>
-
-                    {selectedProposalSlot === slot ? (
-                      <div className="mt-1">
-                        <p className="font-comfortaa text-[12px] font-bold leading-4 text-[#4A3C2A]">Available time</p>
-                        <div className="mt-1 w-[167px]">
-                          <AvailableTimeCombobox
-                            value={availableTimeBySlot[slot] ?? ""}
-                            onValueChange={(value) =>
-                              setAvailableTimeBySlot((current) => ({
-                                ...current,
-                                [slot]: value,
-                              }))
-                            }
-                            options={getAvailableTimeOptions(slot)}
-                          />
-                        </div>
-                        {confirmedAppointmentWarning ? (
-                          <div className="mt-2 flex items-center gap-2 rounded-[8px] border border-[#BEDBFF] bg-[#EFF6FF] px-4 py-1">
-                            <Icon name="alert-info" className="size-3 shrink-0 text-[#2563EB]" aria-hidden="true" />
-                            <p className="font-comfortaa text-[12px] font-bold leading-4 text-[#193CB8]">
-                              {confirmedAppointmentWarning}
-                            </p>
-                          </div>
-                        ) : null}
+                            "flex size-4 items-center justify-center rounded-full border",
+                            selectedProposalSlot === slot ? "border-[#8B6357]" : "border-[#A8A29E]",
+                          )}
+                          aria-label={`Select ${slot}`}
+                        >
+                          <span
+                            className={cn(
+                              "size-2 rounded-full",
+                              selectedProposalSlot === slot ? "bg-[#F08A12]" : "bg-transparent",
+                          )}
+                        />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedProposalSlot(slot)}
+                          className="font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#4A3C2A]"
+                        >
+                          {slot}
+                        </button>
                       </div>
-                    ) : null}
-                  </div>
-                ))}
-              </div>
+
+                      {selectedProposalSlot === slot ? (
+                        <div className="mt-1">
+                          <p className="font-comfortaa text-[12px] font-bold leading-4 text-[#4A3C2A]">Available time</p>
+                          <div className="mt-1 w-[167px]">
+                            <AvailableTimeCombobox
+                              value={availableTimeBySlot[slot] ?? ""}
+                              onValueChange={(value) =>
+                                setAvailableTimeBySlot((current) => ({
+                                  ...current,
+                                  [slot]: value,
+                                }))
+                              }
+                              options={getAvailableTimeOptions(slot)}
+                            />
+                          </div>
+                          {confirmedAppointmentWarning ? (
+                            <div className="mt-2 flex items-center gap-2 rounded-[8px] border border-[#BEDBFF] bg-[#EFF6FF] px-4 py-1">
+                              <Icon name="alert-info" className="size-3 shrink-0 text-[#2563EB]" aria-hidden="true" />
+                              <p className="font-comfortaa text-[12px] font-bold leading-4 text-[#193CB8]">
+                                {confirmedAppointmentWarning}
+                              </p>
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="mt-4 flex flex-col gap-[10px]">
-              <button
-                type="button"
-                onClick={handleConfirmAppointment}
-                disabled={isSubmittingAction !== null}
-                className="inline-flex h-12 items-center justify-center gap-3 rounded-full bg-[#00A63E] px-4 font-comfortaa text-[16px] font-bold leading-6 text-white shadow-[0px_4px_12px_rgba(0,166,62,0.3)] transition-[transform,filter] duration-150 active:scale-[0.98] active:brightness-95 disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                <Icon name="target" className="size-5 text-white" aria-hidden="true" />
-                {isSubmittingAction === "confirm" ? "Confirming..." : "Confirm"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsProposeModalOpen(true)}
-                disabled={isSubmittingAction !== null}
-                className="inline-flex h-12 items-center justify-center gap-[11px] rounded-full border-[1.5px] border-[#F59E0B] bg-white px-4 font-comfortaa text-[15px] font-bold leading-[22.5px] text-[#F59E0B] transition-[transform,background-color] duration-150 active:scale-[0.98] active:bg-[#FFF7ED]"
-              >
-                <Icon name="calendar" className="size-5 text-[#F59E0B]" aria-hidden="true" />
-                Propose new time
-              </button>
+              {showModifyActions ? (
+                <button
+                  type="button"
+                  onClick={handleModifyProposedTime}
+                  disabled={isSubmittingAction !== null}
+                  className="inline-flex h-12 items-center justify-center gap-3 rounded-full bg-[#00A63E] px-4 font-comfortaa text-[15px] font-bold leading-[22.5px] text-white shadow-[0px_4px_12px_rgba(0,166,62,0.3)] transition-[transform,filter] duration-150 active:scale-[0.98] active:brightness-95 disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  <Icon name="target" className="size-5 text-white" aria-hidden="true" />
+                  Modify confirmed appointment
+                </button>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleConfirmAppointment}
+                    disabled={isSubmittingAction !== null}
+                    className="inline-flex h-12 items-center justify-center gap-3 rounded-full bg-[#00A63E] px-4 font-comfortaa text-[16px] font-bold leading-6 text-white shadow-[0px_4px_12px_rgba(0,166,62,0.3)] transition-[transform,filter] duration-150 active:scale-[0.98] active:brightness-95 disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    <Icon name="target" className="size-5 text-white" aria-hidden="true" />
+                    {isSubmittingAction === "confirm" ? "Confirming..." : "Confirm"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsProposeModalOpen(true)}
+                    disabled={isSubmittingAction !== null}
+                    className="inline-flex h-12 items-center justify-center gap-[11px] rounded-full border-[1.5px] border-[#F59E0B] bg-white px-4 font-comfortaa text-[15px] font-bold leading-[22.5px] text-[#F59E0B] transition-[transform,background-color] duration-150 active:scale-[0.98] active:bg-[#FFF7ED]"
+                  >
+                    <Icon name="calendar" className="size-5 text-[#F59E0B]" aria-hidden="true" />
+                    Propose new time
+                  </button>
+                </>
+              )}
               <button
                 type="button"
                 onClick={() => setIsPassModalOpen(true)}
@@ -423,6 +502,7 @@ export function BookingRequestContent({
         onClose={() => setIsProposeModalOpen(false)}
         initialServiceSlot={request.proposalSlots?.includes(selectedProposalSlot) ? selectedProposalSlot : undefined}
         initialServiceSlots={request.proposalSlots ?? []}
+        initialTimeOptions={request.proposedTimeOptions ?? []}
         onSubmit={handleProposeNewTime}
         onPassAppointment={handleDecline}
         isSubmitting={isSubmittingAction === "propose" || isSubmittingAction === "decline"}

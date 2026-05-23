@@ -1676,13 +1676,17 @@ export type GroomerBookingDetailOut = BookingDetailOut;
 export interface GroomerPendingTimeSlotOut {
   date: string;
   slot: string;
+  time?: string;
+  datetime_local?: string;
 }
 
 export interface GroomerPendingInvitationOut {
   invitation_id: number;
+  invitation_status?: string;
   booking_id: number;
   created_at: string;
   preferred_time_slots: GroomerPendingTimeSlotOut[];
+  time_options?: GroomerPendingTimeSlotOut[];
   owner_name: string;
   pet_name: string;
   pet_breed: string;

@@ -16,6 +16,7 @@ interface ProposeNewTimeModalProps {
   onClose: () => void;
   initialServiceSlot?: string;
   initialServiceSlots?: string[];
+  initialTimeOptions?: BookingRequestDecisionTimeOption[];
   onSubmit?: (timeOptions: BookingRequestDecisionTimeOption[]) => Promise<void> | void;
   onPassAppointment?: () => Promise<void> | void;
   isSubmitting?: boolean;
@@ -51,23 +52,45 @@ function parseServiceSlot(serviceSlot?: string) {
   };
 }
 
-function buildInitialModalState(initialServiceSlots: string[]) {
+function parseInitialTimeOption(option: BookingRequestDecisionTimeOption): SelectedTimeEntry | null {
+  const normalizedTime = normalizeTimeInput(option.time);
+  const normalizedSlot = option.slot.toLowerCase();
+  if (!option.date || !normalizedTime || (normalizedSlot !== "am" && normalizedSlot !== "pm")) return null;
+
+  return {
+    date: option.date,
+    suffix: normalizedSlot === "pm" ? "PM" : "AM",
+    time: normalizedTime,
+  };
+}
+
+function buildInitialModalState(
+  initialServiceSlots: string[],
+  initialTimeOptions: BookingRequestDecisionTimeOption[],
+) {
   const now = new Date();
+  const initialEntries = initialTimeOptions
+    .map(parseInitialTimeOption)
+    .filter((entry): entry is SelectedTimeEntry => Boolean(entry))
+    .slice(0, MAX_ENTRIES);
   const parsedSlots = initialServiceSlots
     .map((slot) => parseServiceSlot(slot))
     .filter((slot): slot is NonNullable<typeof slot> => Boolean(slot))
     .sort((left, right) => left.date.getTime() - right.date.getTime());
+  const parsedEntryDate = initialEntries[0] ? parseISODate(initialEntries[0].date) : null;
   const parsedSlot = parsedSlots[0] ?? null;
-  const baseDate = parsedSlot?.date ?? now;
+  const baseDate = parsedEntryDate ?? parsedSlot?.date ?? now;
 
   return {
     selectedDate: baseDate,
     currentDate: new Date(baseDate.getFullYear(), baseDate.getMonth(), 1),
-    selectedEntries: parsedSlots.slice(0, MAX_ENTRIES).map((slot) => ({
-      date: formatDateToISO(slot.date),
-      suffix: slot.suffix,
-      time: null,
-    })),
+    selectedEntries: initialEntries.length
+      ? initialEntries
+      : parsedSlots.slice(0, MAX_ENTRIES).map((slot) => ({
+          date: formatDateToISO(slot.date),
+          suffix: slot.suffix,
+          time: null,
+        })),
   };
 }
 
@@ -131,6 +154,7 @@ export function ProposeNewTimeModal({
   onClose,
   initialServiceSlot,
   initialServiceSlots,
+  initialTimeOptions = [],
   onSubmit,
   onPassAppointment,
   isSubmitting = false,
@@ -155,14 +179,15 @@ export function ProposeNewTimeModal({
 
     const initialState = buildInitialModalState(
       initialServiceSlots?.length ? initialServiceSlots : initialServiceSlot ? [initialServiceSlot] : [],
+      initialTimeOptions,
     );
 
     setSelectedDate(initialState.selectedDate);
     setCurrentDate(initialState.currentDate);
     setSelectedEntries(initialState.selectedEntries);
-    setPendingTime("");
+    setPendingTime(initialState.selectedEntries.find((entry) => entry.time)?.time ?? "");
     closeCalendarPickers();
-  }, [initialServiceSlot, initialServiceSlots, open]);
+  }, [initialServiceSlot, initialServiceSlots, initialTimeOptions, open]);
 
   const remainingSlots = Math.max(0, MAX_ENTRIES - selectedEntries.length);
   const isMaxReached = selectedEntries.length >= MAX_ENTRIES;
