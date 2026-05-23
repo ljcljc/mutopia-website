@@ -193,15 +193,15 @@ export function HistoryDetailsModal({
         className={cn(
           "overflow-hidden border-none bg-[#FFF9ED] p-0 [&>button]:hidden",
           isMobile
-            ? "service-area-dialog inset-x-0! bottom-0! top-auto! mx-auto! flex! max-h-[88vh]! w-full! max-w-[393px]! translate-x-0! translate-y-0! flex-col! gap-0! rounded-b-none rounded-t-[24px] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
-            : "left-1/2! top-1/2! flex! max-h-[88vh]! w-full! max-w-[393px]! -translate-x-1/2! -translate-y-1/2! flex-col! gap-0! rounded-none shadow-[0px_4px_12px_rgba(0,0,0,0.08)]",
+            ? "service-area-dialog inset-x-0! bottom-0! top-auto! mx-auto! flex! max-h-[88vh]! w-full! max-w-none! translate-x-0! translate-y-0! flex-col! gap-0! rounded-b-none rounded-t-[calc(24*var(--px393))] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
+            : "left-1/2! top-1/2! flex! max-h-[88vh]! w-full! max-w-none! -translate-x-1/2! -translate-y-1/2! flex-col! gap-0! rounded-none shadow-[0px_4px_12px_rgba(0,0,0,0.08)]",
         )}
       >
         <DialogTitle className="sr-only">History details</DialogTitle>
         <DialogDescription className="sr-only">View history details of the completed appointment.</DialogDescription>
 
         <div className="flex min-h-0 flex-1 flex-col">
-          <div className="sticky top-0 z-10 shrink-0 bg-[#FFF9ED] px-5 pb-4 pt-5">
+          <div className="sticky top-0 z-10 shrink-0 bg-[#FFF9ED] px-[calc(20*var(--px393))] pb-[calc(16*var(--px393))] pt-[calc(20*var(--px393))] sm:px-5 sm:pb-4 sm:pt-5">
             <div className="flex items-start justify-between gap-4">
               <p className="font-comfortaa text-[12px] font-bold leading-[18px] text-[#8B6357]">History details</p>
               <button
@@ -217,7 +217,7 @@ export function HistoryDetailsModal({
             </div>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5">
+          <div className="min-h-0 flex-1 overflow-y-auto px-[calc(20*var(--px393))] pb-[calc(20*var(--px393))] sm:px-5 sm:pb-5">
             <div className="flex flex-col gap-5">
               <div>
                 <h3 className="font-comfortaa text-[20px] font-bold leading-[30px] text-[#4A2C55]">

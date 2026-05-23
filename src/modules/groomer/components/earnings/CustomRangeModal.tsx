@@ -79,15 +79,15 @@ export function CustomRangeModal({
         className={cn(
           "flex flex-col overflow-hidden bg-white p-0 [&>button]:hidden",
           isMobile
-            ? "service-area-dialog inset-x-0! bottom-0! top-auto! z-60! mx-auto! flex! max-h-[80vh]! w-full! max-w-[393px]! translate-x-0! translate-y-0! gap-0! rounded-b-none rounded-t-[24px] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
-            : "left-1/2! top-1/2! z-60! flex! max-h-[80vh]! w-full! max-w-[393px]! -translate-x-1/2! -translate-y-1/2! gap-0! rounded-none shadow-[0px_4px_12px_rgba(0,0,0,0.08)]",
+            ? "service-area-dialog inset-x-0! bottom-0! top-auto! z-60! mx-auto! flex! max-h-[80vh]! w-full! max-w-none! translate-x-0! translate-y-0! gap-0! rounded-b-none rounded-t-[calc(24*var(--px393))] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
+            : "left-1/2! top-1/2! z-60! flex! max-h-[80vh]! w-full! max-w-none! -translate-x-1/2! -translate-y-1/2! gap-0! rounded-none shadow-[0px_4px_12px_rgba(0,0,0,0.08)]",
         )}
       >
         <DialogTitle className="sr-only">Custom range</DialogTitle>
         <DialogDescription className="sr-only">Select a custom start and end date for earnings breakdown.</DialogDescription>
 
         <div className="flex min-h-0 flex-1 flex-col" onClick={closeCalendarPickers}>
-          <div className="sticky top-0 z-10 shrink-0 bg-white px-5 pb-4 pt-5">
+          <div className="sticky top-0 z-10 shrink-0 bg-white px-[calc(20*var(--px393))] pb-[calc(16*var(--px393))] pt-[calc(20*var(--px393))] sm:px-5 sm:pb-4 sm:pt-5">
             <div className="flex items-start justify-between gap-4">
               <p className="font-comfortaa text-[12px] font-bold leading-[18px] text-[#8B6357]">Earnings &gt; Revenue breakdown</p>
               <button
@@ -103,7 +103,7 @@ export function CustomRangeModal({
             </div>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5">
+          <div className="min-h-0 flex-1 overflow-y-auto px-[calc(20*var(--px393))] pb-[calc(20*var(--px393))] sm:px-5 sm:pb-5">
             <div className="flex flex-col gap-4">
               <h3 className="font-comfortaa text-[20px] font-bold leading-[30px] text-[#4A2C55]">Custom range</h3>
 

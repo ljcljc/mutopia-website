@@ -68,14 +68,14 @@ export default function AddServiceAreaModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="!top-1/2 !left-1/2 !grid !w-full !max-w-[482px] !translate-x-[-50%] !translate-y-[-50%] !gap-0 overflow-hidden rounded-[20px] border border-[rgba(0,0,0,0.2)] bg-white p-0 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] [&>button]:hidden">
+      <DialogContent className="!top-1/2 !left-1/2 !grid !w-full !max-w-none !translate-x-[-50%] !translate-y-[-50%] !gap-0 overflow-hidden rounded-[calc(20*var(--px393))] border border-[rgba(0,0,0,0.2)] bg-white p-0 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] sm:rounded-[20px] [&>button]:hidden">
         <DialogTitle className="sr-only">Modify service areas</DialogTitle>
         <DialogDescription className="sr-only">
           Select province and city, then save groomer service areas.
         </DialogDescription>
 
         <div className="w-full">
-          <div className="relative mb-2 flex items-center px-3 pt-3">
+          <div className="relative mb-[calc(8*var(--px393))] flex items-center px-[calc(12*var(--px393))] pt-[calc(12*var(--px393))] sm:mb-2 sm:px-3 sm:pt-3">
             <button
               type="button"
               onClick={() => onOpenChange(false)}
@@ -91,7 +91,7 @@ export default function AddServiceAreaModal({
           <div className="h-px w-full bg-[rgba(0,0,0,0.1)]" />
         </div>
 
-        <div className="flex flex-col gap-5 px-6 py-5">
+        <div className="flex flex-col gap-[calc(20*var(--px393))] px-[calc(24*var(--px393))] py-[calc(20*var(--px393))] sm:gap-5 sm:px-6 sm:py-5">
           <div className="flex items-center gap-2">
             <Icon name="location" className="h-5 w-5 text-[#DE6A07]" />
             <p className="font-comfortaa text-[16px] font-bold leading-6 text-[#4A2C55]">Service areas</p>

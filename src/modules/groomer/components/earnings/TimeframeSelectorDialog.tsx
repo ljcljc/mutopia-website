@@ -29,14 +29,14 @@ export function TimeframeSelectorDialog({
         className={cn(
           "overflow-hidden bg-white p-0 [&>button]:hidden",
           isMobile
-            ? "service-area-dialog inset-x-0! bottom-0! top-auto! z-[60]! mx-auto! grid! h-auto! max-h-[432px]! w-full! max-w-[393px]! translate-x-0! translate-y-0! gap-0! rounded-b-none rounded-t-[24px] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
-            : "left-1/2! top-1/2! z-[60]! grid! max-h-[min(432px,calc(100vh-48px))]! w-full! max-w-[393px]! -translate-x-1/2! -translate-y-1/2! gap-0! rounded-[20px] shadow-[0px_4px_12px_rgba(0,0,0,0.12)]",
+            ? "service-area-dialog inset-x-0! bottom-0! top-auto! z-[60]! mx-auto! grid! h-auto! max-h-[calc(432*var(--px393))]! w-full! max-w-none! translate-x-0! translate-y-0! gap-0! rounded-b-none rounded-t-[calc(24*var(--px393))] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
+            : "left-1/2! top-1/2! z-[60]! grid! max-h-[min(432px,calc(100vh-48px))]! w-full! max-w-none! -translate-x-1/2! -translate-y-1/2! gap-0! rounded-[20px] shadow-[0px_4px_12px_rgba(0,0,0,0.12)]",
         )}
       >
         <DialogTitle className="sr-only">Select Timeframe</DialogTitle>
         <DialogDescription className="sr-only">Choose a revenue breakdown timeframe.</DialogDescription>
 
-        <div className="flex h-[76px] items-center justify-between border-b border-[#F3F1EE] px-5 pt-1">
+        <div className="flex h-[calc(76*var(--px393))] items-center justify-between border-b border-[#F3F1EE] px-[calc(20*var(--px393))] pt-[calc(4*var(--px393))] sm:h-[76px] sm:px-5 sm:pt-1">
           <h3 className="font-comfortaa text-[18px] font-bold leading-[27px] text-[#4A2C55]">Select Timeframe</h3>
           <button
             type="button"
@@ -69,10 +69,12 @@ export function TimeframeSelectorDialog({
                   }}
                   className={cn(
                     "flex w-full items-center justify-between text-left transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DE6A07]/30",
-                    isMobile ? "h-[56px] border-b border-[#F5F3F0] px-5" : "h-[52px] rounded-[12px] px-5",
+                    isMobile
+                      ? "h-[calc(56*var(--px393))] border-b border-[#F5F3F0] px-[calc(20*var(--px393))]"
+                      : "h-[52px] rounded-[12px] px-5",
                     isMobile
                       ? isSelected
-                        ? "bg-[#DE6A07] px-4 text-white hover:bg-[#D56506] active:bg-[#C85F06]"
+                        ? "bg-[#DE6A07] px-[calc(16*var(--px393))] text-white hover:bg-[#D56506] active:bg-[#C85F06]"
                         : "bg-transparent text-[#4A2C55] hover:bg-[#F8F7FA] active:bg-[#F1EEF6]"
                       : isSelected
                         ? "bg-[#DE6A07] text-white shadow-[0px_8px_18px_rgba(222,106,7,0.18)]"

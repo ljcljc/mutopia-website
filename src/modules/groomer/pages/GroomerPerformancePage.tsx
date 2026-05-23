@@ -312,7 +312,7 @@ export default function GroomerPerformancePage() {
 
   return (
     <>
-      <div className="mx-auto min-h-[calc(100vh-64px)] w-full max-w-[393px] bg-[#633479] px-5 pb-10 pt-4 lg:min-h-0 lg:max-w-[944px] lg:px-0">
+      <div className="min-h-[calc(100vh-64px)] w-full bg-[#633479] px-[calc(20*var(--px393))] pb-[calc(40*var(--px393))] pt-[calc(16*var(--px393))] sm:px-5 sm:pb-10 sm:pt-4 lg:mx-auto lg:max-w-[944px] lg:min-h-0 lg:px-0">
         <div className="mx-auto w-full max-w-[354px]">
           <div className="flex items-center gap-2">
             <button

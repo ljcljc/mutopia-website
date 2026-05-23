@@ -31,13 +31,13 @@ describe("groomer appointment time windows", () => {
     expect(isGroomerDateTimeWithinNextHours("2026-05-17 12:01", 24, now)).toBe(false);
   });
 
-  it("shows Start Travel only within two hours before the appointment", () => {
+  it("shows Start Travel from two hours before the appointment", () => {
     expect(shouldShowStartTravel("2026-05-16 14:00", now)).toBe(true);
     expect(shouldShowStartTravel("2026-05-16 14:01", now)).toBe(false);
   });
 
-  it("does not match past appointments", () => {
+  it("keeps past appointments out of next-hours matching but allows Start Travel", () => {
     expect(isGroomerDateTimeWithinNextHours("2026-05-16 11:59", 24, now)).toBe(false);
-    expect(shouldShowStartTravel("2026-05-16 11:59", now)).toBe(false);
+    expect(shouldShowStartTravel("2026-05-16 11:59", now)).toBe(true);
   });
 });

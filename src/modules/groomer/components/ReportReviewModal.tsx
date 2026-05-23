@@ -39,14 +39,19 @@ export function ReportReviewModal({
         className={cn(
           "overflow-hidden bg-white p-0 [&>button]:hidden",
           isMobile
-            ? "service-area-dialog inset-x-0! bottom-0! top-auto! mx-auto! grid! max-h-[85vh]! w-full! max-w-[393px]! translate-x-0! translate-y-0! gap-0! rounded-b-none rounded-t-[24px] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
-            : "left-1/2! top-1/2! grid! w-full! max-w-[393px]! -translate-x-1/2! -translate-y-1/2! gap-0! rounded-none shadow-[0px_4px_12px_rgba(0,0,0,0.08)]",
+            ? "service-area-dialog inset-x-0! bottom-0! top-auto! mx-auto! grid! max-h-[85vh]! w-full! max-w-none! translate-x-0! translate-y-0! gap-0! rounded-b-none rounded-t-[calc(24*var(--px393))] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
+            : "left-1/2! top-1/2! grid! w-full! max-w-none! -translate-x-1/2! -translate-y-1/2! gap-0! rounded-none shadow-[0px_4px_12px_rgba(0,0,0,0.08)]",
         )}
       >
         <DialogTitle className="sr-only">Report review</DialogTitle>
         <DialogDescription className="sr-only">Submit a review report with a reason and optional evidence.</DialogDescription>
 
-        <div className={cn("flex flex-col gap-4 overflow-y-auto px-5 py-5", isMobile ? "" : "max-h-[85vh]")}>
+        <div
+          className={cn(
+            "flex flex-col gap-4 overflow-y-auto px-[calc(20*var(--px393))] py-[calc(20*var(--px393))] sm:px-5 sm:py-5",
+            isMobile ? "" : "max-h-[85vh]",
+          )}
+        >
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="font-comfortaa text-[12px] font-bold leading-[18px] text-[#8B6357]">Account &gt; Performance Details</p>

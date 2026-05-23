@@ -258,15 +258,15 @@ export function ProposeNewTimeModal({
         className={cn(
           "flex flex-col overflow-hidden bg-white p-0 [&>button]:hidden",
           isMobile
-            ? "service-area-dialog inset-x-0! bottom-0! top-auto! z-[75]! mx-auto! flex! max-h-[80vh]! w-full! max-w-[393px]! translate-x-0! translate-y-0! gap-0! rounded-b-none rounded-t-[24px] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
-            : "left-1/2! bottom-0! top-auto! z-[75]! flex! max-h-[80vh]! w-full! max-w-[393px]! -translate-x-1/2! translate-y-0! gap-0! rounded-b-none rounded-t-[24px] shadow-[0px_4px_12px_rgba(0,0,0,0.08)]",
+            ? "service-area-dialog inset-x-0! bottom-0! top-auto! z-[75]! mx-auto! flex! max-h-[80vh]! w-full! max-w-none! translate-x-0! translate-y-0! gap-0! rounded-b-none rounded-t-[calc(24*var(--px393))] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
+            : "left-1/2! bottom-0! top-auto! z-[75]! flex! max-h-[80vh]! w-full! max-w-none! -translate-x-1/2! translate-y-0! gap-0! rounded-b-none rounded-t-[24px] shadow-[0px_4px_12px_rgba(0,0,0,0.08)]",
         )}
       >
         <DialogTitle className="sr-only">Propose new time</DialogTitle>
         <DialogDescription className="sr-only">Choose up to six dates and times to propose a new appointment window.</DialogDescription>
 
         <div className="flex min-h-0 flex-1 flex-col bg-white" onClick={closeCalendarPickers}>
-          <div className="sticky top-0 z-10 shrink-0 bg-white px-5 pb-4 pt-5">
+          <div className="sticky top-0 z-10 shrink-0 bg-white px-[calc(20*var(--px393))] pb-[calc(16*var(--px393))] pt-[calc(20*var(--px393))] sm:px-5 sm:pb-4 sm:pt-5">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="font-comfortaa text-[12px] font-bold leading-[18px] text-[#8B6357]">Dashboard &gt; BOOKING REQUEST</p>
@@ -285,7 +285,7 @@ export function ProposeNewTimeModal({
             </div>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5">
+          <div className="min-h-0 flex-1 overflow-y-auto px-[calc(20*var(--px393))] pb-[calc(20*var(--px393))] sm:px-5 sm:pb-5">
             <div className="rounded-[12px] border border-[#BBF7D0] bg-[#F0FDF4] p-3">
               <p className="font-comfortaa text-[14px] font-bold leading-[22px] text-[#4A3C2A]">Select date and time period</p>
               <p className="mt-1 font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">Choose up to 6 dates and time periods</p>

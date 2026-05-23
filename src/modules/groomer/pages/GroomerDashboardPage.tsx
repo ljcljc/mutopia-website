@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { OrangeButton } from "@/components/common";
+import { CommonCheckbox, OrangeButton } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
 import { Spinner } from "@/components/common/Spinner";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import {
   BookingRequestInteraction,
   type BookingRequestDecisionTimeOption,
 } from "@/modules/groomer/components/BookingRequestContent";
+import { CancelAppointmentModal } from "@/modules/groomer/components/CancelAppointmentModal";
 import { GroomerUpNextCard } from "@/modules/groomer/components/GroomerUpNextCard";
 import {
   useGroomerDashboardStore,
@@ -14,11 +16,30 @@ import {
   type DashboardGoal,
 } from "@/modules/groomer/groomerStore";
 import { shouldShowStartTravel } from "@/modules/groomer/utils/time";
-import { decideGroomerInvitation } from "@/lib/api";
+import { decideGroomerInvitation, getAddOns, submitGroomerCheckUp, type AddOnOut } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
 
 type BookingRequest = DashboardAppointment;
+type CheckUpTab = "weight" | "add-ons" | "personalization";
+
+const FALLBACK_ADD_ONS: AddOnOut[] = [
+  { id: 1, name: "Teeth brushing", description: "Professional dental cleaning", price: 15, is_variable: false },
+  { id: 2, name: "De-shedding treatment", description: "Reduce shedding by up to 80%", price: 10, is_variable: false },
+  { id: 3, name: "Anal Gland Expression", description: "Manually emptying the small sacs", price: 12, is_variable: false },
+  { id: 4, name: "Pet cologne", description: "Long-lasting fresh scent", price: 8, is_variable: false },
+  { id: 5, name: "Paw Treatment", description: "Moisturizing paw balm", price: 18, is_variable: false },
+  { id: 6, name: "Flea & Tick", description: "Kills fleas, ticks, larvae and eggs by contact", price: 12, is_variable: false },
+];
+
+const PERSONALIZATION_FIELDS = [
+  { key: "senior_pets", label: "Senior pets" },
+  { key: "hard_to_handle", label: "Hard to handle" },
+  { key: "severely_matted", label: "Severely matted" },
+  { key: "extra_large", label: "> 50kg" },
+  { key: "parking", label: "Parking" },
+  { key: "others", label: "Others" },
+] as const;
 
 function normalizeStatus(status?: string): string {
   return (status ?? "").trim().toLowerCase().replace(/[\s-]+/g, "_");
@@ -170,6 +191,15 @@ function getStartServiceLabel(service: string): string {
   return service.toLowerCase().includes("bath") ? "Start bathing" : "Start grooming";
 }
 
+function getInProgressTitle(service: string, petName: string): string {
+  return `${service.toLowerCase().includes("bath") ? "Bathing" : "Grooming"} ${petName}`;
+}
+
+function getCompactDurationLabel(duration: string): string {
+  const minutes = duration.match(/(\d+)\s*(?:min|minute)/i)?.[1];
+  return minutes ? `${minutes} min` : duration.replace(/^Est\. duration:\s*/i, "");
+}
+
 function CurrentJobCard({
   appointment,
   isStartingGrooming,
@@ -214,9 +244,7 @@ function CurrentJobCard({
           <Spinner size="small" color="white" />
         ) : (
           <>
-            <span className="flex size-5 items-center justify-center rounded-full border-2 border-white" aria-hidden="true">
-              <Icon name="check" className="size-3 text-white" />
-            </span>
+            <Icon name="target" className="size-5" aria-hidden="true" />
             {isInProgress ? "Service in progress" : getStartServiceLabel(appointment.service)}
           </>
         )}
@@ -225,7 +253,72 @@ function CurrentJobCard({
   );
 }
 
+function InProgressJobCard({
+  appointment,
+  isCompletingService,
+  onCompleteService,
+}: {
+  appointment: DashboardAppointment;
+  isCompletingService: boolean;
+  onCompleteService: () => void;
+}) {
+  return (
+    <article className="rounded-[16px] bg-[linear-gradient(180deg,#743782_0%,#8A527C_55%,#9A7658_100%)] p-5 shadow-[0px_4px_14px_rgba(0,0,0,0.12)]">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="font-comfortaa text-[12px] leading-[18px] text-white/70">IN PROGRESS</p>
+          <h2 className="mt-1 truncate font-comfortaa text-[20px] leading-[30px] text-white">
+            {getInProgressTitle(appointment.service, appointment.petName)}
+          </h2>
+        </div>
+        <div className="shrink-0 rounded-[12px] bg-white/18 px-4 py-2">
+          <span className="font-comfortaa text-[20px] font-bold leading-[27px] text-white">
+            {getCompactDurationLabel(appointment.duration)}
+          </span>
+        </div>
+      </div>
+
+      <div className="mt-6 rounded-[12px] bg-white/14 px-3 py-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <img src={appointment.avatarUrl} alt={appointment.petName} className="size-14 rounded-full object-cover" />
+          <div className="min-w-0">
+            <p className="truncate font-comfortaa text-[16px] leading-6 text-white">{appointment.petName}</p>
+            <p className="truncate font-comfortaa text-[13px] leading-[19.5px] text-white/75">
+              {appointment.breed} • {appointment.service}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={onCompleteService}
+        disabled={isCompletingService}
+        className="mt-4 flex h-12 w-full items-center justify-center gap-3 rounded-full bg-white font-comfortaa text-[16px] font-bold leading-6 text-[#4A2C55] shadow-[0px_4px_8px_rgba(0,0,0,0.14)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
+      >
+        {isCompletingService ? (
+          <Spinner size="small" color="#4A2C55" />
+        ) : (
+          <>
+            <Icon name="target" className="size-5" aria-hidden="true" />
+            Complete service
+          </>
+        )}
+      </button>
+
+      <button
+        type="button"
+        className="mx-auto mt-5 flex items-center justify-center font-comfortaa text-[13px] leading-[19.5px] text-white underline underline-offset-[3px]"
+      >
+        Service Terminated
+      </button>
+    </article>
+  );
+}
+
 function TotalEstimationCard({ appointment }: { appointment: DashboardAppointment }) {
+  const [isExpanded, setIsExpanded] = useState(true);
+
   return (
     <article className="rounded-[12px] bg-white p-6 shadow-[0px_8px_6px_rgba(0,0,0,0.10)]">
       <div className="flex flex-col gap-3.5">
@@ -246,22 +339,37 @@ function TotalEstimationCard({ appointment }: { appointment: DashboardAppointmen
               ) : null}
               {appointment.totalEstimate}
             </p>
-            <div className="flex flex-wrap items-end justify-end gap-2">
-              {appointment.savingsLabel ? (
-                <span className="inline-flex h-6 items-center gap-1 rounded-full bg-[#DCFCE7] px-3 py-1 font-comfortaa text-[10px] font-bold leading-[14px] text-[#27AE60]">
-                  <Icon name="target" className="size-3.5" aria-hidden="true" />
-                  {appointment.savingsLabel}
-                </span>
-              ) : null}
-              {appointment.estimateBreakdown ? (
-                <span className="font-comfortaa text-[14px] leading-[22.75px] text-[#DE6A07]">
-                  {appointment.estimateBreakdown}
-                </span>
-              ) : null}
-            </div>
-            <span className="font-comfortaa text-[10px] font-bold leading-[14px] text-[#4A5565]">tax included</span>
+            {isExpanded ? (
+              <>
+                <div className="flex flex-wrap items-end justify-end gap-2">
+                  {appointment.savingsLabel ? (
+                    <span className="inline-flex h-6 items-center gap-1 rounded-full bg-[#DCFCE7] px-3 py-1 font-comfortaa text-[10px] font-bold leading-[14px] text-[#27AE60]">
+                      <Icon name="target" className="size-3.5" aria-hidden="true" />
+                      {appointment.savingsLabel}
+                    </span>
+                  ) : null}
+                  {appointment.estimateBreakdown ? (
+                    <span className="font-comfortaa text-[14px] leading-[22.75px] text-[#DE6A07]">
+                      {appointment.estimateBreakdown}
+                    </span>
+                  ) : null}
+                </div>
+                <span className="font-comfortaa text-[10px] font-bold leading-[14px] text-[#4A5565]">tax included</span>
+              </>
+            ) : null}
           </div>
-          <Icon name="chevron-down" className="mt-1 size-5 rotate-180 text-[#8B6357]" aria-hidden="true" />
+          <button
+            type="button"
+            onClick={() => setIsExpanded((value) => !value)}
+            className="mt-1 flex size-5 shrink-0 items-center justify-center rounded-lg transition-colors hover:border hover:border-[#8B6357]"
+            aria-expanded={isExpanded}
+            aria-label="Toggle total estimation details"
+          >
+            <Icon
+              name="chevron-down"
+              className={`size-5 text-[#8B6357] transition-transform ${isExpanded ? "rotate-180" : ""}`}
+            />
+          </button>
         </div>
       </div>
     </article>
@@ -277,7 +385,260 @@ function AmountRow({ line }: { line: DashboardAmountLine }) {
   );
 }
 
-function PackageAndAddonCard({ appointment }: { appointment: DashboardAppointment }) {
+function formatAddOnPrice(value: number | string): string {
+  const raw = typeof value === "number" ? value : Number(String(value).replace(/[^0-9.-]/g, ""));
+  if (!Number.isFinite(raw)) return String(value).startsWith("$") ? String(value) : `$${value}`;
+  return Number.isInteger(raw) ? `$${raw}` : `$${raw.toFixed(2)}`;
+}
+
+function CheckUpTabBadge({
+  tab,
+  activeTab,
+  onClick,
+}: {
+  tab: CheckUpTab;
+  activeTab: CheckUpTab;
+  onClick: () => void;
+}) {
+  const labelByTab: Record<CheckUpTab, string> = {
+    weight: "Weight",
+    "add-ons": "Add-ons",
+    personalization: "Personalization",
+  };
+  const isActive = tab === activeTab;
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`inline-flex h-6 items-center gap-1 rounded-xl border px-[9px] py-[5px] font-comfortaa text-[10px] font-bold leading-[14px] ${
+        isActive ? "border-[#DE6A07] text-[#DE6A07]" : "border-[#4C4C4C] text-[#4C4C4C]"
+      }`}
+    >
+      {labelByTab[tab]}
+      {isActive ? <Icon name="chevron-down" className="size-3 rotate-180 text-current" aria-hidden="true" /> : null}
+    </button>
+  );
+}
+
+function PriceInput({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="flex flex-col gap-1 font-comfortaa text-[14px] leading-[22.75px] text-[#4A3C2A]">
+      {label}
+      <span className="flex h-9 items-center rounded-[12px] border border-[#E5E7EB] bg-white px-4">
+        <span className="mr-1 text-[12.25px] text-[#717182]">$</span>
+        <input
+          type="number"
+          min="0"
+          step="0.01"
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder="Enter price"
+          className="min-w-0 flex-1 bg-transparent font-comfortaa text-[12.25px] text-[#717182] outline-none placeholder:text-[#717182]"
+        />
+      </span>
+    </label>
+  );
+}
+
+function GroomerCheckUpModal({
+  open,
+  appointment,
+  onClose,
+}: {
+  open: boolean;
+  appointment: DashboardAppointment | null;
+  onClose: () => void;
+}) {
+  const [activeTab, setActiveTab] = useState<CheckUpTab>("add-ons");
+  const [weightValue, setWeightValue] = useState("60");
+  const [weightUnit, setWeightUnit] = useState("lbs");
+  const [addOns, setAddOns] = useState<AddOnOut[]>(FALLBACK_ADD_ONS);
+  const [selectedAddOnIds, setSelectedAddOnIds] = useState<number[]>([]);
+  const [personalization, setPersonalization] = useState<Record<string, string>>({});
+  const [description, setDescription] = useState("");
+  const [isApproved, setIsApproved] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    getAddOns()
+      .then((items) => {
+        const visibleItems = items.filter((item) => !item.is_variable).slice(0, 6);
+        setAddOns(visibleItems.length > 0 ? visibleItems : FALLBACK_ADD_ONS);
+      })
+      .catch((error) => {
+        console.error("Failed to load add-ons:", error);
+        setAddOns(FALLBACK_ADD_ONS);
+      });
+  }, [open]);
+
+  const toggleAddOn = (id: number, checked: boolean) => {
+    setSelectedAddOnIds((current) => checked ? [...new Set([...current, id])] : current.filter((itemId) => itemId !== id));
+  };
+
+  const handleNext = async () => {
+    if (!appointment?.id) return;
+
+    if (activeTab === "weight") {
+      setActiveTab("add-ons");
+      return;
+    }
+    if (activeTab === "add-ons") {
+      setActiveTab("personalization");
+      return;
+    }
+
+    const bookingId = Number(appointment.id);
+    if (!Number.isFinite(bookingId)) return;
+
+    setIsSubmitting(true);
+    try {
+      await submitGroomerCheckUp(bookingId, {
+        kind: "personalization",
+        weight_value: weightValue,
+        weight_unit: weightUnit,
+        add_on_ids: selectedAddOnIds,
+        personalization,
+        description,
+      });
+      toast.success("Check-up submitted");
+      onClose();
+    } catch (error) {
+      console.error("Failed to submit check-up:", error);
+      toast.error("Failed to submit check-up");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
+      <DialogContent
+        overlayClassName="service-area-dialog-overlay z-[70]!"
+        className="service-area-dialog inset-x-0! bottom-0! top-auto! z-[75]! mx-auto! flex! max-h-[88vh]! w-full! max-w-none! translate-x-0! translate-y-0! flex-col! gap-0! rounded-b-none rounded-t-[calc(24*var(--px393))] border-0! bg-white! p-0! shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)] [&>button]:top-[calc(24*var(--px393))] [&>button]:right-[calc(24*var(--px393))] sm:[&>button]:top-6 sm:[&>button]:right-6"
+      >
+        <DialogTitle className="sr-only">Groomer check up</DialogTitle>
+        <DialogDescription className="sr-only">Confirm with pet owner before add extra service.</DialogDescription>
+        <div className="min-h-0 overflow-y-auto px-[calc(24*var(--px393))] pb-[max(calc(24*var(--px393)),env(safe-area-inset-bottom))] pt-[calc(24*var(--px393))] sm:px-6 sm:pb-[max(24px,env(safe-area-inset-bottom))] sm:pt-6">
+          <div className="flex flex-col gap-[14px]">
+            <div>
+              <h2 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">Groomer check up</h2>
+              <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
+                Confirm with pet owner before add extra service
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {(["weight", "add-ons", "personalization"] as CheckUpTab[]).map((tab) => (
+                <CheckUpTabBadge key={tab} tab={tab} activeTab={activeTab} onClick={() => setActiveTab(tab)} />
+              ))}
+            </div>
+
+            {activeTab === "weight" ? (
+              <div className="flex min-h-[130px] flex-col gap-3">
+                <p className="font-comfortaa text-[14px] font-bold leading-5 text-[#DE6A07]">Verify weight with pet owner</p>
+                <label className="flex flex-col gap-1 font-comfortaa text-[14px] leading-[22.75px] text-[#4A3C2A]">
+                  Weight (lbs or kg)
+                  <span className="flex h-9 w-[200px] items-center">
+                    <input
+                      type="number"
+                      value={weightValue}
+                      onChange={(event) => setWeightValue(event.target.value)}
+                      className="h-9 min-w-0 flex-1 rounded-l-[12px] border border-[#E5E7EB] px-4 font-comfortaa text-[12.25px] text-[#717182] outline-none"
+                    />
+                    <select
+                      value={weightUnit}
+                      onChange={(event) => setWeightUnit(event.target.value)}
+                      className="h-9 rounded-r-[8px] border border-l-0 border-[#E5E7EB] bg-white px-3 font-comfortaa text-[12.25px] text-[#717182] outline-none"
+                    >
+                      <option value="lbs">lbs</option>
+                      <option value="kg">kg</option>
+                    </select>
+                  </span>
+                </label>
+              </div>
+            ) : null}
+
+            {activeTab === "add-ons" ? (
+              <div className="flex flex-col gap-4">
+                <p className="font-comfortaa text-[14px] font-bold leading-5 text-[#DE6A07]">Most popular add-ons</p>
+                {addOns.map((addOn) => (
+                  <CommonCheckbox
+                    key={addOn.id}
+                    name={addOn.name}
+                    description={addOn.description ?? undefined}
+                    price={formatAddOnPrice(addOn.price)}
+                    checked={selectedAddOnIds.includes(addOn.id)}
+                    onCheckedChange={(checked) => toggleAddOn(addOn.id, checked)}
+                  />
+                ))}
+              </div>
+            ) : null}
+
+            {activeTab === "personalization" ? (
+              <div className="flex flex-col gap-3">
+                <p className="font-comfortaa text-[14px] font-bold leading-5 text-[#DE6A07]">Personalized service</p>
+                {PERSONALIZATION_FIELDS.map((field) => (
+                  <PriceInput
+                    key={field.key}
+                    label={field.label}
+                    value={personalization[field.key] ?? ""}
+                    onChange={(value) => setPersonalization((current) => ({ ...current, [field.key]: value }))}
+                  />
+                ))}
+                <label className="flex flex-col gap-2 font-comfortaa text-[14px] leading-[22.75px] text-[#4A3C2A]">
+                  Description
+                  <textarea
+                    value={description}
+                    onChange={(event) => setDescription(event.target.value)}
+                    placeholder="Enter your note"
+                    className="min-h-[82px] resize-none rounded-[12px] border border-[#E5E7EB] px-4 py-3 font-comfortaa text-[12.25px] text-[#717182] outline-none placeholder:text-[#717182]"
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setIsApproved((current) => !current)}
+                  className="flex items-center gap-2 text-left font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#4A3C2A]"
+                >
+                  <span className={`flex size-4 items-center justify-center border ${isApproved ? "border-[#DE6A07] bg-[#DE6A07]" : "border-[#717182] bg-white"}`}>
+                    {isApproved ? <Icon name="check" className="size-3 text-white" aria-hidden="true" /> : null}
+                  </span>
+                  Service and price approved by pet owner
+                </button>
+              </div>
+            ) : null}
+
+            <div className="flex flex-col gap-[10px]">
+              <OrangeButton type="button" fullWidth textSize={14} loading={isSubmitting} onClick={handleNext}>
+                {activeTab === "personalization" ? "Submit" : "Next"}
+              </OrangeButton>
+              <OrangeButton type="button" variant="outline" fullWidth textSize={14} onClick={onClose}>
+                Cancel
+              </OrangeButton>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function PackageAndAddonCard({
+  appointment,
+  onModify,
+}: {
+  appointment: DashboardAppointment;
+  onModify: () => void;
+}) {
   const hasAddons = appointment.addonLines.length > 0;
 
   return (
@@ -337,8 +698,8 @@ function PackageAndAddonCard({ appointment }: { appointment: DashboardAppointmen
           type="button"
           variant="secondary"
           size="compact"
-          className="mt-1 w-[100px] disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:active:bg-transparent disabled:focus-visible:bg-transparent"
-          disabled
+          className="mt-1 w-[87px]"
+          onClick={onModify}
         >
           Modify
         </OrangeButton>
@@ -508,6 +869,8 @@ function NoUpcomingAppointmentsCard() {
 export default function GroomerDashboardPage() {
   const [now, setNow] = useState(() => new Date());
   const [devTravelStatus, setDevTravelStatus] = useState<"" | "traveling" | "checked_in" | "in_progress">("");
+  const [isCancelAppointmentModalOpen, setIsCancelAppointmentModalOpen] = useState(false);
+  const [isCheckUpOpen, setIsCheckUpOpen] = useState(false);
   const {
     nextAppointment,
     bookingRequests,
@@ -519,12 +882,14 @@ export default function GroomerDashboardPage() {
     isCancelingTravel,
     isCheckingIn,
     isStartingGrooming,
+    isCompletingService,
     fetchDashboard,
     fetchPendingBookingRequests,
     startTravel,
     cancelTravel,
     checkIn,
     startGrooming,
+    completeService,
   } = useGroomerDashboardStore();
 
   useEffect(() => {
@@ -550,7 +915,8 @@ export default function GroomerDashboardPage() {
   const showTravelActions = ["traveling", "travel_started", "en_route", "on_the_way", "checked_in"].includes(
     normalizedAppointmentStatus,
   );
-  const showCurrentJob = ["checked_in", "in_progress"].includes(normalizedAppointmentStatus);
+  const showCurrentJob = normalizedAppointmentStatus === "checked_in";
+  const showInProgressJob = normalizedAppointmentStatus === "in_progress";
 
   const handleStartTravel = async () => {
     if (!effectiveAppointment?.id || isStartingTravel || !showStartTravel) return;
@@ -582,10 +948,12 @@ export default function GroomerDashboardPage() {
       if (enableDevTravelTest) {
         setDevTravelStatus("");
         toast.success("Appointment canceled");
+        setIsCancelAppointmentModalOpen(false);
         return;
       }
       await cancelTravel(bookingId);
       toast.success("Appointment canceled");
+      setIsCancelAppointmentModalOpen(false);
     } catch (error) {
       console.error("Failed to cancel appointment:", error);
       toast.error("Failed to cancel appointment");
@@ -629,6 +997,26 @@ export default function GroomerDashboardPage() {
     } catch (error) {
       console.error("Failed to start grooming:", error);
       toast.error("Failed to start service");
+    }
+  };
+
+  const handleCompleteService = async () => {
+    if (!effectiveAppointment?.id || isCompletingService || normalizedAppointmentStatus !== "in_progress") return;
+
+    const bookingId = Number(effectiveAppointment.id);
+    if (!Number.isFinite(bookingId)) return;
+
+    try {
+      if (enableDevTravelTest) {
+        setDevTravelStatus("");
+        toast.success("Service completed");
+        return;
+      }
+      await completeService(bookingId);
+      toast.success("Service completed");
+    } catch (error) {
+      console.error("Failed to complete service:", error);
+      toast.error("Failed to complete service");
     }
   };
 
@@ -704,7 +1092,7 @@ export default function GroomerDashboardPage() {
   const hasUpcomingAppointmentContent = Boolean(nextAppointment) || bookingRequests.length > 0;
 
   return (
-    <div className="mx-auto min-h-[calc(100vh-64px)] w-full max-w-[393px] bg-[#633479] px-5 pb-28 pt-2">
+    <div className="min-h-[calc(100vh-64px)] w-full bg-[#633479] px-[calc(20*var(--px393))] pb-[calc(112*var(--px393))] pt-[calc(8*var(--px393))] sm:px-5 sm:pb-28 sm:pt-2">
       <div className="space-y-3.5">
         <h1 className="font-comfortaa text-[20px] font-bold leading-[22px] text-white">Dashboard</h1>
 
@@ -712,9 +1100,15 @@ export default function GroomerDashboardPage() {
           <LoadingStateCard />
         ) : (
           <>
-            {effectiveAppointment && showCurrentJob ? (
+            {effectiveAppointment && showInProgressJob ? (
+              <InProgressJobCard
+                appointment={effectiveAppointment}
+                isCompletingService={isCompletingService}
+                onCompleteService={handleCompleteService}
+              />
+            ) : effectiveAppointment && showCurrentJob ? (
               <>
-                <PackageAndAddonCard appointment={effectiveAppointment} />
+                <PackageAndAddonCard appointment={effectiveAppointment} onModify={() => setIsCheckUpOpen(true)} />
                 <CurrentJobCard
                   appointment={effectiveAppointment}
                   isStartingGrooming={isStartingGrooming}
@@ -728,7 +1122,7 @@ export default function GroomerDashboardPage() {
                   isCheckingIn={isCheckingIn}
                   isCancelingTravel={isCancelingTravel}
                   onCheckIn={handleCheckIn}
-                  onCancelTravel={handleCancelTravel}
+                  onCancelTravel={() => setIsCancelAppointmentModalOpen(true)}
                 />
                 <TotalEstimationCard appointment={effectiveAppointment} />
               </>
@@ -761,6 +1155,17 @@ export default function GroomerDashboardPage() {
           </>
         )}
       </div>
+      <GroomerCheckUpModal
+        open={isCheckUpOpen}
+        appointment={effectiveAppointment}
+        onClose={() => setIsCheckUpOpen(false)}
+      />
+      <CancelAppointmentModal
+        open={isCancelAppointmentModalOpen}
+        isSubmitting={isCancelingTravel}
+        onClose={() => setIsCancelAppointmentModalOpen(false)}
+        onSubmit={handleCancelTravel}
+      />
     </div>
   );
 }

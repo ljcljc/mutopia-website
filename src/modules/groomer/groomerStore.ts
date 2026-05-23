@@ -2,6 +2,7 @@ import { create } from "zustand";
 import {
   buildImageUrl,
   cancelGroomerTravel,
+  completeGroomerService,
   getGroomerBookingDetail,
   getGroomerCurrentBooking,
   getGroomerDashboardSummary,
@@ -13,7 +14,6 @@ import {
 import type { GroomerUpNextAppointment } from "@/modules/groomer/components/GroomerUpNextCard";
 import {
   formatGroomerTimeLabel,
-  isGroomerDateTimeWithinNextHours,
   parseGroomerDateTime,
 } from "@/modules/groomer/utils/time";
 import { formatPreferredTimeSlotLocal } from "@/lib/localDateTime";
@@ -293,8 +293,8 @@ function normalizeStatus(status: string): string {
   return status.trim().toLowerCase().replace(/[\s-]+/g, "_");
 }
 
-function isTravelActionStatus(status: string): boolean {
-  return ["traveling", "travel_started", "en_route", "on_the_way", "checked_in", "in_progress"].includes(
+function isDashboardAppointmentStatus(status: string): boolean {
+  return ["confirmed", "traveling", "travel_started", "en_route", "on_the_way", "checked_in", "in_progress", "awaiting_final_payment"].includes(
     normalizeStatus(status),
   );
 }
@@ -385,13 +385,15 @@ function mapNearestDashboardAppointment(raw: unknown): DashboardAppointment | nu
   const nearestRecord = getAppointmentItems(raw)
     .filter((record) => {
       const status = getString(record, ["status"]);
-      const scheduledTime = getString(record, ["scheduled_time", "appointment_time", "time"]);
-      return isTravelActionStatus(status) || isGroomerDateTimeWithinNextHours(scheduledTime, 24, now);
+      return isDashboardAppointmentStatus(status);
     })
     .sort((a, b) => {
-      const aTime = parseGroomerDateTime(getString(a, ["scheduled_time", "appointment_time", "time"]))?.getTime() ?? Number.MAX_SAFE_INTEGER;
-      const bTime = parseGroomerDateTime(getString(b, ["scheduled_time", "appointment_time", "time"]))?.getTime() ?? Number.MAX_SAFE_INTEGER;
-      return aTime - bTime;
+      const aTime = parseGroomerDateTime(getString(a, ["scheduled_time", "appointment_time", "time"]))?.getTime();
+      const bTime = parseGroomerDateTime(getString(b, ["scheduled_time", "appointment_time", "time"]))?.getTime();
+      const aDistance = aTime === undefined ? Number.MAX_SAFE_INTEGER : Math.abs(aTime - now.getTime());
+      const bDistance = bTime === undefined ? Number.MAX_SAFE_INTEGER : Math.abs(bTime - now.getTime());
+      if (aDistance !== bDistance) return aDistance - bDistance;
+      return (aTime ?? Number.MAX_SAFE_INTEGER) - (bTime ?? Number.MAX_SAFE_INTEGER);
     })[0];
 
   return nearestRecord ? mapDashboardAppointment(nearestRecord) : null;
@@ -481,12 +483,14 @@ interface GroomerDashboardState {
   isCancelingTravel: boolean;
   isCheckingIn: boolean;
   isStartingGrooming: boolean;
+  isCompletingService: boolean;
   fetchDashboard: () => Promise<void>;
   fetchPendingBookingRequests: () => Promise<void>;
   startTravel: (bookingId: number) => Promise<void>;
   cancelTravel: (bookingId: number) => Promise<void>;
   checkIn: (bookingId: number) => Promise<void>;
   startGrooming: (bookingId: number) => Promise<void>;
+  completeService: (bookingId: number) => Promise<void>;
 }
 
 export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => ({
@@ -501,6 +505,7 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
   isCancelingTravel: false,
   isCheckingIn: false,
   isStartingGrooming: false,
+  isCompletingService: false,
 
   fetchDashboard: async () => {
     set({ isLoadingDashboard: true });
@@ -625,6 +630,20 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
       }));
     } finally {
       set({ isStartingGrooming: false });
+    }
+  },
+
+  completeService: async (bookingId: number) => {
+    set({ isCompletingService: true });
+    try {
+      await completeGroomerService(bookingId);
+      set((state) => ({
+        nextAppointment: state.nextAppointment && Number(state.nextAppointment.id) === bookingId
+          ? null
+          : state.nextAppointment,
+      }));
+    } finally {
+      set({ isCompletingService: false });
     }
   },
 }));

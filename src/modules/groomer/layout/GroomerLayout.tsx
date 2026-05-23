@@ -38,7 +38,11 @@ export default function GroomerLayout() {
       footerClassName="hidden lg:block"
       bottomNav={showBottomNav ? <AccountBottomNav /> : null}
       bottomNavClassName={showBottomNav ? "lg:hidden" : "hidden"}
-      insetClassName={showBottomNav ? "bg-transparent pb-[96px] lg:pb-0" : "bg-transparent pb-0"}
+      insetClassName={
+        showBottomNav
+          ? "overflow-visible rounded-none bg-transparent pb-[96px] lg:overflow-auto lg:rounded-lg lg:pb-0"
+          : "overflow-visible rounded-none bg-transparent pb-0 lg:overflow-auto lg:rounded-lg"
+      }
       contentGrow={false}
     />
   );
