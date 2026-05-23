@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   formatGroomerTimeLabel,
   isGroomerDateTimeWithinNextHours,
+  shouldShowCancelAppointment,
   shouldShowStartTravel,
 } from "./time";
 
@@ -46,6 +47,12 @@ describe("groomer appointment time windows", () => {
     expect(shouldShowStartTravel("2026-05-16 11:59", now, "scheduled")).toBe(true);
     expect(shouldShowStartTravel("2026-05-16 11:59", now, "traveling")).toBe(false);
     expect(shouldShowStartTravel("2026-05-16 11:59", now, "completed")).toBe(false);
+  });
+
+  it("shows Cancel appointment only for future not-started bookings", () => {
+    expect(shouldShowCancelAppointment("2026-05-16 12:01", now, "confirmed")).toBe(true);
+    expect(shouldShowCancelAppointment("2026-05-16 12:00", now, "confirmed")).toBe(false);
+    expect(shouldShowCancelAppointment("2026-05-16 12:01", now, "traveling")).toBe(false);
   });
 
   it("does not match past appointments for future-only windows", () => {

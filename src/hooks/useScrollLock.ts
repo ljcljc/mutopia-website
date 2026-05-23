@@ -24,6 +24,9 @@ export function useScrollLock(isLocked: boolean) {
 
     // Calculate scrollbar width
     const scrollbarWidth = window.innerWidth - html.clientWidth;
+    const isDesktopLayout = window.matchMedia("(min-width: 640px)").matches;
+    const shouldCompensateScrollbar =
+      isDesktopLayout && scrollbarWidth > 0 && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
     if (lockCount === 0) {
       originalBodyOverflow = body.style.overflow;
@@ -38,7 +41,7 @@ export function useScrollLock(isLocked: boolean) {
     html.style.overflow = "hidden";
     body.classList.add("modal-open");
 
-    if (scrollbarWidth > 0) {
+    if (shouldCompensateScrollbar) {
       body.style.paddingRight = `${scrollbarWidth}px`;
       html.style.paddingRight = `${scrollbarWidth}px`;
       document.documentElement.style.setProperty("--scrollbar-width", `${scrollbarWidth}px`);

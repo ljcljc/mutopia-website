@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import {
+  cancelBooking,
   decideGroomerInvitation,
   getGroomerHistory,
   getGroomerHistoryDetail,
@@ -20,7 +21,9 @@ interface GroomerMyWorkState {
   isLoadingMyWork: boolean;
   isLoadingHistory: boolean;
   isLoadingHistoryDetail: boolean;
+  isCancelingAppointment: boolean;
   isStartingTravel: boolean;
+  cancelAppointment: (bookingId: number) => Promise<void>;
   fetchMyWork: () => Promise<void>;
   fetchHistory: (params?: GroomerHistoryIn) => Promise<void>;
   fetchHistoryDetail: (bookingId: number) => Promise<void>;
@@ -36,7 +39,17 @@ export const useGroomerMyWorkStore = create<GroomerMyWorkState>((set) => ({
   isLoadingMyWork: false,
   isLoadingHistory: false,
   isLoadingHistoryDetail: false,
+  isCancelingAppointment: false,
   isStartingTravel: false,
+
+  cancelAppointment: async (bookingId) => {
+    set({ isCancelingAppointment: true });
+    try {
+      await cancelBooking(bookingId, "Groomer canceled from My Work");
+    } finally {
+      set({ isCancelingAppointment: false });
+    }
+  },
 
   fetchMyWork: async () => {
     set({ isLoadingMyWork: true });

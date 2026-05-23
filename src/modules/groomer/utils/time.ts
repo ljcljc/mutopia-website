@@ -65,3 +65,12 @@ export function shouldShowStartTravel(value: string, now = new Date(), status?: 
 
   return parsed.getTime() <= now.getTime() || isGroomerDateTimeWithinNextHours(value, 2, now);
 }
+
+export function shouldShowCancelAppointment(value: string, now = new Date(), status?: string): boolean {
+  if (!isGroomerStartTravelStatus(status)) return false;
+
+  const parsed = parseGroomerDateTime(value);
+  if (!parsed) return false;
+
+  return parsed.getTime() > now.getTime();
+}

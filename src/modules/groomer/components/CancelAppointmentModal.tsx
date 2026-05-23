@@ -5,17 +5,25 @@ import { useIsMobile } from "@/components/ui/use-mobile";
 import { cn } from "@/components/ui/utils";
 
 interface CancelAppointmentModalProps {
+  description?: string;
   isSubmitting?: boolean;
   onClose: () => void;
   onSubmit: () => Promise<void> | void;
+  notice?: string;
   open: boolean;
+  submitLabel?: string;
+  title?: string;
 }
 
 export function CancelAppointmentModal({
+  description = "Cancel travel and return this appointment to upcoming.",
   isSubmitting = false,
+  notice = "This does not terminate the service. You can start travel again when you are ready.",
   onClose,
   onSubmit,
   open,
+  submitLabel = "Submit",
+  title = "Cancel appointment",
 }: CancelAppointmentModalProps) {
   const isMobile = useIsMobile();
 
@@ -35,8 +43,8 @@ export function CancelAppointmentModal({
             : "left-1/2! top-1/2! z-[75]! grid! w-full! max-w-none! -translate-x-1/2! -translate-y-1/2! gap-0! rounded-[12px]! shadow-[0px_8px_6px_rgba(0,0,0,0.10)]",
         )}
       >
-        <DialogTitle className="sr-only">Cancel appointment</DialogTitle>
-        <DialogDescription className="sr-only">Confirm canceling travel for this appointment.</DialogDescription>
+        <DialogTitle className="sr-only">{title}</DialogTitle>
+        <DialogDescription className="sr-only">{description}</DialogDescription>
 
         <form
           onSubmit={handleSubmit}
@@ -47,9 +55,9 @@ export function CancelAppointmentModal({
         >
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h3 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">Cancel appointment</h3>
+              <h3 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">{title}</h3>
               <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
-                Cancel travel and return this appointment to upcoming.
+                {description}
               </p>
             </div>
             <button
@@ -66,7 +74,7 @@ export function CancelAppointmentModal({
           </div>
 
           <p className="rounded-[12px] border border-[#F5CBA7] bg-[#FFF8F1] px-4 py-3 font-comfortaa text-[13px] leading-5 text-[#8B6357]">
-            This does not terminate the service. You can start travel again when you are ready.
+            {notice}
           </p>
 
           <div className="flex flex-col gap-[10px]">
@@ -75,7 +83,7 @@ export function CancelAppointmentModal({
               disabled={isSubmitting}
               className="flex h-12 w-full items-center justify-center rounded-full bg-[#DE6A07] px-7 font-comfortaa text-[14px] font-medium leading-[17.5px] text-white transition-[opacity,transform] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {isSubmitting ? <Spinner size="small" color="white" /> : "Submit"}
+              {isSubmitting ? <Spinner size="small" color="white" /> : submitLabel}
             </button>
             <button
               type="button"

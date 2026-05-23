@@ -7,10 +7,11 @@ import {
   BookingRequestInteraction,
   type BookingRequestDecisionTimeOption,
 } from "@/modules/groomer/components/BookingRequestContent";
+import { CancelAppointmentModal } from "@/modules/groomer/components/CancelAppointmentModal";
 import { HistoryDetailsModal, type HistoryDetailsAppointment } from "@/modules/groomer/components/HistoryDetailsModal";
 import { GroomerUpNextCard, type GroomerUpNextAppointment } from "@/modules/groomer/components/GroomerUpNextCard";
 import { useGroomerMyWorkStore } from "@/modules/groomer/stores/myWorkStore";
-import { formatGroomerTimeLabel, shouldShowStartTravel } from "@/modules/groomer/utils/time";
+import { formatGroomerTimeLabel, shouldShowCancelAppointment, shouldShowStartTravel } from "@/modules/groomer/utils/time";
 import { buildImageUrl } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { formatPreferredTimeSlotLocal } from "@/lib/localDateTime";
@@ -710,15 +711,20 @@ function BookingRequestCard({
 function UpNextAppointmentItem({
   appointment,
   now,
+  isCancelingAppointment,
   isStartingTravel,
+  onCancelAppointment,
   onStartTravel,
 }: {
   appointment: UpNextCard;
   now: Date;
+  isCancelingAppointment: boolean;
   isStartingTravel: boolean;
+  onCancelAppointment: (appointment: UpNextCard) => void;
   onStartTravel: (appointment: UpNextCard) => void;
 }) {
   const showStartTravel = shouldShowStartTravel(appointment.scheduledTime, now, appointment.status);
+  const showCancelAppointment = shouldShowCancelAppointment(appointment.scheduledTime, now, appointment.status);
 
   return (
     <GroomerUpNextCard
@@ -734,6 +740,16 @@ function UpNextAppointmentItem({
               className="flex h-[38px] w-full items-center justify-center rounded-full bg-[linear-gradient(180deg,#F7A01B_0%,#F08A12_100%)] font-comfortaa text-[14px] font-bold leading-[21px] text-white shadow-[0px_10px_18px_rgba(240,138,18,0.28)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
             >
               {isStartingTravel ? <Spinner size="small" color="white" /> : "Start Travel"}
+            </button>
+          ) : null}
+          {showCancelAppointment ? (
+            <button
+              type="button"
+              onClick={() => onCancelAppointment(appointment)}
+              disabled={isCancelingAppointment || isStartingTravel}
+              className="mt-4 flex w-full items-center justify-center font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357] underline underline-offset-[3px] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Cancel appointment
             </button>
           ) : null}
         </>
@@ -773,7 +789,9 @@ export default function GroomerMyWorkPage() {
     isLoadingMyWork,
     isLoadingHistory,
     isLoadingHistoryDetail,
+    isCancelingAppointment,
     isStartingTravel,
+    cancelAppointment,
     fetchMyWork,
     fetchHistory,
     fetchHistoryDetail,
@@ -786,6 +804,7 @@ export default function GroomerMyWorkPage() {
   const [historySearchValue, setHistorySearchValue] = useState("");
   const [debouncedHistorySearch, setDebouncedHistorySearch] = useState("");
   const [selectedHistoryAppointment, setSelectedHistoryAppointment] = useState<HistoryDetailsAppointment | null>(null);
+  const [appointmentToCancel, setAppointmentToCancel] = useState<UpNextCard | null>(null);
   const [scheduleError, setScheduleError] = useState("");
   const [historyError, setHistoryError] = useState("");
 
@@ -920,6 +939,20 @@ export default function GroomerMyWorkPage() {
     }
   };
 
+  const handleCancelAppointment = async () => {
+    if (!appointmentToCancel?.bookingId || isCancelingAppointment) return;
+
+    try {
+      await cancelAppointment(appointmentToCancel.bookingId);
+      toast.success("Appointment canceled");
+      setAppointmentToCancel(null);
+      await refreshMyWorkAfterAction();
+    } catch (error) {
+      console.error("Failed to cancel appointment:", error);
+      toast.error("Failed to cancel appointment");
+    }
+  };
+
   const openHistoryDetails = async (appointment: HistoryAppointmentCard) => {
     setSelectedHistoryAppointment({
       id: String(appointment.bookingId),
@@ -1014,7 +1047,9 @@ export default function GroomerMyWorkPage() {
                               key={appointment.id}
                               appointment={appointment}
                               now={now}
+                              isCancelingAppointment={isCancelingAppointment}
                               isStartingTravel={isStartingTravel}
+                              onCancelAppointment={setAppointmentToCancel}
                               onStartTravel={handleStartTravel}
                             />
                           ))}
@@ -1068,6 +1103,16 @@ export default function GroomerMyWorkPage() {
         detail={selectedHistoryDetail}
         isLoading={isLoadingHistoryDetail}
         onClose={closeHistoryDetails}
+      />
+      <CancelAppointmentModal
+        open={appointmentToCancel !== null}
+        isSubmitting={isCancelingAppointment}
+        title="Cancel appointment"
+        description="Cancel this appointment from your schedule."
+        notice="The appointment will be canceled and removed from your upcoming work."
+        submitLabel="Cancel appointment"
+        onClose={() => setAppointmentToCancel(null)}
+        onSubmit={handleCancelAppointment}
       />
     </div>
   );

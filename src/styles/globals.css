@@ -569,11 +569,6 @@ html {
   scrollbar-gutter: stable;
 }
 
-/* Smooth transitions for modal open/close */
-body {
-  transition: padding-right 0.1s ease-in-out;
-}
-
 /* Ensure modal overlay covers the entire viewport */
 [data-radix-dialog-overlay] {
   position: fixed !important;
