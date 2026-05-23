@@ -1,14 +1,22 @@
-import { type FormEvent } from "react";
-import { Spinner } from "@/components/common/Spinner";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { Checkbox, CustomInput, CustomTextarea, FileUpload, OrangeButton, type FileUploadItem } from "@/components/common";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { useIsMobile } from "@/components/ui/use-mobile";
 import { cn } from "@/components/ui/utils";
+import { XIcon } from "lucide-react";
+
+export type CancelAppointmentFormData = {
+  description: string;
+  evidenceFile: File | null;
+  interventionRequired: boolean;
+  reason: string;
+};
 
 interface CancelAppointmentModalProps {
   description?: string;
   isSubmitting?: boolean;
   onClose: () => void;
-  onSubmit: () => Promise<void> | void;
+  onSubmit: (data: CancelAppointmentFormData) => Promise<void> | void;
   notice?: string;
   open: boolean;
   submitLabel?: string;
@@ -26,10 +34,69 @@ export function CancelAppointmentModal({
   title = "Cancel appointment",
 }: CancelAppointmentModalProps) {
   const isMobile = useIsMobile();
+  const [reason, setReason] = useState("");
+  const [details, setDetails] = useState("");
+  const [interventionRequired, setInterventionRequired] = useState(false);
+  const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
+  const [evidenceError, setEvidenceError] = useState("");
+  const [evidencePreviewUrl, setEvidencePreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    setReason("");
+    setDetails("");
+    setInterventionRequired(false);
+    setEvidenceFile(null);
+    setEvidenceError("");
+  }, [open]);
+
+  useEffect(() => {
+    if (!interventionRequired) {
+      setEvidenceFile(null);
+      setEvidenceError("");
+    }
+  }, [interventionRequired]);
+
+  useEffect(() => {
+    if (!evidenceFile) {
+      setEvidencePreviewUrl(null);
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(evidenceFile);
+    setEvidencePreviewUrl(previewUrl);
+
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [evidenceFile]);
+
+  const evidenceUploadItems = useMemo<FileUploadItem[]>(
+    () =>
+      evidenceFile && evidencePreviewUrl
+        ? [
+            {
+              file: evidenceFile,
+              previewUrl: evidencePreviewUrl,
+              uploadProgress: 100,
+              uploadStatus: "uploaded",
+            },
+          ]
+        : [],
+    [evidenceFile, evidencePreviewUrl],
+  );
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    await onSubmit();
+    if (interventionRequired && !evidenceFile) {
+      setEvidenceError("Evidence is required when intervention is requested");
+      return;
+    }
+
+    await onSubmit({
+      description: details.trim(),
+      evidenceFile,
+      interventionRequired,
+      reason: reason.trim(),
+    });
   };
 
   return (
@@ -67,32 +134,91 @@ export function CancelAppointmentModal({
               className="flex size-5 shrink-0 items-center justify-center text-[#4A5565] transition-colors hover:text-[#4A3C2A] disabled:cursor-not-allowed disabled:opacity-60"
               aria-label="Close cancel appointment dialog"
             >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
+              <XIcon className="size-4 stroke-[1.5]" aria-hidden="true" />
             </button>
           </div>
 
-          <p className="rounded-[12px] border border-[#F5CBA7] bg-[#FFF8F1] px-4 py-3 font-comfortaa text-[13px] leading-5 text-[#8B6357]">
-            {notice}
-          </p>
+          <div className="grid grid-cols-1 gap-4">
+            <CustomInput
+              label="Reason for cancellation"
+              value={reason}
+              onChange={(event) => setReason(event.target.value)}
+              disabled={isSubmitting}
+              placeholder="Enter your reason"
+            />
+
+            <CustomTextarea
+              label="Description (optional)"
+              value={details}
+              onChange={(event) => setDetails(event.target.value)}
+              disabled={isSubmitting}
+              placeholder="Enter more details"
+              showResizeHandle={false}
+            />
+
+            <Checkbox
+              checked={interventionRequired}
+              onCheckedChange={setInterventionRequired}
+              disabled={isSubmitting}
+              label="Related to an accident, intervention required"
+              containerClassName="items-center"
+            />
+
+            {interventionRequired ? (
+              <div className="flex flex-col gap-2">
+                <div>
+                  <p className="font-comfortaa text-[14px] leading-[22.75px] text-[#4A3C2A]">Upload evidence</p>
+                  <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">Proof of accident</p>
+                </div>
+                <FileUpload
+                  accept="image/jpeg,image/jpg,image/png"
+                  disabled={isSubmitting}
+                  maxFiles={1}
+                  multiple={false}
+                  showDragHint={false}
+                  uploadItems={evidenceUploadItems}
+                  onChange={(files) => {
+                    setEvidenceFile(files[0] ?? null);
+                    setEvidenceError("");
+                  }}
+                  onRemove={() => {
+                    setEvidenceFile(null);
+                    setEvidenceError("");
+                  }}
+                  className="[&_p]:whitespace-normal"
+                />
+                {evidenceError ? (
+                  <p className="font-comfortaa text-[12px] leading-[18px] text-[#DE1507]">{evidenceError}</p>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+
+          {notice ? (
+            <p className="rounded-[12px] border border-[#F5CBA7] bg-[#FFF8F1] px-4 py-3 font-comfortaa text-[13px] leading-5 text-[#8B6357]">
+              {notice}
+            </p>
+          ) : null}
 
           <div className="flex flex-col gap-[10px]">
-            <button
+            <OrangeButton
               type="submit"
-              disabled={isSubmitting}
-              className="flex h-12 w-full items-center justify-center rounded-full bg-[#DE6A07] px-7 font-comfortaa text-[14px] font-medium leading-[17.5px] text-white transition-[opacity,transform] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
+              loading={isSubmitting}
+              fullWidth
+              textSize={14}
             >
-              {isSubmitting ? <Spinner size="small" color="white" /> : submitLabel}
-            </button>
-            <button
+              {submitLabel}
+            </OrangeButton>
+            <OrangeButton
               type="button"
+              variant="outline"
               onClick={onClose}
               disabled={isSubmitting}
-              className="flex h-12 w-full items-center justify-center rounded-full border-2 border-[#DE6A07] bg-white px-[30px] font-comfortaa text-[14px] font-medium leading-[17.5px] text-[#DE6A07] transition-[opacity,transform] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+              fullWidth
+              textSize={14}
             >
               Cancel
-            </button>
+            </OrangeButton>
           </div>
         </form>
       </DialogContent>

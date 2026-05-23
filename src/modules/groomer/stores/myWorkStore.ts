@@ -1,12 +1,13 @@
 import { create } from "zustand";
 import {
-  cancelBooking,
+  cancelGroomerBooking,
   decideGroomerInvitation,
   getGroomerHistory,
   getGroomerHistoryDetail,
   getGroomerMyWorkCalendar,
   getGroomerMyWorkSchedule,
   startGroomerTravel,
+  type GroomerCancelBookingIn,
   type GroomerHistoryDetailOut,
   type GroomerHistoryIn,
   type GroomerHistoryOut,
@@ -23,7 +24,7 @@ interface GroomerMyWorkState {
   isLoadingHistoryDetail: boolean;
   isCancelingAppointment: boolean;
   isStartingTravel: boolean;
-  cancelAppointment: (bookingId: number) => Promise<void>;
+  cancelAppointment: (bookingId: number, data: GroomerCancelBookingIn) => Promise<void>;
   fetchMyWork: () => Promise<void>;
   fetchHistory: (params?: GroomerHistoryIn) => Promise<void>;
   fetchHistoryDetail: (bookingId: number) => Promise<void>;
@@ -42,10 +43,10 @@ export const useGroomerMyWorkStore = create<GroomerMyWorkState>((set) => ({
   isCancelingAppointment: false,
   isStartingTravel: false,
 
-  cancelAppointment: async (bookingId) => {
+  cancelAppointment: async (bookingId, data) => {
     set({ isCancelingAppointment: true });
     try {
-      await cancelBooking(bookingId, "Groomer canceled from My Work");
+      await cancelGroomerBooking(bookingId, data);
     } finally {
       set({ isCancelingAppointment: false });
     }

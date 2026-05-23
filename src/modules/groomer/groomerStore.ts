@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import {
   buildImageUrl,
-  cancelGroomerTravel,
+  cancelGroomerBooking,
   completeGroomerService,
   getGroomerBookingDetail,
   getGroomerCurrentBooking,
@@ -11,6 +11,7 @@ import {
   startGroomerGrooming,
   startGroomerTravel,
   terminateGroomerService,
+  type GroomerCancelBookingIn,
   type TerminateServiceIn,
 } from "@/lib/api";
 import type { GroomerUpNextAppointment } from "@/modules/groomer/components/GroomerUpNextCard";
@@ -506,7 +507,7 @@ interface GroomerDashboardState {
   fetchDashboard: () => Promise<void>;
   fetchPendingBookingRequests: () => Promise<void>;
   startTravel: (bookingId: number) => Promise<void>;
-  cancelTravel: (bookingId: number) => Promise<void>;
+  cancelTravel: (bookingId: number, data: GroomerCancelBookingIn) => Promise<void>;
   checkIn: (bookingId: number) => Promise<void>;
   startGrooming: (bookingId: number) => Promise<void>;
   completeService: (bookingId: number) => Promise<void>;
@@ -612,13 +613,13 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
     }
   },
 
-  cancelTravel: async (bookingId: number) => {
+  cancelTravel: async (bookingId: number, data: GroomerCancelBookingIn) => {
     set({ isCancelingTravel: true });
     try {
-      await cancelGroomerTravel(bookingId);
+      await cancelGroomerBooking(bookingId, data);
       set((state) => ({
         nextAppointment: state.nextAppointment && Number(state.nextAppointment.id) === bookingId
-          ? { ...state.nextAppointment, status: "confirmed" }
+          ? null
           : state.nextAppointment,
       }));
     } finally {

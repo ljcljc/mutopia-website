@@ -1551,6 +1551,19 @@ export interface CancelBookingIn {
   reason?: string; // default: ""
 }
 
+export interface GroomerCancelBookingPayloadIn {
+  reason?: string; // default: ""
+  description?: string; // default: ""
+  intervention_required?: boolean; // default: false
+}
+
+export interface GroomerCancelBookingIn {
+  description?: string;
+  evidenceFile?: File | null;
+  interventionRequired?: boolean;
+  reason?: string;
+}
+
 export interface CheckOutOut {
   ok: boolean;
   status: string;
@@ -1989,6 +2002,35 @@ export async function cancelGroomerTravel(bookingId: number): Promise<OkOut> {
   const response = await http.post<OkOut>(
     `/api/groomers/bookings/${bookingId}/cancel_travel`,
     undefined
+  );
+  return response.data;
+}
+
+/**
+ * 美容师取消预约
+ */
+export async function cancelGroomerBooking(
+  bookingId: number,
+  data: GroomerCancelBookingIn = {}
+): Promise<OkOut> {
+  const payload: GroomerCancelBookingPayloadIn = {
+    reason: data.reason ?? "",
+    description: data.description ?? "",
+    intervention_required: Boolean(data.interventionRequired),
+  };
+
+  const requestData = data.evidenceFile
+    ? (() => {
+        const formData = new FormData();
+        formData.append("payload", JSON.stringify(payload));
+        formData.append("evidence", data.evidenceFile);
+        return formData;
+      })()
+    : payload;
+
+  const response = await http.post<OkOut>(
+    `/api/groomers/bookings/${bookingId}/cancel`,
+    requestData
   );
   return response.data;
 }

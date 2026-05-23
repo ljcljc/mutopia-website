@@ -2278,6 +2278,43 @@
         "security": [{ "JWTAuth": [] }]
       }
     },
+    "/api/groomers/bookings/{booking_id}/cancel": {
+      "post": {
+        "operationId": "api_groomer_portal_groomer_cancel_booking",
+        "summary": "Groomer Cancel Booking",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "schema": { "title": "Booking Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OkOut" }
+              }
+            }
+          }
+        },
+        "tags": ["groomer-portal"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/GroomerCancelBookingIn" }
+            },
+            "multipart/form-data": {
+              "schema": { "$ref": "#/components/schemas/GroomerCancelBookingMultipartIn" }
+            }
+          },
+          "required": true
+        },
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
     "/api/groomers/bookings/{booking_id}/check_in": {
       "post": {
         "operationId": "api_groomer_portal_groomer_check_in",
@@ -4382,6 +4419,37 @@
           "reason": { "default": "", "title": "Reason", "type": "string" }
         },
         "title": "CancelBookingIn",
+        "type": "object"
+      },
+      "GroomerCancelBookingIn": {
+        "properties": {
+          "reason": { "default": "", "title": "Reason", "type": "string" },
+          "description": { "default": "", "title": "Description", "type": "string" },
+          "intervention_required": {
+            "default": false,
+            "title": "Intervention Required",
+            "type": "boolean"
+          }
+        },
+        "title": "GroomerCancelBookingIn",
+        "type": "object"
+      },
+      "GroomerCancelBookingMultipartIn": {
+        "properties": {
+          "payload": {
+            "description": "JSON string matching GroomerCancelBookingIn",
+            "title": "Payload",
+            "type": "string"
+          },
+          "evidence": {
+            "description": "Required when intervention_required is true. JPG, JPEG, or PNG image less than 10MB.",
+            "format": "binary",
+            "title": "Evidence",
+            "type": "string"
+          }
+        },
+        "required": ["payload"],
+        "title": "GroomerCancelBookingMultipartIn",
         "type": "object"
       },
       "PaymentSessionOut": {

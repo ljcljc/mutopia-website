@@ -7,7 +7,10 @@ import {
   BookingRequestInteraction,
   type BookingRequestDecisionTimeOption,
 } from "@/modules/groomer/components/BookingRequestContent";
-import { CancelAppointmentModal } from "@/modules/groomer/components/CancelAppointmentModal";
+import {
+  CancelAppointmentModal,
+  type CancelAppointmentFormData,
+} from "@/modules/groomer/components/CancelAppointmentModal";
 import { GroomerUpNextCard } from "@/modules/groomer/components/GroomerUpNextCard";
 import {
   useGroomerDashboardStore,
@@ -1080,7 +1083,7 @@ export default function GroomerDashboardPage() {
     }
   };
 
-  const handleCancelTravel = async () => {
+  const handleCancelTravel = async (data: CancelAppointmentFormData) => {
     if (!effectiveAppointment?.id || isCancelingTravel) return;
 
     const bookingId = Number(effectiveAppointment.id);
@@ -1093,7 +1096,7 @@ export default function GroomerDashboardPage() {
         setIsCancelAppointmentModalOpen(false);
         return;
       }
-      await cancelTravel(bookingId);
+      await cancelTravel(bookingId, data);
       toast.success("Appointment canceled");
       setIsCancelAppointmentModalOpen(false);
     } catch (error) {

@@ -7,7 +7,10 @@ import {
   BookingRequestInteraction,
   type BookingRequestDecisionTimeOption,
 } from "@/modules/groomer/components/BookingRequestContent";
-import { CancelAppointmentModal } from "@/modules/groomer/components/CancelAppointmentModal";
+import {
+  CancelAppointmentModal,
+  type CancelAppointmentFormData,
+} from "@/modules/groomer/components/CancelAppointmentModal";
 import { HistoryDetailsModal, type HistoryDetailsAppointment } from "@/modules/groomer/components/HistoryDetailsModal";
 import { GroomerUpNextCard, type GroomerUpNextAppointment } from "@/modules/groomer/components/GroomerUpNextCard";
 import { useGroomerMyWorkStore } from "@/modules/groomer/stores/myWorkStore";
@@ -939,11 +942,11 @@ export default function GroomerMyWorkPage() {
     }
   };
 
-  const handleCancelAppointment = async () => {
+  const handleCancelAppointment = async (data: CancelAppointmentFormData) => {
     if (!appointmentToCancel?.bookingId || isCancelingAppointment) return;
 
     try {
-      await cancelAppointment(appointmentToCancel.bookingId);
+      await cancelAppointment(appointmentToCancel.bookingId, data);
       toast.success("Appointment canceled");
       setAppointmentToCancel(null);
       await refreshMyWorkAfterAction();
@@ -1108,9 +1111,9 @@ export default function GroomerMyWorkPage() {
         open={appointmentToCancel !== null}
         isSubmitting={isCancelingAppointment}
         title="Cancel appointment"
-        description="Cancel this appointment from your schedule."
-        notice="The appointment will be canceled and removed from your upcoming work."
-        submitLabel="Cancel appointment"
+        description="Document the reason"
+        notice=""
+        submitLabel="Submit"
         onClose={() => setAppointmentToCancel(null)}
         onSubmit={handleCancelAppointment}
       />
