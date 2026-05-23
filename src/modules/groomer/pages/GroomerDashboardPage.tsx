@@ -1051,7 +1051,7 @@ export default function GroomerDashboardPage() {
     ? { ...nextAppointment, status: devTravelStatus }
     : nextAppointment;
   const showStartTravel = enableDevTravelTest || (effectiveAppointment?.scheduledTime
-    ? shouldShowStartTravel(effectiveAppointment.scheduledTime, now)
+    ? shouldShowStartTravel(effectiveAppointment.scheduledTime, now, effectiveAppointment.status)
     : false);
   const normalizedAppointmentStatus = normalizeStatus(effectiveAppointment?.status);
   const showTravelActions = ["traveling", "travel_started", "en_route", "on_the_way", "checked_in"].includes(

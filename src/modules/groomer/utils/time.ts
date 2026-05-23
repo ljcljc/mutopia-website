@@ -44,7 +44,22 @@ export function isGroomerDateTimeWithinNextHours(value: string, hours: number, n
   return diffMs >= 0 && diffMs <= hours * 60 * 60 * 1000;
 }
 
-export function shouldShowStartTravel(value: string, now = new Date()): boolean {
+export function isGroomerStartTravelStatus(status?: string): boolean {
+  const normalized = (status ?? "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+  if (!normalized) return true;
+  return [
+    "confirmed",
+    "booking_confirmed",
+    "client_confirmed",
+    "groomer_confirmed",
+    "scheduled",
+    "upcoming",
+  ].includes(normalized);
+}
+
+export function shouldShowStartTravel(value: string, now = new Date(), status?: string): boolean {
+  if (!isGroomerStartTravelStatus(status)) return false;
+
   const parsed = parseGroomerDateTime(value);
   if (!parsed) return false;
 

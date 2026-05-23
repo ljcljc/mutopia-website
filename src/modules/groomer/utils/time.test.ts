@@ -41,6 +41,13 @@ describe("groomer appointment time windows", () => {
     expect(shouldShowStartTravel("2026-05-16 11:59", now)).toBe(true);
   });
 
+  it("allows Start Travel only for not-started booking statuses when status is provided", () => {
+    expect(shouldShowStartTravel("2026-05-16 11:59", now, "confirmed")).toBe(true);
+    expect(shouldShowStartTravel("2026-05-16 11:59", now, "scheduled")).toBe(true);
+    expect(shouldShowStartTravel("2026-05-16 11:59", now, "traveling")).toBe(false);
+    expect(shouldShowStartTravel("2026-05-16 11:59", now, "completed")).toBe(false);
+  });
+
   it("does not match past appointments for future-only windows", () => {
     expect(isGroomerDateTimeWithinNextHours("2026-05-16 11:59", 24, now)).toBe(false);
   });

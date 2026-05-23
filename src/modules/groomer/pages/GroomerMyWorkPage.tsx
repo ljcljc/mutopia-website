@@ -41,7 +41,7 @@ type UpNextCard = GroomerUpNextAppointment & {
   id: string;
   bookingId: number;
   scheduledTime: string;
-  showStartTravel: boolean;
+  status?: string;
 };
 
 type ScheduleSection = {
@@ -276,10 +276,11 @@ function mapPendingJob(item: Record<string, unknown>, dateKey: string): PendingJ
   };
 }
 
-function mapUpNext(item: Record<string, unknown>, dateKey: string, todayDateKey: string): UpNextCard {
+function mapUpNext(item: Record<string, unknown>, dateKey: string): UpNextCard {
   const bookingId = getNumber(item, ["id", "booking_id"], 0);
   const petName = getString(item, ["pet_name"], "Pet");
   const scheduledTime = getString(item, ["scheduled_time", "appointment_time", "time"]);
+  const status = getString(item, ["status"]);
   return {
     id: `upnext-${bookingId || `${dateKey}-${petName}`}`,
     bookingId,
@@ -292,7 +293,7 @@ function mapUpNext(item: Record<string, unknown>, dateKey: string, todayDateKey:
     duration: formatDurationLabel(item),
     time: formatTimeLabel(scheduledTime),
     scheduledTime,
-    showStartTravel: dateKey === todayDateKey && shouldShowStartTravel(scheduledTime),
+    status,
   };
 }
 
@@ -339,7 +340,7 @@ function buildWeekCalendarDays(days: CalendarDay[], today: Date): CalendarDay[] 
   });
 }
 
-function mapScheduleSections(myWork: Record<string, unknown>, today: Date, todayDateKey: string): ScheduleSection[] {
+function mapScheduleSections(myWork: Record<string, unknown>, today: Date): ScheduleSection[] {
   return getArray(myWork, "schedule_sections").map((section) => {
     const dateKey = getString(section, ["date"]);
     const date = parseDateKey(dateKey) ?? today;
@@ -348,7 +349,7 @@ function mapScheduleSections(myWork: Record<string, unknown>, today: Date, today
       label: formatScheduleSectionLabel(date, today),
       dateKey,
       pendingJobs: getArray(section, "pending_jobs").map((item) => mapPendingJob(item, dateKey)),
-      upNext: getArray(section, "up_next").map((item) => mapUpNext(item, dateKey, todayDateKey)),
+      upNext: getArray(section, "up_next").map((item) => mapUpNext(item, dateKey)),
     };
   });
 }
@@ -717,9 +718,7 @@ function UpNextAppointmentItem({
   isStartingTravel: boolean;
   onStartTravel: (appointment: UpNextCard) => void;
 }) {
-  const showStartTravel = appointment.scheduledTime
-    ? shouldShowStartTravel(appointment.scheduledTime, now)
-    : appointment.showStartTravel;
+  const showStartTravel = shouldShowStartTravel(appointment.scheduledTime, now, appointment.status);
 
   return (
     <GroomerUpNextCard
@@ -824,7 +823,7 @@ export default function GroomerMyWorkPage() {
   const calendarDays = useMemo(() => mapCalendarDays(myWorkRecord, today), [myWorkRecord, today]);
   const weekCalendarDays = useMemo(() => buildWeekCalendarDays(calendarDays, today), [calendarDays, today]);
   const monthCalendarDays = useMemo(() => buildMonthCalendarDays(calendarDays), [calendarDays]);
-  const scheduleSections = useMemo(() => mapScheduleSections(myWorkRecord, today, todayDateKey), [myWorkRecord, today, todayDateKey]);
+  const scheduleSections = useMemo(() => mapScheduleSections(myWorkRecord, today), [myWorkRecord, today]);
   const monthLabel = useMemo(() => {
     const month = asRecord(myWorkRecord.month);
     return getString(month, ["label"]) || formatMonthYear(today);
@@ -910,7 +909,7 @@ export default function GroomerMyWorkPage() {
   };
 
   const handleStartTravel = async (appointment: UpNextCard) => {
-    if (!appointment.bookingId || isStartingTravel || !shouldShowStartTravel(appointment.scheduledTime, now)) return;
+    if (!appointment.bookingId || isStartingTravel || !shouldShowStartTravel(appointment.scheduledTime, now, appointment.status)) return;
     try {
       await startTravel(appointment.bookingId);
       toast.success("Travel started");
