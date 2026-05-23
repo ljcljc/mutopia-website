@@ -449,9 +449,8 @@ export function BookingRequestContent({
                   type="button"
                   onClick={handleModifyProposedTime}
                   disabled={isSubmittingAction !== null}
-                  className="inline-flex h-12 items-center justify-center gap-3 rounded-full bg-[#00A63E] px-4 font-comfortaa text-[15px] font-bold leading-[22.5px] text-white shadow-[0px_4px_12px_rgba(0,166,62,0.3)] transition-[transform,filter] duration-150 active:scale-[0.98] active:brightness-95 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="py-[7px] font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357] underline underline-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  <Icon name="target" className="size-5 text-white" aria-hidden="true" />
                   Modify confirmed appointment
                 </button>
               ) : (
