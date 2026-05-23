@@ -235,6 +235,15 @@ function formatStatusLabel(status: string): string {
     .join(" ");
 }
 
+function normalizeStatus(status?: string): string {
+  return (status ?? "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+}
+
+function isAwaitingClientConfirmation(status?: string): boolean {
+  const normalized = normalizeStatus(status);
+  return normalized === "awaiting_client_confirmation" || normalized === "awaiting_customer_confirmation";
+}
+
 function getStatusTone(label: string): HistoryBadgeTone {
   const normalized = label.toLowerCase();
   if (normalized.includes("complete")) return "success";
@@ -728,10 +737,13 @@ function UpNextAppointmentItem({
 }) {
   const showStartTravel = shouldShowStartTravel(appointment.scheduledTime, now, appointment.status);
   const showCancelAppointment = shouldShowCancelAppointment(appointment.scheduledTime, now, appointment.status);
+  const waitingForCustomer = isAwaitingClientConfirmation(appointment.status);
 
   return (
     <GroomerUpNextCard
       appointment={appointment}
+      eyebrow={waitingForCustomer ? "BOOKING REQUEST" : undefined}
+      title={waitingForCustomer ? "Waiting for customer confirmation" : undefined}
       showDuration={false}
       footer={
         <>
