@@ -1,6 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
-import { CustomInput, CustomTextarea } from "@/components/common";
-import { Icon } from "@/components/common/Icon";
+import { type FormEvent } from "react";
 import { Spinner } from "@/components/common/Spinner";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { useIsMobile } from "@/components/ui/use-mobile";
@@ -20,25 +18,6 @@ export function CancelAppointmentModal({
   open,
 }: CancelAppointmentModalProps) {
   const isMobile = useIsMobile();
-  const [reason, setReason] = useState("");
-  const [description, setDescription] = useState("");
-  const [isAccidentRelated, setIsAccidentRelated] = useState(true);
-  const [evidenceName, setEvidenceName] = useState("");
-  const [isUploadDragging, setIsUploadDragging] = useState(false);
-
-  useEffect(() => {
-    if (open) return;
-    setReason("");
-    setDescription("");
-    setIsAccidentRelated(true);
-    setEvidenceName("");
-    setIsUploadDragging(false);
-  }, [open]);
-
-  const handleEvidenceSelected = (file?: File) => {
-    setEvidenceName(file?.name ?? "");
-    setIsUploadDragging(false);
-  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -57,7 +36,7 @@ export function CancelAppointmentModal({
         )}
       >
         <DialogTitle className="sr-only">Cancel appointment</DialogTitle>
-        <DialogDescription className="sr-only">Document the reason for canceling this appointment.</DialogDescription>
+        <DialogDescription className="sr-only">Confirm canceling travel for this appointment.</DialogDescription>
 
         <form
           onSubmit={handleSubmit}
@@ -69,7 +48,9 @@ export function CancelAppointmentModal({
           <div className="flex items-start justify-between gap-4">
             <div>
               <h3 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">Cancel appointment</h3>
-              <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">Document the reason</p>
+              <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
+                Cancel travel and return this appointment to upcoming.
+              </p>
             </div>
             <button
               type="button"
@@ -84,82 +65,9 @@ export function CancelAppointmentModal({
             </button>
           </div>
 
-          <div className="grid grid-cols-1 gap-4">
-            <CustomInput
-              label="Reason for cancellation"
-              value={reason}
-              onChange={(event) => setReason(event.target.value)}
-              placeholder="Enter your reason"
-              disabled={isSubmitting}
-            />
-
-            <CustomTextarea
-              label="Description"
-              value={description}
-              onChange={(event) => setDescription(event.target.value)}
-              placeholder="Enter more details"
-              disabled={isSubmitting}
-              className="text-[12.25px] leading-[normal]"
-            />
-
-            <label className="flex items-center gap-2">
-              <span className="relative flex size-4 shrink-0 items-center justify-center">
-                <input
-                  type="radio"
-                  checked={isAccidentRelated}
-                  onChange={() => setIsAccidentRelated(true)}
-                  disabled={isSubmitting}
-                  className="peer sr-only"
-                />
-                <span className="absolute inset-0 rounded-full border border-[#8B6357] bg-white peer-disabled:opacity-60" />
-                <span className="relative size-2 rounded-full bg-[#DE6A07] opacity-0 peer-checked:opacity-100 peer-disabled:opacity-60" />
-              </span>
-              <span className="font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#4A3C2A]">
-                Related to an accident, intervention required
-              </span>
-            </label>
-
-            <div className="flex flex-col gap-2">
-              <div>
-                <p className="font-comfortaa text-[14px] leading-[22.75px] text-[#4A3C2A]">Upload evidence</p>
-                <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">Proof of accident</p>
-              </div>
-              <label
-                htmlFor="cancel-appointment-evidence"
-                onDragEnter={() => setIsUploadDragging(true)}
-                onDragOver={(event) => {
-                  event.preventDefault();
-                  setIsUploadDragging(true);
-                }}
-                onDragLeave={() => setIsUploadDragging(false)}
-                onDrop={(event) => {
-                  event.preventDefault();
-                  handleEvidenceSelected(event.dataTransfer.files?.[0]);
-                }}
-                className={cn(
-                  "flex h-[101px] w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-[1.5px] border-[#DE6A07] bg-[#FAFAFA] px-4 text-center shadow-[0px_4px_5px_rgba(0,0,0,0.15)] transition-[background-color,opacity] hover:bg-[#FFF8F1] active:opacity-90",
-                  isUploadDragging && "bg-[rgba(222,106,7,0.05)]",
-                  isSubmitting && "cursor-not-allowed opacity-60",
-                )}
-              >
-                <span className="flex items-center gap-1 font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#8B6357]">
-                  <Icon name="add-2" className="size-5 text-[#8B6357]" aria-hidden="true" />
-                  <span>{evidenceName || "Click to upload"}</span>
-                </span>
-                <span className="mt-2 text-center font-sans text-[12.25px] leading-[17.5px] text-[#A3A3A3]">
-                  JPG, JPEG, PNG less than 10MB
-                </span>
-              </label>
-              <input
-                id="cancel-appointment-evidence"
-                type="file"
-                accept=".jpg,.jpeg,.png,image/jpeg,image/png"
-                disabled={isSubmitting}
-                className="sr-only"
-                onChange={(event) => handleEvidenceSelected(event.target.files?.[0])}
-              />
-            </div>
-          </div>
+          <p className="rounded-[12px] border border-[#F5CBA7] bg-[#FFF8F1] px-4 py-3 font-comfortaa text-[13px] leading-5 text-[#8B6357]">
+            This does not terminate the service. You can start travel again when you are ready.
+          </p>
 
           <div className="flex flex-col gap-[10px]">
             <button

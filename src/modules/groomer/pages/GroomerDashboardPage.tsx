@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { CommonCheckbox, OrangeButton } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
 import { Spinner } from "@/components/common/Spinner";
@@ -16,7 +16,7 @@ import {
   type DashboardGoal,
 } from "@/modules/groomer/groomerStore";
 import { shouldShowStartTravel } from "@/modules/groomer/utils/time";
-import { decideGroomerInvitation, getAddOns, submitGroomerCheckUp, type AddOnOut } from "@/lib/api";
+import { decideGroomerInvitation, getAddOns, submitGroomerCheckUp, type AddOnOut, type TerminateServiceIn } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
 
@@ -257,10 +257,12 @@ function InProgressJobCard({
   appointment,
   isCompletingService,
   onCompleteService,
+  onTerminateService,
 }: {
   appointment: DashboardAppointment;
   isCompletingService: boolean;
   onCompleteService: () => void;
+  onTerminateService: () => void;
 }) {
   return (
     <article className="rounded-[16px] bg-[linear-gradient(180deg,#743782_0%,#8A527C_55%,#9A7658_100%)] p-5 shadow-[0px_4px_14px_rgba(0,0,0,0.12)]">
@@ -308,11 +310,140 @@ function InProgressJobCard({
 
       <button
         type="button"
+        onClick={onTerminateService}
         className="mx-auto mt-5 flex items-center justify-center font-comfortaa text-[13px] leading-[19.5px] text-white underline underline-offset-[3px]"
       >
         Service Terminated
       </button>
     </article>
+  );
+}
+
+function ServiceTerminationModal({
+  open,
+  isSubmitting,
+  onClose,
+  onSubmit,
+}: {
+  open: boolean;
+  isSubmitting: boolean;
+  onClose: () => void;
+  onSubmit: (data: TerminateServiceIn) => Promise<void>;
+}) {
+  const [reason, setReason] = useState("");
+  const [description, setDescription] = useState("");
+  const [refundableFee, setRefundableFee] = useState("0");
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!open) return;
+    setReason("");
+    setDescription("");
+    setRefundableFee("0");
+    setError("");
+  }, [open]);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const trimmedReason = reason.trim();
+    if (!trimmedReason) {
+      setError("Reason is required");
+      return;
+    }
+
+    await onSubmit({
+      reason: trimmedReason,
+      description: description.trim(),
+      refundable_service_fee: refundableFee.trim() || "0",
+      resolution: "service_terminated",
+    });
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && !isSubmitting && onClose()}>
+      <DialogContent
+        overlayClassName="service-area-dialog-overlay z-[70]!"
+        className="service-area-dialog inset-x-0! bottom-0! top-auto! z-[75]! mx-auto! flex! max-h-[88vh]! w-full! max-w-none! translate-x-0! translate-y-0! flex-col! gap-0! rounded-b-none rounded-t-[calc(24*var(--px393))] border-0! bg-white! p-0! shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)] [&>button]:hidden"
+      >
+        <DialogTitle className="sr-only">Terminate service</DialogTitle>
+        <DialogDescription className="sr-only">Document the reason for terminating this service.</DialogDescription>
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-4 overflow-y-auto px-[calc(24*var(--px393))] pb-[max(calc(24*var(--px393)),env(safe-area-inset-bottom))] pt-[calc(24*var(--px393))] sm:px-6 sm:pb-[max(24px,env(safe-area-inset-bottom))] sm:pt-6"
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">Terminate service</h2>
+              <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">Document the reason</p>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="flex size-5 shrink-0 items-center justify-center text-[#4A5565] transition-colors hover:text-[#4A3C2A] disabled:cursor-not-allowed disabled:opacity-60"
+              aria-label="Close terminate service dialog"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </button>
+          </div>
+
+          <label className="flex flex-col gap-2 font-comfortaa text-[14px] leading-[22.75px] text-[#4A3C2A]">
+            Reason
+            <input
+              value={reason}
+              onChange={(event) => {
+                setReason(event.target.value);
+                setError("");
+              }}
+              disabled={isSubmitting}
+              placeholder="Enter your reason"
+              className={`h-9 rounded-[12px] border px-4 font-comfortaa text-[12.25px] text-[#4A3C2A] outline-none placeholder:text-[#717182] disabled:opacity-60 ${
+                error ? "border-[#DE1507]" : "border-[#E5E7EB]"
+              }`}
+            />
+            {error ? <span className="text-[12px] leading-4 text-[#DE1507]">{error}</span> : null}
+          </label>
+
+          <label className="flex flex-col gap-2 font-comfortaa text-[14px] leading-[22.75px] text-[#4A3C2A]">
+            Description
+            <textarea
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              disabled={isSubmitting}
+              placeholder="Enter more details"
+              className="min-h-[82px] resize-none rounded-[12px] border border-[#E5E7EB] px-4 py-3 font-comfortaa text-[12.25px] text-[#4A3C2A] outline-none placeholder:text-[#717182] disabled:opacity-60"
+            />
+          </label>
+
+          <label className="flex flex-col gap-2 font-comfortaa text-[14px] leading-[22.75px] text-[#4A3C2A]">
+            Refundable service fee
+            <span className="flex h-9 items-center rounded-[12px] border border-[#E5E7EB] bg-white px-4">
+              <span className="mr-1 text-[12.25px] text-[#717182]">$</span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={refundableFee}
+                onChange={(event) => setRefundableFee(event.target.value)}
+                disabled={isSubmitting}
+                className="min-w-0 flex-1 bg-transparent font-comfortaa text-[12.25px] text-[#4A3C2A] outline-none disabled:opacity-60"
+              />
+            </span>
+          </label>
+
+          <div className="flex flex-col gap-[10px]">
+            <OrangeButton type="submit" fullWidth textSize={14} loading={isSubmitting}>
+              Submit
+            </OrangeButton>
+            <OrangeButton type="button" variant="outline" fullWidth textSize={14} onClick={onClose}>
+              Cancel
+            </OrangeButton>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -470,6 +601,14 @@ function GroomerCheckUpModal({
 
   useEffect(() => {
     if (!open) return;
+    setActiveTab("add-ons");
+    setWeightValue("60");
+    setWeightUnit("lbs");
+    setSelectedAddOnIds([]);
+    setPersonalization({});
+    setDescription("");
+    setIsApproved(true);
+    setIsSubmitting(false);
     getAddOns()
       .then((items) => {
         const visibleItems = items.filter((item) => !item.is_variable).slice(0, 6);
@@ -871,6 +1010,7 @@ export default function GroomerDashboardPage() {
   const [devTravelStatus, setDevTravelStatus] = useState<"" | "traveling" | "checked_in" | "in_progress">("");
   const [isCancelAppointmentModalOpen, setIsCancelAppointmentModalOpen] = useState(false);
   const [isCheckUpOpen, setIsCheckUpOpen] = useState(false);
+  const [isTerminateServiceOpen, setIsTerminateServiceOpen] = useState(false);
   const {
     nextAppointment,
     bookingRequests,
@@ -883,6 +1023,7 @@ export default function GroomerDashboardPage() {
     isCheckingIn,
     isStartingGrooming,
     isCompletingService,
+    isTerminatingService,
     fetchDashboard,
     fetchPendingBookingRequests,
     startTravel,
@@ -890,6 +1031,7 @@ export default function GroomerDashboardPage() {
     checkIn,
     startGrooming,
     completeService,
+    terminateService,
   } = useGroomerDashboardStore();
 
   useEffect(() => {
@@ -1020,6 +1162,28 @@ export default function GroomerDashboardPage() {
     }
   };
 
+  const handleTerminateService = async (data: TerminateServiceIn) => {
+    if (!effectiveAppointment?.id || isTerminatingService || normalizedAppointmentStatus !== "in_progress") return;
+
+    const bookingId = Number(effectiveAppointment.id);
+    if (!Number.isFinite(bookingId)) return;
+
+    try {
+      if (enableDevTravelTest) {
+        setDevTravelStatus("");
+        setIsTerminateServiceOpen(false);
+        toast.success("Service terminated");
+        return;
+      }
+      await terminateService(bookingId, data);
+      setIsTerminateServiceOpen(false);
+      toast.success("Service terminated");
+    } catch (error) {
+      console.error("Failed to terminate service:", error);
+      toast.error("Failed to terminate service");
+    }
+  };
+
   const handleConfirmOriginalTime = async (
     request: BookingRequest,
     confirmedTime: BookingRequestDecisionTimeOption,
@@ -1105,6 +1269,7 @@ export default function GroomerDashboardPage() {
                 appointment={effectiveAppointment}
                 isCompletingService={isCompletingService}
                 onCompleteService={handleCompleteService}
+                onTerminateService={() => setIsTerminateServiceOpen(true)}
               />
             ) : effectiveAppointment && showCurrentJob ? (
               <>
@@ -1165,6 +1330,12 @@ export default function GroomerDashboardPage() {
         isSubmitting={isCancelingTravel}
         onClose={() => setIsCancelAppointmentModalOpen(false)}
         onSubmit={handleCancelTravel}
+      />
+      <ServiceTerminationModal
+        open={isTerminateServiceOpen}
+        isSubmitting={isTerminatingService}
+        onClose={() => setIsTerminateServiceOpen(false)}
+        onSubmit={handleTerminateService}
       />
     </div>
   );

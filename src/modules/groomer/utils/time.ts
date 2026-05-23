@@ -48,5 +48,5 @@ export function shouldShowStartTravel(value: string, now = new Date()): boolean 
   const parsed = parseGroomerDateTime(value);
   if (!parsed) return false;
 
-  return now.getTime() >= parsed.getTime() - 2 * 60 * 60 * 1000;
+  return parsed.getTime() <= now.getTime() || isGroomerDateTimeWithinNextHours(value, 2, now);
 }

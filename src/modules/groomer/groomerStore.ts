@@ -10,10 +10,13 @@ import {
   groomerPortalCheckIn,
   startGroomerGrooming,
   startGroomerTravel,
+  terminateGroomerService,
+  type TerminateServiceIn,
 } from "@/lib/api";
 import type { GroomerUpNextAppointment } from "@/modules/groomer/components/GroomerUpNextCard";
 import {
   formatGroomerTimeLabel,
+  isGroomerDateTimeWithinNextHours,
   parseGroomerDateTime,
 } from "@/modules/groomer/utils/time";
 import { formatPreferredTimeSlotLocal } from "@/lib/localDateTime";
@@ -293,10 +296,22 @@ function normalizeStatus(status: string): string {
   return status.trim().toLowerCase().replace(/[\s-]+/g, "_");
 }
 
-function isDashboardAppointmentStatus(status: string): boolean {
-  return ["confirmed", "traveling", "travel_started", "en_route", "on_the_way", "checked_in", "in_progress", "awaiting_final_payment"].includes(
+function isActiveDashboardAppointmentStatus(status: string): boolean {
+  return ["traveling", "travel_started", "en_route", "on_the_way", "checked_in", "in_progress"].includes(
     normalizeStatus(status),
   );
+}
+
+function getDashboardAppointmentPriority(record: Record<string, unknown>, now: Date): number | null {
+  const status = normalizeStatus(getString(record, ["status"]));
+  const scheduledTime = getString(record, ["scheduled_time", "appointment_time", "time"]);
+  const parsedTime = parseGroomerDateTime(scheduledTime);
+
+  if (isActiveDashboardAppointmentStatus(status)) return 0;
+  if (status !== "confirmed" || !parsedTime) return null;
+  if (parsedTime.getTime() <= now.getTime()) return 1;
+  if (isGroomerDateTimeWithinNextHours(scheduledTime, 24, now)) return 2;
+  return null;
 }
 
 function formatTimeLabel(value: string): string {
@@ -383,13 +398,16 @@ function mapDashboardAppointment(raw: unknown): DashboardAppointment | null {
 function mapNearestDashboardAppointment(raw: unknown): DashboardAppointment | null {
   const now = new Date();
   const nearestRecord = getAppointmentItems(raw)
-    .filter((record) => {
-      const status = getString(record, ["status"]);
-      return isDashboardAppointmentStatus(status);
-    })
+    .filter((record) => getDashboardAppointmentPriority(record, now) !== null)
     .sort((a, b) => {
       const aTime = parseGroomerDateTime(getString(a, ["scheduled_time", "appointment_time", "time"]))?.getTime();
       const bTime = parseGroomerDateTime(getString(b, ["scheduled_time", "appointment_time", "time"]))?.getTime();
+      const aPriority = getDashboardAppointmentPriority(a, now) ?? Number.MAX_SAFE_INTEGER;
+      const bPriority = getDashboardAppointmentPriority(b, now) ?? Number.MAX_SAFE_INTEGER;
+      if (aPriority !== bPriority) return aPriority - bPriority;
+      if (aPriority === 1 || aPriority === 2) {
+        return (aTime ?? Number.MAX_SAFE_INTEGER) - (bTime ?? Number.MAX_SAFE_INTEGER);
+      }
       const aDistance = aTime === undefined ? Number.MAX_SAFE_INTEGER : Math.abs(aTime - now.getTime());
       const bDistance = bTime === undefined ? Number.MAX_SAFE_INTEGER : Math.abs(bTime - now.getTime());
       if (aDistance !== bDistance) return aDistance - bDistance;
@@ -484,6 +502,7 @@ interface GroomerDashboardState {
   isCheckingIn: boolean;
   isStartingGrooming: boolean;
   isCompletingService: boolean;
+  isTerminatingService: boolean;
   fetchDashboard: () => Promise<void>;
   fetchPendingBookingRequests: () => Promise<void>;
   startTravel: (bookingId: number) => Promise<void>;
@@ -491,6 +510,7 @@ interface GroomerDashboardState {
   checkIn: (bookingId: number) => Promise<void>;
   startGrooming: (bookingId: number) => Promise<void>;
   completeService: (bookingId: number) => Promise<void>;
+  terminateService: (bookingId: number, data: TerminateServiceIn) => Promise<void>;
 }
 
 export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => ({
@@ -506,6 +526,7 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
   isCheckingIn: false,
   isStartingGrooming: false,
   isCompletingService: false,
+  isTerminatingService: false,
 
   fetchDashboard: async () => {
     set({ isLoadingDashboard: true });
@@ -644,6 +665,20 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
       }));
     } finally {
       set({ isCompletingService: false });
+    }
+  },
+
+  terminateService: async (bookingId: number, data: TerminateServiceIn) => {
+    set({ isTerminatingService: true });
+    try {
+      await terminateGroomerService(bookingId, data);
+      set((state) => ({
+        nextAppointment: state.nextAppointment && Number(state.nextAppointment.id) === bookingId
+          ? null
+          : state.nextAppointment,
+      }));
+    } finally {
+      set({ isTerminatingService: false });
     }
   },
 }));
