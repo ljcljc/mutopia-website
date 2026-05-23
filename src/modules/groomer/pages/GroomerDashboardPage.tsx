@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import { CommonCheckbox, OrangeButton } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
 import { Spinner } from "@/components/common/Spinner";
@@ -25,6 +26,7 @@ import { toast } from "sonner";
 
 type BookingRequest = DashboardAppointment;
 type CheckUpTab = "weight" | "add-ons" | "personalization";
+type BookingRequestSuccessAlertKind = "confirm" | "propose";
 
 const FALLBACK_ADD_ONS: AddOnOut[] = [
   { id: 1, name: "Teeth brushing", description: "Professional dental cleaning", price: 15, is_variable: false },
@@ -1008,12 +1010,51 @@ function NoUpcomingAppointmentsCard() {
   );
 }
 
+function BookingRequestSuccessAlert({
+  kind,
+  onScheduleClick,
+}: {
+  kind: BookingRequestSuccessAlertKind;
+  onScheduleClick: () => void;
+}) {
+  const leadingText =
+    kind === "confirm"
+      ? "Appointment confirmation has been sent. You can verify in "
+      : "New times have been proposed and sent. You can verify in ";
+
+  return (
+    <div
+      role="status"
+      className="flex items-center overflow-hidden rounded-[8px] border border-[#6AA31C] bg-[#F4FFDE] px-4 py-2"
+    >
+      <div className="flex w-full items-start gap-2">
+        <span className="mt-0.5 flex size-3 shrink-0 items-center justify-center rounded-full bg-[#6AA31C]">
+          <Icon name="check" className="size-2 text-white" aria-hidden="true" />
+        </span>
+        <p className="min-w-0 flex-1 font-comfortaa text-[12px] font-bold leading-4 text-[#467900]">
+          {leadingText}
+          <button
+            type="button"
+            onClick={onScheduleClick}
+            className="inline font-comfortaa text-[12px] font-bold leading-4 text-[#467900] underline underline-offset-[2px]"
+          >
+            Schedule
+          </button>
+          .
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function GroomerDashboardPage() {
+  const navigate = useNavigate();
   const [now, setNow] = useState(() => new Date());
   const [devTravelStatus, setDevTravelStatus] = useState<"" | "traveling" | "checked_in" | "in_progress">("");
   const [isCancelAppointmentModalOpen, setIsCancelAppointmentModalOpen] = useState(false);
   const [isCheckUpOpen, setIsCheckUpOpen] = useState(false);
   const [isTerminateServiceOpen, setIsTerminateServiceOpen] = useState(false);
+  const [bookingRequestSuccessAlert, setBookingRequestSuccessAlert] = useState<BookingRequestSuccessAlertKind | null>(null);
   const {
     nextAppointment,
     bookingRequests,
@@ -1047,6 +1088,12 @@ export default function GroomerDashboardPage() {
     const timer = window.setInterval(() => setNow(new Date()), 60 * 1000);
     return () => window.clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    if (!bookingRequestSuccessAlert) return;
+    const timeoutId = window.setTimeout(() => setBookingRequestSuccessAlert(null), 5000);
+    return () => window.clearTimeout(timeoutId);
+  }, [bookingRequestSuccessAlert]);
 
   const enableDevTravelTest =
     import.meta.env.DEV && new URLSearchParams(window.location.search).get("devTravelTest") === "1";
@@ -1202,8 +1249,10 @@ export default function GroomerDashboardPage() {
         confirmed_time: confirmedTime,
         note: "",
       });
-      toast.success("Appointment confirmed");
-      await fetchPendingBookingRequests();
+      setBookingRequestSuccessAlert("confirm");
+      fetchPendingBookingRequests().catch((refreshError) => {
+        console.error("Failed to refresh pending booking requests:", refreshError);
+      });
     } catch (error) {
       console.error("Failed to confirm booking invitation:", error);
       toast.error(getInvitationErrorMessage(error, "Failed to confirm appointment"));
@@ -1226,8 +1275,10 @@ export default function GroomerDashboardPage() {
         time_options: timeOptions,
         note: "",
       });
-      toast.success("New time proposed");
-      await fetchPendingBookingRequests();
+      setBookingRequestSuccessAlert("propose");
+      fetchPendingBookingRequests().catch((refreshError) => {
+        console.error("Failed to refresh pending booking requests:", refreshError);
+      });
     } catch (error) {
       console.error("Failed to propose new time:", error);
       toast.error(getInvitationErrorMessage(error, "Failed to propose new time"));
@@ -1262,6 +1313,13 @@ export default function GroomerDashboardPage() {
     <div className="min-h-[calc(100vh-64px)] w-full bg-[#633479] px-[calc(20*var(--px393))] pb-[calc(112*var(--px393))] pt-[calc(8*var(--px393))] sm:px-5 sm:pb-28 sm:pt-2">
       <div className="space-y-3.5">
         <h1 className="font-comfortaa text-[20px] font-bold leading-[22px] text-white">Dashboard</h1>
+
+        {bookingRequestSuccessAlert ? (
+          <BookingRequestSuccessAlert
+            kind={bookingRequestSuccessAlert}
+            onScheduleClick={() => navigate("/groomer/my-work")}
+          />
+        ) : null}
 
         {showInitialLoading ? (
           <LoadingStateCard />
