@@ -230,95 +230,97 @@ export function HistoryDetailsModal({
                   <Spinner size={32} color="#DE6A07" showTrack trackOpacity={0.22} />
                   <p className="font-comfortaa text-[13px] font-medium leading-5 text-[#8B6357]">Loading details...</p>
                 </div>
-              ) : null}
-
-              {details.timeline.length > 0 ? (
-                <div className="space-y-[1px] font-comfortaa text-[16px] leading-[27px] text-[#4A3C2A]">
-                  {details.timeline.map((item) => (
-                    <p key={item.label}>
-                      {item.label}: <span className="text-[#6B7280]">{item.value}</span>
-                    </p>
-                  ))}
-                </div>
-              ) : null}
-              {details.termination ? (
-                <section className="rounded-[12px] bg-white px-5 py-4 shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.10)]">
-                  <h4 className="font-comfortaa text-[15px] font-semibold leading-6 text-[#4A3C2A]">Termination</h4>
-                  <div className="mt-2 space-y-1 font-comfortaa text-[12px] leading-5 text-[#6B7280]">
-                    <p>Reason: <span className="text-[#4A3C2A]">{details.termination.reason}</span></p>
-                    <p>Description: <span className="text-[#4A3C2A]">{details.termination.description}</span></p>
-                    <p>Resolution: <span className="text-[#4A3C2A]">{details.termination.resolutionLabel}</span></p>
-                    <p>Refunded: <span className="text-[#DE6A07]">{details.termination.refundedAmount}</span></p>
-                  </div>
-                </section>
-              ) : null}
-              <section className="rounded-[12px] bg-white px-6 py-6 shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.10)]">
-                <button
-                  type="button"
-                  onClick={() => setIsBreakdownExpanded((current) => !current)}
-                  className="flex w-full items-start justify-between gap-3 text-left"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-3">
-                      <h4 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">Package and add-on</h4>
-                      <Icon
-                        name="chevron-down"
-                        size={18}
-                        className={cn("mt-[5px] shrink-0 text-[#8B6357] transition-transform", isBreakdownExpanded && "rotate-180")}
-                        aria-hidden="true"
-                      />
+              ) : (
+                <>
+                  {details.timeline.length > 0 ? (
+                    <div className="space-y-[1px] font-comfortaa text-[16px] leading-[27px] text-[#4A3C2A]">
+                      {details.timeline.map((item) => (
+                        <p key={item.label}>
+                          {item.label}: <span className="text-[#6B7280]">{item.value}</span>
+                        </p>
+                      ))}
                     </div>
-                    <div className="mt-[2px] flex items-center justify-between gap-4">
-                      <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#6B7280]">Total estimation for the service</p>
-                      <span className="shrink-0 font-comfortaa text-[16px] font-bold leading-6 text-[#DE6A07]">{details.breakdown.total}</span>
-                    </div>
-                  </div>
-                </button>
-
-                {isBreakdownExpanded ? (
-                  <div className="mt-3">
-                    <p className="mb-[2px] font-comfortaa text-[10px] leading-[18px] text-[#8B6357]">{details.breakdown.packageLabel}</p>
-                    <div className="space-y-px">
-                      {details.breakdown.packageItems.length > 0 ? details.breakdown.packageItems.map((item) => (
-                        <div key={item.label} className="flex items-end justify-between gap-4">
-                          <p className="font-comfortaa text-[12px] leading-5 text-[#4A3C2A]">{item.label}</p>
-                          <p className="shrink-0 font-comfortaa text-[12px] leading-5 text-[#4A3C2A]">{item.amount}</p>
+                  ) : null}
+                  {details.termination ? (
+                    <section className="rounded-[12px] bg-white px-5 py-4 shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.10)]">
+                      <h4 className="font-comfortaa text-[15px] font-semibold leading-6 text-[#4A3C2A]">Termination</h4>
+                      <div className="mt-2 space-y-1 font-comfortaa text-[12px] leading-5 text-[#6B7280]">
+                        <p>Reason: <span className="text-[#4A3C2A]">{details.termination.reason}</span></p>
+                        <p>Description: <span className="text-[#4A3C2A]">{details.termination.description}</span></p>
+                        <p>Resolution: <span className="text-[#4A3C2A]">{details.termination.resolutionLabel}</span></p>
+                        <p>Refunded: <span className="text-[#DE6A07]">{details.termination.refundedAmount}</span></p>
+                      </div>
+                    </section>
+                  ) : null}
+                  <section className="rounded-[12px] bg-white px-6 py-6 shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.10)]">
+                    <button
+                      type="button"
+                      onClick={() => setIsBreakdownExpanded((current) => !current)}
+                      className="flex w-full items-start justify-between gap-3 text-left"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-3">
+                          <h4 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">Package and add-on</h4>
+                          <Icon
+                            name="chevron-down"
+                            size={18}
+                            className={cn("mt-[5px] shrink-0 text-[#8B6357] transition-transform", isBreakdownExpanded && "rotate-180")}
+                            aria-hidden="true"
+                          />
                         </div>
-                      )) : (
-                        <p className="font-comfortaa text-[13px] leading-5 text-[#6B7280]">No package details</p>
-                      )}
-                    </div>
-
-                    <div className="mt-2 border-t border-[#2F2A26] pt-[7px]">
-                      <div className="flex items-end justify-between gap-4">
-                        <p className="font-comfortaa text-[13px] font-semibold leading-5 text-[#4A3C2A]">Subtotal</p>
-                        <p className="shrink-0 font-comfortaa text-[13px] font-semibold leading-5 text-[#4A3C2A]">{details.breakdown.packageSubtotal}</p>
+                        <div className="mt-[2px] flex items-center justify-between gap-4">
+                          <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#6B7280]">Total estimation for the service</p>
+                          <span className="shrink-0 font-comfortaa text-[16px] font-bold leading-6 text-[#DE6A07]">{details.breakdown.total}</span>
+                        </div>
                       </div>
-                    </div>
+                    </button>
 
-                    <div className="mt-[2px]">
-                      <p className="font-comfortaa text-[12px] leading-[18px] text-[#8B6357]">Add-on</p>
-                      <div className="mt-[2px] space-y-px">
-                        {details.breakdown.addOnItems.length > 0 ? details.breakdown.addOnItems.map((item) => (
-                          <div key={item.label} className="flex items-end justify-between gap-4">
-                            <p className="font-comfortaa text-[13px] leading-5 text-[#4A3C2A]">{item.label}</p>
-                            <p className="shrink-0 font-comfortaa text-[13px] leading-5 text-[#4A3C2A]">{item.amount}</p>
+                    {isBreakdownExpanded ? (
+                      <div className="mt-3">
+                        <p className="mb-[2px] font-comfortaa text-[10px] leading-[18px] text-[#8B6357]">{details.breakdown.packageLabel}</p>
+                        <div className="space-y-px">
+                          {details.breakdown.packageItems.length > 0 ? details.breakdown.packageItems.map((item) => (
+                            <div key={item.label} className="flex items-end justify-between gap-4">
+                              <p className="font-comfortaa text-[12px] leading-5 text-[#4A3C2A]">{item.label}</p>
+                              <p className="shrink-0 font-comfortaa text-[12px] leading-5 text-[#4A3C2A]">{item.amount}</p>
+                            </div>
+                          )) : (
+                            <p className="font-comfortaa text-[13px] leading-5 text-[#6B7280]">No package details</p>
+                          )}
+                        </div>
+
+                        <div className="mt-2 border-t border-[#2F2A26] pt-[7px]">
+                          <div className="flex items-end justify-between gap-4">
+                            <p className="font-comfortaa text-[13px] font-semibold leading-5 text-[#4A3C2A]">Subtotal</p>
+                            <p className="shrink-0 font-comfortaa text-[13px] font-semibold leading-5 text-[#4A3C2A]">{details.breakdown.packageSubtotal}</p>
                           </div>
-                        )) : (
-                          <p className="font-comfortaa text-[13px] leading-5 text-[#6B7280]">No add-ons</p>
-                        )}
-                      </div>
-                    </div>
+                        </div>
 
-                    <div className="mt-[3px] border-t border-[#2F2A26] pt-[7px]">
-                      <div className="flex items-end justify-between gap-4">
-                        <p className="font-comfortaa text-[13px] font-semibold leading-5 text-[#4A3C2A]">Subtotal</p>
-                        <p className="shrink-0 font-comfortaa text-[13px] font-semibold leading-5 text-[#4A3C2A]">{details.breakdown.addOnSubtotal}</p>
+                        <div className="mt-[2px]">
+                          <p className="font-comfortaa text-[12px] leading-[18px] text-[#8B6357]">Add-on</p>
+                          <div className="mt-[2px] space-y-px">
+                            {details.breakdown.addOnItems.length > 0 ? details.breakdown.addOnItems.map((item) => (
+                              <div key={item.label} className="flex items-end justify-between gap-4">
+                                <p className="font-comfortaa text-[13px] leading-5 text-[#4A3C2A]">{item.label}</p>
+                                <p className="shrink-0 font-comfortaa text-[13px] leading-5 text-[#4A3C2A]">{item.amount}</p>
+                              </div>
+                            )) : (
+                              <p className="font-comfortaa text-[13px] leading-5 text-[#6B7280]">No add-ons</p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="mt-[3px] border-t border-[#2F2A26] pt-[7px]">
+                          <div className="flex items-end justify-between gap-4">
+                            <p className="font-comfortaa text-[13px] font-semibold leading-5 text-[#4A3C2A]">Subtotal</p>
+                            <p className="shrink-0 font-comfortaa text-[13px] font-semibold leading-5 text-[#4A3C2A]">{details.breakdown.addOnSubtotal}</p>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                ) : null}
-              </section>
+                    ) : null}
+                  </section>
+                </>
+              )}
             </div>
           </div>
         </div>

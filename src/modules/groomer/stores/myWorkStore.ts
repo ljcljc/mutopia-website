@@ -27,10 +27,24 @@ interface GroomerMyWorkState {
   cancelAppointment: (bookingId: number, data: GroomerCancelBookingIn) => Promise<void>;
   fetchMyWork: () => Promise<void>;
   fetchHistory: (params?: GroomerHistoryIn) => Promise<void>;
-  fetchHistoryDetail: (bookingId: number) => Promise<void>;
+  fetchHistoryDetail: (historyDetailRef: number | string) => Promise<void>;
   clearHistoryDetail: () => void;
   decideInvitation: (invitationId: number, data: InvitationDecisionIn) => Promise<void>;
   startTravel: (bookingId: number) => Promise<void>;
+}
+
+let latestHistoryRequestId = 0;
+let latestHistoryDetailRequestId = 0;
+const inFlightHistoryRequests = new Map<string, Promise<GroomerHistoryOut>>();
+
+function getHistoryParamsKey(params?: GroomerHistoryIn): string {
+  return JSON.stringify({
+    pet_name: params?.pet_name || "",
+    date_from: params?.date_from || "",
+    date_to: params?.date_to || "",
+    page: params?.page || "",
+    page_size: params?.page_size || "",
+  });
 }
 
 export const useGroomerMyWorkStore = create<GroomerMyWorkState>((set) => ({
@@ -66,26 +80,57 @@ export const useGroomerMyWorkStore = create<GroomerMyWorkState>((set) => ({
   },
 
   fetchHistory: async (params) => {
+    const requestId = latestHistoryRequestId + 1;
+    latestHistoryRequestId = requestId;
+    const paramsKey = getHistoryParamsKey(params);
     set({ isLoadingHistory: true });
+
+    let requestPromise = inFlightHistoryRequests.get(paramsKey);
+    if (!requestPromise) {
+      requestPromise = getGroomerHistory(params).finally(() => {
+        inFlightHistoryRequests.delete(paramsKey);
+      });
+      inFlightHistoryRequests.set(paramsKey, requestPromise);
+    }
+
     try {
-      const history = await getGroomerHistory(params);
-      set({ history });
+      const history = await requestPromise;
+      if (requestId === latestHistoryRequestId) {
+        set({ history });
+      }
+    } catch (error) {
+      if (requestId === latestHistoryRequestId) {
+        throw error;
+      }
     } finally {
-      set({ isLoadingHistory: false });
+      if (requestId === latestHistoryRequestId) {
+        set({ isLoadingHistory: false });
+      }
     }
   },
 
-  fetchHistoryDetail: async (bookingId) => {
+  fetchHistoryDetail: async (historyDetailRef) => {
+    const requestId = latestHistoryDetailRequestId + 1;
+    latestHistoryDetailRequestId = requestId;
     set({ isLoadingHistoryDetail: true, selectedHistoryDetail: null });
     try {
-      const selectedHistoryDetail = await getGroomerHistoryDetail(bookingId);
-      set({ selectedHistoryDetail });
+      const selectedHistoryDetail = await getGroomerHistoryDetail(historyDetailRef);
+      if (requestId === latestHistoryDetailRequestId) {
+        set({ selectedHistoryDetail });
+      }
+    } catch (error) {
+      if (requestId === latestHistoryDetailRequestId) {
+        throw error;
+      }
     } finally {
-      set({ isLoadingHistoryDetail: false });
+      if (requestId === latestHistoryDetailRequestId) {
+        set({ isLoadingHistoryDetail: false });
+      }
     }
   },
 
   clearHistoryDetail: () => {
+    latestHistoryDetailRequestId += 1;
     set({ selectedHistoryDetail: null, isLoadingHistoryDetail: false });
   },
 

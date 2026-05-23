@@ -2247,11 +2247,13 @@ export async function getGroomerMyWorkSchedule(): Promise<GroomerMyWorkScheduleO
  * 获取历史记录详情
  */
 export async function getGroomerHistoryDetail(
-  bookingId: number
+  historyDetailRef: number | string
 ): Promise<GroomerHistoryDetailOut> {
-  const response = await http.get<GroomerHistoryDetailOut>(
-    `/api/groomers/history/${bookingId}`
-  );
+  const url =
+    typeof historyDetailRef === "string" && historyDetailRef.startsWith("/api/groomers/history/")
+      ? historyDetailRef
+      : `/api/groomers/history/${historyDetailRef}`;
+  const response = await http.get<GroomerHistoryDetailOut>(url);
   return response.data;
 }
 

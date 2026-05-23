@@ -64,6 +64,7 @@ type HistoryBadge = {
 type HistoryAppointmentCard = {
   id: string;
   bookingId: number;
+  detailUri?: string;
   date: string;
   petName: string;
   breed: string;
@@ -368,13 +369,16 @@ function mapScheduleSections(myWork: Record<string, unknown>, today: Date): Sche
 }
 
 function mapHistoryAppointment(item: Record<string, unknown>): HistoryAppointmentCard {
-  const bookingId = getNumber(item, ["id", "booking_id"], 0);
+  const bookingId = getNumber(item, ["booking_id", "id"], 0);
+  const historyItemId = getNumber(item, ["id"], bookingId);
+  const historyItemType = getString(item, ["history_item_type"], "booking");
   const serviceLabel = getString(item, ["service_name", "service_type"], "Service");
   const statusLabel = getString(item, ["status_label"]) || formatStatusLabel(getString(item, ["status"], "Unknown"));
 
   return {
-    id: `history-${bookingId || Math.random().toString(36).slice(2)}`,
+    id: `history-${historyItemType}-${historyItemId || bookingId || Math.random().toString(36).slice(2)}`,
     bookingId,
+    detailUri: getString(item, ["detail_uri"]) || undefined,
     date: getString(item, ["date"]) || formatShortDate(getString(item, ["scheduled_time", "created_at"])),
     petName: getString(item, ["pet_name"], "Pet"),
     breed: getString(item, ["pet_breed", "breed"], "Breed"),
@@ -842,6 +846,7 @@ export default function GroomerMyWorkPage() {
 
   useEffect(() => {
     if (activeTab !== "history") return;
+    setHistoryError("");
     fetchHistory({
       pet_name: debouncedHistorySearch || undefined,
       date_to: todayDateKey,
@@ -975,9 +980,10 @@ export default function GroomerMyWorkPage() {
       breed: appointment.breed,
       serviceLabel: appointment.badges[0]?.label,
     });
-    if (!appointment.bookingId) return;
+    const historyDetailRef = appointment.detailUri || appointment.bookingId;
+    if (!historyDetailRef) return;
     try {
-      await fetchHistoryDetail(appointment.bookingId);
+      await fetchHistoryDetail(historyDetailRef);
     } catch (error) {
       console.error("Failed to load history detail:", error);
       toast.error("Failed to load history details");
