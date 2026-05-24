@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import BookingDetail from "./BookingDetail";
-import { clientConfirmBookingTime, createDepositSession, getBookingDetail, type BookingDetailOut } from "@/lib/api";
+import { clientConfirmBookingTime, createDepositSession, createReview, createTipSession, getBookingDetail, type BookingDetailOut } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
 import { useBookingStore } from "@/components/booking/bookingStore";
@@ -14,6 +14,8 @@ vi.mock("@/lib/api", async (importOriginal) => {
     ...actual,
     clientConfirmBookingTime: vi.fn(),
     createDepositSession: vi.fn(),
+    createReview: vi.fn(),
+    createTipSession: vi.fn(),
     getBookingDetail: vi.fn(),
   };
 });
@@ -43,6 +45,44 @@ function renderBookingDetail(booking: BookingDetailOut) {
       </Routes>
     </MemoryRouter>,
   );
+}
+
+function makeCompletedBooking(overrides: Partial<BookingDetailOut> = {}): BookingDetailOut {
+  return {
+    id: 127,
+    order_code: "BT260523PJQ",
+    status: "completed",
+    scheduled_time: "2026-05-24T08:00:00Z",
+    pet_snapshot: { name: "Hugui" },
+    package_snapshot: {
+      name: "Full grooming",
+      service_type: "Mobile",
+      price: "95.00",
+    },
+    address_snapshot: {
+      address: "100 Vancouver Cres",
+      city: "Miramichi",
+      province: "NB",
+      postal_code: "E1N 2E5",
+    },
+    addons_snapshot: [{ name: "Teeth brushing", price: "10.00" }],
+    membership_snapshot: {},
+    coupon_snapshot: {},
+    package_amount: "95.00",
+    addons_amount: "10.00",
+    membership_fee: "0.00",
+    discount_rate: "0",
+    discount_amount: "0.00",
+    coupon_amount: "0.00",
+    payable_amount: "105.00",
+    deposit_amount: "20.00",
+    final_amount: "105.00",
+    payments: [
+      { id: 1, kind: "deposit", amount: "20.00", currency: "usd", status: "paid" },
+      { id: 2, kind: "final", amount: "85.00", currency: "usd", status: "succeeded" },
+    ],
+    ...overrides,
+  };
 }
 
 describe("BookingDetail", () => {
@@ -272,5 +312,69 @@ describe("BookingDetail", () => {
     });
     expect(screen.getByText("Payment expired after 3 days")).toBeInTheDocument();
     expect(toast.error).toHaveBeenCalledWith("This booking has expired and was canceled.");
+  });
+
+  it("starts tip payment from a completed booking", async () => {
+    renderBookingDetail(makeCompletedBooking());
+    vi.mocked(createTipSession).mockReturnValue(new Promise(() => {}));
+
+    expect(await screen.findByText("Tip your groomer?")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "12% - 12.60$" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Confirm & release Groomer" }));
+
+    await waitFor(() => {
+      expect(createTipSession).toHaveBeenCalledWith(127, "12.60");
+    });
+  });
+
+  it("submits a review for a completed booking", async () => {
+    const initialBooking = makeCompletedBooking({
+      payments: [
+        { id: 1, kind: "deposit", amount: "20.00", currency: "usd", status: "paid" },
+        { id: 2, kind: "final", amount: "85.00", currency: "usd", status: "succeeded" },
+        { id: 3, kind: "tip", amount: "12.60", currency: "usd", status: "paid" },
+      ],
+    });
+    vi.mocked(getBookingDetail)
+      .mockResolvedValueOnce(initialBooking)
+      .mockResolvedValueOnce({
+        ...initialBooking,
+        review: {
+          id: 9,
+          rating: 5,
+          technical_rating: 5,
+          attitude_rating: 5,
+          environment_rating: 5,
+          comment: "Great service",
+          created_at: "2026-05-24T10:00:00Z",
+        },
+      });
+    vi.mocked(createReview).mockResolvedValue({ ok: true, review_id: 9 });
+
+    render(
+      <MemoryRouter initialEntries={["/account/bookings/127"]}>
+        <Routes>
+          <Route path="/account/bookings/:bookingId" element={<BookingDetail />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "Review" }));
+    fireEvent.change(await screen.findByPlaceholderText("Share more details"), {
+      target: { value: "Great service" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Submit" }));
+
+    await waitFor(() => {
+      expect(createReview).toHaveBeenCalledWith(127, {
+        rating: 5,
+        technical_rating: 5,
+        attitude_rating: 5,
+        environment_rating: 5,
+        comment: "Great service",
+      });
+    });
+    expect(toast.success).toHaveBeenCalledWith("Review submitted");
   });
 });

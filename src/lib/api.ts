@@ -2,7 +2,7 @@
 import { http, setAuthToken, setRefreshToken, clearAuthTokens } from "./http";
 import { getEncryptedItem } from "./encryption";
 import { STORAGE_KEYS } from "./storageKeys";
-import { formatLocalDateTimeForApi } from "./localDateTime";
+import { formatLocalDateTimeForApi, getLocalOffsetMinutes } from "./localDateTime";
 
 // ==================== 类型定义 ====================
 
@@ -470,6 +470,19 @@ export interface BookingPaymentOut {
   payment_method?: PaymentMethodOut | null;
 }
 
+export interface ReviewSummaryOut {
+  id: number;
+  rating: number;
+  technical_rating?: number;
+  attitude_rating?: number;
+  environment_rating?: number;
+  comment?: string | null;
+  groomer_reply?: string | null;
+  groomer_replied_at?: string | null;
+  tip_amount?: number | string;
+  created_at: string;
+}
+
 export interface BookingDetailOut {
   id: number;
   order_code?: string | null;
@@ -498,6 +511,7 @@ export interface BookingDetailOut {
   deposit_amount: number | string;
   final_amount: number | string;
   payments?: BookingPaymentOut[];
+  review?: ReviewSummaryOut | null;
 }
 
 export interface BookingUpdateOut extends BookingOut {
@@ -1546,6 +1560,9 @@ export interface AddOnDecisionIn {
 export interface ReviewCreateIn {
   rating: number;
   comment?: string; // default: ""
+  technical_rating?: number | null;
+  attitude_rating?: number | null;
+  environment_rating?: number | null;
 }
 
 export interface CancelBookingIn {
@@ -1799,12 +1816,11 @@ export async function createAddOnRequest(
  */
 export async function createReview(
   bookingId: number,
-  rating: number,
-  comment: string = ""
+  data: ReviewCreateIn
 ): Promise<ReviewCreatedOut> {
   const response = await http.post<ReviewCreatedOut>(
     `/api/bookings/${bookingId}/review`,
-    { rating, comment } satisfies ReviewCreateIn
+    data
   );
   return response.data;
 }
@@ -2030,8 +2046,11 @@ export async function decideGroomerInvitation(
  * 开始前往服务地点
  */
 export async function startGroomerTravel(bookingId: number): Promise<OkOut> {
+  const queryParams = new URLSearchParams({
+    local_now: formatLocalDateTimeForApi(),
+  });
   const response = await http.post<OkOut>(
-    `/api/groomers/bookings/${bookingId}/start_travel`,
+    `/api/groomers/bookings/${bookingId}/start_travel?${queryParams.toString()}`,
     undefined
   );
   return response.data;
@@ -2290,10 +2309,12 @@ export async function getGroomerMyWorkSchedule(): Promise<GroomerMyWorkScheduleO
 export async function getGroomerHistoryDetail(
   historyDetailRef: number | string
 ): Promise<GroomerHistoryDetailOut> {
-  const url =
+  const baseUrl =
     typeof historyDetailRef === "string" && historyDetailRef.startsWith("/api/groomers/history/")
       ? historyDetailRef
       : `/api/groomers/history/${historyDetailRef}`;
+  const separator = baseUrl.includes("?") ? "&" : "?";
+  const url = `${baseUrl}${separator}local_offset_minutes=${encodeURIComponent(String(getLocalOffsetMinutes()))}`;
   const response = await http.get<GroomerHistoryDetailOut>(url);
   return response.data;
 }
@@ -2388,6 +2409,20 @@ export async function createFinalSession(
   const response = await http.post<PaymentSessionOut>(
     `/api/payments/payments/create_final_session?booking_id=${bookingId}`,
     undefined
+  );
+  return response.data;
+}
+
+/**
+ * 创建小费支付会话（Stripe Checkout）
+ */
+export async function createTipSession(
+  bookingId: number,
+  amount: number | string
+): Promise<PaymentSessionOut> {
+  const response = await http.post<PaymentSessionOut>(
+    "/api/payments/payments/create_tip_session",
+    { booking_id: bookingId, amount }
   );
   return response.data;
 }

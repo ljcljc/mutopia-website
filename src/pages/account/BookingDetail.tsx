@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { CustomRadio, OrangeButton } from "@/components/common";
+import { CustomInput, CustomRadio, OrangeButton } from "@/components/common";
 import { CustomTextarea } from "@/components/common/CustomTextarea";
 import { Icon } from "@/components/common/Icon";
 import { useAccountStore } from "@/components/account/accountStore";
@@ -10,6 +10,8 @@ import {
   cancelBooking,
   clientConfirmBookingTime,
   createDepositSession,
+  createReview,
+  createTipSession,
   getBookingDetail,
   getPaymentSessionRedirectUrl,
   type AddressOut,
@@ -29,7 +31,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
-import { XIcon } from "lucide-react";
+import { StarIcon, XIcon } from "lucide-react";
 import {
   addHoursToApiLocalDateTime,
   formatApiLocalDateTime,
@@ -42,6 +44,23 @@ function formatAmount(value: number | string | undefined, fallback: string) {
   if (typeof value === "number") return `$${value.toFixed(2)}`;
   const trimmed = String(value).trim();
   return trimmed.startsWith("$") ? trimmed : `$${trimmed}`;
+}
+
+function parseAmount(value: number | string | undefined): number {
+  if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+  if (typeof value === "string") {
+    const parsed = Number(value.replace(/[$,]/g, ""));
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  return 0;
+}
+
+function formatPaymentKind(kind: string) {
+  return kind
+    .split("_")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
 }
 
 function normalizeBookingStatus(status?: string | null) {
@@ -162,6 +181,38 @@ function StatusBadge({ label, tone }: { label: string; tone: DetailBadgeTone }) 
   );
 }
 
+function RatingControl({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="font-comfortaa text-[12px] font-bold leading-4 text-[#4A3C2A]">{label}</p>
+      <div className="flex items-center gap-1">
+        {[1, 2, 3, 4, 5].map((rating) => (
+          <button
+            key={rating}
+            type="button"
+            onClick={() => onChange(rating)}
+            className="flex size-8 items-center justify-center rounded-full transition-colors hover:bg-[#FFF3E9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2374ff]"
+            aria-label={`${label} ${rating} star${rating === 1 ? "" : "s"}`}
+          >
+            <StarIcon
+              className={`size-5 ${rating <= value ? "fill-[#DE6A07] text-[#DE6A07]" : "fill-none text-[#CFC7BF]"}`}
+              aria-hidden="true"
+            />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function getRefundedBadgeLabel(normalizedStatus: string, notes?: string | null) {
   const notesLower = notes?.toLowerCase() ?? "";
 
@@ -200,6 +251,17 @@ export default function BookingDetail() {
   const [isCardActionLoading, setIsCardActionLoading] = useState(false);
   const [isConfirmingProposedTime, setIsConfirmingProposedTime] = useState(false);
   const [isRejectingProposedTime, setIsRejectingProposedTime] = useState(false);
+  const [isReceiptOpen, setIsReceiptOpen] = useState(false);
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
+  const [rating, setRating] = useState(5);
+  const [technicalRating, setTechnicalRating] = useState(5);
+  const [attitudeRating, setAttitudeRating] = useState(5);
+  const [environmentRating, setEnvironmentRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState("");
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [selectedTipPercent, setSelectedTipPercent] = useState(12);
+  const [customTipAmount, setCustomTipAmount] = useState("");
+  const [isCreatingTipSession, setIsCreatingTipSession] = useState(false);
   const { addresses, isLoadingAddresses, fetchAddresses } = useAccountStore();
   const loadBookingDetailForEdit = useBookingStore((state) => state.loadBookingDetailForEdit);
 
@@ -370,7 +432,7 @@ export default function BookingDetail() {
           progressWidth: 98.5,
           badgeLabel: "Service completed",
           badgeTone: "purple",
-          nextStep: "Pending review",
+          nextStep: detail?.review ? "Review submitted" : "Pending review",
           showNextStep: true,
           actionKind: "review",
         };
@@ -433,7 +495,7 @@ export default function BookingDetail() {
           actionKind: "none",
         };
     }
-  }, [detail?.notes, detail?.scheduled_time, detail?.status, estimatedCompletionDisplay, normalizedStatus, paymentDueDisplay, scheduledDisplay]);
+  }, [detail?.notes, detail?.review, detail?.scheduled_time, detail?.status, estimatedCompletionDisplay, normalizedStatus, paymentDueDisplay, scheduledDisplay]);
 
   const serviceSummary = detailCardConfig.subtitleIncludesScheduled
     ? `${serviceName} - ${serviceTypeLabel} ${scheduledDisplay}`
@@ -491,6 +553,49 @@ export default function BookingDetail() {
     });
   }, [detail?.addons_snapshot]);
 
+  // 计算折扣信息
+  const discountRate = detail?.discount_rate
+    ? (typeof detail.discount_rate === "number" ? detail.discount_rate : parseFloat(String(detail.discount_rate)) || 0)
+    : 0;
+  const discountAmount = formatAmount(detail?.discount_amount, "$0.00");
+  const couponAmount = formatAmount(detail?.coupon_amount, "$0.00");
+  const membershipFee = formatAmount(detail?.membership_fee, "$0.00");
+
+  const receiptLines = useMemo(() => {
+    const lines = [
+      { label: `${serviceName} package`, amount: packageSubtotal },
+      ...(addOnItems.length > 0 ? addOnItems.map((item) => ({ label: item.label, amount: item.amount })) : []),
+    ];
+
+    if (membershipFee !== "$0.00") lines.push({ label: "Membership discount", amount: `-${membershipFee}` });
+    if (couponAmount !== "$0.00") lines.push({ label: "Coupon discount", amount: `-${couponAmount}` });
+    if (discountAmount !== "$0.00") lines.push({ label: "Discount", amount: `-${discountAmount}` });
+
+    return lines;
+  }, [addOnItems, couponAmount, discountAmount, membershipFee, packageSubtotal, serviceName]);
+
+  const paidTotal = useMemo(() => {
+    const total = detail?.payments
+      ?.filter((payment) => ["succeeded", "paid"].includes(payment.status.toLowerCase()))
+      .reduce((sum, payment) => sum + parseAmount(payment.amount), 0);
+    return formatAmount(total ?? 0, "$0.00");
+  }, [detail?.payments]);
+
+  const tipOptions = useMemo(() => {
+    const baseAmount = parseAmount(detail?.final_amount);
+    return [8, 12, 16, 20].map((percent) => ({
+      percent,
+      amount: Number(((baseAmount * percent) / 100).toFixed(2)),
+    }));
+  }, [detail?.final_amount]);
+
+  const selectedPresetTipAmount =
+    tipOptions.find((option) => option.percent === selectedTipPercent)?.amount ?? 0;
+  const selectedTipAmount = customTipAmount.trim() ? parseAmount(customTipAmount) : selectedPresetTipAmount;
+  const hasPaidTip = Boolean(
+    detail?.payments?.some((payment) => payment.kind.toLowerCase() === "tip" && ["succeeded", "paid"].includes(payment.status.toLowerCase())),
+  );
+
   useEffect(() => {
     if (!isModifyOpen) return;
     fetchAddresses();
@@ -509,14 +614,6 @@ export default function BookingDetail() {
     setIsModifyOpen(false);
   };
 
-  // 计算折扣信息
-  const discountRate = detail?.discount_rate 
-    ? (typeof detail.discount_rate === "number" ? detail.discount_rate : parseFloat(String(detail.discount_rate)) || 0)
-    : 0;
-  const discountAmount = formatAmount(detail?.discount_amount, "$0.00");
-  const couponAmount = formatAmount(detail?.coupon_amount, "$0.00");
-  const membershipFee = formatAmount(detail?.membership_fee, "$0.00");
-  
   // 会员和优惠券信息
   const membershipSnapshot = (detail?.membership_snapshot as Record<string, unknown> | undefined) ?? {};
   const couponSnapshot = (detail?.coupon_snapshot as Record<string, unknown> | undefined) ?? {};
@@ -612,8 +709,82 @@ export default function BookingDetail() {
     }
   };
 
+  const handleCreateTipSession = async () => {
+    if (!detail?.id || isCreatingTipSession) return;
+
+    if (selectedTipAmount <= 0) {
+      toast.error("Please choose a tip amount");
+      return;
+    }
+
+    setIsCreatingTipSession(true);
+    try {
+      const session = await createTipSession(detail.id, selectedTipAmount.toFixed(2));
+      const redirectUrl = getPaymentSessionRedirectUrl(session);
+      if (!redirectUrl) {
+        throw new Error(`Invalid tip payment redirect URL: ${session.url}`);
+      }
+      window.location.assign(redirectUrl);
+    } catch (actionError) {
+      console.error("Failed to create tip session:", actionError);
+      if (actionError instanceof HttpError && actionError.status === 409) {
+        const updatedDetail = await getBookingDetail(detail.id);
+        setDetail(updatedDetail);
+        toast.error("Tip is not available for this booking");
+      } else {
+        toast.error("Failed to start tip payment");
+      }
+      setIsCreatingTipSession(false);
+    }
+  };
+
   const handlePendingAction = (message: string) => {
     toast(message);
+  };
+
+  const handleOpenReview = () => {
+    if (detail?.review) {
+      toast("Review already submitted");
+      return;
+    }
+    setRating(5);
+    setTechnicalRating(5);
+    setAttitudeRating(5);
+    setEnvironmentRating(5);
+    setReviewComment("");
+    setIsReviewOpen(true);
+  };
+
+  const handleSubmitReview = async () => {
+    if (!detail?.id || isSubmittingReview) return;
+
+    setIsSubmittingReview(true);
+    try {
+      await createReview(detail.id, {
+        rating,
+        technical_rating: technicalRating,
+        attitude_rating: attitudeRating,
+        environment_rating: environmentRating,
+        comment: reviewComment.trim(),
+      });
+
+      const updatedDetail = await getBookingDetail(detail.id);
+      setDetail(updatedDetail);
+      setIsReviewOpen(false);
+      toast.success("Review submitted");
+    } catch (actionError) {
+      console.error("Failed to submit review:", actionError);
+      if (actionError instanceof HttpError && actionError.status === 409) {
+        const updatedDetail = await getBookingDetail(detail.id);
+        setDetail(updatedDetail);
+        setIsReviewOpen(false);
+        toast.error("Review has already been submitted");
+      } else {
+        toast.error("Failed to submit review");
+      }
+    } finally {
+      setIsSubmittingReview(false);
+    }
   };
 
   const handleEditAwaitingPaymentBooking = () => {
@@ -865,24 +1036,81 @@ export default function BookingDetail() {
                   ) : null}
 
                   {detailCardConfig.actionKind === "review" ? (
-                    <>
-                      <OrangeButton
-                        type="button"
-                        variant="secondary"
-                        size="compact"
-                        className="min-w-[100px]"
-                        onClick={() => handlePendingAction("Receipt is not available yet")}
-                      >
-                        Receipt
-                      </OrangeButton>
-                      <button
-                        type="button"
-                        className="inline-flex h-[28px] min-w-[100px] items-center justify-center rounded-[32px] bg-[#633479] px-[28px] py-[16px] font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#FFF7ED] transition-all duration-200 hover:opacity-90"
-                        onClick={() => handlePendingAction("Review flow is not available yet")}
-                      >
-                        Review
-                      </button>
-                    </>
+                    <div className="flex w-full flex-col gap-4">
+                      <div className="flex flex-col gap-2">
+                        <p className="font-comfortaa text-[12px] font-bold leading-4 text-[#4A3C2A]">Tip your groomer?</p>
+                        {hasPaidTip ? (
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="min-w-[160px] flex-1 font-comfortaa text-[12px] font-bold leading-4 text-[#467900]">
+                              Tip paid. Thank you!
+                            </p>
+                            <OrangeButton
+                              type="button"
+                              variant="primary"
+                              size="compact"
+                              className="min-w-[100px] bg-[#633479] hover:bg-[#633479]/90 active:bg-[#633479]/90 focus-visible:bg-[#633479]/90"
+                              onClick={handleOpenReview}
+                            >
+                              {detail?.review ? "Reviewed" : "Review"}
+                            </OrangeButton>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="grid grid-cols-2 gap-2">
+                              {tipOptions.map((option) => {
+                                const isSelected = !customTipAmount.trim() && selectedTipPercent === option.percent;
+                                return (
+                                  <OrangeButton
+                                    key={option.percent}
+                                    type="button"
+                                    variant={isSelected ? "primary" : "secondary"}
+                                    size="compact"
+                                    fullWidth
+                                    onClick={() => {
+                                      setSelectedTipPercent(option.percent);
+                                      setCustomTipAmount("");
+                                    }}
+                                    textSize={15}
+                                    className={`h-9! rounded-[8px]! ${
+                                      isSelected
+                                        ? "border border-[#633479] bg-[linear-gradient(166deg,#FFF7ED_0%,#FFFBEB_100%)]! text-[#633479]! [&_p]:font-bold [&_p]:text-[#633479]!"
+                                        : "border-[#D1D5DB]! bg-white! hover:border-[#633479]! [&_p]:font-medium [&_p]:text-[#4A2C55]!"
+                                    }`}
+                                  >
+                                    {option.percent}% - {option.amount.toFixed(2)}$
+                                  </OrangeButton>
+                                );
+                              })}
+                            </div>
+
+                            <CustomInput
+                              label="Others"
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={customTipAmount}
+                              onChange={(event) => setCustomTipAmount(event.target.value)}
+                              disabled={isCreatingTipSession}
+                              placeholder="Enter tip"
+                              leftElement={<span className="mr-1 font-comfortaa text-[12.25px] text-[#717182]">$</span>}
+                              inputClassName="font-normal"
+                            />
+
+                            <OrangeButton
+                              type="button"
+                              variant="primary"
+                              size="compact"
+                              fullWidth
+                              className="bg-[#8B6357] hover:bg-[#8B6357]/90 active:bg-[#8B6357]/90 focus-visible:bg-[#8B6357]/90"
+                              loading={isCreatingTipSession}
+                              onClick={handleCreateTipSession}
+                            >
+                              Confirm & release Groomer
+                            </OrangeButton>
+                          </>
+                        )}
+                      </div>
+                    </div>
                   ) : null}
 
                   {detailCardConfig.actionKind === "comment" ? (
@@ -1272,6 +1500,153 @@ export default function BookingDetail() {
                   disabled={!cancelReason.trim()}
                 >
                   Yes, send request
+                </OrangeButton>
+              </div>
+            </AlertDialogFooter>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={isReceiptOpen} onOpenChange={setIsReceiptOpen}>
+        <AlertDialogContent className="max-w-[calc(100%-32px)] rounded-[20px] border-[rgba(0,0,0,0.2)] px-0 py-0 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] sm:max-w-[560px]">
+          <div className="flex flex-col gap-4 pb-6 pt-3">
+            <AlertDialogHeader className="gap-2 px-3">
+              <div className="flex items-center justify-between w-full">
+                <AlertDialogPrimitive.Cancel asChild>
+                  <button
+                    type="button"
+                    className="flex size-4 items-center justify-center border-0 bg-transparent p-0 text-[#4A3C2A] opacity-70 hover:opacity-100"
+                    aria-label="Close receipt dialog"
+                  >
+                    <XIcon className="size-4 stroke-[1.5]" />
+                  </button>
+                </AlertDialogPrimitive.Cancel>
+                <AlertDialogTitle className="flex-1 text-center font-comfortaa font-normal text-[14px] leading-[22.75px] text-[#4C4C4C]">
+                  Receipt
+                </AlertDialogTitle>
+                <span className="size-4" />
+              </div>
+            </AlertDialogHeader>
+            <div className="h-px bg-[rgba(0,0,0,0.1)]" />
+            <div className="flex flex-col gap-4 px-6">
+              <AlertDialogDescription className="sr-only">
+                Booking receipt for {petName}
+              </AlertDialogDescription>
+              <div>
+                <p className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">{petName}</p>
+                <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">{serviceSummary}</p>
+                {bookingCode ? (
+                  <p className="mt-1 font-comfortaa text-[12px] leading-4 text-[#8B6357]">{bookingCode}</p>
+                ) : null}
+              </div>
+
+              <div className="flex flex-col gap-2 rounded-[12px] bg-[#FAF8F4] p-4">
+                {receiptLines.map((line) => (
+                  <div key={`${line.label}-${line.amount}`} className="flex items-center justify-between gap-4">
+                    <p className="font-comfortaa text-[12px] font-bold leading-4 text-[#4A3C2A]">{line.label}</p>
+                    <p className="font-comfortaa text-[12px] font-bold leading-4 text-[#4A3C2A]">{line.amount}</p>
+                  </div>
+                ))}
+                <div className="my-1 border-t border-[#E5E7EB]" />
+                <div className="flex items-center justify-between gap-4">
+                  <p className="font-comfortaa text-[14px] font-bold leading-5 text-[#4A3C2A]">Total</p>
+                  <p className="font-comfortaa text-[14px] font-bold leading-5 text-[#DE6A07]">{totalEstimation}</p>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <p className="font-comfortaa text-[12px] leading-4 text-[#4A5565]">Paid</p>
+                  <p className="font-comfortaa text-[12px] leading-4 text-[#4A5565]">{paidTotal}</p>
+                </div>
+              </div>
+
+              {detail?.payments?.length ? (
+                <div className="flex flex-col gap-2">
+                  <p className="font-comfortaa text-[12px] font-bold leading-4 text-[#4A3C2A]">Payments</p>
+                  {detail.payments.map((payment) => (
+                    <div key={payment.id} className="flex items-center justify-between gap-4">
+                      <p className="font-comfortaa text-[12px] leading-4 text-[#4A5565]">
+                        {formatPaymentKind(payment.kind)} · {payment.status}
+                      </p>
+                      <p className="font-comfortaa text-[12px] leading-4 text-[#4A5565]">
+                        {formatAmount(payment.amount, "$0.00")}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+            <AlertDialogFooter className="px-6">
+              <AlertDialogPrimitive.Cancel asChild>
+                <OrangeButton variant="primary" size="medium" textSize={14} className="min-w-[136px]">
+                  Done
+                </OrangeButton>
+              </AlertDialogPrimitive.Cancel>
+            </AlertDialogFooter>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={isReviewOpen} onOpenChange={(open) => !isSubmittingReview && setIsReviewOpen(open)}>
+        <AlertDialogContent className="max-w-[calc(100%-32px)] rounded-[20px] border-[rgba(0,0,0,0.2)] px-0 py-0 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] sm:max-w-[560px]">
+          <div className="flex max-h-[85vh] flex-col gap-4 overflow-y-auto pb-6 pt-3">
+            <AlertDialogHeader className="gap-2 px-3">
+              <div className="flex items-center justify-between w-full">
+                <AlertDialogPrimitive.Cancel asChild>
+                  <button
+                    type="button"
+                    disabled={isSubmittingReview}
+                    className="flex size-4 items-center justify-center border-0 bg-transparent p-0 text-[#4A3C2A] opacity-70 hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-40"
+                    aria-label="Close review dialog"
+                  >
+                    <XIcon className="size-4 stroke-[1.5]" />
+                  </button>
+                </AlertDialogPrimitive.Cancel>
+                <AlertDialogTitle className="flex-1 text-center font-comfortaa font-normal text-[14px] leading-[22.75px] text-[#4C4C4C]">
+                  Review
+                </AlertDialogTitle>
+                <span className="size-4" />
+              </div>
+            </AlertDialogHeader>
+            <div className="h-px bg-[rgba(0,0,0,0.1)]" />
+            <div className="flex flex-col gap-4 px-6">
+              <AlertDialogDescription className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
+                Share your experience with {petName}'s service.
+              </AlertDialogDescription>
+
+              <RatingControl label="Overall rating" value={rating} onChange={setRating} />
+              <RatingControl label="Technical skill" value={technicalRating} onChange={setTechnicalRating} />
+              <RatingControl label="Attitude" value={attitudeRating} onChange={setAttitudeRating} />
+              <RatingControl label="Environment" value={environmentRating} onChange={setEnvironmentRating} />
+
+              <CustomTextarea
+                label="Comment"
+                placeholder="Share more details"
+                value={reviewComment}
+                onChange={(event) => setReviewComment(event.target.value)}
+                className="text-[#4A5565]"
+              />
+            </div>
+            <AlertDialogFooter className="px-6">
+              <div className="flex w-full items-center justify-end gap-2.5">
+                <AlertDialogPrimitive.Cancel asChild>
+                  <OrangeButton
+                    variant="outline"
+                    size="medium"
+                    textSize={14}
+                    className="min-w-[120px]"
+                    disabled={isSubmittingReview}
+                  >
+                    Cancel
+                  </OrangeButton>
+                </AlertDialogPrimitive.Cancel>
+                <OrangeButton
+                  variant="primary"
+                  size="medium"
+                  textSize={14}
+                  className="min-w-[136px]"
+                  loading={isSubmittingReview}
+                  onClick={handleSubmitReview}
+                >
+                  Submit
                 </OrangeButton>
               </div>
             </AlertDialogFooter>

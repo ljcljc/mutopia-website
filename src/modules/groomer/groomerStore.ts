@@ -7,11 +7,13 @@ import {
   getGroomerCurrentBooking,
   getGroomerDashboardSummary,
   getGroomerPendingBookingInvitations,
+  type GroomerCompleteServiceOut,
   groomerPortalCheckIn,
   startGroomerGrooming,
   startGroomerTravel,
   terminateGroomerService,
   type GroomerCancelBookingIn,
+  type ReviewSummaryOut,
   type TerminateServiceIn,
 } from "@/lib/api";
 import type { GroomerUpNextAppointment } from "@/modules/groomer/components/GroomerUpNextCard";
@@ -39,6 +41,7 @@ export type DashboardAppointment = GroomerUpNextAppointment & {
   addonLines: DashboardAmountLine[];
   addonSubtotal: string;
   priceAdjustmentLines: DashboardAmountLine[];
+  review?: ReviewSummaryOut | null;
   invitationId?: number;
   proposalSlots?: string[];
   proposedTimeOptions?: Array<{ date: string; slot: "am" | "pm"; time: string; datetime_local: string }>;
@@ -315,9 +318,17 @@ function normalizeStatus(status: string): string {
 }
 
 function isActiveDashboardAppointmentStatus(status: string): boolean {
-  return ["traveling", "travel_started", "en_route", "on_the_way", "checked_in", "in_progress"].includes(
-    normalizeStatus(status),
-  );
+  return [
+    "traveling",
+    "travel_started",
+    "en_route",
+    "on_the_way",
+    "checked_in",
+    "in_progress",
+    "completed",
+    "awaiting_final_payment",
+    "reviewed",
+  ].includes(normalizeStatus(status));
 }
 
 function getDashboardAppointmentPriority(record: Record<string, unknown>, now: Date): number | null {
@@ -412,6 +423,7 @@ function mapDashboardAppointment(raw: unknown): DashboardAppointment | null {
     ...estimate,
     ...packageAndAddonBreakdown,
     estimateBreakdown: getString(record, ["estimate_breakdown"]) || getString(price, ["estimate_breakdown"]) || estimate.estimateBreakdown,
+    review: record.review ? (record.review as ReviewSummaryOut) : null,
   };
 }
 
@@ -531,7 +543,7 @@ interface GroomerDashboardState {
   cancelTravel: (bookingId: number, data: GroomerCancelBookingIn) => Promise<void>;
   checkIn: (bookingId: number) => Promise<void>;
   startGrooming: (bookingId: number) => Promise<void>;
-  completeService: (bookingId: number) => Promise<void>;
+  completeService: (bookingId: number) => Promise<GroomerCompleteServiceOut>;
   terminateService: (bookingId: number, data: TerminateServiceIn) => Promise<void>;
 }
 
@@ -593,6 +605,7 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
             originalEstimate: estimate.originalEstimate ?? nextAppointment.originalEstimate,
             savingsLabel: estimate.savingsLabel ?? nextAppointment.savingsLabel,
             estimateBreakdown: estimate.estimateBreakdown ?? nextAppointment.estimateBreakdown,
+            review: detailAppointment?.review ?? nextAppointment.review,
             ...packageAndAddonBreakdown,
           };
         } catch (error) {
@@ -682,12 +695,20 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
   completeService: async (bookingId: number) => {
     set({ isCompletingService: true });
     try {
-      await completeGroomerService(bookingId);
+      const result = await completeGroomerService(bookingId);
+      const resultRecord = asRecord(result);
+      const nextStatus = getString(resultRecord, ["status"], "completed");
+      const totalServiceMinutes = getOptionalNumber(resultRecord, ["total_service_minutes"]);
       set((state) => ({
         nextAppointment: state.nextAppointment && Number(state.nextAppointment.id) === bookingId
-          ? null
+          ? {
+              ...state.nextAppointment,
+              status: nextStatus,
+              duration: totalServiceMinutes ? `Est. duration: ${totalServiceMinutes} minutes` : state.nextAppointment.duration,
+            }
           : state.nextAppointment,
       }));
+      return result;
     } finally {
       set({ isCompletingService: false });
     }

@@ -20,15 +20,24 @@ import {
   type DashboardGoal,
 } from "@/modules/groomer/groomerStore";
 import { shouldShowStartTravel } from "@/modules/groomer/utils/time";
-import { decideGroomerInvitation, getAddOns, submitGroomerCheckUpCheckout, type AddOnOut, type TerminateServiceIn } from "@/lib/api";
+import {
+  decideGroomerInvitation,
+  getAddOns,
+  submitGroomerCheckUpCheckout,
+  submitGroomerHealthReport,
+  type AddOnOut,
+  type HealthReportIn,
+  type TerminateServiceIn,
+} from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
-import { XIcon } from "lucide-react";
+import { CheckCircleIcon, StarIcon, XIcon } from "lucide-react";
 
 type BookingRequest = DashboardAppointment;
 type CheckUpTab = "weight" | "add-ons" | "personalization";
 type BookingRequestSuccessAlertKind = "confirm" | "propose";
 type TerminateServiceResolution = "owner_approved" | "mutopia_intervention";
+type HealthReportFormData = HealthReportIn;
 
 const FALLBACK_ADD_ONS: AddOnOut[] = [
   { id: 1, name: "Teeth brushing", description: "Professional dental cleaning", price: 15, is_variable: false },
@@ -326,6 +335,157 @@ function InProgressJobCard({
   );
 }
 
+function CompletedServiceCard({
+  appointment,
+  onFillReport,
+}: {
+  appointment: DashboardAppointment;
+  onFillReport: () => void;
+}) {
+  return (
+    <article className="rounded-[16px] bg-[linear-gradient(180deg,#633479_0%,#7A4777_52%,#8B6357_100%)] p-5 shadow-[0px_4px_6px_rgba(74,44,85,0.3)]">
+      <div className="min-w-0">
+        <p className="font-comfortaa text-[12px] leading-[18px] text-white/70">IN PROGRESS</p>
+        <h2 className="truncate font-comfortaa text-[20px] font-bold leading-[30px] text-white">
+          {getInProgressTitle(appointment.service, appointment.petName)}
+        </h2>
+      </div>
+
+      <div className="mt-4 rounded-[12px] bg-white/10 px-3 py-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <img src={appointment.avatarUrl} alt={appointment.petName} className="size-14 rounded-full object-cover" />
+          <div className="min-w-0">
+            <p className="truncate font-comfortaa text-[16px] leading-6 text-white">{appointment.petName}</p>
+            <p className="truncate font-comfortaa text-[13px] leading-[19.5px] text-white/70">
+              {appointment.breed} • {appointment.service}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 flex h-9 items-center gap-2 rounded-[8px] border border-[#6AA31C] bg-[#F4FFDE] px-4">
+        <CheckCircleIcon className="size-3 shrink-0 fill-[#6AA31C] text-[#F4FFDE]" aria-hidden="true" />
+        <p className="truncate font-comfortaa text-[12px] font-bold leading-4 text-[#467900]">
+          Completed. Waiting for client confirmation
+        </p>
+      </div>
+
+      <OrangeButton
+        type="button"
+        variant="outline"
+        fullWidth
+        onClick={onFillReport}
+        className="mt-4 border-[#FFF7ED]! text-[#FFF7ED]! hover:bg-white/10! active:bg-white/10! focus-visible:bg-white/10! [&_p]:font-semibold [&_p]:text-[#FFF7ED]!"
+      >
+        Fill report for {appointment.petName}
+      </OrangeButton>
+    </article>
+  );
+}
+
+function parseMoneyValue(value: unknown): number {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && value.trim()) {
+    const parsed = Number(value.replace(/[^0-9.-]/g, ""));
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  return 0;
+}
+
+function formatMoneyValue(value: unknown): string {
+  return `$${parseMoneyValue(value).toFixed(2)}`;
+}
+
+function ReviewedServiceCard({
+  appointment,
+  onFillReport,
+  onViewNextJob,
+}: {
+  appointment: DashboardAppointment;
+  onFillReport: () => void;
+  onViewNextJob: () => void;
+}) {
+  const review = appointment.review;
+  const rating = Math.max(0, Math.min(5, Math.round(review?.rating ?? 0)));
+  const tipAmount = parseMoneyValue(review?.tip_amount);
+  const hasTip = tipAmount > 0;
+
+  return (
+    <article className="rounded-[16px] bg-[linear-gradient(180deg,#DE6A07_0%,#E67E22_100%)] p-5 shadow-[0px_4px_6px_rgba(236,72,153,0.4)]">
+      <div className="flex flex-col items-center text-center">
+        <div className="flex size-16 items-center justify-center rounded-full bg-white">
+          <StarIcon className="size-8 fill-[#DE6A07] text-[#DE6A07]" aria-hidden="true" />
+        </div>
+        <h2 className="mt-5 font-comfortaa text-[24px] font-bold leading-9 text-white">Excellent Work!</h2>
+        <p className="mt-1 font-comfortaa text-[14px] leading-[21px] text-white/90">
+          {appointment.petName}&apos;s grooming is complete.
+          <br />
+          You have to fill health report.
+        </p>
+      </div>
+
+      <div className="mt-8 rounded-[12px] bg-white/20 p-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <img src={appointment.avatarUrl} alt={appointment.petName} className="size-12 rounded-full object-cover" />
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-comfortaa text-[14px] font-medium leading-[21px] text-white">
+              {appointment.owner || "Client"} rated you
+            </p>
+            <div className="mt-1 flex gap-1" aria-label={`${rating} out of 5 stars`}>
+              {Array.from({ length: 5 }, (_, index) => (
+                <StarIcon
+                  key={index}
+                  className={`size-4 ${index < rating ? "fill-[#FDE047] text-[#FDE047]" : "fill-white/25 text-white/25"}`}
+                  aria-hidden="true"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {review?.comment ? (
+          <div className="mt-4 rounded-[8px] bg-white/90 px-[10px] py-[10px]">
+            <p className="line-clamp-2 font-comfortaa text-[12px] leading-[18px] text-[#4A2C55]">
+              &quot;{review.comment}&quot;
+            </p>
+          </div>
+        ) : null}
+      </div>
+
+      {hasTip ? (
+        <div className="mt-4 rounded-[12px] bg-[#FFF7ED] px-3 py-3">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="font-comfortaa text-[12px] leading-[18px] text-[#92400E]">You earned a tip!</p>
+              <p className="font-comfortaa text-[20px] font-bold leading-[30px] text-[#E67E22]">
+                + {formatMoneyValue(tipAmount)}
+              </p>
+            </div>
+            <span className="text-[32px] leading-[48px]" aria-hidden="true">
+              🎉
+            </span>
+          </div>
+        </div>
+      ) : null}
+
+      <button
+        type="button"
+        onClick={onFillReport}
+        className="mt-4 flex h-12 w-full items-center justify-center rounded-full border-2 border-[#FFF7ED] px-7 font-comfortaa text-[16px] font-semibold leading-[17.5px] text-[#FFF7ED] transition-colors hover:bg-white/10"
+      >
+        Fill report for {appointment.petName}
+      </button>
+      <button
+        type="button"
+        onClick={onViewNextJob}
+        className="mt-5 flex h-12 w-full items-center justify-center rounded-full bg-white px-7 font-comfortaa text-[16px] font-bold leading-6 text-[#DF6E0C] shadow-[0px_10px_8px_rgba(0,0,0,0.1),0px_4px_3px_rgba(0,0,0,0.1)] transition-transform active:scale-[0.99]"
+      >
+        View next job
+      </button>
+    </article>
+  );
+}
+
 function ServiceTerminationModal({
   open,
   isSubmitting,
@@ -449,6 +609,132 @@ function ServiceTerminationModal({
           <div className="flex flex-col gap-[10px]">
             <OrangeButton type="submit" fullWidth textSize={14} loading={isSubmitting}>
               Submit
+            </OrangeButton>
+            <OrangeButton type="button" variant="outline" fullWidth textSize={14} onClick={onClose}>
+              Cancel
+            </OrangeButton>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function HealthReportModal({
+  open,
+  isSubmitting,
+  appointment,
+  onClose,
+  onSubmit,
+}: {
+  open: boolean;
+  isSubmitting: boolean;
+  appointment: DashboardAppointment | null;
+  onClose: () => void;
+  onSubmit: (data: HealthReportFormData) => Promise<void>;
+}) {
+  const [summary, setSummary] = useState("");
+  const [petCondition, setPetCondition] = useState("");
+  const [behaviorNotes, setBehaviorNotes] = useState("");
+  const [recommendations, setRecommendations] = useState("");
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!open) return;
+    setSummary("");
+    setPetCondition("");
+    setBehaviorNotes("");
+    setRecommendations("");
+    setError("");
+  }, [open]);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const trimmedSummary = summary.trim();
+    if (!trimmedSummary) {
+      setError("Summary is required");
+      return;
+    }
+
+    await onSubmit({
+      summary: trimmedSummary,
+      pet_condition: petCondition.trim(),
+      behavior_notes: behaviorNotes.trim(),
+      recommendations: recommendations.trim(),
+    });
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && !isSubmitting && onClose()}>
+      <DialogContent
+        overlayClassName="service-area-dialog-overlay z-[70]!"
+        className="service-area-dialog inset-x-0! bottom-0! top-auto! z-[75]! mx-auto! flex! max-h-[88vh]! w-full! max-w-none! translate-x-0! translate-y-0! flex-col! gap-0! rounded-b-none rounded-t-[calc(24*var(--px393))] border-0! bg-white! p-0! shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)] [&>button]:hidden"
+      >
+        <DialogTitle className="sr-only">Health report</DialogTitle>
+        <DialogDescription className="sr-only">Fill the grooming health report.</DialogDescription>
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-4 overflow-y-auto px-[calc(24*var(--px393))] pb-[max(calc(24*var(--px393)),env(safe-area-inset-bottom))] pt-[calc(24*var(--px393))] sm:px-6 sm:pb-[max(24px,env(safe-area-inset-bottom))] sm:pt-6"
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">
+                Health report{appointment ? ` for ${appointment.petName}` : ""}
+              </h2>
+              <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
+                Share condition, behavior, and care recommendations
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="flex size-5 shrink-0 items-center justify-center text-[#4A5565] transition-colors hover:text-[#4A3C2A] disabled:cursor-not-allowed disabled:opacity-60"
+              aria-label="Close health report dialog"
+            >
+              <XIcon className="size-4 stroke-[1.5]" aria-hidden="true" />
+            </button>
+          </div>
+
+          <CustomTextarea
+            label="Summary"
+            value={summary}
+            onChange={(event) => {
+              setSummary(event.target.value);
+              setError("");
+            }}
+            disabled={isSubmitting}
+            placeholder="Enter report summary"
+            error={error}
+            className="min-h-[92px] text-[#4A3C2A]"
+          />
+          <CustomInput
+            label="Pet condition"
+            value={petCondition}
+            onChange={(event) => setPetCondition(event.target.value)}
+            disabled={isSubmitting}
+            placeholder="Enter pet condition"
+          />
+          <CustomTextarea
+            label="Behavior notes"
+            value={behaviorNotes}
+            onChange={(event) => setBehaviorNotes(event.target.value)}
+            disabled={isSubmitting}
+            placeholder="Enter behavior notes"
+            className="min-h-[82px] text-[#4A3C2A]"
+          />
+          <CustomTextarea
+            label="Recommendations"
+            value={recommendations}
+            onChange={(event) => setRecommendations(event.target.value)}
+            disabled={isSubmitting}
+            placeholder="Enter recommendations"
+            className="min-h-[82px] text-[#4A3C2A]"
+          />
+
+          <div className="flex flex-col gap-[10px]">
+            <OrangeButton type="submit" fullWidth textSize={14} loading={isSubmitting}>
+              Submit report
             </OrangeButton>
             <OrangeButton type="button" variant="outline" fullWidth textSize={14} onClick={onClose}>
               Cancel
@@ -1095,6 +1381,8 @@ export default function GroomerDashboardPage() {
   const [devTravelStatus, setDevTravelStatus] = useState<"" | "traveling" | "checked_in" | "in_progress">("");
   const [isCancelAppointmentModalOpen, setIsCancelAppointmentModalOpen] = useState(false);
   const [isCheckUpOpen, setIsCheckUpOpen] = useState(false);
+  const [isHealthReportOpen, setIsHealthReportOpen] = useState(false);
+  const [isSubmittingHealthReport, setIsSubmittingHealthReport] = useState(false);
   const [isTerminateServiceOpen, setIsTerminateServiceOpen] = useState(false);
   const [bookingRequestSuccessAlert, setBookingRequestSuccessAlert] = useState<BookingRequestSuccessAlertKind | null>(null);
   const {
@@ -1151,6 +1439,8 @@ export default function GroomerDashboardPage() {
   );
   const showCurrentJob = normalizedAppointmentStatus === "checked_in";
   const showInProgressJob = normalizedAppointmentStatus === "in_progress";
+  const showCompletedServiceJob = ["completed", "awaiting_final_payment", "reviewed"].includes(normalizedAppointmentStatus);
+  const showReviewedServiceJob = showCompletedServiceJob && Boolean(effectiveAppointment?.review);
 
   const handleStartTravel = async () => {
     if (!effectiveAppointment?.id || isStartingTravel || !showStartTravel) return;
@@ -1276,6 +1566,28 @@ export default function GroomerDashboardPage() {
     }
   };
 
+  const handleSubmitHealthReport = async (data: HealthReportFormData) => {
+    if (!effectiveAppointment?.id || isSubmittingHealthReport) return;
+
+    const bookingId = Number(effectiveAppointment.id);
+    if (!Number.isFinite(bookingId)) return;
+
+    setIsSubmittingHealthReport(true);
+    try {
+      await submitGroomerHealthReport(bookingId, data);
+      setIsHealthReportOpen(false);
+      toast.success("Health report submitted");
+      fetchDashboard().catch((error) => {
+        console.error("Failed to refresh groomer dashboard:", error);
+      });
+    } catch (error) {
+      console.error("Failed to submit health report:", error);
+      toast.error("Failed to submit health report");
+    } finally {
+      setIsSubmittingHealthReport(false);
+    }
+  };
+
   const handleConfirmOriginalTime = async (
     request: BookingRequest,
     confirmedTime: BookingRequestDecisionTimeOption,
@@ -1367,7 +1679,18 @@ export default function GroomerDashboardPage() {
           <LoadingStateCard />
         ) : (
           <>
-            {effectiveAppointment && showInProgressJob ? (
+            {effectiveAppointment && showReviewedServiceJob ? (
+              <ReviewedServiceCard
+                appointment={effectiveAppointment}
+                onFillReport={() => setIsHealthReportOpen(true)}
+                onViewNextJob={() => navigate("/groomer/my-work")}
+              />
+            ) : effectiveAppointment && showCompletedServiceJob ? (
+              <CompletedServiceCard
+                appointment={effectiveAppointment}
+                onFillReport={() => setIsHealthReportOpen(true)}
+              />
+            ) : effectiveAppointment && showInProgressJob ? (
               <InProgressJobCard
                 appointment={effectiveAppointment}
                 isCompletingService={isCompletingService}
@@ -1438,6 +1761,13 @@ export default function GroomerDashboardPage() {
         isSubmitting={isCancelingTravel}
         onClose={() => setIsCancelAppointmentModalOpen(false)}
         onSubmit={handleCancelTravel}
+      />
+      <HealthReportModal
+        open={isHealthReportOpen}
+        isSubmitting={isSubmittingHealthReport}
+        appointment={effectiveAppointment}
+        onClose={() => setIsHealthReportOpen(false)}
+        onSubmit={handleSubmitHealthReport}
       />
       <ServiceTerminationModal
         open={isTerminateServiceOpen}

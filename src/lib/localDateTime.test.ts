@@ -3,6 +3,7 @@ import {
   addHoursToApiLocalDateTime,
   formatApiLocalDateTime,
   formatLocalDateTimeForApi,
+  getLocalOffsetMinutes,
   formatPreferredTimeSlotLocal,
 } from "./localDateTime";
 
@@ -32,6 +33,11 @@ describe("local API date time formatting", () => {
 
   it("formats the browser local date time for API query parameters", () => {
     expect(formatLocalDateTimeForApi(new Date(2026, 4, 24, 0, 6))).toBe("2026-05-24 00:06");
+  });
+
+  it("returns the browser local offset in minutes", () => {
+    const date = new Date(2026, 4, 24, 0, 6);
+    expect(getLocalOffsetMinutes(date)).toBe(-date.getTimezoneOffset());
   });
 
   it("formats preferred booking slots from local date fields without UTC date shifting", () => {

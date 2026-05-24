@@ -84,6 +84,10 @@ export function formatLocalDateTimeForApi(date = new Date()): string {
   return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())} ${pad2(date.getHours())}:${pad2(date.getMinutes())}`;
 }
 
+export function getLocalOffsetMinutes(date = new Date()): number {
+  return -date.getTimezoneOffset();
+}
+
 export function formatPreferredTimeSlotLocal(
   slot: object,
   options: { includeWeekday?: boolean; dateSeparator?: "." | "-" } = {},
