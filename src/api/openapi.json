@@ -2366,6 +2366,40 @@
         "security": [{ "JWTAuth": [] }]
       }
     },
+    "/api/groomers/bookings/{booking_id}/check_up/checkout": {
+      "post": {
+        "operationId": "api_groomer_portal_groomer_check_up_checkout",
+        "summary": "Groomer Check Up Checkout",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "schema": { "title": "Booking Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GroomerCheckUpCheckoutOut" }
+              }
+            }
+          }
+        },
+        "tags": ["groomer-portal"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/GroomerCheckUpCheckoutIn" }
+            }
+          },
+          "required": true
+        },
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
     "/api/groomers/bookings/{booking_id}/start_grooming": {
       "post": {
         "operationId": "api_groomer_portal_start_grooming",
@@ -5096,6 +5130,87 @@
         },
         "required": ["kind"],
         "title": "GroomerCheckUpIn",
+        "type": "object"
+      },
+      "GroomerCheckUpCheckoutIn": {
+        "properties": {
+          "weight_value": {
+            "anyOf": [
+              { "type": "number" },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              { "type": "null" }
+            ],
+            "title": "Weight Value"
+          },
+          "weight_unit": {
+            "default": "kg",
+            "title": "Weight Unit",
+            "type": "string"
+          },
+          "add_on_ids": {
+            "default": [],
+            "items": { "type": "integer" },
+            "title": "Add On Ids",
+            "type": "array"
+          },
+          "personalization": {
+            "additionalProperties": true,
+            "default": {},
+            "title": "Personalization",
+            "type": "object"
+          },
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          }
+        },
+        "title": "GroomerCheckUpCheckoutIn",
+        "type": "object"
+      },
+      "GroomerCheckUpCheckoutOut": {
+        "properties": {
+          "ok": { "title": "Ok", "type": "boolean" },
+          "request_ids": {
+            "default": [],
+            "items": { "type": "integer" },
+            "title": "Request Ids",
+            "type": "array"
+          },
+          "amount": {
+            "anyOf": [
+              { "type": "number" },
+              { "type": "string" }
+            ],
+            "title": "Amount"
+          },
+          "status": { "title": "Status", "type": "string" },
+          "final_amount": {
+            "anyOf": [
+              { "type": "number" },
+              { "type": "string" },
+              { "type": "null" }
+            ],
+            "title": "Final Amount"
+          },
+          "payment_url": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Payment Url"
+          },
+          "session_id": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Session Id"
+          },
+          "payment_id": {
+            "anyOf": [{ "type": "integer" }, { "type": "null" }],
+            "title": "Payment Id"
+          }
+        },
+        "required": ["ok", "amount", "status"],
+        "title": "GroomerCheckUpCheckoutOut",
         "type": "object"
       },
       "TerminateServiceIn": {

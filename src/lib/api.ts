@@ -1615,6 +1615,25 @@ export interface GroomerCheckUpIn {
   description?: string;
 }
 
+export interface GroomerCheckUpCheckoutIn {
+  weight_value?: number | string | null;
+  weight_unit?: string;
+  add_on_ids?: number[];
+  personalization?: Record<string, unknown>;
+  description?: string;
+}
+
+export interface GroomerCheckUpCheckoutOut {
+  ok: boolean;
+  request_ids: number[];
+  amount: number | string;
+  status: "payment_required" | "no_change" | string;
+  final_amount?: number | string | null;
+  payment_url?: string | null;
+  session_id?: string | null;
+  payment_id?: number | null;
+}
+
 export interface TerminateServiceIn {
   reason: string;
   description?: string;
@@ -2078,6 +2097,20 @@ export async function submitGroomerCheckUp(
 ): Promise<GroomerCheckUpOut> {
   const response = await http.post<GroomerCheckUpOut>(
     `/api/groomers/bookings/${bookingId}/check_up`,
+    data
+  );
+  return response.data;
+}
+
+/**
+ * 合并提交 check-up 并创建补款支付
+ */
+export async function submitGroomerCheckUpCheckout(
+  bookingId: number,
+  data: GroomerCheckUpCheckoutIn
+): Promise<GroomerCheckUpCheckoutOut> {
+  const response = await http.post<GroomerCheckUpCheckoutOut>(
+    `/api/groomers/bookings/${bookingId}/check_up/checkout`,
     data
   );
   return response.data;

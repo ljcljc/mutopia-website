@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { CommonCheckbox, CustomInput, CustomSelect, CustomSelectItem, CustomTextarea, OrangeButton } from "@/components/common";
+import { CommonCheckbox, CustomInput, CustomRadio, CustomSelect, CustomSelectItem, CustomTextarea, OrangeButton } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
 import { Spinner } from "@/components/common/Spinner";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -20,13 +20,15 @@ import {
   type DashboardGoal,
 } from "@/modules/groomer/groomerStore";
 import { shouldShowStartTravel } from "@/modules/groomer/utils/time";
-import { decideGroomerInvitation, getAddOns, submitGroomerCheckUp, type AddOnOut, type TerminateServiceIn } from "@/lib/api";
+import { decideGroomerInvitation, getAddOns, submitGroomerCheckUpCheckout, type AddOnOut, type TerminateServiceIn } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
+import { XIcon } from "lucide-react";
 
 type BookingRequest = DashboardAppointment;
 type CheckUpTab = "weight" | "add-ons" | "personalization";
 type BookingRequestSuccessAlertKind = "confirm" | "propose";
+type TerminateServiceResolution = "owner_approved" | "mutopia_intervention";
 
 const FALLBACK_ADD_ONS: AddOnOut[] = [
   { id: 1, name: "Teeth brushing", description: "Professional dental cleaning", price: 15, is_variable: false },
@@ -338,6 +340,7 @@ function ServiceTerminationModal({
   const [reason, setReason] = useState("");
   const [description, setDescription] = useState("");
   const [refundableFee, setRefundableFee] = useState("0");
+  const [resolution, setResolution] = useState<TerminateServiceResolution>("owner_approved");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -345,6 +348,7 @@ function ServiceTerminationModal({
     setReason("");
     setDescription("");
     setRefundableFee("0");
+    setResolution("owner_approved");
     setError("");
   }, [open]);
 
@@ -360,7 +364,7 @@ function ServiceTerminationModal({
       reason: trimmedReason,
       description: description.trim(),
       refundable_service_fee: refundableFee.trim() || "0",
-      resolution: "service_terminated",
+      resolution,
     });
   };
 
@@ -388,55 +392,59 @@ function ServiceTerminationModal({
               className="flex size-5 shrink-0 items-center justify-center text-[#4A5565] transition-colors hover:text-[#4A3C2A] disabled:cursor-not-allowed disabled:opacity-60"
               aria-label="Close terminate service dialog"
             >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
+              <XIcon className="size-4 stroke-[1.5]" aria-hidden="true" />
             </button>
           </div>
 
-          <label className="flex flex-col gap-2 font-comfortaa text-[14px] leading-[22.75px] text-[#4A3C2A]">
-            Reason
-            <input
-              value={reason}
-              onChange={(event) => {
-                setReason(event.target.value);
-                setError("");
-              }}
-              disabled={isSubmitting}
-              placeholder="Enter your reason"
-              className={`h-9 rounded-[12px] border px-4 font-comfortaa text-[12.25px] text-[#4A3C2A] outline-none placeholder:text-[#717182] disabled:opacity-60 ${
-                error ? "border-[#DE1507]" : "border-[#E5E7EB]"
-              }`}
-            />
-            {error ? <span className="text-[12px] leading-4 text-[#DE1507]">{error}</span> : null}
-          </label>
+          <CustomInput
+            label="Reason of termination"
+            value={reason}
+            onChange={(event) => {
+              setReason(event.target.value);
+              setError("");
+            }}
+            disabled={isSubmitting}
+            placeholder="Enter your reason"
+            error={error}
+          />
 
-          <label className="flex flex-col gap-2 font-comfortaa text-[14px] leading-[22.75px] text-[#4A3C2A]">
-            Description
-            <textarea
-              value={description}
-              onChange={(event) => setDescription(event.target.value)}
-              disabled={isSubmitting}
-              placeholder="Enter more details"
-              className="min-h-[82px] resize-none rounded-[12px] border border-[#E5E7EB] px-4 py-3 font-comfortaa text-[12.25px] text-[#4A3C2A] outline-none placeholder:text-[#717182] disabled:opacity-60"
-            />
-          </label>
+          <CustomTextarea
+            label="Description"
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            disabled={isSubmitting}
+            placeholder="Enter your note"
+            className="text-[#4A3C2A]"
+          />
 
-          <label className="flex flex-col gap-2 font-comfortaa text-[14px] leading-[22.75px] text-[#4A3C2A]">
-            Refundable service fee
-            <span className="flex h-9 items-center rounded-[12px] border border-[#E5E7EB] bg-white px-4">
-              <span className="mr-1 text-[12.25px] text-[#717182]">$</span>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={refundableFee}
-                onChange={(event) => setRefundableFee(event.target.value)}
-                disabled={isSubmitting}
-                className="min-w-0 flex-1 bg-transparent font-comfortaa text-[12.25px] text-[#4A3C2A] outline-none disabled:opacity-60"
-              />
-            </span>
-          </label>
+          <CustomInput
+            label="Refundable service fee"
+            type="number"
+            min="0"
+            step="0.01"
+            value={refundableFee}
+            onChange={(event) => setRefundableFee(event.target.value)}
+            disabled={isSubmitting}
+            placeholder="Enter price"
+            leftElement={<span className="mr-1 font-comfortaa text-[12.25px] text-[#717182]">$</span>}
+          />
+
+          <div className="flex flex-col items-start gap-3">
+            <CustomRadio
+              variant="inline"
+              label="Reason and refund approved by pet owner"
+              isSelected={resolution === "owner_approved"}
+              onClick={() => setResolution("owner_approved")}
+              disabled={isSubmitting}
+            />
+            <CustomRadio
+              variant="inline"
+              label="Mutopia intervention required"
+              isSelected={resolution === "mutopia_intervention"}
+              onClick={() => setResolution("mutopia_intervention")}
+              disabled={isSubmitting}
+            />
+          </div>
 
           <div className="flex flex-col gap-[10px]">
             <OrangeButton type="submit" fullWidth textSize={14} loading={isSubmitting}>
@@ -530,7 +538,7 @@ function formatAddOnPrice(value: number | string): string {
 function normalizeCheckUpWeightUnit(value?: string): string {
   const normalizedValue = value?.trim().toLowerCase();
   if (normalizedValue === "kg") return "kg";
-  return "lb";
+  return "lbs";
 }
 
 function CheckUpTabBadge({
@@ -590,12 +598,14 @@ function GroomerCheckUpModal({
   open,
   appointment,
   onClose,
+  onSubmitted,
 }: {
   open: boolean;
   appointment: DashboardAppointment | null;
   onClose: () => void;
+  onSubmitted: () => void;
 }) {
-  const [activeTab, setActiveTab] = useState<CheckUpTab>("add-ons");
+  const [activeTab, setActiveTab] = useState<CheckUpTab>("weight");
   const [weightValue, setWeightValue] = useState("60");
   const [weightUnit, setWeightUnit] = useState("lbs");
   const [addOns, setAddOns] = useState<AddOnOut[]>(FALLBACK_ADD_ONS);
@@ -607,7 +617,7 @@ function GroomerCheckUpModal({
 
   useEffect(() => {
     if (!open) return;
-    setActiveTab("add-ons");
+    setActiveTab("weight");
     setWeightValue(appointment?.weightValue || "60");
     setWeightUnit(normalizeCheckUpWeightUnit(appointment?.weightUnit));
     setSelectedAddOnIds([]);
@@ -647,15 +657,19 @@ function GroomerCheckUpModal({
 
     setIsSubmitting(true);
     try {
-      await submitGroomerCheckUp(bookingId, {
-        kind: "personalization",
+      const result = await submitGroomerCheckUpCheckout(bookingId, {
         weight_value: weightValue,
         weight_unit: weightUnit,
         add_on_ids: selectedAddOnIds,
         personalization,
         description,
       });
-      toast.success("Check-up submitted");
+      if (result.status === "payment_required") {
+        toast.success("Payment request sent to pet owner");
+      } else {
+        toast.success("No additional payment required");
+      }
+      onSubmitted();
       onClose();
     } catch (error) {
       console.error("Failed to submit check-up:", error);
@@ -720,12 +734,13 @@ function GroomerCheckUpModal({
                         <CustomSelect
                           placeholder="Select"
                           value={weightUnit}
+                          displayValue={weightUnit === "lbs" ? "lb" : weightUnit}
                           onValueChange={(value) => setWeightUnit(value)}
                           className="w-auto"
                           noLeftRadius
                         >
                           <CustomSelectItem value="kg">kg</CustomSelectItem>
-                          <CustomSelectItem value="lb">lb</CustomSelectItem>
+                          <CustomSelectItem value="lbs">lb</CustomSelectItem>
                         </CustomSelect>
                       </div>
                     </div>
@@ -734,7 +749,7 @@ function GroomerCheckUpModal({
               ) : null}
 
               {activeTab === "add-ons" ? (
-                <div className="flex w-full flex-col items-start gap-5 rounded-[12px] bg-white p-t-0 p-5 shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)]">
+                <div className="flex w-full flex-col items-start gap-5 rounded-[12px] bg-white p-5 shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)]">
                   <div className="flex w-full flex-col items-start gap-1">
                     <p className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4a3c2a]">Most popular add-ons</p>
                     <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4a5565]">Add extra pampering for your furry friend</p>
@@ -1412,6 +1427,11 @@ export default function GroomerDashboardPage() {
         open={isCheckUpOpen}
         appointment={effectiveAppointment}
         onClose={() => setIsCheckUpOpen(false)}
+        onSubmitted={() => {
+          fetchDashboard().catch((error) => {
+            console.error("Failed to refresh groomer dashboard:", error);
+          });
+        }}
       />
       <CancelAppointmentModal
         open={isCancelAppointmentModalOpen}
