@@ -30,6 +30,9 @@ describe("groomer dashboard current booking selection", () => {
       dailyGoal: {
         completed: 0,
         total: 0,
+        ratingCompletedCount: 0,
+        ratingJobCount: 0,
+        completionRate: "0%",
         remainingAmount: "$0",
         goalAmount: "$0",
         currentAmount: "$0",

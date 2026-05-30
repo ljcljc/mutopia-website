@@ -9,18 +9,22 @@ import { cn } from "@/components/ui/utils";
 
 interface ReportReviewModalProps {
   evidenceName: string;
+  isSubmitting?: boolean;
   onClose: () => void;
-  onEvidenceChange: (fileName: string) => void;
+  onEvidenceChange: (file: File | null) => void;
   onReasonChange: (value: string) => void;
+  onSubmit: () => void;
   open: boolean;
   reason: string;
 }
 
 export function ReportReviewModal({
   evidenceName,
+  isSubmitting = false,
   onClose,
   onEvidenceChange,
   onReasonChange,
+  onSubmit,
   open,
   reason,
 }: ReportReviewModalProps) {
@@ -28,7 +32,7 @@ export function ReportReviewModal({
   const [isUploadDragging, setIsUploadDragging] = useState(false);
 
   const handleEvidenceSelected = (file?: File) => {
-    onEvidenceChange(file?.name ?? "");
+    onEvidenceChange(file ?? null);
     setIsUploadDragging(false);
   };
 
@@ -60,6 +64,7 @@ export function ReportReviewModal({
             <button
               type="button"
               onClick={onClose}
+              disabled={isSubmitting}
               className="flex size-5 shrink-0 items-center justify-center text-[#8B6357] transition-colors hover:text-[#6E4F46]"
               aria-label="Close report review dialog"
             >
@@ -79,6 +84,7 @@ export function ReportReviewModal({
               value={reason}
               onChange={(event) => onReasonChange(event.target.value)}
               placeholder="Share your reasons"
+              disabled={isSubmitting}
               showResizeHandle={false}
               className="h-[120px] min-h-[120px] rounded-xl px-4 py-3 font-comfortaa text-[12px] leading-[18px] text-[#4A2C55] placeholder:text-[#717182]"
             />
@@ -88,6 +94,7 @@ export function ReportReviewModal({
             <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">Upload evidence (optional)</p>
             <label
               htmlFor="report-review-evidence"
+              aria-disabled={isSubmitting}
               onDragEnter={() => setIsUploadDragging(true)}
               onDragOver={(event) => {
                 event.preventDefault();
@@ -95,11 +102,13 @@ export function ReportReviewModal({
               }}
               onDragLeave={() => setIsUploadDragging(false)}
               onDrop={(event) => {
+                if (isSubmitting) return;
                 event.preventDefault();
                 handleEvidenceSelected(event.dataTransfer.files?.[0]);
               }}
               className={cn(
                 "flex h-[100px] w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-[1.5px] border-[#DE6A07] bg-neutral-50 px-4 text-center shadow-[0px_4px_10px_rgba(0,0,0,0.15)] transition-[background-color,opacity] hover:bg-[#FFF8F1] active:opacity-90",
+                isSubmitting && "pointer-events-none opacity-60",
                 isUploadDragging && "bg-[rgba(222,106,7,0.05)]",
               )}
             >
@@ -116,16 +125,17 @@ export function ReportReviewModal({
                 type="file"
                 accept=".jpg,.jpeg,.png,image/jpeg,image/png"
                 className="sr-only"
+                disabled={isSubmitting}
                 onChange={(event) => handleEvidenceSelected(event.target.files?.[0])}
               />
           </div>
 
           <div className="flex flex-col gap-[10px]">
-            <GroomerPrimaryActionButton fullWidth onClick={onClose}>
+            <GroomerPrimaryActionButton fullWidth onClick={onSubmit} disabled={isSubmitting} loading={isSubmitting}>
               Send
             </GroomerPrimaryActionButton>
             <div className="flex h-12 items-center justify-center">
-              <GroomerLinkButton onClick={onClose}>
+              <GroomerLinkButton onClick={onClose} disabled={isSubmitting}>
                 <span className="font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357] underline">Cancel</span>
               </GroomerLinkButton>
             </div>

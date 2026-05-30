@@ -57,6 +57,9 @@ export type DashboardAmountLine = {
 export type DashboardGoal = {
   completed: number | null;
   total: number | null;
+  ratingCompletedCount: number | null;
+  ratingJobCount: number | null;
+  completionRate: string;
   remainingAmount: string;
   goalAmount: string;
   currentAmount: string;
@@ -70,6 +73,9 @@ export type DashboardMetrics = {
 const EMPTY_GOAL: DashboardGoal = {
   completed: 0,
   total: 0,
+  ratingCompletedCount: 0,
+  ratingJobCount: 0,
+  completionRate: "0%",
   remainingAmount: "$0",
   goalAmount: "$0",
   currentAmount: "$0",
@@ -493,12 +499,50 @@ function mapPendingBookingRequests(data: unknown): DashboardAppointment[] {
 }
 
 function mapDashboardGoal(summary: Record<string, unknown>): DashboardGoal {
-  const completed = getOptionalNumber(summary, ["completed_jobs", "jobs_completed", "completed", "done_jobs"]);
-  const total = getOptionalNumber(summary, ["daily_goal_jobs", "goal_jobs", "daily_goal_total", "total"]);
-  const goalAmountRaw = getString(summary, ["daily_goal_amount", "goal_amount", "target_amount"]);
-  const currentAmountRaw = getString(summary, ["current_amount", "earned_amount", "today_earnings"]);
+  const completed = getOptionalNumber(summary, [
+    "completed_jobs",
+    "today_completed_count",
+    "jobs_completed",
+    "completed",
+    "done_jobs",
+  ]);
+  const total = getOptionalNumber(summary, [
+    "daily_goal_jobs",
+    "today_booking_count",
+    "goal_jobs",
+    "daily_goal_total",
+    "total",
+  ]);
+  const goalAmountRaw = getString(summary, [
+    "daily_goal_amount",
+    "today_potential_gross_amount",
+    "goal_amount",
+    "target_amount",
+  ]);
+  const currentAmountRaw = getString(summary, [
+    "current_amount",
+    "today_current_amount",
+    "earned_amount",
+    "today_earnings",
+  ]);
+  const ratingCompletedCount = getOptionalNumber(summary, [
+    "rating_completed_count",
+    "completed_jobs",
+    "today_completed_count",
+  ]);
+  const ratingJobCount = getOptionalNumber(summary, [
+    "rating_job_count",
+    "daily_goal_jobs",
+    "today_booking_count",
+  ]);
+  const completionRateRaw = getString(summary, ["completion_rate"]);
   const goalAmountNumber = Number(goalAmountRaw.replace(/[^0-9.-]/g, ""));
   const currentAmountNumber = Number(currentAmountRaw.replace(/[^0-9.-]/g, ""));
+  const completionRate = completionRateRaw
+    ? `${completionRateRaw.replace(/%$/, "")}%`
+    : ratingJobCount && ratingJobCount > 0 && ratingCompletedCount !== undefined && ratingCompletedCount !== null
+      ? `${((ratingCompletedCount / ratingJobCount) * 100).toFixed(0)}%`
+      : "0%";
   const hasRemainingAmount = goalAmountRaw && currentAmountRaw;
   const remainingAmountNumber =
     hasRemainingAmount && Number.isFinite(goalAmountNumber) && Number.isFinite(currentAmountNumber)
@@ -508,6 +552,9 @@ function mapDashboardGoal(summary: Record<string, unknown>): DashboardGoal {
   return {
     completed: completed ?? 0,
     total: total ?? 0,
+    ratingCompletedCount: ratingCompletedCount ?? completed ?? 0,
+    ratingJobCount: ratingJobCount ?? total ?? 0,
+    completionRate,
     remainingAmount: formatCurrency(remainingAmountNumber, "$0"),
     goalAmount: formatCurrency(goalAmountRaw, "$0"),
     currentAmount: formatCurrency(currentAmountRaw, "$0"),
@@ -708,6 +755,12 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
             }
           : state.nextAppointment,
       }));
+      try {
+        const summary = asRecord(await getGroomerDashboardSummary());
+        set({ dailyGoal: mapDashboardGoal(summary), metrics: mapDashboardMetrics(summary) });
+      } catch (error) {
+        console.error("Failed to refresh groomer dashboard summary:", error);
+      }
       return result;
     } finally {
       set({ isCompletingService: false });

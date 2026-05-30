@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { OrangeButton } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
 import { GroomerLinkButton } from "@/modules/groomer/components/GroomerLinkButton";
@@ -6,6 +6,9 @@ import { GroomerPrimaryActionButton } from "@/modules/groomer/components/Groomer
 import { PerformanceRadarChart } from "@/modules/groomer/components/PerformanceRadarChart";
 import { ReportReviewModal } from "@/modules/groomer/components/ReportReviewModal";
 import { useNavigate } from "react-router-dom";
+import { getGroomerPerformance, reportGroomerReview, replyGroomerReview } from "@/lib/api";
+import { HttpError } from "@/lib/http";
+import { toast } from "sonner";
 
 const REVIEW_AVATAR_URL = "https://www.figma.com/api/mcp/asset/2d6c06cd-b66a-4365-9ebb-501b695cd90d";
 
@@ -21,145 +24,105 @@ type ScoreCard = {
   body: ReactNode;
 };
 
-const radarMetrics = [
-  { label: "Ratings", value: 18, color: "#E67E22" },
-  { label: "Response", value: 20, color: "#22C55E" },
-  { label: "Punctuality", value: 15, color: "#D97706" },
-  { label: "Completion", value: 20, color: "#60A5FA" },
-  { label: "Technical", value: 19, color: "#A855F7" },
-] as const;
+type PerformanceSummary = {
+  score: number;
+  level: string;
+  levelLabel: string;
+  breakdown: {
+    customerRating: number;
+    responseTime: number;
+    reliability: number;
+    completion: number;
+    technical: number;
+  };
+  recentFeedback: Array<{
+    reviewId: number;
+    bookingId: number;
+    userName: string;
+    rating: number;
+    technicalRating: number;
+    attitudeRating: number;
+    environmentRating: number;
+    comment: string;
+    reply: string | null;
+  }>;
+};
 
-const scoreCards: ScoreCard[] = [
-  {
-    title: "User Rating",
-    subtitle: "Max 20 pts",
-    score: 18,
-    maxScore: 20,
-    scoreColor: "text-[#E67E22]",
-    iconToneClassName: "bg-[#FFF7ED]",
-    cardClassName: "min-h-[239px]",
-    icon: <Icon name="professional-service" className="size-[18px] text-[#E67E22]" aria-hidden="true" />,
-    body: (
-      <div className="rounded-[12px] bg-[#FAF9F7] px-4 py-4">
-        <p className="font-comfortaa text-[14px] font-bold leading-[21px] text-[#4A2C55]">Average 4.8 Stars</p>
-        <div className="mt-2.5 space-y-2">
-          {[
-            ["Skill", 5],
-            ["Attitude", 4],
-            ["Environment", 5],
-          ].map(([label, filled]) => (
-            <div key={label} className="flex items-center justify-between gap-3">
-              <span className="font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357]">{label}</span>
-              <div className="flex items-center gap-0.5">
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <Icon
-                    key={`${label}-${index}`}
-                    name="star-2"
-                    className={index < Number(filled) ? "size-[14px] text-[#E67E22]" : "size-[14px] text-[#E7DED8]"}
-                    aria-hidden="true"
-                  />
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    ),
-  },
-  {
-    title: "Confirm Time",
-    subtitle: "Max 20 pts",
-    score: 20,
-    maxScore: 20,
-    scoreColor: "text-[#16A34A]",
-    iconToneClassName: "bg-[#F0FDF4]",
-    cardClassName: "min-h-[170px]",
-    icon: <Icon name="target" className="size-[18px] text-[#16A34A]" aria-hidden="true" />,
-    body: (
-      <div className="rounded-[12px] bg-[#FAF9F7] px-4 py-4">
-        <div className="flex items-center justify-between gap-3">
-          <p className="font-comfortaa text-[14px] font-bold leading-[21px] text-[#4A2C55]">Average: 45 mins</p>
-          <span className="rounded-full bg-[#DCFCE7] px-[10px] py-1 font-comfortaa text-[10px] font-bold leading-[15px] text-[#16A34A]">
-            Fast Responder
-          </span>
-        </div>
-        <div className="mt-3 h-[6px] rounded-full bg-[#E5E7EB]">
-          <div className="h-[6px] w-full rounded-full bg-[#22C55E]" />
-        </div>
-      </div>
-    ),
-  },
-  {
-    title: "Punctuality",
-    subtitle: "Max 20 pts",
-    score: 15,
-    maxScore: 20,
-    scoreColor: "text-[#D97706]",
-    iconToneClassName: "bg-[#FFF7ED]",
-    cardClassName: "min-h-[170px]",
-    icon: <Icon name="clock" className="size-[18px] text-[#D97706]" aria-hidden="true" />,
-    body: (
-      <div className="rounded-[12px] bg-[#FAF9F7] px-4 py-4">
-        <p className="font-comfortaa text-[14px] font-bold leading-[21px] text-[#4A2C55]">98% On-time</p>
-        <div className="mt-3 h-[6px] rounded-full bg-[#E5E7EB]">
-          <div className="h-[6px] w-[74%] rounded-full bg-[#D97706]" />
-        </div>
-        <p className="mt-3 font-comfortaa text-[12px] font-medium leading-[18px] text-[#DC2626]">1 Late arrival (4 mins)</p>
-      </div>
-    ),
-  },
-  {
-    title: "Completion &\nHealth Reports",
-    subtitle: "Max 20 pts",
-    score: 20,
-    maxScore: 20,
-    scoreColor: "text-[#3B82F6]",
-    iconToneClassName: "bg-[#EFF6FF]",
-    cardClassName: "min-h-[167px]",
-    icon: <Icon name="target" className="size-[18px] text-[#60A5FA]" aria-hidden="true" />,
-    body: (
-      <div className="rounded-[12px] bg-[#FAF9F7] px-4 py-4">
-        <div className="flex items-start gap-2">
-          <Icon name="target" className="mt-[2px] size-[14px] text-[#60A5FA]" aria-hidden="true" />
-          <p className="font-comfortaa text-[13px] leading-[19.5px] text-[#4A2C55]">All Health Reports filed within 24h</p>
-        </div>
-      </div>
-    ),
-  },
-  {
-    title: "Technical Skill",
-    subtitle: "Max 20 pts",
-    score: 19,
-    maxScore: 20,
-    scoreColor: "text-[#633479]",
-    iconToneClassName: "bg-[#FAF5FF]",
-    cardClassName: "min-h-[163px]",
-    icon: <Icon name="premium-quality" className="size-[18px] text-[#A855F7]" aria-hidden="true" />,
-    body: (
-      <div className="rounded-[12px] bg-[#FAF9F7] px-4 py-4">
-        <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(168,85,247,0.2)] bg-[rgba(168,85,247,0.1)] px-3 py-[7px]">
-          <Icon name="premium-quality" className="size-[14px] text-[#A855F7]" aria-hidden="true" />
-          <span className="font-comfortaa text-[12px] font-bold leading-[18px] text-[#633479]">Level A (Certified)</span>
-        </div>
-      </div>
-    ),
-  },
-];
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
+}
+
+function getNumber(source: Record<string, unknown>, key: string, fallback = 0): number {
+  const value = source[key];
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && value.trim()) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : fallback;
+  }
+  return fallback;
+}
+
+function getString(source: Record<string, unknown>, key: string, fallback = ""): string {
+  const value = source[key];
+  return typeof value === "string" ? value : fallback;
+}
+
+function getActionErrorMessage(error: unknown, fallback: string) {
+  if (error instanceof HttpError && error.message.trim()) return error.message;
+  if (error instanceof Error && error.message.trim()) return error.message;
+  return fallback;
+}
+
+function mapPerformanceData(raw: unknown): PerformanceSummary {
+  const record = asRecord(raw);
+  const breakdown = asRecord(record.breakdown);
+  const feedback = Array.isArray(record.recent_feedback) ? record.recent_feedback : [];
+
+  return {
+    score: getNumber(record, "score"),
+    level: getString(record, "level"),
+    levelLabel: getString(record, "level_label", "Groomer"),
+    breakdown: {
+      customerRating: getNumber(breakdown, "customer_rating"),
+      responseTime: getNumber(breakdown, "response_time"),
+      reliability: getNumber(breakdown, "reliability"),
+      completion: getNumber(breakdown, "completion"),
+      technical: getNumber(breakdown, "technical"),
+    },
+    recentFeedback: feedback.map((item) => {
+      const review = asRecord(item);
+      return {
+        reviewId: getNumber(review, "review_id"),
+        bookingId: getNumber(review, "booking_id"),
+        userName: getString(review, "user_name", "Client"),
+        rating: getNumber(review, "rating"),
+        technicalRating: getNumber(review, "technical_rating"),
+        attitudeRating: getNumber(review, "attitude_rating"),
+        environmentRating: getNumber(review, "environment_rating"),
+        comment: getString(review, "comment"),
+        reply: getString(review, "reply") || getString(review, "groomer_reply") || null,
+      };
+    }),
+  };
+}
 
 const COLLAPSE_DURATION_MS = 300;
 
-function ScoreRing() {
+function ScoreRing({ score }: { score: number }) {
   return (
-    <div className="relative flex size-[140px] items-center justify-center rounded-full bg-[conic-gradient(#F08A12_306deg,#E7DED8_306deg_360deg)]">
+    <div
+      className="relative flex size-[140px] items-center justify-center rounded-full"
+      style={{ background: `conic-gradient(#F08A12 ${Math.max(0, Math.min(score, 100)) * 3.6}deg,#E7DED8 0deg)` }}
+    >
       <div className="flex size-[116px] flex-col items-center justify-center rounded-full bg-[#633479]">
-        <span className="font-comfortaa text-[32px] font-bold leading-8 text-white">85</span>
+        <span className="font-comfortaa text-[32px] font-bold leading-8 text-white">{Math.round(score)}</span>
         <span className="mt-1 font-comfortaa text-[14px] font-medium leading-[21px] text-[rgba(255,255,255,0.7)]">/100</span>
       </div>
     </div>
   );
 }
 
-function PerformanceBadge() {
+function PerformanceBadge({ label }: { label: string }) {
   return (
     <div className="inline-flex h-[26px] items-center gap-2 rounded-full bg-[linear-gradient(180deg,#FFF584_0%,#F0D65A_13.46%,#E0B730_26.92%,#C78A0E_75.96%,#BB7F12_87.98%,#C8A32B_100%)] px-3 shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)]">
       <div className="flex items-center gap-0.5">
@@ -167,13 +130,21 @@ function PerformanceBadge() {
         <Icon name="star-2" className="size-[12px] text-white" aria-hidden="true" />
       </div>
       <span className="bg-[linear-gradient(168.31deg,#FFF7ED_0%,#FFFBEB_100%)] bg-clip-text font-comfortaa text-[12px] font-bold leading-[17.5px] text-transparent">
-        Gold groomer
+        {label}
       </span>
     </div>
   );
 }
 
-function PerformanceRadarCard({ isOpen, onToggle }: { isOpen: boolean; onToggle: () => void }) {
+function PerformanceRadarCard({
+  isOpen,
+  onToggle,
+  radarMetrics,
+}: {
+  isOpen: boolean;
+  onToggle: () => void;
+  radarMetrics: Array<{ label: string; value: number; color: string }>;
+}) {
   const panelRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number | null>(null);
   const timeoutRef = useRef<number | null>(null);
@@ -299,15 +270,201 @@ export default function GroomerPerformancePage() {
   const navigate = useNavigate();
   const [isPerformanceRadarOpen, setIsPerformanceRadarOpen] = useState(false);
   const [isReplying, setIsReplying] = useState(false);
+  const [isSubmittingReply, setIsSubmittingReply] = useState(false);
   const [replyText, setReplyText] = useState("");
   const [isReportReviewOpen, setIsReportReviewOpen] = useState(false);
+  const [isSubmittingReportReview, setIsSubmittingReportReview] = useState(false);
   const [reportReason, setReportReason] = useState("");
-  const [reportEvidenceName, setReportEvidenceName] = useState("");
+  const [reportEvidenceFile, setReportEvidenceFile] = useState<File | null>(null);
+  const [performance, setPerformance] = useState<PerformanceSummary | null>(null);
+
+  useEffect(() => {
+    getGroomerPerformance()
+      .then((response) => setPerformance(mapPerformanceData(response)))
+      .catch((error) => {
+        console.error("Failed to load groomer performance:", error);
+      });
+  }, []);
+
+  const radarMetrics = useMemo(
+    () => [
+      { label: "Ratings", value: performance?.breakdown.customerRating ?? 0, color: "#E67E22" },
+      { label: "Response", value: performance?.breakdown.responseTime ?? 0, color: "#22C55E" },
+      { label: "Punctuality", value: performance?.breakdown.reliability ?? 0, color: "#D97706" },
+      { label: "Completion", value: performance?.breakdown.completion ?? 0, color: "#60A5FA" },
+      { label: "Technical", value: performance?.breakdown.technical ?? 0, color: "#A855F7" },
+    ],
+    [performance],
+  );
+
+  const scoreCards: ScoreCard[] = useMemo(() => {
+    const firstReview = performance?.recentFeedback[0];
+    const averageStars = firstReview
+      ? ((firstReview.technicalRating || firstReview.rating) + (firstReview.attitudeRating || firstReview.rating) + (firstReview.environmentRating || firstReview.rating)) / 3
+      : 0;
+
+    return [
+      {
+        title: "User Rating",
+        subtitle: "Max 20 pts",
+        score: Math.round(performance?.breakdown.customerRating ?? 0),
+        maxScore: 20,
+        scoreColor: "text-[#E67E22]",
+        iconToneClassName: "bg-[#FFF7ED]",
+        cardClassName: "min-h-[239px]",
+        icon: <Icon name="professional-service" className="size-[18px] text-[#E67E22]" aria-hidden="true" />,
+        body: (
+          <div className="rounded-[12px] bg-[#FAF9F7] px-4 py-4">
+            <p className="font-comfortaa text-[14px] font-bold leading-[21px] text-[#4A2C55]">
+              Average {averageStars > 0 ? averageStars.toFixed(1) : "-"} Stars
+            </p>
+          </div>
+        ),
+      },
+      {
+        title: "Confirm Time",
+        subtitle: "Max 20 pts",
+        score: Math.round(performance?.breakdown.responseTime ?? 0),
+        maxScore: 20,
+        scoreColor: "text-[#16A34A]",
+        iconToneClassName: "bg-[#F0FDF4]",
+        cardClassName: "min-h-[170px]",
+        icon: <Icon name="target" className="size-[18px] text-[#16A34A]" aria-hidden="true" />,
+        body: (
+          <div className="rounded-[12px] bg-[#FAF9F7] px-4 py-4">
+            <p className="font-comfortaa text-[14px] font-bold leading-[21px] text-[#4A2C55]">
+              Response score {Math.round(performance?.breakdown.responseTime ?? 0)}/20
+            </p>
+          </div>
+        ),
+      },
+      {
+        title: "Punctuality",
+        subtitle: "Max 20 pts",
+        score: Math.round(performance?.breakdown.reliability ?? 0),
+        maxScore: 20,
+        scoreColor: "text-[#D97706]",
+        iconToneClassName: "bg-[#FFF7ED]",
+        cardClassName: "min-h-[170px]",
+        icon: <Icon name="clock" className="size-[18px] text-[#D97706]" aria-hidden="true" />,
+        body: (
+          <div className="rounded-[12px] bg-[#FAF9F7] px-4 py-4">
+            <p className="font-comfortaa text-[14px] font-bold leading-[21px] text-[#4A2C55]">
+              Reliability score {Math.round(performance?.breakdown.reliability ?? 0)}/20
+            </p>
+          </div>
+        ),
+      },
+      {
+        title: "Completion &\nHealth Reports",
+        subtitle: "Max 20 pts",
+        score: Math.round(performance?.breakdown.completion ?? 0),
+        maxScore: 20,
+        scoreColor: "text-[#3B82F6]",
+        iconToneClassName: "bg-[#EFF6FF]",
+        cardClassName: "min-h-[167px]",
+        icon: <Icon name="target" className="size-[18px] text-[#60A5FA]" aria-hidden="true" />,
+        body: (
+          <div className="rounded-[12px] bg-[#FAF9F7] px-4 py-4">
+            <div className="flex items-start gap-2">
+              <Icon name="target" className="mt-[2px] size-[14px] text-[#60A5FA]" aria-hidden="true" />
+              <p className="font-comfortaa text-[13px] leading-[19.5px] text-[#4A2C55]">
+                Completion score {Math.round(performance?.breakdown.completion ?? 0)}/20
+              </p>
+            </div>
+          </div>
+        ),
+      },
+      {
+        title: "Technical Skill",
+        subtitle: "Max 20 pts",
+        score: Math.round(performance?.breakdown.technical ?? 0),
+        maxScore: 20,
+        scoreColor: "text-[#633479]",
+        iconToneClassName: "bg-[#FAF5FF]",
+        cardClassName: "min-h-[163px]",
+        icon: <Icon name="premium-quality" className="size-[18px] text-[#A855F7]" aria-hidden="true" />,
+        body: (
+          <div className="rounded-[12px] bg-[#FAF9F7] px-4 py-4">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(168,85,247,0.2)] bg-[rgba(168,85,247,0.1)] px-3 py-[7px]">
+              <Icon name="premium-quality" className="size-[14px] text-[#A855F7]" aria-hidden="true" />
+              <span className="font-comfortaa text-[12px] font-bold leading-[18px] text-[#633479]">{performance?.levelLabel ?? "Groomer"}</span>
+            </div>
+          </div>
+        ),
+      },
+    ];
+  }, [performance]);
+
+  const firstFeedback = performance?.recentFeedback[0] ?? null;
+  const hasExistingReply = Boolean(firstFeedback?.reply?.trim());
+
+  const updateFeedbackReply = (reviewId: number, reply: string) => {
+    setPerformance((current) => {
+      if (!current) return current;
+
+      return {
+        ...current,
+        recentFeedback: current.recentFeedback.map((feedback) =>
+          feedback.reviewId === reviewId ? { ...feedback, reply } : feedback,
+        ),
+      };
+    });
+  };
 
   const resetReportReviewForm = () => {
     setIsReportReviewOpen(false);
     setReportReason("");
-    setReportEvidenceName("");
+    setReportEvidenceFile(null);
+  };
+
+  const handleReplySubmit = async () => {
+    if (!firstFeedback || isSubmittingReply) return;
+
+    const trimmedReply = replyText.trim();
+    if (!trimmedReply) {
+      toast.error("Please enter your reply");
+      return;
+    }
+
+    setIsSubmittingReply(true);
+    try {
+      await replyGroomerReview(firstFeedback.reviewId, { reply: trimmedReply });
+      updateFeedbackReply(firstFeedback.reviewId, trimmedReply);
+      setIsReplying(false);
+      setReplyText("");
+      toast.success("Reply sent");
+    } catch (error) {
+      console.error("Failed to reply review:", error);
+      toast.error(getActionErrorMessage(error, "Failed to send reply"));
+    } finally {
+      setIsSubmittingReply(false);
+    }
+  };
+
+  const handleReportReviewSubmit = async () => {
+    if (!firstFeedback || isSubmittingReportReview) return;
+
+    const trimmedReason = reportReason.trim();
+    if (!trimmedReason) {
+      toast.error("Please share your reasons");
+      return;
+    }
+
+    setIsSubmittingReportReview(true);
+    try {
+      await reportGroomerReview(firstFeedback.reviewId, {
+        why: trimmedReason,
+        evidenceFile: reportEvidenceFile,
+      });
+      resetReportReviewForm();
+      toast.success("Review reported");
+    } catch (error) {
+      console.error("Failed to report review:", error);
+      toast.error(getActionErrorMessage(error, "Failed to report review"));
+    } finally {
+      setIsSubmittingReportReview(false);
+    }
   };
 
   return (
@@ -327,13 +484,17 @@ export default function GroomerPerformancePage() {
           </div>
 
           <section className="mt-5 flex flex-col items-center">
-            <ScoreRing />
+            <ScoreRing score={performance?.score ?? 0} />
             <div className="mt-4">
-              <PerformanceBadge />
+              <PerformanceBadge label={performance?.levelLabel ?? "Groomer"} />
             </div>
           </section>
 
-          <PerformanceRadarCard isOpen={isPerformanceRadarOpen} onToggle={() => setIsPerformanceRadarOpen((value) => !value)} />
+          <PerformanceRadarCard
+            isOpen={isPerformanceRadarOpen}
+            onToggle={() => setIsPerformanceRadarOpen((value) => !value)}
+            radarMetrics={radarMetrics}
+          />
 
           <section className="mt-4">
             <h2 className="px-2 font-comfortaa text-[18px] font-bold leading-[27px] tracking-[0.45px] text-white">Detailed Scores</h2>
@@ -349,21 +510,30 @@ export default function GroomerPerformancePage() {
               Client feedback in 72 hours
             </h2>
             <article className="mt-[15px] rounded-[24px] bg-white px-5 py-5 shadow-[0px_8px_24px_rgba(0,0,0,0.15)]">
+              {!firstFeedback ? (
+                <p className="font-comfortaa text-[14px] leading-[21px] text-[#8B6357]">No recent feedback in the last 72 hours.</p>
+              ) : (
+                <>
               <div className="flex items-start gap-3">
                 <img
                   src={REVIEW_AVATAR_URL}
-                  alt="Jessica L."
+                  alt={firstFeedback.userName}
                   className="size-12 rounded-full border border-white object-cover shadow-[0px_1px_3px_rgba(0,0,0,0.1)]"
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="font-comfortaa text-[15px] font-bold leading-[22.5px] text-[#4A2C55]">Jessica L.</p>
+                  <p className="font-comfortaa text-[15px] font-bold leading-[22.5px] text-[#4A2C55]">{firstFeedback.userName}</p>
                   <div className="mt-1 flex items-center gap-0.5">
                     {Array.from({ length: 5 }).map((_, index) => (
-                      <Icon key={index} name="star-2" className="size-3 text-[#E67E22]" aria-hidden="true" />
+                      <Icon
+                        key={index}
+                        name="star-2"
+                        className={`size-3 ${index < Math.round(firstFeedback.rating) ? "text-[#E67E22]" : "text-[#E7DED8]"}`}
+                        aria-hidden="true"
+                      />
                     ))}
                   </div>
                   <p className="mt-1.5 max-w-[244px] font-comfortaa text-[14px] leading-[21px] text-[#8B6357]">
-                    "Great groom! Max looks amazing and smells wonderful. Will book again."
+                    {firstFeedback.comment ? `"${firstFeedback.comment}"` : "No written comment."}
                   </p>
                 </div>
               </div>
@@ -375,21 +545,22 @@ export default function GroomerPerformancePage() {
                       value={replyText}
                       onChange={(event) => setReplyText(event.target.value)}
                       placeholder="Reply here"
+                      disabled={isSubmittingReply}
                       className="h-[88px] w-full resize-none rounded-[12px] border border-[#DE6A07] bg-white px-4 py-3 font-comfortaa text-[12px] leading-[18px] text-[#4A2C55] outline-none placeholder:text-[#717182]"
                     />
                   </div>
                   <div className="mt-4 w-[266px]">
                     <GroomerPrimaryActionButton
                       fullWidth
-                      onClick={() => {
-                        setIsReplying(false);
-                        setReplyText("");
-                      }}
+                      onClick={handleReplySubmit}
+                      disabled={isSubmittingReply}
+                      loading={isSubmittingReply}
                     >
                       Send
                     </GroomerPrimaryActionButton>
                     <div className="mt-[10px] flex h-12 items-center justify-center">
                       <GroomerLinkButton
+                        disabled={isSubmittingReply}
                         onClick={() => {
                           setIsReplying(false);
                           setReplyText("");
@@ -399,6 +570,11 @@ export default function GroomerPerformancePage() {
                       </GroomerLinkButton>
                     </div>
                   </div>
+                </div>
+              ) : hasExistingReply ? (
+                <div className="mt-4 rounded-[12px] bg-[#FAF9F7] px-4 py-4">
+                  <p className="font-comfortaa text-[12px] font-bold leading-[18px] text-[#8B6357]">Your reply</p>
+                  <p className="mt-2 font-comfortaa text-[13px] leading-[19.5px] text-[#4A2C55]">{firstFeedback.reply}</p>
                 </div>
               ) : (
                 <>
@@ -432,6 +608,8 @@ export default function GroomerPerformancePage() {
                   </div>
                 </>
               )}
+                </>
+              )}
             </article>
           </section>
         </div>
@@ -440,9 +618,11 @@ export default function GroomerPerformancePage() {
       <ReportReviewModal
         open={isReportReviewOpen}
         reason={reportReason}
-        evidenceName={reportEvidenceName}
+        evidenceName={reportEvidenceFile?.name ?? ""}
         onReasonChange={setReportReason}
-        onEvidenceChange={setReportEvidenceName}
+        onEvidenceChange={setReportEvidenceFile}
+        onSubmit={handleReportReviewSubmit}
+        isSubmitting={isSubmittingReportReview}
         onClose={resetReportReviewForm}
       />
     </>

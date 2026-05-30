@@ -1612,7 +1612,7 @@ export interface ReviewReplyIn {
 
 export interface ReviewReportIn {
   why: string;
-  evidence?: string | null;
+  evidenceFile?: File | null;
 }
 
 export interface InvitationDecisionIn {
@@ -1988,13 +1988,13 @@ export async function reportGroomerReview(
   reviewId: number,
   data: ReviewReportIn
 ): Promise<OkOut> {
-  const queryParams = new URLSearchParams();
-  queryParams.append("why", data.why);
-  if (data.evidence) queryParams.append("evidence", data.evidence);
+  const formData = new FormData();
+  formData.append("why", data.why);
+  if (data.evidenceFile) formData.append("evidence", data.evidenceFile);
 
   const response = await http.post<OkOut>(
-    `/api/groomers/reviews/${reviewId}/report?${queryParams.toString()}`,
-    undefined
+    `/api/groomers/reviews/${reviewId}/report`,
+    formData
   );
   return response.data;
 }

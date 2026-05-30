@@ -58,6 +58,9 @@ describe("GroomerDashboardPage complete service", () => {
       dailyGoal: {
         completed: 0,
         total: 0,
+        ratingCompletedCount: 0,
+        ratingJobCount: 0,
+        completionRate: "0%",
         remainingAmount: "$0",
         goalAmount: "$0",
         currentAmount: "$0",
@@ -78,7 +81,25 @@ describe("GroomerDashboardPage complete service", () => {
   });
 
   it("calls complete service and updates the dashboard card when the button is clicked", async () => {
-    vi.mocked(getGroomerDashboardSummary).mockResolvedValue({});
+    vi.mocked(getGroomerDashboardSummary)
+      .mockResolvedValueOnce({
+        daily_goal_jobs: 5,
+        completed_jobs: 2,
+        rating_job_count: 4,
+        rating_completed_count: 2,
+        completion_rate: "50.00",
+        daily_goal_amount: "200.00",
+        current_amount: "80.00",
+      })
+      .mockResolvedValueOnce({
+        daily_goal_jobs: 5,
+        completed_jobs: 3,
+        rating_job_count: 4,
+        rating_completed_count: 3,
+        completion_rate: "75.00",
+        daily_goal_amount: "200.00",
+        current_amount: "145.00",
+      });
     vi.mocked(getGroomerPendingBookingInvitations).mockResolvedValue([]);
     vi.mocked(getGroomerBookingDetail).mockResolvedValue({
       id: 123,
@@ -117,6 +138,8 @@ describe("GroomerDashboardPage complete service", () => {
     await waitFor(() => {
       expect(completeGroomerService).toHaveBeenCalledWith(123);
     });
+    expect(await screen.findByText("3 of 5 jobs completed")).toBeInTheDocument();
+    expect(screen.getByText("Goal: $200.00 • Current: $145.00")).toBeInTheDocument();
     expect(await screen.findByText("Completed. Waiting for client confirmation")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Fill report for Momo" })).toBeInTheDocument();
   });

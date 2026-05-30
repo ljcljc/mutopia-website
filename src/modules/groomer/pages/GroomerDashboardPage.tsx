@@ -1268,7 +1268,7 @@ function DailyGoalProgressCard({ dailyGoal }: { dailyGoal: DashboardGoal }) {
 
   return (
     <article className="rounded-[16px] bg-white px-4 py-4 shadow-[0px_4px_12px_rgba(0,0,0,0.08)]">
-      <h2 className="font-comfortaa text-[16px] leading-6 text-[#4A2C55]">Daily goal progress</h2>
+      <h2 className="font-comfortaa text-[16px] leading-6 text-[#4A2C55]">Today&apos;s work progress</h2>
       <div className="mt-3 h-[6px] rounded-full bg-[#E5E7EB]">
         <div className="h-full rounded-full bg-[#00A63E]" style={{ width: progress }} />
       </div>
