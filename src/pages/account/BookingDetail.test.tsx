@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import BookingDetail from "./BookingDetail";
-import { clientConfirmBookingTime, createDepositSession, createReview, createTipSession, getBookingDetail, updateReview, type BookingDetailOut } from "@/lib/api";
+import { clientConfirmBookingTime, createDepositSession, createReview, createTipSession, getBookingDetail, getCancelQuote, updateReview, type BookingDetailOut } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
 import { useBookingStore } from "@/components/booking/bookingStore";
@@ -16,6 +16,7 @@ vi.mock("@/lib/api", async (importOriginal) => {
     createDepositSession: vi.fn(),
     createReview: vi.fn(),
     createTipSession: vi.fn(),
+    getCancelQuote: vi.fn(),
     getBookingDetail: vi.fn(),
     updateReview: vi.fn(),
   };
@@ -33,6 +34,12 @@ function expectedLocalLabel(value: string) {
   const pad2 = (part: number) => String(part).padStart(2, "0");
 
   return `${parsed.getFullYear()}-${pad2(parsed.getMonth() + 1)}-${pad2(parsed.getDate())} at ${pad2(parsed.getHours())}:${pad2(parsed.getMinutes())}`;
+}
+
+function apiLocalDateTime(value: Date) {
+  const pad2 = (part: number) => String(part).padStart(2, "0");
+
+  return `${value.getFullYear()}-${pad2(value.getMonth() + 1)}-${pad2(value.getDate())} ${pad2(value.getHours())}:${pad2(value.getMinutes())}`;
 }
 
 function renderBookingDetail(booking: BookingDetailOut) {
@@ -188,6 +195,103 @@ describe("BookingDetail", () => {
     expect(
       await screen.findByText(`Full grooming - Mobile ${expectedLocalLabel(scheduledTime)}`),
     ).toBeInTheDocument();
+  });
+
+  it("shows cancellation fee and groomer on the way status in the cancel dialog", async () => {
+    const scheduledTime = apiLocalDateTime(new Date(Date.now() + 60 * 60 * 1000));
+    vi.mocked(getCancelQuote).mockResolvedValueOnce({
+      can_cancel: true,
+      policy: "client_cancel_v5",
+      blocked_reason: "",
+      fee_rate: "0.40",
+      refund_rate: "0.60",
+      paid_total: "100.00",
+      estimated_refund: "60.00",
+      late_minutes: null,
+      coupon_count: 0,
+    });
+
+    renderBookingDetail({
+      id: 128,
+      order_code: "ORDER-128",
+      status: "confirmed",
+      scheduled_time: scheduledTime,
+      pet_snapshot: { name: "Momo" },
+      package_snapshot: {
+        name: "Full grooming",
+        service_type: "Mobile",
+        price: "80.00",
+      },
+      address_snapshot: {
+        address: "100 Vancouver Cres",
+        city: "Miramichi",
+        province: "NB",
+        postal_code: "E1N 2E5",
+      },
+      addons_snapshot: [],
+      membership_snapshot: {},
+      coupon_snapshot: {},
+      package_amount: "80.00",
+      addons_amount: "0.00",
+      membership_fee: "0.00",
+      discount_rate: "0",
+      discount_amount: "0.00",
+      coupon_amount: "0.00",
+      payable_amount: "80.00",
+      deposit_amount: "20.00",
+      final_amount: "80.00",
+    });
+
+    fireEvent.click(await screen.findByRole("button", { name: "Cancel" }));
+
+    expect(getCancelQuote).toHaveBeenCalledWith(128);
+    expect(await screen.findByText("Groomer is on the way")).toBeInTheDocument();
+    expect(screen.getByText("Rule for cancellation")).toBeInTheDocument();
+    expect(screen.getByText("You will be charged 40% of the total invoice.")).toBeInTheDocument();
+    expect(screen.getByText("Reason for cancellation")).toBeInTheDocument();
+  });
+
+  it("disables cancellation submit when the cancellation fee cannot be loaded", async () => {
+    vi.mocked(getCancelQuote).mockRejectedValueOnce(new Error("Quote failed"));
+
+    renderBookingDetail({
+      id: 129,
+      order_code: "ORDER-129",
+      status: "confirmed",
+      scheduled_time: "2026-05-31 17:00",
+      pet_snapshot: { name: "Momo" },
+      package_snapshot: {
+        name: "Full grooming",
+        service_type: "Mobile",
+        price: "80.00",
+      },
+      address_snapshot: {
+        address: "100 Vancouver Cres",
+        city: "Miramichi",
+        province: "NB",
+        postal_code: "E1N 2E5",
+      },
+      addons_snapshot: [],
+      membership_snapshot: {},
+      coupon_snapshot: {},
+      package_amount: "80.00",
+      addons_amount: "0.00",
+      membership_fee: "0.00",
+      discount_rate: "0",
+      discount_amount: "0.00",
+      coupon_amount: "0.00",
+      payable_amount: "80.00",
+      deposit_amount: "20.00",
+      final_amount: "80.00",
+    });
+
+    fireEvent.click(await screen.findByRole("button", { name: "Cancel" }));
+    fireEvent.change(screen.getByPlaceholderText("Share your reason"), {
+      target: { value: "Schedule changed" },
+    });
+
+    expect(await screen.findByText("Unable to load cancellation fee.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Yes, send request" })).toBeDisabled();
   });
 
   it("sends the proposed time with a local datetime string when confirming", async () => {

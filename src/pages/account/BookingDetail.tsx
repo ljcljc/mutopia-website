@@ -12,11 +12,13 @@ import {
   createDepositSession,
   createReview,
   createTipSession,
+  getCancelQuote,
   getBookingDetail,
   getPaymentSessionRedirectUrl,
   updateReview,
   type AddressOut,
   type BookingDetailOut,
+  type CancelQuoteOut,
   type BookingPaymentOut,
   type InvitationDecisionTimeOptionIn,
 } from "@/lib/api";
@@ -33,7 +35,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
-import { StarIcon, XIcon } from "lucide-react";
+import { CheckCircleIcon, StarIcon, XIcon } from "lucide-react";
 import {
   addHoursToApiLocalDateTime,
   formatApiLocalDateTime,
@@ -121,6 +123,38 @@ function isPendingCheckoutStatus(status: string) {
 
 function isSameMoneyAmount(left: number, right: number) {
   return Math.round(left * 100) === Math.round(right * 100);
+}
+
+function formatPercentRate(value: number | string | undefined): string {
+  const parsed = parseAmount(value);
+  if (!Number.isFinite(parsed)) return "0";
+  return String(Math.round(parsed * 100));
+}
+
+function parseApiLocalDateTimeValue(value?: string | null): Date | null {
+  if (!value) return null;
+  const match = value.trim().match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?$/);
+  if (match) {
+    const [, year, month, day, hour, minute, second] = match;
+    const parsed = new Date(
+      Number(year),
+      Number(month) - 1,
+      Number(day),
+      Number(hour),
+      Number(minute),
+      Number(second ?? 0),
+    );
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function isWithinTwoHoursBefore(dateTime?: string | null) {
+  const parsed = parseApiLocalDateTimeValue(dateTime);
+  if (!parsed) return false;
+  const hoursUntil = (parsed.getTime() - Date.now()) / (1000 * 60 * 60);
+  return hoursUntil >= 0 && hoursUntil <= 2;
 }
 
 function formatPreferredTimeSlot(slot: Record<string, unknown>): string | null {
@@ -275,6 +309,9 @@ export default function BookingDetail() {
   const [isCanceling, setIsCanceling] = useState(false);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+  const [cancelQuote, setCancelQuote] = useState<CancelQuoteOut | null>(null);
+  const [isLoadingCancelQuote, setIsLoadingCancelQuote] = useState(false);
+  const [cancelQuoteError, setCancelQuoteError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isModifyOpen, setIsModifyOpen] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
@@ -702,6 +739,9 @@ export default function BookingDetail() {
     "confirmed",
     "traveling",
   ].includes(normalizedStatus);
+  const showGroomerOnTheWayCancelTag =
+    normalizedStatus === "traveling" || isWithinTwoHoursBefore(detail?.scheduled_time);
+  const cancelFeeRateDisplay = cancelQuote ? formatPercentRate(cancelQuote.fee_rate) : null;
   const isInitialLoading = isLoading && !detail && !error;
 
   const handleConfirmProposedTime = async () => {
@@ -876,6 +916,32 @@ export default function BookingDetail() {
     if (!detail) return;
     loadBookingDetailForEdit(detail);
     navigate("/booking");
+  };
+
+  const loadCancelQuote = async (bookingId: number) => {
+    setIsLoadingCancelQuote(true);
+    setCancelQuoteError(null);
+    try {
+      const quote = await getCancelQuote(bookingId);
+      setCancelQuote(quote);
+    } catch (quoteError) {
+      console.error("Failed to load cancel quote:", quoteError);
+      setCancelQuote(null);
+      setCancelQuoteError("Unable to load cancellation fee.");
+    } finally {
+      setIsLoadingCancelQuote(false);
+    }
+  };
+
+  const handleCancelDialogOpenChange = (open: boolean) => {
+    setIsCancelDialogOpen(open);
+    if (!open) {
+      setCancelReason("");
+      setCancelQuote(null);
+      setCancelQuoteError(null);
+      return;
+    }
+    if (detail?.id) void loadCancelQuote(detail.id);
   };
   
   // 处理取消预约
@@ -1114,7 +1180,7 @@ export default function BookingDetail() {
                       variant="secondary"
                       size="compact"
                       className="min-w-[100px]"
-                      onClick={() => setIsCancelDialogOpen(true)}
+                      onClick={() => handleCancelDialogOpenChange(true)}
                     >
                       Cancel
                     </OrangeButton>
@@ -1576,7 +1642,7 @@ export default function BookingDetail() {
                 <div className="flex justify-end">
                   <button
                     type="button"
-                    onClick={() => setIsCancelDialogOpen(true)}
+                    onClick={() => handleCancelDialogOpenChange(true)}
                     disabled={isCanceling}
                     className="flex cursor-pointer items-center justify-center gap-2 font-comfortaa text-[12px] leading-[17.5px] text-[#8B6357] transition-colors hover:text-[#DE6A07] disabled:cursor-not-allowed disabled:opacity-50"
                   >
@@ -1590,7 +1656,7 @@ export default function BookingDetail() {
         </div>
       </div>
 
-      <AlertDialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
+      <AlertDialog open={isCancelDialogOpen} onOpenChange={handleCancelDialogOpenChange}>
         <AlertDialogContent className="max-w-[calc(100%-32px)] rounded-[20px] border-[rgba(0,0,0,0.2)] px-0 py-0 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] sm:max-w-[520px]">
           <div className="flex flex-col gap-4 pb-8 pt-3">
             <AlertDialogHeader className="gap-2 px-3">
@@ -1599,7 +1665,6 @@ export default function BookingDetail() {
                   <button
                     type="button"
                     className="flex size-4 items-center justify-center border-0 bg-transparent p-0 text-[#4A3C2A] opacity-70 hover:opacity-100"
-                    onClick={() => setCancelReason("")}
                     aria-label="Close cancel booking dialog"
                   >
                     <XIcon className="size-4 stroke-[1.5]" />
@@ -1622,14 +1687,48 @@ export default function BookingDetail() {
                 </p>
               </AlertDialogDescription>
               <CustomTextarea
-                label=""
+                label="Reason for cancellation"
                 placeholder="Share your reason"
                 value={cancelReason}
                 onChange={(event) => setCancelReason(event.target.value)}
                 className="text-[#4A5565]"
                 helperTextClassName="hidden"
-                labelClassName="hidden"
               />
+              {showGroomerOnTheWayCancelTag ? (
+                <div className="flex flex-wrap items-center gap-3">
+                  <p className="font-comfortaa text-[14px] font-bold leading-[22px] text-[#4A5565]">
+                    Groomer’s status
+                  </p>
+                  <div className="inline-flex h-6 items-center justify-center gap-1 rounded-xl bg-[#DCFCE7] px-3 py-1">
+                    <CheckCircleIcon className="size-3.5 text-[#27AE60]" aria-hidden="true" />
+                    <span className="font-comfortaa text-[10px] font-bold leading-[14px] text-[#27AE60]">
+                      Groomer is on the way
+                    </span>
+                  </div>
+                </div>
+              ) : null}
+              <div className="flex flex-col text-[#4A5565]">
+                <p className="font-comfortaa text-[14px] font-bold leading-[22px]">
+                  Rule for cancellation
+                </p>
+                {isLoadingCancelQuote ? (
+                  <p className="font-comfortaa text-[12.25px] font-normal leading-[17.5px]">
+                    Loading cancellation fee...
+                  </p>
+                ) : cancelQuoteError ? (
+                  <p className="font-comfortaa text-[12.25px] font-normal leading-[17.5px] text-[#DE1507]">
+                    {cancelQuoteError}
+                  </p>
+                ) : cancelQuote?.can_cancel === false ? (
+                  <p className="font-comfortaa text-[12.25px] font-normal leading-[17.5px]">
+                    This booking can no longer be canceled.
+                  </p>
+                ) : (
+                  <p className="font-comfortaa text-[12.25px] font-normal leading-[17.5px]">
+                    You will be charged {cancelFeeRateDisplay ?? "0"}% of the total invoice.
+                  </p>
+                )}
+              </div>
             </div>
             <AlertDialogFooter className="px-6">
               <div className="flex w-full items-center justify-end gap-2.5">
@@ -1639,7 +1738,6 @@ export default function BookingDetail() {
                     size="medium"
                     textSize={14}
                     className="min-w-[136px]"
-                    onClick={() => setCancelReason("")}
                   >
                     No, Keep it
                   </OrangeButton>
@@ -1651,7 +1749,7 @@ export default function BookingDetail() {
                   className="min-w-[177px]"
                   onClick={handleCancelBooking}
                   loading={isCanceling}
-                  disabled={!cancelReason.trim()}
+                  disabled={!cancelReason.trim() || isLoadingCancelQuote || !cancelQuote || Boolean(cancelQuoteError) || cancelQuote.can_cancel === false}
                 >
                   Yes, send request
                 </OrangeButton>

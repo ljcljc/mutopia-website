@@ -1569,6 +1569,18 @@ export interface CancelBookingIn {
   reason?: string; // default: ""
 }
 
+export interface CancelQuoteOut {
+  can_cancel: boolean;
+  policy: string;
+  blocked_reason?: string;
+  fee_rate: number | string;
+  refund_rate: number | string;
+  paid_total: number | string;
+  estimated_refund: number | string;
+  late_minutes?: number | string | null;
+  coupon_count?: number;
+}
+
 export interface GroomerCancelBookingPayloadIn {
   reason?: string; // default: ""
   description?: string; // default: ""
@@ -1879,6 +1891,11 @@ export async function clientDecideAddOn(
 /**
  * 取消预约
  */
+export async function getCancelQuote(bookingId: number): Promise<CancelQuoteOut> {
+  const response = await http.get<CancelQuoteOut>(`/api/bookings/${bookingId}/cancel_quote`);
+  return response.data;
+}
+
 export async function cancelBooking(
   bookingId: number,
   reason: string = ""
