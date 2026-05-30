@@ -86,12 +86,6 @@ function formatProposedTimeOption(option: BookingRequestDecisionTimeOption): str
   return `${dateLabel} ${hours12}:${minutes} ${suffix}`;
 }
 
-function getProposalSlotLabelFromOption(option: BookingRequestDecisionTimeOption): string {
-  const parsedDate = option.date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  const dateLabel = parsedDate ? `${parsedDate[1]}.${parsedDate[2]}.${parsedDate[3]}` : option.date.replace(/-/g, ".");
-  return `${dateLabel} ${option.slot.toUpperCase()}`;
-}
-
 function normalizeTimeInput(value: string, period?: "am" | "pm"): string | null {
   const match = value.trim().match(/^(\d{1,2}):(\d{2})$/);
   if (!match) return null;
@@ -149,13 +143,11 @@ export function BookingRequestContent({
   const [isProposeModalOpen, setIsProposeModalOpen] = useState(false);
   const [isPassModalOpen, setIsPassModalOpen] = useState(false);
   const [isSubmittingAction, setIsSubmittingAction] = useState<"confirm" | "propose" | "decline" | null>(null);
-  const [isModifyingProposedTime, setIsModifyingProposedTime] = useState(false);
   const [confirmedAppointmentWarning, setConfirmedAppointmentWarning] = useState<string | null>(null);
   const [contentHeight, setContentHeight] = useState<string>(expanded ? "auto" : "0px");
   const collapseContentRef = useRef<HTMLDivElement | null>(null);
   const expiryBadgeColor = request.expiresInLabel === "Expired" ? "#DE1507" : "#DE6A07";
   const hasProposedTime = isProposedInvitation(request);
-  const showModifyActions = hasProposedTime && !isModifyingProposedTime;
   const selectedAvailableTime = selectedProposalSlot ? availableTimeBySlot[selectedProposalSlot] ?? "" : "";
   const selectedTimeOption = useMemo(
     () => (selectedProposalSlot ? buildDecisionTimeOption(selectedProposalSlot, selectedAvailableTime) : null),
@@ -230,25 +222,6 @@ export function BookingRequestContent({
     };
   }, [selectedTimeOption]);
 
-  useEffect(() => {
-    setIsModifyingProposedTime(false);
-  }, [request.invitationStatus, request.proposedTimeOptions]);
-
-  const handleModifyProposedTime = () => {
-    const firstOption = request.proposedTimeOptions?.[0];
-    if (firstOption) {
-      const slotLabel = getProposalSlotLabelFromOption(firstOption);
-      if (proposalSlots.includes(slotLabel)) {
-        setSelectedProposalSlot(slotLabel);
-        setAvailableTimeBySlot((current) => ({
-          ...current,
-          [slotLabel]: firstOption.time,
-        }));
-      }
-    }
-    setIsModifyingProposedTime(true);
-  };
-
   const handleConfirmAppointment = async () => {
     if (!onConfirmOriginalTime || !selectedProposalSlot) return;
 
@@ -276,7 +249,6 @@ export function BookingRequestContent({
     try {
       await onProposeNewTime(timeOptions);
       setIsProposeModalOpen(false);
-      setIsModifyingProposedTime(false);
     } finally {
       setIsSubmittingAction(null);
     }
@@ -368,10 +340,10 @@ export function BookingRequestContent({
 
             <div className="mt-4 rounded-[12px] border border-[#BBF7D0] bg-[#F0FDF4] p-3">
               <p className="font-comfortaa text-[11px] font-medium leading-[16.5px] text-[#166534]">
-                {showModifyActions ? "Waiting for pet owner confirmation" : "Specify your available time from one date"}
+                {hasProposedTime ? "Waiting for pet owner confirmation" : "Specify your available time from one date"}
               </p>
 
-              {showModifyActions ? (
+              {hasProposedTime ? (
                 <div className="mt-2 flex flex-wrap gap-2">
                   {request.proposedTimeOptions?.map((option) => (
                     <span
@@ -444,16 +416,7 @@ export function BookingRequestContent({
             </div>
 
             <div className="mt-4 flex flex-col gap-[10px]">
-              {showModifyActions ? (
-                <button
-                  type="button"
-                  onClick={handleModifyProposedTime}
-                  disabled={isSubmittingAction !== null}
-                  className="py-[7px] font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357] underline underline-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
-                >
-                  Modify confirmed appointment
-                </button>
-              ) : (
+              {!hasProposedTime ? (
                 <>
                   <button
                     type="button"
@@ -474,7 +437,7 @@ export function BookingRequestContent({
                     Propose new time
                   </button>
                 </>
-              )}
+              ) : null}
               <button
                 type="button"
                 onClick={() => setIsPassModalOpen(true)}
