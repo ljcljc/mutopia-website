@@ -4,6 +4,7 @@ import { Icon } from "@/components/common/Icon";
 import { formatApiLocalDateTime } from "@/lib/localDateTime";
 import { useAccountStore } from "../accountStore";
 import type { BookingListOut } from "@/lib/api";
+import { StatusBadge } from "./dashboardBookingUtils";
 
 /**
  * 解析地址字符串（假设格式为 "address, city, province postal_code" 或类似格式）
@@ -22,90 +23,6 @@ function parseAddress(address?: string | null): { line1: string; line2: string }
   
   // 如果没有逗号，整个地址作为第一行
   return { line1: address, line2: "" };
-}
-
-type BookingStatusTone = "orange" | "green" | "purple" | "outlined";
-
-function normalizeBookingStatus(status: string): string {
-  return status.trim().toLowerCase().replace(/[\s-]+/g, "_");
-}
-
-function getStatusBadgeConfig(status: string): { label: string; tone: BookingStatusTone } {
-  const normalized = normalizeBookingStatus(status);
-
-  switch (normalized) {
-    case "pending":
-      return { label: "Waiting for groomer match", tone: "orange" };
-    case "awaiting_client_confirmation":
-      return { label: "Waiting for your confirmation", tone: "orange" };
-    case "confirmed":
-      return { label: "Ready for service", tone: "green" };
-    case "traveling":
-      return { label: "Traveling", tone: "green" };
-    case "checked_in":
-      return { label: "Groomer checked in", tone: "purple" };
-    case "in_progress":
-      return { label: "Service started", tone: "purple" };
-    case "awaiting_payment":
-      return { label: "Waiting for payment", tone: "orange" };
-    case "awaiting_final_payment":
-      return { label: "Waiting for final payment", tone: "orange" };
-    case "completed":
-      return { label: "Service completed", tone: "purple" };
-    case "terminated":
-      return { label: "Service terminated", tone: "outlined" };
-    case "canceled":
-    case "cancelled":
-    case "booking_canceled":
-      return { label: "Service canceled", tone: "outlined" };
-    case "refunded":
-      return { label: "Refunded", tone: "outlined" };
-    default:
-      return { label: status || "Waiting for groomer match", tone: "orange" };
-  }
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const { label, tone } = getStatusBadgeConfig(status);
-  
-  if (tone === "green") {
-    return (
-      <div className="inline-flex w-fit items-center justify-center rounded-[12px] bg-[#DCFCE7] px-[12px] py-[5px]">
-        <Icon name="check-green" size={12} className="mr-1 text-[#00A63E]" />
-        <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-[#00A63E]">
-          {label}
-        </span>
-      </div>
-    );
-  }
-
-  if (tone === "purple") {
-    return (
-      <div className="inline-flex h-6 w-fit items-center rounded-[12px] bg-[#633479] px-[12px] py-[5px]">
-        <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-white">
-          {label}
-        </span>
-      </div>
-    );
-  }
-
-  if (tone === "outlined") {
-    return (
-      <div className="inline-flex h-6 w-fit items-center rounded-[12px] border border-[#4C4C4C] bg-white px-[9px] py-[5px]">
-        <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-[#4C4C4C]">
-          {label}
-        </span>
-      </div>
-    );
-  }
-
-  return (
-    <div className="inline-flex h-6 w-fit items-center rounded-[12px] bg-[#DE6A07] px-[12px] py-[5px]">
-      <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-white">
-        {label}
-      </span>
-    </div>
-  );
 }
 
 function BookingItem({ booking }: { booking: BookingListOut }) {

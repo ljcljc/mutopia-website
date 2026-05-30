@@ -1,7 +1,9 @@
 import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Icon } from "@/components/common/Icon";
 import { formatApiLocalDateTime } from "@/lib/localDateTime";
 import { useAccountStore } from "../accountStore";
+import { selectCurrentDashboardBooking, StatusBadge } from "./dashboardBookingUtils";
 
 /**
  * 解析地址字符串
@@ -21,37 +23,36 @@ function parseAddress(address?: string | null): { line1: string; line2: string }
 }
 
 export default function DashboardHeroCard() {
+  const navigate = useNavigate();
   const { upcomingBookings } = useAccountStore();
 
-  // 找到最近的 checked in 预约（从 upcoming 中查找）
-  const checkedInBooking = useMemo(() => {
-    const checkedInBookings = upcomingBookings.filter((booking) => {
-      const statusLower = booking.status.toLowerCase();
-      return statusLower.includes("checked_in") || statusLower === "checked_in";
-    });
+  const currentBooking = useMemo(
+    () => selectCurrentDashboardBooking(upcomingBookings),
+    [upcomingBookings]
+  );
 
-    if (checkedInBookings.length === 0) return null;
-
-    // 按 scheduled_time 排序，选择最近的（时间最晚的）
-    return checkedInBookings.sort((a, b) => {
-      if (!a.scheduled_time) return 1;
-      if (!b.scheduled_time) return -1;
-      return new Date(b.scheduled_time).getTime() - new Date(a.scheduled_time).getTime();
-    })[0];
-  }, [upcomingBookings]);
-
-  // 如果没有 checked in 的预约，不显示卡片
-  if (!checkedInBooking) {
+  if (!currentBooking) {
     return null;
   }
 
-  const petName = checkedInBooking.pet_name || "-";
-  const dateTime = formatApiLocalDateTime(checkedInBooking.scheduled_time);
-  const address = parseAddress(checkedInBooking.address);
+  const petName = currentBooking.pet_name || "-";
+  const dateTime = formatApiLocalDateTime(currentBooking.scheduled_time);
+  const address = parseAddress(currentBooking.address);
 
   return (
     <div className="rounded-xl bg-[#E2FFE8] p-5 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
-      <div className="flex items-center justify-between rounded-[14px] border border-[#4A5565] p-[13px]">
+      <div
+        className="flex cursor-pointer items-center justify-between rounded-[14px] border border-[#4A5565] p-[13px] transition-colors duration-200 hover:bg-white/40"
+        role="button"
+        tabIndex={0}
+        onClick={() => navigate(`/account/bookings/${currentBooking.id}`)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            navigate(`/account/bookings/${currentBooking.id}`);
+          }
+        }}
+      >
         <div className="flex flex-col gap-3">
           <div className="flex w-[134px] flex-col gap-2">
             <p className="font-comfortaa font-bold text-[16px] leading-[28px] text-[#8B6357]">
@@ -73,11 +74,7 @@ export default function DashboardHeroCard() {
           </div>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="flex h-6 items-center rounded-xl border border-[#4C4C4C] px-[9px] py-[5px]">
-            <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#4C4C4C]">
-              Checked in
-            </span>
-          </div>
+          <StatusBadge status={currentBooking.status} />
           <Icon name="nav-next" className="size-4 text-[#99A1AF]" />
         </div>
       </div>
