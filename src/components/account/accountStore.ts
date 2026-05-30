@@ -256,7 +256,7 @@ export const useAccountStore = create<AccountState>((set, get: () => AccountStat
    * 获取 upcoming 预约列表
    * API: GET /api/bookings?group=upcoming&page=1&page_size=50
    * 
-   * upcoming 包含除 history 以外的所有状态（即非 canceled/completed/refunded 的预约）
+   * upcoming 包含除 history 以外的所有状态（即非 canceled/completed/refunded/terminated 的预约）
    */
   fetchUpcomingBookings: async (options = {}) => {
     const { force = false, maxAgeMs = 10000 } = options;
@@ -291,7 +291,7 @@ export const useAccountStore = create<AccountState>((set, get: () => AccountStat
    * 获取 history 预约列表
    * API: GET /api/bookings?group=history&page=1&page_size=50
    * 
-   * history 包含以下状态的预约：canceled/completed/refunded
+   * history 包含以下状态的预约：canceled/completed/refunded/terminated
    */
   fetchHistoryBookings: async () => {
     set({ isLoadingBookings: true });
