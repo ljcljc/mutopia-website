@@ -328,6 +328,48 @@ describe("BookingDetail", () => {
     });
   });
 
+  it("shows pending tip payment and continues the same amount", async () => {
+    renderBookingDetail(
+      makeCompletedBooking({
+        payments: [
+          { id: 1, kind: "deposit", amount: "20.00", currency: "usd", status: "paid" },
+          { id: 2, kind: "final", amount: "85.00", currency: "usd", status: "succeeded" },
+          { id: 7, kind: "tip", amount: "12.60", currency: "usd", status: "open" },
+        ],
+      }),
+    );
+    vi.mocked(createTipSession).mockReturnValue(new Promise(() => {}));
+
+    expect(await screen.findByText("Payment was not completed. You can continue or change the tip amount.")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Continue payment" }));
+
+    await waitFor(() => {
+      expect(createTipSession).toHaveBeenCalledWith(127, "12.60");
+    });
+  });
+
+  it("marks a changed pending tip amount as a new payment", async () => {
+    renderBookingDetail(
+      makeCompletedBooking({
+        payments: [
+          { id: 1, kind: "deposit", amount: "20.00", currency: "usd", status: "paid" },
+          { id: 2, kind: "final", amount: "85.00", currency: "usd", status: "succeeded" },
+          { id: 7, kind: "tip", amount: "12.60", currency: "usd", status: "open" },
+        ],
+      }),
+    );
+    vi.mocked(createTipSession).mockReturnValue(new Promise(() => {}));
+
+    fireEvent.click(await screen.findByRole("button", { name: "20% - 21.00$" }));
+    expect(screen.getByText("Changing the tip amount will start a new payment and cancel the previous one.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Confirm & release Groomer" }));
+
+    await waitFor(() => {
+      expect(createTipSession).toHaveBeenCalledWith(127, "21.00");
+    });
+  });
+
   it("submits a review for a completed booking", async () => {
     const initialBooking = makeCompletedBooking({
       payments: [

@@ -16,6 +16,7 @@ import {
   getPaymentSessionRedirectUrl,
   type AddressOut,
   type BookingDetailOut,
+  type BookingPaymentOut,
   type InvitationDecisionTimeOptionIn,
 } from "@/lib/api";
 import { toast } from "sonner";
@@ -98,6 +99,20 @@ function isPaymentExpiredError(error: unknown) {
     message.includes("canceled") ||
     message.includes("cancelled")
   );
+}
+
+function isPaidPaymentStatus(status: string) {
+  return ["succeeded", "paid"].includes(status.toLowerCase());
+}
+
+function isPendingCheckoutStatus(status: string) {
+  return ["open", "created", "pending", "requires_payment_method", "requires_confirmation", "requires_action", "processing"].includes(
+    status.toLowerCase(),
+  );
+}
+
+function isSameMoneyAmount(left: number, right: number) {
+  return Math.round(left * 100) === Math.round(right * 100);
 }
 
 function formatPreferredTimeSlot(slot: Record<string, unknown>): string | null {
@@ -592,9 +607,32 @@ export default function BookingDetail() {
   const selectedPresetTipAmount =
     tipOptions.find((option) => option.percent === selectedTipPercent)?.amount ?? 0;
   const selectedTipAmount = customTipAmount.trim() ? parseAmount(customTipAmount) : selectedPresetTipAmount;
+  const pendingTipPayment = useMemo(() => {
+    return (
+      detail?.payments
+        ?.filter((payment) => payment.kind.toLowerCase() === "tip" && isPendingCheckoutStatus(payment.status))
+        .reduce<BookingPaymentOut | null>((latest, payment) => {
+          return !latest || payment.id > latest.id ? payment : latest;
+        }, null) ?? null
+    );
+  }, [detail?.payments]);
+  const pendingTipAmount = pendingTipPayment ? parseAmount(pendingTipPayment.amount) : 0;
+  const isContinuingPendingTip =
+    Boolean(pendingTipPayment) && selectedTipAmount > 0 && isSameMoneyAmount(selectedTipAmount, pendingTipAmount);
   const hasPaidTip = Boolean(
-    detail?.payments?.some((payment) => payment.kind.toLowerCase() === "tip" && ["succeeded", "paid"].includes(payment.status.toLowerCase())),
+    detail?.payments?.some((payment) => payment.kind.toLowerCase() === "tip" && isPaidPaymentStatus(payment.status)),
   );
+
+  useEffect(() => {
+    if (!pendingTipPayment || pendingTipAmount <= 0) return;
+    const matchingPreset = tipOptions.find((option) => isSameMoneyAmount(option.amount, pendingTipAmount));
+    if (matchingPreset) {
+      setSelectedTipPercent(matchingPreset.percent);
+      setCustomTipAmount("");
+      return;
+    }
+    setCustomTipAmount(pendingTipAmount.toFixed(2));
+  }, [pendingTipPayment?.id, pendingTipAmount, tipOptions]);
 
   useEffect(() => {
     if (!isModifyOpen) return;
@@ -1096,6 +1134,14 @@ export default function BookingDetail() {
                               inputClassName="font-normal"
                             />
 
+                            {pendingTipPayment ? (
+                              <p className="font-comfortaa text-[11px] font-normal leading-4 text-[#8B6357]">
+                                {isContinuingPendingTip
+                                  ? "Payment was not completed. You can continue or change the tip amount."
+                                  : "Changing the tip amount will start a new payment and cancel the previous one."}
+                              </p>
+                            ) : null}
+
                             <OrangeButton
                               type="button"
                               variant="primary"
@@ -1105,7 +1151,7 @@ export default function BookingDetail() {
                               loading={isCreatingTipSession}
                               onClick={handleCreateTipSession}
                             >
-                              Confirm & release Groomer
+                              {isContinuingPendingTip ? "Continue payment" : "Confirm & release Groomer"}
                             </OrangeButton>
                           </>
                         )}
