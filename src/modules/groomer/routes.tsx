@@ -4,6 +4,7 @@ import GroomerDashboardPage from "@/modules/groomer/pages/GroomerDashboardPage";
 import GroomerAccountPage from "@/modules/groomer/pages/GroomerAccountPage";
 import GroomerMyWorkPage from "@/modules/groomer/pages/GroomerMyWorkPage";
 import GroomerEarningsPage from "@/modules/groomer/pages/GroomerEarningsPage";
+import GroomerTransactionsPage from "@/modules/groomer/pages/GroomerTransactionsPage";
 import GroomerMenuPage from "@/modules/groomer/pages/GroomerMenuPage";
 import GroomerPerformancePage from "@/modules/groomer/pages/GroomerPerformancePage";
 
@@ -34,6 +35,10 @@ export const groomerRoutes = [
           {
             path: "earnings",
             element: <GroomerEarningsPage />,
+          },
+          {
+            path: "earnings/transactions",
+            element: <GroomerTransactionsPage />,
           },
           {
             path: "menu",

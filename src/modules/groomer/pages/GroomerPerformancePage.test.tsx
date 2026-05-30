@@ -99,7 +99,7 @@ describe("GroomerPerformancePage review actions", () => {
     });
     vi.mocked(reportGroomerReview).mockResolvedValue({ ok: true });
 
-    const { container } = renderPage();
+    renderPage();
 
     fireEvent.click(await screen.findByRole("button", { name: "Report review" }));
     fireEvent.change(screen.getByPlaceholderText("Share your reasons"), {
