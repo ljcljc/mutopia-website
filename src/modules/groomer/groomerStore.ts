@@ -189,8 +189,8 @@ function getAppointmentItems(raw: unknown): Record<string, unknown>[] {
 
 function formatCurrency(value: number | string | undefined, fallback: string = "$0"): string {
   if (value === undefined || value === null || value === "") return fallback;
-  if (typeof value === "number") return `$${value}`;
-  return value.startsWith("$") ? value : `$${value}`;
+  const parsed = parseAmount(value);
+  return parsed === null ? fallback : `$${parsed.toFixed(2)}`;
 }
 
 function formatAmount(value: unknown, fallback = "-"): string {
@@ -536,8 +536,8 @@ function mapDashboardGoal(summary: Record<string, unknown>): DashboardGoal {
     "today_booking_count",
   ]);
   const completionRateRaw = getString(summary, ["completion_rate"]);
-  const goalAmountNumber = Number(goalAmountRaw.replace(/[^0-9.-]/g, ""));
-  const currentAmountNumber = Number(currentAmountRaw.replace(/[^0-9.-]/g, ""));
+  const goalAmountNumber = parseAmount(goalAmountRaw);
+  const currentAmountNumber = parseAmount(currentAmountRaw);
   const completionRate = completionRateRaw
     ? `${completionRateRaw.replace(/%$/, "")}%`
     : ratingJobCount && ratingJobCount > 0 && ratingCompletedCount !== undefined && ratingCompletedCount !== null
@@ -545,8 +545,8 @@ function mapDashboardGoal(summary: Record<string, unknown>): DashboardGoal {
       : "0%";
   const hasRemainingAmount = goalAmountRaw && currentAmountRaw;
   const remainingAmountNumber =
-    hasRemainingAmount && Number.isFinite(goalAmountNumber) && Number.isFinite(currentAmountNumber)
-      ? Math.max(goalAmountNumber - currentAmountNumber, 0)
+    hasRemainingAmount && goalAmountNumber !== null && currentAmountNumber !== null
+      ? Math.max(Number((goalAmountNumber - currentAmountNumber).toFixed(2)), 0)
       : undefined;
 
   return {
