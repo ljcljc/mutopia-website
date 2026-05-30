@@ -1826,6 +1826,20 @@ export async function createReview(
 }
 
 /**
+ * 更新评价
+ */
+export async function updateReview(
+  bookingId: number,
+  data: ReviewCreateIn
+): Promise<ReviewCreatedOut> {
+  const response = await http.patch<ReviewCreatedOut>(
+    `/api/bookings/${bookingId}/review`,
+    data
+  );
+  return response.data;
+}
+
+/**
  * 签到
  */
 export async function checkInBooking(bookingId: number): Promise<OkOut> {

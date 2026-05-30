@@ -14,6 +14,7 @@ import {
   createTipSession,
   getBookingDetail,
   getPaymentSessionRedirectUrl,
+  updateReview,
   type AddressOut,
   type BookingDetailOut,
   type BookingPaymentOut,
@@ -85,6 +86,13 @@ function extractTimeLabel(dateTime?: string | null) {
   return timeLabel ?? dateTime;
 }
 
+function formatRecommendationMonth(dateTime?: string | null) {
+  if (!dateTime) return "Booking for next month";
+  const parsed = new Date(dateTime);
+  if (Number.isNaN(parsed.getTime())) return "Booking for next month";
+  return `Booking for ${parsed.toLocaleString("en-US", { month: "long" })}`;
+}
+
 function getHttpErrorMessage(error: unknown) {
   return error instanceof Error ? error.message.toLowerCase() : "";
 }
@@ -142,7 +150,7 @@ function normalizeProposedTimeOption(option: InvitationDecisionTimeOptionIn, ind
   };
 }
 
-type DetailBadgeTone = "orange" | "green" | "purple" | "outlined";
+type DetailBadgeTone = "orange" | "green" | "purple" | "brown" | "outlined";
 
 type DetailCardConfig = {
   subtitleIncludesScheduled: boolean;
@@ -170,6 +178,16 @@ function StatusBadge({ label, tone }: { label: string; tone: DetailBadgeTone }) 
   if (tone === "purple") {
     return (
       <div className="inline-flex h-6 w-fit items-center rounded-xl bg-[#633479] px-4 py-1">
+        <span className="font-comfortaa text-[10px] font-bold leading-[14px] text-white">
+          {label}
+        </span>
+      </div>
+    );
+  }
+
+  if (tone === "brown") {
+    return (
+      <div className="inline-flex h-6 w-fit items-center rounded-xl bg-[#8B6357] px-4 py-1">
         <span className="font-comfortaa text-[10px] font-bold leading-[14px] text-white">
           {label}
         </span>
@@ -276,6 +294,7 @@ export default function BookingDetail() {
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [selectedTipPercent, setSelectedTipPercent] = useState(12);
   const [customTipAmount, setCustomTipAmount] = useState("");
+  const [isTipDeclined, setIsTipDeclined] = useState(false);
   const [isCreatingTipSession, setIsCreatingTipSession] = useState(false);
   const { addresses, isLoadingAddresses, fetchAddresses } = useAccountStore();
   const loadBookingDetailForEdit = useBookingStore((state) => state.loadBookingDetailForEdit);
@@ -291,6 +310,7 @@ export default function BookingDetail() {
 
     setIsLoading(true);
     setError(null);
+    setIsTipDeclined(false);
     getBookingDetail(id)
       .then((data) => {
         setDetail(data);
@@ -443,12 +463,12 @@ export default function BookingDetail() {
       case "completed":
         return {
           subtitleIncludesScheduled: true,
-          progressColor: "#633479",
+          progressColor: detail?.review ? "#8B6357" : "#633479",
           progressWidth: 98.5,
-          badgeLabel: "Service completed",
-          badgeTone: "purple",
+          badgeLabel: detail?.review ? "Service completed and reviewed" : "Service completed",
+          badgeTone: detail?.review ? "brown" : "purple",
           nextStep: detail?.review ? "Review submitted" : "Pending review",
-          showNextStep: true,
+          showNextStep: !detail?.review,
           actionKind: "review",
         };
       case "terminated":
@@ -512,8 +532,23 @@ export default function BookingDetail() {
     }
   }, [detail?.notes, detail?.review, detail?.scheduled_time, detail?.status, estimatedCompletionDisplay, normalizedStatus, paymentDueDisplay, scheduledDisplay]);
 
+  const reviewedDisplay = formatApiLocalDateTime(detail?.review?.created_at);
+  const recommendationLabel = formatRecommendationMonth(detail?.scheduled_time);
+  const reviewCommentDisplay = detail?.review?.comment?.trim() || "No written review provided.";
+  const isHistoryBooking = [
+    "completed",
+    "terminated",
+    "canceled",
+    "cancelled",
+    "booking_canceled",
+    "terminated_and_refunded",
+    "canceled_and_refunded",
+    "cancelled_and_refunded",
+    "refunded",
+  ].includes(normalizedStatus);
+  const breadcrumbBookingLabel = isHistoryBooking ? "History booking" : "Upcoming booking";
   const serviceSummary = detailCardConfig.subtitleIncludesScheduled
-    ? `${serviceName} - ${serviceTypeLabel} ${scheduledDisplay}`
+    ? `${serviceName} - ${serviceTypeLabel} ${scheduledDisplay}${reviewedDisplay ? ` - Reviewed ${reviewedDisplay}` : ""}`
     : `${serviceName} - ${serviceTypeLabel}`;
   const rawCanceledReason =
     typeof detail?.cancel_reason === "string" && detail.cancel_reason.trim()
@@ -589,12 +624,14 @@ export default function BookingDetail() {
     return lines;
   }, [addOnItems, couponAmount, discountAmount, membershipFee, packageSubtotal, serviceName]);
 
-  const paidTotal = useMemo(() => {
-    const total = detail?.payments
-      ?.filter((payment) => ["succeeded", "paid"].includes(payment.status.toLowerCase()))
-      .reduce((sum, payment) => sum + parseAmount(payment.amount), 0);
-    return formatAmount(total ?? 0, "$0.00");
+  const paidReceiptPayments = useMemo(() => {
+    return detail?.payments?.filter((payment) => isPaidPaymentStatus(payment.status)) ?? [];
   }, [detail?.payments]);
+
+  const paidTotal = useMemo(() => {
+    const total = paidReceiptPayments.reduce((sum, payment) => sum + parseAmount(payment.amount), 0);
+    return formatAmount(total ?? 0, "$0.00");
+  }, [paidReceiptPayments]);
 
   const tipOptions = useMemo(() => {
     const baseAmount = parseAmount(detail?.final_amount);
@@ -622,6 +659,7 @@ export default function BookingDetail() {
   const hasPaidTip = Boolean(
     detail?.payments?.some((payment) => payment.kind.toLowerCase() === "tip" && isPaidPaymentStatus(payment.status)),
   );
+  const isTipDecisionComplete = hasPaidTip || isTipDeclined;
 
   useEffect(() => {
     if (!pendingTipPayment || pendingTipAmount <= 0) return;
@@ -750,7 +788,13 @@ export default function BookingDetail() {
   const handleCreateTipSession = async () => {
     if (!detail?.id || isCreatingTipSession) return;
 
-    if (selectedTipAmount <= 0) {
+    const customTipIsZero = customTipAmount.trim() !== "" && isSameMoneyAmount(selectedTipAmount, 0);
+    if (customTipIsZero) {
+      setIsTipDeclined(true);
+      return;
+    }
+
+    if (selectedTipAmount < 0 || selectedTipAmount === 0) {
       toast.error("Please choose a tip amount");
       return;
     }
@@ -781,15 +825,12 @@ export default function BookingDetail() {
   };
 
   const handleOpenReview = () => {
-    if (detail?.review) {
-      toast("Review already submitted");
-      return;
-    }
-    setRating(5);
-    setTechnicalRating(5);
-    setAttitudeRating(5);
-    setEnvironmentRating(5);
-    setReviewComment("");
+    const review = detail?.review;
+    setRating(review?.rating ?? 5);
+    setTechnicalRating(review?.technical_rating || review?.rating || 5);
+    setAttitudeRating(review?.attitude_rating || review?.rating || 5);
+    setEnvironmentRating(review?.environment_rating || review?.rating || 5);
+    setReviewComment(review?.comment ?? "");
     setIsReviewOpen(true);
   };
 
@@ -798,18 +839,24 @@ export default function BookingDetail() {
 
     setIsSubmittingReview(true);
     try {
-      await createReview(detail.id, {
+      const payload = {
         rating,
         technical_rating: technicalRating,
         attitude_rating: attitudeRating,
         environment_rating: environmentRating,
         comment: reviewComment.trim(),
-      });
+      };
+
+      if (detail.review) {
+        await updateReview(detail.id, payload);
+      } else {
+        await createReview(detail.id, payload);
+      }
 
       const updatedDetail = await getBookingDetail(detail.id);
       setDetail(updatedDetail);
       setIsReviewOpen(false);
-      toast.success("Review submitted");
+      toast.success(detail.review ? "Review updated" : "Review submitted");
     } catch (actionError) {
       console.error("Failed to submit review:", actionError);
       if (actionError instanceof HttpError && actionError.status === 409) {
@@ -869,7 +916,7 @@ export default function BookingDetail() {
                 Dashboard
               </Link>
               <span aria-hidden="true">{" > "}</span>
-              <span>{isInitialLoading ? "Upcoming booking" : `Upcoming booking - ${petName}`}</span>
+              <span>{isInitialLoading ? "Upcoming booking" : `${breadcrumbBookingLabel} - ${petName}`}</span>
             </nav>
           </div>
 
@@ -1075,48 +1122,81 @@ export default function BookingDetail() {
 
                   {detailCardConfig.actionKind === "review" ? (
                     <div className="flex w-full flex-col gap-4">
-                      <div className="flex flex-col gap-2">
-                        <p className="font-comfortaa text-[12px] font-bold leading-4 text-[#4A3C2A]">Tip your groomer?</p>
-                        {hasPaidTip ? (
-                          <div className="flex flex-wrap items-center gap-2">
-                            <p className="min-w-[160px] flex-1 font-comfortaa text-[12px] font-bold leading-4 text-[#467900]">
-                              Tip paid. Thank you!
+                      {detail?.review ? (
+                        <div className="flex w-full flex-wrap items-center gap-2">
+                          <div className="flex min-w-[220px] flex-1 flex-col gap-1 text-[#4A3C2A]">
+                            <p className="font-comfortaa text-[10px] font-normal leading-[12px]">
+                              Our recommendation
                             </p>
+                            <p className="font-comfortaa text-[12px] font-bold leading-[16px]">
+                              {recommendationLabel}
+                            </p>
+                          </div>
+                          <div className="flex flex-wrap items-center justify-end gap-2">
+                            <OrangeButton
+                              type="button"
+                              variant="secondary"
+                              size="compact"
+                              className="min-w-[136px] bg-white! hover:bg-[#F9F1E8]!"
+                              onClick={() => setIsReceiptOpen(true)}
+                            >
+                              Receipt
+                            </OrangeButton>
+                            <OrangeButton
+                              type="button"
+                              variant="secondary"
+                              size="compact"
+                              className="min-w-[136px] bg-white! hover:bg-[#F9F1E8]!"
+                              onClick={() => handlePendingAction("Health report is not available yet")}
+                            >
+                              Health report
+                            </OrangeButton>
+                          </div>
+                        </div>
+                      ) : isTipDecisionComplete ? (
+                        <div className="flex w-full flex-wrap items-center justify-end gap-2">
+                            <OrangeButton
+                              type="button"
+                              variant="secondary"
+                              size="compact"
+                              className="min-w-[136px] bg-white! hover:bg-[#F9F1E8]!"
+                              onClick={() => setIsReceiptOpen(true)}
+                            >
+                              Receipt
+                            </OrangeButton>
                             <OrangeButton
                               type="button"
                               variant="primary"
                               size="compact"
-                              className="min-w-[100px] bg-[#633479] hover:bg-[#633479]/90 active:bg-[#633479]/90 focus-visible:bg-[#633479]/90"
+                              className="min-w-[136px] bg-[#633479]! hover:bg-[#734886]! active:bg-[#734886]! focus-visible:bg-[#734886]!"
                               onClick={handleOpenReview}
                             >
-                              {detail?.review ? "Reviewed" : "Review"}
+                              Review
                             </OrangeButton>
-                          </div>
-                        ) : (
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-2">
+                          <p className="font-comfortaa text-[12px] font-bold leading-4 text-[#4A3C2A]">Tip your groomer?</p>
                           <>
                             <div className="grid grid-cols-2 gap-2">
                               {tipOptions.map((option) => {
                                 const isSelected = !customTipAmount.trim() && selectedTipPercent === option.percent;
                                 return (
-                                  <OrangeButton
+                                  <button
                                     key={option.percent}
                                     type="button"
-                                    variant={isSelected ? "primary" : "secondary"}
-                                    size="compact"
-                                    fullWidth
                                     onClick={() => {
                                       setSelectedTipPercent(option.percent);
                                       setCustomTipAmount("");
                                     }}
-                                    textSize={15}
-                                    className={`h-9! rounded-[8px]! ${
+                                    className={`flex h-9 w-full cursor-pointer items-center justify-center rounded-[8px] border bg-white px-3 font-comfortaa text-[15px] leading-[18px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2374ff] active:bg-white ${
                                       isSelected
-                                        ? "border border-[#633479] bg-[linear-gradient(166deg,#FFF7ED_0%,#FFFBEB_100%)]! text-[#633479]! [&_p]:font-bold [&_p]:text-[#633479]!"
-                                        : "border-[#D1D5DB]! bg-white! hover:border-[#633479]! [&_p]:font-medium [&_p]:text-[#4A2C55]!"
+                                        ? "border-[#633479] bg-[linear-gradient(166deg,#FFF7ED_0%,#FFFBEB_100%)] font-bold text-[#633479]"
+                                        : "border-[0.735px] border-[#D1D5DB] bg-white font-medium text-[#4A2C55] hover:border-[#633479] hover:bg-[#FBFAF7]"
                                     }`}
                                   >
                                     {option.percent}% - {option.amount.toFixed(2)}$
-                                  </OrangeButton>
+                                  </button>
                                 );
                               })}
                             </div>
@@ -1154,8 +1234,8 @@ export default function BookingDetail() {
                               {isContinuingPendingTip ? "Continue payment" : "Confirm & release Groomer"}
                             </OrangeButton>
                           </>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
                   ) : null}
 
@@ -1195,6 +1275,34 @@ export default function BookingDetail() {
               ) : null}
             </div>
           </div>
+
+          {detail?.review ? (
+            <div className="rounded-xl bg-white p-6 shadow-[0px_8px_6px_0px_rgba(0,0,0,0.1)]">
+              <div className="flex flex-col gap-2">
+                <p className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">
+                  Review
+                </p>
+                <div className="flex items-start">
+                  <div className="flex min-w-0 flex-1 flex-col gap-1 font-comfortaa text-[12px] leading-4">
+                    {reviewedDisplay ? (
+                      <p className="font-bold text-[#4A5565]">{reviewedDisplay}</p>
+                    ) : null}
+                    <p className="font-normal text-[#4A3C2A]">{reviewCommentDisplay}</p>
+                  </div>
+                </div>
+                <OrangeButton
+                  type="button"
+                  variant="secondary"
+                  size="compact"
+                  textSize={12}
+                  className="h-7! w-[103px] px-[30px]!"
+                  onClick={handleOpenReview}
+                >
+                  Modify
+                </OrangeButton>
+              </div>
+            </div>
+          ) : null}
 
           <div className="rounded-xl bg-white p-6 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
             <div className="flex flex-col gap-2">
@@ -1604,10 +1712,10 @@ export default function BookingDetail() {
                 </div>
               </div>
 
-              {detail?.payments?.length ? (
+              {paidReceiptPayments.length ? (
                 <div className="flex flex-col gap-2">
                   <p className="font-comfortaa text-[12px] font-bold leading-4 text-[#4A3C2A]">Payments</p>
-                  {detail.payments.map((payment) => (
+                  {paidReceiptPayments.map((payment) => (
                     <div key={payment.id} className="flex items-center justify-between gap-4">
                       <p className="font-comfortaa text-[12px] leading-4 text-[#4A5565]">
                         {formatPaymentKind(payment.kind)} · {payment.status}
@@ -1647,7 +1755,7 @@ export default function BookingDetail() {
                   </button>
                 </AlertDialogPrimitive.Cancel>
                 <AlertDialogTitle className="flex-1 text-center font-comfortaa font-normal text-[14px] leading-[22.75px] text-[#4C4C4C]">
-                  Review
+                  Rating and review
                 </AlertDialogTitle>
                 <span className="size-4" />
               </div>

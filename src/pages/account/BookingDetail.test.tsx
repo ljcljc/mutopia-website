@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import BookingDetail from "./BookingDetail";
-import { clientConfirmBookingTime, createDepositSession, createReview, createTipSession, getBookingDetail, type BookingDetailOut } from "@/lib/api";
+import { clientConfirmBookingTime, createDepositSession, createReview, createTipSession, getBookingDetail, updateReview, type BookingDetailOut } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
 import { useBookingStore } from "@/components/booking/bookingStore";
@@ -17,6 +17,7 @@ vi.mock("@/lib/api", async (importOriginal) => {
     createReview: vi.fn(),
     createTipSession: vi.fn(),
     getBookingDetail: vi.fn(),
+    updateReview: vi.fn(),
   };
 });
 
@@ -134,6 +135,7 @@ describe("BookingDetail", () => {
     expect(screen.getByText("2026-05-03 AM", { exact: false })).toBeInTheDocument();
     expect(screen.getByText("2026-05-04 PM", { exact: false })).toBeInTheDocument();
     expect(screen.getByText("Waiting for payment")).toBeInTheDocument();
+    expect(screen.getByText("Upcoming booking - Momo")).toBeInTheDocument();
     expect(screen.getByText(`Pay before ${expectedLocalLabel("2026-05-04T10:00:00Z")}`)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Go pay" })).toBeInTheDocument();
 
@@ -319,6 +321,9 @@ describe("BookingDetail", () => {
     vi.mocked(createTipSession).mockReturnValue(new Promise(() => {}));
 
     expect(await screen.findByText("Tip your groomer?")).toBeInTheDocument();
+    expect(screen.getByText("History booking - Hugui")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Review" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Receipt" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "12% - 12.60$" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Confirm & release Groomer" }));
@@ -326,6 +331,198 @@ describe("BookingDetail", () => {
     await waitFor(() => {
       expect(createTipSession).toHaveBeenCalledWith(127, "12.60");
     });
+  });
+
+  it("allows entering zero tip and shows receipt and review without creating a tip session", async () => {
+    renderBookingDetail(makeCompletedBooking());
+
+    expect(await screen.findByText("Tip your groomer?")).toBeInTheDocument();
+    fireEvent.change(screen.getByPlaceholderText("Enter tip"), {
+      target: { value: "0" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Confirm & release Groomer" }));
+
+    expect(createTipSession).not.toHaveBeenCalled();
+    expect(screen.queryByText("Tip your groomer?")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Receipt" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Review" })).toBeInTheDocument();
+  });
+
+  it("shows only paid and succeeded payments in the receipt", async () => {
+    renderBookingDetail(makeCompletedBooking({
+      payments: [
+        { id: 1, kind: "deposit", amount: "20.00", currency: "usd", status: "paid" },
+        { id: 2, kind: "final", amount: "85.00", currency: "usd", status: "succeeded" },
+        { id: 3, kind: "tip", amount: "12.60", currency: "usd", status: "expired" },
+        { id: 4, kind: "tip", amount: "12.60", currency: "usd", status: "open" },
+        { id: 5, kind: "tip", amount: "12.60", currency: "usd", status: "paid" },
+      ],
+    }));
+
+    fireEvent.click(await screen.findByRole("button", { name: "Receipt" }));
+
+    expect(screen.getByText("Deposit · paid")).toBeInTheDocument();
+    expect(screen.getByText("Final · succeeded")).toBeInTheDocument();
+    expect(screen.getByText("Tip · paid")).toBeInTheDocument();
+    expect(screen.queryByText("Tip · expired")).not.toBeInTheDocument();
+    expect(screen.queryByText("Tip · open")).not.toBeInTheDocument();
+  });
+
+  it("shows a review card for a completed reviewed booking", async () => {
+    renderBookingDetail(makeCompletedBooking({
+      review: {
+        id: 11,
+        rating: 5,
+        technical_rating: 5,
+        attitude_rating: 5,
+        environment_rating: 5,
+        comment: "Laura is super professional and very detailed oriented groomer. Thanks Laura!",
+        created_at: "2026-05-30T08:21:00Z",
+      },
+    }));
+
+    expect(await screen.findByText("Service completed and reviewed")).toBeInTheDocument();
+    expect(screen.getByText("Review")).toBeInTheDocument();
+    expect(screen.getByText(expectedLocalLabel("2026-05-30T08:21:00Z"))).toBeInTheDocument();
+    expect(screen.getByText("Laura is super professional and very detailed oriented groomer. Thanks Laura!")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Modify" }));
+
+    expect(screen.getByRole("heading", { name: "Rating and review" })).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Share more details")).toHaveValue(
+      "Laura is super professional and very detailed oriented groomer. Thanks Laura!",
+    );
+  });
+
+  it("updates an existing review from the modify dialog", async () => {
+    const reviewedBooking = makeCompletedBooking({
+      review: {
+        id: 11,
+        rating: 4,
+        technical_rating: 4,
+        attitude_rating: 5,
+        environment_rating: 3,
+        comment: "Original review",
+        created_at: "2026-05-30T08:21:00Z",
+      },
+    });
+    vi.mocked(getBookingDetail)
+      .mockResolvedValueOnce(reviewedBooking)
+      .mockResolvedValueOnce({
+        ...reviewedBooking,
+        review: {
+          ...reviewedBooking.review!,
+          rating: 5,
+          technical_rating: 5,
+          environment_rating: 5,
+          comment: "Updated review",
+        },
+      });
+    vi.mocked(updateReview).mockResolvedValueOnce({ ok: true, review_id: 11 });
+
+    render(
+      <MemoryRouter initialEntries={["/account/bookings/127"]}>
+        <Routes>
+          <Route path="/account/bookings/:bookingId" element={<BookingDetail />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "Modify" }));
+    fireEvent.click(screen.getByRole("button", { name: "Overall rating 5 stars" }));
+    fireEvent.click(screen.getByRole("button", { name: "Technical skill 5 stars" }));
+    fireEvent.click(screen.getByRole("button", { name: "Environment 5 stars" }));
+    fireEvent.change(screen.getByPlaceholderText("Share more details"), {
+      target: { value: "Updated review" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Submit" }));
+
+    await waitFor(() => {
+      expect(updateReview).toHaveBeenCalledWith(127, {
+        rating: 5,
+        technical_rating: 5,
+        attitude_rating: 5,
+        environment_rating: 5,
+        comment: "Updated review",
+      });
+    });
+    expect(createReview).not.toHaveBeenCalled();
+    expect(toast.success).toHaveBeenCalledWith("Review updated");
+    expect(await screen.findByText("Updated review")).toBeInTheDocument();
+  });
+
+  it("opens the rating and review dialog from a completed booking", async () => {
+    renderBookingDetail(makeCompletedBooking({
+      payments: [
+        { id: 1, kind: "deposit", amount: "20.00", currency: "usd", status: "paid" },
+        { id: 2, kind: "final", amount: "85.00", currency: "usd", status: "succeeded" },
+        { id: 3, kind: "tip", amount: "12.60", currency: "usd", status: "paid" },
+      ],
+    }));
+
+    fireEvent.click(await screen.findByRole("button", { name: "Review" }));
+
+    expect(screen.getByRole("heading", { name: "Rating and review" })).toBeInTheDocument();
+    expect(screen.getByText("Overall rating")).toBeInTheDocument();
+    expect(screen.getByText("Technical skill")).toBeInTheDocument();
+    expect(screen.getByText("Attitude")).toBeInTheDocument();
+    expect(screen.getByText("Environment")).toBeInTheDocument();
+  });
+
+  it("submits a rating and review", async () => {
+    const initialBooking = makeCompletedBooking({
+      payments: [
+        { id: 1, kind: "deposit", amount: "20.00", currency: "usd", status: "paid" },
+        { id: 2, kind: "final", amount: "85.00", currency: "usd", status: "succeeded" },
+        { id: 3, kind: "tip", amount: "12.60", currency: "usd", status: "paid" },
+      ],
+    });
+    vi.mocked(getBookingDetail)
+      .mockResolvedValueOnce(initialBooking)
+      .mockResolvedValueOnce({
+        ...initialBooking,
+        review: {
+          id: 11,
+          rating: 5,
+          technical_rating: 5,
+          attitude_rating: 5,
+          environment_rating: 5,
+          comment: "Excellent service",
+          created_at: "2026-05-24T10:00:00Z",
+        },
+      });
+    vi.mocked(createReview).mockResolvedValueOnce({ ok: true, review_id: 11 });
+
+    render(
+      <MemoryRouter initialEntries={["/account/bookings/127"]}>
+        <Routes>
+          <Route path="/account/bookings/:bookingId" element={<BookingDetail />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "Review" }));
+    fireEvent.change(screen.getByPlaceholderText("Share more details"), {
+      target: { value: "Excellent service" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Submit" }));
+
+    await waitFor(() => {
+      expect(createReview).toHaveBeenCalledWith(127, {
+        rating: 5,
+        technical_rating: 5,
+        attitude_rating: 5,
+        environment_rating: 5,
+        comment: "Excellent service",
+      });
+    });
+    expect(await screen.findByText("Our recommendation")).toBeInTheDocument();
+    expect(screen.getByText("Booking for May")).toBeInTheDocument();
+    expect(screen.getByText("Service completed and reviewed")).toBeInTheDocument();
+    expect(screen.getByText(/Full grooming - Mobile .* - Reviewed /)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Receipt" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Health report" })).toBeInTheDocument();
+    expect(screen.queryByText("Tip your groomer?")).not.toBeInTheDocument();
   });
 
   it("shows pending tip payment and continues the same amount", async () => {
