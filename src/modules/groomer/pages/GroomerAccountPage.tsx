@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { OrangeButton } from "@/components/common";
@@ -16,6 +16,8 @@ import {
   type AccountListRow,
 } from "@/components/account-center";
 import {
+  createGroomerPayoutLoginLink,
+  createGroomerPayoutOnboardingLink,
   getGroomerServiceAreas,
   getServiceAreaProvinces,
   getServiceAreas,
@@ -24,8 +26,20 @@ import {
   type ProvinceOut,
   type ServiceAreaOut,
 } from "@/lib/api";
+import { useGroomerPerformance } from "@/modules/groomer/hooks/useGroomerPerformance";
+import { useGroomerPayoutSummary } from "@/modules/groomer/hooks/useGroomerPayoutSummary";
+import {
+  getGroomerPerformancePresentation,
+} from "@/modules/groomer/utils/performance";
 
-type PerformanceTier = "gold" | "silver" | "premium";
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
+}
+
+function getString(source: Record<string, unknown>, key: string, fallback = ""): string {
+  const value = source[key];
+  return typeof value === "string" ? value : fallback;
+}
 
 function createServiceRow(label: string, index: number): AccountListRow {
   return {
@@ -57,12 +71,25 @@ function ToastStatusIcon({ type }: { type: "check" | "warning" }) {
 export default function GroomerAccountPage() {
   const navigate = useNavigate();
   useIsMobile();
+  const hasShownAccountLoadError = useRef(false);
   const [isAddAreaModalOpen, setIsAddAreaModalOpen] = useState(false);
   const [isLoadingAreas, setIsLoadingAreas] = useState(false);
   const [isSavingAreas, setIsSavingAreas] = useState(false);
   const [provinces, setProvinces] = useState<ProvinceOut[]>([]);
   const [serviceAreaOptions, setServiceAreaOptions] = useState<ServiceAreaOut[]>([]);
   const [selectedServiceAreas, setSelectedServiceAreas] = useState<GroomerServiceAreaOut[]>([]);
+  const showAccountLoadError = useCallback(() => {
+    if (hasShownAccountLoadError.current) return;
+    hasShownAccountLoadError.current = true;
+    toast.error("Failed to load account data");
+  }, []);
+  const { performance, isLoading: isLoadingPerformance } = useGroomerPerformance({
+    onError: showAccountLoadError,
+  });
+  const { payout, isLoading: isLoadingPayout } = useGroomerPayoutSummary({
+    onError: showAccountLoadError,
+  });
+  const [isOpeningPayoutSettings, setIsOpeningPayoutSettings] = useState(false);
 
   const showServiceAreaToast = (
     message: string,
@@ -89,7 +116,7 @@ export default function GroomerAccountPage() {
         setSelectedServiceAreas(selectedList);
       } catch (error) {
         console.error("Failed to load groomer service areas:", error);
-        toast.error("Failed to load service areas");
+        showAccountLoadError();
       } finally {
         if (!cancelled) {
           setIsLoadingAreas(false);
@@ -100,7 +127,7 @@ export default function GroomerAccountPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [showAccountLoadError]);
 
   const serviceRows: AccountListRow[] = useMemo(
     () => createServiceRows(selectedServiceAreas.map((item) => item.label)),
@@ -123,65 +150,30 @@ export default function GroomerAccountPage() {
     }
   };
 
-  const performanceTier: PerformanceTier = "premium";
+  const selectedPerformance = getGroomerPerformancePresentation(
+    performance?.level ?? "level_c",
+    performance?.levelLabel ?? "Groomer",
+    performance?.serviceFeeRate ?? 0.25,
+  );
 
-  const performanceConfig: Record<
-    PerformanceTier,
-    {
-      badgeClassName: string;
-      badgeTextClassName: string;
-      badgeText: string;
-      showStars: boolean;
-      badgeIconName?: IconName;
-      badgeIconClassName?: string;
-      benefitTone: "gold" | "neutral";
-      buttonText: string;
-      benefits: Array<{ title: string; description: string }>;
+  const handleOpenPayoutSettings = async () => {
+    if (isOpeningPayoutSettings) return;
+
+    setIsOpeningPayoutSettings(true);
+    try {
+      const response = payout.onboardingCompleted
+        ? await createGroomerPayoutLoginLink()
+        : await createGroomerPayoutOnboardingLink();
+      const url = getString(asRecord(response), "url");
+      if (!url) throw new Error("Failed to load payout settings");
+      window.open(url, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      console.error("Failed to open payout settings:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to open payout settings");
+    } finally {
+      setIsOpeningPayoutSettings(false);
     }
-  > = {
-    gold: {
-      badgeClassName:
-        "h-[26px] rounded-full bg-[linear-gradient(180deg,#FFF584_0%,#F0D65A_13.46%,#E0B730_26.92%,#C78A0E_75.96%,#BB7F12_87.98%,#C8A32B_100%)] px-3 shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)]",
-      badgeTextClassName:
-        "bg-[linear-gradient(168.31deg,#FFF7ED_0%,#FFFBEB_100%)] bg-clip-text font-comfortaa text-[12px] font-bold leading-[17.5px] text-transparent",
-      badgeText: "Gold groomer",
-      showStars: true,
-      benefitTone: "gold",
-      buttonText: "View your performance",
-      benefits: [
-        { title: "80% payout share", description: "Higher earnings per job" },
-        { title: "Priority client matching", description: "Get bookings first in first 24 hours" },
-        { title: "Free Liability Insurance", description: "Full coverage included" },
-      ],
-    },
-    silver: {
-      badgeClassName:
-        "h-[26px] rounded-full bg-[linear-gradient(180deg,#EEECEC_0%,#EDECEC_16.83%,#DFDEDE_50%,#A4A4A4_88.46%,#B8B6B6_100%)] px-3 shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)]",
-      badgeTextClassName: "font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#633479]",
-      badgeText: "Silver groomer",
-      showStars: false,
-      badgeIconName: "star-3",
-      badgeIconClassName: "size-[12px]",
-      benefitTone: "neutral",
-      buttonText: "View your performance",
-      benefits: [
-        { title: "70% payout share", description: "Higher earnings per job" },
-        { title: "Priority client matching", description: "Get bookings first" },
-      ],
-    },
-    premium: {
-      badgeClassName:
-        "h-[26px] rounded-full bg-[linear-gradient(180deg,#8B6357_0%,#4A2C55_100%)] px-3 shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)]",
-      badgeTextClassName: "font-comfortaa text-[12px] font-bold leading-[17.5px] text-white",
-      badgeText: "Premium groomer",
-      showStars: false,
-      benefitTone: "neutral",
-      buttonText: "View your performance",
-      benefits: [{ title: "60% payout share", description: "Higher earnings per job" }],
-    },
   };
-
-  const selectedPerformance = performanceConfig[performanceTier];
 
   return (
     <>
@@ -220,7 +212,15 @@ export default function GroomerAccountPage() {
             emptyText={isLoadingAreas ? "Loading service areas..." : "No service areas saved yet."}
           />
 
-          <PayoutCard bankName="TD Bank Checking" bankMask="**** **** **** 5678" className="lg:h-[152px]" />
+          <PayoutCard
+            bankName={payout.bankName}
+            bankMask={payout.bankMask}
+            statusText={isLoadingPayout ? "Loading..." : payout.statusText}
+            actionText={payout.onboardingCompleted ? "Manage" : "Setup"}
+            onActionClick={handleOpenPayoutSettings}
+            actionDisabled={isLoadingPayout || isOpeningPayoutSettings}
+            className="lg:h-[152px]"
+          />
 
           <section className="rounded-[20px] border-[1.47px] border-[#4A2C55] bg-white px-5 pb-5 pt-[19px] shadow-[0px_4px_12px_rgba(0,0,0,0.08)] lg:h-[332px]">
             <div className="mb-[14px] flex items-center justify-between">
@@ -235,7 +235,7 @@ export default function GroomerAccountPage() {
                   ) : null}
                   {!selectedPerformance.showStars && selectedPerformance.badgeIconName ? (
                     <Icon
-                      name={selectedPerformance.badgeIconName}
+                      name={selectedPerformance.badgeIconName as IconName}
                       className={selectedPerformance.badgeIconClassName ?? "size-[12px]"}
                     />
                   ) : null}
@@ -244,7 +244,7 @@ export default function GroomerAccountPage() {
               </div>
             </div>
             <p className="font-comfortaa text-[13px] leading-[19.5px] text-[#6B7280]">
-              Maintain your excellent performance to keep these benefits:
+              {isLoadingPerformance ? "Loading your performance benefits..." : "Maintain your performance to keep these benefits:"}
             </p>
             <ul className="mt-3 space-y-3">
               {selectedPerformance.benefits.map((benefit) => (
@@ -264,7 +264,7 @@ export default function GroomerAccountPage() {
               onClick={() => navigate("/groomer/account/performance")}
             >
               <span className="text-center font-comfortaa text-[15px] font-bold leading-[22.5px] text-[#633479]">
-                {selectedPerformance.buttonText}
+                View your performance
               </span>
             </OrangeButton>
           </section>

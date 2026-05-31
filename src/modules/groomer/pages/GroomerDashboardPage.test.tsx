@@ -8,6 +8,7 @@ import {
   getGroomerBookingDetail,
   getGroomerCurrentBooking,
   getGroomerDashboardSummary,
+  getGroomerPerformance,
   getGroomerPendingBookingInvitations,
   submitGroomerHealthReport,
 } from "@/lib/api";
@@ -23,6 +24,7 @@ vi.mock("@/lib/api", async (importOriginal) => {
     getGroomerBookingDetail: vi.fn(),
     getGroomerCurrentBooking: vi.fn(),
     getGroomerDashboardSummary: vi.fn(),
+    getGroomerPerformance: vi.fn(),
     getGroomerPendingBookingInvitations: vi.fn(),
     submitGroomerHealthReport: vi.fn(),
   };
@@ -50,6 +52,16 @@ describe("GroomerDashboardPage complete service", () => {
         removeListener: vi.fn(),
         dispatchEvent: vi.fn(),
       })),
+    });
+    vi.mocked(getGroomerPerformance).mockResolvedValue({
+      score: "92.00",
+      level: "level_a",
+      level_label: "Gold Groomer",
+      service_fee_rate: "0.15",
+      breakdown: {
+        customer_rating: "18.40",
+      },
+      recent_feedback: [],
     });
     useGroomerDashboardStore.setState({
       nextAppointment: null,
@@ -132,6 +144,9 @@ describe("GroomerDashboardPage complete service", () => {
         <GroomerDashboardPage />
       </MemoryRouter>,
     );
+
+    expect(await screen.findByText("92/100")).toBeInTheDocument();
+    expect(screen.getByText("4.6")).toBeInTheDocument();
 
     fireEvent.click(await screen.findByRole("button", { name: /complete service/i }));
 

@@ -5,8 +5,12 @@ import { GroomerLinkButton } from "@/modules/groomer/components/GroomerLinkButto
 import { GroomerPrimaryActionButton } from "@/modules/groomer/components/GroomerPrimaryActionButton";
 import { PerformanceRadarChart } from "@/modules/groomer/components/PerformanceRadarChart";
 import { ReportReviewModal } from "@/modules/groomer/components/ReportReviewModal";
+import {
+  getGroomerPerformancePresentation,
+} from "@/modules/groomer/utils/performance";
+import { useGroomerPerformance } from "@/modules/groomer/hooks/useGroomerPerformance";
 import { useNavigate } from "react-router-dom";
-import { getGroomerPerformance, reportGroomerReview, replyGroomerReview } from "@/lib/api";
+import { reportGroomerReview, replyGroomerReview } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
 
@@ -24,86 +28,10 @@ type ScoreCard = {
   body: ReactNode;
 };
 
-type PerformanceSummary = {
-  score: number;
-  level: string;
-  levelLabel: string;
-  breakdown: {
-    customerRating: number;
-    responseTime: number;
-    reliability: number;
-    completion: number;
-    technical: number;
-  };
-  recentFeedback: Array<{
-    reviewId: number;
-    bookingId: number;
-    userName: string;
-    rating: number;
-    technicalRating: number;
-    attitudeRating: number;
-    environmentRating: number;
-    comment: string;
-    reply: string | null;
-  }>;
-};
-
-function asRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
-}
-
-function getNumber(source: Record<string, unknown>, key: string, fallback = 0): number {
-  const value = source[key];
-  if (typeof value === "number" && Number.isFinite(value)) return value;
-  if (typeof value === "string" && value.trim()) {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : fallback;
-  }
-  return fallback;
-}
-
-function getString(source: Record<string, unknown>, key: string, fallback = ""): string {
-  const value = source[key];
-  return typeof value === "string" ? value : fallback;
-}
-
 function getActionErrorMessage(error: unknown, fallback: string) {
   if (error instanceof HttpError && error.message.trim()) return error.message;
   if (error instanceof Error && error.message.trim()) return error.message;
   return fallback;
-}
-
-function mapPerformanceData(raw: unknown): PerformanceSummary {
-  const record = asRecord(raw);
-  const breakdown = asRecord(record.breakdown);
-  const feedback = Array.isArray(record.recent_feedback) ? record.recent_feedback : [];
-
-  return {
-    score: getNumber(record, "score"),
-    level: getString(record, "level"),
-    levelLabel: getString(record, "level_label", "Groomer"),
-    breakdown: {
-      customerRating: getNumber(breakdown, "customer_rating"),
-      responseTime: getNumber(breakdown, "response_time"),
-      reliability: getNumber(breakdown, "reliability"),
-      completion: getNumber(breakdown, "completion"),
-      technical: getNumber(breakdown, "technical"),
-    },
-    recentFeedback: feedback.map((item) => {
-      const review = asRecord(item);
-      return {
-        reviewId: getNumber(review, "review_id"),
-        bookingId: getNumber(review, "booking_id"),
-        userName: getString(review, "user_name", "Client"),
-        rating: getNumber(review, "rating"),
-        technicalRating: getNumber(review, "technical_rating"),
-        attitudeRating: getNumber(review, "attitude_rating"),
-        environmentRating: getNumber(review, "environment_rating"),
-        comment: getString(review, "comment"),
-        reply: getString(review, "reply") || getString(review, "groomer_reply") || null,
-      };
-    }),
-  };
 }
 
 const COLLAPSE_DURATION_MS = 300;
@@ -122,16 +50,21 @@ function ScoreRing({ score }: { score: number }) {
   );
 }
 
-function PerformanceBadge({ label }: { label: string }) {
+function PerformanceBadge({ label, level }: { label: string; level: string }) {
+  const presentation = getGroomerPerformancePresentation(level, label, 0);
+
   return (
-    <div className="inline-flex h-[26px] items-center gap-2 rounded-full bg-[linear-gradient(180deg,#FFF584_0%,#F0D65A_13.46%,#E0B730_26.92%,#C78A0E_75.96%,#BB7F12_87.98%,#C8A32B_100%)] px-3 shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)]">
-      <div className="flex items-center gap-0.5">
-        <Icon name="star-2" className="size-[12px] text-white" aria-hidden="true" />
-        <Icon name="star-2" className="size-[12px] text-white" aria-hidden="true" />
-      </div>
-      <span className="bg-[linear-gradient(168.31deg,#FFF7ED_0%,#FFFBEB_100%)] bg-clip-text font-comfortaa text-[12px] font-bold leading-[17.5px] text-transparent">
-        {label}
-      </span>
+    <div className={`inline-flex h-[26px] items-center gap-2 ${presentation.badgeClassName}`}>
+      {presentation.showStars ? (
+        <div className="flex items-center gap-0.5">
+          <Icon name="star-2" className="size-[12px] text-white" aria-hidden="true" />
+          <Icon name="star-2" className="size-[12px] text-white" aria-hidden="true" />
+        </div>
+      ) : null}
+      {!presentation.showStars && presentation.badgeIconName ? (
+        <Icon name={presentation.badgeIconName} className={presentation.badgeIconClassName ?? "size-[12px]"} aria-hidden="true" />
+      ) : null}
+      <span className={presentation.badgeTextClassName}>{label}</span>
     </div>
   );
 }
@@ -276,15 +209,7 @@ export default function GroomerPerformancePage() {
   const [isSubmittingReportReview, setIsSubmittingReportReview] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportEvidenceFile, setReportEvidenceFile] = useState<File | null>(null);
-  const [performance, setPerformance] = useState<PerformanceSummary | null>(null);
-
-  useEffect(() => {
-    getGroomerPerformance()
-      .then((response) => setPerformance(mapPerformanceData(response)))
-      .catch((error) => {
-        console.error("Failed to load groomer performance:", error);
-      });
-  }, []);
+  const { performance, setPerformance } = useGroomerPerformance();
 
   const radarMetrics = useMemo(
     () => [
@@ -486,7 +411,7 @@ export default function GroomerPerformancePage() {
           <section className="mt-5 flex flex-col items-center">
             <ScoreRing score={performance?.score ?? 0} />
             <div className="mt-4">
-              <PerformanceBadge label={performance?.levelLabel ?? "Groomer"} />
+              <PerformanceBadge label={performance?.levelLabel ?? "Groomer"} level={performance?.level ?? "level_c"} />
             </div>
           </section>
 

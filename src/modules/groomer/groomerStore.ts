@@ -6,6 +6,7 @@ import {
   getGroomerBookingDetail,
   getGroomerCurrentBooking,
   getGroomerDashboardSummary,
+  getGroomerPerformance,
   getGroomerPendingBookingInvitations,
   type GroomerCompleteServiceOut,
   groomerPortalCheckIn,
@@ -17,6 +18,7 @@ import {
   type TerminateServiceIn,
 } from "@/lib/api";
 import type { GroomerUpNextAppointment } from "@/modules/groomer/components/GroomerUpNextCard";
+import { mapGroomerPerformanceDashboardMetrics } from "@/modules/groomer/utils/performance";
 import {
   formatGroomerTimeLabel,
   isGroomerDateTimeWithinNextHours,
@@ -570,6 +572,96 @@ function mapDashboardMetrics(summary: Record<string, unknown>): DashboardMetrics
   };
 }
 
+function resolveDashboardSummaryState(
+  summaryResult: PromiseSettledResult<unknown>,
+  performanceResult: PromiseSettledResult<unknown>,
+): Pick<GroomerDashboardState, "dailyGoal" | "metrics"> {
+  if (summaryResult.status === "fulfilled") {
+    const summary = asRecord(summaryResult.value);
+    return {
+      dailyGoal: mapDashboardGoal(summary),
+      metrics: performanceResult.status === "fulfilled"
+        ? mapGroomerPerformanceDashboardMetrics(performanceResult.value)
+        : mapDashboardMetrics(summary),
+    };
+  }
+
+  console.error("Failed to load groomer dashboard summary:", summaryResult.reason);
+  return {
+    dailyGoal: EMPTY_GOAL,
+    metrics: performanceResult.status === "fulfilled"
+      ? mapGroomerPerformanceDashboardMetrics(performanceResult.value)
+      : EMPTY_METRICS,
+  };
+}
+
+async function enrichDashboardAppointment(nextAppointment: DashboardAppointment | null): Promise<DashboardAppointment | null> {
+  const bookingId = Number(nextAppointment?.id);
+  if (!nextAppointment || !Number.isFinite(bookingId)) {
+    return nextAppointment;
+  }
+
+  try {
+    const bookingDetail = await getGroomerBookingDetail(bookingId);
+    const price = getNestedRecord(asRecord(bookingDetail), ["price", "price_snapshot"]);
+    const detailRecord = { ...price, ...asRecord(bookingDetail) };
+    const detailAppointment = mapDashboardAppointment(bookingDetail);
+    const estimate = mapEstimateFromPrice(detailRecord);
+    const packageAndAddonBreakdown = mapPackageAndAddonBreakdown(detailRecord);
+
+    return {
+      ...nextAppointment,
+      weightValue: detailAppointment?.weightValue || nextAppointment.weightValue,
+      weightUnit: detailAppointment?.weightUnit || nextAppointment.weightUnit,
+      totalEstimate: estimate.totalEstimate,
+      originalEstimate: estimate.originalEstimate ?? nextAppointment.originalEstimate,
+      savingsLabel: estimate.savingsLabel ?? nextAppointment.savingsLabel,
+      estimateBreakdown: estimate.estimateBreakdown ?? nextAppointment.estimateBreakdown,
+      review: detailAppointment?.review ?? nextAppointment.review,
+      ...packageAndAddonBreakdown,
+    };
+  } catch (error) {
+    console.error("Failed to load groomer current booking detail:", error);
+    return nextAppointment;
+  }
+}
+
+async function resolveNextAppointmentState(
+  currentBookingResult: PromiseSettledResult<unknown>,
+): Promise<Pick<GroomerDashboardState, "nextAppointment">> {
+  if (currentBookingResult.status !== "fulfilled") {
+    console.error("Failed to load groomer current booking:", currentBookingResult.reason);
+    return { nextAppointment: null };
+  }
+
+  const nextAppointment = await enrichDashboardAppointment(mapNearestDashboardAppointment(currentBookingResult.value));
+  return { nextAppointment };
+}
+
+function resolvePendingBookingRequestState(
+  pendingResult: PromiseSettledResult<unknown>,
+): Pick<GroomerDashboardState, "bookingRequest" | "bookingRequests"> {
+  if (pendingResult.status === "fulfilled") {
+    const bookingRequests = mapPendingBookingRequests(pendingResult.value);
+    return { bookingRequest: bookingRequests[0] ?? null, bookingRequests };
+  }
+
+  console.error("Failed to load groomer pending invitations:", pendingResult.reason);
+  return { bookingRequest: null, bookingRequests: [] };
+}
+
+function updateMatchingNextAppointment(
+  current: DashboardAppointment | null,
+  bookingId: number,
+  updater: (appointment: DashboardAppointment) => DashboardAppointment | null,
+): DashboardAppointment | null {
+  if (!current || Number(current.id) !== bookingId) {
+    return current;
+  }
+
+  return updater(current);
+}
+
 interface GroomerDashboardState {
   nextAppointment: DashboardAppointment | null;
   bookingRequest: DashboardAppointment | null;
@@ -612,75 +704,33 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
   fetchDashboard: async () => {
     set({ isLoadingDashboard: true });
 
-    const [summaryResult, currentBookingResult, pendingResult] = await Promise.allSettled([
+    const [summaryResult, performanceResult, currentBookingResult, pendingResult] = await Promise.allSettled([
       getGroomerDashboardSummary(),
+      getGroomerPerformance(),
       getGroomerCurrentBooking(),
       getGroomerPendingBookingInvitations(),
     ]);
 
-    if (summaryResult.status === "fulfilled") {
-      const summary = asRecord(summaryResult.value);
-      set({
-        dailyGoal: mapDashboardGoal(summary),
-        metrics: mapDashboardMetrics(summary),
-      });
-    } else {
-      console.error("Failed to load groomer dashboard summary:", summaryResult.reason);
-      set({
-        dailyGoal: EMPTY_GOAL,
-        metrics: EMPTY_METRICS,
-      });
+    set(resolveDashboardSummaryState(summaryResult, performanceResult));
+
+    if (performanceResult.status === "rejected") {
+      console.error("Failed to load groomer performance for dashboard metrics:", performanceResult.reason);
     }
 
-    if (currentBookingResult.status === "fulfilled") {
-      let nextAppointment = mapNearestDashboardAppointment(currentBookingResult.value);
-      const bookingId = Number(nextAppointment?.id);
-
-      if (nextAppointment && Number.isFinite(bookingId)) {
-        try {
-          const bookingDetail = await getGroomerBookingDetail(bookingId);
-          const price = getNestedRecord(asRecord(bookingDetail), ["price", "price_snapshot"]);
-          const detailRecord = { ...price, ...asRecord(bookingDetail) };
-          const detailAppointment = mapDashboardAppointment(bookingDetail);
-          const estimate = mapEstimateFromPrice(detailRecord);
-          const packageAndAddonBreakdown = mapPackageAndAddonBreakdown(detailRecord);
-          nextAppointment = {
-            ...nextAppointment,
-            weightValue: detailAppointment?.weightValue || nextAppointment.weightValue,
-            weightUnit: detailAppointment?.weightUnit || nextAppointment.weightUnit,
-            totalEstimate: estimate.totalEstimate,
-            originalEstimate: estimate.originalEstimate ?? nextAppointment.originalEstimate,
-            savingsLabel: estimate.savingsLabel ?? nextAppointment.savingsLabel,
-            estimateBreakdown: estimate.estimateBreakdown ?? nextAppointment.estimateBreakdown,
-            review: detailAppointment?.review ?? nextAppointment.review,
-            ...packageAndAddonBreakdown,
-          };
-        } catch (error) {
-          console.error("Failed to load groomer current booking detail:", error);
-        }
-      }
-
-      set({ nextAppointment });
-    } else {
-      console.error("Failed to load groomer current booking:", currentBookingResult.reason);
-      set({ nextAppointment: null });
-    }
-
-    if (pendingResult.status === "fulfilled") {
-      const bookingRequests = mapPendingBookingRequests(pendingResult.value);
-      set({ bookingRequest: bookingRequests[0] ?? null, bookingRequests });
-    } else {
-      console.error("Failed to load groomer pending invitations:", pendingResult.reason);
-      set({ bookingRequest: null, bookingRequests: [] });
-    }
+    set(await resolveNextAppointmentState(currentBookingResult));
+    set(resolvePendingBookingRequestState(pendingResult));
 
     set({ isLoadingDashboard: false, hasLoadedDashboard: true });
   },
 
   fetchPendingBookingRequests: async () => {
-    const pendingResult = await getGroomerPendingBookingInvitations();
-    const bookingRequests = mapPendingBookingRequests(pendingResult);
-    set({ bookingRequest: bookingRequests[0] ?? null, bookingRequests });
+    try {
+      const pendingResponse = await getGroomerPendingBookingInvitations();
+      set(resolvePendingBookingRequestState({ status: "fulfilled", value: pendingResponse }));
+    } catch (error) {
+      console.error("Failed to refresh pending booking requests:", error);
+      throw error;
+    }
   },
 
   startTravel: async (bookingId: number) => {
@@ -688,9 +738,10 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
     try {
       await startGroomerTravel(bookingId);
       set((state) => ({
-        nextAppointment: state.nextAppointment && Number(state.nextAppointment.id) === bookingId
-          ? { ...state.nextAppointment, status: "traveling" }
-          : state.nextAppointment,
+        nextAppointment: updateMatchingNextAppointment(state.nextAppointment, bookingId, (appointment) => ({
+          ...appointment,
+          status: "traveling",
+        })),
       }));
     } finally {
       set({ isStartingTravel: false });
@@ -702,9 +753,7 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
     try {
       await cancelGroomerBooking(bookingId, data);
       set((state) => ({
-        nextAppointment: state.nextAppointment && Number(state.nextAppointment.id) === bookingId
-          ? null
-          : state.nextAppointment,
+        nextAppointment: updateMatchingNextAppointment(state.nextAppointment, bookingId, () => null),
       }));
     } finally {
       set({ isCancelingTravel: false });
@@ -716,9 +765,10 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
     try {
       await groomerPortalCheckIn(bookingId);
       set((state) => ({
-        nextAppointment: state.nextAppointment && Number(state.nextAppointment.id) === bookingId
-          ? { ...state.nextAppointment, status: "checked_in" }
-          : state.nextAppointment,
+        nextAppointment: updateMatchingNextAppointment(state.nextAppointment, bookingId, (appointment) => ({
+          ...appointment,
+          status: "checked_in",
+        })),
       }));
     } finally {
       set({ isCheckingIn: false });
@@ -730,9 +780,10 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
     try {
       await startGroomerGrooming(bookingId);
       set((state) => ({
-        nextAppointment: state.nextAppointment && Number(state.nextAppointment.id) === bookingId
-          ? { ...state.nextAppointment, status: "in_progress" }
-          : state.nextAppointment,
+        nextAppointment: updateMatchingNextAppointment(state.nextAppointment, bookingId, (appointment) => ({
+          ...appointment,
+          status: "in_progress",
+        })),
       }));
     } finally {
       set({ isStartingGrooming: false });
@@ -747,17 +798,21 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
       const nextStatus = getString(resultRecord, ["status"], "completed");
       const totalServiceMinutes = getOptionalNumber(resultRecord, ["total_service_minutes"]);
       set((state) => ({
-        nextAppointment: state.nextAppointment && Number(state.nextAppointment.id) === bookingId
-          ? {
-              ...state.nextAppointment,
-              status: nextStatus,
-              duration: totalServiceMinutes ? `Est. duration: ${totalServiceMinutes} minutes` : state.nextAppointment.duration,
-            }
-          : state.nextAppointment,
+        nextAppointment: updateMatchingNextAppointment(state.nextAppointment, bookingId, (appointment) => ({
+          ...appointment,
+          status: nextStatus,
+          duration: totalServiceMinutes ? `Est. duration: ${totalServiceMinutes} minutes` : appointment.duration,
+        })),
       }));
       try {
-        const summary = asRecord(await getGroomerDashboardSummary());
-        set({ dailyGoal: mapDashboardGoal(summary), metrics: mapDashboardMetrics(summary) });
+        const [summaryResult, performanceResult] = await Promise.allSettled([
+          getGroomerDashboardSummary(),
+          getGroomerPerformance(),
+        ]);
+        set(resolveDashboardSummaryState(summaryResult, performanceResult));
+        if (performanceResult.status === "rejected") {
+          console.error("Failed to refresh groomer performance for dashboard metrics:", performanceResult.reason);
+        }
       } catch (error) {
         console.error("Failed to refresh groomer dashboard summary:", error);
       }
@@ -772,9 +827,7 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
     try {
       await terminateGroomerService(bookingId, data);
       set((state) => ({
-        nextAppointment: state.nextAppointment && Number(state.nextAppointment.id) === bookingId
-          ? null
-          : state.nextAppointment,
+        nextAppointment: updateMatchingNextAppointment(state.nextAppointment, bookingId, () => null),
       }));
     } finally {
       set({ isTerminatingService: false });

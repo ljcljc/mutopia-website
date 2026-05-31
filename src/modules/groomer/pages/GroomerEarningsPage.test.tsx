@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import GroomerEarningsPage from "./GroomerEarningsPage";
+import { toast } from "sonner";
 import {
   getGroomerEarningTransactions,
   getGroomerEarningsSummary,
@@ -217,5 +218,33 @@ describe("GroomerEarningsPage", () => {
     });
     expect(await screen.findByText("$0.00")).toBeInTheDocument();
     expect(screen.getByText("-$840.50")).toBeInTheDocument();
+  });
+
+  it("shows an error toast when payout loading fails", async () => {
+    vi.mocked(getGroomerEarningsSummary).mockResolvedValue({
+      available: "840.50",
+      held: "98.36",
+      cashed_out: "1200.00",
+      service_amount: "650.00",
+      completed_count: 12,
+      tip_amount: "140.50",
+      tip_count: 8,
+    });
+    vi.mocked(getGroomerPayoutSummary).mockRejectedValue(new Error("payout failed"));
+    vi.mocked(getGroomerEarningTransactions).mockResolvedValue({
+      total: 0,
+      page: 1,
+      page_size: 20,
+      items: [],
+    });
+
+    render(
+      <MemoryRouter>
+        <GroomerEarningsPage />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("$840.50")).toBeInTheDocument();
+    expect(toast.error).toHaveBeenCalledWith("payout failed");
   });
 });

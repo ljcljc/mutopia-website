@@ -10,6 +10,8 @@ interface PayoutCardProps {
   bankMask: string;
   leftIcon?: IconName;
   statusText?: string;
+  onActionClick?: () => void;
+  actionDisabled?: boolean;
   className?: string;
 }
 
@@ -21,6 +23,8 @@ export default function PayoutCard({
   bankMask,
   leftIcon = "bank",
   statusText = "Verified",
+  onActionClick,
+  actionDisabled = false,
   className = "",
 }: PayoutCardProps) {
   return (
@@ -31,6 +35,9 @@ export default function PayoutCard({
           <h2 className={accountCenterTheme.contentTitleClassName}>{title}</h2>
         </div>
         <button
+          type="button"
+          onClick={onActionClick}
+          disabled={actionDisabled}
           className={`${accountCenterTheme.actionTextClassName} ${accountCenterTheme.actionInteractiveClassName} inline-flex items-center gap-1.5`}
         >
           <span>{actionText}</span>
