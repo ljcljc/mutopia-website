@@ -245,6 +245,9 @@ describe("GroomerEarningsPage", () => {
     );
 
     expect(await screen.findByText("$840.50")).toBeInTheDocument();
-    expect(toast.error).toHaveBeenCalledWith("payout failed");
+    await waitFor(() => {
+      expect(getGroomerPayoutSummary).toHaveBeenCalled();
+      expect(toast.error).toHaveBeenCalledWith("payout failed");
+    });
   });
 });

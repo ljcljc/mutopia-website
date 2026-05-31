@@ -95,6 +95,26 @@ describe("GroomerAccountPage", () => {
     expect(screen.getByText("Verified")).toBeInTheDocument();
   });
 
+  it("renders the performance badge from the live level label", async () => {
+    vi.mocked(getGroomerPerformance).mockResolvedValue({
+      score: 78,
+      level: "level_b",
+      level_label: "Silver Groomer",
+      service_fee_rate: "0.20",
+      breakdown: {},
+      recent_feedback: [],
+    });
+
+    render(
+      <MemoryRouter>
+        <GroomerAccountPage />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Silver Groomer")).toBeInTheDocument();
+    expect(screen.getByText("80% payout share")).toBeInTheDocument();
+  });
+
   it("shows an error toast when payout loading fails", async () => {
     vi.mocked(getGroomerPerformance).mockResolvedValue({
       score: 91,

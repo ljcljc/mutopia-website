@@ -2,14 +2,10 @@ import { useEffect, useState } from "react";
 import { getGroomerPerformance } from "@/lib/api";
 import { mapGroomerPerformanceData, type GroomerPerformanceSummary } from "@/modules/groomer/utils/performance";
 
-type UseGroomerPerformanceOptions = {
-  onError?: (error: unknown) => void;
-};
-
-export function useGroomerPerformance(options: UseGroomerPerformanceOptions = {}) {
+export function useGroomerPerformance() {
   const [performance, setPerformance] = useState<GroomerPerformanceSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { onError } = options;
+  const [error, setError] = useState<unknown>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -19,12 +15,13 @@ export function useGroomerPerformance(options: UseGroomerPerformanceOptions = {}
       try {
         const response = await getGroomerPerformance();
         if (!cancelled) {
+          setError(null);
           setPerformance(mapGroomerPerformanceData(response));
         }
       } catch (error) {
         if (!cancelled) {
           console.error("Failed to load groomer performance:", error);
-          onError?.(error);
+          setError(error);
         }
       } finally {
         if (!cancelled) {
@@ -38,7 +35,7 @@ export function useGroomerPerformance(options: UseGroomerPerformanceOptions = {}
     return () => {
       cancelled = true;
     };
-  }, [onError]);
+  }, []);
 
-  return { performance, isLoading, setPerformance };
+  return { performance, isLoading, error, setPerformance };
 }

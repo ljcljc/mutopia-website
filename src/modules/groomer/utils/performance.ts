@@ -21,6 +21,21 @@ export type GroomerPerformanceSummary = {
     comment: string;
     reply: string | null;
   }>;
+  technicalSkill: {
+    certificationTitle: string;
+    status: string;
+    statusLabel: string;
+    canUpdate: boolean;
+    latestRequest: {
+      id: number;
+      status: string;
+      description: string;
+      reviewerNotes: string;
+      evidenceImageId: number;
+      submittedAt: string;
+      reviewedAt: string | null;
+    } | null;
+  };
 };
 
 export type GroomerPerformancePresentation = {
@@ -68,6 +83,8 @@ export function mapGroomerPerformanceData(raw: unknown): GroomerPerformanceSumma
   const record = asRecord(raw);
   const breakdown = asRecord(record.breakdown);
   const feedback = Array.isArray(record.recent_feedback) ? record.recent_feedback : [];
+  const technicalSkill = asRecord(record.technical_skill);
+  const latestRequest = asRecord(technicalSkill.latest_request);
 
   return {
     score: getNumber(record, "score"),
@@ -95,6 +112,23 @@ export function mapGroomerPerformanceData(raw: unknown): GroomerPerformanceSumma
         reply: getString(review, "reply") || getString(review, "groomer_reply") || null,
       };
     }),
+    technicalSkill: {
+      certificationTitle: getString(technicalSkill, "certification_title", "Groomer"),
+      status: getString(technicalSkill, "status", "needs_update"),
+      statusLabel: getString(technicalSkill, "status_label", "Update certification details"),
+      canUpdate: Boolean(technicalSkill.can_update ?? true),
+      latestRequest: Object.keys(latestRequest).length
+        ? {
+            id: getNumber(latestRequest, "id"),
+            status: getString(latestRequest, "status"),
+            description: getString(latestRequest, "description"),
+            reviewerNotes: getString(latestRequest, "reviewer_notes"),
+            evidenceImageId: getNumber(latestRequest, "evidence_image_id"),
+            submittedAt: getString(latestRequest, "submitted_at"),
+            reviewedAt: getString(latestRequest, "reviewed_at") || null,
+          }
+        : null,
+    },
   };
 }
 

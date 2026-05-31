@@ -2,14 +2,10 @@ import { useEffect, useState } from "react";
 import { getGroomerPayoutSummary } from "@/lib/api";
 import { DEFAULT_GROOMER_PAYOUT_SUMMARY, mapGroomerPayoutSummary, type GroomerPayoutSummary } from "@/modules/groomer/utils/payout";
 
-type UseGroomerPayoutSummaryOptions = {
-  onError?: (error: unknown) => void;
-};
-
-export function useGroomerPayoutSummary(options: UseGroomerPayoutSummaryOptions = {}) {
+export function useGroomerPayoutSummary() {
   const [payout, setPayout] = useState<GroomerPayoutSummary>(DEFAULT_GROOMER_PAYOUT_SUMMARY);
   const [isLoading, setIsLoading] = useState(true);
-  const { onError } = options;
+  const [error, setError] = useState<unknown>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -19,12 +15,13 @@ export function useGroomerPayoutSummary(options: UseGroomerPayoutSummaryOptions 
       try {
         const response = await getGroomerPayoutSummary();
         if (!cancelled) {
+          setError(null);
           setPayout(mapGroomerPayoutSummary(response));
         }
       } catch (error) {
         if (!cancelled) {
           console.error("Failed to load groomer payout summary:", error);
-          onError?.(error);
+          setError(error);
         }
       } finally {
         if (!cancelled) {
@@ -38,7 +35,7 @@ export function useGroomerPayoutSummary(options: UseGroomerPayoutSummaryOptions 
     return () => {
       cancelled = true;
     };
-  }, [onError]);
+  }, []);
 
-  return { payout, isLoading, setPayout };
+  return { payout, isLoading, error, setPayout };
 }

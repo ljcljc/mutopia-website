@@ -83,12 +83,8 @@ export default function GroomerAccountPage() {
     hasShownAccountLoadError.current = true;
     toast.error("Failed to load account data");
   }, []);
-  const { performance, isLoading: isLoadingPerformance } = useGroomerPerformance({
-    onError: showAccountLoadError,
-  });
-  const { payout, isLoading: isLoadingPayout } = useGroomerPayoutSummary({
-    onError: showAccountLoadError,
-  });
+  const { performance, isLoading: isLoadingPerformance, error: performanceError } = useGroomerPerformance();
+  const { payout, isLoading: isLoadingPayout, error: payoutError } = useGroomerPayoutSummary();
   const [isOpeningPayoutSettings, setIsOpeningPayoutSettings] = useState(false);
 
   const showServiceAreaToast = (
@@ -129,6 +125,12 @@ export default function GroomerAccountPage() {
     };
   }, [showAccountLoadError]);
 
+  useEffect(() => {
+    if (performanceError || payoutError) {
+      showAccountLoadError();
+    }
+  }, [performanceError, payoutError, showAccountLoadError]);
+
   const serviceRows: AccountListRow[] = useMemo(
     () => createServiceRows(selectedServiceAreas.map((item) => item.label)),
     [selectedServiceAreas],
@@ -150,11 +152,13 @@ export default function GroomerAccountPage() {
     }
   };
 
-  const selectedPerformance = getGroomerPerformancePresentation(
-    performance?.level ?? "level_c",
-    performance?.levelLabel ?? "Groomer",
-    performance?.serviceFeeRate ?? 0.25,
-  );
+  const selectedPerformance = performance
+    ? getGroomerPerformancePresentation(
+        performance.level,
+        performance.levelLabel,
+        performance.serviceFeeRate,
+      )
+    : null;
 
   const handleOpenPayoutSettings = async () => {
     if (isOpeningPayoutSettings) return;
@@ -225,34 +229,40 @@ export default function GroomerAccountPage() {
           <section className="rounded-[20px] border-[1.47px] border-[#4A2C55] bg-white px-5 pb-5 pt-[19px] shadow-[0px_4px_12px_rgba(0,0,0,0.08)] lg:h-[332px]">
             <div className="mb-[14px] flex items-center justify-between">
               <h2 className="font-comfortaa text-[16px] font-bold leading-6 text-[#4A2C55]">Performance</h2>
-              <div className={selectedPerformance.badgeClassName}>
-                <div className="flex h-full items-center gap-2">
-                  {selectedPerformance.showStars ? (
-                    <div className="flex items-center gap-0.5">
-                      <Icon name="star-2" className="size-[12px] text-white" />
-                      <Icon name="star-2" className="size-[12px] text-white" />
-                    </div>
-                  ) : null}
-                  {!selectedPerformance.showStars && selectedPerformance.badgeIconName ? (
-                    <Icon
-                      name={selectedPerformance.badgeIconName as IconName}
-                      className={selectedPerformance.badgeIconClassName ?? "size-[12px]"}
-                    />
-                  ) : null}
-                  <span className={selectedPerformance.badgeTextClassName}>{selectedPerformance.badgeText}</span>
+              {selectedPerformance ? (
+                <div className={selectedPerformance.badgeClassName}>
+                  <div className="flex h-full items-center gap-2">
+                    {selectedPerformance.showStars ? (
+                      <div className="flex items-center gap-0.5">
+                        <Icon name="star-2" className="size-[12px] text-white" />
+                        <Icon name="star-2" className="size-[12px] text-white" />
+                      </div>
+                    ) : null}
+                    {!selectedPerformance.showStars && selectedPerformance.badgeIconName ? (
+                      <Icon
+                        name={selectedPerformance.badgeIconName as IconName}
+                        className={selectedPerformance.badgeIconClassName ?? "size-[12px]"}
+                      />
+                    ) : null}
+                    <span className={selectedPerformance.badgeTextClassName}>{selectedPerformance.badgeText}</span>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="inline-flex h-[26px] items-center rounded-full bg-[#F5F1EC] px-3">
+                  <span className="font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#8B6357]">Loading...</span>
+                </div>
+              )}
             </div>
             <p className="font-comfortaa text-[13px] leading-[19.5px] text-[#6B7280]">
               {isLoadingPerformance ? "Loading your performance benefits..." : "Maintain your performance to keep these benefits:"}
             </p>
             <ul className="mt-3 space-y-3">
-              {selectedPerformance.benefits.map((benefit) => (
+              {(selectedPerformance?.benefits ?? []).map((benefit) => (
                 <PerformanceBenefitItem
                   key={benefit.title}
                   title={benefit.title}
                   description={benefit.description}
-                  tone={selectedPerformance.benefitTone}
+                  tone={selectedPerformance?.benefitTone ?? "neutral"}
                 />
               ))}
             </ul>

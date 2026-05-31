@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { OrangeButton } from "@/components/common";
 import { Spinner } from "@/components/common/Spinner";
@@ -8,11 +8,11 @@ import { RecentTransactionItem } from "@/modules/groomer/components/earnings/Rec
 import { TimeframeSelectorDialog } from "@/modules/groomer/components/earnings/TimeframeSelectorDialog";
 import { CustomRangeModal } from "@/modules/groomer/components/earnings/CustomRangeModal";
 import { EarningsEmptyState } from "@/modules/groomer/components/earnings/EarningsEmptyState";
-import { useGroomerPayoutSummary } from "@/modules/groomer/hooks/useGroomerPayoutSummary";
 import { formatRangeDate, getDateRangeForTimeframe } from "@/modules/groomer/components/earnings/utils";
 import {
   getGroomerEarningTransactions,
   getGroomerEarningsSummary,
+  getGroomerPayoutSummary,
   groomerCashOut,
 } from "@/lib/api";
 import { formatCurrency, mapTransactionPage, type TransactionItemView } from "@/modules/groomer/components/earnings/transactionUtils";
@@ -31,6 +31,10 @@ type SummaryData = {
   tipCount: number;
 };
 
+type PayoutData = {
+  cashOutFeeRate: number;
+};
+
 const DEFAULT_SUMMARY: SummaryData = {
   availableAmount: 0,
   heldAmount: 0,
@@ -39,6 +43,10 @@ const DEFAULT_SUMMARY: SummaryData = {
   completedCount: 0,
   tipAmount: 0,
   tipCount: 0,
+};
+
+const DEFAULT_PAYOUT: PayoutData = {
+  cashOutFeeRate: 0.015,
 };
 
 function asRecord(value: unknown): Record<string, unknown> {
@@ -86,6 +94,13 @@ function mapSummary(raw: unknown): SummaryData {
     completedCount: getNumber(record, "completed_count"),
     tipAmount: getNumber(record, "tip_amount"),
     tipCount: getNumber(record, "tip_count"),
+  };
+}
+
+function mapPayout(raw: unknown): PayoutData {
+  const record = asRecord(raw);
+  return {
+    cashOutFeeRate: getNumber(record, "cash_out_fee_rate", DEFAULT_PAYOUT.cashOutFeeRate),
   };
 }
 
@@ -257,12 +272,7 @@ export default function GroomerEarningsPage() {
   const [customRangeStartDate, setCustomRangeStartDate] = useState(initialRange.startDate);
   const [customRangeEndDate, setCustomRangeEndDate] = useState(initialRange.endDate);
   const [summary, setSummary] = useState<SummaryData>(DEFAULT_SUMMARY);
-  const handlePayoutLoadError = useCallback((error: unknown) => {
-    toast.error(getActionErrorMessage(error, "Failed to load payout settings"));
-  }, []);
-  const { payout } = useGroomerPayoutSummary({
-    onError: handlePayoutLoadError,
-  });
+  const [payout, setPayout] = useState<PayoutData>(DEFAULT_PAYOUT);
   const [transactions, setTransactions] = useState<TransactionItemView[]>([]);
   const [isLoadingSummary, setIsLoadingSummary] = useState(true);
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
@@ -299,12 +309,22 @@ export default function GroomerEarningsPage() {
     }
   };
 
+  const loadPayout = async () => {
+    try {
+      const data = await getGroomerPayoutSummary();
+      setPayout(mapPayout(data));
+    } catch (error) {
+      toast.error(getActionErrorMessage(error, "Failed to load payout settings"));
+    }
+  };
+
   useEffect(() => {
     void loadSummary();
   }, [selectedTimeframe, customRangeStartDate, customRangeEndDate]);
 
   useEffect(() => {
     void loadTransactions();
+    void loadPayout();
   }, []);
 
   const handleChangeTimeframe = (timeframe: string) => {
@@ -331,7 +351,7 @@ export default function GroomerEarningsPage() {
       const result = await groomerCashOut({ amount: summary.availableAmount.toFixed(2) });
       const record = asRecord(result);
       toast.success(`Cash out submitted: ${formatCurrency(getNumber(record, "net_amount", summary.availableAmount))}`);
-      await Promise.all([loadSummary(), loadTransactions()]);
+      await Promise.all([loadSummary(), loadTransactions(), loadPayout()]);
     } catch (error) {
       toast.error(getActionErrorMessage(error, "Cash out failed"));
     } finally {

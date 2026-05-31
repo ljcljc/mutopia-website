@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import GroomerPerformancePage from "./GroomerPerformancePage";
-import { getGroomerPerformance, reportGroomerReview, replyGroomerReview } from "@/lib/api";
+import { getGroomerPerformance, reportGroomerReview, replyGroomerReview, submitGroomerTechnicalSkillUpdate, uploadGroomerApplyImage } from "@/lib/api";
 import { toast } from "sonner";
 
 vi.mock("@/lib/api", async (importOriginal) => {
@@ -13,6 +13,8 @@ vi.mock("@/lib/api", async (importOriginal) => {
     getGroomerPerformance: vi.fn(),
     replyGroomerReview: vi.fn(),
     reportGroomerReview: vi.fn(),
+    uploadGroomerApplyImage: vi.fn(),
+    submitGroomerTechnicalSkillUpdate: vi.fn(),
   };
 });
 
@@ -141,5 +143,63 @@ describe("GroomerPerformancePage review actions", () => {
     expect(await screen.findByText("Your reply")).toBeInTheDocument();
     expect(screen.getByText("Appreciate your support.")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Reply" })).not.toBeInTheDocument();
+  });
+
+  it("submits a technical skill update and refreshes the status badge", async () => {
+    vi.mocked(getGroomerPerformance).mockResolvedValue({
+      score: 92,
+      level_label: "Premium",
+      breakdown: { technical: 19 },
+      technical_skill: {
+        certification_title: "Level A (Certified groomer in China)",
+        status: "approved",
+        status_label: "Profile documents received",
+        can_update: true,
+        latest_request: null,
+      },
+      recent_feedback: [],
+    });
+    vi.mocked(uploadGroomerApplyImage).mockResolvedValue({ id: 17, url: "/media/evidence.png", category: "work_or_cert" });
+    vi.mocked(submitGroomerTechnicalSkillUpdate).mockResolvedValue({
+      ok: true,
+      technical_skill: {
+        certification_title: "Level A (Certified groomer in China)",
+        status: "pending",
+        status_label: "Your request is under review",
+        can_update: true,
+        latest_request: {
+          id: 99,
+          status: "pending",
+          description: "I completed advanced grooming workshops.",
+          reviewer_notes: "",
+          evidence_image_id: 17,
+          submitted_at: "2026-05-31T00:00:00Z",
+          reviewed_at: null,
+        },
+      },
+    });
+
+    renderPage();
+
+    fireEvent.click(await screen.findByRole("button", { name: "Update" }));
+    await screen.findByText("How you optimize your skills");
+    fireEvent.change(screen.getByPlaceholderText("Share your experience"), {
+      target: { value: "I completed advanced grooming workshops." },
+    });
+    const file = new File(["evidence"], "skill-proof.png", { type: "image/png" });
+    const fileInput = document.querySelector("#technical-skill-evidence") as HTMLInputElement;
+    fireEvent.change(fileInput, { target: { files: [file] } });
+    const updateButtons = screen.getAllByRole("button", { name: "Update" });
+    fireEvent.click(updateButtons[updateButtons.length - 1] as HTMLElement);
+
+    await waitFor(() => {
+      expect(uploadGroomerApplyImage).toHaveBeenCalledWith(file, "work_or_cert");
+      expect(submitGroomerTechnicalSkillUpdate).toHaveBeenCalledWith({
+        description: "I completed advanced grooming workshops.",
+        evidence_image_id: 17,
+      });
+    });
+    expect(toast.success).toHaveBeenCalledWith("Technical skill update submitted");
+    expect(await screen.findByText("Your request is under review")).toBeInTheDocument();
   });
 });

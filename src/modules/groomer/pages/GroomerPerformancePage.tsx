@@ -5,12 +5,13 @@ import { GroomerLinkButton } from "@/modules/groomer/components/GroomerLinkButto
 import { GroomerPrimaryActionButton } from "@/modules/groomer/components/GroomerPrimaryActionButton";
 import { PerformanceRadarChart } from "@/modules/groomer/components/PerformanceRadarChart";
 import { ReportReviewModal } from "@/modules/groomer/components/ReportReviewModal";
+import { UpdateTechnicalSkillModal } from "@/modules/groomer/components/UpdateTechnicalSkillModal";
 import {
   getGroomerPerformancePresentation,
 } from "@/modules/groomer/utils/performance";
 import { useGroomerPerformance } from "@/modules/groomer/hooks/useGroomerPerformance";
 import { useNavigate } from "react-router-dom";
-import { reportGroomerReview, replyGroomerReview } from "@/lib/api";
+import { reportGroomerReview, replyGroomerReview, submitGroomerTechnicalSkillUpdate, uploadGroomerApplyImage } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
 
@@ -199,6 +200,122 @@ function ScoreCardView({ card }: { card: ScoreCard }) {
   );
 }
 
+function RatingStars({ rating }: { rating: number }) {
+  return (
+    <div className="flex items-center gap-0.5">
+      {Array.from({ length: 5 }).map((_, index) => (
+        <Icon
+          key={index}
+          name="star-2"
+          className={`size-[14px] ${index < Math.round(rating) ? "text-[#E67E22]" : "text-[#E7DED8]"}`}
+          aria-hidden="true"
+        />
+      ))}
+    </div>
+  );
+}
+
+function RatingBreakdownRow({ label, rating }: { label: string; rating: number }) {
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <span className="font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357]">{label}</span>
+      <RatingStars rating={rating} />
+    </div>
+  );
+}
+
+function getResponseTimePresentation(score: number) {
+  const normalizedScore = Math.max(0, Math.min(score, 20));
+  const completion = (normalizedScore / 20) * 100;
+  const averageMinutes = Math.round(120 - normalizedScore * 3.75);
+
+  if (normalizedScore >= 18) {
+    return { averageMinutes, badge: "Fast Responder", progress: completion };
+  }
+
+  if (normalizedScore >= 14) {
+    return { averageMinutes, badge: "On Track", progress: completion };
+  }
+
+  return { averageMinutes, badge: "Needs Follow-up", progress: completion };
+}
+
+function getReliabilityPresentation(score: number) {
+  const normalizedScore = Math.max(0, Math.min(score, 20));
+  const progress = (normalizedScore / 20) * 100;
+  const onTimeRate = Math.round(70 + normalizedScore * 1.4);
+
+  if (normalizedScore >= 18) {
+    return { onTimeRate, progress, incidentText: "No recent late arrivals", incidentTone: "text-[#16A34A]" };
+  }
+
+  if (normalizedScore >= 15) {
+    return { onTimeRate, progress, incidentText: "1 Late arrival (4 mins)", incidentTone: "text-[#DC2626]" };
+  }
+
+  return { onTimeRate, progress, incidentText: "Recent late arrivals need attention", incidentTone: "text-[#DC2626]" };
+}
+
+function getCompletionPresentation(score: number) {
+  const normalizedScore = Math.max(0, Math.min(score, 20));
+
+  if (normalizedScore >= 18) {
+    return {
+      summary: "All Health Reports filed within 24h",
+      tone: "text-[#4A2C55]",
+      iconTone: "text-[#3B82F6]",
+    };
+  }
+
+  if (normalizedScore >= 14) {
+    return {
+      summary: "Most Health Reports filed within 24h",
+      tone: "text-[#4A2C55]",
+      iconTone: "text-[#3B82F6]",
+    };
+  }
+
+  return {
+    summary: "Some Health Reports were filed after 24h",
+    tone: "text-[#DC2626]",
+    iconTone: "text-[#DC2626]",
+  };
+}
+
+function getTechnicalSkillPresentation(technicalSkill: {
+  certificationTitle: string;
+  status: string;
+  statusLabel: string;
+}) {
+  if (technicalSkill.status === "pending") {
+    return {
+      title: technicalSkill.certificationTitle,
+      status: technicalSkill.statusLabel,
+      statusTone: "text-[#27AE60]",
+      statusBg: "bg-[#DCFCE7]",
+      statusIcon: "check-green" as const,
+    };
+  }
+
+  if (technicalSkill.status === "approved") {
+    return {
+      title: technicalSkill.certificationTitle,
+      status: technicalSkill.statusLabel,
+      statusTone: "text-[#27AE60]",
+      statusBg: "bg-[#DCFCE7]",
+      statusIcon: "check-green" as const,
+    };
+  }
+
+  return {
+    title: technicalSkill.certificationTitle,
+    status: technicalSkill.statusLabel,
+    statusTone: "text-[#633479]",
+    statusBg: "bg-[rgba(124,58,237,0.1)]",
+    statusIcon: "premium-quality" as const,
+  };
+}
+
 export default function GroomerPerformancePage() {
   const navigate = useNavigate();
   const [isPerformanceRadarOpen, setIsPerformanceRadarOpen] = useState(false);
@@ -209,6 +326,10 @@ export default function GroomerPerformancePage() {
   const [isSubmittingReportReview, setIsSubmittingReportReview] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportEvidenceFile, setReportEvidenceFile] = useState<File | null>(null);
+  const [isTechnicalSkillModalOpen, setIsTechnicalSkillModalOpen] = useState(false);
+  const [technicalSkillDescription, setTechnicalSkillDescription] = useState("");
+  const [technicalSkillEvidenceFile, setTechnicalSkillEvidenceFile] = useState<File | null>(null);
+  const [isSubmittingTechnicalSkill, setIsSubmittingTechnicalSkill] = useState(false);
   const { performance, setPerformance } = useGroomerPerformance();
 
   const radarMetrics = useMemo(
@@ -227,6 +348,20 @@ export default function GroomerPerformancePage() {
     const averageStars = firstReview
       ? ((firstReview.technicalRating || firstReview.rating) + (firstReview.attitudeRating || firstReview.rating) + (firstReview.environmentRating || firstReview.rating)) / 3
       : 0;
+    const responseTimeScore = Math.round(performance?.breakdown.responseTime ?? 0);
+    const responseTimePresentation = getResponseTimePresentation(responseTimeScore);
+    const reliabilityScore = Math.round(performance?.breakdown.reliability ?? 0);
+    const reliabilityPresentation = getReliabilityPresentation(reliabilityScore);
+    const completionScore = Math.round(performance?.breakdown.completion ?? 0);
+    const completionPresentation = getCompletionPresentation(completionScore);
+    const technicalScore = Math.round(performance?.breakdown.technical ?? 0);
+    const technicalPresentation = getTechnicalSkillPresentation(
+      performance?.technicalSkill ?? {
+        certificationTitle: "Groomer",
+        status: "needs_update",
+        statusLabel: "Update certification details",
+      },
+    );
 
     return [
       {
@@ -236,46 +371,80 @@ export default function GroomerPerformancePage() {
         maxScore: 20,
         scoreColor: "text-[#E67E22]",
         iconToneClassName: "bg-[#FFF7ED]",
-        cardClassName: "min-h-[239px]",
-        icon: <Icon name="professional-service" className="size-[18px] text-[#E67E22]" aria-hidden="true" />,
+        cardClassName: "min-h-[218px]",
+        icon: <Icon name="star" className="size-[18px] text-[#E67E22]" aria-hidden="true" />,
         body: (
           <div className="rounded-[12px] bg-[#FAF9F7] px-4 py-4">
             <p className="font-comfortaa text-[14px] font-bold leading-[21px] text-[#4A2C55]">
               Average {averageStars > 0 ? averageStars.toFixed(1) : "-"} Stars
             </p>
+            <div className="mt-[10px] space-y-[11px]">
+              <RatingBreakdownRow
+                label="Skill"
+                rating={firstReview ? (firstReview.technicalRating || firstReview.rating) : 0}
+              />
+              <RatingBreakdownRow
+                label="Attitude"
+                rating={firstReview ? (firstReview.attitudeRating || firstReview.rating) : 0}
+              />
+              <RatingBreakdownRow
+                label="Environment"
+                rating={firstReview ? (firstReview.environmentRating || firstReview.rating) : 0}
+              />
+            </div>
           </div>
         ),
       },
       {
         title: "Confirm Time",
         subtitle: "Max 20 pts",
-        score: Math.round(performance?.breakdown.responseTime ?? 0),
+        score: responseTimeScore,
         maxScore: 20,
         scoreColor: "text-[#16A34A]",
         iconToneClassName: "bg-[#F0FDF4]",
-        cardClassName: "min-h-[170px]",
-        icon: <Icon name="target" className="size-[18px] text-[#16A34A]" aria-hidden="true" />,
+        cardClassName: "min-h-[167px]",
+        icon: <Icon name="alert-success" className="size-[18px]" aria-hidden="true" />,
         body: (
           <div className="rounded-[12px] bg-[#FAF9F7] px-4 py-4">
-            <p className="font-comfortaa text-[14px] font-bold leading-[21px] text-[#4A2C55]">
-              Response score {Math.round(performance?.breakdown.responseTime ?? 0)}/20
-            </p>
+            <div className="flex items-center justify-between gap-3">
+              <p className="font-comfortaa text-[14px] font-bold leading-[21px] text-[#4A2C55]">
+                Average: {responseTimePresentation.averageMinutes} mins
+              </p>
+              <span className="inline-flex h-6 items-center rounded-full bg-[#DCFCE7] px-3 font-comfortaa text-[11px] font-bold leading-[16.5px] text-[#388B5E]">
+                {responseTimePresentation.badge}
+              </span>
+            </div>
+            <div className="mt-2 h-[6px] overflow-hidden rounded-full bg-[#E5E7EB]">
+              <div
+                className="h-full rounded-full bg-[#00A63E]"
+                style={{ width: `${responseTimePresentation.progress}%` }}
+              />
+            </div>
           </div>
         ),
       },
       {
         title: "Punctuality",
         subtitle: "Max 20 pts",
-        score: Math.round(performance?.breakdown.reliability ?? 0),
+        score: reliabilityScore,
         maxScore: 20,
         scoreColor: "text-[#D97706]",
         iconToneClassName: "bg-[#FFF7ED]",
-        cardClassName: "min-h-[170px]",
+        cardClassName: "min-h-[190px]",
         icon: <Icon name="clock" className="size-[18px] text-[#D97706]" aria-hidden="true" />,
         body: (
           <div className="rounded-[12px] bg-[#FAF9F7] px-4 py-4">
             <p className="font-comfortaa text-[14px] font-bold leading-[21px] text-[#4A2C55]">
-              Reliability score {Math.round(performance?.breakdown.reliability ?? 0)}/20
+              {reliabilityPresentation.onTimeRate}% On-time
+            </p>
+            <div className="mt-2 h-[6px] overflow-hidden rounded-full bg-[#E5E7EB]">
+              <div
+                className="h-full rounded-full bg-[#D97706]"
+                style={{ width: `${reliabilityPresentation.progress}%` }}
+              />
+            </div>
+            <p className={`mt-[9px] font-comfortaa text-[12px] font-medium leading-[18px] ${reliabilityPresentation.incidentTone}`}>
+              {reliabilityPresentation.incidentText}
             </p>
           </div>
         ),
@@ -283,18 +452,18 @@ export default function GroomerPerformancePage() {
       {
         title: "Completion &\nHealth Reports",
         subtitle: "Max 20 pts",
-        score: Math.round(performance?.breakdown.completion ?? 0),
+        score: completionScore,
         maxScore: 20,
         scoreColor: "text-[#3B82F6]",
         iconToneClassName: "bg-[#EFF6FF]",
-        cardClassName: "min-h-[167px]",
-        icon: <Icon name="target" className="size-[18px] text-[#60A5FA]" aria-hidden="true" />,
+        cardClassName: "min-h-[149px]",
+        icon: <Icon name="check" className="size-[18px] text-[#3B82F6]" aria-hidden="true" />,
         body: (
           <div className="rounded-[12px] bg-[#FAF9F7] px-4 py-4">
             <div className="flex items-start gap-2">
-              <Icon name="target" className="mt-[2px] size-[14px] text-[#60A5FA]" aria-hidden="true" />
-              <p className="font-comfortaa text-[13px] leading-[19.5px] text-[#4A2C55]">
-                Completion score {Math.round(performance?.breakdown.completion ?? 0)}/20
+              <Icon name="check" className={`mt-[2px] size-[14px] ${completionPresentation.iconTone}`} aria-hidden="true" />
+              <p className={`font-comfortaa text-[13px] leading-[19.5px] ${completionPresentation.tone}`}>
+                {completionPresentation.summary}
               </p>
             </div>
           </div>
@@ -303,17 +472,46 @@ export default function GroomerPerformancePage() {
       {
         title: "Technical Skill",
         subtitle: "Max 20 pts",
-        score: Math.round(performance?.breakdown.technical ?? 0),
+        score: technicalScore,
         maxScore: 20,
         scoreColor: "text-[#633479]",
         iconToneClassName: "bg-[#FAF5FF]",
-        cardClassName: "min-h-[163px]",
+        cardClassName: "min-h-[218px]",
         icon: <Icon name="premium-quality" className="size-[18px] text-[#A855F7]" aria-hidden="true" />,
         body: (
-          <div className="rounded-[12px] bg-[#FAF9F7] px-4 py-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(168,85,247,0.2)] bg-[rgba(168,85,247,0.1)] px-3 py-[7px]">
-              <Icon name="premium-quality" className="size-[14px] text-[#A855F7]" aria-hidden="true" />
-              <span className="font-comfortaa text-[12px] font-bold leading-[18px] text-[#633479]">{performance?.levelLabel ?? "Groomer"}</span>
+          <div>
+            <div className="rounded-[12px] bg-[#FAF9F7] px-4 py-4">
+              <div className="space-y-2">
+                <div className="flex items-center rounded-full border border-[rgba(124,58,237,0.2)] bg-[rgba(124,58,237,0.1)] px-3 py-[7px]">
+                  <Icon name="premium-quality" className="size-[14px] shrink-0 text-[#633479]" aria-hidden="true" />
+                  <span className="ml-2 truncate font-comfortaa text-[12px] font-bold leading-[18px] text-[#633479]">
+                    {technicalPresentation.title}
+                  </span>
+                </div>
+                <div className={`inline-flex h-6 items-center gap-1 rounded-[12px] px-3 ${technicalPresentation.statusBg}`}>
+                  <Icon
+                    name={technicalPresentation.statusIcon}
+                    className={`size-[14px] ${technicalPresentation.statusTone}`}
+                    aria-hidden="true"
+                  />
+                  <span className={`font-comfortaa text-[10px] font-bold leading-[14px] ${technicalPresentation.statusTone}`}>
+                    {technicalPresentation.status}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 flex justify-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setTechnicalSkillDescription(performance?.technicalSkill.latestRequest?.description ?? "");
+                  setTechnicalSkillEvidenceFile(null);
+                  setIsTechnicalSkillModalOpen(true);
+                }}
+                className="inline-flex h-9 w-[196px] items-center justify-center rounded-[20px] border border-[#633479] bg-white font-comfortaa text-[14px] font-bold leading-[21px] text-[#633479] transition-[transform,opacity] active:scale-[0.98] active:opacity-80"
+              >
+                Update
+              </button>
             </div>
           </div>
         ),
@@ -337,10 +535,26 @@ export default function GroomerPerformancePage() {
     });
   };
 
+  const updateTechnicalSkill = (technicalSkill: NonNullable<typeof performance>["technicalSkill"]) => {
+    setPerformance((current) => {
+      if (!current) return current;
+      return {
+        ...current,
+        technicalSkill,
+      };
+    });
+  };
+
   const resetReportReviewForm = () => {
     setIsReportReviewOpen(false);
     setReportReason("");
     setReportEvidenceFile(null);
+  };
+
+  const resetTechnicalSkillForm = () => {
+    setIsTechnicalSkillModalOpen(false);
+    setTechnicalSkillDescription("");
+    setTechnicalSkillEvidenceFile(null);
   };
 
   const handleReplySubmit = async () => {
@@ -389,6 +603,53 @@ export default function GroomerPerformancePage() {
       toast.error(getActionErrorMessage(error, "Failed to report review"));
     } finally {
       setIsSubmittingReportReview(false);
+    }
+  };
+
+  const handleTechnicalSkillSubmit = async () => {
+    const trimmedDescription = technicalSkillDescription.trim();
+    if (isSubmittingTechnicalSkill) return;
+
+    if (!trimmedDescription) {
+      toast.error("Please share your updated skills");
+      return;
+    }
+
+    setIsSubmittingTechnicalSkill(true);
+    try {
+      let evidenceImageId: number | null = null;
+      if (technicalSkillEvidenceFile) {
+        const uploaded = await uploadGroomerApplyImage(technicalSkillEvidenceFile, "work_or_cert");
+        evidenceImageId = uploaded.id;
+      }
+      const response = await submitGroomerTechnicalSkillUpdate({
+        description: trimmedDescription,
+        evidence_image_id: evidenceImageId,
+      });
+      updateTechnicalSkill({
+        certificationTitle: String(response.technical_skill.certification_title ?? "Groomer"),
+        status: String(response.technical_skill.status ?? "pending"),
+        statusLabel: String(response.technical_skill.status_label ?? "Your request is under review"),
+        canUpdate: Boolean(response.technical_skill.can_update ?? true),
+        latestRequest: response.technical_skill.latest_request && typeof response.technical_skill.latest_request === "object"
+          ? {
+              id: Number((response.technical_skill.latest_request as Record<string, unknown>).id ?? 0),
+              status: String((response.technical_skill.latest_request as Record<string, unknown>).status ?? "pending"),
+              description: String((response.technical_skill.latest_request as Record<string, unknown>).description ?? ""),
+              reviewerNotes: String((response.technical_skill.latest_request as Record<string, unknown>).reviewer_notes ?? ""),
+              evidenceImageId: Number((response.technical_skill.latest_request as Record<string, unknown>).evidence_image_id ?? 0),
+              submittedAt: String((response.technical_skill.latest_request as Record<string, unknown>).submitted_at ?? ""),
+              reviewedAt: ((response.technical_skill.latest_request as Record<string, unknown>).reviewed_at as string | null | undefined) ?? null,
+            }
+          : null,
+      });
+      resetTechnicalSkillForm();
+      toast.success("Technical skill update submitted");
+    } catch (error) {
+      console.error("Failed to submit technical skill update:", error);
+      toast.error(getActionErrorMessage(error, "Failed to submit technical skill update"));
+    } finally {
+      setIsSubmittingTechnicalSkill(false);
     }
   };
 
@@ -549,6 +810,17 @@ export default function GroomerPerformancePage() {
         onSubmit={handleReportReviewSubmit}
         isSubmitting={isSubmittingReportReview}
         onClose={resetReportReviewForm}
+      />
+
+      <UpdateTechnicalSkillModal
+        open={isTechnicalSkillModalOpen}
+        description={technicalSkillDescription}
+        evidenceName={technicalSkillEvidenceFile?.name ?? ""}
+        isSubmitting={isSubmittingTechnicalSkill}
+        onDescriptionChange={setTechnicalSkillDescription}
+        onEvidenceChange={setTechnicalSkillEvidenceFile}
+        onSubmit={handleTechnicalSkillSubmit}
+        onClose={resetTechnicalSkillForm}
       />
     </>
   );

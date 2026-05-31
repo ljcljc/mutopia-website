@@ -1615,6 +1615,16 @@ export interface ReviewReportIn {
   evidenceFile?: File | null;
 }
 
+export interface TechnicalSkillUpdateIn {
+  description: string;
+  evidence_image_id?: number | null;
+}
+
+export interface TechnicalSkillUpdateOut {
+  ok: boolean;
+  technical_skill: UnknownObjectOut;
+}
+
 export interface InvitationDecisionIn {
   action?: "confirm_original_time" | "propose_new_time" | "decline";
   accept?: boolean;
@@ -1995,6 +2005,16 @@ export async function reportGroomerReview(
   const response = await http.post<OkOut>(
     `/api/groomers/reviews/${reviewId}/report`,
     formData
+  );
+  return response.data;
+}
+
+export async function submitGroomerTechnicalSkillUpdate(
+  data: TechnicalSkillUpdateIn
+): Promise<TechnicalSkillUpdateOut> {
+  const response = await http.post<TechnicalSkillUpdateOut>(
+    "/api/groomers/performance/technical-skill-update",
+    data
   );
   return response.data;
 }
