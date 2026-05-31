@@ -10,6 +10,11 @@ export type GroomerPerformanceSummary = {
     completion: number;
     technical: number;
   };
+  punctuality: {
+    onTimeRate: number;
+    lateArrivalCount: number;
+    latestLateMinutes: number | null;
+  };
   recentFeedback: Array<{
     reviewId: number;
     bookingId: number;
@@ -54,6 +59,12 @@ export type GroomerPerformanceDashboardMetrics = {
   rating: string;
 };
 
+function getPerformanceTierBadgeText(level: string): string {
+  if (level === "level_a") return "Level A";
+  if (level === "level_b") return "Level B";
+  return "Level C";
+}
+
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
 }
@@ -66,6 +77,17 @@ function getNumber(source: Record<string, unknown>, key: string, fallback = 0): 
     return Number.isFinite(parsed) ? parsed : fallback;
   }
   return fallback;
+}
+
+function getNullableNumber(source: Record<string, unknown>, key: string): number | null {
+  const value = source[key];
+  if (value == null) return null;
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && value.trim()) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
 }
 
 function getString(source: Record<string, unknown>, key: string, fallback = ""): string {
@@ -83,6 +105,7 @@ export function mapGroomerPerformanceData(raw: unknown): GroomerPerformanceSumma
   const record = asRecord(raw);
   const breakdown = asRecord(record.breakdown);
   const feedback = Array.isArray(record.recent_feedback) ? record.recent_feedback : [];
+  const punctuality = asRecord(record.punctuality);
   const technicalSkill = asRecord(record.technical_skill);
   const latestRequest = asRecord(technicalSkill.latest_request);
 
@@ -97,6 +120,11 @@ export function mapGroomerPerformanceData(raw: unknown): GroomerPerformanceSumma
       reliability: getNumber(breakdown, "reliability"),
       completion: getNumber(breakdown, "completion"),
       technical: getNumber(breakdown, "technical"),
+    },
+    punctuality: {
+      onTimeRate: getNumber(punctuality, "on_time_rate", 100),
+      lateArrivalCount: getNumber(punctuality, "late_arrival_count"),
+      latestLateMinutes: getNullableNumber(punctuality, "latest_late_minutes"),
     },
     recentFeedback: feedback.map((item) => {
       const review = asRecord(item);
@@ -145,10 +173,11 @@ export function mapGroomerPerformanceDashboardMetrics(raw: unknown): GroomerPerf
 
 export function getGroomerPerformancePresentation(
   level: string,
-  levelLabel: string,
+  _levelLabel: string,
   serviceFeeRate: number,
 ): GroomerPerformancePresentation {
   const payoutShare = formatPercent(1 - serviceFeeRate);
+  const badgeText = getPerformanceTierBadgeText(level);
 
   if (level === "level_a") {
     return {
@@ -156,7 +185,7 @@ export function getGroomerPerformancePresentation(
         "h-[26px] rounded-full bg-[linear-gradient(180deg,#FFF584_0%,#F0D65A_13.46%,#E0B730_26.92%,#C78A0E_75.96%,#BB7F12_87.98%,#C8A32B_100%)] px-3 shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)]",
       badgeTextClassName:
         "bg-[linear-gradient(168.31deg,#FFF7ED_0%,#FFFBEB_100%)] bg-clip-text font-comfortaa text-[12px] font-bold leading-[17.5px] text-transparent",
-      badgeText: levelLabel || "Gold Groomer",
+      badgeText,
       showStars: true,
       benefitTone: "gold",
       benefits: [
@@ -172,7 +201,7 @@ export function getGroomerPerformancePresentation(
       badgeClassName:
         "h-[26px] rounded-full bg-[linear-gradient(180deg,#EEECEC_0%,#EDECEC_16.83%,#DFDEDE_50%,#A4A4A4_88.46%,#B8B6B6_100%)] px-3 shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)]",
       badgeTextClassName: "font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#633479]",
-      badgeText: levelLabel || "Silver Groomer",
+      badgeText,
       showStars: false,
       badgeIconName: "star-3",
       badgeIconClassName: "size-[12px]",
@@ -189,7 +218,7 @@ export function getGroomerPerformancePresentation(
     badgeClassName:
       "h-[26px] rounded-full bg-[linear-gradient(180deg,#8B6357_0%,#4A2C55_100%)] px-3 shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)]",
     badgeTextClassName: "font-comfortaa text-[12px] font-bold leading-[17.5px] text-white",
-    badgeText: levelLabel || "Groomer",
+    badgeText,
     showStars: false,
     benefitTone: "neutral",
     benefits: [

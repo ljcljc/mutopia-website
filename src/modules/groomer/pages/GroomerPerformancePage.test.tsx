@@ -56,6 +56,7 @@ describe("GroomerPerformancePage review actions", () => {
       score: 92,
       level_label: "Premium",
       breakdown: {},
+      punctuality: { on_time_rate: 92, late_arrival_count: 1, latest_late_minutes: 4 },
       recent_feedback: [
         {
           review_id: 18,
@@ -89,6 +90,7 @@ describe("GroomerPerformancePage review actions", () => {
       score: 92,
       level_label: "Premium",
       breakdown: {},
+      punctuality: { on_time_rate: 92, late_arrival_count: 1, latest_late_minutes: 4 },
       recent_feedback: [
         {
           review_id: 21,
@@ -126,6 +128,7 @@ describe("GroomerPerformancePage review actions", () => {
       score: 92,
       level_label: "Premium",
       breakdown: {},
+      punctuality: { on_time_rate: 100, late_arrival_count: 0, latest_late_minutes: null },
       recent_feedback: [
         {
           review_id: 22,
@@ -150,6 +153,7 @@ describe("GroomerPerformancePage review actions", () => {
       score: 92,
       level_label: "Premium",
       breakdown: { technical: 19 },
+      punctuality: { on_time_rate: 100, late_arrival_count: 0, latest_late_minutes: null },
       technical_skill: {
         certification_title: "Level A (Certified groomer in China)",
         status: "approved",
@@ -201,5 +205,21 @@ describe("GroomerPerformancePage review actions", () => {
     });
     expect(toast.success).toHaveBeenCalledWith("Technical skill update submitted");
     expect(await screen.findByText("Your request is under review")).toBeInTheDocument();
+  });
+
+  it("renders punctuality from real API fields instead of score mapping", async () => {
+    vi.mocked(getGroomerPerformance).mockResolvedValue({
+      score: 92,
+      level_label: "Premium",
+      breakdown: { reliability: 16 },
+      punctuality: { on_time_rate: 92, late_arrival_count: 1, latest_late_minutes: 4 },
+      recent_feedback: [],
+    });
+
+    renderPage();
+
+    expect(await screen.findByText("92% On-time")).toBeInTheDocument();
+    expect(screen.getByText("1 Late arrival (4 mins)")).toBeInTheDocument();
+    expect(screen.getByText("16")).toBeInTheDocument();
   });
 });

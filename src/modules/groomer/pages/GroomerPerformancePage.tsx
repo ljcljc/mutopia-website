@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { OrangeButton } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
+import { useIsMobile } from "@/components/ui/use-mobile";
 import { GroomerLinkButton } from "@/modules/groomer/components/GroomerLinkButton";
 import { GroomerPrimaryActionButton } from "@/modules/groomer/components/GroomerPrimaryActionButton";
 import { PerformanceRadarChart } from "@/modules/groomer/components/PerformanceRadarChart";
@@ -65,7 +66,28 @@ function PerformanceBadge({ label, level }: { label: string; level: string }) {
       {!presentation.showStars && presentation.badgeIconName ? (
         <Icon name={presentation.badgeIconName} className={presentation.badgeIconClassName ?? "size-[12px]"} aria-hidden="true" />
       ) : null}
-      <span className={presentation.badgeTextClassName}>{label}</span>
+      <span className={presentation.badgeTextClassName}>{presentation.badgeText}</span>
+    </div>
+  );
+}
+
+function PerformanceTierScale() {
+  const secondaryText = "75/100 Silver groomer";
+  const baseText = "70/100 Premium groomer";
+
+  return (
+    <div className="mt-2 flex w-[147px] flex-col gap-2">
+      <div className="h-[21px] rounded-full bg-[linear-gradient(180deg,rgba(238,236,236,0.4)_0%,rgba(237,236,236,0.4)_16.827%,rgba(223,222,222,0.4)_50%,rgba(164,164,164,0.4)_88.462%,rgba(184,182,182,0.4)_100%)] px-2 shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)]">
+        <div className="flex h-full items-center gap-1 text-[#633479]">
+          <Icon name="star-3" className="size-[10px]" aria-hidden="true" />
+          <span className="font-comfortaa text-[10px] font-bold leading-[14px]">{secondaryText}</span>
+        </div>
+      </div>
+      <div className="h-[21px] rounded-full bg-[linear-gradient(180deg,rgba(139,99,87,0.6)_0%,rgba(74,44,85,0.6)_100%)] px-[9px] shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)]">
+        <div className="flex h-full items-center">
+          <span className="font-comfortaa text-[10px] font-bold leading-[14px] text-[rgba(255,255,255,0.4)]">{baseText}</span>
+        </div>
+      </div>
     </div>
   );
 }
@@ -131,7 +153,7 @@ function PerformanceRadarCard({
   }, [isOpen]);
 
   return (
-    <article className="mt-6 rounded-[16px] bg-white p-5 shadow-[0px_8px_24px_rgba(0,0,0,0.15)]">
+    <article className="rounded-[16px] bg-white p-5 shadow-[0px_8px_24px_rgba(0,0,0,0.15)] lg:h-full lg:p-6">
       <button
         type="button"
         onClick={onToggle}
@@ -178,7 +200,7 @@ function PerformanceRadarCard({
 function ScoreCardView({ card }: { card: ScoreCard }) {
   return (
     <article
-      className={`rounded-[20px] border border-[rgba(139,99,87,0.05)] bg-white px-[20.73px] pb-[20px] pt-[20.73px] shadow-[0px_4px_16px_rgba(0,0,0,0.1)] ${card.cardClassName ?? ""}`}
+      className={`w-full rounded-[20px] border border-[rgba(139,99,87,0.05)] bg-white px-[20.73px] pb-[20px] pt-[20.73px] shadow-[0px_4px_16px_rgba(0,0,0,0.1)] lg:px-6 lg:pb-6 lg:pt-6 ${card.cardClassName ?? ""}`}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-center gap-2">
@@ -240,20 +262,34 @@ function getResponseTimePresentation(score: number) {
   return { averageMinutes, badge: "Needs Follow-up", progress: completion };
 }
 
-function getReliabilityPresentation(score: number) {
-  const normalizedScore = Math.max(0, Math.min(score, 20));
-  const progress = (normalizedScore / 20) * 100;
-  const onTimeRate = Math.round(70 + normalizedScore * 1.4);
+function getPunctualityPresentation(punctuality: {
+  onTimeRate: number;
+  lateArrivalCount: number;
+  latestLateMinutes: number | null;
+}) {
+  const progress = Math.max(0, Math.min(Math.round(punctuality.onTimeRate), 100));
 
-  if (normalizedScore >= 18) {
-    return { onTimeRate, progress, incidentText: "No recent late arrivals", incidentTone: "text-[#16A34A]" };
+  if (punctuality.lateArrivalCount <= 0) {
+    return {
+      onTimeRate: progress,
+      progress,
+      incidentText: "No recent late arrivals",
+      incidentTone: "text-[#16A34A]",
+    };
   }
 
-  if (normalizedScore >= 15) {
-    return { onTimeRate, progress, incidentText: "1 Late arrival (4 mins)", incidentTone: "text-[#DC2626]" };
-  }
+  const lateLabel = punctuality.lateArrivalCount === 1 ? "Late arrival" : "Late arrivals";
+  const minuteLabel =
+    punctuality.latestLateMinutes && punctuality.latestLateMinutes > 0
+      ? ` (${punctuality.latestLateMinutes} mins)`
+      : "";
 
-  return { onTimeRate, progress, incidentText: "Recent late arrivals need attention", incidentTone: "text-[#DC2626]" };
+  return {
+    onTimeRate: progress,
+    progress,
+    incidentText: `${punctuality.lateArrivalCount} ${lateLabel}${minuteLabel}`,
+    incidentTone: "text-[#DC2626]",
+  };
 }
 
 function getCompletionPresentation(score: number) {
@@ -318,6 +354,7 @@ function getTechnicalSkillPresentation(technicalSkill: {
 
 export default function GroomerPerformancePage() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [isPerformanceRadarOpen, setIsPerformanceRadarOpen] = useState(false);
   const [isReplying, setIsReplying] = useState(false);
   const [isSubmittingReply, setIsSubmittingReply] = useState(false);
@@ -351,7 +388,13 @@ export default function GroomerPerformancePage() {
     const responseTimeScore = Math.round(performance?.breakdown.responseTime ?? 0);
     const responseTimePresentation = getResponseTimePresentation(responseTimeScore);
     const reliabilityScore = Math.round(performance?.breakdown.reliability ?? 0);
-    const reliabilityPresentation = getReliabilityPresentation(reliabilityScore);
+    const punctualityPresentation = getPunctualityPresentation(
+      performance?.punctuality ?? {
+        onTimeRate: 100,
+        lateArrivalCount: 0,
+        latestLateMinutes: null,
+      },
+    );
     const completionScore = Math.round(performance?.breakdown.completion ?? 0);
     const completionPresentation = getCompletionPresentation(completionScore);
     const technicalScore = Math.round(performance?.breakdown.technical ?? 0);
@@ -435,16 +478,16 @@ export default function GroomerPerformancePage() {
         body: (
           <div className="rounded-[12px] bg-[#FAF9F7] px-4 py-4">
             <p className="font-comfortaa text-[14px] font-bold leading-[21px] text-[#4A2C55]">
-              {reliabilityPresentation.onTimeRate}% On-time
+              {punctualityPresentation.onTimeRate}% On-time
             </p>
             <div className="mt-2 h-[6px] overflow-hidden rounded-full bg-[#E5E7EB]">
               <div
                 className="h-full rounded-full bg-[#D97706]"
-                style={{ width: `${reliabilityPresentation.progress}%` }}
+                style={{ width: `${punctualityPresentation.progress}%` }}
               />
             </div>
-            <p className={`mt-[9px] font-comfortaa text-[12px] font-medium leading-[18px] ${reliabilityPresentation.incidentTone}`}>
-              {reliabilityPresentation.incidentText}
+            <p className={`mt-[9px] font-comfortaa text-[12px] font-medium leading-[18px] ${punctualityPresentation.incidentTone}`}>
+              {punctualityPresentation.incidentText}
             </p>
           </div>
         ),
@@ -518,7 +561,6 @@ export default function GroomerPerformancePage() {
       },
     ];
   }, [performance]);
-
   const firstFeedback = performance?.recentFeedback[0] ?? null;
   const hasExistingReply = Boolean(firstFeedback?.reply?.trim());
 
@@ -655,51 +697,71 @@ export default function GroomerPerformancePage() {
 
   return (
     <>
-      <div className="min-h-[calc(100vh-64px)] w-full bg-[#633479] px-[calc(20*var(--px393))] pb-[calc(40*var(--px393))] pt-[calc(16*var(--px393))] sm:px-5 sm:pb-10 sm:pt-4 lg:mx-auto lg:max-w-[944px] lg:min-h-0 lg:px-0">
-        <div className="mx-auto w-full max-w-[354px]">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => navigate("/groomer/account")}
-              className="flex size-5 items-center justify-center text-white"
-              aria-label="Go back to my account"
-            >
-              <Icon name="nav-prev" className="size-5 text-white" aria-hidden="true" />
-            </button>
-            <h1 className="font-comfortaa text-[20px] font-bold leading-[22px] text-white">Performance details</h1>
-          </div>
-
-          <section className="mt-5 flex flex-col items-center">
-            <ScoreRing score={performance?.score ?? 0} />
-            <div className="mt-4">
-              <PerformanceBadge label={performance?.levelLabel ?? "Groomer"} level={performance?.level ?? "level_c"} />
+      <div className="min-h-[calc(100vh-64px)] w-full bg-[#633479] px-[calc(20*var(--px393))] pb-[calc(40*var(--px393))] pt-[calc(16*var(--px393))] sm:px-5 sm:pb-10 sm:pt-4 lg:mx-auto lg:max-w-[944px] lg:min-h-0 lg:px-0 lg:pb-6 lg:pt-6">
+        <div className="mx-auto w-full max-w-[354px] lg:max-w-none">
+          <div className="w-full">
+            <div className="flex items-center gap-2 lg:px-0">
+              <button
+                type="button"
+                onClick={() => navigate("/groomer/account")}
+                className="flex size-5 items-center justify-center text-white lg:hidden"
+                aria-label="Go back to my account"
+              >
+                <Icon name="nav-prev" className="size-5 text-white" aria-hidden="true" />
+              </button>
+              <h1 className="font-comfortaa text-[20px] font-bold leading-[22px] text-white lg:hidden">Performance details</h1>
+              <nav
+                aria-label="Breadcrumb"
+                className="hidden items-center gap-2 font-comfortaa text-[20px] font-bold leading-[22px] text-white lg:flex"
+              >
+                <button
+                  type="button"
+                  onClick={() => navigate("/groomer/account")}
+                  className="transition-opacity hover:opacity-80"
+                >
+                  My account
+                </button>
+                <span aria-hidden="true">&gt;</span>
+                <span>Performance details</span>
+              </nav>
             </div>
-          </section>
 
-          <PerformanceRadarCard
-            isOpen={isPerformanceRadarOpen}
-            onToggle={() => setIsPerformanceRadarOpen((value) => !value)}
-            radarMetrics={radarMetrics}
-          />
+            <section className="mt-5">
+              <div className="flex flex-col items-center">
+                <ScoreRing score={performance?.score ?? 0} />
+                <div className="mt-4">
+                  <PerformanceBadge label={performance?.levelLabel ?? "Groomer"} level={performance?.level ?? "level_c"} />
+                </div>
+                {!isMobile ? <PerformanceTierScale /> : null}
+              </div>
+            </section>
 
-          <section className="mt-4">
-            <h2 className="px-2 font-comfortaa text-[18px] font-bold leading-[27px] tracking-[0.45px] text-white">Detailed Scores</h2>
-            <div className="mt-4 space-y-4">
-              {scoreCards.map((card) => (
-                <ScoreCardView key={card.title} card={card} />
-              ))}
-            </div>
-          </section>
+            <section className="mt-4 lg:mt-5">
+              <PerformanceRadarCard
+                isOpen={isPerformanceRadarOpen}
+                onToggle={() => setIsPerformanceRadarOpen((value) => !value)}
+                radarMetrics={radarMetrics}
+              />
+            </section>
 
-          <section className="mt-[26px]">
-            <h2 className="px-2 font-comfortaa text-[18px] font-bold leading-[27px] tracking-[0.45px] text-white">
-              Client feedback in 72 hours
-            </h2>
-            <article className="mt-[15px] rounded-[24px] bg-white px-5 py-5 shadow-[0px_8px_24px_rgba(0,0,0,0.15)]">
-              {!firstFeedback ? (
-                <p className="font-comfortaa text-[14px] leading-[21px] text-[#8B6357]">No recent feedback in the last 72 hours.</p>
-              ) : (
-                <>
+            <section className="mt-4 lg:mt-3">
+              <h2 className="px-2 font-comfortaa text-[18px] font-bold leading-[27px] tracking-[0.45px] text-white">Detailed Scores</h2>
+              <div className="mt-4 space-y-4">
+                {scoreCards.map((card) => (
+                  <ScoreCardView key={card.title} card={card} />
+                ))}
+              </div>
+            </section>
+
+            <section className="mt-[26px] lg:mt-5">
+              <h2 className="px-2 font-comfortaa text-[18px] font-bold leading-[27px] tracking-[0.45px] text-white">
+                Client feedback in 72 hours
+              </h2>
+              <article className="mt-[15px] rounded-[24px] bg-white px-5 py-5 shadow-[0px_8px_24px_rgba(0,0,0,0.15)] lg:px-6 lg:py-6">
+                {!firstFeedback ? (
+                  <p className="font-comfortaa text-[14px] leading-[21px] text-[#8B6357]">No recent feedback in the last 72 hours.</p>
+                ) : (
+                  <>
               <div className="flex items-start gap-3">
                 <img
                   src={REVIEW_AVATAR_URL}
@@ -798,6 +860,7 @@ export default function GroomerPerformancePage() {
               )}
             </article>
           </section>
+          </div>
         </div>
       </div>
 

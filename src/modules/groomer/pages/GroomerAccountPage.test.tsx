@@ -87,7 +87,7 @@ describe("GroomerAccountPage", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText("Gold Groomer")).toBeInTheDocument();
+    expect(await screen.findByText("Level A")).toBeInTheDocument();
     expect(screen.getByText("85% payout share")).toBeInTheDocument();
     expect(screen.getByText("Priority client matching")).toBeInTheDocument();
     expect(screen.getByText("TD Bank")).toBeInTheDocument();
@@ -111,7 +111,7 @@ describe("GroomerAccountPage", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText("Silver Groomer")).toBeInTheDocument();
+    expect(await screen.findByText("Level B")).toBeInTheDocument();
     expect(screen.getByText("80% payout share")).toBeInTheDocument();
   });
 
@@ -132,7 +132,7 @@ describe("GroomerAccountPage", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText("Gold Groomer")).toBeInTheDocument();
+    expect(await screen.findByText("Level A")).toBeInTheDocument();
     expect(toast.error).toHaveBeenCalledWith("Failed to load account data");
   });
 });
