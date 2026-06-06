@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { Icon, type IconName } from "@/components/common/Icon";
-import { deleteMessage, getMessages, markAllMessagesRead, markMessageRead, type MessageOut } from "@/lib/api";
+import { Spinner } from "@/components/common/Spinner";
+import { deleteMessage, getMessages, markAllMessagesRead, markMessageRead, type MessageOut, type MessagePageOut } from "@/lib/api";
 
 type NotificationItem = {
   id: number;
@@ -19,9 +20,13 @@ type NotificationItem = {
 };
 
 const NOTIFICATIONS_MAX_AGE_MS = 10000;
+const NOTIFICATIONS_PAGE_SIZE = 20;
 let notificationsLastFetchedAt = 0;
 let notificationsLastItems: MessageOut[] = [];
-let notificationsInFlight: Promise<MessageOut[]> | null = null;
+let notificationsLastTotal = 0;
+let notificationsLastNextPage = 1;
+let notificationsLastHasMore = true;
+let notificationsInFlight: Promise<MessagePageOut> | null = null;
 
 const linkClassName = "text-[#DE6A07] underline hover:text-[#C15A05]";
 
@@ -117,46 +122,85 @@ function buildNotificationBody(message: MessageOut): ReactNode {
 
 export default function Notifications() {
   const [messages, setMessages] = useState<MessageOut[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [nextPage, setNextPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [swipedId, setSwipedId] = useState<number | null>(null);
   const touchStartXRef = useRef(0);
   const touchStartYRef = useRef(0);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const isLoadingMoreRef = useRef(false);
+  const messagesRef = useRef<MessageOut[]>([]);
+  const totalCountRef = useRef(0);
+  const nextPageRef = useRef(1);
+  const hasMoreRef = useRef(true);
   const channel = "in_app" as const;
+
+  const syncCache = (items: MessageOut[], total: number, upcomingPage: number, more: boolean) => {
+    notificationsLastItems = items;
+    notificationsLastTotal = total;
+    notificationsLastNextPage = upcomingPage;
+    notificationsLastHasMore = more;
+    notificationsLastFetchedAt = Date.now();
+  };
+
+  useEffect(() => {
+    messagesRef.current = messages;
+    totalCountRef.current = totalCount;
+    nextPageRef.current = nextPage;
+    hasMoreRef.current = hasMore;
+  }, [messages, totalCount, nextPage, hasMore]);
 
   useEffect(() => {
     let isMounted = true;
     const now = Date.now();
-    if (now - notificationsLastFetchedAt < NOTIFICATIONS_MAX_AGE_MS && notificationsLastItems.length > 0) {
+    if (now - notificationsLastFetchedAt < NOTIFICATIONS_MAX_AGE_MS && (notificationsLastItems.length > 0 || notificationsLastTotal === 0)) {
       setMessages(notificationsLastItems);
+      setTotalCount(notificationsLastTotal);
+      setNextPage(notificationsLastNextPage);
+      setHasMore(notificationsLastHasMore);
       return () => {
         isMounted = false;
       };
     }
     const loadMessages = async () => {
-      setIsLoading(true);
+      setIsInitialLoading(true);
       try {
         if (notificationsInFlight) {
-          const items = await notificationsInFlight;
-          if (isMounted) setMessages(items);
+          const response = await notificationsInFlight;
+          if (isMounted) {
+            setMessages(response.items);
+            setTotalCount(response.total);
+            setNextPage(response.page + 1);
+            setHasMore(response.page * response.page_size < response.total);
+          }
           return;
         }
         notificationsInFlight = (async () => {
-          const response = await getMessages({ page: 1, page_size: 50, channel });
-          const items = response.items || [];
-          notificationsLastItems = items;
-          notificationsLastFetchedAt = Date.now();
-          return items;
+          const response = await getMessages({ page: 1, page_size: NOTIFICATIONS_PAGE_SIZE, channel });
+          syncCache(response.items, response.total, response.page + 1, response.page * response.page_size < response.total);
+          return response;
         })();
-        const items = await notificationsInFlight;
+        const response = await notificationsInFlight;
         if (isMounted) {
-          setMessages(items);
+          setMessages(response.items);
+          setTotalCount(response.total);
+          setNextPage(response.page + 1);
+          setHasMore(response.page * response.page_size < response.total);
         }
       } catch (error) {
         console.error("Failed to load messages:", error);
-        if (isMounted) setMessages([]);
+        if (isMounted) {
+          setMessages([]);
+          setTotalCount(0);
+          setNextPage(1);
+          setHasMore(false);
+        }
       } finally {
-        if (isMounted) setIsLoading(false);
+        if (isMounted) setIsInitialLoading(false);
         notificationsInFlight = null;
       }
     };
@@ -165,6 +209,36 @@ export default function Notifications() {
       isMounted = false;
     };
   }, []);
+
+  const loadOlderMessages = async () => {
+    if (isLoadingMoreRef.current || !hasMoreRef.current) return;
+    isLoadingMoreRef.current = true;
+    setIsLoadingMore(true);
+    try {
+      const response = await getMessages({ page: nextPageRef.current, page_size: NOTIFICATIONS_PAGE_SIZE, channel });
+      const nextItems = response.items;
+      const mergedItems = [...messagesRef.current, ...nextItems];
+      const upcomingPage = response.page + 1;
+      const more = response.page * response.page_size < response.total;
+      setMessages(mergedItems);
+      setTotalCount(response.total);
+      setNextPage(upcomingPage);
+      setHasMore(more);
+      syncCache(mergedItems, response.total, upcomingPage, more);
+    } catch (error) {
+      console.error("Failed to load older messages:", error);
+    } finally {
+      isLoadingMoreRef.current = false;
+      setIsLoadingMore(false);
+    }
+  };
+
+  const handleListScroll = () => {
+    const container = scrollContainerRef.current;
+    if (!container || isInitialLoading || isLoadingMoreRef.current || !hasMoreRef.current) return;
+    if (container.scrollTop + container.clientHeight < container.scrollHeight - 80) return;
+    void loadOlderMessages();
+  };
 
   const notifications: NotificationItem[] = useMemo(() => {
     return messages.map((message) => {
@@ -188,7 +262,11 @@ export default function Notifications() {
 
   const handleMarkAllAsRead = () => {
     markAllMessagesRead({ channel }).then(() => {
-      setMessages((prev) => prev.map((item) => ({ ...item, is_read: true })));
+      setMessages((prev) => {
+        const nextItems = prev.map((item) => ({ ...item, is_read: true }));
+        syncCache(nextItems, totalCountRef.current, nextPageRef.current, hasMoreRef.current);
+        return nextItems;
+      });
     }).catch((error) => {
       console.error("Failed to mark all as read:", error);
     });
@@ -197,7 +275,11 @@ export default function Notifications() {
   const handleMarkRead = (id: number) => {
     setSwipedId(null);
     markMessageRead(id).then(() => {
-      setMessages((prev) => prev.map((item) => (item.id === id ? { ...item, is_read: true } : item)));
+      setMessages((prev) => {
+        const nextItems = prev.map((item) => (item.id === id ? { ...item, is_read: true } : item));
+        syncCache(nextItems, totalCountRef.current, nextPageRef.current, hasMoreRef.current);
+        return nextItems;
+      });
     }).catch((error) => {
       console.error("Failed to mark message read:", error);
     });
@@ -210,7 +292,13 @@ export default function Notifications() {
     try {
       const result = await deleteMessage(id);
       if (result.ok) {
-        setMessages((prev) => prev.filter((item) => item.id !== id));
+        const nextItems = messagesRef.current.filter((item) => item.id !== id);
+        const nextTotal = Math.max(0, totalCountRef.current - 1);
+        const more = nextItems.length < nextTotal;
+        setMessages(nextItems);
+        setTotalCount(nextTotal);
+        setHasMore(more);
+        syncCache(nextItems, nextTotal, nextPageRef.current, more);
       } else {
         console.error("Failed to delete message: ok=false");
       }
@@ -229,7 +317,7 @@ export default function Notifications() {
             <h1 className="font-comfortaa text-[20px] font-bold text-[#4A3C2A]">
               Notifications
             </h1>
-            {notifications.length > 0 ? (
+            {totalCount > 0 ? (
               <button
                 type="button"
                 onClick={handleMarkAllAsRead}
@@ -243,15 +331,20 @@ export default function Notifications() {
             ) : null}
           </div>
 
-          <div className="flex w-full flex-col gap-4">
-            {isLoading ? (
+          <div
+            ref={scrollContainerRef}
+            onScroll={handleListScroll}
+            className="flex max-h-[calc(100vh-220px)] w-full flex-col gap-4 overflow-y-auto pr-1 sm:max-h-[calc(100vh-210px)]"
+          >
+            {isInitialLoading ? (
               <div className="text-[#4A3C2A] text-sm py-4">Loading notifications...</div>
             ) : notifications.length === 0 ? (
               <div className="w-full rounded-xl border border-[rgba(0,0,0,0.10)] bg-[rgba(255,255,255,0.7)] px-[21px] py-[21px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.10),0px_1px_2px_-1px_rgba(0,0,0,0.10)]">
                 <EmptyState />
               </div>
             ) : (
-              notifications.map((item) => {
+              <>
+                {notifications.map((item) => {
                 const isRead = messages.find((m) => m.id === item.id)?.is_read ?? true;
                 const showReadAction = item.showCheck && !isRead;
                 const showDeleteAction = item.showClose;
@@ -418,7 +511,20 @@ export default function Notifications() {
                     </div>
                   </div>
                 );
-              })
+              })}
+                <div className="flex min-h-8 items-center justify-center">
+                  {isLoadingMore ? (
+                    <div className="flex items-center gap-2 py-1 text-[12px] text-[#8B6357]">
+                      <Spinner size={16} color="#DE6A07" showTrack trackOpacity={0.18} />
+                      <div>Loading more notifications...</div>
+                    </div>
+                  ) : hasMore ? (
+                    <div className="py-1 text-[12px] text-[#8B6357]">Scroll up to load more</div>
+                  ) : (
+                    <div className="py-1 text-[12px] text-[#8B6357]">No more notifications</div>
+                  )}
+                </div>
+              </>
             )}
           </div>
         </div>
