@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Calendar } from "@/components/common/Calendar";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { GroomerLinkButton } from "@/modules/groomer/components/GroomerLinkButton";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { useIsMobile } from "@/components/ui/use-mobile";
@@ -89,7 +90,22 @@ export function CustomRangeModal({
         <div className="flex min-h-0 flex-1 flex-col" onClick={closeCalendarPickers}>
           <div className="sticky top-0 z-10 shrink-0 bg-white px-[calc(20*var(--px393))] pb-[calc(16*var(--px393))] pt-[calc(20*var(--px393))] sm:px-5 sm:pb-4 sm:pt-5">
             <div className="flex items-start justify-between gap-4">
-              <p className="font-comfortaa text-[12px] font-bold leading-[18px] text-[#8B6357]">Earnings &gt; Revenue breakdown</p>
+              <div>
+                <p className="font-comfortaa text-[12px] font-bold leading-[18px] text-[#8B6357] sm:hidden">Earnings &gt; Revenue breakdown</p>
+                <Breadcrumb className="hidden sm:block">
+                  <BreadcrumbList className="gap-2 font-comfortaa text-[12px] font-bold leading-[18px] text-[#8B6357]">
+                    <BreadcrumbItem>
+                      <span className="text-[#8B6357]">Earnings</span>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator className="text-[#B59C93] [&>svg]:size-3" />
+                    <BreadcrumbItem>
+                      <BreadcrumbPage className="font-comfortaa text-[12px] font-bold leading-[18px] text-[#4A2C55]">
+                        Revenue breakdown
+                      </BreadcrumbPage>
+                    </BreadcrumbItem>
+                  </BreadcrumbList>
+                </Breadcrumb>
+              </div>
               <button
                 type="button"
                 onClick={onClose}

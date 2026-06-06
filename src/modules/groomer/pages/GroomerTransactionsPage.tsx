@@ -82,9 +82,10 @@ export default function GroomerTransactionsPage() {
   }, [hasMore, isLoading, page]);
 
   const summaryLabel = useMemo(() => {
+    if (isInitialLoading) return "";
     if (totalCount === 0) return "No transactions yet";
     return `Showing ${transactions.length} of ${totalCount}`;
-  }, [totalCount, transactions.length]);
+  }, [isInitialLoading, totalCount, transactions.length]);
 
   return (
     <div className="min-h-[calc(100vh-64px)] w-full bg-[#633479] px-[calc(20*var(--px393))] pb-[calc(32*var(--px393))] pt-[calc(8*var(--px393))] sm:px-5 sm:pb-10 sm:pt-2">
@@ -93,15 +94,31 @@ export default function GroomerTransactionsPage() {
           <button
             type="button"
             onClick={() => navigate("/groomer/earnings")}
-            className="flex size-10 items-center justify-center rounded-full bg-white/14 text-white transition-colors hover:bg-white/20"
+            className="flex size-10 items-center justify-center rounded-full bg-white/14 text-white transition-colors hover:bg-white/20 sm:hidden"
             aria-label="Back to earnings"
           >
             <Icon name="nav-prev" size={18} className="text-current" aria-hidden="true" />
           </button>
-          <div>
+          <div className="sm:hidden">
             <h1 className="font-comfortaa text-[20px] font-bold leading-[22px] text-white">Transaction</h1>
-            <p className="mt-1 font-comfortaa text-[12px] leading-[18px] text-[rgba(255,255,255,0.78)]">{summaryLabel}</p>
+            {summaryLabel ? (
+              <p className="mt-1 font-comfortaa text-[12px] leading-[18px] text-[rgba(255,255,255,0.78)]">{summaryLabel}</p>
+            ) : null}
           </div>
+          <nav
+            aria-label="Breadcrumb"
+            className="hidden items-center gap-2 font-comfortaa text-[20px] font-bold leading-[22px] text-white sm:flex"
+          >
+            <button
+              type="button"
+              onClick={() => navigate("/groomer/earnings")}
+              className="cursor-pointer transition-opacity hover:opacity-80"
+            >
+              Earnings
+            </button>
+            <span aria-hidden="true">&gt;</span>
+            <span>Transaction</span>
+          </nav>
         </header>
 
         {isInitialLoading ? (

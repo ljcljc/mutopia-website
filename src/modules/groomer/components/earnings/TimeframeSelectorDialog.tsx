@@ -30,18 +30,26 @@ export function TimeframeSelectorDialog({
           "overflow-hidden bg-white p-0 [&>button]:hidden",
           isMobile
             ? "service-area-dialog inset-x-0! bottom-0! top-auto! z-[60]! mx-auto! grid! h-auto! max-h-[calc(432*var(--px393))]! w-full! max-w-none! translate-x-0! translate-y-0! gap-0! rounded-b-none rounded-t-[calc(24*var(--px393))] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
-            : "left-1/2! top-1/2! z-[60]! grid! max-h-[min(432px,calc(100vh-48px))]! w-full! max-w-none! -translate-x-1/2! -translate-y-1/2! gap-0! rounded-[20px] shadow-[0px_4px_12px_rgba(0,0,0,0.12)]",
+            : "left-1/2! top-1/2! z-[60]! grid! max-h-[min(560px,calc(100vh-48px))]! w-[min(560px,calc(100vw-48px))]! max-w-[560px]! -translate-x-1/2! -translate-y-1/2! gap-0! rounded-[24px] border-0 shadow-[0px_24px_60px_rgba(74,44,85,0.16)]",
         )}
       >
         <DialogTitle className="sr-only">Select Timeframe</DialogTitle>
         <DialogDescription className="sr-only">Choose a revenue breakdown timeframe.</DialogDescription>
 
-        <div className="flex h-[calc(76*var(--px393))] items-center justify-between border-b border-[#F3F1EE] px-[calc(20*var(--px393))] pt-[calc(4*var(--px393))] sm:h-[76px] sm:px-5 sm:pt-1">
-          <h3 className="font-comfortaa text-[18px] font-bold leading-[27px] text-[#4A2C55]">Select Timeframe</h3>
+        <div
+          className={cn(
+            "flex justify-between border-b border-[#F3F1EE] bg-white px-[calc(20*var(--px393))] pb-[calc(16*var(--px393))] pt-[calc(20*var(--px393))]",
+            isMobile ? "items-start" : "items-center sm:h-[84px] sm:px-6 sm:pb-0 sm:pt-0",
+          )}
+        >
+          <h3 className="font-comfortaa text-[20px] font-bold leading-[30px] text-[#4A2C55] sm:text-[22px] sm:leading-[32px]">Select Timeframe</h3>
           <button
             type="button"
             onClick={() => onOpenChange(false)}
-            className="flex size-9 items-center justify-center rounded-full text-[#8B6357] transition-colors hover:bg-[#F8F7F1] hover:text-[#6E4F46] active:bg-[#F3F1EE]"
+            className={cn(
+              "flex cursor-pointer items-center justify-center text-[#8B6357] transition-colors hover:text-[#6E4F46]",
+              isMobile ? "size-5 shrink-0" : "size-9 rounded-full hover:bg-[#F8F7F1] active:bg-[#F3F1EE]",
+            )}
             aria-label="Close timeframe selector"
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
@@ -50,8 +58,8 @@ export function TimeframeSelectorDialog({
           </button>
         </div>
 
-        <div className="min-h-0 overflow-y-auto px-0">
-          <div className={cn("space-y-2.5", isMobile && "space-y-0")}>
+        <div className={cn("min-h-0 overflow-y-auto", isMobile ? "px-0" : "px-6 py-5")}>
+          <div className={cn("space-y-2.5", isMobile && "space-y-0", !isMobile && "space-y-3")}>
             {timeframeOptions.map((option) => {
               const isSelected = option === selectedTimeframe;
 
@@ -68,10 +76,10 @@ export function TimeframeSelectorDialog({
                     onSelectTimeframe(option);
                   }}
                   className={cn(
-                    "flex w-full items-center justify-between text-left transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DE6A07]/30",
+                    "flex w-full cursor-pointer items-center justify-between text-left transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DE6A07]/30",
                     isMobile
                       ? "h-[calc(56*var(--px393))] border-b border-[#F5F3F0] px-[calc(20*var(--px393))]"
-                      : "h-[52px] rounded-[12px] px-5",
+                      : "h-[56px] rounded-[16px] px-5",
                     isMobile
                       ? isSelected
                         ? "bg-[#DE6A07] px-[calc(16*var(--px393))] text-white hover:bg-[#D56506] active:bg-[#C85F06]"

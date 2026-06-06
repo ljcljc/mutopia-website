@@ -566,7 +566,7 @@ select:focus-visible,
 /* Prevent layout shift when scrollbar appears/disappears */
 html {
   /* Ensure consistent scrollbar behavior */
-  scrollbar-gutter: stable;
+  scrollbar-gutter: stable both-edges;
 }
 
 /* Ensure modal overlay covers the entire viewport */
@@ -582,7 +582,6 @@ html {
 /* Prevent body scroll when modal is open */
 body.modal-open {
   overflow: hidden !important;
-  padding-right: var(--scrollbar-width, 0px) !important;
 }
 
 /* Custom scrollbar styles to match the design */
@@ -610,19 +609,6 @@ body.modal-open {
 html {
   scrollbar-width: thin;
   scrollbar-color: #c1c1c1 #f1f1f1;
-}
-
-/* Scrollbar compensation area styling */
-body.modal-open::after {
-  content: "";
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: var(--scrollbar-width, 0px);
-  height: 100vh;
-  background: var(--scrollbar-track-color, #f1f1f1);
-  z-index: 1;
-  pointer-events: none;
 }
 
 /* Remove focus-visible outline on form elements and dialogs */

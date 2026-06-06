@@ -164,7 +164,7 @@ function RevenueBreakdownCard({
             <button
               type="button"
               onClick={() => setIsTimeframeOpen(true)}
-              className="inline-flex items-center gap-2 bg-transparent p-0 font-comfortaa text-[14px] font-medium leading-[21px] text-[#DE6A07] transition-colors hover:text-[#C45E06] active:text-[#C45E06]"
+              className="inline-flex cursor-pointer items-center gap-2 bg-transparent p-0 font-comfortaa text-[14px] font-medium leading-[21px] text-[#DE6A07] transition-colors hover:text-[#C45E06] active:text-[#C45E06]"
             >
               <span>{selectedTimeframe}</span>
               <Icon name="chevron-down" size={16} className="text-current" aria-hidden="true" />
@@ -239,7 +239,7 @@ function RecentTransactionCard({
         <button
           type="button"
           onClick={onViewAll}
-          className="inline-flex items-center gap-1.5 bg-transparent p-0 font-comfortaa text-[14px] font-medium leading-[21px] text-[#E67E22] transition-colors hover:text-[#C96F1E] active:text-[#C96F1E]"
+          className="inline-flex cursor-pointer items-center gap-1.5 bg-transparent p-0 font-comfortaa text-[14px] font-medium leading-[21px] text-[#E67E22] transition-colors hover:text-[#C96F1E] active:text-[#C96F1E]"
         >
           <span>View all</span>
           <Icon name="button-arrow" size={14} className="text-current" aria-hidden="true" />
