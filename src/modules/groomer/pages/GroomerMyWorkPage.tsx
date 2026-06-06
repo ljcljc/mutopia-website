@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Icon } from "@/components/common/Icon";
 import { Spinner } from "@/components/common/Spinner";
+import { useIsMobile } from "@/components/ui/use-mobile";
 import { cn } from "@/components/ui/utils";
 import {
   BookingRequestInteraction,
@@ -541,7 +542,7 @@ function CalendarOverviewCard({
           className={cn(
             "flex size-10 items-center justify-center rounded-full font-comfortaa text-[14px] font-bold leading-[21px] transition-transform active:scale-[0.96]",
             isSelected ? "bg-[#DE6A07] text-white shadow-[0px_4px_5px_rgba(222,106,7,0.3)]" : "text-[#8B6357]",
-            isDisabled && !isSelected ? "cursor-default opacity-40" : "hover:bg-[#FFF5EC]",
+            isDisabled && !isSelected ? "cursor-default opacity-40" : !isSelected ? "hover:bg-[#FFF5EC]" : "",
           )}
         >
           {day.day}
@@ -584,7 +585,7 @@ function CalendarOverviewCard({
           <button
             type="button"
             onClick={onExpandMonth}
-            className="mx-auto mt-[2px] block font-comfortaa text-[13px] leading-[19.5px] text-[#7F5B7A] underline underline-offset-[2px]"
+            className="mx-auto mt-[2px] block font-comfortaa text-[13px] leading-[19.5px] text-[#7F5B7A] underline underline-offset-[2px] sm:mx-0 sm:ml-auto sm:mt-3 cursor-pointer"
           >
             See all dates
           </button>
@@ -626,7 +627,7 @@ function CalendarOverviewCard({
           <button
             type="button"
             onClick={onShowWeek}
-            className="mx-auto mt-[10px] block font-comfortaa text-[13px] leading-[19.5px] text-[#7F5B7A] underline underline-offset-[2px]"
+            className="mx-auto mt-[10px] block font-comfortaa text-[13px] leading-[19.5px] text-[#7F5B7A] underline underline-offset-[2px] sm:mx-0 sm:ml-auto sm:cursor-pointer"
           >
             Show week dates
           </button>
@@ -825,6 +826,7 @@ function LoadingStateCard({ label }: { label: string }) {
 }
 
 export default function GroomerMyWorkPage() {
+  const isMobile = useIsMobile();
   const today = useMemo(() => new Date(), []);
   const todayDateKey = useMemo(() => toDateKey(today), [today]);
   const [now, setNow] = useState(() => new Date());
@@ -848,7 +850,9 @@ export default function GroomerMyWorkPage() {
     startTravel,
   } = useGroomerMyWorkStore();
   const [activeTab, setActiveTab] = useState<WorkTab>("schedule");
-  const [calendarMode, setCalendarMode] = useState<CalendarMode>("collapsed");
+  const [calendarMode, setCalendarMode] = useState<CalendarMode>(() =>
+    typeof window !== "undefined" && window.matchMedia("(min-width: 640px)").matches ? "week" : "collapsed",
+  );
   const [historySearchValue, setHistorySearchValue] = useState("");
   const [debouncedHistorySearch, setDebouncedHistorySearch] = useState("");
   const [selectedHistoryAppointment, setSelectedHistoryAppointment] = useState<HistoryDetailsAppointment | null>(null);
@@ -913,7 +917,7 @@ export default function GroomerMyWorkPage() {
 
   const handleTabChange = (tab: WorkTab) => {
     setActiveTab(tab);
-    if (tab !== "schedule") setCalendarMode("collapsed");
+    setCalendarMode(tab === "schedule" ? (isMobile ? "collapsed" : "week") : isMobile ? "collapsed" : "week");
   };
 
   const refreshMyWorkAfterAction = async () => {
