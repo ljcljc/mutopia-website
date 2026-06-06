@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { BrownOutlineButton, CustomTextarea, OrangeButton } from "@/components/common";
+import { BrownOutlineButton, CustomTextarea } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { useIsMobile } from "@/components/ui/use-mobile";
 import { cn } from "@/components/ui/utils";
+import { GroomerPrimaryActionButton } from "@/modules/groomer/components/GroomerPrimaryActionButton";
 
 interface UpdateTechnicalSkillModalProps {
   description: string;
@@ -130,25 +131,22 @@ export function UpdateTechnicalSkillModal({
             <div className="flex items-center justify-end gap-[10px]">
               <BrownOutlineButton
                 type="button"
-                size="medium"
+                size="standard"
                 disabled={isSubmitting}
                 onClick={onClose}
                 className="w-[120px] border-[#DE6A07] text-[#DE6A07] hover:bg-[rgba(222,106,7,0.08)]"
               >
                 <span className="font-comfortaa text-[14px] font-medium leading-[17.5px]">Cancel</span>
               </BrownOutlineButton>
-              <OrangeButton
+              <GroomerPrimaryActionButton
                 type="button"
-                variant="primary"
-                size="compact"
                 disabled={isSubmitting}
                 loading={isSubmitting}
                 onClick={onSubmit}
-                className="h-9 w-[120px]"
-                textSize={14}
+                className="w-[120px]"
               >
                 Update
-              </OrangeButton>
+              </GroomerPrimaryActionButton>
             </div>
           </div>
         </div>
