@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import {
+  type AddOnOut,
   buildImageUrl,
   cancelGroomerBooking,
   completeGroomerService,
@@ -9,6 +10,7 @@ import {
   getGroomerPerformance,
   getGroomerPendingBookingInvitations,
   type GroomerCompleteServiceOut,
+  type GroomerCheckUpCheckoutOut,
   groomerPortalCheckIn,
   startGroomerGrooming,
   startGroomerTravel,
@@ -66,6 +68,7 @@ export type DashboardGoal = {
   remainingAmount: string;
   goalAmount: string;
   currentAmount: string;
+  isUnavailable: boolean;
 };
 
 export type DashboardMetrics = {
@@ -82,6 +85,19 @@ const EMPTY_GOAL: DashboardGoal = {
   remainingAmount: "$0",
   goalAmount: "$0",
   currentAmount: "$0",
+  isUnavailable: false,
+};
+
+const UNAVAILABLE_GOAL: DashboardGoal = {
+  completed: null,
+  total: null,
+  ratingCompletedCount: null,
+  ratingJobCount: null,
+  completionRate: "-",
+  remainingAmount: "-",
+  goalAmount: "-",
+  currentAmount: "-",
+  isUnavailable: true,
 };
 
 const EMPTY_METRICS: DashboardMetrics = {
@@ -92,6 +108,15 @@ const EMPTY_METRICS: DashboardMetrics = {
 const BOOKING_REQUEST_EXPIRES_IN_MS = 7 * 24 * 60 * 60 * 1000;
 const BOOKING_REQUEST_EXPIRY_WARNING_MS = 24 * 60 * 60 * 1000;
 const HOUR_IN_MS = 60 * 60 * 1000;
+const CHECK_UP_PERSONALIZATION_LABELS: Record<string, string> = {
+  senior_pets: "Senior pets",
+  hard_to_handle: "Hard to handle",
+  severely_matted: "Severely matted",
+  gt_50kg: "> 50kg",
+  extra_large: "> 50kg",
+  parking: "Parking",
+  others: "Others",
+};
 
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value)
@@ -333,6 +358,52 @@ function mapPackageAndAddonBreakdown(record: Record<string, unknown>) {
   };
 }
 
+function normalizeCheckUpPersonalization(
+  personalization: Record<string, string>,
+): Record<string, string> {
+  return Object.entries(personalization).reduce<Record<string, string>>((next, [key, value]) => {
+    const normalizedValue = typeof value === "string" ? value.trim() : String(value ?? "").trim();
+    if (!normalizedValue) return next;
+    const normalizedKey = key === "extra_large" ? "gt_50kg" : key;
+    next[normalizedKey] = normalizedValue;
+    return next;
+  }, {});
+}
+
+function buildCheckUpPersonalizationLines(
+  personalization: Record<string, string>,
+  description: string,
+): DashboardAmountLine[] {
+  const note = description.trim();
+
+  return Object.entries(normalizeCheckUpPersonalization(personalization)).reduce<DashboardAmountLine[]>((lines, [key, value]) => {
+    const amount = parseAmount(value);
+    if (amount === null || amount <= 0) return lines;
+
+    const baseLabel = CHECK_UP_PERSONALIZATION_LABELS[key] ?? key;
+    const label = key === "others" && note ? `${baseLabel} (${note})` : baseLabel;
+    lines.push({ label, amount: formatBreakdownAmount(amount) });
+    return lines;
+  }, []);
+}
+
+function getBasePriceAdjustmentLines(lines: DashboardAmountLine[]): DashboardAmountLine[] {
+  const staticLabels = new Set(["membership", "discount", "coupon"]);
+  return lines.filter((line) => staticLabels.has(line.label.trim().toLowerCase()));
+}
+
+function buildCheckUpAddonLines(addOns: AddOnOut[], selectedAddOnIds: number[]): DashboardAmountLine[] {
+  const selectedIdSet = new Set(selectedAddOnIds);
+  return addOns.reduce<DashboardAmountLine[]>((lines, addOn) => {
+    if (!selectedIdSet.has(addOn.id)) return lines;
+    lines.push({
+      label: addOn.name,
+      amount: formatBreakdownAmount(addOn.price),
+    });
+    return lines;
+  }, []);
+}
+
 function normalizeStatus(status: string): string {
   return status.trim().toLowerCase().replace(/[\s-]+/g, "_");
 }
@@ -572,6 +643,7 @@ function mapDashboardGoal(summary: Record<string, unknown>): DashboardGoal {
     remainingAmount: formatCurrency(remainingAmountNumber, "$0"),
     goalAmount: formatCurrency(goalAmountRaw, "$0"),
     currentAmount: formatCurrency(currentAmountRaw, "$0"),
+    isUnavailable: false,
   };
 }
 
@@ -600,7 +672,7 @@ function resolveDashboardSummaryState(
 
   console.error("Failed to load groomer dashboard summary:", summaryResult.reason);
   return {
-    dailyGoal: EMPTY_GOAL,
+    dailyGoal: UNAVAILABLE_GOAL,
     metrics: performanceResult.status === "fulfilled"
       ? mapGroomerPerformanceDashboardMetrics(performanceResult.value)
       : EMPTY_METRICS,
@@ -690,6 +762,16 @@ interface GroomerDashboardState {
   isTerminatingService: boolean;
   fetchDashboard: () => Promise<void>;
   fetchPendingBookingRequests: () => Promise<void>;
+  applyCheckUpCheckoutPreview: (payload: {
+    bookingId: number;
+    weightValue: string;
+    weightUnit: string;
+    selectedAddOnIds: number[];
+    addOns: AddOnOut[];
+    personalization: Record<string, string>;
+    description: string;
+    result: GroomerCheckUpCheckoutOut;
+  }) => void;
   startTravel: (bookingId: number) => Promise<void>;
   cancelTravel: (bookingId: number, data: GroomerCancelBookingIn) => Promise<void>;
   checkIn: (bookingId: number) => Promise<void>;
@@ -743,6 +825,42 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
       console.error("Failed to refresh pending booking requests:", error);
       throw error;
     }
+  },
+
+  applyCheckUpCheckoutPreview: ({
+    bookingId,
+    weightValue,
+    weightUnit,
+    selectedAddOnIds,
+    addOns,
+    personalization,
+    description,
+    result,
+  }) => {
+    set((state) => ({
+      nextAppointment: updateMatchingNextAppointment(state.nextAppointment, bookingId, (appointment) => {
+        const addonLines = buildCheckUpAddonLines(addOns, selectedAddOnIds);
+        const addonSubtotalAmount = addonLines.reduce<number>((total, line) => total + (parseAmount(line.amount) ?? 0), 0);
+        const personalizationLines = buildCheckUpPersonalizationLines(personalization, description);
+        const totalEstimateAmount =
+          parseAmount(result.final_amount) ??
+          sumAmounts(parseAmount(appointment.totalEstimate) ?? 0, result.amount);
+
+        return {
+          ...appointment,
+          weightValue,
+          weightUnit,
+          totalEstimate: formatBreakdownAmount(totalEstimateAmount),
+          addonIds: selectedAddOnIds,
+          addonLines,
+          addonSubtotal: formatBreakdownAmount(addonSubtotalAmount),
+          priceAdjustmentLines: [
+            ...getBasePriceAdjustmentLines(appointment.priceAdjustmentLines),
+            ...personalizationLines,
+          ],
+        };
+      }),
+    }));
   },
 
   startTravel: async (bookingId: number) => {

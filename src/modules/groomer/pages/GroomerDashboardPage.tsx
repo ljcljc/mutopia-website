@@ -897,7 +897,16 @@ function GroomerCheckUpModal({
   open: boolean;
   appointment: DashboardAppointment | null;
   onClose: () => void;
-  onSubmitted: () => void;
+  onSubmitted: (payload: {
+    bookingId: number;
+    weightValue: string;
+    weightUnit: string;
+    selectedAddOnIds: number[];
+    addOns: AddOnOut[];
+    personalization: Record<string, string>;
+    description: string;
+    result: Awaited<ReturnType<typeof submitGroomerCheckUpCheckout>>;
+  }) => void;
 }) {
   const [activeTab, setActiveTab] = useState<CheckUpTab>("weight");
   const [weightValue, setWeightValue] = useState("60");
@@ -952,19 +961,34 @@ function GroomerCheckUpModal({
 
     setIsSubmitting(true);
     try {
+      const normalizedPersonalization = Object.entries(personalization).reduce<Record<string, string>>((next, [key, value]) => {
+        const normalizedValue = value.trim();
+        if (!normalizedValue) return next;
+        next[key === "extra_large" ? "gt_50kg" : key] = normalizedValue;
+        return next;
+      }, {});
       const result = await submitGroomerCheckUpCheckout(bookingId, {
         weight_value: weightValue,
         weight_unit: weightUnit,
         add_on_ids: selectedAddOnIds,
-        personalization,
+        personalization: normalizedPersonalization,
         description,
       });
-      if (result.status === "payment_required") {
-        toast.success("Payment request sent to pet owner");
+      if (result.status === "client_confirmation_required") {
+        toast.success("Confirmation request sent to pet owner");
       } else {
         toast.success("No additional payment required");
       }
-      onSubmitted();
+      onSubmitted({
+        bookingId,
+        weightValue,
+        weightUnit,
+        selectedAddOnIds,
+        addOns,
+        personalization: normalizedPersonalization,
+        description,
+        result,
+      });
       onClose();
     } catch (error) {
       console.error("Failed to submit check-up:", error);
@@ -1274,6 +1298,7 @@ function DailyGoalProgressCard({ dailyGoal }: { dailyGoal: DashboardGoal }) {
   const progress = hasJobProgress ? `${Math.min(((dailyGoal.completed ?? 0) / safeTotal) * 100, 100)}%` : "0%";
   const completedLabel = dailyGoal.completed === null ? "-" : String(dailyGoal.completed);
   const totalLabel = dailyGoal.total === null ? "-" : String(dailyGoal.total);
+  const isUnavailable = dailyGoal.isUnavailable;
 
   return (
     <article className="rounded-[16px] bg-white px-4 py-4 shadow-[0px_4px_12px_rgba(0,0,0,0.08)]">
@@ -1281,25 +1306,25 @@ function DailyGoalProgressCard({ dailyGoal }: { dailyGoal: DashboardGoal }) {
       <div className="mt-3 h-[6px] rounded-full bg-[#E5E7EB]">
         <div className="h-full rounded-full bg-[#00A63E]" style={{ width: progress }} />
       </div>
-      <div className="mt-3 inline-flex rounded-full bg-[#DCFCE7] px-[10px] py-[2px]">
+      <div className={`mt-3 inline-flex rounded-full px-[10px] py-[2px] ${isUnavailable ? "bg-[#F3F4F6]" : "bg-[#DCFCE7]"}`}>
         <div className="flex items-center gap-1.5">
-          <Icon name="target" className="size-4 text-[#16A34A]" aria-hidden="true" />
-          <span className="font-comfortaa text-[10px] font-bold leading-[15px] text-[#16A34A]">
-            {completedLabel} of {totalLabel} jobs completed
+          <Icon name="target" className={`size-4 ${isUnavailable ? "text-[#6B7280]" : "text-[#16A34A]"}`} aria-hidden="true" />
+          <span className={`font-comfortaa text-[10px] font-bold leading-[15px] ${isUnavailable ? "text-[#6B7280]" : "text-[#16A34A]"}`}>
+            {isUnavailable ? "Today’s progress is temporarily unavailable" : `${completedLabel} of ${totalLabel} jobs completed`}
           </span>
         </div>
       </div>
-      <div className="mt-3 rounded-[12px] border border-[#BBF7D0] bg-[#F0FDF4] px-3 py-3">
+      <div className={`mt-3 rounded-[12px] px-3 py-3 ${isUnavailable ? "border border-[#E5E7EB] bg-[#F9FAFB]" : "border border-[#BBF7D0] bg-[#F0FDF4]"}`}>
         <div className="flex items-start gap-2">
-          <div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-[#00A63E]">
+          <div className={`mt-0.5 flex h-6 w-6 items-center justify-center rounded-full ${isUnavailable ? "bg-[#9CA3AF]" : "bg-[#00A63E]"}`}>
             <Icon name="star-2" className="size-4 text-white" aria-hidden="true" />
           </div>
           <div>
-            <p className="font-comfortaa text-[13px] leading-[19.5px] text-[#166534]">
-              You&apos;re <span className="text-[#00A63E]">{dailyGoal.remainingAmount}</span> away from your daily goal!
+            <p className={`font-comfortaa text-[13px] leading-[19.5px] ${isUnavailable ? "text-[#4B5563]" : "text-[#166534]"}`}>
+              {isUnavailable ? "We couldn’t load your goal summary right now." : <>You&apos;re <span className="text-[#00A63E]">{dailyGoal.remainingAmount}</span> away from your daily goal!</>}
             </p>
-            <p className="mt-0.5 font-comfortaa text-[10px] leading-[15px] text-[#16A34A]">
-              Goal: {dailyGoal.goalAmount} • Current: {dailyGoal.currentAmount}
+            <p className={`mt-0.5 font-comfortaa text-[10px] leading-[15px] ${isUnavailable ? "text-[#6B7280]" : "text-[#16A34A]"}`}>
+              {isUnavailable ? "Please refresh in a moment." : `Goal: ${dailyGoal.goalAmount} • Current: ${dailyGoal.currentAmount}`}
             </p>
           </div>
         </div>
@@ -1409,6 +1434,7 @@ export default function GroomerDashboardPage() {
     isTerminatingService,
     fetchDashboard,
     fetchPendingBookingRequests,
+    applyCheckUpCheckoutPreview,
     startTravel,
     cancelTravel,
     checkIn,
@@ -1759,10 +1785,8 @@ export default function GroomerDashboardPage() {
         open={isCheckUpOpen}
         appointment={effectiveAppointment}
         onClose={() => setIsCheckUpOpen(false)}
-        onSubmitted={() => {
-          fetchDashboard().catch((error) => {
-            console.error("Failed to refresh groomer dashboard:", error);
-          });
+        onSubmitted={(payload) => {
+          applyCheckUpCheckoutPreview(payload);
         }}
       />
       <CancelAppointmentModal

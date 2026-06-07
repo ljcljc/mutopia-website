@@ -53,8 +53,8 @@ export default function DashboardHeroCard() {
           }
         }}
       >
-        <div className="flex flex-col gap-3">
-          <div className="flex w-[134px] flex-col gap-2">
+        <div className="flex min-w-0 flex-1 flex-col gap-3">
+          <div className="flex max-w-[180px] flex-col gap-2">
             <p className="font-comfortaa font-bold text-[16px] leading-[28px] text-[#8B6357]">
               {petName}
             </p>
@@ -62,7 +62,7 @@ export default function DashboardHeroCard() {
               {dateTime}
             </p>
           </div>
-          <div className="flex w-[134px] flex-col">
+          <div className="flex max-w-[180px] flex-col">
             <p className="font-comfortaa font-medium text-[12.25px] leading-[17.5px] text-[#4A3C2A]">
               {address.line1}
             </p>
@@ -73,7 +73,7 @@ export default function DashboardHeroCard() {
             )}
           </div>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="ml-3 flex shrink-0 items-center gap-1.5">
           <StatusBadge status={currentBooking.status} />
           <Icon name="nav-next" className="size-4 text-[#99A1AF]" />
         </div>

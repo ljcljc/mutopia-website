@@ -37,6 +37,7 @@ describe("groomer dashboard current booking selection", () => {
         remainingAmount: "$0",
         goalAmount: "$0",
         currentAmount: "$0",
+        isUnavailable: false,
       },
       metrics: {
         partnerScore: "-",
@@ -190,14 +191,15 @@ describe("groomer dashboard current booking selection", () => {
     await useGroomerDashboardStore.getState().fetchDashboard();
 
     expect(useGroomerDashboardStore.getState().dailyGoal).toEqual({
-      completed: 0,
-      total: 0,
-      ratingCompletedCount: 0,
-      ratingJobCount: 0,
-      completionRate: "0%",
-      remainingAmount: "$0",
-      goalAmount: "$0",
-      currentAmount: "$0",
+      completed: null,
+      total: null,
+      ratingCompletedCount: null,
+      ratingJobCount: null,
+      completionRate: "-",
+      remainingAmount: "-",
+      goalAmount: "-",
+      currentAmount: "-",
+      isUnavailable: true,
     });
     expect(useGroomerDashboardStore.getState().metrics).toEqual({
       partnerScore: "81/100",
@@ -251,14 +253,15 @@ describe("groomer dashboard current booking selection", () => {
       duration: "Est. duration: 45 minutes",
     });
     expect(useGroomerDashboardStore.getState().dailyGoal).toEqual({
-      completed: 0,
-      total: 0,
-      ratingCompletedCount: 0,
-      ratingJobCount: 0,
-      completionRate: "0%",
-      remainingAmount: "$0",
-      goalAmount: "$0",
-      currentAmount: "$0",
+      completed: null,
+      total: null,
+      ratingCompletedCount: null,
+      ratingJobCount: null,
+      completionRate: "-",
+      remainingAmount: "-",
+      goalAmount: "-",
+      currentAmount: "-",
+      isUnavailable: true,
     });
     expect(useGroomerDashboardStore.getState().metrics).toEqual({
       partnerScore: "90/100",

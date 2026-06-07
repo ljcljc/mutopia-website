@@ -74,7 +74,7 @@ function BookingItem({ booking }: { booking: BookingListOut }) {
         </div>
       </div>
       <div className="hidden items-center justify-between sm:flex">
-        <div className="flex flex-col gap-[12px]">
+        <div className="flex min-w-0 flex-1 flex-col gap-[12px]">
           <div className="flex flex-col gap-[8px] pr-[30px]">
             <p className="font-['Comfortaa:Bold',sans-serif] font-bold text-[16px] leading-[28px] text-[#DE6A07]">
               {petName}

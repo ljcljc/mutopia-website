@@ -448,10 +448,20 @@ export interface BookingListOut {
   address?: string | null;
   service_type?: string | null;
   scheduled_time?: string | null;
+  payment_summary?: BookingListPaymentSummaryOut | null;
   payment_due_at?: string | null;
   canceled_at?: string | null;
   cancel_reason?: string | null;
   canceled_by?: string | null;
+}
+
+export interface BookingListPaymentSummaryOut {
+  current_total_amount: number | string;
+  paid_amount: number | string;
+  due_amount: number | string;
+  action: string;
+  pending_adjustment_amount?: number | string | null;
+  proposed_total_amount?: number | string | null;
 }
 
 export interface BookingPageOut {
@@ -468,6 +478,18 @@ export interface BookingPaymentOut {
   currency: string;
   status: string;
   payment_method?: PaymentMethodOut | null;
+}
+
+export interface BookingAdjustmentOut {
+  id: number;
+  kind: string;
+  amount: number | string;
+  status: string;
+  description?: string | null;
+  details?: Record<string, unknown>;
+  created_at: string;
+  decided_at?: string | null;
+  paid_at?: string | null;
 }
 
 export interface ReviewSummaryOut {
@@ -511,6 +533,7 @@ export interface BookingDetailOut {
   deposit_amount: number | string;
   final_amount: number | string;
   payments?: BookingPaymentOut[];
+  adjustments?: BookingAdjustmentOut[];
   review?: ReviewSummaryOut | null;
 }
 
@@ -1597,6 +1620,10 @@ export interface GroomerCancelBookingIn {
 export interface CheckOutOut {
   ok: boolean;
   status: string;
+  payment_url?: string | null;
+  session_id?: string | null;
+  payment_id?: number | null;
+  refund_amount?: number | string | null;
 }
 
 export interface GroomerProfileUpdateIn {
@@ -2023,8 +2050,12 @@ export async function submitGroomerTechnicalSkillUpdate(
  * 获取美容师仪表盘摘要
  */
 export async function getGroomerDashboardSummary(): Promise<GroomerDashboardSummaryOut> {
+  const queryParams = new URLSearchParams({
+    local_now: formatLocalDateTimeForApi(),
+    local_offset_minutes: String(getLocalOffsetMinutes()),
+  });
   const response = await http.get<GroomerDashboardSummaryOut>(
-    "/api/groomers/dashboard/summary"
+    `/api/groomers/dashboard/summary?${queryParams.toString()}`
   );
   return response.data;
 }

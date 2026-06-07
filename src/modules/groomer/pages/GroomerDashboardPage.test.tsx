@@ -80,6 +80,7 @@ describe("GroomerDashboardPage complete service", () => {
         remainingAmount: "$0",
         goalAmount: "$0",
         currentAmount: "$0",
+        isUnavailable: false,
       },
       metrics: {
         partnerScore: "-",
@@ -303,7 +304,7 @@ describe("GroomerDashboardPage complete service", () => {
       ok: true,
       request_ids: [1],
       amount: "12.00",
-      status: "payment_required",
+      status: "client_confirmation_required",
     });
 
     render(
@@ -325,5 +326,71 @@ describe("GroomerDashboardPage complete service", () => {
         add_on_ids: [7],
       }));
     });
+  });
+
+  it("updates verify package and add-on immediately after check up submit", async () => {
+    vi.mocked(getGroomerDashboardSummary).mockResolvedValue({});
+    vi.mocked(getGroomerPendingBookingInvitations).mockResolvedValue([]);
+    vi.mocked(getGroomerBookingDetail).mockResolvedValue({
+      id: 123,
+      status: "checked_in",
+      package_amount: "95.00",
+      addons_amount: "0.00",
+      membership_fee: "0.00",
+      discount_rate: "0",
+      discount_amount: "0.00",
+      coupon_amount: "0.00",
+      payable_amount: "95.00",
+      deposit_amount: "20.00",
+      final_amount: "95.00",
+      package_snapshot: {
+        service_name: "Full grooming",
+      },
+    } as BookingDetailOut);
+    vi.mocked(getGroomerCurrentBooking).mockResolvedValue({
+      id: 123,
+      status: "checked_in",
+      pet_name: "Momo",
+      pet_breed: "Poodle",
+      service_name: "Full grooming",
+    });
+    vi.mocked(getAddOns).mockResolvedValue([
+      { id: 8, name: "Special add-on", price: "12.00", is_variable: false },
+    ]);
+    vi.mocked(submitGroomerCheckUpCheckout).mockResolvedValue({
+      ok: true,
+      request_ids: [1],
+      amount: "20.00",
+      status: "client_confirmation_required",
+      final_amount: "115.00",
+    });
+
+    render(
+      <MemoryRouter>
+        <GroomerDashboardPage />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("Verify package and add-on")).toBeInTheDocument();
+
+    fireEvent.click(await screen.findByRole("button", { name: "Modify" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Next" }));
+    fireEvent.click(await screen.findByRole("checkbox"));
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    fireEvent.change(screen.getAllByRole("spinbutton")[3], {
+      target: { value: "8.00" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Submit" }));
+
+    await waitFor(() => {
+      expect(submitGroomerCheckUpCheckout).toHaveBeenCalledWith(123, expect.objectContaining({
+        add_on_ids: [8],
+        personalization: { gt_50kg: "8.00" },
+      }));
+    });
+
+    expect(await screen.findByText("$115.00")).toBeInTheDocument();
+    expect(screen.getByText("Special add-on")).toBeInTheDocument();
+    expect(screen.getByText("> 50kg")).toBeInTheDocument();
   });
 });
