@@ -127,6 +127,50 @@ describe("groomer dashboard current booking selection", () => {
     });
   });
 
+  it("keeps addon ids from booking detail for check-up form prefill", async () => {
+    apiMocks.getGroomerDashboardSummary.mockResolvedValue({});
+    apiMocks.getGroomerPerformance.mockResolvedValue({
+      score: "88.00",
+      level: "level_a",
+      level_label: "Gold Groomer",
+      service_fee_rate: "0.15",
+      breakdown: {
+        customer_rating: "18.00",
+      },
+      recent_feedback: [],
+    });
+    apiMocks.getGroomerPendingBookingInvitations.mockResolvedValue({ items: [] });
+    apiMocks.getGroomerCurrentBooking.mockResolvedValue({
+      id: 123,
+      status: "checked_in",
+      pet_name: "Momo",
+      service_name: "Bath",
+    });
+    apiMocks.getGroomerBookingDetail.mockResolvedValue({
+      id: 123,
+      status: "checked_in",
+      package_amount: "95.00",
+      addons_amount: "12.00",
+      membership_fee: "0.00",
+      discount_rate: "0",
+      discount_amount: "0.00",
+      coupon_amount: "0.00",
+      payable_amount: "107.00",
+      deposit_amount: "20.00",
+      final_amount: "107.00",
+      addons_snapshot: [
+        { id: 7, name: "Teeth brushing", price: "12.00" },
+      ],
+    });
+
+    await useGroomerDashboardStore.getState().fetchDashboard();
+
+    expect(useGroomerDashboardStore.getState().nextAppointment).toMatchObject({
+      id: 123,
+      addonIds: [7],
+    });
+  });
+
   it("falls back to performance metrics when dashboard summary fails", async () => {
     apiMocks.getGroomerDashboardSummary.mockRejectedValue(new Error("summary failed"));
     apiMocks.getGroomerPerformance.mockResolvedValue({

@@ -32,6 +32,7 @@ export type DashboardAppointment = GroomerUpNextAppointment & {
   status?: string;
   weightValue?: string;
   weightUnit?: string;
+  addonIds?: number[];
   phone: string;
   totalEstimate: string;
   originalEstimate?: string;
@@ -287,13 +288,23 @@ function mapAmountLines(items: Record<string, unknown>[]): DashboardAmountLine[]
   }, []);
 }
 
+function getAddonIds(items: Record<string, unknown>[]): number[] {
+  return items.reduce<number[]>((ids, item) => {
+    const id = getOptionalNumber(item, ["id", "add_on_id", "addon_id"]);
+    if (id === null || ids.includes(id)) return ids;
+    ids.push(id);
+    return ids;
+  }, []);
+}
+
 function mapPackageAndAddonBreakdown(record: Record<string, unknown>) {
   const packageSnapshot = getNestedRecord(record, ["package_snapshot", "package", "service_detail", "service"]);
   const packageItems = getRecordArray(packageSnapshot, ["items", "package_items"]);
   const packageName = getString(packageSnapshot, ["service_name", "name"], getString(record, ["service_name"], "Package"));
   const packageAmount = getAmount(record, ["package_amount"]) ?? getAmount(packageSnapshot, ["price"]);
   const packageLines = mapAmountLines(packageItems);
-  const addonLines = mapAmountLines(getRecordArray(record, ["addons_snapshot", "addons", "add_ons"]));
+  const addonItems = getRecordArray(record, ["addons_snapshot", "addons", "add_ons"]);
+  const addonLines = mapAmountLines(addonItems);
   const membershipFee = parseAmount(getAmount(record, ["membership_fee"])) ?? 0;
   const discountAmount = parseAmount(getAmount(record, ["discount_amount"])) ?? 0;
   const couponAmount = parseAmount(getAmount(record, ["coupon_amount"])) ?? 0;
@@ -315,6 +326,7 @@ function mapPackageAndAddonBreakdown(record: Record<string, unknown>) {
       ? packageLines
       : [{ label: packageName, amount: formatBreakdownAmount(packageAmount) }],
     packageSubtotal: formatBreakdownAmount(packageAmount),
+    addonIds: getAddonIds(addonItems),
     addonLines,
     addonSubtotal: formatBreakdownAmount(getAmount(record, ["addons_amount"])),
     priceAdjustmentLines,

@@ -5,11 +5,13 @@ import GroomerDashboardPage from "./GroomerDashboardPage";
 import {
   type BookingDetailOut,
   completeGroomerService,
+  getAddOns,
   getGroomerBookingDetail,
   getGroomerCurrentBooking,
   getGroomerDashboardSummary,
   getGroomerPerformance,
   getGroomerPendingBookingInvitations,
+  submitGroomerCheckUpCheckout,
   submitGroomerHealthReport,
 } from "@/lib/api";
 import { useGroomerDashboardStore } from "@/modules/groomer/groomerStore";
@@ -21,11 +23,13 @@ vi.mock("@/lib/api", async (importOriginal) => {
     ...actual,
     buildImageUrl: vi.fn((value: string) => value),
     completeGroomerService: vi.fn(),
+    getAddOns: vi.fn(),
     getGroomerBookingDetail: vi.fn(),
     getGroomerCurrentBooking: vi.fn(),
     getGroomerDashboardSummary: vi.fn(),
     getGroomerPerformance: vi.fn(),
     getGroomerPendingBookingInvitations: vi.fn(),
+    submitGroomerCheckUpCheckout: vi.fn(),
     submitGroomerHealthReport: vi.fn(),
   };
 });
@@ -258,5 +262,68 @@ describe("GroomerDashboardPage complete service", () => {
     expect(screen.getByText("+ $15.00")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Fill report for Max" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "View next job" })).toBeInTheDocument();
+  });
+
+  it("preselects existing add-ons in groomer check up and submits them back", async () => {
+    vi.mocked(getGroomerDashboardSummary).mockResolvedValue({});
+    vi.mocked(getGroomerPendingBookingInvitations).mockResolvedValue([]);
+    vi.mocked(getGroomerBookingDetail).mockResolvedValue({
+      id: 123,
+      status: "checked_in",
+      package_amount: "95.00",
+      addons_amount: "12.00",
+      membership_fee: "0.00",
+      discount_rate: "0",
+      discount_amount: "0.00",
+      coupon_amount: "0.00",
+      payable_amount: "107.00",
+      deposit_amount: "20.00",
+      final_amount: "107.00",
+      addons_snapshot: [
+        { id: 7, name: "Selected add-on", price: "12.00" },
+      ],
+    } as BookingDetailOut);
+    vi.mocked(getGroomerCurrentBooking).mockResolvedValue({
+      id: 123,
+      status: "checked_in",
+      pet_name: "Momo",
+      pet_breed: "Poodle",
+      service_name: "Full grooming",
+    });
+    vi.mocked(getAddOns).mockResolvedValue([
+      { id: 1, name: "A", price: "1.00", is_variable: false },
+      { id: 2, name: "B", price: "1.00", is_variable: false },
+      { id: 3, name: "C", price: "1.00", is_variable: false },
+      { id: 4, name: "D", price: "1.00", is_variable: false },
+      { id: 5, name: "E", price: "1.00", is_variable: false },
+      { id: 6, name: "F", price: "1.00", is_variable: false },
+      { id: 7, name: "Selected add-on", price: "12.00", is_variable: false },
+    ]);
+    vi.mocked(submitGroomerCheckUpCheckout).mockResolvedValue({
+      ok: true,
+      request_ids: [1],
+      amount: "12.00",
+      status: "payment_required",
+    });
+
+    render(
+      <MemoryRouter>
+        <GroomerDashboardPage />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "Modify" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Next" }));
+    await waitFor(() => {
+      expect(screen.getAllByText("Selected add-on").length).toBeGreaterThan(0);
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    fireEvent.click(screen.getByRole("button", { name: "Submit" }));
+
+    await waitFor(() => {
+      expect(submitGroomerCheckUpCheckout).toHaveBeenCalledWith(123, expect.objectContaining({
+        add_on_ids: [7],
+      }));
+    });
   });
 });

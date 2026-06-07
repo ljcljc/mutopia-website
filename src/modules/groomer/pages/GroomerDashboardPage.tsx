@@ -880,6 +880,14 @@ function PriceInput({
   );
 }
 
+function buildVisibleAddOns(items: AddOnOut[], selectedIds: number[]): AddOnOut[] {
+  const baseItems = items.filter((item) => !item.is_variable);
+  const visibleItems = baseItems.slice(0, 6);
+  const visibleItemIds = new Set(visibleItems.map((item) => item.id));
+  const selectedItems = baseItems.filter((item) => selectedIds.includes(item.id) && !visibleItemIds.has(item.id));
+  return [...visibleItems, ...selectedItems];
+}
+
 function GroomerCheckUpModal({
   open,
   appointment,
@@ -906,14 +914,15 @@ function GroomerCheckUpModal({
     setActiveTab("weight");
     setWeightValue(appointment?.weightValue || "60");
     setWeightUnit(normalizeCheckUpWeightUnit(appointment?.weightUnit));
-    setSelectedAddOnIds([]);
+    const initialSelectedAddOnIds = appointment?.addonIds ?? [];
+    setSelectedAddOnIds(initialSelectedAddOnIds);
     setPersonalization({});
     setDescription("");
     setIsApproved(true);
     setIsSubmitting(false);
     getAddOns()
       .then((items) => {
-        const visibleItems = items.filter((item) => !item.is_variable).slice(0, 6);
+        const visibleItems = buildVisibleAddOns(items, initialSelectedAddOnIds);
         setAddOns(visibleItems.length > 0 ? visibleItems : FALLBACK_ADD_ONS);
       })
       .catch((error) => {
