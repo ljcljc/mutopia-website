@@ -339,6 +339,20 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
   const loginEmail = userInfo?.email ?? user?.email ?? "";
   const isAuthenticated = Boolean(loginEmail);
   const [birthDate, setBirthDate] = useState("");
+  const [step, setStep] = useState<"identification" | "experience" | "portfolio" | "submitted">(
+    "identification"
+  );
+  const isSubmittedStep = step === "submitted";
+  const isExperienceStep = step === "experience" || step === "portfolio" || isSubmittedStep;
+  const [portfolioMessage, setPortfolioMessage] = useState("");
+  const [portfolioPlatform, setPortfolioPlatform] = useState("");
+  const [portfolioLink, setPortfolioLink] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [tableUploadItems, setTableUploadItems] = useState<FileUploadItem[]>([]);
+  const [workUploadItems, setWorkUploadItems] = useState<FileUploadItem[]>([]);
+  const [tableUploadErrorType, setTableUploadErrorType] = useState<"size" | "format" | null>(null);
+  const [workUploadErrorType, setWorkUploadErrorType] = useState<"size" | "format" | null>(null);
   const maxBirthDate = (() => {
     const today = new Date();
     const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
@@ -378,21 +392,6 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
     if (tableUploadErrorType) return false;
     return true;
   })();
-  const [step, setStep] = useState<"identification" | "experience" | "portfolio" | "submitted">(
-    "identification"
-  );
-  const isSubmittedStep = step === "submitted";
-  const isExperienceStep = step === "experience" || step === "portfolio" || isSubmittedStep;
-  const [portfolioMessage, setPortfolioMessage] = useState("");
-  const [hasCertifications, setHasCertifications] = useState<boolean | null>(null);
-  const [portfolioPlatform, setPortfolioPlatform] = useState("");
-  const [portfolioLink, setPortfolioLink] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [tableUploadItems, setTableUploadItems] = useState<FileUploadItem[]>([]);
-  const [workUploadItems, setWorkUploadItems] = useState<FileUploadItem[]>([]);
-  const [tableUploadErrorType, setTableUploadErrorType] = useState<"size" | "format" | null>(null);
-  const [workUploadErrorType, setWorkUploadErrorType] = useState<"size" | "format" | null>(null);
   const portfolioPlatforms = ["Instagram", "Facebook", "TikTok", "YouTube", "Other"];
   const contentScrollRef = useRef<HTMLDivElement | null>(null);
   const toggleValue = (values: string[], value: string) =>
@@ -421,7 +420,6 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
     setBirthDate("");
     setStep("identification");
     setPortfolioMessage("");
-    setHasCertifications(null);
     setPortfolioPlatform("");
     setPortfolioLink("");
     setTableUploadItems([]);
@@ -1060,7 +1058,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
 
                   <div className="flex flex-col gap-[8px]">
                     <p className="font-comfortaa text-[14px] leading-[22.75px] text-black">
-                      Upload your grooming table and environment
+                      Upload your grooming table and environment (required)
                     </p>
                     <FileUpload
                       accept="image/*"
