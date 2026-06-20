@@ -46,6 +46,7 @@ export type DashboardAppointment = GroomerUpNextAppointment & {
   addonLines: DashboardAmountLine[];
   addonSubtotal: string;
   priceAdjustmentLines: DashboardAmountLine[];
+  pendingCheckUp?: PendingCheckUpSummary | null;
   review?: ReviewSummaryOut | null;
   invitationId?: number;
   proposalSlots?: string[];
@@ -57,6 +58,14 @@ export type DashboardAppointment = GroomerUpNextAppointment & {
 export type DashboardAmountLine = {
   label: string;
   amount?: string;
+};
+
+export type PendingCheckUpSummary = {
+  amount: string;
+  actionLabel: string;
+  direction: "charge" | "refund";
+  statusLabel: string;
+  summary: string;
 };
 
 export type DashboardGoal = {
@@ -246,6 +255,13 @@ function formatNegativeBreakdownAmount(value: unknown): string {
   return parsed > 0 ? `-$${parsed.toFixed(2)}` : "$0.00";
 }
 
+function formatSignedBreakdownAmount(value: unknown, fallback = "$0.00"): string {
+  const parsed = parseAmount(value);
+  if (parsed === null) return fallback;
+  if (parsed < 0) return `-$${Math.abs(parsed).toFixed(2)}`;
+  return `$${parsed.toFixed(2)}`;
+}
+
 function sumAmounts(...values: unknown[]): number {
   return values.reduce<number>((total, value) => total + (parseAmount(value) ?? 0), 0);
 }
@@ -378,13 +394,35 @@ function buildCheckUpPersonalizationLines(
 
   return Object.entries(normalizeCheckUpPersonalization(personalization)).reduce<DashboardAmountLine[]>((lines, [key, value]) => {
     const amount = parseAmount(value);
-    if (amount === null || amount <= 0) return lines;
+    if (amount === null || amount === 0) return lines;
 
     const baseLabel = CHECK_UP_PERSONALIZATION_LABELS[key] ?? key;
     const label = key === "others" && note ? `${baseLabel} (${note})` : baseLabel;
-    lines.push({ label, amount: formatBreakdownAmount(amount) });
+    lines.push({ label, amount: formatSignedBreakdownAmount(amount) });
     return lines;
   }, []);
+}
+
+function buildPendingCheckUpSummary({
+  amount,
+  summary,
+}: {
+  amount: unknown;
+  summary?: string;
+}): PendingCheckUpSummary | null {
+  const parsedAmount = parseAmount(amount);
+  if (parsedAmount === null || parsedAmount === 0) return null;
+
+  const direction = parsedAmount < 0 ? "refund" : "charge";
+  const displayAmount = formatBreakdownAmount(Math.abs(parsedAmount));
+
+  return {
+    amount: displayAmount,
+    actionLabel: direction === "refund" ? `Refund ${displayAmount}` : `Go pay ${displayAmount}`,
+    direction,
+    statusLabel: direction === "refund" ? "Waiting for refund" : "Waiting for payment",
+    summary: summary?.trim() || `Check-in adjustment ${direction === "refund" ? "refund" : "payment"} pending`,
+  };
 }
 
 function getBasePriceAdjustmentLines(lines: DashboardAmountLine[]): DashboardAmountLine[] {
@@ -488,6 +526,7 @@ function mapDashboardAppointment(raw: unknown): DashboardAppointment | null {
   const pet = getNestedRecord(record, ["pet", "pet_snapshot"]);
   const service = getNestedRecord(record, ["service_detail", "service", "package", "package_snapshot"]);
   const price = getNestedRecord(record, ["price", "price_snapshot"]);
+  const pendingCheckUp = asRecord(record.pending_check_up);
   const scheduledTime = getString(record, ["scheduled_time", "appointment_time", "time"]);
   const estimate = mapEstimateFromPrice({ ...price, ...record });
   const packageAndAddonBreakdown = mapPackageAndAddonBreakdown({ ...price, ...record });
@@ -513,6 +552,10 @@ function mapDashboardAppointment(raw: unknown): DashboardAppointment | null {
     weightUnit: getString(record, ["weight_unit"], getString(pet, ["weight_unit"])),
     ...estimate,
     ...packageAndAddonBreakdown,
+    pendingCheckUp: buildPendingCheckUpSummary({
+      amount: getAmount(pendingCheckUp, ["amount"]),
+      summary: getString(pendingCheckUp, ["summary"]),
+    }),
     estimateBreakdown: getString(record, ["estimate_breakdown"]) || getString(price, ["estimate_breakdown"]) || estimate.estimateBreakdown,
     review: record.review ? (record.review as ReviewSummaryOut) : null,
   };
@@ -854,6 +897,13 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
           addonIds: selectedAddOnIds,
           addonLines,
           addonSubtotal: formatBreakdownAmount(addonSubtotalAmount),
+          pendingCheckUp: buildPendingCheckUpSummary({
+            amount: result.amount,
+            summary: [
+              ...addonLines.map((line) => `${line.label} ${line.amount ?? ""}`.trim()),
+              ...personalizationLines.map((line) => `${line.label} ${line.amount ?? ""}`.trim()),
+            ].join(" + "),
+          }),
           priceAdjustmentLines: [
             ...getBasePriceAdjustmentLines(appointment.priceAdjustmentLines),
             ...personalizationLines,

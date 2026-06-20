@@ -393,4 +393,58 @@ describe("GroomerDashboardPage complete service", () => {
     expect(screen.getByText("Special add-on")).toBeInTheDocument();
     expect(screen.getByText("> 50kg")).toBeInTheDocument();
   });
+
+  it("shows a pending refund summary after a negative check-up adjustment", async () => {
+    vi.mocked(getGroomerDashboardSummary).mockResolvedValue({});
+    vi.mocked(getGroomerPendingBookingInvitations).mockResolvedValue([]);
+    vi.mocked(getGroomerBookingDetail).mockResolvedValue({
+      id: 123,
+      status: "checked_in",
+      package_amount: "95.00",
+      addons_amount: "0.00",
+      membership_fee: "0.00",
+      discount_rate: "0",
+      discount_amount: "0.00",
+      coupon_amount: "0.00",
+      payable_amount: "95.00",
+      deposit_amount: "20.00",
+      final_amount: "95.00",
+      package_snapshot: {
+        service_name: "Full grooming",
+      },
+    } as BookingDetailOut);
+    vi.mocked(getGroomerCurrentBooking).mockResolvedValue({
+      id: 123,
+      status: "checked_in",
+      pet_name: "Momo",
+      pet_breed: "Poodle",
+      service_name: "Full grooming",
+    });
+    vi.mocked(getAddOns).mockResolvedValue([]);
+    vi.mocked(submitGroomerCheckUpCheckout).mockResolvedValue({
+      ok: true,
+      request_ids: [1],
+      amount: "-8.00",
+      status: "client_confirmation_required",
+      final_amount: "87.00",
+    });
+
+    render(
+      <MemoryRouter>
+        <GroomerDashboardPage />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "Modify" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Next" }));
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    fireEvent.change(screen.getAllByRole("spinbutton")[4], {
+      target: { value: "-8.00" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Submit" }));
+
+    expect(await screen.findByText("Waiting for refund")).toBeInTheDocument();
+    expect(screen.getByText("Refund $8.00")).toBeInTheDocument();
+    expect(screen.getByText("$87.00")).toBeInTheDocument();
+  });
 });

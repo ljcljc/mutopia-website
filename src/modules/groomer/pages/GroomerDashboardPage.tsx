@@ -18,6 +18,7 @@ import {
   type DashboardAppointment,
   type DashboardAmountLine,
   type DashboardGoal,
+  type PendingCheckUpSummary,
 } from "@/modules/groomer/groomerStore";
 import { shouldShowStartTravel } from "@/modules/groomer/utils/time";
 import {
@@ -821,6 +822,10 @@ function formatAddOnPrice(value: number | string): string {
   return Number.isInteger(raw) ? `$${raw}` : `$${raw.toFixed(2)}`;
 }
 
+function formatActionAmount(value: string): string {
+  return value.startsWith("-$") ? value.slice(1) : value;
+}
+
 function normalizeCheckUpWeightUnit(value?: string): string {
   const normalizedValue = value?.trim().toLowerCase();
   if (normalizedValue === "kg") return "kg";
@@ -870,7 +875,6 @@ function PriceInput({
     <CustomInput
       label={label}
       type="number"
-      min="0"
       step="0.01"
       value={value}
       onChange={(event) => onChange(event.target.value)}
@@ -975,9 +979,9 @@ function GroomerCheckUpModal({
         description,
       });
       if (result.status === "client_confirmation_required") {
-        toast.success("Confirmation request sent to pet owner");
+        toast.success(Number(result.amount) < 0 ? "Refund request sent to pet owner" : "Payment request sent to pet owner");
       } else {
-        toast.success("No additional payment required");
+        toast.success("No check-in adjustment required");
       }
       onSubmitted({
         bookingId,
@@ -1092,6 +1096,9 @@ function GroomerCheckUpModal({
               {activeTab === "personalization" ? (
                 <div className="flex flex-col gap-3">
                   <p className="font-comfortaa text-[14px] font-bold leading-5 text-[#DE6A07]">Personalized service</p>
+                  <p className="font-comfortaa text-[10px] leading-4 text-[#4A5565]">
+                    Enter a negative amount when this item should be refunded.
+                  </p>
                   {PERSONALIZATION_FIELDS.map((field) => (
                     <PriceInput
                       key={field.key}
@@ -1145,6 +1152,7 @@ function PackageAndAddonCard({
   onModify: () => void;
 }) {
   const hasAddons = appointment.addonLines.length > 0;
+  const pendingCheckUp = appointment.pendingCheckUp;
 
   return (
     <article className="rounded-[12px] bg-white p-6 shadow-[0px_8px_6px_rgba(0,0,0,0.10)]">
@@ -1199,6 +1207,8 @@ function PackageAndAddonCard({
           </div>
         ) : null}
 
+        {pendingCheckUp ? <PendingCheckUpBanner pendingCheckUp={pendingCheckUp} /> : null}
+
         <OrangeButton
           type="button"
           variant="secondary"
@@ -1210,6 +1220,36 @@ function PackageAndAddonCard({
         </OrangeButton>
       </div>
     </article>
+  );
+}
+
+function PendingCheckUpBanner({ pendingCheckUp }: { pendingCheckUp: PendingCheckUpSummary }) {
+  const isRefund = pendingCheckUp.direction === "refund";
+
+  return (
+    <div className="flex flex-col gap-3 rounded-[12px] bg-[#FAF9F7] p-4 shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)]">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="font-comfortaa text-[10px] leading-3 text-[#4A3C2A]">Check-in adjustment</p>
+          <p className="mt-1 font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#4A3C2A]">
+            {pendingCheckUp.summary}
+          </p>
+        </div>
+        <span className={`inline-flex rounded-[12px] px-2 py-1 font-comfortaa text-[10px] font-bold leading-[14px] text-white ${isRefund ? "bg-[#2563EB]" : "bg-[#DE6A07]"}`}>
+          {pendingCheckUp.statusLabel}
+        </span>
+      </div>
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="font-comfortaa text-[10px] leading-3 text-[#4A3C2A]">Next step</p>
+          <p className="mt-1 font-comfortaa text-[12px] font-bold leading-4 text-[#4A3C2A]">Start grooming</p>
+        </div>
+        <div className={`inline-flex items-center gap-1 rounded-[32px] px-4 py-2 font-comfortaa text-[12px] font-bold leading-[17.5px] ${isRefund ? "bg-[#DBEAFE] text-[#1D4ED8]" : "bg-[#8B6357] text-[#FFF7ED]"}`}>
+          {isRefund ? `Refund ${formatActionAmount(pendingCheckUp.amount)}` : `Go pay ${pendingCheckUp.amount}`}
+          <Icon name="button-arrow" className="size-[14px]" aria-hidden="true" />
+        </div>
+      </div>
+    </div>
   );
 }
 
