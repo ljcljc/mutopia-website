@@ -154,6 +154,7 @@ export function Step6() {
     membershipPlans,
     useMembership,
     useMembershipDiscount,
+    useCashCoupon,
     coupons,
     selectedCouponIds,
     selectedTimeSlots,
@@ -627,7 +628,7 @@ export function Step6() {
     const cashDefault = getDefaultGeneralCoupon("cash");
     const inviteDefault = getDefaultGeneralCoupon("invite");
     
-    if (cashDefault && !newSelectedIds.includes(cashDefault)) {
+    if (useCashCoupon && cashDefault && !newSelectedIds.includes(cashDefault)) {
       newSelectedIds.push(cashDefault);
       hasChanges = true;
     }
@@ -670,7 +671,22 @@ export function Step6() {
       setSelectedCouponIds(newSelectedIds);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoadingCoupons, Array.isArray(coupons) ? coupons.length : 0, couponGroups.general.length, couponGroups.special.length]); // Re-run when coupons are loaded or change
+  }, [isLoadingCoupons, Array.isArray(coupons) ? coupons.length : 0, couponGroups.general.length, couponGroups.special.length, useCashCoupon]); // Re-run when coupons are loaded or change
+
+  useEffect(() => {
+    if (useCashCoupon) return;
+
+    const cashCouponIds = couponGroups.generalGroups
+      .filter((group) => group.category === "cash")
+      .flatMap((group) => group.coupons.map((coupon) => coupon.id));
+
+    if (cashCouponIds.length === 0) return;
+
+    const filteredIds = selectedCouponIds.filter((couponId) => !cashCouponIds.includes(couponId));
+    if (filteredIds.length !== selectedCouponIds.length) {
+      setSelectedCouponIds(filteredIds);
+    }
+  }, [couponGroups.generalGroups, selectedCouponIds, setSelectedCouponIds, useCashCoupon]);
 
   // Handle special coupon selection (radio - only one per group)
   const handleSpecialCouponSelect = (couponId: number, groupKey: string) => {

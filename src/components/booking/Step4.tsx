@@ -57,7 +57,7 @@ export function Step4() {
 
   // Track whether user has interacted with discount checkboxes to avoid overriding later
   const hasInitializedDiscounts = useRef(false);
-  const hasDeclinedMembership = !(useMembershipDiscount && useCashCoupon);
+  const hasDeclinedMembership = !useMembershipDiscount && !useCashCoupon;
 
   // Set default checked state for membership discounts
   useEffect(() => {
@@ -158,24 +158,15 @@ export function Step4() {
 
   const handleMembershipDiscountChange = (checked: boolean) => {
     hasInitializedDiscounts.current = true;
-    if (checked) {
-      setUseMembershipDiscount(true);
-      setUseCashCoupon(true);
-    } else {
-      setUseMembershipDiscount(false);
+    setUseMembershipDiscount(checked);
+    if (!checked) {
       setUseCashCoupon(false);
     }
   };
 
   const handleCashCouponChange = (checked: boolean) => {
     hasInitializedDiscounts.current = true;
-    if (checked) {
-      setUseMembershipDiscount(true);
-      setUseCashCoupon(true);
-    } else {
-      setUseMembershipDiscount(false);
-      setUseCashCoupon(false);
-    }
+    setUseCashCoupon(checked);
   };
 
   // Calculate savings
@@ -526,11 +517,16 @@ export function Step4() {
                   label={`Cash coupon (${cashCouponInfo.count}x$${cashCouponInfo.amount} left)`}
                   containerClassName="relative shrink-0"
                 />
-                {useCashCoupon && (
-                  <p className="font-comfortaa font-bold leading-[calc(16*var(--px393))] relative shrink-0 text-[#4a3c2a] text-[calc(12*var(--px393))]">
+                <div className="flex min-w-[calc(44*var(--px393))] justify-end">
+                  <p
+                    className={cn(
+                      "font-comfortaa font-bold leading-[calc(16*var(--px393))] relative shrink-0 text-[#4a3c2a] text-[calc(12*var(--px393))]",
+                      !useCashCoupon && "invisible",
+                    )}
+                  >
                     -${cashCouponInfo.amount.toFixed(0)}
                   </p>
-                )}
+                </div>
               </div>
               <div className="h-0 relative shrink-0 w-full border-t border-[#e0e0e0] my-[calc(4*var(--px393))]" />
             </div>
@@ -901,11 +897,16 @@ export function Step4() {
                     label={`Cash coupon (${cashCouponInfo.count}x$${cashCouponInfo.amount} left)`}
                     containerClassName="relative shrink-0"
                   />
-                  {useCashCoupon && (
-                    <p className="font-comfortaa font-bold leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px]">
+                  <div className="flex min-w-[44px] justify-end">
+                    <p
+                      className={cn(
+                        "font-comfortaa font-bold leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px]",
+                        !useCashCoupon && "invisible",
+                      )}
+                    >
                       -${cashCouponInfo.amount.toFixed(0)}
                     </p>
-                  )}
+                  </div>
                 </div>
                 <div className="h-0 relative shrink-0 w-full border-t border-[#000000] my-[4px]" />
               </div>
