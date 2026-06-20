@@ -120,6 +120,21 @@ export function Step2() {
     setPhotoResetKey((value) => value + 1);
   };
 
+  const isCoatConditionComplete =
+    coatCondition !== "" &&
+    (coatCondition === "not_matted" || approveShave !== null);
+  const isBreedComplete =
+    petType === "other" ? precisePetType.trim().length > 0 : breed.trim().length > 0;
+  const isStep2Valid =
+    petName.trim().length > 0 &&
+    isBreedComplete &&
+    dateOfBirth.trim().length > 0 &&
+    gender !== "" &&
+    weight.trim().length > 0 &&
+    isCoatConditionComplete &&
+    behavior !== "" &&
+    groomingFrequency !== "";
+
   return (
     <PetForm
       petOptions={user && pets.length > 0 ? pets : undefined}
@@ -170,6 +185,7 @@ export function Step2() {
       setReferencePhotoUrls={setReferencePhotoUrls}
       setPetPhoto={setPetPhoto}
       setReferenceStyles={setReferenceStyles}
+      primaryActionDisabled={!isStep2Valid}
       onPrimaryAction={nextStep}
       onBackAction={previousStep}
     />

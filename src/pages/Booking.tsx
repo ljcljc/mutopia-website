@@ -16,7 +16,19 @@ export default function Booking() {
   const user = useAuthStore((state) => state.user);
   const userInfo = useAuthStore((state) => state.userInfo);
   const loadUserInfo = useBookingStore((state) => state.loadUserInfo);
-  const { currentStep, nextStep, petName } = useBookingStore();
+  const {
+    currentStep,
+    nextStep,
+    petName,
+    address,
+    serviceType,
+    city,
+    province,
+    postCode,
+    selectedServiceAreaId,
+    selectedAddressId,
+    selectedStoreId,
+  } = useBookingStore();
 
   // 当用户登出时，清空 bookingStore 的 userInfo
   // 注意：用户信息加载由 LoginModalContent 统一处理，这里不需要调用 API
@@ -53,6 +65,15 @@ export default function Booking() {
     }
   };
 
+  const isStep1Valid =
+    serviceType === "in_store"
+      ? selectedStoreId !== null
+      : (selectedAddressId !== null || address.trim().length > 0) &&
+        city.trim().length > 0 &&
+        province.trim().length > 0 &&
+        postCode.trim().length > 0 &&
+        selectedServiceAreaId !== null;
+
   return (
     <div className="relative flex min-h-full w-full flex-col items-center gap-[60px] bg-[#f9f1e8] px-0 pt-8 pb-[60px] sm:pt-[60px] sm:pb-[100px]">
       {/* Content */}
@@ -77,7 +98,12 @@ export default function Booking() {
           {/* Continue Button - Only show for Step 1 */}
           {currentStep === 1 && (
             <div className="relative flex w-full shrink-0 items-start gap-5 px-5 sm:px-0">
-              <OrangeButton size="medium" onClick={nextStep} className="w-full sm:w-auto">
+              <OrangeButton
+                size="medium"
+                onClick={nextStep}
+                disabled={!isStep1Valid}
+                className="w-full sm:w-auto"
+              >
                 <div className="flex items-center gap-1">
                   <p className="font-comfortaa font-medium leading-[17.5px] text-[14px] text-white">
                     Continue

@@ -76,6 +76,7 @@ export interface PetFormProps {
   setReferenceStyles: (value: File[]) => void;
   primaryActionLabel?: string;
   isPrimaryActionLoading?: boolean;
+  primaryActionDisabled?: boolean;
   onPrimaryAction?: () => void;
   showBackButton?: boolean;
   backLabel?: string;
@@ -141,6 +142,7 @@ export function PetForm({
   setReferenceStyles,
   primaryActionLabel,
   isPrimaryActionLoading = false,
+  primaryActionDisabled = false,
   onPrimaryAction,
   showBackButton = true,
   backLabel = "Back",
@@ -262,6 +264,7 @@ export function PetForm({
           size="medium"
           onClick={handlePrimaryAction}
           loading={isPrimaryActionLoading}
+          disabled={primaryActionDisabled}
           className="w-full sm:w-auto"
         >
           <div className="flex gap-[calc(4*var(--px393))] sm:gap-[4px] items-center">

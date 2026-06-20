@@ -6,6 +6,9 @@ import { useAuthStore } from "@/components/auth/authStore";
 import { useBookingStore } from "./bookingStore";
 import { getServiceAreaProvinces, getServiceAreas, type ProvinceOut, type ServiceAreaOut } from "@/lib/api";
 
+const DEFAULT_PROVINCE_CODE = "BC";
+const DEFAULT_PROVINCE_NAME = "British Columbia";
+
 export function Step1AddressAndServiceType() {
   const user = useAuthStore((state) => state.user);
   const {
@@ -45,6 +48,12 @@ export function Step1AddressAndServiceType() {
   useEffect(() => {
     cityRef.current = city;
   }, [city]);
+
+  useEffect(() => {
+    if (!province) {
+      setProvince(DEFAULT_PROVINCE_CODE);
+    }
+  }, [province, setProvince]);
 
   // 点击外部关闭下拉菜单
   useEffect(() => {
@@ -189,6 +198,145 @@ export function Step1AddressAndServiceType() {
   // displayCity, displayProvince, displayPostCode are no longer needed
   // as the input fields now directly use city, province, postCode from store
 
+  const locationField =
+    (serviceType === "mobile" || serviceType === "in_home") && user && addresses.length > 0 ? (
+      <div className="flex flex-col items-start relative w-full sm:w-[320px]">
+        <div className="relative mb-2 flex items-center gap-[7px]">
+          <p className="relative font-comfortaa text-[14px] leading-[22.75px] font-normal text-[#4a3c2a]">
+            Address
+          </p>
+        </div>
+        <div className="relative w-full sm:w-[320px]" ref={addressDropdownRef}>
+          <div className="relative h-9 w-full rounded-lg border border-solid border-gray-200 bg-white transition-colors hover:border-[#633479]">
+            <div className="relative flex h-9 w-full items-center overflow-clip rounded-[inherit] px-3 py-1">
+              <div className="relative flex flex-1 items-center">
+                <input
+                  type="text"
+                  value={currentAddress?.address || address || ""}
+                  onChange={(e) => {
+                    setAddress(e.target.value);
+                    if (selectedAddressId !== null) {
+                      setSelectedAddressId(null);
+                    }
+                  }}
+                  onFocus={() => setIsAddressDropdownOpen(true)}
+                  placeholder="Select an address or type"
+                  className="flex-1 font-comfortaa font-normal leading-[normal] relative text-[#717182] text-[12.25px] bg-transparent border-none outline-none placeholder:text-[#717182]"
+                />
+                <div
+                  className="relative w-4 shrink-0 cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsAddressDropdownOpen(!isAddressDropdownOpen);
+                  }}
+                >
+                  <Icon
+                    name="chevron-down"
+                    aria-label="Dropdown"
+                    className={`block size-full text-[#717182] transition-transform ${
+                      isAddressDropdownOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          {isAddressDropdownOpen && (
+            <div className="absolute z-10 mt-1 max-h-[200px] w-full overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg">
+              {addresses.map((addr) => (
+                <div
+                  key={addr.id}
+                  className={`cursor-pointer px-3 py-2 transition-colors hover:bg-gray-50 ${
+                    selectedAddressId === addr.id ? "bg-blue-50" : ""
+                  }`}
+                  onClick={() => {
+                    setSelectedAddressId(addr.id);
+                    setIsAddressDropdownOpen(false);
+                  }}
+                >
+                  <p className="font-comfortaa text-[12.25px] text-[#4a3c2a]">{addr.address}</p>
+                  <p className="font-comfortaa text-[10px] text-[#717182] mt-1">
+                    {addr.city}, {addr.province} {addr.postal_code}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    ) : serviceType === "in_store" && stores.length > 0 ? (
+      <div className="flex flex-col items-start relative w-full sm:w-[320px]">
+        <div className="flex gap-[7px] items-center relative mb-2">
+          <p className="font-comfortaa font-normal leading-[22.75px] relative text-[#4a3c2a] text-[14px]">
+            Store Location
+          </p>
+        </div>
+        <div className="relative w-full sm:w-[320px]" ref={storeDropdownRef}>
+          <div
+            className="bg-white border border-gray-200 border-solid h-[36px] relative rounded-[8px] w-full cursor-pointer hover:border-[#633479] transition-colors"
+            onClick={() => setIsStoreDropdownOpen(!isStoreDropdownOpen)}
+          >
+            <div className="flex h-[36px] items-center overflow-clip px-[12px] py-[4px] relative rounded-[inherit] w-full">
+              <div className="flex flex-1 items-center relative">
+                <div className="overflow-clip relative shrink-0 size-[24px]">
+                  <Icon
+                    name="location"
+                    aria-label="Location"
+                    className="block size-full text-[#de6a07]"
+                  />
+                </div>
+                <p className="flex-1 font-comfortaa font-normal leading-[normal] relative text-[#717182] text-[12.25px] ml-[4px] truncate">
+                  {currentStore?.name || "Select a store"}
+                </p>
+                <div className="h-[6.375px] relative shrink-0 w-[11.25px]">
+                  <Icon
+                    name="chevron-down"
+                    aria-label="Dropdown"
+                    className={`block size-full text-[#717182] transition-transform ${
+                      isStoreDropdownOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          {isStoreDropdownOpen && (
+            <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-[8px] shadow-lg max-h-[200px] overflow-y-auto">
+              {stores.map((store) => (
+                <div
+                  key={store.id}
+                  className={`px-[12px] py-[8px] cursor-pointer hover:bg-gray-50 transition-colors ${
+                    selectedStoreId === store.id ? "bg-blue-50" : ""
+                  }`}
+                  onClick={() => {
+                    setSelectedStoreId(store.id);
+                    setIsStoreDropdownOpen(false);
+                  }}
+                >
+                  <p className="font-comfortaa text-[12.25px] text-[#4a3c2a] font-semibold">
+                    {store.name}
+                  </p>
+                  <p className="font-comfortaa text-[10px] text-[#717182] mt-1">
+                    {store.address}, {store.city}, {store.province} {store.postal_code}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    ) : (
+      <div className="w-full sm:w-[320px]">
+        <CustomInput
+          label={serviceType === "in_store" ? "Store Location" : "Address"}
+          type="text"
+          placeholder={serviceType === "in_store" ? "Enter store address" : "Enter your address"}
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+        />
+      </div>
+    );
+
   return (
     <>
       <div className="relative flex w-full flex-col items-start gap-4 px-5 sm:px-0">
@@ -259,179 +407,24 @@ export function Step1AddressAndServiceType() {
               </div>
             </div>
 
-            {/* Address/Store Selection */}
-            {(serviceType === "mobile" || serviceType === "in_home") && user && addresses.length > 0 ? (
-              // 已登录用户选择地址（mobile 服务）- 支持下拉选择和手动输入
-              <div className="flex flex-col items-start relative w-full sm:w-[320px]">
-                <div className="relative mb-2 flex items-center gap-[7px]">
-                  <p className="relative font-comfortaa text-[14px] leading-[22.75px] font-normal text-[#4a3c2a]">
-                    Address
-                  </p>
-                </div>
-                <div className="relative w-full sm:w-[320px]" ref={addressDropdownRef}>
-                  <div className="relative h-9 w-full rounded-lg border border-solid border-gray-200 bg-white transition-colors hover:border-[#633479]">
-                    <div className="relative flex h-9 w-full items-center overflow-clip rounded-[inherit] px-3 py-1">
-                      <div className="relative flex flex-1 items-center">
-                        <div className="relative size-6 shrink-0 overflow-clip">
-                          <Icon
-                            name="location"
-                            aria-label="Location"
-                            className="block size-full text-[#de6a07]"
-                          />
-                        </div>
-                        <input
-                          type="text"
-                          value={currentAddress?.address || address || ""}
-                          onChange={(e) => {
-                            setAddress(e.target.value);
-                            // 当用户手动输入时，清除选中的地址 ID
-                            if (selectedAddressId !== null) {
-                              setSelectedAddressId(null);
-                            }
-                          }}
-                          onFocus={() => setIsAddressDropdownOpen(true)}
-                          placeholder="Select an address or type"
-                          className="flex-1 font-comfortaa font-normal leading-[normal] relative text-[#717182] text-[12.25px] ml-[4px] bg-transparent border-none outline-none placeholder:text-[#717182]"
-                        />
-                        <div 
-                          className="relative w-4 shrink-0 cursor-pointer"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setIsAddressDropdownOpen(!isAddressDropdownOpen);
-                          }}
-                        >
-                          <Icon
-                            name="chevron-down"
-                            aria-label="Dropdown"
-                            className={`block size-full text-[#717182] transition-transform ${
-                              isAddressDropdownOpen ? "rotate-180" : ""
-                            }`}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  {/* Address Dropdown */}
-                  {isAddressDropdownOpen && (
-                    <div className="absolute z-10 mt-1 max-h-[200px] w-full overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg">
-                      {addresses.map((addr) => (
-                        <div
-                          key={addr.id}
-                          className={`cursor-pointer px-3 py-2 transition-colors hover:bg-gray-50 ${
-                            selectedAddressId === addr.id ? "bg-blue-50" : ""
-                          }`}
-                          onClick={() => {
-                            setSelectedAddressId(addr.id);
-                            setIsAddressDropdownOpen(false);
-                          }}
-                        >
-                          <p className="font-comfortaa text-[12.25px] text-[#4a3c2a]">
-                            {addr.address}
-                          </p>
-                          <p className="font-comfortaa text-[10px] text-[#717182] mt-1">
-                            {addr.city}, {addr.province} {addr.postal_code}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ) : serviceType === "in_store" && stores.length > 0 ? (
-              // 选择门店（in_store 服务）
-              <div className="flex flex-col items-start relative w-full sm:w-[320px]">
-                <div className="flex gap-[7px] items-center relative mb-2">
-                  <p className="font-comfortaa font-normal leading-[22.75px] relative text-[#4a3c2a] text-[14px]">
-                    Store Location
-                  </p>
-                </div>
-                <div className="relative w-full sm:w-[320px]" ref={storeDropdownRef}>
-                  <div
-                    className="bg-white border border-gray-200 border-solid h-[36px] relative rounded-[8px] w-full cursor-pointer hover:border-[#633479] transition-colors"
-                    onClick={() => setIsStoreDropdownOpen(!isStoreDropdownOpen)}
-                  >
-                    <div className="flex h-[36px] items-center overflow-clip px-[12px] py-[4px] relative rounded-[inherit] w-full">
-                      <div className="flex flex-1 items-center relative">
-                        <div className="overflow-clip relative shrink-0 size-[24px]">
-                          <Icon
-                            name="location"
-                            aria-label="Location"
-                            className="block size-full text-[#de6a07]"
-                          />
-                        </div>
-                        <p className="flex-1 font-comfortaa font-normal leading-[normal] relative text-[#717182] text-[12.25px] ml-[4px] truncate">
-                          {currentStore?.name || "Select a store"}
-                        </p>
-                        <div className="h-[6.375px] relative shrink-0 w-[11.25px]">
-                          <Icon
-                            name="chevron-down"
-                            aria-label="Dropdown"
-                            className={`block size-full text-[#717182] transition-transform ${
-                              isStoreDropdownOpen ? "rotate-180" : ""
-                            }`}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  {/* Store Dropdown */}
-                  {isStoreDropdownOpen && (
-                    <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-[8px] shadow-lg max-h-[200px] overflow-y-auto">
-                      {stores.map((store) => (
-                        <div
-                          key={store.id}
-                          className={`px-[12px] py-[8px] cursor-pointer hover:bg-gray-50 transition-colors ${
-                            selectedStoreId === store.id ? "bg-blue-50" : ""
-                          }`}
-                          onClick={() => {
-                            setSelectedStoreId(store.id);
-                            setIsStoreDropdownOpen(false);
-                          }}
-                        >
-                          <p className="font-comfortaa text-[12.25px] text-[#4a3c2a] font-semibold">
-                            {store.name}
-                          </p>
-                          <p className="font-comfortaa text-[10px] text-[#717182] mt-1">
-                            {store.address}, {store.city}, {store.province}{" "}
-                            {store.postal_code}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ) : (
-              // 手动输入地址（未登录用户或没有保存的地址）
-              <div className="w-full sm:w-[320px]">
-                <CustomInput
-                  label={serviceType === "in_store" ? "Store Location" : "Address"}
-                  type="text"
-                  placeholder={
-                    serviceType === "in_store"
-                      ? "Enter store address"
-                      : "Enter your address"
-                  }
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  rightElement={
-                    <div
-                      className="overflow-clip relative shrink-0 size-[24px] cursor-pointer hover:opacity-80 transition-opacity ml-2"
-                      title="Use current location"
-                    >
-                      <Icon
-                        name="location"
-                        aria-label="Use current location"
-                        className="block size-full text-[#de6a07]"
-                      />
-                    </div>
-                  }
-                />
-              </div>
-            )}
-
             {/* City and Province */}
             <div className="flex flex-col sm:flex-row gap-[12px] sm:gap-[20px] items-start relative shrink-0 w-full">
+              <div className="flex flex-col items-start relative shrink-0 w-full sm:w-[160px]">
+                <CustomSelect
+                  label="Province"
+                  placeholder="Select province"
+                  value={province}
+                  displayValue={selectedProvinceName || DEFAULT_PROVINCE_NAME}
+                  onValueChange={handleProvinceChange}
+                  disabled={true}
+                >
+                  {provinces.map((item) => (
+                    <CustomSelectItem key={item.code} value={item.code}>
+                      {item.name}
+                    </CustomSelectItem>
+                  ))}
+                </CustomSelect>
+              </div>
               <div className="flex flex-col items-start relative shrink-0 w-full sm:w-[192px]">
                 <CustomSelect
                   label="City"
@@ -448,23 +441,10 @@ export function Step1AddressAndServiceType() {
                   ))}
                 </CustomSelect>
               </div>
-              <div className="flex flex-col items-start relative shrink-0 w-full sm:w-[160px]">
-                <CustomSelect
-                  label="Province"
-                  placeholder="Select province"
-                  value={province}
-                  displayValue={selectedProvinceName}
-                  onValueChange={handleProvinceChange}
-                  disabled={serviceType === "in_store"}
-                >
-                  {provinces.map((item) => (
-                    <CustomSelectItem key={item.code} value={item.code}>
-                      {item.name}
-                    </CustomSelectItem>
-                  ))}
-                </CustomSelect>
-              </div>
             </div>
+
+            {/* Address/Store Selection */}
+            {locationField}
 
             {/* Post Code */}
             <div className="flex gap-[20px] items-start relative shrink-0 w-full">

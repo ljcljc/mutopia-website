@@ -32,6 +32,7 @@ export function Step3() {
   const user = useAuthStore((state) => state.user);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const isLoggedIn = userInfo !== null || user !== null;
+  const canContinue = serviceId !== null;
 
   const hasLoadedAddOns = useRef(false);
   const hasAutoSelectedMembership = useRef(false);
@@ -532,6 +533,7 @@ export function Step3() {
                 variant="primary"
                 showArrow={true}
                 onClick={nextStep}
+                disabled={!canContinue}
                 className="w-full sm:w-auto"
               >
                 Continue
