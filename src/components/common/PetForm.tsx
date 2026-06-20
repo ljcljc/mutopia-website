@@ -1526,12 +1526,6 @@ export function PetForm({
                     onClick={() => handleBehaviorSelect("hard_to_handle")}
                     className="w-auto flex-none self-stretch h-[calc(53*var(--px393))] sm:h-[53px]"
                   />
-                  <CustomRadio
-                    label="Senior pets"
-                    isSelected={behavior === "senior_pets"}
-                    onClick={() => handleBehaviorSelect("senior_pets")}
-                    className="w-auto flex-none self-stretch h-[calc(53*var(--px393))] sm:h-[53px]"
-                  />
                 </div>
               </div>
             </div>
