@@ -866,6 +866,9 @@ export interface CouponOut {
   apply_scope: string;
   amount: number | string;
   count?: number; // default: 1
+  active_count?: number; // default: 0
+  locked_count?: number; // default: 0
+  used_count?: number; // default: 0
   valid_from?: string | null;
   expires_at?: string | null;
   status: string;

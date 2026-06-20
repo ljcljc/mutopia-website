@@ -168,8 +168,22 @@ function getCouponStatus(coupon: CouponOut): {
   isPending: boolean;
 } {
   const statusLower = coupon.status?.toLowerCase() ?? "";
+  const totalCount = coupon.count ?? 1;
+  const activeCount = coupon.active_count ?? (statusLower === "active" ? totalCount : 0);
+  const lockedCount = coupon.locked_count ?? (statusLower === "locked" || statusLower === "pending" ? totalCount : 0);
   const now = new Date();
   const expiresAt = coupon.expires_at ? new Date(coupon.expires_at) : null;
+
+  if (totalCount > 1 && activeCount > 0 && lockedCount > 0) {
+    return {
+      statusText: `${activeCount} active, ${lockedCount} pending`,
+      statusColor: "text-[#4A5565]",
+      dotColor: "text-[#2374FF]",
+      faded: false,
+      showStatusIcon: true,
+      isPending: false,
+    };
+  }
   
   // 已过期（优先检查 status，然后检查 expires_at）
   if (statusLower === "expired" || statusLower === "used" || (expiresAt && expiresAt < now)) {

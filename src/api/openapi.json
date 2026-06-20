@@ -4776,6 +4776,9 @@
             "title": "Amount"
           },
           "count": { "default": 1, "title": "Count", "type": "integer" },
+          "active_count": { "default": 0, "title": "Active Count", "type": "integer" },
+          "locked_count": { "default": 0, "title": "Locked Count", "type": "integer" },
+          "used_count": { "default": 0, "title": "Used Count", "type": "integer" },
           "valid_from": {
             "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Valid From"
