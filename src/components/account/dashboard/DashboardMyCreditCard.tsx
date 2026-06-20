@@ -235,6 +235,77 @@ function getCouponStatus(coupon: CouponOut): {
   };
 }
 
+function shouldSplitMixedStatusCoupon(coupon: CouponOut): boolean {
+  const totalCount = coupon.count ?? 1;
+  const statusLower = coupon.status?.toLowerCase() ?? "";
+  const activeCount = coupon.active_count ?? (statusLower === "active" ? totalCount : 0);
+  const lockedCount = coupon.locked_count ?? (statusLower === "locked" || statusLower === "pending" ? totalCount : 0);
+
+  return activeCount > 0 && lockedCount > 0;
+}
+
+function splitCouponByStatus(coupon: CouponOut, title: string, subtitle: string) {
+  const amount = formatAmount(coupon.amount);
+  const totalCount = coupon.count ?? 1;
+  const statusLower = coupon.status?.toLowerCase() ?? "";
+  const activeCount = coupon.active_count ?? (statusLower === "active" ? totalCount : 0);
+  const lockedCount = coupon.locked_count ?? (statusLower === "locked" || statusLower === "pending" ? totalCount : 0);
+
+  const buildCredit = (sourceCoupon: CouponOut, count?: number) => {
+    const status = getCouponStatus(sourceCoupon);
+    return {
+      title,
+      amount,
+      subtitle,
+      statusText: status.statusText,
+      statusColor: status.statusColor,
+      dotColor: status.dotColor,
+      faded: status.faded,
+      showStatusIcon: status.showStatusIcon,
+      count: count != null && count > 0 ? count : undefined,
+      isPending: status.isPending,
+    };
+  };
+
+  if (!shouldSplitMixedStatusCoupon(coupon)) {
+    return [buildCredit(coupon, coupon.count)];
+  }
+
+  const splitCredits = [];
+
+  if (activeCount > 0) {
+    splitCredits.push(
+      buildCredit(
+        {
+          ...coupon,
+          status: "active",
+          count: activeCount,
+          active_count: activeCount,
+          locked_count: 0,
+        },
+        activeCount
+      )
+    );
+  }
+
+  if (lockedCount > 0) {
+    splitCredits.push(
+      buildCredit(
+        {
+          ...coupon,
+          status: "pending",
+          count: lockedCount,
+          active_count: 0,
+          locked_count: lockedCount,
+        },
+        lockedCount
+      )
+    );
+  }
+
+  return splitCredits;
+}
+
 export default function DashboardMyCreditCard() {
   const navigate = useNavigate();
   const { cashCoupons, specialCoupons, isLoadingCashCoupons, isLoadingSpecialCoupons, fetchCashCoupons, fetchSpecialCoupons } = useAccountStore();
@@ -289,48 +360,18 @@ export default function DashboardMyCreditCard() {
 
   // 转换 Cash credit 数据
   const cashCredits = useMemo(() => {
-    return cashCoupons.map((coupon) => {
-      const status = getCouponStatus(coupon);
-      const amount = formatAmount(coupon.amount);
+    return cashCoupons.flatMap((coupon) => {
       const title = coupon.template_name || coupon.type || "Cash credit";
-      const count = coupon.count;
-      
-      return {
-        title,
-        amount,
-        subtitle: "",
-        statusText: status.statusText,
-        statusColor: status.statusColor,
-        dotColor: status.dotColor,
-        faded: status.faded,
-        showStatusIcon: status.showStatusIcon,
-        count: count != null && count > 0 ? count : undefined,
-        isPending: status.isPending,
-      };
+      return splitCouponByStatus(coupon, title, "");
     });
   }, [cashCoupons]);
 
   // 转换 Special offer 数据（与 Cash credit 一致：使用 getCouponStatus）
   const specialOffers = useMemo(() => {
-    return specialCoupons.map((coupon) => {
-      const status = getCouponStatus(coupon);
-      const amount = formatAmount(coupon.amount);
+    return specialCoupons.flatMap((coupon) => {
       const title = coupon.template_name || coupon.type || "Special offer";
       const subtitle = coupon.notes || "";
-      const count = coupon.count;
-
-      return {
-        title,
-        subtitle,
-        amount,
-        statusText: status.statusText,
-        statusColor: status.statusColor,
-        dotColor: status.dotColor,
-        faded: status.faded,
-        showStatusIcon: status.showStatusIcon,
-        count: count != null && count > 0 ? count : undefined,
-        isPending: status.isPending,
-      };
+      return splitCouponByStatus(coupon, title, subtitle);
     });
   }, [specialCoupons]);
 

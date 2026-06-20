@@ -290,17 +290,21 @@ function CreditsBadge() {
     });
   }, [fetchCashCoupons]);
 
-  const credits = cashCoupons
-    .filter((coupon) => {
-      if (coupon.status?.toLowerCase() !== "active") return false;
-      if (!coupon.expires_at) return true;
-      return new Date(coupon.expires_at).getTime() >= Date.now();
-    })
-    .reduce((total, coupon) => {
-      const amount = typeof coupon.amount === "number" ? coupon.amount : parseFloat(coupon.amount || "0");
-      const count = coupon.count && coupon.count > 0 ? coupon.count : 1;
-      return total + (Number.isFinite(amount) ? amount : 0) * count;
-    }, 0);
+  const credits = cashCoupons.reduce((total, coupon) => {
+    if (coupon.expires_at && new Date(coupon.expires_at).getTime() < Date.now()) {
+      return total;
+    }
+
+    const amount = typeof coupon.amount === "number" ? coupon.amount : parseFloat(coupon.amount || "0");
+    if (!Number.isFinite(amount)) return total;
+
+    const totalCount = coupon.count ?? 1;
+    const statusLower = coupon.status?.toLowerCase() ?? "";
+    const activeCount = coupon.active_count ?? (statusLower === "active" ? totalCount : 0);
+
+    if (activeCount <= 0) return total;
+    return total + amount * activeCount;
+  }, 0);
 
   return (
     <div
