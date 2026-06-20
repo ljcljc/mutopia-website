@@ -21,8 +21,8 @@ export default function AccountLayout() {
 
   return (
     <BaseAccountLayoutShell
-      rootClassName="bg-[#F9F1E8]"
-      contentBackgroundClassName="bg-[#F9F1E8]"
+      rootClassName="bg-[#FFFBEB]"
+      contentBackgroundClassName="bg-[#FFFBEB]"
       contentContainerClassName="w-full max-w-[1248px] mx-auto flex flex-1 overflow-hidden gap-6 my-6 lg:my-14"
       sidebar={<AccountSidebar className="hidden lg:block" />}
       header={<HeaderApp />}
@@ -30,7 +30,7 @@ export default function AccountLayout() {
       footerClassName="hidden md:block"
       bottomNav={<AccountBottomNav />}
       bottomNavClassName="lg:hidden"
-      insetClassName="bg-[#F9F1E8] pb-[96px] lg:pb-0"
+      insetClassName="bg-[#FFFBEB] pb-[96px] lg:pb-0"
     />
   );
 }
