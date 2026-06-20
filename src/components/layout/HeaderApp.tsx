@@ -48,6 +48,7 @@ export default function HeaderApp() {
   const user = useAuthStore((state) => state.user);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<"home" | "back">("home");
   const navigate = useNavigate();
   const hasFormData = useBookingStore((state) => state.hasFormData);
   const reset = useBookingStore((state) => state.reset);
@@ -131,8 +132,31 @@ export default function HeaderApp() {
     if (isBookingPage && hasFormData()) {
       e.preventDefault();
       e.currentTarget.blur();
+      setPendingNavigation("home");
       setIsDialogOpen(true);
     }
+  };
+
+  const navigateBackOrHome = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+    navigate("/");
+  };
+
+  const handleBackClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    const isBookingPage = window.location.pathname.includes("/booking");
+
+    if (isBookingPage && hasFormData()) {
+      e.currentTarget.blur();
+      setPendingNavigation("back");
+      setIsDialogOpen(true);
+      return;
+    }
+
+    navigateBackOrHome();
   };
 
   const handleCancelLeave = () => {
@@ -142,6 +166,10 @@ export default function HeaderApp() {
   const handleConfirmLeave = () => {
     setIsDialogOpen(false);
     reset();
+    if (pendingNavigation === "back") {
+      navigateBackOrHome();
+      return;
+    }
     navigate("/");
   };
 
@@ -164,7 +192,7 @@ export default function HeaderApp() {
         {!user && (
           <Link
             to="/"
-            onClick={handleHomeClick}
+            onClick={handleBackClick}
             className="relative shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
             data-name="Button tertiary"
           >

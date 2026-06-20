@@ -3,6 +3,7 @@ import Layout from "@/components/layout/Layout";
 import AccountLayout from "@/components/layout/AccountLayout";
 import Home from "@/pages/Home";
 import Booking from "@/pages/Booking";
+import HowItWorks from "@/pages/HowItWorks";
 import PaymentSuccess from "@/pages/PaymentSuccess";
 import PaymentFail from "@/pages/PaymentFail";
 import { customerAccountRoutes } from "@/modules/customer/routes";
@@ -20,6 +21,10 @@ export const router = createBrowserRouter([
       {
         path: "booking",
         element: <Booking />,
+      },
+      {
+        path: "how-it-works",
+        element: <HowItWorks />,
       },
       {
         path: "/success",

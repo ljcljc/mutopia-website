@@ -58,10 +58,6 @@ export default function BaseAccountSidebar({
   const handleNavClick = (item: SidebarNavItem) => {
     if (item.onClick) {
       item.onClick();
-      return;
-    }
-    if (item.path !== "#") {
-      navigate(item.path);
     }
   };
 
@@ -90,7 +86,6 @@ export default function BaseAccountSidebar({
                   >
                     <Link
                       to={item.path}
-                      onClick={() => handleNavClick(item)}
                       aria-label={item.label}
                       aria-current={active ? "page" : undefined}
                       className="flex items-center gap-3 w-full group"
@@ -180,7 +175,6 @@ export default function BaseAccountSidebar({
                   <SidebarMenuButton asChild isActive={active} className={baseClassName}>
                     <Link
                       to={item.path}
-                      onClick={() => handleNavClick(item)}
                       aria-label={item.label}
                       aria-current={active ? "page" : undefined}
                       className="flex items-center gap-3 w-full group"
