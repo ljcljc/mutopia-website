@@ -5,7 +5,7 @@ const mainNavItems: SidebarNavItem[] = [
   { id: "dashboard", label: "Dashboard", path: "/account/dashboard", iconName: "dashboard" },
   { id: "my-pets", label: "My Pets", path: "/account/pets", iconName: "pets" },
   { id: "notifications", label: "Notifications", path: "/account/notifications", iconName: "notify", badge: 0 },
-  { id: "my-account", label: "My Account", path: "/account/profile", iconName: "user" },
+  { id: "my-account", label: "My Account", path: "/account/profile", iconName: "account-3" },
 ];
 
 interface AccountSidebarProps {

@@ -96,6 +96,7 @@ import IconNotificationRefundSvg from "@/assets/icons/icon-notification-refund.s
 import IconNotificationEmptySvg from "@/assets/icons/icon-notification-empty.svg?react";
 import IconAccountSvg from "@/assets/icons/icon-account.svg?react";
 import IconAccount2Svg from "@/assets/icons/icon-account-2.svg?react";
+import IconAccount3Svg from "@/assets/icons/icon-account-3.svg?react";
 import IconEarningSvg from "@/assets/icons/icon-earning.svg?react";
 import IconExperienceSvg from "@/assets/icons/icon-experience.svg?react";
 import IconIdentificationSvg from "@/assets/icons/icon-identification.svg?react";
@@ -181,6 +182,7 @@ const iconComponentMap = {
   "notification-empty": IconNotificationEmptySvg,
   "account": IconAccountSvg,
   "account-2": IconAccount2Svg,
+  "account-3": IconAccount3Svg,
   "earning": IconEarningSvg,
   "experience": IconExperienceSvg,
   "identification": IconIdentificationSvg,

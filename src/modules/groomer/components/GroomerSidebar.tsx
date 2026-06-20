@@ -5,7 +5,7 @@ const mainNavItems: SidebarNavItem[] = [
   { id: "dashboard", label: "Dashboard", path: "/groomer/dashboard", iconName: "logo" },
   { id: "my-work", label: "My work", path: "/groomer/my-work", iconName: "clock" },
   { id: "earnings", label: "Earnings", path: "/groomer/earnings", iconName: "earning" },
-  { id: "my-account", label: "My Account", path: "/groomer/account", iconName: "user" },
+  { id: "my-account", label: "My Account", path: "/groomer/account", iconName: "account-3" },
 ];
 
 interface GroomerSidebarProps {

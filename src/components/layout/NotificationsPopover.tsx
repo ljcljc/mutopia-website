@@ -35,12 +35,12 @@ export default function NotificationsPopover() {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
-          className="relative shrink-0 size-[24px] cursor-pointer hover:opacity-80 transition-opacity"
+          className="relative shrink-0 size-[20px] cursor-pointer hover:opacity-80 transition-opacity"
           aria-label="Notifications"
           data-name="notifications"
         >
-          <div className="bg-clip-padding border-0 border-transparent border-solid overflow-clip relative rounded-[inherit] size-[24px]">
-            <div className="absolute inset-[8.33%_16.67%]" data-name="icon">
+          <div className="bg-clip-padding border-0 border-transparent border-solid overflow-clip relative rounded-[inherit] size-[20px]">
+            <div className="relative size-[20px]" data-name="icon">
               <Icon
                 name="notify"
                 aria-label="Notifications"

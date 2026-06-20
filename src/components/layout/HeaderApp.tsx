@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 const imgIcon = "/images/logo.png";
 import { Icon } from "@/components/common/Icon";
 import { useAuthStore } from "@/components/auth/authStore";
+import { useAccountStore } from "@/components/account/accountStore";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -276,18 +277,49 @@ export default function HeaderApp() {
   );
 }
 function CreditsBadge() {
-  // TODO: Replace with actual credits from API when available
-  const credits = "$0.00";
+  const navigate = useNavigate();
+  const cashCoupons = useAccountStore((state) => state.cashCoupons);
+  const fetchCashCoupons = useAccountStore((state) => state.fetchCashCoupons);
+  const hasFetchedRef = useRef(false);
+
+  useEffect(() => {
+    if (hasFetchedRef.current) return;
+    hasFetchedRef.current = true;
+    fetchCashCoupons().catch((error) => {
+      console.error("Failed to load cash credits for header:", error);
+    });
+  }, [fetchCashCoupons]);
+
+  const credits = cashCoupons
+    .filter((coupon) => {
+      if (coupon.status?.toLowerCase() !== "active") return false;
+      if (!coupon.expires_at) return true;
+      return new Date(coupon.expires_at).getTime() >= Date.now();
+    })
+    .reduce((total, coupon) => {
+      const amount = typeof coupon.amount === "number" ? coupon.amount : parseFloat(coupon.amount || "0");
+      const count = coupon.count && coupon.count > 0 ? coupon.count : 1;
+      return total + (Number.isFinite(amount) ? amount : 0) * count;
+    }, 0);
 
   return (
     <div
       className="bg-[#de6a07] h-[24px] relative rounded-[12px] shrink-0 cursor-pointer hover:opacity-90 transition-opacity"
       data-name="Badge"
+      onClick={() => navigate("/account/dashboard#my-credit")}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          navigate("/account/dashboard#my-credit");
+        }
+      }}
     >
       <div className="bg-clip-padding border-0 border-transparent border-solid flex gap-[4px] h-[24px] items-center justify-center overflow-clip px-[16px] py-[4px] relative rounded-[inherit]">
         <p className="font-comfortaa font-bold leading-[14px] relative shrink-0 text-[10px] text-white whitespace-nowrap">
           <span>Credits </span>
-          {credits}
+          {`$${credits.toFixed(2)}`}
         </p>
       </div>
     </div>
