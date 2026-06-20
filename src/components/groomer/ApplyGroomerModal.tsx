@@ -26,6 +26,7 @@ interface IdentificationCommonProps {
   onAddressChange: (value: string) => void;
   phone: string;
   onPhoneChange: (value: string) => void;
+  phoneError: string | null;
   hearAboutUs: string;
   onHearAboutUsChange: (value: string) => void;
 }
@@ -37,6 +38,8 @@ const HEAR_ABOUT_US_OPTIONS = [
   "Online reviews",
   "AI Chat",
 ];
+
+const PHONE_NUMBER_REGEX = /^(\+1\s?)?\(?[2-9][0-9]{2}\)?[-.\s]?[2-9][0-9]{2}[-.\s]?[0-9]{4}$/;
 
 function SearchableSelectField({
   label,
@@ -179,6 +182,7 @@ function IdentificationAuthenticatedForm({
   onAddressChange,
   phone,
   onPhoneChange,
+  phoneError,
   hearAboutUs,
   onHearAboutUsChange,
 }: IdentificationCommonProps) {
@@ -285,8 +289,16 @@ function IdentificationAuthenticatedForm({
                 placeholder="Enter phone number"
                 value={phone}
                 onChange={(event) => onPhoneChange(event.target.value)}
-                className="h-[36px] w-full rounded-[12px] border border-[#e5e7eb] px-[16px] text-[12.25px] text-[#4a3c2a] placeholder:text-[#717182]"
+                aria-invalid={phoneError ? "true" : "false"}
+                className={`h-[36px] w-full rounded-[12px] border px-[16px] text-[12.25px] text-[#4a3c2a] placeholder:text-[#717182] ${
+                  phoneError ? "border-[#de1507]" : "border-[#e5e7eb]"
+                }`}
               />
+              {phoneError ? (
+                <span className="font-comfortaa text-[10px] leading-[12px] text-[#DE1507]">
+                  {phoneError}
+                </span>
+              ) : null}
             </label>
           </div>
 
@@ -332,11 +344,17 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
     const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
     return maxDate.toISOString().split("T")[0];
   })();
+  const normalizedPhone = phone.trim();
+  const phoneError =
+    normalizedPhone.length > 0 && !PHONE_NUMBER_REGEX.test(normalizedPhone)
+      ? "Please enter a valid US/Canada phone number."
+      : null;
   const isFormComplete = (() => {
     if (!firstName.trim() || !lastName.trim() || !sinAnswer) return false;
     if (sinAnswer === "no") return false;
     if (!birthDate) return false;
-    if (!address.trim() || !phone.trim()) return false;
+    if (!address.trim() || !normalizedPhone) return false;
+    if (phoneError) return false;
     return true;
   })();
   const isExperienceComplete = (() => {
@@ -351,12 +369,22 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
     if (hasReferences && references.some((ref) => !ref.name.trim() || !ref.email.trim())) return false;
     return true;
   })();
+  const hasUploadedEnvironmentImages = tableUploadItems.some(
+    (item) => item.uploadStatus === "uploaded" && item.photoId !== undefined
+  );
+  const isPortfolioComplete = (() => {
+    if (!portfolioMessage.trim()) return false;
+    if (!hasUploadedEnvironmentImages) return false;
+    if (tableUploadErrorType) return false;
+    return true;
+  })();
   const [step, setStep] = useState<"identification" | "experience" | "portfolio" | "submitted">(
     "identification"
   );
   const isSubmittedStep = step === "submitted";
   const isExperienceStep = step === "experience" || step === "portfolio" || isSubmittedStep;
   const [portfolioMessage, setPortfolioMessage] = useState("");
+  const [hasCertifications, setHasCertifications] = useState<boolean | null>(null);
   const [portfolioPlatform, setPortfolioPlatform] = useState("");
   const [portfolioLink, setPortfolioLink] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -393,6 +421,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
     setBirthDate("");
     setStep("identification");
     setPortfolioMessage("");
+    setHasCertifications(null);
     setPortfolioPlatform("");
     setPortfolioLink("");
     setTableUploadItems([]);
@@ -438,6 +467,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
   }, [step]);
 
   const handleSubmitApply = async () => {
+    if (!isPortfolioComplete) return;
     setSubmitError(null);
     setIsSubmitting(true);
     try {
@@ -751,6 +781,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                   onAddressChange={setAddress}
                   phone={phone}
                   onPhoneChange={setPhone}
+                  phoneError={phoneError}
                   hearAboutUs={hearAboutUs}
                   onHearAboutUsChange={setHearAboutUs}
                 />
@@ -1017,7 +1048,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                 <div className="flex flex-col gap-[28px]">
                   <div className="flex flex-col gap-[8px]">
                     <p className="font-comfortaa text-[14px] leading-[22.75px] text-[#4a3c2a]">
-                      Where did you learn bathing?
+                      Where did you learn grooming? Do you hold any certifications?
                     </p>
                     <textarea
                       value={portfolioMessage}
@@ -1029,7 +1060,7 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
 
                   <div className="flex flex-col gap-[8px]">
                     <p className="font-comfortaa text-[14px] leading-[22.75px] text-black">
-                      Upload your grooming table and environment (required)
+                      Upload your grooming table and environment
                     </p>
                     <FileUpload
                       accept="image/*"
@@ -1145,14 +1176,14 @@ export default function ApplyGroomerModal({ open, onOpenChange }: ApplyGroomerMo
                       size="medium"
                       variant="primary"
                       type="button"
-                      className="w-[120px]"
+                      className="w-[120px] disabled:cursor-not-allowed"
                       loading={step === "portfolio" && isSubmitting}
                       disabled={
                         step === "identification"
                           ? !isFormComplete
                           : step === "experience"
                             ? !isExperienceComplete
-                            : isSubmitting
+                            : !isPortfolioComplete || isSubmitting
                       }
                       onClick={() => {
                         if (step === "identification") {
