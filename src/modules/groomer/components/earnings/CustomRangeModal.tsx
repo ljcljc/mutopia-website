@@ -81,7 +81,7 @@ export function CustomRangeModal({
           "flex flex-col overflow-hidden bg-white p-0 [&>button]:hidden",
           isMobile
             ? "service-area-dialog inset-x-0! bottom-0! top-auto! z-60! mx-auto! flex! max-h-[80vh]! w-full! max-w-none! translate-x-0! translate-y-0! gap-0! rounded-b-none rounded-t-[calc(24*var(--px393))] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
-            : "left-1/2! top-1/2! z-60! flex! max-h-[80vh]! w-full! max-w-none! -translate-x-1/2! -translate-y-1/2! gap-0! rounded-none shadow-[0px_4px_12px_rgba(0,0,0,0.08)]",
+            : "left-1/2! top-1/2! z-60! flex! max-h-[80vh]! w-[min(560px,calc(100vw-48px))]! max-w-[560px]! -translate-x-1/2! -translate-y-1/2! gap-0! rounded-[24px] shadow-[0px_4px_12px_rgba(0,0,0,0.08)]",
         )}
       >
         <DialogTitle className="sr-only">Custom range</DialogTitle>
@@ -109,7 +109,7 @@ export function CustomRangeModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="flex size-5 shrink-0 items-center justify-center text-[#8B6357] transition-colors hover:text-[#6E4F46]"
+                className="flex size-5 shrink-0 cursor-pointer items-center justify-center text-[#8B6357] transition-colors hover:text-[#6E4F46]"
                 aria-label="Close custom range dialog"
               >
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
@@ -152,7 +152,7 @@ export function CustomRangeModal({
                       setActiveField("start");
                       setCalendarDate(draftStartDate);
                     }}
-                    className="flex w-full items-center justify-between py-2 text-left"
+                    className="flex w-full cursor-pointer items-center justify-between py-2 text-left"
                   >
                     <span className="font-comfortaa text-[14px] leading-[21px] text-[#6B7280]">Start Date</span>
                     <span className="font-comfortaa text-[16px] font-bold leading-6 text-[#27AE60]">{formatRangeDate(draftStartDate)}</span>
@@ -164,7 +164,7 @@ export function CustomRangeModal({
                       setActiveField("end");
                       setCalendarDate(draftEndDate);
                     }}
-                    className="flex w-full items-center justify-between py-2 text-left"
+                    className="flex w-full cursor-pointer items-center justify-between py-2 text-left"
                   >
                     <span className="font-comfortaa text-[14px] leading-[21px] text-[#6B7280]">End Date</span>
                     <span className="font-comfortaa text-[16px] font-bold leading-6 text-[#27AE60]">{formatRangeDate(draftEndDate)}</span>
@@ -175,7 +175,7 @@ export function CustomRangeModal({
               <button
                 type="button"
                 onClick={() => onConfirm(draftStartDate, draftEndDate)}
-                className="h-12 rounded-[32px] bg-[#00A63E] font-comfortaa text-[15px] font-bold leading-[22.5px] text-white shadow-[0px_4px_12px_rgba(0,166,62,0.3)] transition-colors hover:bg-[#009638] active:bg-[#008730]"
+                className="h-12 cursor-pointer rounded-[32px] bg-[#00A63E] font-comfortaa text-[15px] font-bold leading-[22.5px] text-white shadow-[0px_4px_12px_rgba(0,166,62,0.3)] transition-colors hover:bg-[#009638] active:bg-[#008730]"
               >
                 Confirm
               </button>
