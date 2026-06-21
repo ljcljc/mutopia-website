@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { Icon, type IconName } from "@/components/common/Icon";
 import { Spinner } from "@/components/common/Spinner";
+import { cn } from "@/components/ui/utils";
 import { deleteMessage, getMessages, markAllMessagesRead, markMessageRead, type MessageOut, type MessagePageOut } from "@/lib/api";
 
 type NotificationItem = {
@@ -21,12 +22,26 @@ type NotificationItem = {
 
 const NOTIFICATIONS_MAX_AGE_MS = 10000;
 const NOTIFICATIONS_PAGE_SIZE = 20;
-let notificationsLastFetchedAt = 0;
-let notificationsLastItems: MessageOut[] = [];
-let notificationsLastTotal = 0;
-let notificationsLastNextPage = 1;
-let notificationsLastHasMore = true;
-let notificationsInFlight: Promise<MessagePageOut> | null = null;
+type NotificationsScope = "all" | "groomer";
+type NotificationsVariant = "customer" | "groomer";
+
+type NotificationsCacheEntry = {
+  lastFetchedAt: number;
+  items: MessageOut[];
+  total: number;
+  nextPage: number;
+  hasMore: boolean;
+};
+
+const notificationsCache: Record<NotificationsScope, NotificationsCacheEntry> = {
+  all: { lastFetchedAt: 0, items: [], total: 0, nextPage: 1, hasMore: true },
+  groomer: { lastFetchedAt: 0, items: [], total: 0, nextPage: 1, hasMore: true },
+};
+
+const notificationsInFlight: Partial<Record<NotificationsScope, Promise<MessagePageOut> | null>> = {
+  all: null,
+  groomer: null,
+};
 
 const linkClassName = "text-[#DE6A07] underline hover:text-[#C15A05]";
 
@@ -120,7 +135,15 @@ function buildNotificationBody(message: MessageOut): ReactNode {
   return message.content;
 }
 
-export default function Notifications() {
+interface NotificationsProps {
+  scope?: NotificationsScope;
+  variant?: NotificationsVariant;
+}
+
+export default function Notifications({
+  scope = "all",
+  variant = "customer",
+}: NotificationsProps) {
   const [messages, setMessages] = useState<MessageOut[]>([]);
   const [isInitialLoading, setIsInitialLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -138,13 +161,18 @@ export default function Notifications() {
   const nextPageRef = useRef(1);
   const hasMoreRef = useRef(true);
   const channel = "in_app" as const;
+  const cache = notificationsCache[scope];
+  const scopeParam = scope === "groomer" ? "groomer" : undefined;
+  const isGroomerVariant = variant === "groomer";
 
   const syncCache = (items: MessageOut[], total: number, upcomingPage: number, more: boolean) => {
-    notificationsLastItems = items;
-    notificationsLastTotal = total;
-    notificationsLastNextPage = upcomingPage;
-    notificationsLastHasMore = more;
-    notificationsLastFetchedAt = Date.now();
+    notificationsCache[scope] = {
+      items,
+      total,
+      nextPage: upcomingPage,
+      hasMore: more,
+      lastFetchedAt: Date.now(),
+    };
   };
 
   useEffect(() => {
@@ -157,11 +185,11 @@ export default function Notifications() {
   useEffect(() => {
     let isMounted = true;
     const now = Date.now();
-    if (now - notificationsLastFetchedAt < NOTIFICATIONS_MAX_AGE_MS && (notificationsLastItems.length > 0 || notificationsLastTotal === 0)) {
-      setMessages(notificationsLastItems);
-      setTotalCount(notificationsLastTotal);
-      setNextPage(notificationsLastNextPage);
-      setHasMore(notificationsLastHasMore);
+    if (now - cache.lastFetchedAt < NOTIFICATIONS_MAX_AGE_MS && (cache.items.length > 0 || cache.total === 0)) {
+      setMessages(cache.items);
+      setTotalCount(cache.total);
+      setNextPage(cache.nextPage);
+      setHasMore(cache.hasMore);
       return () => {
         isMounted = false;
       };
@@ -169,8 +197,8 @@ export default function Notifications() {
     const loadMessages = async () => {
       setIsInitialLoading(true);
       try {
-        if (notificationsInFlight) {
-          const response = await notificationsInFlight;
+        if (notificationsInFlight[scope]) {
+          const response = await notificationsInFlight[scope];
           if (isMounted) {
             setMessages(response.items);
             setTotalCount(response.total);
@@ -179,12 +207,12 @@ export default function Notifications() {
           }
           return;
         }
-        notificationsInFlight = (async () => {
-          const response = await getMessages({ page: 1, page_size: NOTIFICATIONS_PAGE_SIZE, channel });
+        notificationsInFlight[scope] = (async () => {
+          const response = await getMessages({ page: 1, page_size: NOTIFICATIONS_PAGE_SIZE, channel, scope: scopeParam });
           syncCache(response.items, response.total, response.page + 1, response.page * response.page_size < response.total);
           return response;
         })();
-        const response = await notificationsInFlight;
+        const response = await notificationsInFlight[scope];
         if (isMounted) {
           setMessages(response.items);
           setTotalCount(response.total);
@@ -201,21 +229,26 @@ export default function Notifications() {
         }
       } finally {
         if (isMounted) setIsInitialLoading(false);
-        notificationsInFlight = null;
+        notificationsInFlight[scope] = null;
       }
     };
     loadMessages();
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [cache.hasMore, cache.items, cache.lastFetchedAt, cache.nextPage, cache.total, scope, scopeParam]);
 
   const loadOlderMessages = async () => {
     if (isLoadingMoreRef.current || !hasMoreRef.current) return;
     isLoadingMoreRef.current = true;
     setIsLoadingMore(true);
     try {
-      const response = await getMessages({ page: nextPageRef.current, page_size: NOTIFICATIONS_PAGE_SIZE, channel });
+      const response = await getMessages({
+        page: nextPageRef.current,
+        page_size: NOTIFICATIONS_PAGE_SIZE,
+        channel,
+        scope: scopeParam,
+      });
       const nextItems = response.items;
       const mergedItems = [...messagesRef.current, ...nextItems];
       const upcomingPage = response.page + 1;
@@ -236,9 +269,27 @@ export default function Notifications() {
   const handleListScroll = () => {
     const container = scrollContainerRef.current;
     if (!container || isInitialLoading || isLoadingMoreRef.current || !hasMoreRef.current) return;
-    if (container.scrollTop + container.clientHeight < container.scrollHeight - 80) return;
+    if (container.scrollTop + container.clientHeight < container.scrollHeight - 120) return;
     void loadOlderMessages();
   };
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    container.addEventListener("scroll", handleListScroll, { passive: true });
+    return () => {
+      container.removeEventListener("scroll", handleListScroll);
+    };
+  }, [isInitialLoading]);
+
+  useEffect(() => {
+    if (isInitialLoading) return;
+    const container = scrollContainerRef.current;
+    if (!container || !hasMore || isLoadingMoreRef.current) return;
+    if (container.scrollHeight <= container.clientHeight + 24) {
+      void loadOlderMessages();
+    }
+  }, [messages.length, hasMore, isInitialLoading]);
 
   const notifications: NotificationItem[] = useMemo(() => {
     return messages.map((message) => {
@@ -261,7 +312,7 @@ export default function Notifications() {
   }, [messages]);
 
   const handleMarkAllAsRead = () => {
-    markAllMessagesRead({ channel }).then(() => {
+    markAllMessagesRead({ channel, scope: scopeParam }).then(() => {
       setMessages((prev) => {
         const nextItems = prev.map((item) => ({ ...item, is_read: true }));
         syncCache(nextItems, totalCountRef.current, nextPageRef.current, hasMoreRef.current);
@@ -310,18 +361,40 @@ export default function Notifications() {
   };
 
   return (
-    <div className="flex min-h-full w-full flex-col">
-      <div className="mx-auto w-full max-w-[944px] flex-1 px-6 pb-8">
-        <div className="flex flex-col gap-6">
-          <div className="flex items-center justify-between">
-            <h1 className="font-comfortaa text-[20px] font-bold text-[#4A3C2A]">
+    <div
+      className={cn(
+        "flex h-full min-h-0 w-full flex-col overflow-hidden",
+        isGroomerVariant
+          ? "bg-[#633479] px-[calc(20*var(--px393))] pb-[calc(112*var(--px393))] pt-[calc(8*var(--px393))] sm:px-5 sm:pb-28 sm:pt-2 lg:pb-0"
+          : ""
+      )}
+    >
+      <div
+        className={cn(
+          "flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden pb-8 lg:pb-0",
+          isGroomerVariant ? "" : "mx-auto max-w-[944px] px-6"
+        )}
+      >
+        <div
+          className={cn(
+            "mb-5 flex shrink-0 items-center justify-between",
+            isGroomerVariant && "sticky top-0 z-10 bg-[#633479]"
+          )}
+        >
+            <h1 className={cn(
+              "font-comfortaa text-[20px] font-bold text-[#4A3C2A]",
+              isGroomerVariant && "leading-[22px] text-white"
+            )}>
               Notifications
             </h1>
             {totalCount > 0 ? (
               <button
                 type="button"
                 onClick={handleMarkAllAsRead}
-                className="group flex cursor-pointer items-center gap-1.5 rounded-xl border border-transparent px-3 py-1 text-[#00A63E] hover:border-[#00A63E]"
+                className={cn(
+                  "group flex cursor-pointer items-center gap-1.5 rounded-xl border border-transparent px-3 py-1 text-[#00A63E] hover:border-[#00A63E]",
+                  isGroomerVariant && "text-[#6CC04A] hover:border-[#6CC04A]"
+                )}
               >
                 <Icon name="check-green" size={16} className="text-current" />
                 <span className="font-comfortaa font-medium text-[12.25px] leading-[17.5px] text-current">
@@ -333,13 +406,15 @@ export default function Notifications() {
 
           <div
             ref={scrollContainerRef}
-            onScroll={handleListScroll}
-            className="flex max-h-[calc(100vh-220px)] w-full flex-col gap-4 overflow-y-auto pr-1 sm:max-h-[calc(100vh-210px)]"
+            className="flex min-h-0 flex-1 w-full flex-col gap-4 overflow-y-auto pr-1"
           >
             {isInitialLoading ? (
-              <div className="text-[#4A3C2A] text-sm py-4">Loading notifications...</div>
+              <div className={cn("text-[#4A3C2A] text-sm py-4", isGroomerVariant && "text-white")}>Loading notifications...</div>
             ) : notifications.length === 0 ? (
-              <div className="w-full rounded-xl border border-[rgba(0,0,0,0.10)] bg-[rgba(255,255,255,0.7)] px-[21px] py-[21px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.10),0px_1px_2px_-1px_rgba(0,0,0,0.10)]">
+              <div className={cn(
+                "w-full rounded-xl border border-[rgba(0,0,0,0.10)] bg-[rgba(255,255,255,0.7)] px-[21px] py-[21px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.10),0px_1px_2px_-1px_rgba(0,0,0,0.10)]",
+                isGroomerVariant && "border-[rgba(255,255,255,0.18)] bg-white"
+              )}>
                 <EmptyState />
               </div>
             ) : (
@@ -529,6 +604,5 @@ export default function Notifications() {
           </div>
         </div>
       </div>
-    </div>
   );
 }

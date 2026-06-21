@@ -7,6 +7,7 @@ import GroomerEarningsPage from "@/modules/groomer/pages/GroomerEarningsPage";
 import GroomerTransactionsPage from "@/modules/groomer/pages/GroomerTransactionsPage";
 import GroomerMenuPage from "@/modules/groomer/pages/GroomerMenuPage";
 import GroomerPerformancePage from "@/modules/groomer/pages/GroomerPerformancePage";
+import GroomerNotificationsPage from "@/modules/groomer/pages/GroomerNotificationsPage";
 
 export const groomerRoutes = [
   {
@@ -43,6 +44,10 @@ export const groomerRoutes = [
           {
             path: "menu",
             element: <GroomerMenuPage />,
+          },
+          {
+            path: "notifications",
+            element: <GroomerNotificationsPage />,
           },
         ],
       },

@@ -1126,11 +1126,13 @@ export async function getMessages(params?: {
   page?: number;
   page_size?: number;
   channel?: "in_app" | "email";
+  scope?: "groomer";
 }): Promise<MessagePageOut> {
   const queryParams = new URLSearchParams();
   if (params?.page) queryParams.append("page", String(params.page));
   if (params?.page_size) queryParams.append("page_size", String(params.page_size));
   if (params?.channel) queryParams.append("channel", params.channel);
+  if (params?.scope) queryParams.append("scope", params.scope);
   const url = `/api/messages${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
   const response = await http.get<MessagePageOut>(url);
   return response.data;
@@ -1147,9 +1149,10 @@ export async function markMessageRead(messageId: number): Promise<OkOut> {
 /**
  * 标记全部消息已读
  */
-export async function markAllMessagesRead(params?: { channel?: "in_app" | "email" }): Promise<OkOut> {
+export async function markAllMessagesRead(params?: { channel?: "in_app" | "email"; scope?: "groomer" }): Promise<OkOut> {
   const queryParams = new URLSearchParams();
   if (params?.channel) queryParams.append("channel", params.channel);
+  if (params?.scope) queryParams.append("scope", params.scope);
   const url = `/api/messages/read_all${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
   const response = await http.post<OkOut>(url);
   return response.data;

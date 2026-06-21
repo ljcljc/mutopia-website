@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Icon } from "@/components/common/Icon";
 import { useAuthStore } from "@/components/auth/authStore";
 import BaseAccountHeaderShell from "@/components/layout/BaseAccountHeaderShell";
@@ -44,6 +45,7 @@ function TodayBadge() {
 }
 
 export default function GroomerHeader() {
+  const navigate = useNavigate();
   const userInfo = useAuthStore((state) => state.userInfo);
   const user = useAuthStore((state) => state.user);
   const partnerName = getPartnerDisplayName(
@@ -60,7 +62,14 @@ export default function GroomerHeader() {
       <PartnerLogo name={partnerName} />
       <div className="flex items-center gap-2">
         <TodayBadge />
-        <Icon name="notify" className="size-6 text-[#633479]" aria-hidden="true" />
+        <button
+          type="button"
+          onClick={() => navigate("/groomer/notifications")}
+          className="flex cursor-pointer items-center justify-center text-[#633479] transition-opacity hover:opacity-80"
+          aria-label="Notifications"
+        >
+          <Icon name="notify" className="size-6 cursor-pointer text-current" aria-hidden="true" />
+        </button>
       </div>
     </BaseAccountHeaderShell>
   );
