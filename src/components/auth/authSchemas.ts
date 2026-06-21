@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+const phoneNumberPattern = /^(\+1\s?)?\(?[2-9][0-9]{2}\)?[-.\s]?[2-9][0-9]{2}[-.\s]?[0-9]{4}$/;
+
 // Email validation schema
 export const emailSchema = z
   .string()
@@ -37,7 +39,8 @@ export const signUpFormSchema = z
     lastName: z.string().min(1, "Last name is required"),
     phone: z
       .string()
-      .min(1, "Phone is required"),
+      .min(1, "Phone is required")
+      .regex(phoneNumberPattern, "Enter a valid phone number"),
     birthday: z
       .string()
       .min(1, "Date of birth is required")
