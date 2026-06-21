@@ -99,6 +99,7 @@ export default function MyPets() {
   const [referenceStyles, setReferenceStyles] = useState<File[]>([]);
   const {
     reset: resetBookingStore,
+    setSelectedPetId: setBookingSelectedPetId,
     setPetName: setBookingPetName,
     setPetType: setBookingPetType,
     setBreed: setBookingBreed,
@@ -214,6 +215,7 @@ export default function MyPets() {
   };
 
   const handleBookForPet = (pet: PetOut) => {
+    setBookingSelectedPetId(pet.id);
     setBookingPetName(pet.name || "");
     setBookingPetType((pet.pet_type as PetType) || "dog");
     setBookingBreed(pet.breed || "");
