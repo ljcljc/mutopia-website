@@ -5,6 +5,13 @@ export type GroomerPerformanceSummary = {
   serviceFeeRate: number;
   breakdown: {
     customerRating: number;
+    customerRatingAvgStars: number | null;
+    customerRatingReviewCount: number;
+    customerRatingDetails: {
+      skillAvg: number;
+      attitudeAvg: number;
+      environmentAvg: number;
+    } | null;
     responseTime: number;
     reliability: number;
     completion: number;
@@ -15,10 +22,11 @@ export type GroomerPerformanceSummary = {
     lateArrivalCount: number;
     latestLateMinutes: number | null;
   };
-  recentFeedback: Array<{
+  feedbackHistory: Array<{
     reviewId: number;
     bookingId: number;
     userName: string;
+    avatarUrl: string | null;
     rating: number;
     technicalRating: number;
     attitudeRating: number;
@@ -104,6 +112,7 @@ function formatPercent(value: number): string {
 export function mapGroomerPerformanceData(raw: unknown): GroomerPerformanceSummary {
   const record = asRecord(raw);
   const breakdown = asRecord(record.breakdown);
+  const customerRatingDetails = asRecord(breakdown.customer_rating_details);
   const feedback = Array.isArray(record.recent_feedback) ? record.recent_feedback : [];
   const punctuality = asRecord(record.punctuality);
   const technicalSkill = asRecord(record.technical_skill);
@@ -116,6 +125,15 @@ export function mapGroomerPerformanceData(raw: unknown): GroomerPerformanceSumma
     serviceFeeRate: getNumber(record, "service_fee_rate"),
     breakdown: {
       customerRating: getNumber(breakdown, "customer_rating"),
+      customerRatingAvgStars: getNullableNumber(breakdown, "customer_rating_avg_stars"),
+      customerRatingReviewCount: getNumber(breakdown, "customer_rating_review_count"),
+      customerRatingDetails: Object.keys(customerRatingDetails).length
+        ? {
+            skillAvg: getNumber(customerRatingDetails, "skill_avg"),
+            attitudeAvg: getNumber(customerRatingDetails, "attitude_avg"),
+            environmentAvg: getNumber(customerRatingDetails, "environment_avg"),
+          }
+        : null,
       responseTime: getNumber(breakdown, "response_time"),
       reliability: getNumber(breakdown, "reliability"),
       completion: getNumber(breakdown, "completion"),
@@ -126,12 +144,13 @@ export function mapGroomerPerformanceData(raw: unknown): GroomerPerformanceSumma
       lateArrivalCount: getNumber(punctuality, "late_arrival_count"),
       latestLateMinutes: getNullableNumber(punctuality, "latest_late_minutes"),
     },
-    recentFeedback: feedback.map((item) => {
+    feedbackHistory: feedback.map((item) => {
       const review = asRecord(item);
       return {
         reviewId: getNumber(review, "review_id"),
         bookingId: getNumber(review, "booking_id"),
         userName: getString(review, "user_name", "Client"),
+        avatarUrl: getString(review, "avatar_url") || null,
         rating: getNumber(review, "rating"),
         technicalRating: getNumber(review, "technical_rating"),
         attitudeRating: getNumber(review, "attitude_rating"),

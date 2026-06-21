@@ -12,7 +12,7 @@ import {
 } from "@/modules/groomer/utils/performance";
 import { useGroomerPerformance } from "@/modules/groomer/hooks/useGroomerPerformance";
 import { useNavigate } from "react-router-dom";
-import { reportGroomerReview, replyGroomerReview, submitGroomerTechnicalSkillUpdate, uploadGroomerApplyImage } from "@/lib/api";
+import { buildImageUrl, reportGroomerReview, replyGroomerReview, submitGroomerTechnicalSkillUpdate, uploadGroomerApplyImage } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
 
@@ -80,7 +80,7 @@ function PerformanceTierScale({ level }: { level: string }) {
       activeTextClassName:
         "whitespace-nowrap bg-[linear-gradient(169.046deg,#FFF7ED_0%,#FFFBEB_100%)] bg-clip-text font-comfortaa text-[12px] font-bold leading-[17.5px] text-transparent",
       inactiveTextClassName:
-        "whitespace-nowrap bg-[linear-gradient(169.046deg,#FFF7ED_0%,#FFFBEB_100%)] bg-clip-text font-comfortaa text-[12px] font-bold leading-[17.5px] text-transparent opacity-40",
+        "whitespace-nowrap bg-[linear-gradient(169.046deg,#FFF7ED_0%,#FFFBEB_100%)] bg-clip-text font-comfortaa text-[12px] font-bold leading-[17.5px] text-transparent",
     },
     {
       key: "level_b",
@@ -153,7 +153,7 @@ function PerformanceRadarCard({
         <div className="mt-0.5 flex size-5 shrink-0 items-center justify-center text-[#8B6357]">
           <Icon
             name="chevron-down"
-            className={`size-5 origin-center transform-gpu text-[#8B6357] transition-transform duration-300 ease-in-out ${isOpen ? "rotate-180" : ""}`}
+            className={`size-5 origin-center transform-gpu text-[#8B6357] transition-transform duration-300 ease-in-out ${isOpen ? "rotate-180" : ""} cursor-pointer`}
             aria-hidden="true"
           />
         </div>
@@ -223,7 +223,12 @@ function RatingBreakdownRow({ label, rating }: { label: string; rating: number }
   return (
     <div className="flex items-center justify-between gap-4">
       <span className="font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357]">{label}</span>
-      <RatingStars rating={rating} />
+      <div className="flex items-center gap-2">
+        <span className="min-w-[28px] text-right font-comfortaa text-[12px] font-bold leading-[18px] text-[#8B6357]">
+          {rating > 0 ? rating.toFixed(1) : "-"}
+        </span>
+        <RatingStars rating={rating} />
+      </div>
     </div>
   );
 }
@@ -363,10 +368,33 @@ export default function GroomerPerformancePage() {
   );
 
   const scoreCards: ScoreCard[] = useMemo(() => {
-    const firstReview = performance?.recentFeedback[0];
-    const averageStars = firstReview
-      ? ((firstReview.technicalRating || firstReview.rating) + (firstReview.attitudeRating || firstReview.rating) + (firstReview.environmentRating || firstReview.rating)) / 3
-      : 0;
+    const fallbackReviews = performance?.feedbackHistory ?? [];
+    const fallbackReviewCount = fallbackReviews.length;
+    const fallbackAggregate = fallbackReviewCount > 0
+      ? fallbackReviews.reduce(
+          (acc, review) => {
+            acc.skill += review.technicalRating || review.rating;
+            acc.attitude += review.attitudeRating || review.rating;
+            acc.environment += review.environmentRating || review.rating;
+            return acc;
+          },
+          { skill: 0, attitude: 0, environment: 0 },
+        )
+      : null;
+    const customerRatingDetails = performance?.breakdown.customerRatingDetails ?? (
+      fallbackAggregate
+        ? {
+            skillAvg: fallbackAggregate.skill / fallbackReviewCount,
+            attitudeAvg: fallbackAggregate.attitude / fallbackReviewCount,
+            environmentAvg: fallbackAggregate.environment / fallbackReviewCount,
+          }
+        : null
+    );
+    const averageStars = performance?.breakdown.customerRatingAvgStars ?? (
+      customerRatingDetails
+        ? (customerRatingDetails.skillAvg + customerRatingDetails.attitudeAvg + customerRatingDetails.environmentAvg) / 3
+        : 0
+    );
     const responseTimeScore = Math.round(performance?.breakdown.responseTime ?? 0);
     const responseTimePresentation = getResponseTimePresentation(responseTimeScore);
     const reliabilityScore = Math.round(performance?.breakdown.reliability ?? 0);
@@ -403,20 +431,26 @@ export default function GroomerPerformancePage() {
             <p className="font-comfortaa text-[14px] font-bold leading-[21px] text-[#4A2C55]">
               Average {averageStars > 0 ? averageStars.toFixed(1) : "-"} Stars
             </p>
-            <div className="mt-[10px] space-y-[11px]">
-              <RatingBreakdownRow
-                label="Skill"
-                rating={firstReview ? (firstReview.technicalRating || firstReview.rating) : 0}
-              />
-              <RatingBreakdownRow
-                label="Attitude"
-                rating={firstReview ? (firstReview.attitudeRating || firstReview.rating) : 0}
-              />
-              <RatingBreakdownRow
-                label="Environment"
-                rating={firstReview ? (firstReview.environmentRating || firstReview.rating) : 0}
-              />
-            </div>
+            {customerRatingDetails ? (
+              <div className="mt-[10px] space-y-[11px]">
+                <RatingBreakdownRow
+                  label="Skill"
+                  rating={customerRatingDetails.skillAvg}
+                />
+                <RatingBreakdownRow
+                  label="Attitude"
+                  rating={customerRatingDetails.attitudeAvg}
+                />
+                <RatingBreakdownRow
+                  label="Environment"
+                  rating={customerRatingDetails.environmentAvg}
+                />
+              </div>
+            ) : (
+              <p className="mt-[10px] font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357]">
+                Ratings will appear after your first completed reviews.
+              </p>
+            )}
           </div>
         ),
       },
@@ -543,7 +577,7 @@ export default function GroomerPerformancePage() {
       },
     ];
   }, [performance]);
-  const firstFeedback = performance?.recentFeedback[0] ?? null;
+  const firstFeedback = performance?.feedbackHistory[0] ?? null;
   const hasExistingReply = Boolean(firstFeedback?.reply?.trim());
 
   const updateFeedbackReply = (reviewId: number, reply: string) => {
@@ -552,7 +586,7 @@ export default function GroomerPerformancePage() {
 
       return {
         ...current,
-        recentFeedback: current.recentFeedback.map((feedback) =>
+        feedbackHistory: current.feedbackHistory.map((feedback) =>
           feedback.reviewId === reviewId ? { ...feedback, reply } : feedback,
         ),
       };
@@ -736,17 +770,14 @@ export default function GroomerPerformancePage() {
             </section>
 
             <section className="mt-[26px] lg:mt-5">
-              <h2 className="px-2 font-comfortaa text-[18px] font-bold leading-[27px] tracking-[0.45px] text-white">
-                Client feedback in 72 hours
-              </h2>
               <article className="mt-[15px] rounded-[24px] bg-white px-5 py-5 shadow-[0px_8px_24px_rgba(0,0,0,0.15)] lg:px-6 lg:py-6">
                 {!firstFeedback ? (
-                  <p className="font-comfortaa text-[14px] leading-[21px] text-[#8B6357]">No recent feedback in the last 72 hours.</p>
+                  <p className="font-comfortaa text-[14px] leading-[21px] text-[#8B6357]">No client feedback yet.</p>
                 ) : (
                   <>
               <div className="flex items-start gap-3">
                 <img
-                  src={REVIEW_AVATAR_URL}
+                  src={firstFeedback.avatarUrl ? buildImageUrl(firstFeedback.avatarUrl) : REVIEW_AVATAR_URL}
                   alt={firstFeedback.userName}
                   className="size-12 rounded-full border border-white object-cover shadow-[0px_1px_3px_rgba(0,0,0,0.1)]"
                 />
