@@ -1816,7 +1816,7 @@ export default function GroomerDashboardPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <DashboardMetricCard icon="logo-mark" value={metrics.partnerScore} label="Mutopia partner score" />
-              <DashboardMetricCard icon="star-2" value={metrics.rating} label="Rating" />
+              <DashboardMetricCard icon="star-2" value={metrics.rating} label="Rating & review" />
             </div>
           </>
         )}
