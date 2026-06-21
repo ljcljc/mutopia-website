@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { OrangeButton } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
 import { useIsMobile } from "@/components/ui/use-mobile";
@@ -36,8 +36,6 @@ function getActionErrorMessage(error: unknown, fallback: string) {
   return fallback;
 }
 
-const COLLAPSE_DURATION_MS = 300;
-
 function ScoreRing({ score }: { score: number }) {
   return (
     <div
@@ -70,23 +68,57 @@ function PerformanceBadge({ label, level }: { label: string; level: string }) {
   );
 }
 
-function PerformanceTierScale() {
-  const secondaryText = "75/100 Silver groomer";
-  const baseText = "70/100 Premium groomer";
+function PerformanceTierScale({ level }: { level: string }) {
+  const tiers = [
+    {
+      key: "level_a",
+      label: "Level A (85-100)",
+      activeContainerClassName:
+        "h-[26px] rounded-[24675400px] bg-[linear-gradient(180deg,#FFF584_0%,#F0D65A_13.462%,#E0B730_26.923%,#C78A0E_75.962%,#BB7F12_87.981%,#C8A32B_100%)] px-[25px] shadow-[0px_10px_7.5px_rgba(0,0,0,0.1),0px_4px_3px_rgba(0,0,0,0.1)]",
+      inactiveContainerClassName:
+        "h-[26px] rounded-[24675400px] bg-[linear-gradient(180deg,#FFF584_0%,#F0D65A_13.462%,#E0B730_26.923%,#C78A0E_75.962%,#BB7F12_87.981%,#C8A32B_100%)] px-[25px] shadow-[0px_10px_7.5px_rgba(0,0,0,0.1),0px_4px_3px_rgba(0,0,0,0.1)] brightness-[0.4]",
+      activeTextClassName:
+        "whitespace-nowrap bg-[linear-gradient(169.046deg,#FFF7ED_0%,#FFFBEB_100%)] bg-clip-text font-comfortaa text-[12px] font-bold leading-[17.5px] text-transparent",
+      inactiveTextClassName:
+        "whitespace-nowrap bg-[linear-gradient(169.046deg,#FFF7ED_0%,#FFFBEB_100%)] bg-clip-text font-comfortaa text-[12px] font-bold leading-[17.5px] text-transparent opacity-40",
+    },
+    {
+      key: "level_b",
+      label: "Level B (70-85)",
+      activeContainerClassName:
+        "h-[26px] rounded-[24675400px] bg-[linear-gradient(180deg,#EEECEC_0%,#EDECEC_16.827%,#DFDEDE_50%,#A4A4A4_88.462%,#B8B6B6_100%)] px-[37px] shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)]",
+      inactiveContainerClassName:
+        "h-[26px] rounded-[24675400px] bg-[linear-gradient(180deg,rgba(238,236,236,0.4)_0%,rgba(237,236,236,0.4)_16.827%,rgba(223,222,222,0.4)_50%,rgba(164,164,164,0.4)_88.462%,rgba(184,182,182,0.4)_100%)] px-[37px] shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)]",
+      activeTextClassName: "whitespace-nowrap font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#4A2C55]",
+      inactiveTextClassName: "whitespace-nowrap font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#633479]",
+    },
+    {
+      key: "level_c",
+      label: "Level C (<70)",
+      activeContainerClassName:
+        "h-[26px] rounded-[24px] bg-[linear-gradient(180deg,#8B6357_0%,#4A2C55_100%)] px-[42px] shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)]",
+      inactiveContainerClassName:
+        "h-[26px] rounded-[24px] bg-[linear-gradient(180deg,rgba(139,99,87,0.4)_0%,rgba(74,44,85,0.4)_100%)] px-[42px] shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)]",
+      activeTextClassName: "whitespace-nowrap font-comfortaa text-[12px] font-bold leading-[17.5px] text-white",
+      inactiveTextClassName: "whitespace-nowrap font-comfortaa text-[12px] font-bold leading-[17.5px] text-[rgba(255,255,255,0.4)]",
+    },
+  ] as const;
 
   return (
     <div className="mt-2 flex w-[147px] flex-col gap-2">
-      <div className="h-[21px] rounded-full bg-[linear-gradient(180deg,rgba(238,236,236,0.4)_0%,rgba(237,236,236,0.4)_16.827%,rgba(223,222,222,0.4)_50%,rgba(164,164,164,0.4)_88.462%,rgba(184,182,182,0.4)_100%)] px-2 shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)]">
-        <div className="flex h-full items-center gap-1 text-[#633479]">
-          <Icon name="star-3" className="size-[10px]" aria-hidden="true" />
-          <span className="font-comfortaa text-[10px] font-bold leading-[14px]">{secondaryText}</span>
-        </div>
-      </div>
-      <div className="h-[21px] rounded-full bg-[linear-gradient(180deg,rgba(139,99,87,0.6)_0%,rgba(74,44,85,0.6)_100%)] px-[9px] shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)]">
-        <div className="flex h-full items-center">
-          <span className="font-comfortaa text-[10px] font-bold leading-[14px] text-[rgba(255,255,255,0.4)]">{baseText}</span>
-        </div>
-      </div>
+      {tiers.map((tier) => {
+        const isActive = level === tier.key;
+        return (
+          <div
+            key={tier.key}
+            className={`${isActive ? tier.activeContainerClassName : tier.inactiveContainerClassName} transition-[filter,opacity]`}
+          >
+            <div className="flex h-full items-center justify-center">
+              <span className={isActive ? tier.activeTextClassName : tier.inactiveTextClassName}>{tier.label}</span>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -100,57 +132,6 @@ function PerformanceRadarCard({
   onToggle: () => void;
   radarMetrics: Array<{ label: string; value: number; color: string }>;
 }) {
-  const panelRef = useRef<HTMLDivElement>(null);
-  const animationFrameRef = useRef<number | null>(null);
-  const timeoutRef = useRef<number | null>(null);
-  const [panelHeight, setPanelHeight] = useState<number | "auto">(isOpen ? "auto" : 0);
-
-  useEffect(() => {
-    const panelElement = panelRef.current;
-
-    if (!panelElement) {
-      return;
-    }
-
-    const clearPendingAnimation = () => {
-      if (animationFrameRef.current !== null) {
-        window.cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = null;
-      }
-
-      if (timeoutRef.current !== null) {
-        window.clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
-    };
-
-    clearPendingAnimation();
-
-    const nextHeight = panelElement.scrollHeight;
-
-    if (isOpen) {
-      setPanelHeight(0);
-      animationFrameRef.current = window.requestAnimationFrame(() => {
-        setPanelHeight(nextHeight);
-        timeoutRef.current = window.setTimeout(() => {
-          setPanelHeight("auto");
-        }, COLLAPSE_DURATION_MS);
-      });
-    } else {
-      const startingHeight = panelElement.scrollHeight;
-      setPanelHeight(startingHeight);
-      animationFrameRef.current = window.requestAnimationFrame(() => {
-        animationFrameRef.current = window.requestAnimationFrame(() => {
-          setPanelHeight(0);
-        });
-      });
-    }
-
-    return () => {
-      clearPendingAnimation();
-    };
-  }, [isOpen]);
-
   return (
     <article className="rounded-[16px] bg-white p-5 shadow-[0px_8px_24px_rgba(0,0,0,0.15)] lg:h-full lg:p-6">
       <button
@@ -180,14 +161,16 @@ function PerformanceRadarCard({
 
       <div
         id="performance-radar-panel"
-        ref={panelRef}
-        style={{ height: panelHeight === "auto" ? "auto" : `${panelHeight}px` }}
-        className={`overflow-hidden transition-[height,opacity,margin] duration-300 ease-in-out ${
-          isOpen ? "mt-4 opacity-100" : "mt-0 opacity-0"
+        className={`grid overflow-hidden transition-[grid-template-rows,margin] duration-300 ease-out ${
+          isOpen ? "mt-4 grid-rows-[1fr]" : "mt-0 grid-rows-[0fr]"
         }`}
       >
-        <div>
-          <div className={`flex justify-center ${isOpen ? "pointer-events-auto" : "pointer-events-none"}`}>
+        <div className="min-h-0">
+          <div
+            className={`flex justify-center transition-[opacity,transform] duration-300 ease-out ${
+              isOpen ? "pointer-events-auto opacity-100 translate-y-0" : "pointer-events-none opacity-0 -translate-y-2"
+            }`}
+          >
             <PerformanceRadarChart metrics={radarMetrics.map((metric) => ({ ...metric }))} />
           </div>
         </div>
@@ -728,10 +711,10 @@ export default function GroomerPerformancePage() {
             <section className="mt-5">
               <div className="flex flex-col items-center">
                 <ScoreRing score={performance?.score ?? 0} />
-                <div className="mt-4">
+                <div className="mt-4 lg:hidden">
                   <PerformanceBadge label={performance?.levelLabel ?? "Groomer"} level={performance?.level ?? "level_c"} />
                 </div>
-                {!isMobile ? <PerformanceTierScale /> : null}
+                {!isMobile ? <PerformanceTierScale level={performance?.level ?? "level_c"} /> : null}
               </div>
             </section>
 
