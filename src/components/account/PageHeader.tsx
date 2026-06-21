@@ -33,7 +33,7 @@ export default function PageHeader() {
 
   return (
     <>
-      <div className="mb-6 flex w-full items-center gap-4">
+      <div className="mb-5 flex w-full items-center gap-4">
         <h1 className="font-comfortaa text-[20px] font-bold text-[#4A3C2A]">
           My Account
         </h1>
