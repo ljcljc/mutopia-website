@@ -21,6 +21,8 @@ import { updateUserInfo, type MeOut } from "@/lib/api";
 import { toast } from "sonner";
 import { HttpError } from "@/lib/http";
 
+const phoneNumberPattern = /^(\+1\s?)?\(?[2-9][0-9]{2}\)?[-.\s]?[2-9][0-9]{2}[-.\s]?[0-9]{4}$/;
+
 interface ModifyPersonalInfoModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -83,6 +85,7 @@ export default function ModifyPersonalInfoModal({
   const [showBirthdayWarning, setShowBirthdayWarning] = useState(false);
   const [isBirthdayModified, setIsBirthdayModified] = useState(false);
   const [birthdayModifiedDate, setBirthdayModifiedDate] = useState<string | undefined>();
+  const [phoneError, setPhoneError] = useState("");
   
   // 加载状态
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -95,6 +98,7 @@ export default function ModifyPersonalInfoModal({
       setBirthday(userInfo.birthday || "");
       setOriginalBirthday(userInfo.birthday || "");
       setPhone(userInfo.phone || "");
+      setPhoneError("");
       
       // 检查生日是否在1年内被修改过
       const birthdayStatus = isBirthdayModifiedWithin1Year(userInfo);
@@ -121,8 +125,16 @@ export default function ModifyPersonalInfoModal({
       setLastName(userInfo.last_name || "");
       setBirthday(userInfo.birthday || "");
       setPhone(userInfo.phone || "");
+      setPhoneError("");
       setShowBirthdayWarning(false);
     }
+  };
+
+  const validatePhone = (value: string) => {
+    const trimmedValue = value.trim();
+    if (!trimmedValue) return "Phone number is required";
+    if (!phoneNumberPattern.test(trimmedValue)) return "Enter a valid phone number";
+    return "";
   };
 
   const handleSubmit = async () => {
@@ -139,6 +151,12 @@ export default function ModifyPersonalInfoModal({
     }
     if (!birthday) {
       toast.error("Date of birth is required");
+      return;
+    }
+    const nextPhoneError = validatePhone(phone);
+    if (nextPhoneError) {
+      setPhoneError(nextPhoneError);
+      toast.error(nextPhoneError);
       return;
     }
 
@@ -160,8 +178,7 @@ export default function ModifyPersonalInfoModal({
         first_name: firstName.trim(),
         last_name: lastName.trim(),
         birthday: birthday,
-        // phone 字段：如果用户输入了电话号码，则包含在更新数据中
-        ...(phone.trim() ? { phone: phone.trim() } : {}),
+        phone: phone.trim(),
       };
 
       // 调用 API 更新用户信息
@@ -302,18 +319,23 @@ export default function ModifyPersonalInfoModal({
             </p>
           </div>
 
-          {/* Phone number (Optional) */}
+          {/* Phone number */}
           <CustomInput
-            label="Phone number (Optional)"
+            label="Phone number"
             value={phone}
             onChange={(e) => {
               const value = e.target.value;
-              // 只允许数字、空格、括号、破折号
-              const cleaned = value.replace(/[^\d\s()]/g, "");
+              const cleaned = value.replace(/[^+\d().\-\s]/g, "");
               setPhone(cleaned);
+              setPhoneError("");
             }}
+            onBlur={() => setPhoneError(validatePhone(phone))}
             placeholder="(XXX) XXX - XXXX"
+            error={phoneError}
           />
+          {phoneError ? (
+            <p className="mt-[-8px] font-comfortaa text-[12px] text-[#de1507]">{phoneError}</p>
+          ) : null}
         </div>
 
         {/* Action Buttons */}
