@@ -288,6 +288,7 @@ describe("groomer dashboard current booking selection", () => {
       id: 55,
       petName: "Coco",
     });
+    expect(useGroomerDashboardStore.getState().bookingRequest?.avatarUrl).toContain("data:image/svg+xml");
     expect(useGroomerDashboardStore.getState().bookingRequests).toHaveLength(1);
   });
 

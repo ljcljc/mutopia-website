@@ -589,14 +589,14 @@ export default function Notifications({
               })}
                 <div className="flex min-h-8 items-center justify-center">
                   {isLoadingMore ? (
-                    <div className="flex items-center gap-2 py-1 text-[12px] text-[#8B6357]">
+                    <div className="flex items-center gap-2 py-1 text-[12px] text-white">
                       <Spinner size={16} color="#DE6A07" showTrack trackOpacity={0.18} />
                       <div>Loading more notifications...</div>
                     </div>
                   ) : hasMore ? (
-                    <div className="py-1 text-[12px] text-[#8B6357]">Scroll up to load more</div>
+                    <div className="py-1 text-[12px] text-white">Scroll up to load more</div>
                   ) : (
-                    <div className="py-1 text-[12px] text-[#8B6357]">No more notifications</div>
+                    <div className="py-1 text-[12px] text-white">No more notifications</div>
                   )}
                 </div>
               </>

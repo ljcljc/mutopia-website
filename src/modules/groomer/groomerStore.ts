@@ -26,6 +26,7 @@ import {
   isGroomerDateTimeWithinNextHours,
   parseGroomerDateTime,
 } from "@/modules/groomer/utils/time";
+import DEFAULT_PET_AVATAR from "@/assets/icons/icon-pet-avatar-placeholder.svg";
 import { formatPreferredTimeSlotLocal } from "@/lib/localDateTime";
 
 export type DashboardAppointment = GroomerUpNextAppointment & {
@@ -519,6 +520,14 @@ function getBookingRequestExpiresInLabel(createdAt: string): string | undefined 
   return `Expire in ${remainingHours} hour${remainingHours === 1 ? "" : "s"}`;
 }
 
+function getPetAvatarUrl(record: Record<string, unknown>, pet: Record<string, unknown> = {}): string {
+  return (
+    buildImageUrl(getString(record, ["pet_avatar", "avatar", "avatar_url"])) ||
+    buildImageUrl(getString(pet, ["avatar", "avatar_url", "pet_avatar"])) ||
+    DEFAULT_PET_AVATAR
+  );
+}
+
 function mapDashboardAppointment(raw: unknown): DashboardAppointment | null {
   const record = unwrapAppointmentRecord(raw);
   if (!Object.keys(record).length) return null;
@@ -540,7 +549,7 @@ function mapDashboardAppointment(raw: unknown): DashboardAppointment | null {
     petName: getString(record, ["pet_name"], getString(pet, ["name"], "Pet")),
     breed: getString(record, ["breed", "pet_breed"], getString(pet, ["breed", "pet_breed"], "Breed")),
     owner: getString(record, ["user_name", "owner_name"]),
-    avatarUrl: buildImageUrl(getString(record, ["pet_avatar"])),
+    avatarUrl: getPetAvatarUrl(record, pet),
     address: getString(record, ["service_address"]),
     phone: getString(record, ["phone", "owner_phone", "user_phone", "contact_phone"]),
     service: getString(record, ["service_name"]),
@@ -586,6 +595,7 @@ function mapNearestDashboardAppointment(raw: unknown): DashboardAppointment | nu
 function mapPendingBookingRequest(raw: unknown): DashboardAppointment | null {
   const record = asRecord(raw);
   if (!Object.keys(record).length) return null;
+  const pet = getNestedRecord(record, ["pet", "pet_snapshot"]);
 
   return {
     id: getNumber(record, ["booking_id"], Number.NaN),
@@ -593,7 +603,7 @@ function mapPendingBookingRequest(raw: unknown): DashboardAppointment | null {
     petName: getString(record, ["pet_name"]),
     breed: getString(record, ["pet_breed"]),
     owner: getString(record, ["owner_name"]),
-    avatarUrl: buildImageUrl(getString(record, ["pet_avatar"])),
+    avatarUrl: getPetAvatarUrl(record, pet),
     address: getString(record, ["service_address"]),
     phone: getString(record, ["phone", "owner_phone", "user_phone", "contact_phone"]),
     service: getString(record, ["service_name"]),
