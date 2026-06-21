@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { OrangeButton } from "@/components/common";
-import { Icon, type IconName } from "@/components/common/Icon";
+import { Icon } from "@/components/common/Icon";
 import { useIsMobile } from "@/components/ui/use-mobile";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -54,6 +54,13 @@ function createServiceRows(labels: string[]) {
   return [...labels]
     .sort((left, right) => left.localeCompare(right))
     .map((label, index) => createServiceRow(label, index));
+}
+
+function getPerformanceTagText(level: string, fallbackLabel: string) {
+  if (level === "level_a") return "Level A (85-100)";
+  if (level === "level_b") return "Level B (70-84)";
+  if (level === "level_c") return "Level C (0-69)";
+  return fallbackLabel;
 }
 
 function ToastStatusIcon({ type }: { type: "check" | "warning" }) {
@@ -231,20 +238,10 @@ export default function GroomerAccountPage() {
               <h2 className="font-comfortaa text-[16px] font-bold leading-6 text-[#4A2C55]">Performance</h2>
               {selectedPerformance ? (
                 <div className={selectedPerformance.badgeClassName}>
-                  <div className="flex h-full items-center gap-2">
-                    {selectedPerformance.showStars ? (
-                      <div className="flex items-center gap-0.5">
-                        <Icon name="star-2" className="size-[12px] text-white" />
-                        <Icon name="star-2" className="size-[12px] text-white" />
-                      </div>
-                    ) : null}
-                    {!selectedPerformance.showStars && selectedPerformance.badgeIconName ? (
-                      <Icon
-                        name={selectedPerformance.badgeIconName as IconName}
-                        className={selectedPerformance.badgeIconClassName ?? "size-[12px]"}
-                      />
-                    ) : null}
-                    <span className={selectedPerformance.badgeTextClassName}>{selectedPerformance.badgeText}</span>
+                  <div className="flex h-full items-center">
+                    <span className={selectedPerformance.badgeTextClassName}>
+                      {getPerformanceTagText(performance?.level ?? "", selectedPerformance.badgeText)}
+                    </span>
                   </div>
                 </div>
               ) : (

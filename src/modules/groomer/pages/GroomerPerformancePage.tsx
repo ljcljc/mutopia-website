@@ -54,19 +54,18 @@ function ScoreRing({ score }: { score: number }) {
 
 function PerformanceBadge({ label, level }: { label: string; level: string }) {
   const presentation = getGroomerPerformancePresentation(level, label, 0);
+  const tagText =
+    level === "level_a"
+      ? "Level A (85-100)"
+      : level === "level_b"
+        ? "Level B (70-84)"
+        : level === "level_c"
+          ? "Level C (0-69)"
+          : presentation.badgeText;
 
   return (
-    <div className={`inline-flex h-[26px] items-center gap-2 ${presentation.badgeClassName}`}>
-      {presentation.showStars ? (
-        <div className="flex items-center gap-0.5">
-          <Icon name="star-2" className="size-[12px] text-white" aria-hidden="true" />
-          <Icon name="star-2" className="size-[12px] text-white" aria-hidden="true" />
-        </div>
-      ) : null}
-      {!presentation.showStars && presentation.badgeIconName ? (
-        <Icon name={presentation.badgeIconName} className={presentation.badgeIconClassName ?? "size-[12px]"} aria-hidden="true" />
-      ) : null}
-      <span className={presentation.badgeTextClassName}>{presentation.badgeText}</span>
+    <div className={`inline-flex h-[26px] items-center ${presentation.badgeClassName}`}>
+      <span className={presentation.badgeTextClassName}>{tagText}</span>
     </div>
   );
 }
