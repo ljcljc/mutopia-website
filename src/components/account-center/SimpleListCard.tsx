@@ -7,6 +7,7 @@ interface SimpleListCardProps {
   title: string;
   titleIcon: IconName;
   actionText?: string;
+  actionIcon?: IconName;
   onActionClick?: () => void;
   actionButtonClassName?: string;
   rows: AccountListRow[];
@@ -21,6 +22,7 @@ export default function SimpleListCard({
   title,
   titleIcon,
   actionText,
+  actionIcon,
   onActionClick,
   actionButtonClassName,
   rows,
@@ -39,11 +41,12 @@ export default function SimpleListCard({
         </div>
         {actionText ? (
           <button
-            className={`${accountCenterTheme.actionTextClassName} ${actionButtonClassName ?? ""}`}
+            className={`${accountCenterTheme.actionTextClassName} ${actionButtonClassName ?? ""} inline-flex items-center gap-2`}
             type="button"
             onClick={onActionClick}
           >
-            {actionText}
+            {actionIcon ? <Icon name={actionIcon} className="size-4" /> : null}
+            <span>{actionText}</span>
           </button>
         ) : null}
       </div>

@@ -68,7 +68,7 @@ export default function AddServiceAreaModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="!top-1/2 !left-1/2 !grid !w-full !max-w-none !translate-x-[-50%] !translate-y-[-50%] !gap-0 overflow-hidden rounded-[calc(20*var(--px393))] border border-[rgba(0,0,0,0.2)] bg-white p-0 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] sm:rounded-[20px] [&>button]:hidden">
+      <DialogContent className="!top-1/2 !left-1/2 !grid !w-[calc(100%-32px)] !max-w-[calc(100%-32px)] !translate-x-[-50%] !translate-y-[-50%] !gap-0 overflow-hidden rounded-[calc(20*var(--px393))] border border-[rgba(0,0,0,0.2)] bg-white p-0 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] sm:!w-[640px] sm:!max-w-[640px] sm:rounded-[20px] [&>button]:hidden">
         <DialogTitle className="sr-only">Modify service areas</DialogTitle>
         <DialogDescription className="sr-only">
           Select province and city, then save groomer service areas.

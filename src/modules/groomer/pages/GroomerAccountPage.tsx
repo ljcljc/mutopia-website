@@ -217,6 +217,7 @@ export default function GroomerAccountPage() {
             title="Service areas"
             titleIcon="location"
             actionText="Modify"
+            actionIcon="pencil"
             onActionClick={() => setIsAddAreaModalOpen(true)}
             actionButtonClassName={accountCenterTheme.actionInteractiveClassName}
             rows={serviceRows}
