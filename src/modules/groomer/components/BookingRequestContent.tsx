@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Icon } from "@/components/common/Icon";
 import { cn } from "@/components/ui/utils";
 import {
@@ -145,6 +145,7 @@ export function BookingRequestContent({
   const [isSubmittingAction, setIsSubmittingAction] = useState<"confirm" | "propose" | "decline" | null>(null);
   const [confirmedAppointmentWarning, setConfirmedAppointmentWarning] = useState<string | null>(null);
   const [contentHeight, setContentHeight] = useState<string>(expanded ? "auto" : "0px");
+  const contentHeightRef = useRef(contentHeight);
   const collapseContentRef = useRef<HTMLDivElement | null>(null);
   const expiryBadgeColor = request.expiresInLabel === "Expired" ? "#DE1507" : "#DE6A07";
   const hasProposedTime = isProposedInvitation(request);
@@ -155,45 +156,41 @@ export function BookingRequestContent({
   );
 
   useEffect(() => {
+    contentHeightRef.current = contentHeight;
+  }, [contentHeight]);
+
+  useLayoutEffect(() => {
     const element = collapseContentRef.current;
     if (!element) return;
 
+    let frameId = 0;
     const nextHeight = `${element.scrollHeight}px`;
+
+    const handleTransitionEnd = (event: TransitionEvent) => {
+      if (event.target !== element || event.propertyName !== "height") return;
+      if (expanded) {
+        setContentHeight("auto");
+      }
+    };
+
+    element.addEventListener("transitionend", handleTransitionEnd);
 
     if (expanded) {
       setContentHeight(nextHeight);
-      const timeoutId = window.setTimeout(() => {
-        setContentHeight("auto");
-      }, 300);
-      return () => window.clearTimeout(timeoutId);
-    }
-
-    if (contentHeight === "auto") {
+    } else if (contentHeightRef.current === "auto") {
       setContentHeight(nextHeight);
-      const frameId = window.requestAnimationFrame(() => {
+      frameId = window.requestAnimationFrame(() => {
         setContentHeight("0px");
       });
-      return () => window.cancelAnimationFrame(frameId);
+    } else {
+      setContentHeight("0px");
     }
 
-    setContentHeight("0px");
-  }, [contentHeight, expanded]);
-
-  useEffect(() => {
-    if (!expanded || contentHeight !== "auto") return;
-    const element = collapseContentRef.current;
-    if (!element) return;
-
-    const resizeObserver = new ResizeObserver(() => {
-      setContentHeight(`${element.scrollHeight}px`);
-      window.requestAnimationFrame(() => {
-        setContentHeight("auto");
-      });
-    });
-
-    resizeObserver.observe(element);
-    return () => resizeObserver.disconnect();
-  }, [contentHeight, expanded]);
+    return () => {
+      element.removeEventListener("transitionend", handleTransitionEnd);
+      if (frameId) window.cancelAnimationFrame(frameId);
+    };
+  }, [expanded]);
 
   useEffect(() => {
     if (!selectedTimeOption) {
@@ -310,16 +307,11 @@ export function BookingRequestContent({
         </div>
 
         <div
-          className={cn(
-            "overflow-hidden transition-[height,opacity,margin] duration-300 ease-in-out will-change-[height,opacity]",
-            expanded ? "mt-4 opacity-100" : "mt-0 opacity-0",
-          )}
+          ref={collapseContentRef}
+          className="overflow-hidden transition-[height] duration-180 ease-out will-change-[height]"
           style={{ height: contentHeight }}
         >
-          <div
-            ref={collapseContentRef}
-            className={cn(expanded ? "pointer-events-auto" : "pointer-events-none")}
-          >
+          <div className={cn("pt-4", expanded ? "pointer-events-auto" : "pointer-events-none")}>
             <div className="flex flex-wrap gap-x-6 gap-y-4">
               <div className="flex items-start gap-3">
                 <Icon name="location" className="size-[18px] text-[#00A63E]" aria-hidden="true" />
@@ -507,7 +499,7 @@ export function BookingRequestInteraction<TRequest extends BookingRequestContent
         >
           <Icon
             name="chevron-down"
-            className={cn("size-4 text-[#717182]", isExpanded ? "rotate-180" : "")}
+            className={cn("size-4 text-[#717182] cursor-pointer", isExpanded ? "rotate-180" : "")}
             aria-hidden="true"
           />
         </button>
