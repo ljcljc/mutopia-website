@@ -225,9 +225,9 @@ export default function MyPets() {
     setBookingGender((pet.gender as Gender) || "");
     setBookingWeight(pet.weight_value ? String(pet.weight_value) : "");
     setBookingWeightUnit((pet.weight_unit as WeightUnit) || "lbs");
-    setBookingCoatCondition((pet.coat_condition as CoatCondition) || "");
-    setBookingApproveShave(pet.approve_shave ?? null);
-    setBookingBehavior((pet.behavior as Behavior) || "");
+    setBookingCoatCondition("");
+    setBookingApproveShave(null);
+    setBookingBehavior("");
     setBookingGroomingFrequency((pet.grooming_frequency as GroomingFrequency) || "");
     setBookingSpecialNotes(pet.special_notes || "");
     setBookingPhotoIds(pet.photo_ids || []);
