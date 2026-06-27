@@ -64,7 +64,7 @@ export function GroomerUpNextCard({
           <Icon name="location" className="mt-[2px] size-4 text-[#F08A12]" aria-hidden="true" />
           <div>
             <p className="font-comfortaa text-[11px] leading-[16.5px] text-[#A07D72]">ADDRESS</p>
-            <p className="mt-0.5 font-comfortaa text-[14px] leading-[21px] text-[#F08A12] underline underline-offset-[2px]">{appointment.address}</p>
+            <p className="mt-0.5 font-comfortaa text-[14px] leading-[21px] text-[#F08A12] underline underline-offset-[2px] cursor-pointer">{appointment.address}</p>
           </div>
         </div>
 

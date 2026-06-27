@@ -534,8 +534,8 @@ function CalendarOverviewCard({
           aria-label={`${day.dateKey}, completed ${day.green ? "yes" : "no"}, upcoming ${day.yellow ? "yes" : "no"}`}
           className={cn(
             "flex size-10 items-center justify-center rounded-full font-comfortaa text-[14px] font-bold leading-[21px] transition-transform active:scale-[0.96]",
-            isSelected ? "bg-[#DE6A07] text-white shadow-[0px_4px_5px_rgba(222,106,7,0.3)]" : "text-[#8B6357]",
-            isDisabled && !isSelected ? "cursor-default opacity-40" : !isSelected ? "hover:bg-[#FFF5EC]" : "",
+            isSelected ? "bg-[#DE6A07] text-white shadow-[0px_4px_5px_rgba(222,106,7,0.3)] cursor-pointer" : "text-[#8B6357]",
+            isDisabled && !isSelected ? "cursor-default opacity-40" : !isSelected ? "hover:bg-[#FFF5EC] cursor-pointer" : "",
           )}
         >
           {day.day}
@@ -552,7 +552,7 @@ function CalendarOverviewCard({
           <Icon name="calendar" size={15} aria-hidden="true" />
           <p className="font-comfortaa text-[16px] font-bold leading-6 text-[#8B6357]">{monthLabel}</p>
         </div>
-        <button type="button" onClick={onCollapse} className="flex size-6 items-center justify-center" aria-label="Collapse calendar">
+        <button type="button" onClick={onCollapse} className="flex size-6 items-center justify-center cursor-pointer" aria-label="Collapse calendar">
           <Icon name="chevron-down" size={16} className="text-[#F08A12]" aria-hidden="true" />
         </button>
       </div>
@@ -620,7 +620,7 @@ function CalendarOverviewCard({
           <button
             type="button"
             onClick={onShowWeek}
-            className="mx-auto mt-[10px] block font-comfortaa text-[13px] leading-[19.5px] text-[#7F5B7A] underline underline-offset-[2px] sm:mx-0 sm:ml-auto sm:cursor-pointer"
+            className="mx-auto mt-[10px] block font-comfortaa text-[13px] leading-[19.5px] text-[#7F5B7A] underline underline-offset-[2px] sm:mx-0 sm:ml-auto cursor-pointer"
           >
             Show week dates
           </button>
@@ -721,7 +721,7 @@ function BookingRequestCard({
           onClick={() => setIsExpanded((current) => !current)}
           aria-expanded={isExpanded}
           aria-label="Expand booking request"
-          className="mt-3 w-full rounded-[10px] bg-[#F8F7F3] px-3 py-[11px] text-left"
+          className="mt-3 w-full rounded-[10px] bg-[#F8F7F3] px-3 py-[11px] text-left cursor-pointer"
         >
           <div className="flex items-center gap-3">
             <img src={request.avatarUrl} alt={request.petName} className="size-[50px] rounded-full object-cover" />
@@ -1032,7 +1032,7 @@ export default function GroomerMyWorkPage() {
             <button
               type="button"
               onClick={() => setCalendarMode("week")}
-              className="inline-flex h-9 items-center gap-2 rounded-[12px] border border-[rgba(255,255,255,0.16)] bg-[rgba(255,255,255,0.08)] px-4 font-comfortaa text-[14px] font-medium leading-[21px] text-white"
+              className="inline-flex h-9 items-center gap-2 rounded-[12px] border border-[rgba(255,255,255,0.16)] bg-[rgba(255,255,255,0.08)] px-4 font-comfortaa text-[14px] font-medium leading-[21px] text-white cursor-pointer"
             >
               <Icon name="calendar" className="size-4 text-white" aria-hidden="true" />
               <span>My calendar</span>
@@ -1127,11 +1127,11 @@ export default function GroomerMyWorkPage() {
                         <div className="space-y-4">
                           {section.appointments.map((appointment) => (
                             <button
-                              key={appointment.id}
-                              type="button"
-                              onClick={() => void openHistoryDetails(appointment)}
-                              className="block w-full text-left transition-transform active:scale-[0.99]"
-                            >
+                          key={appointment.id}
+                          type="button"
+                          onClick={() => void openHistoryDetails(appointment)}
+                          className="block w-full text-left transition-transform active:scale-[0.99] cursor-pointer"
+                        >
                               <HistoryAppointmentItem appointment={appointment} />
                             </button>
                           ))}

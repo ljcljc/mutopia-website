@@ -355,7 +355,7 @@ export function BookingRequestContent({
                           type="button"
                           onClick={() => setSelectedProposalSlot(slot)}
                           className={cn(
-                            "flex size-4 items-center justify-center rounded-full border",
+                            "flex size-4 items-center justify-center rounded-full border cursor-pointer",
                             selectedProposalSlot === slot ? "border-[#8B6357]" : "border-[#A8A29E]",
                           )}
                           aria-label={`Select ${slot}`}
@@ -370,7 +370,7 @@ export function BookingRequestContent({
                         <button
                           type="button"
                           onClick={() => setSelectedProposalSlot(slot)}
-                          className="font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#4A3C2A]"
+                          className="font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#4A3C2A] cursor-pointer"
                         >
                           {slot}
                         </button>
@@ -414,7 +414,7 @@ export function BookingRequestContent({
                     type="button"
                     onClick={handleConfirmAppointment}
                     disabled={isSubmittingAction !== null}
-                    className="inline-flex h-12 items-center justify-center gap-3 rounded-full bg-[#00A63E] px-4 font-comfortaa text-[16px] font-bold leading-6 text-white shadow-[0px_4px_12px_rgba(0,166,62,0.3)] transition-[transform,filter] duration-150 active:scale-[0.98] active:brightness-95 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="inline-flex h-12 items-center justify-center gap-3 rounded-full bg-[#00A63E] px-4 font-comfortaa text-[16px] font-bold leading-6 text-white shadow-[0px_4px_12px_rgba(0,166,62,0.3)] transition-[transform,filter] duration-150 active:scale-[0.98] active:brightness-95 disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
                   >
                     <Icon name="target" className="size-5 text-white" aria-hidden="true" />
                     {isSubmittingAction === "confirm" ? "Confirming..." : "Confirm"}
@@ -423,7 +423,7 @@ export function BookingRequestContent({
                     type="button"
                     onClick={() => setIsProposeModalOpen(true)}
                     disabled={isSubmittingAction !== null}
-                    className="inline-flex h-12 items-center justify-center gap-[11px] rounded-full border-[1.5px] border-[#F59E0B] bg-white px-4 font-comfortaa text-[15px] font-bold leading-[22.5px] text-[#F59E0B] transition-[transform,background-color] duration-150 active:scale-[0.98] active:bg-[#FFF7ED]"
+                    className="inline-flex h-12 items-center justify-center gap-[11px] rounded-full border-[1.5px] border-[#F59E0B] bg-white px-4 font-comfortaa text-[15px] font-bold leading-[22.5px] text-[#F59E0B] transition-[transform,background-color] duration-150 active:scale-[0.98] active:bg-[#FFF7ED] cursor-pointer"
                   >
                     <Icon name="calendar" className="size-5 text-[#F59E0B]" aria-hidden="true" />
                     Propose new time
@@ -434,7 +434,7 @@ export function BookingRequestContent({
                 type="button"
                 onClick={() => setIsPassModalOpen(true)}
                 disabled={isSubmittingAction !== null}
-                className="py-[7px] font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357] underline underline-offset-2"
+                className="py-[7px] font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357] underline underline-offset-2 cursor-pointer"
               >
                 Pass appointment
               </button>
@@ -495,7 +495,7 @@ export function BookingRequestInteraction<TRequest extends BookingRequestContent
           onClick={handleToggleExpanded}
           aria-expanded={isExpanded}
           aria-label={isExpanded ? "Collapse booking request" : "Expand booking request"}
-          className="flex size-6 shrink-0 items-center justify-center rounded-full self-start"
+          className="flex size-6 shrink-0 items-center justify-center rounded-full self-start cursor-pointer"
         >
           <Icon
             name="chevron-down"

@@ -300,7 +300,7 @@ export function ProposeNewTimeModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="flex size-5 shrink-0 items-center justify-center text-[#8B6357] transition-colors hover:text-[#6E4F46]"
+                className="flex size-5 shrink-0 items-center justify-center text-[#8B6357] transition-colors hover:text-[#6E4F46] cursor-pointer"
                 aria-label="Close propose new time dialog"
               >
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
@@ -373,7 +373,7 @@ export function ProposeNewTimeModal({
                           <button
                             type="button"
                             onClick={() => handleRemoveEntry(entry)}
-                            className="flex size-4 items-center justify-center text-[#4C4C4C]"
+                            className="flex size-4 items-center justify-center text-[#4C4C4C] cursor-pointer"
                             aria-label={`Remove ${tagLabel}`}
                           >
                             <Icon name="close-arrow" className="size-4" aria-hidden="true" />
@@ -391,7 +391,7 @@ export function ProposeNewTimeModal({
                 type="button"
                 onClick={handleSubmit}
                 disabled={isSubmitting || selectedEntries.length === 0}
-                className="h-12 w-full rounded-[32px] bg-[#00A63E] font-comfortaa text-[15px] font-bold leading-[22.5px] text-white shadow-[0px_4px_12px_rgba(0,166,62,0.3)] transition-colors hover:bg-[#009638] active:bg-[#008730]"
+                className="h-12 w-full rounded-[32px] bg-[#00A63E] font-comfortaa text-[15px] font-bold leading-[22.5px] text-white shadow-[0px_4px_12px_rgba(0,166,62,0.3)] transition-colors hover:bg-[#009638] active:bg-[#008730] cursor-pointer"
               >
                 {isSubmitting ? "Sending..." : "Send new time"}
               </button>
@@ -400,7 +400,7 @@ export function ProposeNewTimeModal({
                 type="button"
                 onClick={onPassAppointment}
                 disabled={isSubmitting}
-                className="mt-[10px] flex h-12 w-full items-center justify-center font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357] underline underline-offset-[2px]"
+                className="mt-[10px] flex h-12 w-full items-center justify-center font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357] underline underline-offset-[2px] cursor-pointer"
               >
                 Pass appointment
               </button>
