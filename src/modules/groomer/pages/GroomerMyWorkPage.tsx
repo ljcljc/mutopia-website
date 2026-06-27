@@ -453,7 +453,7 @@ function SegmentControl({ activeTab, onChange }: { activeTab: WorkTab; onChange:
             type="button"
             onClick={() => onChange(tab.key)}
             className={cn(
-              "h-9 rounded-full px-4 font-comfortaa text-[14px] font-medium leading-[21px] transition-colors",
+              "h-9 rounded-full px-4 font-comfortaa text-[14px] font-medium leading-[21px] transition-colors cursor-pointer",
               activeTab === tab.key ? "bg-white text-[#4A2C55]" : "text-[#F3EAF7]",
             )}
           >
