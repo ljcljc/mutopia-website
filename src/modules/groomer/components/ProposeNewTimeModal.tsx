@@ -284,7 +284,7 @@ export function ProposeNewTimeModal({
           "flex flex-col overflow-hidden bg-white p-0 [&>button]:hidden",
           isMobile
             ? "service-area-dialog inset-x-0! bottom-0! top-auto! z-[75]! mx-auto! flex! max-h-[80vh]! w-full! max-w-none! translate-x-0! translate-y-0! gap-0! rounded-b-none rounded-t-[calc(24*var(--px393))] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
-            : "left-1/2! bottom-0! top-auto! z-[75]! flex! max-h-[80vh]! w-full! max-w-none! -translate-x-1/2! translate-y-0! gap-0! rounded-b-none rounded-t-[24px] shadow-[0px_4px_12px_rgba(0,0,0,0.08)]",
+            : "left-1/2! top-1/2! z-[75]! flex! max-h-[80vh]! w-[min(560px,calc(100vw-48px))]! max-w-[560px]! -translate-x-1/2! -translate-y-1/2! gap-0! rounded-[24px] shadow-[0px_4px_12px_rgba(0,0,0,0.08)]",
         )}
       >
         <DialogTitle className="sr-only">Propose new time</DialogTitle>
