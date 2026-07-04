@@ -109,6 +109,8 @@ interface AuthState {
   // User info from API (MeOut)
   userInfo: MeOut | null;
   setUserInfo: (userInfo: MeOut | null) => void;
+  isResolvingUserInfo: boolean;
+  setIsResolvingUserInfo: (isResolvingUserInfo: boolean) => void;
 
   // Reset function
   reset: () => void;
@@ -157,6 +159,7 @@ const initialState = {
   isLoading: false,
   user: loadUserFromStorage(),
   userInfo: null as MeOut | null,
+  isResolvingUserInfo: false,
 };
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -323,6 +326,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ user: null });
     }
   },
+
+  setIsResolvingUserInfo: (isResolvingUserInfo) => set({ isResolvingUserInfo }),
 
   reset: () =>
     set((state) => ({

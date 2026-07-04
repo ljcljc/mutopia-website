@@ -50,6 +50,7 @@ export default function AccountDropdown({
   const switchClassName = isCustomerMode
     ? "cursor-pointer"
     : "cursor-pointer data-[state=checked]:border-[#633479] data-[state=checked]:bg-[#633479]";
+  const switchChecked = isCustomerMode ? false : true;
 
   return (
     <DropdownMenu>
@@ -82,12 +83,12 @@ export default function AccountDropdown({
               </Label>
               <Switch
                 id={switchId}
-                checked={false}
+                checked={switchChecked}
                 onCheckedChange={(checked) => {
                   if (checked && isCustomerMode) {
                     navigate("/groomer/dashboard");
                   }
-                  if (checked && !isCustomerMode) {
+                  if (!checked && !isCustomerMode) {
                     navigate("/account/dashboard");
                   }
                 }}

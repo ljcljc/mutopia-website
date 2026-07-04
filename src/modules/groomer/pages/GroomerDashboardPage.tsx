@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import IdentitySwitchAction from "@/components/account/IdentitySwitchAction";
 import { CommonCheckbox, CustomInput, CustomRadio, CustomSelect, CustomSelectItem, CustomTextarea, OrangeButton } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
 import { Spinner } from "@/components/common/Spinner";
@@ -1741,7 +1742,18 @@ export default function GroomerDashboardPage() {
   return (
     <div className="min-h-[calc(100vh-64px)] w-full bg-[#633479] px-[calc(20*var(--px393))] pb-[calc(112*var(--px393))] pt-[calc(8*var(--px393))] sm:px-5 sm:pb-28 sm:pt-2">
       <div className="space-y-3.5">
-        <h1 className="font-comfortaa text-[20px] font-bold leading-[22px] text-white">Dashboard</h1>
+        <div className="flex items-center gap-4">
+          <h1 className="font-comfortaa text-[20px] font-bold leading-[22px] text-white">Dashboard</h1>
+          <IdentitySwitchAction
+            mode="groomer"
+            targetPath="/account/dashboard"
+            className="ml-auto flex items-center"
+            controlClassName="flex items-center gap-3"
+            labelClassName="cursor-pointer font-comfortaa text-[14px] font-bold leading-[22px] text-[#FFF7ED]"
+            switchClassName="cursor-pointer data-[state=checked]:border-[#DE6A07] data-[state=checked]:bg-[#DE6A07]"
+            labelFirst
+          />
+        </div>
 
         {bookingRequestSuccessAlert ? (
           <BookingRequestSuccessAlert

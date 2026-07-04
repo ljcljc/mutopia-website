@@ -15,10 +15,13 @@ const refreshUserInfoFromApi = async () => {
   try {
     const accessToken = await getEncryptedItem(STORAGE_KEYS.ACCESS_TOKEN);
     if (!accessToken) return;
+    useAuthStore.getState().setIsResolvingUserInfo(true);
     const userInfo = await getCurrentUser();
     useAuthStore.getState().setUserInfo(userInfo);
   } catch (e) {
     console.warn("Failed to refresh user info from API:", e);
+  } finally {
+    useAuthStore.getState().setIsResolvingUserInfo(false);
   }
 };
 

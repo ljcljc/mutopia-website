@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { useAccountStore } from "@/components/account/accountStore";
 import { useAuthStore } from "@/components/auth/authStore";
 import { getCurrentUser } from "@/lib/api";
+import IdentitySwitchAction from "@/components/account/IdentitySwitchAction";
 import MembershipCard from "@/components/account/MembershipCard";
 import ShareAndEarnCard from "@/components/account/ShareAndEarnCard";
 import DashboardBookingCard from "@/components/account/dashboard/DashboardBookingCard";
@@ -57,10 +58,17 @@ export default function Dashboard() {
         style={{ ["--px493" as never]: "calc(100vw / 493)" }}
       >
         <div className="flex flex-col gap-[calc(16*var(--px493))] sm:gap-[20px]">
-          <div className="h-auto sm:h-[27px]">
+          <div className="flex h-auto items-center gap-4 sm:h-[27px]">
             <h1 className="font-['Comfortaa:Bold',sans-serif] font-bold text-[20px] text-[#4A3C2A]">
               Dashboard
             </h1>
+            <IdentitySwitchAction
+              mode="customer"
+              targetPath="/groomer/dashboard"
+              className="ml-auto flex items-center"
+              labelClassName="cursor-pointer font-comfortaa text-[14px] font-bold text-[#8B6357] sm:text-sm"
+              switchClassName="cursor-pointer"
+            />
           </div>
 
           <DashboardHeroCard />

@@ -87,10 +87,10 @@ describe("AccountDropdown", () => {
     openDropdown();
 
     expect(screen.getByText("Pet owner")).toBeInTheDocument();
-    expect(screen.getByRole("switch", { name: "Switch to pet owner" })).toHaveAttribute("aria-checked", "false");
+    expect(screen.getByRole("switch", { name: "Switch to pet owner" })).toHaveAttribute("aria-checked", "true");
   });
 
-  it("navigates back to the customer dashboard from the groomer switch control", () => {
+  it("navigates back to the customer dashboard when disabling the groomer switch control", () => {
     renderDropdown(true, "groomer");
 
     openDropdown();

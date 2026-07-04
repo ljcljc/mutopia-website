@@ -13,6 +13,10 @@ import {
   getServiceAreas,
 } from "@/lib/api";
 
+vi.mock("@/components/account/PersonalInfoCard", () => ({
+  default: () => <div>Mocked personal info</div>,
+}));
+
 vi.mock("@/lib/api", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/api")>();
 
@@ -87,7 +91,7 @@ describe("GroomerAccountPage", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText("Level A")).toBeInTheDocument();
+    expect(await screen.findByText("Level A (85-100)")).toBeInTheDocument();
     expect(screen.getByText("85% payout share")).toBeInTheDocument();
     expect(screen.getByText("Priority client matching")).toBeInTheDocument();
     expect(screen.getByText("TD Bank")).toBeInTheDocument();
@@ -111,7 +115,7 @@ describe("GroomerAccountPage", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText("Level B")).toBeInTheDocument();
+    expect(await screen.findByText("Level B (70-84)")).toBeInTheDocument();
     expect(screen.getByText("80% payout share")).toBeInTheDocument();
   });
 
@@ -132,7 +136,7 @@ describe("GroomerAccountPage", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText("Level A")).toBeInTheDocument();
+    expect(await screen.findByText("Level A (85-100)")).toBeInTheDocument();
     expect(toast.error).toHaveBeenCalledWith("Failed to load account data");
   });
 });

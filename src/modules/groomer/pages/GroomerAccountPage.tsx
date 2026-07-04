@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import IdentitySwitchAction from "@/components/account/IdentitySwitchAction";
 import { OrangeButton } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
 import { useIsMobile } from "@/components/ui/use-mobile";
@@ -189,25 +188,17 @@ export default function GroomerAccountPage() {
   return (
     <>
       <div className="min-h-[calc(100vh-64px)] w-full bg-[#633479] px-[calc(20*var(--px393))] pb-[calc(36*var(--px393))] pt-[calc(8*var(--px393))] sm:px-5 sm:pb-8 sm:pt-2 lg:min-h-0 lg:pb-4 lg:pt-1">
-        <div className="mb-4 flex items-center justify-between sm:mb-5">
+        <div className="mb-4 flex items-center gap-4 sm:mb-5">
           <h1 className="font-comfortaa text-[20px] font-bold leading-[22px] text-white">My account</h1>
-          <div className="flex items-center gap-3">
-            <Label
-              htmlFor="groomer-pet-owner-toggle"
-              className="cursor-pointer font-comfortaa text-[14px] font-bold leading-[22px] text-[#FFF7ED]"
-            >
-              Pet owner
-            </Label>
-            <Switch
-              id="groomer-pet-owner-toggle"
-              className="data-[state=checked]:border-[#DE6A07] data-[state=checked]:bg-[#DE6A07]"
-              checked
-              onCheckedChange={(checked) => {
-                if (!checked) navigate("/account/profile");
-              }}
-              aria-label="Switch back to pet owner account"
-            />
-          </div>
+          <IdentitySwitchAction
+            mode="groomer"
+            targetPath="/account/profile"
+            className="ml-auto flex items-center"
+            controlClassName="flex items-center gap-3"
+            labelClassName="cursor-pointer font-comfortaa text-[14px] font-bold leading-[22px] text-[#FFF7ED]"
+            switchClassName="cursor-pointer data-[state=checked]:border-[#DE6A07] data-[state=checked]:bg-[#DE6A07]"
+            labelFirst
+          />
         </div>
 
         <div className="space-y-4 sm:space-y-5">

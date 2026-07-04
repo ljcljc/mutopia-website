@@ -1,93 +1,18 @@
-/**
- * PageHeader 组件 - My Account 页面头部
- * 
- * 根据 Figma 设计图 1:1 还原
- * Figma: https://www.figma.com/design/uPtOY1EQwpnZkgAb8YhWMN/Landing_page?node-id=1417-11252&m=dev
- */
-
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { OrangeButton } from "@/components/common";
-import { LoginModal } from "@/components/auth/LoginModal";
-import { useAuthStore } from "@/components/auth/authStore";
-import ApplyGroomerModal from "@/components/groomer/ApplyGroomerModal";
+import IdentitySwitchAction from "@/components/account/IdentitySwitchAction";
 
 export default function PageHeader() {
-  const navigate = useNavigate();
-  const { userInfo, user } = useAuthStore();
-  const [isApplyOpen, setIsApplyOpen] = useState(false);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const isLoggedIn = Boolean(userInfo?.email ?? user?.email);
-
-  const handleApplyOpen = () => {
-    if (!isLoggedIn) {
-      setIsLoginModalOpen(true);
-      return;
-    }
-
-    console.log("[ApplyGroomer] open modal");
-    setIsApplyOpen(true);
-  };
-
   return (
-    <>
-      <div className="mb-5 flex w-full items-center gap-4">
-        <h1 className="font-comfortaa text-[20px] font-bold text-[#4A3C2A]">
-          My Account
-        </h1>
-        <div className="ml-auto flex items-center">
-          {userInfo?.is_groomer ? (
-            <div className="flex items-center gap-2 sm:gap-3">
-              <Switch
-                id="groomer-account-toggle"
-                checked={false}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    navigate("/groomer/account");
-                  }
-                }}
-                className="cursor-pointer"
-                aria-label="Groomer account toggle"
-              />
-              <Label
-                htmlFor="groomer-account-toggle"
-                className="cursor-pointer font-comfortaa text-[14px] font-bold text-[#8B6357] sm:text-sm"
-              >
-                Groomer account
-              </Label>
-            </div>
-          ) : (
-            <OrangeButton
-              variant="secondary"
-              size="compact"
-              showArrow={false}
-              type="button"
-              onClick={handleApplyOpen}
-            >
-              Apply as groomer
-            </OrangeButton>
-          )}
-        </div>
-      </div>
-      <ApplyGroomerModal
-        open={isApplyOpen}
-        onOpenChange={(open) => {
-          console.log("[ApplyGroomer] onOpenChange:", open);
-          setIsApplyOpen(open);
-        }}
+    <div className="mb-5 flex w-full items-center gap-4">
+      <h1 className="font-comfortaa text-[20px] font-bold text-[#4A3C2A]">
+        My Account
+      </h1>
+      <IdentitySwitchAction
+        mode="customer"
+        targetPath="/groomer/account"
+        className="ml-auto flex items-center"
+        labelClassName="cursor-pointer font-comfortaa text-[14px] font-bold text-[#8B6357] sm:text-sm"
+        switchClassName="cursor-pointer"
       />
-      <LoginModal
-        open={isLoginModalOpen}
-        onOpenChange={setIsLoginModalOpen}
-        onSuccess={() => {
-          setIsLoginModalOpen(false);
-          setIsApplyOpen(true);
-        }}
-      >
-        <div />
-      </LoginModal>
-    </>
+    </div>
   );
 }
