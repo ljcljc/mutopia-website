@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Icon } from "@/components/common/Icon";
 import { Spinner } from "@/components/common/Spinner";
@@ -672,19 +673,35 @@ function HistoryAppointmentItem({ appointment }: { appointment: HistoryAppointme
 
 function BookingRequestCard({
   request,
+  isHighlighted,
   onConfirmOriginalTime,
   onProposeNewTime,
   onDecline,
 }: {
   request: PendingJobCard;
+  isHighlighted?: boolean;
   onConfirmOriginalTime: (request: PendingJobCard, confirmedTime: BookingRequestDecisionTimeOption) => Promise<void>;
   onProposeNewTime: (request: PendingJobCard, timeOptions: BookingRequestDecisionTimeOption[]) => Promise<void>;
   onDecline: (request: PendingJobCard) => Promise<void>;
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const cardRef = useRef<HTMLDivElement | null>(null);
+
+  // Scroll to highlighted card on mount
+  useEffect(() => {
+    if (isHighlighted && cardRef.current) {
+      cardRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [isHighlighted]);
 
   return (
-    <article className="relative overflow-hidden rounded-[14px] bg-[#A86140] px-[18px] pb-5 pt-4 shadow-[0px_10px_18px_rgba(0,0,0,0.16)]">
+    <article
+      ref={cardRef}
+      className={cn(
+        "relative overflow-hidden rounded-[14px] bg-[#A86140] px-[18px] pb-5 pt-4 shadow-[0px_10px_18px_rgba(0,0,0,0.16)]",
+        isHighlighted && "ring-4 ring-[#DE6A07] ring-offset-2 ring-offset-[#fffbf5]"
+      )}
+    >
       <span className="absolute inset-y-0 left-0 w-[6px] bg-[#DE6A07]" aria-hidden="true" />
 
       <div className="flex items-start justify-between gap-3">
@@ -820,6 +837,8 @@ function LoadingStateCard({ label }: { label: string }) {
 
 export default function GroomerMyWorkPage() {
   const isMobile = useIsMobile();
+  const [searchParams] = useSearchParams();
+  const highlightBookingId = searchParams.get("highlight");
   const today = useMemo(() => new Date(), []);
   const todayDateKey = useMemo(() => toDateKey(today), [today]);
   const [now, setNow] = useState(() => new Date());
@@ -1080,6 +1099,7 @@ export default function GroomerMyWorkPage() {
                             <BookingRequestCard
                               key={request.id}
                               request={request}
+                              isHighlighted={highlightBookingId === String(request.bookingId)}
                               onConfirmOriginalTime={handleConfirmOriginalTime}
                               onProposeNewTime={handleProposeNewTime}
                               onDecline={handleDeclinePendingJob}
