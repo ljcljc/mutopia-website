@@ -22,6 +22,11 @@ import {
   type ServiceAreaOut,
 } from "@/lib/api";
 import { HttpError } from "@/lib/http";
+import {
+  formatCanadianPostalCodeInput,
+  getCanadianPostalCodeError,
+  normalizeCanadianPostalCode,
+} from "@/lib/postalCode";
 import { toast } from "sonner";
 
 interface AddAddressModalProps {
@@ -45,6 +50,7 @@ export default function AddAddressModal({
   const [isDefault, setIsDefault] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingAreas, setIsLoadingAreas] = useState(false);
+  const [postalCodeError, setPostalCodeError] = useState("");
   const [provinces, setProvinces] = useState<ProvinceOut[]>([]);
   const [serviceAreas, setServiceAreas] = useState<ServiceAreaOut[]>([]);
   const cityRef = useRef(city);
@@ -64,6 +70,7 @@ export default function AddAddressModal({
     setCity("");
     setServiceAreaId(null);
     setPostalCode("");
+    setPostalCodeError("");
     setLabel("");
     setIsDefault(false);
     setServiceAreas([]);
@@ -166,19 +173,22 @@ export default function AddAddressModal({
       toast.error("City is required");
       return;
     }
-    if (!postalCode.trim()) {
-      toast.error("Postal code is required");
+    const nextPostalCodeError = getCanadianPostalCodeError(postalCode);
+    if (nextPostalCodeError) {
+      setPostalCodeError(nextPostalCodeError);
+      toast.error(nextPostalCodeError);
       return;
     }
 
     setIsSubmitting(true);
     try {
+      const normalizedPostalCode = normalizeCanadianPostalCode(postalCode);
       const payload: AddressManageIn = {
         service_area_id: serviceAreaId,
         address: address.trim(),
         city: city.trim(),
         province: province.trim(),
-        postal_code: postalCode.trim(),
+        postal_code: normalizedPostalCode,
         service_type: serviceType,
         is_default: isDefault,
         ...(label.trim() ? { label: label.trim() } : {}),
@@ -317,7 +327,17 @@ export default function AddAddressModal({
                 type="text"
                 placeholder="Enter post code"
                 value={postalCode}
-                onChange={(e) => setPostalCode(e.target.value)}
+                error={postalCodeError}
+                onChange={(e) => {
+                  const nextValue = formatCanadianPostalCodeInput(e.target.value);
+                  setPostalCode(nextValue);
+                  if (postalCodeError) {
+                    setPostalCodeError(getCanadianPostalCodeError(nextValue));
+                  }
+                }}
+                onBlur={() => {
+                  setPostalCodeError(getCanadianPostalCodeError(postalCode));
+                }}
               />
             </div>
           </div>

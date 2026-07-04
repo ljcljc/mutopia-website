@@ -4,6 +4,7 @@ import { OrangeButton } from "@/components/common/OrangeButton";
 import { Icon } from "@/components/common/Icon";
 import { useAuthStore } from "@/components/auth/authStore";
 import { useBookingStore } from "@/components/booking/bookingStore";
+import { isValidCanadianPostalCode } from "@/lib/postalCode";
 import { Step1AddressAndServiceType } from "@/components/booking/Step1AddressAndServiceType";
 import { Step2 } from "@/components/booking/Step2";
 import { Step3 } from "@/components/booking/Step3";
@@ -71,7 +72,7 @@ export default function Booking() {
       : (selectedAddressId !== null || address.trim().length > 0) &&
         city.trim().length > 0 &&
         province.trim().length > 0 &&
-        postCode.trim().length > 0 &&
+        isValidCanadianPostalCode(postCode) &&
         selectedServiceAreaId !== null;
 
   return (

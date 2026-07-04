@@ -22,6 +22,7 @@ import {
   type BookingDetailOut,
   type TimeSlotIn,
 } from "@/lib/api";
+import { normalizeCanadianPostalCode } from "@/lib/postalCode";
 import { useAuthStore } from "@/components/auth/authStore";
 
 // 与后端枚举保持一致
@@ -555,7 +556,7 @@ export const useBookingStore = create<BookingState>((set) => ({
       address: state.address,
       city: state.city,
       province: state.province,
-      postal_code: state.postCode,
+      postal_code: normalizeCanadianPostalCode(state.postCode),
       service_type: state.serviceType,
     };
   },

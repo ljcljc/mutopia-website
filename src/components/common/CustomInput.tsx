@@ -51,6 +51,11 @@ export const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
             }`}
           />
         </div>
+        {error ? (
+          <p className="font-comfortaa font-normal text-[12px] leading-[16px] text-[#de1507]">
+            {error}
+          </p>
+        ) : null}
       </div>
     );
   }

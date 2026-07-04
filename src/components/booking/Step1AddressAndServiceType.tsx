@@ -3,6 +3,7 @@ import { LoginModal } from "@/components/auth/LoginModal";
 import { Icon } from "@/components/common/Icon";
 import { CustomInput, CustomRadio, CustomSelect, CustomSelectItem } from "@/components/common";
 import { useAuthStore } from "@/components/auth/authStore";
+import { formatCanadianPostalCodeInput, getCanadianPostalCodeError } from "@/lib/postalCode";
 import { useBookingStore } from "./bookingStore";
 import { getServiceAreaProvinces, getServiceAreas, type ProvinceOut, type ServiceAreaOut } from "@/lib/api";
 
@@ -41,6 +42,7 @@ export function Step1AddressAndServiceType() {
   const [provinces, setProvinces] = useState<ProvinceOut[]>([]);
   const [serviceAreas, setServiceAreas] = useState<ServiceAreaOut[]>([]);
   const [isLoadingAreas, setIsLoadingAreas] = useState(false);
+  const [postalCodeError, setPostalCodeError] = useState("");
   const addressDropdownRef = useRef<HTMLDivElement>(null);
   const storeDropdownRef = useRef<HTMLDivElement>(null);
   const cityRef = useRef(city);
@@ -454,7 +456,17 @@ export function Step1AddressAndServiceType() {
                   type="text"
                   placeholder="Enter post code"
                   value={postCode}
-                  onChange={(e) => setPostCode(e.target.value)}
+                  error={postalCodeError}
+                  onChange={(e) => {
+                    const nextValue = formatCanadianPostalCodeInput(e.target.value);
+                    setPostCode(nextValue);
+                    if (postalCodeError) {
+                      setPostalCodeError(getCanadianPostalCodeError(nextValue));
+                    }
+                  }}
+                  onBlur={() => {
+                    setPostalCodeError(getCanadianPostalCodeError(postCode));
+                  }}
                 />
               </div>
             </div>
