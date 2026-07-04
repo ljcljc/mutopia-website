@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useLogout } from "@/hooks/useLogout";
 import type { MeOut } from "@/lib/api";
+import { getIdentitySwitchConfig, shouldNavigateIdentitySwitch, type IdentityMode } from "@/components/account/identitySwitchConfig";
 
 export default function AccountDropdown({
   userInfo,
@@ -19,7 +20,7 @@ export default function AccountDropdown({
 }: {
   userInfo?: MeOut | null;
   fallbackName?: string;
-  mode?: "customer" | "groomer";
+  mode?: IdentityMode;
 }) {
   const userName = userInfo
     ? (userInfo.first_name || userInfo.email.split("@")[0] || "User")
@@ -32,10 +33,10 @@ export default function AccountDropdown({
     ? location.pathname.startsWith("/account/dashboard")
     : location.pathname.startsWith("/groomer/dashboard");
   const isGroomerSwitchVisible = Boolean(userInfo?.is_groomer);
-  const switchId = isCustomerMode ? "header-groomer-switch" : "header-pet-owner-switch";
-  const switchLabel = isCustomerMode ? "Groomer" : "Pet owner";
-  const switchAriaLabel = isCustomerMode ? "Switch to groomer" : "Switch to pet owner";
-  const dashboardPath = isCustomerMode ? "/account/dashboard" : "/groomer/dashboard";
+  const { switchId, switchLabel, switchAriaLabel, switchChecked, dashboardPath, targetPath } = getIdentitySwitchConfig({
+    mode,
+    header: true,
+  });
   const triggerAvatarClassName = isCustomerMode ? "bg-[#8b6357]" : "bg-[#633479]";
   const triggerTextClassName = isCustomerMode ? "text-[#8b6357]" : "text-[#633479]";
   const contentClassName = isCustomerMode
@@ -50,7 +51,6 @@ export default function AccountDropdown({
   const switchClassName = isCustomerMode
     ? "cursor-pointer"
     : "cursor-pointer data-[state=checked]:border-[#633479] data-[state=checked]:bg-[#633479]";
-  const switchChecked = isCustomerMode ? false : true;
 
   return (
     <DropdownMenu>
@@ -85,12 +85,8 @@ export default function AccountDropdown({
                 id={switchId}
                 checked={switchChecked}
                 onCheckedChange={(checked) => {
-                  if (checked && isCustomerMode) {
-                    navigate("/groomer/dashboard");
-                  }
-                  if (!checked && !isCustomerMode) {
-                    navigate("/account/dashboard");
-                  }
+                  if (!shouldNavigateIdentitySwitch(mode, checked)) return;
+                  navigate(targetPath);
                 }}
                 className={switchClassName}
                 aria-label={switchAriaLabel}

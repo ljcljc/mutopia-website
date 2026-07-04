@@ -1570,10 +1570,12 @@ export default function GroomerDashboardPage() {
     try {
       if (enableDevTravelTest) {
         setDevTravelStatus("checked_in");
+        setIsCheckUpOpen(true);
         toast.success("Checked in");
         return;
       }
       await checkIn(bookingId);
+      setIsCheckUpOpen(true);
       toast.success("Checked in");
     } catch (error) {
       console.error("Failed to check in:", error);

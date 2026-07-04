@@ -6,9 +6,10 @@ import { useAuthStore } from "@/components/auth/authStore";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import ApplyGroomerModal from "@/components/groomer/ApplyGroomerModal";
+import { getIdentitySwitchConfig, shouldNavigateIdentitySwitch, type IdentityMode } from "@/components/account/identitySwitchConfig";
 
 interface IdentitySwitchActionProps {
-  mode: "customer" | "groomer";
+  mode: IdentityMode;
   targetPath: string;
   className?: string;
   controlClassName?: string;
@@ -35,9 +36,7 @@ export default function IdentitySwitchAction({
   const canSwitchToGroomer = Boolean(userInfo?.is_groomer);
   const isWaitingForUserInfo = isCustomerMode && isResolvingUserInfo && !userInfo;
   const shouldShowApplyButton = isCustomerMode && !canSwitchToGroomer;
-  const switchId = isCustomerMode ? "groomer-account-toggle" : "pet-owner-toggle";
-  const switchLabel = isCustomerMode ? "Groomer account" : "Pet owner";
-  const switchChecked = isCustomerMode ? false : true;
+  const { switchId, switchLabel, switchAriaLabel, switchChecked } = getIdentitySwitchConfig({ mode });
 
   const handleApplyOpen = () => {
     if (!isLoggedIn) {
@@ -49,8 +48,7 @@ export default function IdentitySwitchAction({
   };
 
   const handleSwitchChange = (checked: boolean) => {
-    if (isCustomerMode && !checked) return;
-    if (!isCustomerMode && checked) return;
+    if (!shouldNavigateIdentitySwitch(mode, checked)) return;
     navigate(targetPath);
   };
 
@@ -60,7 +58,7 @@ export default function IdentitySwitchAction({
       checked={switchChecked}
       onCheckedChange={handleSwitchChange}
       className={switchClassName}
-      aria-label={`${switchLabel} toggle`}
+      aria-label={switchAriaLabel}
     />
   );
 
