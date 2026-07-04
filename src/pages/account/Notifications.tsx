@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { Icon, type IconName } from "@/components/common/Icon";
 import { Spinner } from "@/components/common/Spinner";
+import AccountContentContainer from "@/components/layout/AccountContentContainer";
 import { cn } from "@/components/ui/utils";
 import { deleteMessage, getMessages, markAllMessagesRead, markMessageRead, type MessageOut, type MessagePageOut } from "@/lib/api";
 
@@ -369,10 +370,10 @@ export default function Notifications({
           : ""
       )}
     >
-      <div
+      <AccountContentContainer
         className={cn(
           "flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden pb-8 lg:pb-0",
-          isGroomerVariant ? "" : "mx-auto max-w-[944px] px-6"
+          isGroomerVariant ? "" : "px-6"
         )}
       >
         <div
@@ -602,7 +603,7 @@ export default function Notifications({
               </>
             )}
           </div>
-        </div>
-      </div>
+      </AccountContentContainer>
+    </div>
   );
 }

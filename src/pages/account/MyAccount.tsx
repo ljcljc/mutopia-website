@@ -8,6 +8,7 @@ import AddressesCard from "@/components/account/AddressesCard";
 import PaymentMethodCard from "@/components/account/PaymentMethodCard";
 import ShareAndEarnCard from "@/components/account/ShareAndEarnCard";
 import MembershipCard from "@/components/account/MembershipCard";
+import AccountContentContainer from "@/components/layout/AccountContentContainer";
 
 export default function MyAccount() {
   const { fetchAddresses, fetchMembershipPlans } = useAccountStore();
@@ -40,7 +41,7 @@ export default function MyAccount() {
 
   return (
     <div className="flex min-h-full w-full flex-col">
-      <div className="mx-auto w-full max-w-none flex-1 px-5 pb-5 sm:max-w-[944px] sm:px-6 sm:pb-8">
+      <AccountContentContainer className="flex-1 px-5 pb-5 sm:px-6 sm:pb-8">
         {/* Page Header */}
         <PageHeader />
 
@@ -64,7 +65,7 @@ export default function MyAccount() {
           <ShareAndEarnCard />
           <MembershipCard />
         </div>
-      </div>
+      </AccountContentContainer>
     </div>
   );
 }

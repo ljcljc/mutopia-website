@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Icon } from "@/components/common/Icon";
 import { Spinner } from "@/components/common/Spinner";
+import AccountContentContainer from "@/components/layout/AccountContentContainer";
 import DEFAULT_PET_AVATAR from "@/assets/icons/icon-pet-avatar-placeholder.svg";
 import { useIsMobile } from "@/components/ui/use-mobile";
 import { cn } from "@/components/ui/utils";
@@ -1043,7 +1044,8 @@ export default function GroomerMyWorkPage() {
 
   return (
     <div className="min-h-[calc(100vh-64px)] w-full bg-[#633479] px-[calc(20*var(--px393))] pb-[calc(112*var(--px393))] pt-[calc(8*var(--px393))] sm:px-5 sm:pb-28 sm:pt-2">
-      <div className="space-y-4">
+      <AccountContentContainer>
+        <div className="space-y-4">
         <SegmentControl activeTab={activeTab} onChange={handleTabChange} />
 
         {activeTab === "schedule" ? (
@@ -1164,6 +1166,7 @@ export default function GroomerMyWorkPage() {
           )}
         </div>
       </div>
+      </AccountContentContainer>
 
       <HistoryDetailsModal
         open={selectedHistoryAppointment !== null}

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import AccountContentContainer from "@/components/layout/AccountContentContainer";
 import { PetForm } from "@/components/common/PetForm";
 import type { WeightUnit, Gender, PetType, Behavior, CoatCondition } from "@/components/booking/bookingStore";
 import type { PetBreedOut } from "@/lib/api";
@@ -107,7 +108,7 @@ export default function AddPet() {
 
   return (
     <div className="relative flex min-h-full w-full flex-col items-center gap-15 bg-[#f9f1e8] px-[calc(20*var(--px393))] pb-15 sm:px-0 sm:pb-25">
-      <div className="relative flex w-full max-w-[944px] shrink-0 flex-col items-start gap-4">
+      <AccountContentContainer className="relative flex shrink-0 flex-col items-start gap-4">
         <div className="flex h-[27px] w-full items-center">
           <nav
             aria-label="Breadcrumb"
@@ -183,7 +184,7 @@ export default function AddPet() {
             showMobileStepHeader={false}
           />
         </div>
-      </div>
+      </AccountContentContainer>
     </div>
   );
 }

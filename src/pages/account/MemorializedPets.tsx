@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useAccountStore } from "@/components/account/accountStore";
+import AccountContentContainer from "@/components/layout/AccountContentContainer";
 import { Icon } from "@/components/common/Icon";
 import { OrangeButton } from "@/components/common/OrangeButton";
 import { buildImageUrl, deletePet } from "@/lib/api";
@@ -139,7 +140,7 @@ export default function MemorializedPets() {
 
   return (
     <div className="flex min-h-full w-full flex-col">
-      <div className="mx-auto w-full max-w-[944px] flex-1 px-5 sm:px-6">
+      <AccountContentContainer className="flex-1 px-5 sm:px-6">
       <div className="mb-[-2px] flex flex-col gap-2">
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
             <nav
@@ -304,9 +305,9 @@ export default function MemorializedPets() {
             </div>
           </div>
         </div>
-      </div>
+      </AccountContentContainer>
 
-      <div className="mx-auto w-full max-w-[944px] px-6 pb-8 pt-5">
+      <AccountContentContainer className="px-6 pb-8 pt-5">
         <div className="flex items-center justify-end">
           <button
             type="button"
@@ -318,7 +319,7 @@ export default function MemorializedPets() {
             Delete pet
           </button>
         </div>
-      </div>
+      </AccountContentContainer>
 
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent className="rounded-[20px] px-0 py-0 max-w-[calc(100%-32px)] sm:max-w-[520px]">

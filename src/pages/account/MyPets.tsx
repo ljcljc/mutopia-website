@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useAccountStore } from "@/components/account/accountStore";
+import AccountContentContainer from "@/components/layout/AccountContentContainer";
 import { Icon } from "@/components/common/Icon";
 import { OrangeButton } from "@/components/common/OrangeButton";
 import { FileUpload, type FileUploadItem } from "@/components/common/FileUpload";
@@ -600,7 +601,7 @@ export default function MyPets() {
 
   return (
     <div className="w-full min-h-full flex flex-col">
-      <div className="w-full max-w-none sm:max-w-[944px] mx-auto px-[20px] sm:px-6 pb-[20px] sm:pb-8 flex-1">
+      <AccountContentContainer className="px-[20px] sm:px-6 pb-[20px] sm:pb-8 flex-1">
         <div className="flex flex-col gap-[16px] mb-[-2px]">
           <div className="flex flex-col gap-[16px] sm:gap-4 sm:flex-row sm:items-start sm:justify-between">
             <h1 className="font-['Comfortaa:Bold',sans-serif] font-bold text-[20px] text-[#4A3C2A]">
@@ -977,7 +978,7 @@ export default function MyPets() {
             </button>
           </div>
         </div>
-      </div>
+      </AccountContentContainer>
 
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent className="rounded-[20px] px-0 py-0 max-w-[calc(100%-32px)] sm:max-w-[520px]">

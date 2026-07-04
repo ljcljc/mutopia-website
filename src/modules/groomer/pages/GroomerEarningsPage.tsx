@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { OrangeButton } from "@/components/common";
 import { Spinner } from "@/components/common/Spinner";
 import { Icon } from "@/components/common/Icon";
+import AccountContentContainer from "@/components/layout/AccountContentContainer";
 import { RevenueBreakdownItem } from "@/modules/groomer/components/earnings/RevenueBreakdownItem";
 import { RecentTransactionItem } from "@/modules/groomer/components/earnings/RecentTransactionItem";
 import { TimeframeSelectorDialog } from "@/modules/groomer/components/earnings/TimeframeSelectorDialog";
@@ -364,19 +365,22 @@ export default function GroomerEarningsPage() {
   if (isInitialLoading) {
     return (
       <div className="min-h-[calc(100vh-64px)] w-full bg-[#633479] px-[calc(20*var(--px393))] pb-[calc(112*var(--px393))] pt-[calc(8*var(--px393))] sm:px-5 sm:pb-28 sm:pt-2">
-        <div className="space-y-4">
-          <header>
-            <h1 className="font-comfortaa text-[20px] font-bold leading-[22px] text-white">Earnings</h1>
-          </header>
-          <LoadingCard label="Loading earnings..." />
-        </div>
+        <AccountContentContainer>
+          <div className="space-y-4">
+            <header>
+              <h1 className="font-comfortaa text-[20px] font-bold leading-[22px] text-white">Earnings</h1>
+            </header>
+            <LoadingCard label="Loading earnings..." />
+          </div>
+        </AccountContentContainer>
       </div>
     );
   }
 
   return (
     <div className="min-h-[calc(100vh-64px)] w-full bg-[#633479] px-[calc(20*var(--px393))] pb-[calc(112*var(--px393))] pt-[calc(8*var(--px393))] sm:px-5 sm:pb-28 sm:pt-2">
-      <div className="space-y-4">
+      <AccountContentContainer>
+        <div className="space-y-4">
         <header>
           <h1 className="font-comfortaa text-[20px] font-bold leading-[22px] text-white">Earnings</h1>
         </header>
@@ -422,6 +426,7 @@ export default function GroomerEarningsPage() {
           onViewAll={() => navigate("/groomer/earnings/transactions")}
         />
       </div>
+      </AccountContentContainer>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import AccountContentContainer from "@/components/layout/AccountContentContainer";
 import { CustomInput, CustomRadio, OrangeButton } from "@/components/common";
 import { CustomTextarea } from "@/components/common/CustomTextarea";
 import { Icon } from "@/components/common/Icon";
@@ -1063,7 +1064,7 @@ export default function BookingDetail() {
 
   return (
     <div className="flex min-h-full w-full flex-col">
-      <div className="mx-auto flex-1 w-full max-w-[944px] px-6 pb-8">
+      <AccountContentContainer className="flex-1 px-6 pb-8">
         <div className="flex flex-col gap-5">
           <div className="flex h-[27px] items-center">
             <nav
@@ -1813,7 +1814,7 @@ export default function BookingDetail() {
             </>
           )}
         </div>
-      </div>
+      </AccountContentContainer>
 
       <AlertDialog open={isAdjustmentDialogOpen} onOpenChange={(open) => !isApprovingAdjustment && !isRejectingAdjustment && setIsAdjustmentDialogOpen(open)}>
         <AlertDialogContent className="max-w-[calc(100%-32px)] rounded-[20px] border-[rgba(0,0,0,0.2)] px-0 py-0 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] sm:max-w-[560px]">

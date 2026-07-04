@@ -1,6 +1,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { OrangeButton } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
+import AccountContentContainer from "@/components/layout/AccountContentContainer";
 import { useIsMobile } from "@/components/ui/use-mobile";
 import { GroomerLinkButton } from "@/modules/groomer/components/GroomerLinkButton";
 import { GroomerPrimaryActionButton } from "@/modules/groomer/components/GroomerPrimaryActionButton";
@@ -713,7 +714,8 @@ export default function GroomerPerformancePage() {
 
   return (
     <>
-      <div className="min-h-[calc(100vh-64px)] w-full bg-[#633479] px-[calc(20*var(--px393))] pb-[calc(40*var(--px393))] pt-[calc(16*var(--px393))] sm:px-5 sm:pb-10 sm:pt-4 lg:mx-auto lg:max-w-[944px] lg:min-h-0 lg:px-0 lg:pb-6 lg:pt-6">
+      <div className="min-h-[calc(100vh-64px)] w-full bg-[#633479] px-[calc(20*var(--px393))] pb-[calc(40*var(--px393))] pt-[calc(16*var(--px393))] sm:px-5 sm:pb-10 sm:pt-4 lg:min-h-0 lg:px-0 lg:pb-6 lg:pt-6">
+        <AccountContentContainer>
         <div className="mx-auto w-full max-w-[354px] lg:max-w-none">
           <div className="w-full">
             <div className="flex items-center gap-2 lg:px-0">
@@ -875,6 +877,7 @@ export default function GroomerPerformancePage() {
           </section>
           </div>
         </div>
+        </AccountContentContainer>
       </div>
 
       <ReportReviewModal

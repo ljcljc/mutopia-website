@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Spinner } from "@/components/common/Spinner";
 import { Icon } from "@/components/common/Icon";
+import AccountContentContainer from "@/components/layout/AccountContentContainer";
 import { EarningsEmptyState } from "@/modules/groomer/components/earnings/EarningsEmptyState";
 import { RecentTransactionItem } from "@/modules/groomer/components/earnings/RecentTransactionItem";
 import { getGroomerEarningTransactions } from "@/lib/api";
@@ -89,7 +90,8 @@ export default function GroomerTransactionsPage() {
 
   return (
     <div className="min-h-[calc(100vh-64px)] w-full bg-[#633479] px-[calc(20*var(--px393))] pb-[calc(32*var(--px393))] pt-[calc(8*var(--px393))] sm:px-5 sm:pb-10 sm:pt-2">
-      <div className="space-y-4">
+      <AccountContentContainer>
+        <div className="space-y-4">
         <header className="flex items-center gap-3">
           <button
             type="button"
@@ -160,6 +162,7 @@ export default function GroomerTransactionsPage() {
           </section>
         )}
       </div>
+      </AccountContentContainer>
     </div>
   );
 }

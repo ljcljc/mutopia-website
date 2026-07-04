@@ -4,6 +4,7 @@ import IdentitySwitchAction from "@/components/account/IdentitySwitchAction";
 import { CommonCheckbox, CustomInput, CustomRadio, CustomSelect, CustomSelectItem, CustomTextarea, OrangeButton } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
 import { Spinner } from "@/components/common/Spinner";
+import AccountContentContainer from "@/components/layout/AccountContentContainer";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import {
   BookingRequestInteraction,
@@ -1741,7 +1742,8 @@ export default function GroomerDashboardPage() {
 
   return (
     <div className="min-h-[calc(100vh-64px)] w-full bg-[#633479] px-[calc(20*var(--px393))] pb-[calc(112*var(--px393))] pt-[calc(8*var(--px393))] sm:px-5 sm:pb-28 sm:pt-2">
-      <div className="space-y-3.5">
+      <AccountContentContainer>
+        <div className="space-y-3.5">
         <div className="flex items-center gap-4">
           <h1 className="font-comfortaa text-[20px] font-bold leading-[22px] text-white">Dashboard</h1>
           <IdentitySwitchAction
@@ -1833,6 +1835,7 @@ export default function GroomerDashboardPage() {
           </>
         )}
       </div>
+      </AccountContentContainer>
       <GroomerCheckUpModal
         open={isCheckUpOpen}
         appointment={effectiveAppointment}

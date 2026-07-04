@@ -189,13 +189,16 @@ function UserInfo() {
 function DesktopActions() {
   const user = useAuthStore((state) => state.user);
   const userInfo = useAuthStore((state) => state.userInfo);
+  const isResolvingUserInfo = useAuthStore((state) => state.isResolvingUserInfo);
+  const isWaitingForUserInfo = Boolean(user) && isResolvingUserInfo && !userInfo;
 
   return (
     <div
       className="h-[28px] relative shrink-0 hidden lg:flex items-center gap-[10.5px]"
       data-name="Buttons"
     >
-      {!userInfo?.is_groomer && <ApplyAsGroomerButton />}
+      {isWaitingForUserInfo ? <div className="h-7 w-[142px] shrink-0" aria-hidden="true" /> : null}
+      {!isWaitingForUserInfo && !userInfo?.is_groomer && <ApplyAsGroomerButton />}
       {user ? <UserInfo /> : <LoginSignUpButton />}
     </div>
   );
@@ -463,24 +466,35 @@ function CloseButton({ onClick }: { onClick: () => void }) {
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const user = useAuthStore((state) => state.user);
   const userInfo = useAuthStore((state) => state.userInfo);
   const setUserInfo = useAuthStore((state) => state.setUserInfo);
-  console.log("[Header] userInfo.is_groomer:", userInfo?.is_groomer);
+  const setIsResolvingUserInfo = useAuthStore((state) => state.setIsResolvingUserInfo);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
   useEffect(() => {
+    let isCancelled = false;
+
     const loadUserInfoFromStorage = async () => {
-      if (userInfo) return;
+      if (userInfo || !user) {
+        setIsResolvingUserInfo(false);
+        return;
+      }
+
+      setIsResolvingUserInfo(true);
+
       try {
         const userInfoStr = await getEncryptedItem(STORAGE_KEYS.USER_INFO);
-        if (!userInfoStr) return;
+        if (!userInfoStr || isCancelled) return;
         const parsed = JSON.parse(userInfoStr);
         if (parsed && typeof parsed === "object" && parsed.email) {
           if (parsed.first_name !== undefined || !parsed.name) {
-            setUserInfo(parsed as MeOut);
+            if (!isCancelled) {
+              setUserInfo(parsed as MeOut);
+            }
           } else {
             const converted: MeOut = {
               id: "",
@@ -496,16 +510,26 @@ export default function Header() {
               is_member: false,
               is_groomer: false,
             };
-            setUserInfo(converted);
+            if (!isCancelled) {
+              setUserInfo(converted);
+            }
           }
         }
       } catch (e) {
         console.warn("Failed to load userInfo from localStorage:", e);
+      } finally {
+        if (!isCancelled) {
+          setIsResolvingUserInfo(false);
+        }
       }
     };
 
     loadUserInfoFromStorage();
-  }, [userInfo, setUserInfo]);
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [user, userInfo, setIsResolvingUserInfo, setUserInfo]);
 
   // 滚动检测和智能阴影显示
   useEffect(() => {

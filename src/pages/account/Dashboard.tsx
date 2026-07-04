@@ -10,6 +10,7 @@ import DashboardBookingCard from "@/components/account/dashboard/DashboardBookin
 import DashboardHeroCard from "@/components/account/dashboard/DashboardHeroCard";
 import DashboardMyCreditCard from "@/components/account/dashboard/DashboardMyCreditCard";
 import DashboardMyPetsCard from "@/components/account/dashboard/DashboardMyPetsCard";
+import AccountContentContainer from "@/components/layout/AccountContentContainer";
 
 export default function Dashboard() {
   const { fetchMembershipPlans } = useAccountStore();
@@ -53,8 +54,8 @@ export default function Dashboard() {
 
   return (
     <div className="w-full min-h-full flex flex-col">
-      <div
-        className="w-full max-w-none sm:max-w-[944px] mx-auto px-[calc(20*var(--px493))] sm:px-6 pb-[calc(20*var(--px493))] sm:pb-8 flex-1"
+      <AccountContentContainer
+        className="px-[calc(20*var(--px493))] sm:px-6 pb-[calc(20*var(--px493))] sm:pb-8 flex-1"
         style={{ ["--px493" as never]: "calc(100vw / 493)" }}
       >
         <div className="flex flex-col gap-[calc(16*var(--px493))] sm:gap-[20px]">
@@ -83,7 +84,7 @@ export default function Dashboard() {
             <MembershipCard />
           </div>
         </div>
-      </div>
+      </AccountContentContainer>
     </div>
   );
 }

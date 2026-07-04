@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import IdentitySwitchAction from "@/components/account/IdentitySwitchAction";
 import { OrangeButton } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
+import AccountContentContainer from "@/components/layout/AccountContentContainer";
 import { useIsMobile } from "@/components/ui/use-mobile";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -188,86 +189,88 @@ export default function GroomerAccountPage() {
   return (
     <>
       <div className="min-h-[calc(100vh-64px)] w-full bg-[#633479] px-[calc(20*var(--px393))] pb-[calc(36*var(--px393))] pt-[calc(8*var(--px393))] sm:px-5 sm:pb-8 sm:pt-2 lg:min-h-0 lg:pb-4 lg:pt-1">
-        <div className="mb-4 flex items-center gap-4 sm:mb-5">
-          <h1 className="font-comfortaa text-[20px] font-bold leading-[22px] text-white">My account</h1>
-          <IdentitySwitchAction
-            mode="groomer"
-            targetPath="/account/profile"
-            className="ml-auto flex items-center"
-            controlClassName="flex items-center gap-3"
-            labelClassName="cursor-pointer font-comfortaa text-[14px] font-bold leading-[22px] text-[#FFF7ED]"
-            switchClassName="cursor-pointer data-[state=checked]:border-[#DE6A07] data-[state=checked]:bg-[#DE6A07]"
-            labelFirst
-          />
-        </div>
+        <AccountContentContainer>
+          <div className="mb-4 flex items-center gap-4 sm:mb-5">
+            <h1 className="font-comfortaa text-[20px] font-bold leading-[22px] text-white">My account</h1>
+            <IdentitySwitchAction
+              mode="groomer"
+              targetPath="/account/profile"
+              className="ml-auto flex items-center"
+              controlClassName="flex items-center gap-3"
+              labelClassName="cursor-pointer font-comfortaa text-[14px] font-bold leading-[22px] text-[#FFF7ED]"
+              switchClassName="cursor-pointer data-[state=checked]:border-[#DE6A07] data-[state=checked]:bg-[#DE6A07]"
+              labelFirst
+            />
+          </div>
 
-        <div className="space-y-4 sm:space-y-5">
-          <PersonalInfoCard mode="groomer" />
+          <div className="space-y-4 sm:space-y-5">
+            <PersonalInfoCard mode="groomer" />
 
-          <SimpleListCard
-            title="Service areas"
-            titleIcon="location"
-            actionText="Modify"
-            actionIcon="pencil"
-            onActionClick={() => setIsAddAreaModalOpen(true)}
-            actionButtonClassName={accountCenterTheme.actionInteractiveClassName}
-            rows={serviceRows}
-            emptyText={isLoadingAreas ? "Loading service areas..." : "No service areas saved yet."}
-          />
+            <SimpleListCard
+              title="Service areas"
+              titleIcon="location"
+              actionText="Modify"
+              actionIcon="pencil"
+              onActionClick={() => setIsAddAreaModalOpen(true)}
+              actionButtonClassName={accountCenterTheme.actionInteractiveClassName}
+              rows={serviceRows}
+              emptyText={isLoadingAreas ? "Loading service areas..." : "No service areas saved yet."}
+            />
 
-          <PayoutCard
-            bankName={payout.bankName}
-            bankMask={payout.bankMask}
-            statusText={isLoadingPayout ? "Loading..." : payout.statusText}
-            actionText={payout.onboardingCompleted ? "Manage" : "Setup"}
-            onActionClick={handleOpenPayoutSettings}
-            actionDisabled={isLoadingPayout || isOpeningPayoutSettings}
-            className="lg:h-[152px]"
-          />
+            <PayoutCard
+              bankName={payout.bankName}
+              bankMask={payout.bankMask}
+              statusText={isLoadingPayout ? "Loading..." : payout.statusText}
+              actionText={payout.onboardingCompleted ? "Manage" : "Setup"}
+              onActionClick={handleOpenPayoutSettings}
+              actionDisabled={isLoadingPayout || isOpeningPayoutSettings}
+              className="lg:h-[152px]"
+            />
 
-          <section className="rounded-[20px] border-[1.47px] border-[#4A2C55] bg-white px-5 pb-5 pt-[19px] shadow-[0px_4px_12px_rgba(0,0,0,0.08)] lg:h-[332px]">
-            <div className="mb-[14px] flex items-center justify-between">
-              <h2 className="font-comfortaa text-[16px] font-bold leading-6 text-[#4A2C55]">Performance</h2>
-              {selectedPerformance ? (
-                <div className={selectedPerformance.badgeClassName}>
-                  <div className="flex h-full items-center">
-                    <span className={selectedPerformance.badgeTextClassName}>
-                      {getPerformanceTagText(performance?.level ?? "", selectedPerformance.badgeText)}
-                    </span>
+            <section className="rounded-[20px] border-[1.47px] border-[#4A2C55] bg-white px-5 pb-5 pt-[19px] shadow-[0px_4px_12px_rgba(0,0,0,0.08)] lg:h-[332px]">
+              <div className="mb-[14px] flex items-center justify-between">
+                <h2 className="font-comfortaa text-[16px] font-bold leading-6 text-[#4A2C55]">Performance</h2>
+                {selectedPerformance ? (
+                  <div className={selectedPerformance.badgeClassName}>
+                    <div className="flex h-full items-center">
+                      <span className={selectedPerformance.badgeTextClassName}>
+                        {getPerformanceTagText(performance?.level ?? "", selectedPerformance.badgeText)}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="inline-flex h-[26px] items-center rounded-full bg-[#F5F1EC] px-3">
-                  <span className="font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#8B6357]">Loading...</span>
-                </div>
-              )}
-            </div>
-            <p className="font-comfortaa text-[13px] leading-[19.5px] text-[#6B7280]">
-              {isLoadingPerformance ? "Loading your performance benefits..." : "Maintain your performance to keep these benefits:"}
-            </p>
-            <ul className="mt-3 space-y-3">
-              {(selectedPerformance?.benefits ?? []).map((benefit) => (
-                <PerformanceBenefitItem
-                  key={benefit.title}
-                  title={benefit.title}
-                  description={benefit.description}
-                  tone={selectedPerformance?.benefitTone ?? "neutral"}
-                />
-              ))}
-            </ul>
-            <OrangeButton
-              type="button"
-              variant="outline"
-              size="medium"
-              className="mt-6 w-full border-[#633479]! text-[#633479]! shadow-[0_4px_12px_0_rgba(74,44,85,0.30)] hover:bg-[rgba(99,52,121,0.12)]! active:!bg-[rgba(99,52,121,0.12)] focus-visible:!bg-[rgba(99,52,121,0.12)] focus-visible:!border-[#633479] active:!border-[#633479] lg:w-[247px]"
-              onClick={() => navigate("/groomer/account/performance")}
-            >
-              <span className="text-center font-comfortaa text-[15px] font-bold leading-[22.5px] text-[#633479]">
-                View your performance
-              </span>
-            </OrangeButton>
-          </section>
-        </div>
+                ) : (
+                  <div className="inline-flex h-[26px] items-center rounded-full bg-[#F5F1EC] px-3">
+                    <span className="font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#8B6357]">Loading...</span>
+                  </div>
+                )}
+              </div>
+              <p className="font-comfortaa text-[13px] leading-[19.5px] text-[#6B7280]">
+                {isLoadingPerformance ? "Loading your performance benefits..." : "Maintain your performance to keep these benefits:"}
+              </p>
+              <ul className="mt-3 space-y-3">
+                {(selectedPerformance?.benefits ?? []).map((benefit) => (
+                  <PerformanceBenefitItem
+                    key={benefit.title}
+                    title={benefit.title}
+                    description={benefit.description}
+                    tone={selectedPerformance?.benefitTone ?? "neutral"}
+                  />
+                ))}
+              </ul>
+              <OrangeButton
+                type="button"
+                variant="outline"
+                size="medium"
+                className="mt-6 w-full border-[#633479]! text-[#633479]! shadow-[0_4px_12px_0_rgba(74,44,85,0.30)] hover:bg-[rgba(99,52,121,0.12)]! active:!bg-[rgba(99,52,121,0.12)] focus-visible:!bg-[rgba(99,52,121,0.12)] focus-visible:!border-[#633479] active:!border-[#633479] lg:w-[247px]"
+                onClick={() => navigate("/groomer/account/performance")}
+              >
+                <span className="text-center font-comfortaa text-[15px] font-bold leading-[22.5px] text-[#633479]">
+                  View your performance
+                </span>
+              </OrangeButton>
+            </section>
+          </div>
+        </AccountContentContainer>
       </div>
       <AddServiceAreaModal
         open={isAddAreaModalOpen}
