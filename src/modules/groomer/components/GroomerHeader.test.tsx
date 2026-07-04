@@ -4,12 +4,21 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { useAuthStore } from "@/components/auth/authStore";
 import GroomerHeader from "./GroomerHeader";
 
+function openAccountDropdown() {
+  const trigger = document.querySelector('[data-slot="dropdown-menu-trigger"]');
+  if (!(trigger instanceof HTMLElement)) {
+    throw new Error("Dropdown trigger not found");
+  }
+  fireEvent.pointerDown(trigger);
+}
+
 function renderHeader() {
   render(
     <MemoryRouter initialEntries={["/groomer/dashboard"]}>
       <Routes>
         <Route path="/groomer/dashboard" element={<GroomerHeader />} />
         <Route path="/groomer/notifications" element={<div>Groomer notifications page</div>} />
+        <Route path="/account/dashboard" element={<div>Customer dashboard page</div>} />
       </Routes>
     </MemoryRouter>,
   );
@@ -59,7 +68,7 @@ describe("GroomerHeader", () => {
 
     renderHeader();
 
-    expect(screen.getByText("partner")).toBeInTheDocument();
+    expect(screen.getAllByText("partner")).toHaveLength(2);
   });
 
   it("navigates to the groomer notifications page when clicking the notification icon", () => {
@@ -68,5 +77,27 @@ describe("GroomerHeader", () => {
     fireEvent.click(screen.getByRole("button", { name: "Notifications" }));
 
     expect(screen.getByText("Groomer notifications page")).toBeInTheDocument();
+  });
+
+  it("navigates back to the customer dashboard when switching the toggle", () => {
+    useAuthStore.setState({
+      userInfo: {
+        id: "groomer-3",
+        email: "partner@example.com",
+        first_name: "Jane",
+        last_name: "Doe",
+        receive_marketing_message: false,
+        role: "groomer",
+        is_email_verified: true,
+        is_groomer: true,
+      },
+    });
+
+    renderHeader();
+
+    openAccountDropdown();
+    fireEvent.click(screen.getByRole("switch", { name: "Switch to pet owner" }));
+
+    expect(screen.getByText("Customer dashboard page")).toBeInTheDocument();
   });
 });

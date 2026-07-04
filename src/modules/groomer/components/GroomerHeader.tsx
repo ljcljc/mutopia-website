@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Icon } from "@/components/common/Icon";
 import { useAuthStore } from "@/components/auth/authStore";
 import BaseAccountHeaderShell from "@/components/layout/BaseAccountHeaderShell";
+import AccountDropdown from "@/components/layout/AccountDropdown";
 
 function getPartnerDisplayName(firstName?: string | null, lastName?: string | null, email?: string | null) {
   return [firstName, lastName].filter(Boolean).join(" ").trim() || email?.split("@")[0] || "Partner";
@@ -62,6 +63,11 @@ export default function GroomerHeader() {
       <PartnerLogo name={partnerName} />
       <div className="flex items-center gap-2">
         <TodayBadge />
+        <AccountDropdown
+          userInfo={userInfo ?? undefined}
+          fallbackName={partnerName}
+          mode="groomer"
+        />
         <button
           type="button"
           onClick={() => navigate("/groomer/notifications")}
