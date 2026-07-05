@@ -1,11 +1,23 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import IdentitySwitchAction from "@/components/account/IdentitySwitchAction";
-import { CommonCheckbox, CustomInput, CustomRadio, CustomSelect, CustomSelectItem, CustomTextarea, OrangeButton } from "@/components/common";
+import {
+  CommonCheckbox,
+  CustomInput,
+  CustomRadio,
+  CustomSelect,
+  CustomSelectItem,
+  CustomTextarea,
+  FileUpload,
+  OrangeButton,
+  type FileUploadItem,
+} from "@/components/common";
 import { Icon } from "@/components/common/Icon";
 import { Spinner } from "@/components/common/Spinner";
 import AccountContentContainer from "@/components/layout/AccountContentContainer";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { useIsMobile } from "@/components/ui/use-mobile";
+import { cn } from "@/components/ui/utils";
 import {
   BookingRequestInteraction,
   type BookingRequestDecisionTimeOption,
@@ -37,7 +49,7 @@ import { toast } from "sonner";
 import { CheckCircleIcon, StarIcon, XIcon } from "lucide-react";
 
 type BookingRequest = DashboardAppointment;
-type CheckUpTab = "weight" | "add-ons" | "personalization";
+type CheckUpTab = "photo" | "weight" | "add-ons" | "personalization";
 type BookingRequestSuccessAlertKind = "confirm" | "propose";
 type TerminateServiceResolution = "owner_approved" | "mutopia_intervention";
 type HealthReportFormData = HealthReportIn;
@@ -844,6 +856,7 @@ function CheckUpTabBadge({
   onClick: () => void;
 }) {
   const labelByTab: Record<CheckUpTab, string> = {
+    photo: "Photo",
     weight: "Weight",
     "add-ons": "Add-ons",
     personalization: "Personalization",
@@ -914,7 +927,11 @@ function GroomerCheckUpModal({
     result: Awaited<ReturnType<typeof submitGroomerCheckUpCheckout>>;
   }) => void;
 }) {
+  const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<CheckUpTab>("weight");
+  const [beforePhotoFile, setBeforePhotoFile] = useState<File | null>(null);
+  const [beforePhotoError, setBeforePhotoError] = useState("");
+  const [beforePhotoPreviewUrl, setBeforePhotoPreviewUrl] = useState<string | null>(null);
   const [weightValue, setWeightValue] = useState("60");
   const [weightUnit, setWeightUnit] = useState("lbs");
   const [addOns, setAddOns] = useState<AddOnOut[]>(FALLBACK_ADD_ONS);
@@ -926,7 +943,9 @@ function GroomerCheckUpModal({
 
   useEffect(() => {
     if (!open) return;
-    setActiveTab("weight");
+    setActiveTab("photo");
+    setBeforePhotoFile(null);
+    setBeforePhotoError("");
     setWeightValue(appointment?.weightValue || "60");
     setWeightUnit(normalizeCheckUpWeightUnit(appointment?.weightUnit));
     const initialSelectedAddOnIds = appointment?.addonIds ?? [];
@@ -946,6 +965,33 @@ function GroomerCheckUpModal({
       });
   }, [appointment?.weightUnit, appointment?.weightValue, open]);
 
+  useEffect(() => {
+    if (!beforePhotoFile) {
+      setBeforePhotoPreviewUrl(null);
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(beforePhotoFile);
+    setBeforePhotoPreviewUrl(previewUrl);
+
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [beforePhotoFile]);
+
+  const beforePhotoUploadItems = useMemo<FileUploadItem[]>(
+    () =>
+      beforePhotoFile && beforePhotoPreviewUrl
+        ? [
+            {
+              file: beforePhotoFile,
+              previewUrl: beforePhotoPreviewUrl,
+              uploadProgress: 100,
+              uploadStatus: "uploaded",
+            },
+          ]
+        : [],
+    [beforePhotoFile, beforePhotoPreviewUrl],
+  );
+
   const toggleAddOn = (id: number, checked: boolean) => {
     setSelectedAddOnIds((current) => checked ? [...new Set([...current, id])] : current.filter((itemId) => itemId !== id));
   };
@@ -953,6 +999,14 @@ function GroomerCheckUpModal({
   const handleNext = async () => {
     if (!appointment?.id) return;
 
+    if (activeTab === "photo") {
+      if (!beforePhotoFile) {
+        setBeforePhotoError("Before service photo is required");
+        return;
+      }
+      setActiveTab("weight");
+      return;
+    }
     if (activeTab === "weight") {
       setActiveTab("add-ons");
       return;
@@ -964,6 +1018,11 @@ function GroomerCheckUpModal({
 
     const bookingId = Number(appointment.id);
     if (!Number.isFinite(bookingId)) return;
+    if (!beforePhotoFile) {
+      setBeforePhotoError("Before service photo is required");
+      setActiveTab("photo");
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -974,6 +1033,7 @@ function GroomerCheckUpModal({
         return next;
       }, {});
       const result = await submitGroomerCheckUpCheckout(bookingId, {
+        before_photo_file: beforePhotoFile,
         weight_value: weightValue,
         weight_unit: weightUnit,
         add_on_ids: selectedAddOnIds,
@@ -1007,8 +1067,13 @@ function GroomerCheckUpModal({
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
       <DialogContent
-        overlayClassName="service-area-dialog-overlay z-[70]!"
-        className="service-area-dialog inset-x-0! bottom-0! top-auto! z-[75]! mx-auto! flex! max-h-[88vh]! w-full! max-w-none! translate-x-0! translate-y-0! flex-col! gap-0! rounded-b-none rounded-t-[calc(24*var(--px393))] border-0! bg-white! p-0! shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)] [&>button]:top-[calc(24*var(--px393))] [&>button]:right-[calc(24*var(--px393))] sm:[&>button]:top-6 sm:[&>button]:right-6 sm:top-1/2! sm:bottom-auto! sm:translate-y-[-50%]! sm:max-w-[600px]! sm:rounded-[24px]! sm:shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.3)]"
+        overlayClassName={isMobile ? "service-area-dialog-overlay z-[70]!" : "z-[70]!"}
+        className={cn(
+          "border-0! bg-white! p-0! gap-0! [&>button]:top-[calc(24*var(--px393))] [&>button]:right-[calc(24*var(--px393))] sm:[&>button]:top-6 sm:[&>button]:right-6",
+          isMobile
+            ? "service-area-dialog inset-x-0! bottom-0! top-auto! z-[75]! mx-auto! flex! max-h-[88vh]! w-full! max-w-none! translate-x-0! translate-y-0! flex-col! rounded-b-none rounded-t-[calc(24*var(--px393))] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
+            : "left-1/2! top-1/2! z-[75]! grid! w-[min(100%-32px,420px)]! max-h-[min(88vh,760px)]! -translate-x-1/2! -translate-y-1/2! overflow-hidden! rounded-[20px]! shadow-[0px_18px_40px_rgba(0,0,0,0.18)]",
+        )}
       >
         <DialogTitle className="sr-only">Groomer check up</DialogTitle>
         <DialogDescription className="sr-only">Confirm with pet owner before add extra service.</DialogDescription>
@@ -1018,20 +1083,52 @@ function GroomerCheckUpModal({
               <div>
                 <h2 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">Groomer check up</h2>
                 <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
-                  Confirm with pet owner before add extra service
+                  We&apos;ll show before and after photo to pet owner
                 </p>
               </div>
 
               <div className="flex flex-wrap gap-2">
-                {(["weight", "add-ons", "personalization"] as CheckUpTab[]).map((tab) => (
+                {(["photo", "weight", "add-ons", "personalization"] as CheckUpTab[]).map((tab) => (
                   <CheckUpTabBadge key={tab} tab={tab} activeTab={activeTab} onClick={() => setActiveTab(tab)} />
                 ))}
               </div>
             </div>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto px-[calc(24*var(--px393))] pb-[max(calc(24*var(--px393)),env(safe-area-inset-bottom))] sm:px-6 sm:pb-[max(24px,env(safe-area-inset-bottom))] sm:max-h-[60vh]">
+          <div
+            className={cn(
+              "min-h-0 flex-1 overflow-y-auto px-[calc(24*var(--px393))] sm:px-6",
+              isMobile
+                ? "pb-[max(calc(24*var(--px393)),env(safe-area-inset-bottom))] sm:pb-[max(24px,env(safe-area-inset-bottom))]"
+                : "pb-6",
+            )}
+          >
             <div className="flex flex-col gap-[14px]">
+              {activeTab === "photo" ? (
+                <div className="flex flex-col gap-3">
+                  <p className="font-comfortaa text-[14px] font-bold leading-5 text-[#DE6A07]">Upload before service photo</p>
+                  <FileUpload
+                    accept="image/jpeg,image/jpg,image/png"
+                    disabled={isSubmitting}
+                    maxFiles={1}
+                    multiple={false}
+                    uploadItems={beforePhotoUploadItems}
+                    onChange={(files) => {
+                      setBeforePhotoFile(files[0] ?? null);
+                      setBeforePhotoError("");
+                    }}
+                    onRemove={() => {
+                      setBeforePhotoFile(null);
+                      setBeforePhotoError("");
+                    }}
+                    className="[&_p]:whitespace-normal"
+                  />
+                  {beforePhotoError ? (
+                    <p className="font-comfortaa text-[12px] leading-[18px] text-[#DE1507]">{beforePhotoError}</p>
+                  ) : null}
+                </div>
+              ) : null}
+
               {activeTab === "weight" ? (
                 <div className="flex min-h-[130px] flex-col gap-3 rounded-[12px] bg-white p-5 shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)]">
                   <p className="font-comfortaa text-[14px] font-bold leading-5 text-[#DE6A07]">Verify weight with pet owner</p>

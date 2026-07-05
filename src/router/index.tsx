@@ -3,6 +3,7 @@ import Layout from "@/components/layout/Layout";
 import AccountLayout from "@/components/layout/AccountLayout";
 import Home from "@/pages/Home";
 import Booking from "@/pages/Booking";
+import BookingHealthInfo from "@/pages/account/BookingHealthInfo";
 import HowItWorks from "@/pages/HowItWorks";
 import PaymentSuccess from "@/pages/PaymentSuccess";
 import PaymentFail from "@/pages/PaymentFail";
@@ -21,6 +22,10 @@ export const router = createBrowserRouter([
       {
         path: "booking",
         element: <Booking />,
+      },
+      {
+        path: "health-form/:bookingId",
+        element: <BookingHealthInfo />,
       },
       {
         path: "how-it-works",

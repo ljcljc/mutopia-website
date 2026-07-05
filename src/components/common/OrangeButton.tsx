@@ -1,4 +1,5 @@
 import { ButtonHTMLAttributes, forwardRef } from "react";
+import { cn } from "@/components/ui/utils";
 import { Spinner } from "./Spinner";
 
 interface OrangeButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -30,6 +31,7 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
     const baseStyles =
       "relative rounded-[32px] transition-all duration-200 cursor-pointer group";
     const isDisabled = disabled || loading;
+    const disabledStyles = "opacity-60 !cursor-not-allowed";
 
     const textStyle = textSize ? { fontSize: `${textSize}px` } : undefined;
 
@@ -41,7 +43,15 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
           <button
             ref={ref}
             disabled={isDisabled}
-            className={`${baseStyles} h-[28px] bg-[#8b6357] hover:bg-[rgba(139,99,87,0.8)] active:bg-[rgba(139,99,87,0.8)] focus-visible:bg-[rgba(139,99,87,0.8)] ${isDisabled ? "opacity-60 !cursor-not-allowed" : ""} ${fullWidth ? "w-full" : ""} ${className}`}
+            className={cn(
+              baseStyles,
+              "h-[28px] bg-[#8b6357]",
+              !isDisabled &&
+                "hover:bg-[rgba(139,99,87,0.8)] active:bg-[rgba(139,99,87,0.8)] focus-visible:bg-[rgba(139,99,87,0.8)]",
+              isDisabled && disabledStyles,
+              fullWidth && "w-full",
+              className
+            )}
             {...props}
           >
             {/* Focus ring - appears on keyboard focus and active state */}
@@ -142,7 +152,15 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
           <button
             ref={ref}
             disabled={isDisabled}
-            className={`${baseStyles} h-[28px] bg-transparent hover:bg-[rgba(139,99,87,0.2)] active:bg-[rgba(139,99,87,0.2)] focus-visible:bg-[rgba(139,99,87,0.2)] ${isDisabled ? "opacity-60 !cursor-not-allowed" : ""} ${fullWidth ? "w-full" : ""} ${className}`}
+            className={cn(
+              baseStyles,
+              "h-[28px] bg-transparent",
+              !isDisabled &&
+                "hover:bg-[rgba(139,99,87,0.2)] active:bg-[rgba(139,99,87,0.2)] focus-visible:bg-[rgba(139,99,87,0.2)]",
+              isDisabled && disabledStyles,
+              fullWidth && "w-full",
+              className
+            )}
             {...props}
           >
             {/* Border - changes color on focus/active */}
@@ -220,11 +238,20 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
 
     const variantStyles = {
       primary:
-        "bg-[#de6a07] hover:bg-[rgba(222,106,7,0.8)] active:bg-[rgba(222,106,7,0.8)] focus-visible:bg-[rgba(222,106,7,0.8)] text-white",
+        "bg-[#de6a07] text-white",
       outline:
-        "border-2 border-[#de6a07] focus-visible:border-[#2374ff] active:border-[#2374ff] text-[#de6a07] hover:bg-[rgba(222,106,7,0.16)] active:bg-[rgba(222,106,7,0.16)] focus-visible:bg-[rgba(222,106,7,0.16)]",
+        "border-2 border-[#de6a07] text-[#de6a07]",
       outlineMuted:
-        "border-2 border-[#8B6357] focus-visible:border-[#2374ff] active:border-[#2374ff] text-[#8B6357] hover:bg-[rgba(139,99,87,0.16)] active:bg-[rgba(139,99,87,0.16)] focus-visible:bg-[rgba(139,99,87,0.16)]",
+        "border-2 border-[#8B6357] text-[#8B6357]",
+      secondary: "",
+    };
+    const interactionStyles = {
+      primary:
+        "hover:bg-[rgba(222,106,7,0.8)] active:bg-[rgba(222,106,7,0.8)] focus-visible:bg-[rgba(222,106,7,0.8)]",
+      outline:
+        "hover:bg-[rgba(222,106,7,0.16)] active:bg-[rgba(222,106,7,0.16)] focus-visible:bg-[rgba(222,106,7,0.16)] focus-visible:border-[#2374ff] active:border-[#2374ff]",
+      outlineMuted:
+        "hover:bg-[rgba(139,99,87,0.16)] active:bg-[rgba(139,99,87,0.16)] focus-visible:bg-[rgba(139,99,87,0.16)] focus-visible:border-[#2374ff] active:border-[#2374ff]",
       secondary: "",
     };
 
@@ -235,7 +262,15 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
         <button
           ref={ref}
           disabled={isDisabled}
-          className={`${baseStyles} ${sizeStyles[size as "standard" | "medium"]} ${variantStyles[variant]} ${isDisabled ? "opacity-60 !cursor-not-allowed" : ""} ${widthStyle} ${className}`}
+          className={cn(
+            baseStyles,
+            sizeStyles[size as "standard" | "medium"],
+            variantStyles[variant],
+            !isDisabled && interactionStyles[variant],
+            isDisabled && disabledStyles,
+            widthStyle,
+            className
+          )}
           {...props}
         >
           {/* Focus ring - appears on keyboard focus and active state */}
@@ -273,7 +308,15 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
       <button
         ref={ref}
         disabled={isDisabled}
-        className={`${baseStyles} ${sizeStyles[size as "standard" | "medium"]} ${variantStyles[variant]} ${isDisabled ? "opacity-60 !cursor-not-allowed" : ""} ${widthStyle} ${className}`}
+        className={cn(
+          baseStyles,
+          sizeStyles[size as "standard" | "medium"],
+          variantStyles[variant],
+          !isDisabled && interactionStyles[variant],
+          isDisabled && disabledStyles,
+          widthStyle,
+          className
+        )}
         {...props}
       >
         <div className="flex gap-[7px] items-center justify-center size-full relative">

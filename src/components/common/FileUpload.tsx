@@ -162,10 +162,10 @@ export function FileUpload({
   const isUploadDisabled = maxFiles ? displayItems.length >= maxFiles : false;
 
   return (
-    <div className={cn("flex flex-col items-start relative w-full ", className)}>
+    <div className={cn("relative flex w-full flex-col items-start", className)}>
       <div
         className={cn(
-          "bg-neutral-50 border-[#de6a07] border-[1.5px] border-dashed flex flex-col items-center justify-center p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(16*var(--px393))] sm:rounded-[16px] shrink-0 w-full transition-colors shadow-[0px_4px_10px_0px_rgba(0,0,0,0.15)]",
+          "relative flex w-full shrink-0 flex-col items-center justify-center rounded-[calc(16*var(--px393))] border-[1.5px] border-dashed border-[#de6a07] bg-neutral-50 p-[calc(16*var(--px393))] transition-colors shadow-[0px_4px_10px_0px_rgba(0,0,0,0.15)] sm:rounded-[16px] sm:p-[24px]",
           isDragging && "border-[#de6a07] bg-[rgba(222,106,7,0.05)]",
           (disabled || isUploadDisabled) && "opacity-60 cursor-not-allowed",
           (state === "error-size" || state === "error-format") && "gap-[12px]"
@@ -176,12 +176,12 @@ export function FileUpload({
         onDrop={!isUploadDisabled ? handleDrop : undefined}
       >
         <div className={cn(
-          "flex flex-col gap-[calc(18*var(--px393))] sm:gap-[18px] items-center justify-center relative shrink-0",
+          "relative flex shrink-0 flex-col items-center justify-center gap-[calc(14*var(--px393))] sm:gap-[18px]",
           hasFiles && "w-full"
         )}>
           {/* 文件列表：显示在按钮和文字上方 */}
           {hasFiles && (
-            <div className="flex flex-wrap sm:flex-nowrap gap-[calc(12*var(--px393))] sm:gap-[12px] items-center relative shrink-0 w-full">
+            <div className="relative flex w-full flex-wrap items-center gap-[calc(10*var(--px393))] sm:flex-nowrap sm:gap-[12px]">
               {/* 已上传的图片缩略图列表 */}
               {displayItems.map((item, index) => {
                 const file = item.file;
@@ -317,27 +317,27 @@ export function FileUpload({
           )}
 
           {/* Text Group: 上传按钮和提示文字（移动端：按钮与 or drag and drop 纵向；PC：横向） */}
-          <div className="flex flex-col gap-[calc(6*var(--px393))] sm:gap-[3px] items-center justify-center relative shrink-0">
-            <div className="flex flex-col sm:flex-row gap-[calc(6*var(--px393))] sm:gap-[9px] items-center justify-center relative shrink-0">
-              <div className="border-2 border-[#de6a07] sm:border-[#8b6357] border-solid flex h-[calc(28*var(--px393))] sm:h-[28px] items-center justify-center px-[calc(26*var(--px393))] sm:px-[26px] relative rounded-[calc(32*var(--px393))] sm:rounded-[32px] shrink-0">
-                <div className="bg-clip-padding border-0 border-transparent border-solid flex gap-[5px] items-center relative">
+          <div className="relative flex w-full flex-col items-center justify-center gap-[calc(6*var(--px393))] sm:gap-[3px]">
+            <div className="relative flex w-full flex-col items-center justify-center gap-[calc(6*var(--px393))] sm:w-auto sm:flex-row sm:gap-[9px]">
+              <div className="relative flex h-[calc(32*var(--px393))] w-full items-center justify-center rounded-[calc(32*var(--px393))] border-2 border-solid border-[#de6a07] px-[calc(18*var(--px393))] sm:h-[28px] sm:w-auto sm:rounded-[32px] sm:border-[#8b6357] sm:px-[26px]">
+                <div className="relative flex items-center gap-[5px] border-0 border-solid border-transparent bg-clip-padding">
                   <button
                     type="button"
                     onClick={handleClick}
                     disabled={disabled || isUploadDisabled}
-                    className="font-comfortaa font-bold leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[calc(12*var(--px393))] sm:text-[12px] text-[#de6a07] sm:text-[#8b6357] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="relative w-full cursor-pointer text-center font-comfortaa text-[calc(12*var(--px393))] font-bold leading-[calc(17.5*var(--px393))] text-[#de6a07] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:text-[12px] sm:leading-[17.5px] sm:text-[#8b6357]"
                   >
                     {buttonText}
                   </button>
                 </div>
               </div>
               {showDragHint && (
-                <p className="font-comfortaa font-bold leading-[calc(20*var(--px393))] sm:leading-[20px] relative shrink-0 text-[calc(14*var(--px393))] sm:text-[14px] text-neutral-600">
+                <p className="relative text-center font-comfortaa text-[calc(13*var(--px393))] font-bold leading-[calc(18*var(--px393))] text-neutral-600 sm:shrink-0 sm:text-[14px] sm:leading-[20px]">
                   or drag and drop
                 </p>
               )}
             </div>
-            <p className="font-['Inter:Regular',sans-serif] font-normal leading-[calc(24*var(--px393))] sm:leading-[24px] not-italic relative shrink-0 text-[calc(16.5*var(--px393))] sm:text-[16.5px] text-neutral-400">
+            <p className="max-w-full text-center font-['Inter:Regular',sans-serif] text-[calc(13px*var(--px393))] font-normal leading-[calc(20*var(--px393))] not-italic text-neutral-400 sm:shrink-0 sm:text-[16.5px] sm:leading-[24px]">
               {fileTypeHint}
             </p>
           </div>

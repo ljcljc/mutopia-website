@@ -1,4 +1,5 @@
 import { ButtonHTMLAttributes, forwardRef } from "react";
+import { cn } from "@/components/ui/utils";
 import { Spinner } from "./Spinner";
 
 interface BrownOutlineButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -24,6 +25,7 @@ export const BrownOutlineButton = forwardRef<HTMLButtonElement, BrownOutlineButt
     const baseStyles =
       "relative rounded-[32px] transition-all duration-200 cursor-pointer group";
     const isDisabled = disabled || loading;
+    const disabledStyles = "opacity-60 cursor-not-allowed";
 
     // Size styles
     const sizeStyles = {
@@ -36,8 +38,9 @@ export const BrownOutlineButton = forwardRef<HTMLButtonElement, BrownOutlineButt
     // Default: border 2px solid #8B6357, color #8B6357, no background
     // Hover: border 2px solid #8B6357, background rgba(139, 99, 87, 0.20), color #8B6357
     // Focus: border 2px solid #2374FF, background rgba(139, 99, 87, 0.20), color #8B6357
-    const variantStyles =
-      "bg-transparent border-2 border-[#8B6357] text-[#8B6357] hover:bg-[rgba(139,99,87,0.20)] hover:border-[#8B6357] active:bg-[rgba(139,99,87,0.20)] active:border-[#8B6357] focus-visible:bg-[rgba(139,99,87,0.20)] focus-visible:border-[#2374ff]";
+    const variantStyles = "bg-transparent border-2 border-[#8B6357] text-[#8B6357]";
+    const interactionStyles =
+      "hover:bg-[rgba(139,99,87,0.20)] hover:border-[#8B6357] active:bg-[rgba(139,99,87,0.20)] active:border-[#8B6357] focus-visible:bg-[rgba(139,99,87,0.20)] focus-visible:border-[#2374ff]";
 
     const widthStyle = fullWidth ? "w-full" : "";
 
@@ -45,7 +48,15 @@ export const BrownOutlineButton = forwardRef<HTMLButtonElement, BrownOutlineButt
       <button
         ref={ref}
         disabled={isDisabled}
-        className={`${baseStyles} ${sizeStyles[size]} ${variantStyles} ${isDisabled ? "opacity-60 cursor-not-allowed" : ""} ${widthStyle} ${className}`}
+        className={cn(
+          baseStyles,
+          sizeStyles[size],
+          variantStyles,
+          !isDisabled && interactionStyles,
+          isDisabled && disabledStyles,
+          widthStyle,
+          className
+        )}
         {...props}
       >
         <div className="flex gap-[7px] items-center justify-center size-full relative z-10">
@@ -72,7 +83,6 @@ export const BrownOutlineButton = forwardRef<HTMLButtonElement, BrownOutlineButt
 );
 
 BrownOutlineButton.displayName = "BrownOutlineButton";
-
 
 
 

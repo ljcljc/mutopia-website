@@ -1563,6 +1563,14 @@ export async function getBookingDetail(bookingId: number): Promise<BookingDetail
   return response.data;
 }
 
+export async function updateBookingHealthInfo(
+  bookingId: number,
+  payload: BookingHealthInfoUpdateIn,
+): Promise<OkOut> {
+  const response = await http.patch<OkOut>(`/api/bookings/${bookingId}/health_info`, payload);
+  return response.data;
+}
+
 export interface AddOnRequestOut {
   id: number;
   status: string;
@@ -1592,6 +1600,23 @@ export interface ReviewCreateIn {
   technical_rating?: number | null;
   attitude_rating?: number | null;
   environment_rating?: number | null;
+}
+
+export interface BookingHealthInfoUpdateIn {
+  coat_condition?: string | null;
+  approve_shave?: boolean | null;
+  behavior?: string | null;
+  grooming_frequency?: string | null;
+  special_notes?: string | null;
+  questionnaire?: BookingHealthQuestionnaireIn | null;
+}
+
+export interface BookingHealthQuestionnaireIn {
+  lifestyle: Record<string, unknown>;
+  prevention: Record<string, unknown>;
+  nutrition: Record<string, unknown>;
+  medical: Record<string, unknown>;
+  clinical: Record<string, unknown>;
 }
 
 export interface CancelBookingIn {
@@ -1693,6 +1718,7 @@ export interface GroomerCheckUpCheckoutIn {
   add_on_ids?: number[];
   personalization?: Record<string, unknown>;
   description?: string;
+  before_photo_file?: File | null;
 }
 
 export interface GroomerCheckUpCheckoutOut {
@@ -2216,9 +2242,15 @@ export async function submitGroomerCheckUpCheckout(
   bookingId: number,
   data: GroomerCheckUpCheckoutIn
 ): Promise<GroomerCheckUpCheckoutOut> {
+  const { before_photo_file, ...payload } = data;
+  const requestData = new FormData();
+  requestData.append("payload", JSON.stringify(payload));
+  if (before_photo_file) {
+    requestData.append("evidence", before_photo_file);
+  }
   const response = await http.post<GroomerCheckUpCheckoutOut>(
     `/api/groomers/bookings/${bookingId}/check_up/checkout`,
-    data
+    requestData
   );
   return response.data;
 }
