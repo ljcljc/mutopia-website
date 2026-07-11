@@ -10,6 +10,36 @@ vi.mock("@/components/layout/messageUnreadStore", () => ({
   useUnreadSummary: (...args: unknown[]) => useUnreadSummaryMock(...args),
 }));
 
+vi.mock("@/components/layout/NotificationsPopover", async () => {
+  const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
+
+  return {
+    default: ({
+      scope,
+      navigateTo,
+    }: {
+      scope?: "user" | "groomer" | "all";
+      navigateTo?: string;
+    }) => {
+      const navigate = actual.useNavigate();
+      const summary = useUnreadSummaryMock(scope);
+
+      return (
+        <button
+          type="button"
+          aria-label="Notifications"
+          onClick={() => navigate(navigateTo ?? "/groomer/notifications")}
+        >
+          {summary?.hasUnread ? (
+            <span data-testid={`notifications-unread-dot-${scope ?? "user"}`} />
+          ) : null}
+          Notifications
+        </button>
+      );
+    },
+  };
+});
+
 function openAccountDropdown() {
   const trigger = document.querySelector('[data-slot="dropdown-menu-trigger"]');
   if (!(trigger instanceof HTMLElement)) {

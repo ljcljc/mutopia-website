@@ -88,4 +88,32 @@ describe("Header", () => {
 
     expect(screen.getByRole("button", { name: "Apply as groomer" })).toBeInTheDocument();
   });
+
+  it("does not show the mobile apply to groomer entry for groomer users", () => {
+    useAuthStore.setState({
+      user: {
+        name: "Groomer User",
+        email: "groomer@example.com",
+      },
+      userInfo: {
+        id: "groomer-1",
+        email: "groomer@example.com",
+        first_name: "Groomer",
+        last_name: "User",
+        receive_marketing_message: false,
+        role: "groomer",
+        is_email_verified: true,
+        is_groomer: true,
+      },
+      isResolvingUserInfo: false,
+    });
+
+    render(
+      <MemoryRouter>
+        <Header />
+      </MemoryRouter>,
+    );
+
+    expect(screen.queryByText("Apply as groomer")).not.toBeInTheDocument();
+  });
 });

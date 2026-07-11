@@ -1,5 +1,11 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Icon, type IconName } from "@/components/common/Icon";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/components/ui/utils";
 
 interface NavItem {
@@ -187,6 +193,46 @@ export default function AccountBottomNav() {
           <div className="flex w-[calc(50%-40px)] items-start justify-around">
             {items.slice(2).map((item) => {
               const active = isActiveRoute(location.pathname, item.path, mode, from);
+              const isGroomerMenu = mode === "groomer" && item.id === "more";
+
+              if (isGroomerMenu) {
+                return (
+                  <DropdownMenu key={item.id}>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        aria-label={item.label}
+                        className="nav-item relative h-[43px] min-w-[48px] transition-colors duration-200"
+                      >
+                        <Icon
+                          name={item.iconName}
+                          className="nav-item-icon size-6 text-[#9CA3AF] transition-colors duration-200"
+                          aria-hidden="true"
+                        />
+                        <span className="nav-item-text whitespace-nowrap font-comfortaa text-[10px] font-normal leading-[15px] text-[#9CA3AF] transition-colors duration-200">
+                          {item.label}
+                        </span>
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      side="top"
+                      sideOffset={12}
+                      className="min-w-[160px] border-[#633479]/15 bg-[#FCFAFF]"
+                    >
+                      <DropdownMenuItem
+                        onClick={() => navigate("/groomer/notifications")}
+                        className="cursor-pointer text-[#633479] hover:bg-[#633479]/6 hover:text-[#4F2960]"
+                      >
+                        <span className="font-comfortaa font-normal text-[14px]">
+                          Notifications
+                        </span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                );
+              }
+
               return (
                 <button
                   key={item.id}

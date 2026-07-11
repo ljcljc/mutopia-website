@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Icon } from "@/components/common/Icon";
 import { useAuthStore } from "@/components/auth/authStore";
 import BaseAccountHeaderShell from "@/components/layout/BaseAccountHeaderShell";
 import AccountDropdown from "@/components/layout/AccountDropdown";
-import { useUnreadSummary } from "@/components/layout/messageUnreadStore";
+import NotificationsPopover from "@/components/layout/NotificationsPopover";
 
 function getPartnerDisplayName(firstName?: string | null, lastName?: string | null, email?: string | null) {
   return [firstName, lastName].filter(Boolean).join(" ").trim() || email?.split("@")[0] || "Partner";
@@ -47,10 +46,8 @@ function TodayBadge() {
 }
 
 export default function GroomerHeader() {
-  const navigate = useNavigate();
   const userInfo = useAuthStore((state) => state.userInfo);
   const user = useAuthStore((state) => state.user);
-  const { hasUnread } = useUnreadSummary("groomer");
   const partnerName = getPartnerDisplayName(
     userInfo?.first_name,
     userInfo?.last_name,
@@ -65,25 +62,19 @@ export default function GroomerHeader() {
       <PartnerLogo name={partnerName} />
       <div className="flex items-center gap-2">
         <TodayBadge />
-        <AccountDropdown
-          userInfo={userInfo ?? undefined}
-          fallbackName={partnerName}
-          mode="groomer"
+        <div className="hidden lg:block">
+          <AccountDropdown
+            userInfo={userInfo ?? undefined}
+            fallbackName={partnerName}
+            mode="groomer"
+          />
+        </div>
+        <NotificationsPopover
+          scope="groomer"
+          navigateTo="/groomer/notifications"
+          triggerClassName="size-6"
+          iconClassName="text-[#633479]"
         />
-        <button
-          type="button"
-          onClick={() => navigate("/groomer/notifications")}
-          className="relative flex cursor-pointer items-center justify-center text-[#633479] transition-opacity hover:opacity-80"
-          aria-label="Notifications"
-        >
-          {hasUnread ? (
-            <span
-              data-testid="notifications-unread-dot-groomer"
-              className="absolute right-0 top-0 size-2 rounded-full bg-[#EF4444]"
-            />
-          ) : null}
-          <Icon name="notify" className="size-6 cursor-pointer text-current" aria-hidden="true" />
-        </button>
       </div>
     </BaseAccountHeaderShell>
   );

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Icon } from "@/components/common/Icon";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { getMessages, markMessageRead, type MessageOut, type MessageScope } from "@/lib/api";
+import { cn } from "@/components/ui/utils";
 import { formatNotificationDateTime } from "@/lib/localDateTime";
 import { emitNotificationRead } from "@/lib/notificationEvents";
 import { adjustUnreadCount, useUnreadSummary } from "@/components/layout/messageUnreadStore";
@@ -10,11 +11,15 @@ import { adjustUnreadCount, useUnreadSummary } from "@/components/layout/message
 interface NotificationsPopoverProps {
   scope?: MessageScope;
   navigateTo?: string;
+  triggerClassName?: string;
+  iconClassName?: string;
 }
 
 export default function NotificationsPopover({
   scope = "user",
   navigateTo = "/account/notifications",
+  triggerClassName,
+  iconClassName,
 }: NotificationsPopoverProps) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -67,7 +72,10 @@ export default function NotificationsPopover({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
-          className="relative shrink-0 size-[20px] cursor-pointer hover:opacity-80 transition-opacity"
+          className={cn(
+            "relative shrink-0 size-[20px] cursor-pointer hover:opacity-80 transition-opacity",
+            triggerClassName
+          )}
           aria-label="Notifications"
           data-name="notifications"
         >
@@ -82,7 +90,7 @@ export default function NotificationsPopover({
               <Icon
                 name="notify"
                 aria-label="Notifications"
-                className="block max-w-none size-full text-[#8b6357]"
+                className={cn("block max-w-none size-full text-[#8b6357]", iconClassName)}
               />
             </div>
           </div>

@@ -182,6 +182,10 @@ export default function Notifications({
   const cache = notificationsCache[scope];
   const scopeParam = scope;
   const isGroomerVariant = variant === "groomer";
+  const loadMoreStatusClassName = cn(
+    "w-full py-2 text-center font-comfortaa text-[12px] leading-[16px]",
+    isGroomerVariant ? "text-white/85" : "text-[#9CA3AF]"
+  );
 
   const syncCache = (items: MessageOut[], total: number, upcomingPage: number, more: boolean) => {
     notificationsCache[scope] = {
@@ -650,16 +654,16 @@ export default function Notifications({
                   </div>
                 );
               })}
-                <div className="flex min-h-8 items-center justify-center">
+                <div className="flex min-h-8 w-full items-center justify-center">
                   {isLoadingMore ? (
-                    <div className="flex items-center gap-2 py-1 text-[12px] text-white">
+                    <div className={cn(loadMoreStatusClassName, "flex items-center justify-center gap-2")}>
                       <Spinner size={16} color="#DE6A07" showTrack trackOpacity={0.18} />
                       <div>Loading more notifications...</div>
                     </div>
                   ) : hasMore ? (
-                    <div className="py-1 text-[12px] text-white">Scroll up to load more</div>
+                    <div className={loadMoreStatusClassName}>Scroll up to load more</div>
                   ) : (
-                    <div className="py-1 text-[12px] text-white">No more notifications</div>
+                    <div className={loadMoreStatusClassName}>No more notifications</div>
                   )}
                 </div>
                 <div ref={loadMoreSentinelRef} className="h-px w-full" aria-hidden="true" />

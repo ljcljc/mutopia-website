@@ -237,6 +237,15 @@ function MobileLink({
 
 // Mobile buttons
 function MobileButton1() {
+  const user = useAuthStore((state) => state.user);
+  const userInfo = useAuthStore((state) => state.userInfo);
+  const isResolvingUserInfo = useAuthStore((state) => state.isResolvingUserInfo);
+  const isWaitingForUserInfo = Boolean(user) && isResolvingUserInfo && !userInfo;
+
+  if (isWaitingForUserInfo || userInfo?.is_groomer) {
+    return null;
+  }
+
   return (
     <div
       className="bg-[#f8f7f1] h-[48px] relative rounded-[2.47134e+07px] shrink-0 w-full cursor-pointer hover:bg-[#f0efe8] transition-colors"
@@ -249,7 +258,7 @@ function MobileButton1() {
       <div className="flex flex-row items-center justify-center size-full">
         <div className="bg-clip-padding border-0 border-transparent border-solid flex gap-[5.25px] h-[48px] items-center justify-center px-[11.237px] py-[0.737px] relative w-full">
           <p className="font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[12.25px] text-nowrap whitespace-pre">
-            Apply to Groomer
+            Apply as groomer
           </p>
         </div>
       </div>
