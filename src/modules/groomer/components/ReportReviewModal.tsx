@@ -44,7 +44,7 @@ export function ReportReviewModal({
           "overflow-hidden bg-white p-0 [&>button]:hidden",
           isMobile
             ? "service-area-dialog inset-x-0! bottom-0! top-auto! mx-auto! grid! max-h-[85vh]! w-full! max-w-none! translate-x-0! translate-y-0! gap-0! rounded-b-none rounded-t-[calc(24*var(--px393))] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
-            : "left-1/2! top-1/2! grid! w-full! max-w-none! -translate-x-1/2! -translate-y-1/2! gap-0! rounded-none shadow-[0px_4px_12px_rgba(0,0,0,0.08)]",
+            : "left-1/2! top-1/2! grid! w-[min(520px,calc(100vw-48px))]! max-w-[520px]! max-h-[85vh]! -translate-x-1/2! -translate-y-1/2! gap-0! rounded-[20px] shadow-[0px_24px_60px_rgba(74,44,85,0.16)]",
         )}
       >
         <DialogTitle className="sr-only">Report review</DialogTitle>

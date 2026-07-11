@@ -525,6 +525,7 @@ function ServiceTerminationModal({
   onClose: () => void;
   onSubmit: (data: TerminateServiceIn) => Promise<void>;
 }) {
+  const isMobile = useIsMobile();
   const [reason, setReason] = useState("");
   const [description, setDescription] = useState("");
   const [refundableFee, setRefundableFee] = useState("0");
@@ -559,8 +560,13 @@ function ServiceTerminationModal({
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && !isSubmitting && onClose()}>
       <DialogContent
-        overlayClassName="service-area-dialog-overlay z-[70]!"
-        className="service-area-dialog inset-x-0! bottom-0! top-auto! z-[75]! mx-auto! flex! max-h-[88vh]! w-full! max-w-none! translate-x-0! translate-y-0! flex-col! gap-0! rounded-b-none rounded-t-[calc(24*var(--px393))] border-0! bg-white! p-0! shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)] [&>button]:hidden"
+        overlayClassName={isMobile ? "service-area-dialog-overlay z-[70]!" : "z-[70]!"}
+        className={cn(
+          "border-0! bg-white! p-0! gap-0! [&>button]:hidden",
+          isMobile
+            ? "service-area-dialog inset-x-0! bottom-0! top-auto! z-[75]! mx-auto! flex! max-h-[88vh]! w-full! max-w-none! translate-x-0! translate-y-0! flex-col! rounded-b-none rounded-t-[calc(24*var(--px393))] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
+            : "left-1/2! top-1/2! z-[75]! grid! w-[min(520px,calc(100vw-48px))]! max-h-[88vh]! max-w-[520px]! -translate-x-1/2! -translate-y-1/2! overflow-hidden! rounded-[20px]! shadow-[0px_24px_60px_rgba(74,44,85,0.16)]",
+        )}
       >
         <DialogTitle className="sr-only">Terminate service</DialogTitle>
         <DialogDescription className="sr-only">Document the reason for terminating this service.</DialogDescription>
@@ -661,6 +667,7 @@ function HealthReportModal({
   onClose: () => void;
   onSubmit: (data: HealthReportFormData) => Promise<void>;
 }) {
+  const isMobile = useIsMobile();
   const [summary, setSummary] = useState("");
   const [petCondition, setPetCondition] = useState("");
   const [behaviorNotes, setBehaviorNotes] = useState("");
@@ -695,8 +702,13 @@ function HealthReportModal({
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && !isSubmitting && onClose()}>
       <DialogContent
-        overlayClassName="service-area-dialog-overlay z-[70]!"
-        className="service-area-dialog inset-x-0! bottom-0! top-auto! z-[75]! mx-auto! flex! max-h-[88vh]! w-full! max-w-none! translate-x-0! translate-y-0! flex-col! gap-0! rounded-b-none rounded-t-[calc(24*var(--px393))] border-0! bg-white! p-0! shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)] [&>button]:hidden"
+        overlayClassName={isMobile ? "service-area-dialog-overlay z-[70]!" : "z-[70]!"}
+        className={cn(
+          "border-0! bg-white! p-0! gap-0! [&>button]:hidden",
+          isMobile
+            ? "service-area-dialog inset-x-0! bottom-0! top-auto! z-[75]! mx-auto! flex! max-h-[88vh]! w-full! max-w-none! translate-x-0! translate-y-0! flex-col! rounded-b-none rounded-t-[calc(24*var(--px393))] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
+            : "left-1/2! top-1/2! z-[75]! grid! w-[min(560px,calc(100vw-48px))]! max-h-[88vh]! max-w-[560px]! -translate-x-1/2! -translate-y-1/2! overflow-hidden! rounded-[20px]! shadow-[0px_24px_60px_rgba(74,44,85,0.16)]",
+        )}
       >
         <DialogTitle className="sr-only">Health report</DialogTitle>
         <DialogDescription className="sr-only">Fill the grooming health report.</DialogDescription>

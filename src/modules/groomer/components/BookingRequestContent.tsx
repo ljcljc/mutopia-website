@@ -35,6 +35,7 @@ export type BookingRequestDecisionTimeOption = {
 export type BookingRequestInteractionProps<TRequest extends BookingRequestContentData> = {
   request: TRequest;
   expanded?: boolean;
+  showHeader?: boolean;
   passAppointmentContextLabel: string;
   passAppointmentReturnLabel: string;
   onToggleExpanded?: () => void;
@@ -468,6 +469,7 @@ export function BookingRequestContent({
 export function BookingRequestInteraction<TRequest extends BookingRequestContentData>({
   request,
   expanded,
+  showHeader = false,
   passAppointmentContextLabel,
   passAppointmentReturnLabel,
   onToggleExpanded,
@@ -482,7 +484,7 @@ export function BookingRequestInteraction<TRequest extends BookingRequestContent
   return (
     <BookingRequestContent
       request={request}
-      showHeader={false}
+      showHeader={showHeader}
       expanded={isExpanded}
       passAppointmentContextLabel={passAppointmentContextLabel}
       passAppointmentReturnLabel={passAppointmentReturnLabel}
