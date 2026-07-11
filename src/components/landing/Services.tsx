@@ -1,6 +1,7 @@
 import { useState } from "react";
 // import svgPaths from "@/assets/icons/svg-aj6ul1v84s";
 import { useNavigate } from "react-router-dom";
+import { useBookingStore, type ServicePackage } from "@/components/booking/bookingStore";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { OrangeButton } from "@/components/common";
@@ -13,6 +14,7 @@ import {
 
 // Service Card Component
 interface ServiceCardProps {
+  packageKey: ServicePackage;
   icon: React.ReactNode;
   title: string;
   description: string;
@@ -24,6 +26,7 @@ interface ServiceCardProps {
 }
 
 function ServiceCard({
+  packageKey,
   icon,
   title,
   description,
@@ -36,6 +39,11 @@ function ServiceCard({
   const navigate = useNavigate();
 
   const handleBookNow = () => {
+    useBookingStore.setState({
+      servicePackage: packageKey,
+      serviceId: null,
+      addOns: [],
+    });
     navigate("/booking");
   };
   return (
@@ -173,6 +181,7 @@ export default function Services() {
 
   const services = [
     {
+      packageKey: "premium-bath" as const,
       icon: (
         <Icon
           name="bath-brush"
@@ -194,6 +203,7 @@ export default function Services() {
       ],
     },
     {
+      packageKey: "full-grooming" as const,
       icon: (
         <Icon
           name="full-grooming"

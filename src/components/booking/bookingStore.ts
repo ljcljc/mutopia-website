@@ -249,6 +249,16 @@ function inferServicePackage(name: string): ServicePackage | "" {
   return "";
 }
 
+function findServiceIdForPackage(
+  services: ServiceOut[],
+  servicePackage: ServicePackage | ""
+): number | null {
+  if (!servicePackage) return null;
+
+  const matchedService = services.find((service) => inferServicePackage(service.name) === servicePackage);
+  return matchedService?.id ?? null;
+}
+
 function normalizeTimeSlots(slots?: Record<string, unknown>[]): TimeSlotIn[] {
   return (
     slots
@@ -759,7 +769,15 @@ export const useBookingStore = create<BookingState>((set) => ({
         weight: weight || undefined,
         weight_unit: weight ? weightUnit : undefined,
       });
-      set({ services, isLoadingServices: false });
+      const currentState = useBookingStore.getState();
+      const preselectedServiceId = currentState.serviceId
+        ?? findServiceIdForPackage(services, currentState.servicePackage);
+
+      set({
+        services,
+        serviceId: preselectedServiceId,
+        isLoadingServices: false,
+      });
     } catch (error) {
       console.error("Failed to load services:", error);
       set({ services: [], isLoadingServices: false });
