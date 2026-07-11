@@ -17,6 +17,7 @@ export default function GroomerLayout() {
     "/groomer/my-work",
     "/groomer/earnings",
     "/groomer/menu",
+    "/groomer/notifications",
   ]);
   const showBottomNav = groomerRootPaths.has(location.pathname);
   const hasAccessToken =

@@ -110,6 +110,9 @@ const isActiveRoute = (
       return pathname === "/account" || pathname === "/account/";
     }
   }
+  if (mode === "groomer" && path === "/groomer/menu") {
+    return pathname === "/groomer/menu" || pathname === "/groomer/notifications";
+  }
   return pathname === path || pathname.startsWith(path + "/");
 };
 
@@ -201,15 +204,24 @@ export default function AccountBottomNav() {
                     <DropdownMenuTrigger asChild>
                       <button
                         type="button"
+                        aria-current={active ? "page" : undefined}
                         aria-label={item.label}
                         className="nav-item relative h-[43px] min-w-[48px] transition-colors duration-200"
                       >
                         <Icon
                           name={item.iconName}
-                          className="nav-item-icon size-6 text-[#9CA3AF] transition-colors duration-200"
+                          className={cn(
+                            "nav-item-icon size-6 transition-colors duration-200",
+                            active ? "text-[#E67E22]" : "text-[#9CA3AF]"
+                          )}
                           aria-hidden="true"
                         />
-                        <span className="nav-item-text whitespace-nowrap font-comfortaa text-[10px] font-normal leading-[15px] text-[#9CA3AF] transition-colors duration-200">
+                        <span
+                          className={cn(
+                            "nav-item-text whitespace-nowrap font-comfortaa text-[10px] leading-[15px] transition-colors duration-200",
+                            active ? "font-bold text-[#E67E22]" : "font-normal text-[#9CA3AF]"
+                          )}
+                        >
                           {item.label}
                         </span>
                       </button>
