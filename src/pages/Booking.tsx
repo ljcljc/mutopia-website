@@ -4,6 +4,7 @@ import { OrangeButton } from "@/components/common/OrangeButton";
 import { Icon } from "@/components/common/Icon";
 import { useAuthStore } from "@/components/auth/authStore";
 import { useBookingStore } from "@/components/booking/bookingStore";
+import { useAccountStore } from "@/components/account/accountStore";
 import { isValidCanadianPostalCode } from "@/lib/postalCode";
 import { Step1AddressAndServiceType } from "@/components/booking/Step1AddressAndServiceType";
 import { Step2 } from "@/components/booking/Step2";
@@ -11,11 +12,12 @@ import { Step3 } from "@/components/booking/Step3";
 import { Step4 } from "@/components/booking/Step4";
 import { Step5 } from "@/components/booking/Step5";
 import { Step6 } from "@/components/booking/Step6";
-import { STEP_TITLES } from "@/components/booking/stepTitles";
+import { STEP_TITLES, getMembershipStepTitle } from "@/components/booking/stepTitles";
 
 export default function Booking() {
   const user = useAuthStore((state) => state.user);
   const userInfo = useAuthStore((state) => state.userInfo);
+  const { membershipInfo, fetchMembershipInfo, isLoadingMembershipInfo } = useAccountStore();
   const loadUserInfo = useBookingStore((state) => state.loadUserInfo);
   const {
     currentStep,
@@ -45,6 +47,13 @@ export default function Booking() {
       loadUserInfo();
     }
   }, [loadUserInfo, userInfo]);
+
+  useEffect(() => {
+    if (currentStep !== 4 || userInfo?.is_member !== true || membershipInfo || isLoadingMembershipInfo) {
+      return;
+    }
+    fetchMembershipInfo();
+  }, [currentStep, fetchMembershipInfo, isLoadingMembershipInfo, membershipInfo, userInfo?.is_member]);
 
   // Render step component based on current step
   const renderStepComponent = () => {
@@ -87,6 +96,8 @@ export default function Booking() {
             title={
               currentStep === 3 && petName
                 ? `${petName} - package and add-on`
+                : currentStep === 4
+                  ? getMembershipStepTitle(userInfo?.is_member === true, membershipInfo?.end_at)
                 : STEP_TITLES[currentStep] || "Address and service type"
             }
           />

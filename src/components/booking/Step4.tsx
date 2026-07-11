@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getServicePrice } from "@/lib/pricing";
 import { useAccountStore } from "@/components/account/accountStore";
 import { useAuthStore } from "@/components/auth/authStore";
+import { getMembershipStepTitle } from "./stepTitles";
 
 export function Step4() {
   const {
@@ -34,9 +35,6 @@ export function Step4() {
 
   // Check if user is a member
   const isMember = authUserInfo?.is_member === true;
-  console.log("[Booking Step4] isMember:", isMember);
-  console.log("[Booking Step4] userInfo:", authUserInfo);
-
   // Load membership plans on mount
   const hasLoadedMembershipPlans = useRef(false);
   useEffect(() => {
@@ -226,12 +224,7 @@ export function Step4() {
   const membershipHeaderTitle = isMember ? `Welcome back ${memberName}` : "Upgrade to annual membership";
   const membershipHeaderSubtitle = "Enjoy year-round savings on every visit";
   const showMembershipPrice = !isMember;
-  const membershipExpiryDate = membershipInfo?.end_at
-    ? new Date(membershipInfo.end_at).toISOString().split("T")[0]
-    : null;
-  const membershipTopLabel = isMember && membershipExpiryDate
-    ? `Membership until ${membershipExpiryDate}`
-    : "Membership (optional but save more)";
+  const membershipTopLabel = getMembershipStepTitle(isMember, membershipInfo?.end_at);
   const isMemberEstimation = useMembershipDiscount && discountRate < 1;
   const estimationLabel = isMemberEstimation ? "Estimation for members" : "Estimation for non member";
   const estimationTextColor = isMemberEstimation ? "text-[#633479]" : "text-[#4A5565]";
