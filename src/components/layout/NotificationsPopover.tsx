@@ -26,6 +26,7 @@ export default function NotificationsPopover({
   const [items, setItems] = useState<MessageOut[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { hasUnread } = useUnreadSummary(scope);
+  const isMobileViewport = typeof window !== "undefined" && window.innerWidth < 640;
 
   const handleNotificationClick = (item: MessageOut) => {
     if (!item.is_read) {
@@ -43,6 +44,12 @@ export default function NotificationsPopover({
       });
     }
 
+    setOpen(false);
+    navigate(navigateTo);
+  };
+
+  const handleTriggerClick = () => {
+    if (!isMobileViewport) return;
     setOpen(false);
     navigate(navigateTo);
   };
@@ -69,7 +76,16 @@ export default function NotificationsPopover({
   }, [open, scope]);
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (isMobileViewport) {
+          setOpen(false);
+          return;
+        }
+        setOpen(nextOpen);
+      }}
+    >
       <PopoverTrigger asChild>
         <button
           className={cn(
@@ -78,6 +94,7 @@ export default function NotificationsPopover({
           )}
           aria-label="Notifications"
           data-name="notifications"
+          onClick={handleTriggerClick}
         >
           {hasUnread ? (
             <span

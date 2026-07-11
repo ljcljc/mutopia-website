@@ -8,6 +8,7 @@ import {
 import { Icon } from "@/components/common/Icon";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import type { ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useLogout } from "@/hooks/useLogout";
 import type { MeOut } from "@/lib/api";
@@ -17,10 +18,24 @@ export default function AccountDropdown({
   userInfo,
   fallbackName,
   mode = "customer",
+  trigger,
+  showDashboard = true,
+  showUserSummary = false,
+  showNotifications = false,
+  contentAlign = "end",
+  contentSide,
+  contentSideOffset,
 }: {
   userInfo?: MeOut | null;
   fallbackName?: string;
   mode?: IdentityMode;
+  trigger?: ReactNode;
+  showDashboard?: boolean;
+  showUserSummary?: boolean;
+  showNotifications?: boolean;
+  contentAlign?: "start" | "center" | "end";
+  contentSide?: "top" | "right" | "bottom" | "left";
+  contentSideOffset?: number;
 }) {
   const userName = userInfo
     ? (userInfo.first_name || userInfo.email.split("@")[0] || "User")
@@ -32,6 +47,8 @@ export default function AccountDropdown({
   const isDashboardActive = isCustomerMode
     ? location.pathname.startsWith("/account/dashboard")
     : location.pathname.startsWith("/groomer/dashboard");
+  const notificationsPath = isCustomerMode ? "/account/notifications" : "/groomer/notifications";
+  const isNotificationsActive = location.pathname.startsWith(notificationsPath);
   const isGroomerSwitchVisible = Boolean(userInfo?.is_groomer);
   const { switchId, switchLabel, switchAriaLabel, switchChecked, dashboardPath, targetPath } = getIdentitySwitchConfig({
     mode,
@@ -55,23 +72,53 @@ export default function AccountDropdown({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <div className="relative shrink-0 cursor-pointer hover:opacity-80 transition-opacity" data-name="Button tertiary">
-          <div className="bg-clip-padding border-0 border-transparent border-solid flex gap-[8px] items-center px-[12px] py-[4px] relative">
-            <div className={`${triggerAvatarClassName} relative rounded-[100px] shrink-0 size-[20px] flex items-center justify-center`} data-name="Icons/Avatar/Brown/Default/Rempli">
-              <Icon name="user" aria-label="User" className="block size-full text-white" />
-              {userInfo?.is_member && (
-                <span className="absolute -right-[4px] -top-[4px] z-10 inline-flex h-[12px] w-[12px] items-center justify-center rounded-full border border-white bg-[#DCFCE7] text-[8px] font-comfortaa font-bold leading-none text-[#008236] pointer-events-none">
-                  M
-                </span>
-              )}
+        {trigger ?? (
+          <div className="relative shrink-0 cursor-pointer hover:opacity-80 transition-opacity" data-name="Button tertiary">
+            <div className="bg-clip-padding border-0 border-transparent border-solid flex gap-[8px] items-center px-[12px] py-[4px] relative">
+              <div className={`${triggerAvatarClassName} relative rounded-[100px] shrink-0 size-[20px] flex items-center justify-center`} data-name="Icons/Avatar/Brown/Default/Rempli">
+                <Icon name="user" aria-label="User" className="block size-full text-white" />
+                {userInfo?.is_member && (
+                  <span className="absolute -right-[4px] -top-[4px] z-10 inline-flex h-[12px] w-[12px] items-center justify-center rounded-full border border-white bg-[#DCFCE7] text-[8px] font-comfortaa font-bold leading-none text-[#008236] pointer-events-none">
+                    M
+                  </span>
+                )}
+              </div>
+              <p className={`font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[12px] ${triggerTextClassName}`}>
+                {userName}
+              </p>
             </div>
-            <p className={`font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[12px] ${triggerTextClassName}`}>
-              {userName}
-            </p>
           </div>
-        </div>
+        )}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className={contentClassName}>
+      <DropdownMenuContent
+        align={contentAlign}
+        side={contentSide}
+        sideOffset={contentSideOffset}
+        className={contentClassName}
+      >
+        {showUserSummary ? (
+          <>
+            <div className="flex items-center gap-3 px-2 py-2.5">
+              <div className={`${triggerAvatarClassName} relative rounded-[100px] shrink-0 size-8 flex items-center justify-center`}>
+                <Icon name="user" aria-label="User" className="block size-full text-white" />
+                {userInfo?.is_member && (
+                  <span className="absolute -right-[3px] -top-[3px] z-10 inline-flex h-[12px] w-[12px] items-center justify-center rounded-full border border-white bg-[#DCFCE7] text-[8px] font-comfortaa font-bold leading-none text-[#008236] pointer-events-none">
+                    M
+                  </span>
+                )}
+              </div>
+              <div className="min-w-0">
+                <p className={`truncate font-comfortaa text-[14px] font-medium ${triggerTextClassName}`}>
+                  {userName}
+                </p>
+                <p className={`truncate font-comfortaa text-[12px] font-normal ${isCustomerMode ? "text-[#8b6357]/70" : "text-[#633479]/70"}`}>
+                  {userInfo?.email || fallbackName || ""}
+                </p>
+              </div>
+            </div>
+            <DropdownMenuSeparator className={separatorClassName} />
+          </>
+        ) : null}
         {isGroomerSwitchVisible ? (
           <>
             <div className="flex items-center justify-between gap-3 px-2 py-2">
@@ -95,16 +142,30 @@ export default function AccountDropdown({
             <DropdownMenuSeparator className={separatorClassName} />
           </>
         ) : null}
-        <DropdownMenuItem
-          onClick={() => navigate(dashboardPath)}
-          className={`cursor-pointer ${itemBaseClassName} ${
-            isDashboardActive ? activeItemClassName : ""
-          }`}
-        >
-          <span className="font-comfortaa font-normal text-[14px]">
-            Dashboard
-          </span>
-        </DropdownMenuItem>
+        {showDashboard ? (
+          <DropdownMenuItem
+            onClick={() => navigate(dashboardPath)}
+            className={`cursor-pointer ${itemBaseClassName} ${
+              isDashboardActive ? activeItemClassName : ""
+            }`}
+          >
+            <span className="font-comfortaa font-normal text-[14px]">
+              Dashboard
+            </span>
+          </DropdownMenuItem>
+        ) : null}
+        {showNotifications ? (
+          <DropdownMenuItem
+            onClick={() => navigate(notificationsPath)}
+            className={`cursor-pointer ${itemBaseClassName} ${
+              isNotificationsActive ? activeItemClassName : ""
+            }`}
+          >
+            <span className="font-comfortaa font-normal text-[14px]">
+              Notifications
+            </span>
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuItem
           onClick={handleLogout}
           className={`cursor-pointer ${itemBaseClassName}`}

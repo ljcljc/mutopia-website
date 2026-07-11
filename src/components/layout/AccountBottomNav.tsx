@@ -1,11 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import { useAuthStore } from "@/components/auth/authStore";
 import { Icon, type IconName } from "@/components/common/Icon";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import AccountDropdown from "@/components/layout/AccountDropdown";
 import { cn } from "@/components/ui/utils";
 
 interface NavItem {
@@ -126,6 +122,8 @@ const getNavConfig = (pathname: string): { mode: NavMode; config: NavConfig } =>
 export default function AccountBottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
+  const userInfo = useAuthStore((state) => state.userInfo);
   const from = (location.state as { from?: string } | null)?.from ?? null;
   const { mode, config } = getNavConfig(location.pathname);
   const items = config.items;
@@ -196,12 +194,22 @@ export default function AccountBottomNav() {
           <div className="flex w-[calc(50%-40px)] items-start justify-around">
             {items.slice(2).map((item) => {
               const active = isActiveRoute(location.pathname, item.path, mode, from);
-              const isGroomerMenu = mode === "groomer" && item.id === "more";
+              const isMenuDropdown = item.id === "more";
 
-              if (isGroomerMenu) {
+              if (isMenuDropdown) {
                 return (
-                  <DropdownMenu key={item.id}>
-                    <DropdownMenuTrigger asChild>
+                  <AccountDropdown
+                    key={item.id}
+                    userInfo={userInfo ?? undefined}
+                    fallbackName={user?.name || user?.email}
+                    mode={mode}
+                    showDashboard={false}
+                    showUserSummary
+                    showNotifications
+                    contentAlign="end"
+                    contentSide="top"
+                    contentSideOffset={12}
+                    trigger={
                       <button
                         type="button"
                         aria-current={active ? "page" : undefined}
@@ -225,23 +233,8 @@ export default function AccountBottomNav() {
                           {item.label}
                         </span>
                       </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="end"
-                      side="top"
-                      sideOffset={12}
-                      className="min-w-[160px] border-[#633479]/15 bg-[#FCFAFF]"
-                    >
-                      <DropdownMenuItem
-                        onClick={() => navigate("/groomer/notifications")}
-                        className="cursor-pointer text-[#633479] hover:bg-[#633479]/6 hover:text-[#4F2960]"
-                      >
-                        <span className="font-comfortaa font-normal text-[14px]">
-                          Notifications
-                        </span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                    }
+                  />
                 );
               }
 
