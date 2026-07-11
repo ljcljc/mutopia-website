@@ -1,15 +1,28 @@
 import { Link } from "react-router-dom";
+import { useAuthStore } from "@/components/auth/authStore";
 import { Icon } from "@/components/common/Icon";
 
 export default function Footer() {
+  const user = useAuthStore((state) => state.user);
+  const userInfo = useAuthStore((state) => state.userInfo);
+  const isResolvingUserInfo = useAuthStore((state) => state.isResolvingUserInfo);
+  const isWaitingForUserInfo = Boolean(user) && isResolvingUserInfo && !userInfo;
+
+  const handleRouteLinkClick = () => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  };
+
   const quickLinks = [
     { label: "Services", href: "#services", isAnchor: true },
-    { label: "Packages", href: "#packages", isAnchor: true },
+    { label: "Membership", href: "#packages", isAnchor: true },
     { label: "Why Choose Us", href: "#why-us", isAnchor: true },
     { label: "FAQ", href: "#faq", isAnchor: true },
     { label: "Book Appointment", href: "/booking", isAnchor: false },
-    { label: "Apply to Groomer", href: "#", isAnchor: true },
   ];
+  const shouldShowApplyAsGroomer = !isWaitingForUserInfo && !userInfo?.is_groomer;
+  if (shouldShowApplyAsGroomer) {
+    quickLinks.push({ label: "Apply as Groomer", href: "#", isAnchor: true });
+  }
 
   const supportLinks = [
     { label: "Help Center", href: "#" },
@@ -98,6 +111,7 @@ export default function Footer() {
                       <Link
                         key={index}
                         to={link.href}
+                        onClick={handleRouteLinkClick}
                         className={linkClassName}
                       >
                         {link.label}
@@ -218,4 +232,3 @@ export default function Footer() {
     </footer>
   );
 }
-
