@@ -4,7 +4,17 @@ import { Icon, type IconName } from "@/components/common/Icon";
 import { Spinner } from "@/components/common/Spinner";
 import AccountContentContainer from "@/components/layout/AccountContentContainer";
 import { cn } from "@/components/ui/utils";
-import { deleteMessage, getMessages, markAllMessagesRead, markMessageRead, type MessageOut, type MessagePageOut } from "@/lib/api";
+import { formatNotificationDateTime } from "@/lib/localDateTime";
+import {
+  deleteMessage,
+  getMessages,
+  markAllMessagesRead,
+  markMessageRead,
+  type MessageOut,
+  type MessagePageOut,
+  type MessageScope,
+} from "@/lib/api";
+import { adjustUnreadCount } from "@/components/layout/messageUnreadStore";
 
 type NotificationItem = {
   id: number;
@@ -23,7 +33,7 @@ type NotificationItem = {
 
 const NOTIFICATIONS_MAX_AGE_MS = 10000;
 const NOTIFICATIONS_PAGE_SIZE = 20;
-type NotificationsScope = "all" | "groomer";
+type NotificationsScope = MessageScope;
 type NotificationsVariant = "customer" | "groomer";
 
 type NotificationsCacheEntry = {
@@ -35,11 +45,13 @@ type NotificationsCacheEntry = {
 };
 
 const notificationsCache: Record<NotificationsScope, NotificationsCacheEntry> = {
+  user: { lastFetchedAt: 0, items: [], total: 0, nextPage: 1, hasMore: true },
   all: { lastFetchedAt: 0, items: [], total: 0, nextPage: 1, hasMore: true },
   groomer: { lastFetchedAt: 0, items: [], total: 0, nextPage: 1, hasMore: true },
 };
 
 const notificationsInFlight: Partial<Record<NotificationsScope, Promise<MessagePageOut> | null>> = {
+  user: null,
   all: null,
   groomer: null,
 };
@@ -142,7 +154,7 @@ interface NotificationsProps {
 }
 
 export default function Notifications({
-  scope = "all",
+  scope = "user",
   variant = "customer",
 }: NotificationsProps) {
   const [messages, setMessages] = useState<MessageOut[]>([]);
@@ -156,14 +168,18 @@ export default function Notifications({
   const touchStartXRef = useRef(0);
   const touchStartYRef = useRef(0);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const loadMoreSentinelRef = useRef<HTMLDivElement | null>(null);
   const isLoadingMoreRef = useRef(false);
   const messagesRef = useRef<MessageOut[]>([]);
   const totalCountRef = useRef(0);
   const nextPageRef = useRef(1);
   const hasMoreRef = useRef(true);
+  const hasFetchedInitialPageRef = useRef(false);
+  const hasAutoFilledRef = useRef(false);
+  const hasUserScrolledRef = useRef(false);
   const channel = "in_app" as const;
   const cache = notificationsCache[scope];
-  const scopeParam = scope === "groomer" ? "groomer" : undefined;
+  const scopeParam = scope;
   const isGroomerVariant = variant === "groomer";
 
   const syncCache = (items: MessageOut[], total: number, upcomingPage: number, more: boolean) => {
@@ -184,9 +200,16 @@ export default function Notifications({
   }, [messages, totalCount, nextPage, hasMore]);
 
   useEffect(() => {
+    hasFetchedInitialPageRef.current = false;
+    hasAutoFilledRef.current = false;
+    hasUserScrolledRef.current = false;
+  }, [scope]);
+
+  useEffect(() => {
     let isMounted = true;
     const now = Date.now();
     if (now - cache.lastFetchedAt < NOTIFICATIONS_MAX_AGE_MS && (cache.items.length > 0 || cache.total === 0)) {
+      hasFetchedInitialPageRef.current = true;
       setMessages(cache.items);
       setTotalCount(cache.total);
       setNextPage(cache.nextPage);
@@ -196,6 +219,8 @@ export default function Notifications({
       };
     }
     const loadMessages = async () => {
+      if (hasFetchedInitialPageRef.current) return;
+      hasFetchedInitialPageRef.current = true;
       setIsInitialLoading(true);
       try {
         if (notificationsInFlight[scope]) {
@@ -267,28 +292,43 @@ export default function Notifications({
     }
   };
 
-  const handleListScroll = () => {
-    const container = scrollContainerRef.current;
-    if (!container || isInitialLoading || isLoadingMoreRef.current || !hasMoreRef.current) return;
-    if (container.scrollTop + container.clientHeight < container.scrollHeight - 120) return;
+  const maybeLoadOlderMessages = (requireUserScroll: boolean) => {
+    if (isInitialLoading || isLoadingMoreRef.current || !hasMoreRef.current) return;
+    if (requireUserScroll && !hasUserScrolledRef.current) return;
+
+    const sentinel = loadMoreSentinelRef.current;
+    if (!sentinel) return;
+
+    const { top } = sentinel.getBoundingClientRect();
+    if (top > window.innerHeight + 120) return;
+
     void loadOlderMessages();
   };
 
   useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-    container.addEventListener("scroll", handleListScroll, { passive: true });
-    return () => {
-      container.removeEventListener("scroll", handleListScroll);
+    const handleScrollActivity = () => {
+      hasUserScrolledRef.current = true;
+      maybeLoadOlderMessages(true);
     };
-  }, [isInitialLoading]);
+
+    const container = scrollContainerRef.current;
+    container?.addEventListener("scroll", handleScrollActivity, { passive: true });
+    document.addEventListener("scroll", handleScrollActivity, { passive: true, capture: true });
+
+    return () => {
+      container?.removeEventListener("scroll", handleScrollActivity);
+      document.removeEventListener("scroll", handleScrollActivity, true);
+    };
+  }, [isInitialLoading, messages.length, hasMore]);
 
   useEffect(() => {
     if (isInitialLoading) return;
     const container = scrollContainerRef.current;
     if (!container || !hasMore || isLoadingMoreRef.current) return;
+    if (hasAutoFilledRef.current) return;
     if (container.scrollHeight <= container.clientHeight + 24) {
-      void loadOlderMessages();
+      hasAutoFilledRef.current = true;
+      maybeLoadOlderMessages(false);
     }
   }, [messages.length, hasMore, isInitialLoading]);
 
@@ -299,7 +339,7 @@ export default function Notifications({
         id: message.id,
         title: message.title,
         body: buildNotificationBody(message),
-        time: message.sent_at,
+        time: formatNotificationDateTime(message.sent_at),
         iconName: style.iconName,
         iconBg: style.iconBg,
         iconSize: style.iconSize,
@@ -314,6 +354,8 @@ export default function Notifications({
 
   const handleMarkAllAsRead = () => {
     markAllMessagesRead({ channel, scope: scopeParam }).then(() => {
+      const unreadCount = messagesRef.current.reduce((count, item) => count + (item.is_read ? 0 : 1), 0);
+      if (unreadCount > 0) adjustUnreadCount(scope, -unreadCount);
       setMessages((prev) => {
         const nextItems = prev.map((item) => ({ ...item, is_read: true }));
         syncCache(nextItems, totalCountRef.current, nextPageRef.current, hasMoreRef.current);
@@ -327,6 +369,8 @@ export default function Notifications({
   const handleMarkRead = (id: number) => {
     setSwipedId(null);
     markMessageRead(id).then(() => {
+      const target = messagesRef.current.find((item) => item.id === id);
+      if (target && !target.is_read) adjustUnreadCount(scope, -1);
       setMessages((prev) => {
         const nextItems = prev.map((item) => (item.id === id ? { ...item, is_read: true } : item));
         syncCache(nextItems, totalCountRef.current, nextPageRef.current, hasMoreRef.current);
@@ -342,8 +386,10 @@ export default function Notifications({
     setSwipedId(null);
     setDeletingId(id);
     try {
+      const target = messagesRef.current.find((item) => item.id === id);
       const result = await deleteMessage(id);
       if (result.ok) {
+        if (target && !target.is_read) adjustUnreadCount(scope, -1);
         const nextItems = messagesRef.current.filter((item) => item.id !== id);
         const nextTotal = Math.max(0, totalCountRef.current - 1);
         const more = nextItems.length < nextTotal;
@@ -600,6 +646,7 @@ export default function Notifications({
                     <div className="py-1 text-[12px] text-white">No more notifications</div>
                   )}
                 </div>
+                <div ref={loadMoreSentinelRef} className="h-px w-full" aria-hidden="true" />
               </>
             )}
           </div>

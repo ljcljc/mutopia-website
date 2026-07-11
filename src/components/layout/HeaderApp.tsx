@@ -218,7 +218,7 @@ export default function HeaderApp() {
         <>
           <div className="flex items-center gap-[10.5px] lg:hidden">
             <CreditsBadge />
-            <NotificationsPopover />
+            <NotificationsPopover scope="user" navigateTo="/account/notifications" />
           </div>
           <div className="hidden lg:flex items-center gap-[10.5px]">
             <CreditsBadge />
@@ -226,7 +226,7 @@ export default function HeaderApp() {
               userInfo={userInfo ?? undefined}
               fallbackName={user.name || user.email.split("@")[0]}
             />
-            <NotificationsPopover />
+            <NotificationsPopover scope="user" navigateTo="/account/notifications" />
           </div>
         </>
       )}

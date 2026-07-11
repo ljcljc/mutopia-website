@@ -2,13 +2,43 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@/components/common/Icon";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { getMessages, type MessageOut } from "@/lib/api";
+import { getMessages, markMessageRead, type MessageOut, type MessageScope } from "@/lib/api";
+import { formatNotificationDateTime } from "@/lib/localDateTime";
+import { adjustUnreadCount, useUnreadSummary } from "@/components/layout/messageUnreadStore";
 
-export default function NotificationsPopover() {
+interface NotificationsPopoverProps {
+  scope?: MessageScope;
+  navigateTo?: string;
+}
+
+export default function NotificationsPopover({
+  scope = "user",
+  navigateTo = "/account/notifications",
+}: NotificationsPopoverProps) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<MessageOut[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { hasUnread } = useUnreadSummary(scope);
+
+  const handleNotificationClick = (item: MessageOut) => {
+    if (!item.is_read) {
+      setItems((currentItems) => currentItems.map((currentItem) => (
+        currentItem.id === item.id ? { ...currentItem, is_read: true } : currentItem
+      )));
+      adjustUnreadCount(scope, -1);
+      void markMessageRead(item.id).catch((error) => {
+        console.error("Failed to mark popover notification as read:", error);
+        adjustUnreadCount(scope, 1);
+        setItems((currentItems) => currentItems.map((currentItem) => (
+          currentItem.id === item.id ? { ...currentItem, is_read: false } : currentItem
+        )));
+      });
+    }
+
+    setOpen(false);
+    navigate(navigateTo);
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -16,7 +46,7 @@ export default function NotificationsPopover() {
     const load = async () => {
       setIsLoading(true);
       try {
-        const response = await getMessages({ page: 1, page_size: 2, channel: "in_app" });
+        const response = await getMessages({ page: 1, page_size: 2, channel: "in_app", scope });
         if (isMounted) setItems(response.items || []);
       } catch (error) {
         console.error("Failed to load notifications:", error);
@@ -29,7 +59,7 @@ export default function NotificationsPopover() {
     return () => {
       isMounted = false;
     };
-  }, [open]);
+  }, [open, scope]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -39,6 +69,12 @@ export default function NotificationsPopover() {
           aria-label="Notifications"
           data-name="notifications"
         >
+          {hasUnread ? (
+            <span
+              data-testid={`notifications-unread-dot-${scope}`}
+              className="absolute -right-[2px] -top-[2px] z-10 size-[8px] rounded-full bg-[#EF4444]"
+            />
+          ) : null}
           <div className="bg-clip-padding border-0 border-transparent border-solid overflow-clip relative rounded-[inherit] size-[20px]">
             <div className="relative size-[20px]" data-name="icon">
               <Icon
@@ -82,10 +118,7 @@ export default function NotificationsPopover() {
                   key={item.id}
                   type="button"
                   className="flex flex-col gap-[4px] h-[64px] pt-[12px] px-[16px] w-full text-left hover:bg-[rgba(0,0,0,0.03)] transition-colors"
-                  onClick={() => {
-                    setOpen(false);
-                    navigate("/account/notifications");
-                  }}
+                  onClick={() => handleNotificationClick(item)}
                 >
                   <div className="flex items-start w-full">
                     <div className="flex flex-1 gap-[4px] items-center">
@@ -99,7 +132,7 @@ export default function NotificationsPopover() {
                   </div>
                   <div className="h-[16px] w-full">
                     <p className="font-['Inter:Regular',sans-serif] font-normal text-[12px] leading-[16px] text-[#64748B]">
-                      {item.sent_at}
+                      {formatNotificationDateTime(item.sent_at)}
                     </p>
                   </div>
                 </button>

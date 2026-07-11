@@ -88,6 +88,23 @@ export function getLocalOffsetMinutes(date = new Date()): number {
   return -date.getTimezoneOffset();
 }
 
+export function formatNotificationDateTime(value?: string | null, fallback = ""): string {
+  const parsed = parseApiDateTime(value);
+  if (!parsed) return value || fallback;
+
+  const now = new Date();
+  const isCurrentYear = parsed.getFullYear() === now.getFullYear();
+  const dateLabel = parsed.toLocaleDateString("en-US", isCurrentYear
+    ? { month: "short", day: "numeric" }
+    : { year: "numeric", month: "short", day: "numeric" });
+  const timeLabel = parsed.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+
+  return `${dateLabel}, ${timeLabel}`;
+}
+
 export function formatPreferredTimeSlotLocal(
   slot: object,
   options: { includeWeekday?: boolean; dateSeparator?: "." | "-" } = {},

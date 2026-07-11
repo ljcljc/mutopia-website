@@ -8,6 +8,7 @@ import GroomerTransactionsPage from "@/modules/groomer/pages/GroomerTransactions
 import GroomerMenuPage from "@/modules/groomer/pages/GroomerMenuPage";
 import GroomerPerformancePage from "@/modules/groomer/pages/GroomerPerformancePage";
 import GroomerNotificationsPage from "@/modules/groomer/pages/GroomerNotificationsPage";
+import GroomerHealthDetailsPage from "@/modules/groomer/pages/GroomerHealthDetailsPage";
 
 export const groomerRoutes = [
   {
@@ -48,6 +49,10 @@ export const groomerRoutes = [
           {
             path: "notifications",
             element: <GroomerNotificationsPage />,
+          },
+          {
+            path: "bookings/:bookingId/health-details",
+            element: <GroomerHealthDetailsPage />,
           },
         ],
       },

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Icon } from "@/components/common/Icon";
 import { Spinner } from "@/components/common/Spinner";
@@ -770,6 +770,7 @@ function UpNextAppointmentItem({
   now,
   isCancelingAppointment,
   isStartingTravel,
+  onViewHealthDetails,
   onCancelAppointment,
   onStartTravel,
 }: {
@@ -777,6 +778,7 @@ function UpNextAppointmentItem({
   now: Date;
   isCancelingAppointment: boolean;
   isStartingTravel: boolean;
+  onViewHealthDetails: (appointment: UpNextCard) => void;
   onCancelAppointment: (appointment: UpNextCard) => void;
   onStartTravel: (appointment: UpNextCard) => void;
 }) {
@@ -792,12 +794,19 @@ function UpNextAppointmentItem({
       showDuration={false}
       footer={
         <>
+          <button
+            type="button"
+            onClick={() => onViewHealthDetails(appointment)}
+            className="flex h-[38px] w-full items-center justify-center rounded-full border border-[#D6CCFA] bg-[#F4EFFE] font-comfortaa text-[13px] font-bold leading-[19.5px] text-[#633479] transition-transform active:scale-[0.99]"
+          >
+            Health details
+          </button>
           {showStartTravel ? (
             <button
               type="button"
               onClick={() => onStartTravel(appointment)}
               disabled={isStartingTravel}
-              className="flex h-[38px] w-full items-center justify-center rounded-full bg-[linear-gradient(180deg,#F7A01B_0%,#F08A12_100%)] font-comfortaa text-[14px] font-bold leading-[21px] text-white shadow-[0px_10px_18px_rgba(240,138,18,0.28)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
+              className="mt-3 flex h-[38px] w-full items-center justify-center rounded-full bg-[linear-gradient(180deg,#F7A01B_0%,#F08A12_100%)] font-comfortaa text-[14px] font-bold leading-[21px] text-white shadow-[0px_10px_18px_rgba(240,138,18,0.28)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
             >
               {isStartingTravel ? <Spinner size="small" color="white" /> : "Start Travel"}
             </button>
@@ -838,6 +847,7 @@ function LoadingStateCard({ label }: { label: string }) {
 
 export default function GroomerMyWorkPage() {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const highlightBookingId = searchParams.get("highlight");
   const today = useMemo(() => new Date(), []);
@@ -1119,6 +1129,9 @@ export default function GroomerMyWorkPage() {
                               now={now}
                               isCancelingAppointment={isCancelingAppointment}
                               isStartingTravel={isStartingTravel}
+                              onViewHealthDetails={(selectedAppointment) =>
+                                navigate(`/groomer/bookings/${selectedAppointment.bookingId}/health-details`)
+                              }
                               onCancelAppointment={setAppointmentToCancel}
                               onStartTravel={handleStartTravel}
                             />

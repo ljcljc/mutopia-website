@@ -235,11 +235,19 @@ export interface MessageOut {
   is_read: boolean;
 }
 
+export type MessageScope = "user" | "groomer" | "all";
+
 export interface MessagePageOut {
   total: number;
   page: number;
   page_size: number;
   items: MessageOut[];
+}
+
+export interface MessageUnreadSummaryOut {
+  scope: MessageScope;
+  unread_count: number;
+  has_unread: boolean;
 }
 
 // PetPayload 用于提交预约时的宠物信息
@@ -1126,7 +1134,7 @@ export async function getMessages(params?: {
   page?: number;
   page_size?: number;
   channel?: "in_app" | "email";
-  scope?: "groomer";
+  scope?: MessageScope;
 }): Promise<MessagePageOut> {
   const queryParams = new URLSearchParams();
   if (params?.page) queryParams.append("page", String(params.page));
@@ -1135,6 +1143,21 @@ export async function getMessages(params?: {
   if (params?.scope) queryParams.append("scope", params.scope);
   const url = `/api/messages${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
   const response = await http.get<MessagePageOut>(url);
+  return response.data;
+}
+
+/**
+ * 获取未读消息汇总
+ */
+export async function getMessageUnreadSummary(params?: {
+  channel?: "in_app" | "email";
+  scope?: MessageScope;
+}): Promise<MessageUnreadSummaryOut> {
+  const queryParams = new URLSearchParams();
+  if (params?.channel) queryParams.append("channel", params.channel);
+  if (params?.scope) queryParams.append("scope", params.scope);
+  const url = `/api/messages/unread-summary${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+  const response = await http.get<MessageUnreadSummaryOut>(url);
   return response.data;
 }
 
@@ -1149,7 +1172,7 @@ export async function markMessageRead(messageId: number): Promise<OkOut> {
 /**
  * 标记全部消息已读
  */
-export async function markAllMessagesRead(params?: { channel?: "in_app" | "email"; scope?: "groomer" }): Promise<OkOut> {
+export async function markAllMessagesRead(params?: { channel?: "in_app" | "email"; scope?: MessageScope }): Promise<OkOut> {
   const queryParams = new URLSearchParams();
   if (params?.channel) queryParams.append("channel", params.channel);
   if (params?.scope) queryParams.append("scope", params.scope);

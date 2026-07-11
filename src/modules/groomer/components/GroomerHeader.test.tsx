@@ -1,8 +1,14 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useAuthStore } from "@/components/auth/authStore";
 import GroomerHeader from "./GroomerHeader";
+
+const useUnreadSummaryMock = vi.fn();
+
+vi.mock("@/components/layout/messageUnreadStore", () => ({
+  useUnreadSummary: (...args: unknown[]) => useUnreadSummaryMock(...args),
+}));
 
 function openAccountDropdown() {
   const trigger = document.querySelector('[data-slot="dropdown-menu-trigger"]');
@@ -29,6 +35,13 @@ describe("GroomerHeader", () => {
     useAuthStore.setState({
       user: null,
       userInfo: null,
+    });
+    useUnreadSummaryMock.mockReturnValue({
+      unreadCount: 0,
+      hasUnread: false,
+      isLoading: false,
+      isInitialized: true,
+      lastSyncedAt: Date.now(),
     });
   });
 
@@ -99,5 +112,19 @@ describe("GroomerHeader", () => {
     fireEvent.click(screen.getByRole("switch", { name: "Switch to pet owner" }));
 
     expect(screen.getByText("Customer dashboard page")).toBeInTheDocument();
+  });
+
+  it("shows a red dot when there are unread groomer notifications", () => {
+    useUnreadSummaryMock.mockReturnValue({
+      unreadCount: 2,
+      hasUnread: true,
+      isLoading: false,
+      isInitialized: true,
+      lastSyncedAt: Date.now(),
+    });
+
+    renderHeader();
+
+    expect(screen.getByTestId("notifications-unread-dot-groomer")).toBeInTheDocument();
   });
 });

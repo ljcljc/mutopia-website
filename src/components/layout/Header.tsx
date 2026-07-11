@@ -181,7 +181,7 @@ function UserInfo() {
         fallbackName={user.name || user.email}
       />
 
-      <NotificationsPopover />
+      <NotificationsPopover scope="user" navigateTo="/account/notifications" />
     </div>
   );
 }

@@ -284,6 +284,9 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: async () => {
     await clearAuthTokens();
+    void import("@/components/layout/messageUnreadStore").then(({ resetUnreadSummaries }) => {
+      resetUnreadSummaries();
+    });
     set({ user: null, userInfo: null });
     // Clear user info from localStorage when user logs out
     try {

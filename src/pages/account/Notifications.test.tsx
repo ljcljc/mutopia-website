@@ -37,6 +37,11 @@ describe("Notifications", () => {
 
     expect(await screen.findByText("Notifications")).toBeInTheDocument();
     expect(await screen.findByText("No notifications")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(getMessages).toHaveBeenCalledWith(
+        expect.objectContaining({ scope: "user" }),
+      );
+    });
     expect(container.textContent).toContain("You're all caught up!");
   });
 

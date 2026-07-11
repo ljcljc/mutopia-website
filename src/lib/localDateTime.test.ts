@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   addHoursToApiLocalDateTime,
   formatApiLocalDateTime,
+  formatNotificationDateTime,
   formatLocalDateTimeForApi,
   getLocalOffsetMinutes,
   formatPreferredTimeSlotLocal,
@@ -38,6 +39,20 @@ describe("local API date time formatting", () => {
   it("returns the browser local offset in minutes", () => {
     const date = new Date(2026, 4, 24, 0, 6);
     expect(getLocalOffsetMinutes(date)).toBe(-date.getTimezoneOffset());
+  });
+
+  it("formats notification timestamps in the browser local timezone", () => {
+    const value = "2026-04-26T01:30:00Z";
+    const parsed = new Date(value);
+    const now = new Date();
+    const expectedDate = parsed.toLocaleDateString("en-US", parsed.getFullYear() === now.getFullYear()
+      ? { month: "short", day: "numeric" }
+      : { year: "numeric", month: "short", day: "numeric" });
+    const expectedTime = parsed.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+    expect(formatNotificationDateTime(value)).toBe(`${expectedDate}, ${expectedTime}`);
   });
 
   it("formats preferred booking slots from local date fields without UTC date shifting", () => {
