@@ -5,6 +5,7 @@ import { Spinner } from "@/components/common/Spinner";
 import AccountContentContainer from "@/components/layout/AccountContentContainer";
 import { cn } from "@/components/ui/utils";
 import { formatNotificationDateTime } from "@/lib/localDateTime";
+import { onNotificationRead } from "@/lib/notificationEvents";
 import {
   deleteMessage,
   getMessages,
@@ -14,7 +15,7 @@ import {
   type MessagePageOut,
   type MessageScope,
 } from "@/lib/api";
-import { adjustUnreadCount } from "@/components/layout/messageUnreadStore";
+import { adjustUnreadCount, getUnreadCount } from "@/components/layout/messageUnreadStore";
 
 type NotificationItem = {
   id: number;
@@ -199,6 +200,21 @@ export default function Notifications({
     hasMoreRef.current = hasMore;
   }, [messages, totalCount, nextPage, hasMore]);
 
+  useEffect(() => onNotificationRead(({ id, scope: eventScope }) => {
+    if (eventScope !== scope) return;
+
+    setMessages((currentMessages) => {
+      const target = currentMessages.find((item) => item.id === id);
+      if (!target || target.is_read) return currentMessages;
+
+      const nextItems = currentMessages.map((item) => (
+        item.id === id ? { ...item, is_read: true } : item
+      ));
+      syncCache(nextItems, totalCountRef.current, nextPageRef.current, hasMoreRef.current);
+      return nextItems;
+    });
+  }), [scope]);
+
   useEffect(() => {
     hasFetchedInitialPageRef.current = false;
     hasAutoFilledRef.current = false;
@@ -354,7 +370,7 @@ export default function Notifications({
 
   const handleMarkAllAsRead = () => {
     markAllMessagesRead({ channel, scope: scopeParam }).then(() => {
-      const unreadCount = messagesRef.current.reduce((count, item) => count + (item.is_read ? 0 : 1), 0);
+      const unreadCount = getUnreadCount(scope);
       if (unreadCount > 0) adjustUnreadCount(scope, -unreadCount);
       setMessages((prev) => {
         const nextItems = prev.map((item) => ({ ...item, is_read: true }));

@@ -4,6 +4,7 @@ import { Icon } from "@/components/common/Icon";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { getMessages, markMessageRead, type MessageOut, type MessageScope } from "@/lib/api";
 import { formatNotificationDateTime } from "@/lib/localDateTime";
+import { emitNotificationRead } from "@/lib/notificationEvents";
 import { adjustUnreadCount, useUnreadSummary } from "@/components/layout/messageUnreadStore";
 
 interface NotificationsPopoverProps {
@@ -27,6 +28,7 @@ export default function NotificationsPopover({
         currentItem.id === item.id ? { ...currentItem, is_read: true } : currentItem
       )));
       adjustUnreadCount(scope, -1);
+      emitNotificationRead({ id: item.id, scope });
       void markMessageRead(item.id).catch((error) => {
         console.error("Failed to mark popover notification as read:", error);
         adjustUnreadCount(scope, 1);

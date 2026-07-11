@@ -174,6 +174,10 @@ export function adjustUnreadCount(scope: MessageScope, delta: number) {
   useMessageUnreadStore.getState().adjustUnreadCount(scope, delta);
 }
 
+export function getUnreadCount(scope: MessageScope): number {
+  return useMessageUnreadStore.getState().summaries[scope].unreadCount;
+}
+
 export function resetUnreadSummaries() {
   for (const timerId of pollTimers.values()) {
     window.clearInterval(timerId);
