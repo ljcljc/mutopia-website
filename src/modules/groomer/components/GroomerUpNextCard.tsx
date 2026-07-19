@@ -20,6 +20,7 @@ export function GroomerUpNextCard({
   timeBadgeTone = "orange",
   serviceIconName = "full-grooming",
   showDuration = true,
+  onPetNameClick,
 }: {
   appointment: GroomerUpNextAppointment;
   footer?: ReactNode;
@@ -28,6 +29,7 @@ export function GroomerUpNextCard({
   timeBadgeTone?: "orange" | "blue";
   serviceIconName?: IconName;
   showDuration?: boolean;
+  onPetNameClick?: () => void;
 }) {
   const isBlueTone = timeBadgeTone === "blue";
 
@@ -49,7 +51,17 @@ export function GroomerUpNextCard({
         <div className="flex items-center gap-3">
           <img src={appointment.avatarUrl} alt={appointment.petName} className="size-[44px] rounded-full object-cover" />
           <div className="min-w-0">
-            <p className="font-comfortaa text-[14px] leading-[21px] text-[#4A2C55]">{appointment.petName}</p>
+            {onPetNameClick ? (
+              <button
+                type="button"
+                onClick={onPetNameClick}
+                className="font-comfortaa text-[14px] leading-[21px] text-[#4A2C55] underline underline-offset-[2px] cursor-pointer"
+              >
+                {appointment.petName}
+              </button>
+            ) : (
+              <p className="font-comfortaa text-[14px] leading-[21px] text-[#4A2C55]">{appointment.petName}</p>
+            )}
             <p className="font-comfortaa text-[12px] leading-[18px] text-[#8B6357]">{appointment.breed}</p>
             <p className="font-comfortaa text-[11px] leading-[16.5px] text-[#15A34A]">
               <span aria-hidden="true">• </span>

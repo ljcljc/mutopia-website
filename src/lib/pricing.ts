@@ -43,10 +43,3 @@ export function getServicePrice(
     ? parseFloat(service.base_price)
     : service.base_price;
 }
-
-
-
-
-
-
-

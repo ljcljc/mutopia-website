@@ -55,7 +55,7 @@ export interface BookingHealthQuestionnaire {
     otherAllergies: string;
   };
   clinical: {
-    noKnownMedicalConditions: boolean;
+    noKnownMedicalConditions: boolean | null;
     eatingHabitsAndBehaviors: string[];
     metabolicAndGeneralHealth: string[];
     preExistingHealthConditions: string[];

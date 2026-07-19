@@ -15,6 +15,14 @@ interface GroomerSidebarProps {
 export default function GroomerSidebar({ className }: GroomerSidebarProps) {
   const { handleLogout } = useLogout();
 
+  const activeMatcher = (locationPath: string, itemPath: string) => {
+    if (itemPath === "/groomer/dashboard" && /^\/groomer\/bookings\/[^/]+\/health-details$/.test(locationPath)) {
+      return true;
+    }
+
+    return locationPath === itemPath || locationPath.startsWith(itemPath + "/");
+  };
+
   const auxiliaryLinks: SidebarNavItem[] = [
     { id: "how-it-works", label: "How It Works", path: "/how-it-works", iconName: "help-circle" },
     { id: "logout", label: "Logout", path: "#", iconName: "logout", variant: "danger", onClick: handleLogout },
@@ -25,6 +33,7 @@ export default function GroomerSidebar({ className }: GroomerSidebarProps) {
       className={className}
       mainNavItems={mainNavItems}
       auxiliaryLinks={auxiliaryLinks}
+      activeMatcher={activeMatcher}
       footerGapClassName="mt-0"
     />
   );

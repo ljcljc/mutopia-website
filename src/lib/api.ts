@@ -518,6 +518,7 @@ export interface BookingDetailOut {
   order_code?: string | null;
   status: string;
   scheduled_time?: string | null;
+  user_phone?: string | null;
   payment_due_at?: string | null;
   canceled_at?: string | null;
   cancel_reason?: string | null;
@@ -543,6 +544,14 @@ export interface BookingDetailOut {
   payments?: BookingPaymentOut[];
   adjustments?: BookingAdjustmentOut[];
   review?: ReviewSummaryOut | null;
+  health_report?: {
+    id: number;
+    summary?: string | null;
+    pet_condition?: string | null;
+    behavior_notes?: string | null;
+    recommendations?: string | null;
+    updated_at?: string | null;
+  } | null;
 }
 
 export interface BookingUpdateOut extends BookingOut {

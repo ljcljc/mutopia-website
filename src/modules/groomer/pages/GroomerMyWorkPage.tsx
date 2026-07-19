@@ -649,14 +649,29 @@ function HistoryBadgeView({ badge }: { badge: HistoryBadge }) {
   );
 }
 
-function HistoryAppointmentItem({ appointment }: { appointment: HistoryAppointmentCard }) {
+function HistoryAppointmentItem({
+  appointment,
+  onViewHealthDetails,
+}: {
+  appointment: HistoryAppointmentCard;
+  onViewHealthDetails: (appointment: HistoryAppointmentCard) => void;
+}) {
   return (
     <article className="rounded-[24px] border border-[rgba(139,99,87,0.05)] bg-white px-[20px] pb-[20px] pt-[20px] shadow-[0px_4px_16px_rgba(139,99,87,0.06)]">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="font-comfortaa text-[13px] font-bold leading-[19.5px] text-[rgba(139,99,87,0.6)]">{appointment.date}</p>
           <h3 className="mt-1 font-comfortaa text-[18px] font-bold leading-[22.5px] text-[#8B6357]">
-            <span className="underline underline-offset-2">{appointment.petName}</span>
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                onViewHealthDetails(appointment);
+              }}
+              className="underline underline-offset-2 cursor-pointer"
+            >
+              {appointment.petName}
+            </button>
             <span className="font-medium text-[rgba(139,99,87,0.6)]">{` (${appointment.breed})`}</span>
           </h3>
         </div>
@@ -792,21 +807,15 @@ function UpNextAppointmentItem({
       eyebrow={waitingForCustomer ? "BOOKING REQUEST" : undefined}
       title={waitingForCustomer ? "Waiting for customer confirmation" : undefined}
       showDuration={false}
+      onPetNameClick={() => onViewHealthDetails(appointment)}
       footer={
         <>
-          <button
-            type="button"
-            onClick={() => onViewHealthDetails(appointment)}
-            className="flex h-[38px] w-full items-center justify-center rounded-full border border-[#D6CCFA] bg-[#F4EFFE] font-comfortaa text-[13px] font-bold leading-[19.5px] text-[#633479] transition-transform active:scale-[0.99]"
-          >
-            Health details
-          </button>
           {showStartTravel ? (
             <button
               type="button"
               onClick={() => onStartTravel(appointment)}
               disabled={isStartingTravel}
-              className="mt-3 flex h-[38px] w-full items-center justify-center rounded-full bg-[linear-gradient(180deg,#F7A01B_0%,#F08A12_100%)] font-comfortaa text-[14px] font-bold leading-[21px] text-white shadow-[0px_10px_18px_rgba(240,138,18,0.28)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
+              className="flex h-[38px] w-full items-center justify-center rounded-full bg-[linear-gradient(180deg,#F7A01B_0%,#F08A12_100%)] font-comfortaa text-[14px] font-bold leading-[21px] text-white shadow-[0px_10px_18px_rgba(240,138,18,0.28)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
             >
               {isStartingTravel ? <Spinner size="small" color="white" /> : "Start Travel"}
             </button>
@@ -872,6 +881,10 @@ export default function GroomerMyWorkPage() {
     decideInvitation,
     startTravel,
   } = useGroomerMyWorkStore();
+
+  const openHealthDetails = (bookingId: number) => {
+    navigate(`/groomer/bookings/${bookingId}/health-details`);
+  };
   const [activeTab, setActiveTab] = useState<WorkTab>("schedule");
   const [calendarMode, setCalendarMode] = useState<CalendarMode>(() =>
     typeof window !== "undefined" && window.matchMedia("(min-width: 640px)").matches ? "week" : "collapsed",
@@ -1129,9 +1142,7 @@ export default function GroomerMyWorkPage() {
                               now={now}
                               isCancelingAppointment={isCancelingAppointment}
                               isStartingTravel={isStartingTravel}
-                              onViewHealthDetails={(selectedAppointment) =>
-                                navigate(`/groomer/bookings/${selectedAppointment.bookingId}/health-details`)
-                              }
+                              onViewHealthDetails={(selectedAppointment) => openHealthDetails(selectedAppointment.bookingId)}
                               onCancelAppointment={setAppointmentToCancel}
                               onStartTravel={handleStartTravel}
                             />
@@ -1161,14 +1172,24 @@ export default function GroomerMyWorkPage() {
                       {section.appointments.length > 0 ? (
                         <div className="space-y-4">
                           {section.appointments.map((appointment) => (
-                            <button
-                          key={appointment.id}
-                          type="button"
-                          onClick={() => void openHistoryDetails(appointment)}
-                          className="block w-full text-left transition-transform active:scale-[0.99] cursor-pointer"
-                        >
-                              <HistoryAppointmentItem appointment={appointment} />
-                            </button>
+                            <div
+                              key={appointment.id}
+                              role="button"
+                              tabIndex={0}
+                              onClick={() => void openHistoryDetails(appointment)}
+                              onKeyDown={(event) => {
+                                if (event.key === "Enter" || event.key === " ") {
+                                  event.preventDefault();
+                                  void openHistoryDetails(appointment);
+                                }
+                              }}
+                              className="block w-full text-left transition-transform active:scale-[0.99] cursor-pointer"
+                            >
+                              <HistoryAppointmentItem
+                                appointment={appointment}
+                                onViewHealthDetails={(selectedAppointment) => openHealthDetails(selectedAppointment.bookingId)}
+                              />
+                            </div>
                           ))}
                         </div>
                       ) : null}

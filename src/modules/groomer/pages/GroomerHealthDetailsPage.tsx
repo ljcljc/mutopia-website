@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ChevronDown, ChevronUp, CircleAlert, Lightbulb, Phone } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { ChevronDown, ChevronRight, CircleAlert, Lightbulb } from "lucide-react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
+import DEFAULT_PET_AVATAR from "@/assets/icons/icon-pet-avatar-placeholder.svg";
+import { Icon } from "@/components/common/Icon";
 import { OrangeButton } from "@/components/common/OrangeButton";
 import { Spinner } from "@/components/common/Spinner";
+import AccountContentContainer from "@/components/layout/AccountContentContainer";
 import { buildImageUrl, getGroomerBookingDetail, startGroomerTravel, type GroomerBookingDetailOut } from "@/lib/api";
-import { normalizeQuestionnaire } from "@/pages/account/booking-health/questionnaire";
-import type { BookingHealthQuestionnaire, TimelineEntry } from "@/pages/account/booking-health/types";
 import { formatGroomerTimeLabel, shouldShowStartTravel } from "@/modules/groomer/utils/time";
-import DEFAULT_PET_AVATAR from "@/assets/icons/icon-pet-avatar-placeholder.svg";
+import { BOOKING_HEALTH_STEPS, normalizeQuestionnaire } from "@/pages/account/booking-health/questionnaire";
+import type { BookingHealthQuestionnaire, TimelineEntry } from "@/pages/account/booking-health/types";
 
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
@@ -21,6 +23,14 @@ function getString(source: Record<string, unknown>, keys: string[], fallback = "
     if (typeof value === "number") return String(value);
   }
   return fallback;
+}
+
+function getStringList(source: Record<string, unknown>, keys: string[]): string[] {
+  for (const key of keys) {
+    const value = source[key];
+    if (Array.isArray(value)) return value.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
+  }
+  return [];
 }
 
 function titleCase(value: string): string {
@@ -41,8 +51,7 @@ function formatBirthLabel(value: string): string {
 
 function formatWeightLabel(value: string, unit: string): string {
   if (!value) return "-";
-  if (!unit) return value;
-  return `${value} ${unit}`;
+  return unit ? `${value} ${unit}` : value;
 }
 
 function formatFrequencyLabel(questionnaire: BookingHealthQuestionnaire, snapshot: Record<string, unknown>): string {
@@ -53,21 +62,61 @@ function formatFrequencyLabel(questionnaire: BookingHealthQuestionnaire, snapsho
   if (days > 45) return "Occasionally";
 
   const legacy = getString(snapshot, ["grooming_frequency"]);
-  if (!legacy) return "-";
-  return titleCase(legacy);
+  return legacy ? titleCase(legacy) : "-";
+}
+
+function formatScheduleLabel(value: string): string {
+  if (!value) return "-";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+
+  return new Intl.DateTimeFormat("en-CA", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(parsed);
+}
+
+function formatHealthReportUpdatedLabel(value: string): string {
+  if (!value) return "";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+
+  const year = parsed.getFullYear();
+  const month = String(parsed.getMonth() + 1).padStart(2, "0");
+  const day = String(parsed.getDate()).padStart(2, "0");
+  const hour = String(parsed.getHours()).padStart(2, "0");
+  return `${year}-${month}-${day} at ${hour}H`;
+}
+
+function formatListValue(values: string[], fallback = "Not provided"): string {
+  const normalized = values.map((item) => item.trim()).filter(Boolean);
+  return normalized.length > 0 ? normalized.join(", ") : fallback;
+}
+
+function formatBooleanValue(value: boolean | null, trueLabel = "Yes", falseLabel = "No", fallback = "Not provided"): string {
+  if (value === true) return trueLabel;
+  if (value === false) return falseLabel;
+  return fallback;
+}
+
+function formatNumberValue(value: number, suffix = "", fallback = "Not provided"): string {
+  if (value > 0) return suffix ? `${value} ${suffix}` : String(value);
+  return fallback;
 }
 
 function formatVaccinationStatus(entry: TimelineEntry) {
   if (!entry.type) return null;
   return {
     label: titleCase(entry.type),
-    status: entry.date ? "Up to date" : "Not provided",
+    status: entry.date ? `Updated ${entry.date}` : "Not provided",
     isActive: Boolean(entry.date),
   };
 }
 
 function buildAlerts(questionnaire: BookingHealthQuestionnaire): string[] {
   const items = [
+    questionnaire.prevention.restrictions.trim(),
     ...questionnaire.clinical.preExistingHealthConditions,
     ...questionnaire.clinical.chronicConditions,
     ...questionnaire.clinical.metabolicAndGeneralHealth,
@@ -76,13 +125,10 @@ function buildAlerts(questionnaire: BookingHealthQuestionnaire): string[] {
       const normalized = item.trim().toLowerCase();
       return normalized && !["normal", "no known illnesses", "no chronic conditions"].includes(normalized);
     })
-    .slice(0, 3);
+    .map((item) => titleCase(item))
+    .slice(0, 4);
 
-  if (questionnaire.prevention.restrictions.trim()) {
-    items.unshift(questionnaire.prevention.restrictions.trim());
-  }
-
-  return Array.from(new Set(items)).slice(0, 3);
+  return Array.from(new Set(items));
 }
 
 function buildActionPlan(questionnaire: BookingHealthQuestionnaire): string[] {
@@ -91,9 +137,15 @@ function buildActionPlan(questionnaire: BookingHealthQuestionnaire): string[] {
     ...questionnaire.prevention.recentTreatments
       .filter((entry) => entry.type.trim())
       .map((entry) => `${titleCase(entry.type)}${entry.date ? ` (${entry.date})` : ""}`),
-  ];
+    questionnaire.medical.recentMedicalManagement.includes("Current topical medications") && questionnaire.medical.topicalMedications.trim()
+      ? `Handle topical medication areas carefully`
+      : "",
+    questionnaire.medical.recentMedicalManagement.includes("Current oral medications") && questionnaire.medical.oralMedications.trim()
+      ? `Confirm oral medication timing with owner`
+      : "",
+  ].filter(Boolean);
 
-  return Array.from(new Set(items)).slice(0, 3);
+  return Array.from(new Set(items)).slice(0, 4);
 }
 
 function buildCoreNeeds(questionnaire: BookingHealthQuestionnaire): string[] {
@@ -105,36 +157,410 @@ function buildCoreNeeds(questionnaire: BookingHealthQuestionnaire): string[] {
     questionnaire.prevention.externalParasiteIntervalDays > 0
       ? `External parasite prevention every ${questionnaire.prevention.externalParasiteIntervalDays} days`
       : "",
-    questionnaire.medical.topicalMedications.trim() ? `Topical medications: ${questionnaire.medical.topicalMedications.trim()}` : "",
-    questionnaire.medical.oralMedications.trim() ? `Oral medications: ${questionnaire.medical.oralMedications.trim()}` : "",
+    questionnaire.medical.topicalMedications.trim() ? `Topical meds: ${questionnaire.medical.topicalMedications.trim()}` : "",
+    questionnaire.medical.oralMedications.trim() ? `Oral meds: ${questionnaire.medical.oralMedications.trim()}` : "",
   ].filter(Boolean);
 
-  return Array.from(new Set(items)).slice(0, 3);
+  return Array.from(new Set(items)).slice(0, 4);
 }
 
-function buildNotes(questionnaire: BookingHealthQuestionnaire): string[] {
+function buildNotes(questionnaire: BookingHealthQuestionnaire, snapshot: Record<string, unknown>): string[] {
   return [
+    getString(snapshot, ["special_notes"]),
     questionnaire.prevention.restrictions.trim(),
     questionnaire.medical.recentVetVisitReason.trim(),
     ...questionnaire.clinical.eatingHabitsAndBehaviors.filter(Boolean),
   ].filter(Boolean);
 }
 
-function buildBehaviorRows(questionnaire: BookingHealthQuestionnaire): Array<{ label: string; value: string }> {
-  return [
-    {
-      label: "Energy Level",
-      value: questionnaire.clinical.metabolicAndGeneralHealth[0] || "Not provided",
+function buildPhotoUrls(snapshot: Record<string, unknown>, primaryKeys: string[], fallbackKeys: string[] = []): string[] {
+  const urls = [
+    ...getStringList(snapshot, primaryKeys),
+    ...getStringList(snapshot, fallbackKeys),
+  ]
+    .map((url) => buildImageUrl(url) || url)
+    .filter(Boolean);
+
+  return Array.from(new Set(urls));
+}
+
+function SummaryField({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-w-0">
+      <p className="font-comfortaa text-[10px] leading-3 text-[#8B6357]">{label}</p>
+      <p className="mt-1 font-comfortaa text-[12px] font-bold leading-4 text-[#4A3C2A]">{value || "-"}</p>
+    </div>
+  );
+}
+
+type PetInfoCardProps = {
+  avatarUrl: string;
+  petName: string;
+  serviceName: string;
+  phone: string;
+  petType: string;
+  breed: string;
+  birthDate: string;
+  genderLabel: string;
+  weightLabel: string;
+  coatLabel: string;
+  behaviorLabel: string;
+  frequencyLabel: string;
+  serviceTimeLabel: string;
+  appointmentDateLabel: string;
+  addressLabel: string;
+  hasHealthDetails?: boolean;
+  detailsContent?: React.ReactNode;
+};
+
+function MobileDetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start justify-between gap-4">
+      <p className="font-comfortaa text-[14px] leading-[21px] text-[#45556C]">{label}:</p>
+      <p className="text-right font-comfortaa text-[14px] font-medium leading-[21px] text-[#0F172B]">{value || "Not provided"}</p>
+    </div>
+  );
+}
+
+function MobileDetailSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <p className="font-comfortaa text-[12.25px] font-semibold uppercase tracking-[0.3063px] text-[#0F172B]">{title}</p>
+      <div className="mt-[10.5px] space-y-[7px]">{children}</div>
+    </div>
+  );
+}
+
+function MobileVaccinationRow({ label, status, isActive }: { label: string; status: string; isActive: boolean }) {
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <p className="font-comfortaa text-[14px] leading-[21px] text-[#45556C]">{label}:</p>
+      <span
+        className={`rounded-full px-[8.75px] py-[3.5px] font-comfortaa text-[10.5px] font-medium leading-[14px] ${
+          isActive ? "bg-[#DCFCE7] text-[#008236]" : "bg-[#F3F4F6] text-[#6B7280]"
+        }`}
+      >
+        {isActive ? `✓ ${status}` : status}
+      </span>
+    </div>
+  );
+}
+
+function DesktopProfileRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start justify-between gap-6">
+      <p className="font-comfortaa text-[14px] leading-[21px] text-[#45556C]">{label}:</p>
+      <p className="text-right font-comfortaa text-[14px] font-medium leading-[21px] text-[#0F172B]">{value || "Not provided"}</p>
+    </div>
+  );
+}
+
+function DesktopVaccinationRow({ label, status, isActive }: { label: string; status: string; isActive: boolean }) {
+  return (
+    <div className="flex items-center justify-between gap-6">
+      <p className="font-comfortaa text-[14px] leading-[21px] text-[#45556C]">{label}:</p>
+      <span
+        className={`rounded-full px-[8.75px] py-[3.5px] font-comfortaa text-[10.5px] font-medium leading-[14px] ${
+          isActive ? "bg-[#DCFCE7] text-[#008236]" : "bg-[#F3F4F6] text-[#6B7280]"
+        }`}
+      >
+        {isActive ? `✓ ${status}` : status}
+      </span>
+    </div>
+  );
+}
+
+function PetInfoCardMobile({
+  avatarUrl,
+  petName,
+  petType,
+  breed,
+  birthDate,
+  weightLabel,
+  coatLabel,
+  behaviorLabel,
+  frequencyLabel,
+  hasHealthDetails = false,
+  detailsContent,
+}: PetInfoCardProps) {
+  const [isExpanded, setIsExpanded] = useState(hasHealthDetails);
+
+  return (
+    <section className="rounded-[16px] border-2 border-[#DE6A07] bg-white px-[22px] py-[14px] md:hidden">
+      <div className="flex items-start gap-3">
+        <img src={avatarUrl} alt={petName} className="size-14 rounded-full object-cover" />
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-comfortaa text-[14px] leading-[22.75px] text-[#4A3C2A]">{petName}</p>
+          <div className="mt-[7px] grid grid-cols-2 gap-x-10 gap-y-4 text-[#4A3C2A]">
+            <SummaryField label="Pet type" value={petType} />
+            <SummaryField label="Breed" value={breed} />
+            <SummaryField label="Weight" value={weightLabel} />
+            <SummaryField label="Date of birth" value={birthDate} />
+            <SummaryField label="Coat condition" value={coatLabel} />
+            <SummaryField label="Behavior" value={behaviorLabel} />
+          </div>
+          <div className="mt-2 h-px bg-[#D1D5DC]" />
+          <div className="mt-3">
+            <div className="w-20">
+              <SummaryField label="Frequency" value={frequencyLabel} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {hasHealthDetails ? (
+        <>
+          {isExpanded && detailsContent ? (
+            <div className="mt-3 rounded-[14px] border border-[#E5E7EB] bg-[#F9FAFB] p-[18.5px]">
+              {detailsContent}
+            </div>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => setIsExpanded((current) => !current)}
+            className="mt-2 flex w-full items-center justify-center gap-2 px-3 py-1 text-center"
+          >
+            <ChevronDown className={`size-3 text-[#8B6357] transition-transform ${isExpanded ? "rotate-180" : "rotate-0"}`} strokeWidth={2} />
+            <span className="font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#8B6357]">
+              {isExpanded ? "Hide health details" : "Show health details"}
+            </span>
+          </button>
+        </>
+      ) : null}
+    </section>
+  );
+}
+
+function PetInfoCardDesktop({
+  avatarUrl,
+  petName,
+  phone,
+  petType,
+  breed,
+  birthDate,
+  genderLabel,
+  weightLabel,
+  coatLabel,
+  behaviorLabel,
+  frequencyLabel,
+}: PetInfoCardProps) {
+  return (
+    <section className="hidden rounded-[12px] border-2 border-[#DE6A07] bg-white p-[22px] shadow-[0px_8px_6px_rgba(0,0,0,0.1)] md:block">
+      <div className="flex items-start gap-2">
+        <img src={avatarUrl} alt={petName} className="size-14 rounded-full object-cover" />
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-comfortaa text-[14px] leading-[22.75px] text-[#4A3C2A]">{petName}</p>
+          <div className="mt-[7px] space-y-2">
+            <div className="flex flex-wrap gap-[16px_12px] text-[#4A3C2A]">
+              <div className="w-20 shrink-0">
+                <SummaryField label="Pet type" value={petType} />
+              </div>
+              <div className="w-20 shrink-0">
+                <SummaryField label="Breed" value={breed} />
+              </div>
+              <div className="w-20 shrink-0">
+                <SummaryField label="Date of birth" value={birthDate} />
+              </div>
+              <div className="w-20 shrink-0">
+                <SummaryField label="Gender" value={genderLabel} />
+              </div>
+              <div className="w-20 shrink-0">
+                <SummaryField label="Weight" value={weightLabel} />
+              </div>
+            </div>
+
+            <div className="h-px bg-[#D1D5DC]" />
+
+            <div className="flex items-center gap-3">
+              <div className="w-20 shrink-0">
+                <SummaryField label="Frequency" value={frequencyLabel} />
+              </div>
+              <div className="w-20 shrink-0">
+                <SummaryField label="Coat" value={coatLabel} />
+              </div>
+              <div className="w-20 shrink-0">
+                <SummaryField label="Behavior" value={behaviorLabel} />
+              </div>
+              {phone ? (
+                <a
+                  href={`tel:${phone}`}
+                  className="ml-auto inline-flex h-7 shrink-0 items-center gap-[5px] rounded-[32px] bg-[#8B6357] px-7 font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#FFF7ED]"
+                >
+                  Contact
+                  <Icon name="button-arrow" className="size-[14px] text-[#FFF7ED]" aria-hidden="true" />
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className="ml-auto inline-flex h-7 shrink-0 items-center gap-[5px] rounded-[32px] bg-[#8B6357]/45 px-7 font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#FFF7ED]/85"
+                >
+                  Contact
+                  <Icon name="button-arrow" className="size-[14px] text-[#FFF7ED]/85" aria-hidden="true" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function InsightPanel({
+  title,
+  tone,
+  items,
+  emptyText,
+  icon,
+  noteText,
+}: {
+  title: string;
+  tone: "danger" | "success" | "info";
+  items: string[];
+  emptyText: string;
+  icon?: React.ReactNode;
+  noteText?: string;
+}) {
+  const toneClasses = {
+    danger: {
+      wrapper: "border-[#FFC9C9] bg-[#FEF2F2]",
+      card: "border-[#FFA2A2] bg-white",
+      title: "text-[#82181A]",
+      text: "text-[#9F0712]",
     },
-    {
-      label: "Socialization",
-      value: questionnaire.lifestyle.householdSetup.join(", ") || "Not provided",
+    success: {
+      wrapper: "border-[#A4F4CF] bg-[#ECFDF5]",
+      card: "border-[#9EE7C2] bg-white",
+      title: "text-[#004F3B]",
+      text: "text-[#314158]",
+      index: "bg-[#009966] text-white",
+      accent: "text-[#007A55]",
     },
-    {
-      label: "Previous Grooming",
-      value: formatFrequencyLabel(questionnaire, {}),
+    info: {
+      wrapper: "border-[#BEDBFF] bg-[#EFF6FF]",
+      card: "border-[#E5E7EB] bg-white",
+      title: "text-[#0E2B93]",
+      text: "text-[#193CB8]",
+      index: "bg-[#2374FF] text-white",
+      noteTitle: "text-[#0F172B]",
+      noteText: "text-[#314158]",
     },
-  ];
+  }[tone];
+
+  const visibleItems = items.length > 0 ? items : [emptyText];
+
+  return (
+    <div className={`rounded-[18px] border-2 p-[14px] ${toneClasses.wrapper}`}>
+      {tone === "danger" ? (
+        <>
+          <h3 className={`font-comfortaa text-[15.75px] font-semibold leading-[24.5px] ${toneClasses.title}`}>{title}</h3>
+          <div className="mt-[14px] space-y-[10.5px]">
+            {visibleItems.map((item) => (
+              <div key={`${title}-${item}`} className={`rounded-[18px] border-2 px-4 py-4 ${toneClasses.card}`}>
+                <div className="flex items-start gap-[7px]">
+                  <CircleAlert className="mt-1 size-3 shrink-0 text-[#DE1507]" strokeWidth={2.4} />
+                  <p className={`font-comfortaa text-[14px] font-semibold leading-[21px] ${toneClasses.text}`}>{item}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      ) : tone === "success" ? (
+        <>
+          <div className="flex items-center gap-[7px]">
+            <span className="text-[15.75px] leading-[24.5px]">💡</span>
+            <h3 className={`font-comfortaa text-[15.75px] font-semibold leading-[24.5px] ${toneClasses.title}`}>{title}</h3>
+          </div>
+          <div className="mt-[14px] space-y-[10.5px]">
+            {visibleItems.map((item, index) => {
+              const match = item.match(/^(.*?)(\s*\([^()]+\))$/);
+              const mainText = match ? match[1].trimEnd() : item;
+              const accentText = match ? match[2].trim() : "";
+
+              return (
+                <div key={`${title}-${item}`} className="flex items-start gap-[10.5px]">
+                  <div className={`flex size-[24.5px] shrink-0 items-center justify-center rounded-full font-comfortaa text-[12.25px] font-semibold leading-[17.5px] ${toneClasses.index}`}>
+                    {index + 1}
+                  </div>
+                  <p className={`pt-[2.25px] font-comfortaa text-[14px] leading-[21px] ${toneClasses.text}`}>
+                    {mainText}
+                    {accentText ? <span className={`font-medium ${toneClasses.accent}`}> {accentText}</span> : null}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      ) : tone === "info" ? (
+        <>
+          <h3 className={`font-comfortaa text-[15.75px] font-semibold leading-[24.5px] ${toneClasses.title}`}>{title}</h3>
+          <div className="mt-3 space-y-[10.5px]">
+            {visibleItems.map((item, index) => (
+              <div key={`${title}-${item}`} className="flex items-start gap-[10.5px]">
+                <div className={`flex size-[24.5px] shrink-0 items-center justify-center rounded-full font-comfortaa text-[12.25px] font-semibold leading-[17.5px] ${toneClasses.index}`}>
+                  {index + 1}
+                </div>
+                <p className={`pt-[2.25px] font-comfortaa text-[14px] leading-[21px] ${toneClasses.text}`}>{item}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-6">
+            <p className={`font-comfortaa text-[12.25px] font-semibold uppercase leading-[17.5px] tracking-[0.3063px] ${toneClasses.noteTitle}`}>Notes</p>
+            <div className={`mt-[10.5px] rounded-[14px] border px-[15px] py-[15px] ${toneClasses.card}`}>
+              <p className={`font-comfortaa text-[12.25px] leading-[19.906px] ${toneClasses.noteText}`}>
+                {noteText || "No special notes were provided."}
+              </p>
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="flex items-center gap-2">
+            {icon}
+            <h3 className={`font-comfortaa text-[14px] font-semibold leading-[22px] ${toneClasses.title}`}>{title}</h3>
+          </div>
+          <div className="mt-3 space-y-[10px]">
+            {visibleItems.map((item, index) => (
+              <div key={`${title}-${item}`} className={`flex items-start gap-3 rounded-[16px] border-2 px-4 py-3 ${toneClasses.card}`}>
+                <div className={`mt-[2px] flex size-5 shrink-0 items-center justify-center rounded-full font-comfortaa text-[10px] font-bold ${toneClasses.index}`}>
+                  {index + 1}
+                </div>
+                <p className={`font-comfortaa text-[13px] leading-5 ${toneClasses.text}`}>{item}</p>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function PhotoGalleryCard({ title, photos, emptyText }: { title: string; photos: string[]; emptyText: string }) {
+  return (
+    <div className="space-y-2">
+      <p className="font-comfortaa text-[12px] font-bold leading-[18px] text-[#4A3C2A]">{title}</p>
+      {photos.length > 0 ? (
+        <div className="grid grid-cols-3 gap-2">
+          {photos.slice(0, 6).map((photoUrl, index) => (
+            <a
+              key={`${title}-${index}`}
+              href={photoUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="overflow-hidden rounded-[12px] border border-[#E5E7EB] bg-[#FAFAFA]"
+            >
+              <img src={photoUrl} alt={`${title} ${index + 1}`} className="aspect-square w-full object-cover" />
+            </a>
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-[12px] border border-dashed border-[#D6D3D1] bg-[#FAFAFA] px-4 py-5">
+          <p className="font-comfortaa text-[12px] leading-[18px] text-[#717182]">{emptyText}</p>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function GroomerHealthDetailsPage() {
@@ -144,7 +570,8 @@ export default function GroomerHealthDetailsPage() {
   const [detail, setDetail] = useState<GroomerBookingDetailOut | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isStartingTravel, setIsStartingTravel] = useState(false);
-  const [isProfileExpanded, setIsProfileExpanded] = useState(true);
+  const [isDesktopProfileExpanded, setIsDesktopProfileExpanded] = useState(true);
+  const [isMobileInsightsExpanded, setIsMobileInsightsExpanded] = useState(true);
 
   useEffect(() => {
     if (!Number.isFinite(parsedBookingId)) {
@@ -172,7 +599,6 @@ export default function GroomerHealthDetailsPage() {
     };
 
     void loadDetail();
-
     return () => {
       cancelled = true;
     };
@@ -180,40 +606,235 @@ export default function GroomerHealthDetailsPage() {
 
   const detailRecord = useMemo(() => asRecord(detail), [detail]);
   const petSnapshot = useMemo(() => asRecord(detail?.pet_snapshot), [detail]);
-  const questionnaire = useMemo(
-    () => normalizeQuestionnaire(petSnapshot.health_questionnaire),
-    [petSnapshot],
-  );
+  const packageSnapshot = useMemo(() => asRecord(detail?.package_snapshot), [detail]);
+  const addressSnapshot = useMemo(() => asRecord(detail?.address_snapshot), [detail]);
+  const questionnaire = useMemo(() => normalizeQuestionnaire(petSnapshot.health_questionnaire), [petSnapshot]);
 
   const petName = getString(petSnapshot, ["name"], "Pet");
   const petType = titleCase(getString(petSnapshot, ["pet_type", "species", "type"], "Pet"));
   const breed = getString(petSnapshot, ["breed", "pet_breed"], "-");
   const birthDate = formatBirthLabel(getString(petSnapshot, ["birthday", "date_of_birth", "birth_date"]));
-  const gender = titleCase(getString(petSnapshot, ["gender", "sex"], "-"));
+  const genderLabel = titleCase(getString(petSnapshot, ["gender", "sex"], "-"));
   const weightLabel = formatWeightLabel(
     getString(petSnapshot, ["weight_value", "weight_kg", "weight"], ""),
     getString(petSnapshot, ["weight_unit"], ""),
   );
-  const coat = questionnaire.clinical.preExistingHealthConditions[0]
-    || getString(petSnapshot, ["coat_condition", "coat"], "-");
-  const behavior = questionnaire.clinical.eatingHabitsAndBehaviors[0] || getString(petSnapshot, ["behavior"], "-");
-  const frequency = formatFrequencyLabel(questionnaire, petSnapshot);
-  const avatarUrl = buildImageUrl(getString(petSnapshot, ["avatar_url", "pet_avatar", "avatar"])) || DEFAULT_PET_AVATAR;
+  const coatLabel = titleCase(getString(petSnapshot, ["coat_condition", "coat"], "Not provided"));
+  const behaviorLabel = questionnaire.clinical.eatingHabitsAndBehaviors[0] || titleCase(getString(petSnapshot, ["behavior"], "Not provided"));
+  const frequencyLabel = formatFrequencyLabel(questionnaire, petSnapshot);
   const phone = getString(detailRecord, ["owner_phone", "phone", "user_phone", "contact_phone"]);
+  const serviceName = getString(packageSnapshot, ["service_name"], "Service not provided");
+  const serviceTime = getString(packageSnapshot, ["service_time"]);
+  const addressLabel = getString(addressSnapshot, ["address", "full_address"], "Address unavailable");
+  const appointmentDateLabel = formatScheduleLabel(detail?.scheduled_time ?? "");
+  const appointmentTimeLabel = formatGroomerTimeLabel(detail?.scheduled_time ?? "", "-");
+  const avatarUrl = buildImageUrl(getString(petSnapshot, ["avatar_url", "primary_photo", "pet_avatar", "avatar"])) || DEFAULT_PET_AVATAR;
+
   const alerts = buildAlerts(questionnaire);
   const actionPlan = buildActionPlan(questionnaire);
   const coreNeeds = buildCoreNeeds(questionnaire);
-  const notes = buildNotes(questionnaire);
+  const noteItems = buildNotes(questionnaire, petSnapshot);
   const vaccinationRows = questionnaire.prevention.vaccinationHistory
     .map(formatVaccinationStatus)
     .filter((item): item is NonNullable<ReturnType<typeof formatVaccinationStatus>> => Boolean(item))
-    .slice(0, 3);
-  const behaviorRows = buildBehaviorRows(questionnaire);
+    .slice(0, 6);
+
+  const petPhotos = buildPhotoUrls(petSnapshot, ["photos"], ["primary_photo"]);
+  const referencePhotos = buildPhotoUrls(petSnapshot, ["reference_photos"]);
+
+  const nutritionRows = [
+    {
+      label: "Primary diet",
+      value: formatListValue(questionnaire.nutrition.primaryDiet),
+    },
+    {
+      label: "Current brand",
+      value: questionnaire.nutrition.currentBrand.trim() || "Not provided",
+    },
+    {
+      label: "Feeding habits",
+      value: formatListValue(questionnaire.nutrition.feedingHabits),
+    },
+    {
+      label: "Meals per day",
+      value: formatNumberValue(questionnaire.nutrition.feedingFrequencyPerDay, "/ day"),
+    },
+    {
+      label: "Water intake",
+      value: formatListValue(questionnaire.nutrition.waterIntake),
+    },
+    {
+      label: "Stool condition",
+      value: formatListValue(questionnaire.nutrition.stoolCondition),
+    },
+    {
+      label: "Vomiting",
+      value: questionnaire.nutrition.vomitingFrequency || "Not provided",
+    },
+    {
+      label: "Food sensitivities",
+      value: formatListValue(
+        [
+          ...questionnaire.nutrition.foodSensitivities,
+          questionnaire.nutrition.otherFoodSensitivity.trim(),
+        ].filter(Boolean) as string[],
+      ),
+    },
+    {
+      label: "Treat frequency",
+      value: questionnaire.nutrition.treatFrequency || "Not provided",
+    },
+    {
+      label: "Treat times per day",
+      value: formatNumberValue(questionnaire.nutrition.treatTimesPerDay, "/ day"),
+    },
+    {
+      label: "Treat types",
+      value: formatListValue(questionnaire.nutrition.treatTypes),
+    },
+    {
+      label: "Daily supplements",
+      value: formatListValue(questionnaire.nutrition.dailySupplements),
+    },
+  ];
+
+  const energyLevel =
+    questionnaire.clinical.metabolicAndGeneralHealth.find((item) => item.toLowerCase().includes("energy")) ||
+    questionnaire.clinical.eatingHabitsAndBehaviors.find((item) => item.toLowerCase().includes("energy")) ||
+    "Not provided";
+
+  const behaviorRows = [
+    {
+      label: "Energy level",
+      value: titleCase(energyLevel),
+    },
+    {
+      label: "Eating habits & behaviors",
+      value: formatListValue(questionnaire.clinical.eatingHabitsAndBehaviors),
+    },
+    {
+      label: "Previous grooming",
+      value: frequencyLabel || "Not provided",
+    },
+  ];
+
+  const preventionRows = [
+    {
+      label: "Spayed / neutered",
+      value: formatBooleanValue(questionnaire.prevention.spayedNeutered),
+    },
+    {
+      label: "Microchip number",
+      value: questionnaire.prevention.microchipNumber.trim() || "Not provided",
+    },
+    {
+      label: "Internal parasite prevention",
+      value: formatNumberValue(questionnaire.prevention.internalParasiteIntervalDays, "days"),
+    },
+    {
+      label: "External parasite prevention",
+      value: formatNumberValue(questionnaire.prevention.externalParasiteIntervalDays, "days"),
+    },
+    {
+      label: "Recent treatments",
+      value:
+        questionnaire.prevention.recentTreatments
+          .filter((entry) => entry.type.trim())
+          .map((entry) => `${titleCase(entry.type)}${entry.date ? ` (${entry.date})` : ""}`)
+          .join(", ") || "Not provided",
+    },
+    {
+      label: "Primary goals",
+      value: formatListValue(questionnaire.prevention.primaryGoals),
+    },
+    {
+      label: "Restrictions",
+      value: questionnaire.prevention.restrictions.trim() || "Not provided",
+    },
+  ];
+
+  const medicalRows = [
+    {
+      label: "Recent medical management",
+      value: formatListValue(questionnaire.medical.recentMedicalManagement),
+    },
+    {
+      label: "Topical medications",
+      value: questionnaire.medical.topicalMedications.trim() || "Not provided",
+    },
+    {
+      label: "Oral medications",
+      value: questionnaire.medical.oralMedications.trim() || "Not provided",
+    },
+    {
+      label: "Vet visits per year",
+      value: formatNumberValue(questionnaire.medical.vetVisitFrequencyPerYear),
+    },
+    {
+      label: "Recent vet visit date",
+      value: questionnaire.medical.recentVetVisitDate || "Not provided",
+    },
+    {
+      label: "Recent vet visit reason",
+      value: questionnaire.medical.recentVetVisitReason.trim() || "Not provided",
+    },
+    {
+      label: "Known food allergies",
+      value: formatListValue(questionnaire.medical.knownFoodAllergies),
+    },
+    {
+      label: "Other allergies",
+      value: questionnaire.medical.otherAllergies.trim() || "Not provided",
+    },
+  ];
+
+  const clinicalRows = [
+    {
+      label: "No known medical conditions",
+      value: formatBooleanValue(questionnaire.clinical.noKnownMedicalConditions),
+    },
+    {
+      label: "Metabolic & general health",
+      value: formatListValue(questionnaire.clinical.metabolicAndGeneralHealth),
+    },
+    {
+      label: "Pre-existing health conditions",
+      value: formatListValue(questionnaire.clinical.preExistingHealthConditions),
+    },
+    {
+      label: "Chronic conditions",
+      value: formatListValue(questionnaire.clinical.chronicConditions),
+    },
+    {
+      label: "Surgery history",
+      value: formatListValue(questionnaire.clinical.surgeryHistory),
+    },
+  ];
+
   const scheduledTime = detail?.scheduled_time ?? "";
   const canStartTravel = Boolean(detail?.id) && shouldShowStartTravel(scheduledTime, new Date(), detail?.status);
+  const joinedNotes = noteItems.length > 0 ? noteItems.join(". ") : "No special notes were provided.";
+  const healthReport = detail?.health_report ?? null;
+  const hasHealthReport = Boolean(
+    healthReport &&
+      [healthReport.summary, healthReport.pet_condition, healthReport.behavior_notes, healthReport.recommendations]
+        .some((value) => typeof value === "string" && value.trim().length > 0),
+  );
+  const healthReportUpdatedLabel = formatHealthReportUpdatedLabel(healthReport?.updated_at ?? "");
+  const hasOwnerReport = BOOKING_HEALTH_STEPS.some((_, index) => {
+    if (index === 0) return questionnaire.lifestyle.neighborhoods.length > 0 || questionnaire.lifestyle.neighborhoodDraft.trim().length > 0;
+    if (index === 1) return questionnaire.prevention.primaryGoals.length > 0 || questionnaire.prevention.restrictions.trim().length > 0;
+    if (index === 2) return questionnaire.nutrition.primaryDiet.length > 0 || questionnaire.nutrition.foodSensitivities.length > 0;
+    return questionnaire.clinical.eatingHabitsAndBehaviors.length > 0 || questionnaire.clinical.preExistingHealthConditions.length > 0;
+  });
+
+  useEffect(() => {
+    setIsMobileInsightsExpanded(hasOwnerReport);
+  }, [hasOwnerReport]);
 
   const handleStartTravel = async () => {
     if (!detail?.id) return;
+
     setIsStartingTravel(true);
     try {
       await startGroomerTravel(detail.id);
@@ -229,251 +850,340 @@ export default function GroomerHealthDetailsPage() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto flex min-h-full w-full max-w-[731px] flex-col bg-white shadow-[0_18px_48px_rgba(15,23,43,0.12)]">
-        <div className="flex items-center gap-4 border-b border-[#e5e7eb] px-5 py-4">
-          <div className="h-8 w-8 rounded-full bg-[#f3f4f6]" />
-          <div className="h-5 w-48 rounded-full bg-[#f3f4f6]" />
+      <AccountContentContainer className="px-4 pb-8 pt-4 sm:px-6">
+        <div className="mx-auto w-full space-y-4">
+          <div className="h-6 w-52 rounded-full bg-white/20" />
+          <div className="h-44 rounded-[20px] bg-white/90" />
+          <div className="h-52 rounded-[20px] bg-white/90" />
+          <div className="h-40 rounded-[20px] bg-white/90" />
         </div>
-        <div className="space-y-4 px-5 py-5">
-          <div className="h-28 rounded-[18px] bg-[#faf5ef]" />
-          <div className="h-32 rounded-[18px] bg-[#fff1f1]" />
-          <div className="h-32 rounded-[18px] bg-[#eefcf5]" />
-          <div className="h-56 rounded-[18px] bg-[#edf4ff]" />
-        </div>
-      </div>
+      </AccountContentContainer>
     );
   }
 
   return (
-    <div className="mx-auto flex min-h-full w-full max-w-[731px] flex-col bg-white shadow-[0_18px_48px_rgba(15,23,43,0.12)]">
-      <div className="border-b border-[#e5e7eb] bg-white">
-        <div className="mx-auto flex w-full max-w-[588px] items-center gap-[14px] px-4 py-4 sm:px-[21px]">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="inline-flex size-[31px] items-center justify-center rounded-full text-[#25314c]"
-            aria-label="Go back"
-          >
-            <ArrowLeft className="size-[17px]" strokeWidth={1.8} />
-          </button>
-          <h1 className="font-comfortaa text-[18px] font-semibold leading-[24px] text-[#0f172b]">
-            Health details - {petName}
-          </h1>
-        </div>
-      </div>
+    <AccountContentContainer className="px-4 pb-8 pt-4 sm:px-6">
+      <div className="mx-auto w-full space-y-4">
+        <nav
+          aria-label="Breadcrumb"
+          className="flex items-center gap-1.5 whitespace-nowrap font-comfortaa text-[14px] font-bold leading-[20px] text-white"
+        >
+          <Link to="/groomer/dashboard" className="transition-colors hover:text-[#FFE4C7]">
+            Dashboard
+          </Link>
+          <span aria-hidden="true">{">"}</span>
+          <span className="truncate">{petName}</span>
+        </nav>
 
-      <div className="flex-1 bg-white">
-        <div className="mx-auto flex w-full max-w-[588px] flex-col gap-4 px-4 py-5 sm:px-[21px]">
-          <section className="rounded-[12px] border-2 border-[#de6a07] bg-white p-[22px] shadow-[0px_8px_18px_rgba(0,0,0,0.08)]">
-            <div className="flex items-start gap-3">
-              <img src={avatarUrl} alt={petName} className="size-14 rounded-full object-cover" />
-              <div className="min-w-0 flex-1">
-                <p className="font-comfortaa text-[16px] leading-6 text-[#4a3c2a]">{petName}</p>
-                <div className="mt-[7px] flex flex-wrap gap-x-3 gap-y-2 text-[#4a3c2a]">
-                  {[
-                    ["Pet type", petType],
-                    ["Breed", breed],
-                    ["Date of birth", birthDate],
-                    ["Gender", gender],
-                    ["Weight", weightLabel],
-                    ["Frequency", frequency],
-                    ["Coat", coat],
-                    ["Behavior", behavior],
-                  ].map(([label, value]) => (
-                    <div key={label} className="w-[80px]">
-                      <p className="font-comfortaa text-[10px] leading-3 text-[#6b5a4d]">{label}</p>
-                      <p className="mt-1 font-comfortaa text-[12px] font-bold leading-4 text-[#4a3c2a]">{value || "-"}</p>
-                    </div>
+        <section className="space-y-0">
+          <PetInfoCardMobile
+            avatarUrl={avatarUrl}
+            petName={petName}
+            serviceName={serviceName}
+            phone={phone}
+            petType={petType}
+            breed={breed}
+            birthDate={birthDate}
+            genderLabel={genderLabel}
+            weightLabel={weightLabel}
+            coatLabel={coatLabel}
+            behaviorLabel={behaviorLabel}
+            frequencyLabel={frequencyLabel}
+            serviceTimeLabel={serviceTime || appointmentTimeLabel}
+            appointmentDateLabel={appointmentDateLabel}
+            addressLabel={addressLabel}
+            hasHealthDetails={hasOwnerReport}
+            detailsContent={
+              <div className="space-y-4">
+                <MobileDetailSection title="Nutrition & diet">
+                  {nutritionRows.map((item) => (
+                    <MobileDetailRow key={item.label} label={item.label} value={item.value} />
                   ))}
-                </div>
+                </MobileDetailSection>
+
+                <MobileDetailSection title="Vaccinations">
+                  {vaccinationRows.length > 0 ? (
+                    vaccinationRows.map((item) => (
+                      <MobileVaccinationRow
+                        key={item.label}
+                        label={item.label}
+                        status={item.isActive ? "Up to date" : item.status}
+                        isActive={item.isActive}
+                      />
+                    ))
+                  ) : (
+                    <MobileDetailRow label="Vaccinations" value="Not provided" />
+                  )}
+                </MobileDetailSection>
+
+                <MobileDetailSection title="Behavioral habits">
+                  {behaviorRows.map((item) => (
+                    <MobileDetailRow key={item.label} label={item.label} value={item.value} />
+                  ))}
+                </MobileDetailSection>
+
+                {noteItems.length > 0 ? (
+                  <MobileDetailSection title="Special notes">
+                    <p className="font-comfortaa text-[14px] leading-[21px] text-[#0F172B]">{noteItems.join(". ")}</p>
+                  </MobileDetailSection>
+                ) : null}
               </div>
-            </div>
-            {phone ? (
-              <div className="mt-3 flex justify-end">
-                <a
-                  href={`tel:${phone}`}
-                  className="inline-flex h-7 items-center gap-[5px] rounded-[32px] bg-[#8b6357] px-7 font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#fff7ed]"
-                >
-                  <span>Contact</span>
-                  <Phone className="size-[14px]" strokeWidth={2} />
-                </a>
-              </div>
-            ) : null}
-          </section>
+            }
+          />
+          <PetInfoCardDesktop
+            avatarUrl={avatarUrl}
+            petName={petName}
+            serviceName={serviceName}
+            phone={phone}
+            petType={petType}
+            breed={breed}
+            birthDate={birthDate}
+            genderLabel={genderLabel}
+            weightLabel={weightLabel}
+            coatLabel={coatLabel}
+            behaviorLabel={behaviorLabel}
+            frequencyLabel={frequencyLabel}
+            serviceTimeLabel={serviceTime || appointmentTimeLabel}
+            appointmentDateLabel={appointmentDateLabel}
+            addressLabel={addressLabel}
+          />
+        </section>
 
-          <section className="rounded-[14px] border-2 border-[#ffc9c9] bg-[#fef2f2] p-5">
-            <h2 className="font-comfortaa text-[16px] font-semibold leading-6 text-[#82181a]">
-              Critical Alerts (Read Before Grooming)
-            </h2>
-            <div className="mt-4 flex flex-col gap-[10px]">
-              {(alerts.length > 0 ? alerts : ["No critical alerts were provided by the owner."]).map((item) => (
-                <div key={item} className="flex items-start gap-2 rounded-[18px] border-2 border-[#ffa2a2] bg-white px-4 py-4">
-                  <CircleAlert className="mt-[2px] size-4 shrink-0 text-[#c81e1e]" strokeWidth={2} />
-                  <p className="font-comfortaa text-[14px] font-semibold leading-[21px] text-[#9f0712]">{item}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="rounded-[14px] border-2 border-[#8ee2bf] bg-[#edfdf5] p-5">
-            <div className="flex items-center gap-2">
-              <Lightbulb className="size-4 text-[#0f9f6e]" strokeWidth={2} />
-              <h2 className="font-comfortaa text-[16px] font-semibold leading-6 text-[#0f7a58]">
-                Grooming Action Plan
-              </h2>
-            </div>
-            <div className="mt-4 flex flex-col gap-3">
-              {(actionPlan.length > 0 ? actionPlan : ["No specific grooming goals were submitted."]).map((item, index) => (
-                <div key={item} className="flex items-start gap-3">
-                  <div className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[#0f9f6e] font-comfortaa text-[11px] font-bold text-white">
-                    {index + 1}
-                  </div>
-                  <p className="font-comfortaa text-[14px] leading-[21px] text-[#246356]">{item}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="rounded-[14px] border-2 border-[#b8d7ff] bg-[#eef4ff] p-5">
-            <h2 className="font-comfortaa text-[16px] font-semibold leading-6 text-[#2f5fd4]">Core needs and note</h2>
-            <div className="mt-4 flex flex-col gap-3">
-              {(coreNeeds.length > 0 ? coreNeeds : ["No extra core-care instructions were provided."]).map((item, index) => (
-                <div key={item} className="flex items-start gap-3">
-                  <div className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[#3b82f6] font-comfortaa text-[11px] font-bold text-white">
-                    {index + 1}
-                  </div>
-                  <p className="font-comfortaa text-[14px] leading-[21px] text-[#2f5fd4]">{item}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-5">
-              <p className="font-comfortaa text-[12px] font-semibold uppercase leading-[18px] tracking-[0.3px] text-[#4a3c2a]">
-                Notes
-              </p>
-              <div className="mt-3 rounded-[14px] bg-white/90 px-4 py-4">
-                <p className="font-comfortaa text-[13px] leading-5 text-[#5b6473]">
-                  {notes.length > 0 ? notes.join(". ") : "No additional notes were submitted."}
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section className="overflow-hidden rounded-[14px] border border-[#e5e7eb] bg-white">
+        {hasOwnerReport ? (
+          <section className="rounded-[16px] border-2 border-[#DE6A07] bg-white p-[14px] md:hidden">
             <button
               type="button"
-              onClick={() => setIsProfileExpanded((current) => !current)}
-              className="flex w-full items-center justify-between px-4 py-4 text-left"
+              onClick={() => setIsMobileInsightsExpanded((current) => !current)}
+              className="flex w-full items-center justify-between gap-4 text-left"
             >
-              <span className="font-comfortaa text-[14px] leading-[21px] text-[#4a5565]">
-                View Full Health Profile (Diet, Vaccines, Habits)
-              </span>
-              {isProfileExpanded ? (
-                <ChevronUp className="size-4 text-[#64748b]" strokeWidth={1.8} />
-              ) : (
-                <ChevronDown className="size-4 text-[#64748b]" strokeWidth={1.8} />
-              )}
+              <div className="flex items-center gap-2">
+                <Lightbulb className="size-4 text-[#DE6A07]" strokeWidth={2} />
+                <h2 className="font-comfortaa text-[15px] font-bold leading-6 text-[#DE6A07]">Insights from owner&apos;s report</h2>
+              </div>
+              <ChevronDown
+                className={`size-4 shrink-0 text-[#8B6357] transition-transform ${isMobileInsightsExpanded ? "rotate-180" : "rotate-0"}`}
+                strokeWidth={2}
+              />
             </button>
 
-            {isProfileExpanded ? (
-              <div className="border-t border-[#e5e7eb] px-4 py-4">
-                <div className="space-y-5">
-                  <div>
-                    <p className="font-comfortaa text-[12px] font-semibold uppercase leading-[18px] tracking-[0.3px] text-[#0f172b]">
-                      Nutrition & Diet
-                    </p>
-                    <div className="mt-3 space-y-2">
-                      {[
-                        ["Primary Diet", questionnaire.nutrition.primaryDiet.join(", ") || "Not provided"],
-                        ["Stool Condition", questionnaire.nutrition.stoolCondition.join(", ") || "Not provided"],
-                        ["Vomiting", questionnaire.nutrition.vomitingFrequency || "Not provided"],
-                        [
-                          "Food Sensitivities",
-                          [
-                            ...questionnaire.nutrition.foodSensitivities,
-                            questionnaire.nutrition.otherFoodSensitivity.trim(),
-                          ].filter(Boolean).join(", ") || "Not provided",
-                        ],
-                      ].map(([label, value]) => (
-                        <div key={label} className="flex items-start justify-between gap-4">
-                          <p className="font-comfortaa text-[14px] leading-[21px] text-[#45556c]">{label}:</p>
-                          <p className="text-right font-comfortaa text-[14px] font-medium leading-[21px] text-[#0f172b]">{value}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="font-comfortaa text-[12px] font-semibold uppercase leading-[18px] tracking-[0.3px] text-[#0f172b]">
-                      Vaccinations
-                    </p>
-                    <div className="mt-3 space-y-2">
-                      {(vaccinationRows.length > 0 ? vaccinationRows : [{ label: "Vaccinations", status: "Not provided", isActive: false }]).map((item) => (
-                        <div key={item.label} className="flex items-center justify-between gap-4">
-                          <p className="font-comfortaa text-[14px] leading-[21px] text-[#45556c]">{item.label}:</p>
-                          <span
-                            className={
-                              item.isActive
-                                ? "rounded-full bg-[#dcfce7] px-[10px] py-[4px] font-comfortaa text-[10.5px] font-medium leading-[14px] text-[#008236]"
-                                : "rounded-full bg-[#f3f4f6] px-[10px] py-[4px] font-comfortaa text-[10.5px] font-medium leading-[14px] text-[#64748b]"
-                            }
-                          >
-                            {item.isActive ? "✓ " : ""}{item.status}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="font-comfortaa text-[12px] font-semibold uppercase leading-[18px] tracking-[0.3px] text-[#0f172b]">
-                      Behavioral Habits
-                    </p>
-                    <div className="mt-3 space-y-2">
-                      {behaviorRows.map((item) => (
-                        <div key={item.label} className="flex items-start justify-between gap-4">
-                          <p className="font-comfortaa text-[14px] leading-[21px] text-[#45556c]">{item.label}:</p>
-                          <p className="text-right font-comfortaa text-[14px] font-medium leading-[21px] text-[#0f172b]">{item.value}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+            {isMobileInsightsExpanded ? (
+              <div className="mt-4 space-y-3">
+                <InsightPanel
+                  title="Critical Alerts (Read Before Grooming)"
+                  tone="danger"
+                  items={alerts}
+                  emptyText="No critical alerts were submitted by the owner."
+                  icon={<CircleAlert className="size-4 text-[#DE1507]" strokeWidth={2} />}
+                />
+                <InsightPanel
+                  title="Grooming Action Plan"
+                  tone="success"
+                  items={actionPlan}
+                  emptyText="No specific grooming goals were submitted."
+                />
+                <InsightPanel
+                  title="Core needs and note"
+                  tone="info"
+                  items={coreNeeds}
+                  emptyText="No extra care instructions were submitted."
+                  noteText={joinedNotes}
+                />
               </div>
             ) : null}
           </section>
-        </div>
-      </div>
+        ) : null}
 
-      <div className="border-t border-[#e5e7eb] bg-white shadow-[0_-10px_18px_rgba(15,23,43,0.06)]">
-        <div className="mx-auto flex w-full max-w-[588px] flex-col items-center px-4 py-[14px] sm:px-[21px]">
-          {canStartTravel ? (
+        {hasHealthReport ? (
+          <section className="space-y-2 md:hidden">
+            <h2 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">Health report</h2>
+            <div className="rounded-[12px] border border-[#E5E7EB] bg-white px-[15px] py-[13px]">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate font-comfortaa text-[16px] leading-7 text-[#DE6A07]">{petName}</p>
+                  <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
+                    {healthReportUpdatedLabel ? `Updated: ${healthReportUpdatedLabel}` : "Updated recently"}
+                  </p>
+                </div>
+
+                <div className="flex shrink-0 items-center gap-[7px]">
+                  <span className="inline-flex items-center gap-1 rounded-[12px] bg-[#DCFCE7] px-3 py-1 font-comfortaa text-[10px] font-bold leading-[14px] text-[#27AE60]">
+                    <Icon name="check" className="size-[14px]" aria-hidden="true" />
+                    Ready
+                  </span>
+                  <ChevronRight className="size-4 text-[#8B6357]" strokeWidth={1.8} />
+                </div>
+              </div>
+            </div>
+          </section>
+        ) : null}
+
+        {hasOwnerReport ? (
+          <section className="hidden rounded-[18px] border-2 border-[#DE6A07] bg-white px-4 py-4 shadow-[0px_8px_20px_rgba(0,0,0,0.12)] sm:px-5 md:block">
+            <div className="flex items-center gap-2">
+              <Lightbulb className="size-4 text-[#DE6A07]" strokeWidth={2} />
+              <h2 className="font-comfortaa text-[15px] font-bold leading-6 text-[#DE6A07]">Insights from owner&apos;s report</h2>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              <InsightPanel
+                title="Critical Alerts (Read Before Grooming)"
+                tone="danger"
+                items={alerts}
+                emptyText="No critical alerts were submitted by the owner."
+                icon={<CircleAlert className="size-4 text-[#DE1507]" strokeWidth={2} />}
+              />
+              <InsightPanel
+                title="Grooming Action Plan"
+                tone="success"
+                items={actionPlan}
+                emptyText="No specific grooming goals were submitted."
+              />
+              <InsightPanel
+                title="Core needs and note"
+                tone="info"
+                items={coreNeeds}
+                emptyText="No extra care instructions were submitted."
+                noteText={joinedNotes}
+              />
+
+              <section className="rounded-[14px] border border-[#E5E7EB] bg-[#F9FAFB] px-[18.5px] py-[18.5px]">
+                <button
+                  type="button"
+                  onClick={() => setIsDesktopProfileExpanded((current) => !current)}
+                  className="flex w-full items-center justify-between gap-4 text-left"
+                >
+                  <h2 className="font-comfortaa text-[14px] font-medium leading-[21px] text-[#314158]">
+                    View Full Health Profile (Diet, Vaccines, Habits)
+                  </h2>
+                  <ChevronDown
+                    className={`size-[17.5px] shrink-0 text-[#74829A] transition-transform ${isDesktopProfileExpanded ? "rotate-180" : "rotate-0"}`}
+                    strokeWidth={2}
+                  />
+                </button>
+
+                {isDesktopProfileExpanded ? (
+                  <div className="mt-5 space-y-5">
+                    <div>
+                      <p className="font-comfortaa text-[12.25px] font-semibold uppercase leading-[17.5px] tracking-[0.3063px] text-[#0F172B]">
+                        Nutrition & diet
+                      </p>
+                      <div className="mt-[10.5px] space-y-[7px]">
+                        {nutritionRows.map((item) => (
+                          <DesktopProfileRow key={item.label} label={item.label} value={item.value} />
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="font-comfortaa text-[12.25px] font-semibold uppercase leading-[17.5px] tracking-[0.3063px] text-[#0F172B]">
+                        Prevention & core needs
+                      </p>
+                      <div className="mt-[10.5px] space-y-[7px]">
+                        {preventionRows.map((item) => (
+                          <DesktopProfileRow key={item.label} label={item.label} value={item.value} />
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="font-comfortaa text-[12.25px] font-semibold uppercase leading-[17.5px] tracking-[0.3063px] text-[#0F172B]">
+                        Vaccinations
+                      </p>
+                      <div className="mt-[10.5px] space-y-[7px]">
+                        {vaccinationRows.length > 0 ? (
+                          vaccinationRows.map((item) => (
+                            <DesktopVaccinationRow
+                              key={item.label}
+                              label={item.label}
+                              status={item.isActive ? "Up to date" : item.status}
+                              isActive={item.isActive}
+                            />
+                          ))
+                        ) : (
+                          <DesktopProfileRow label="Vaccinations" value="Not provided" />
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="font-comfortaa text-[12.25px] font-semibold uppercase leading-[17.5px] tracking-[0.3063px] text-[#0F172B]">
+                        Medical management
+                      </p>
+                      <div className="mt-[10.5px] space-y-[7px]">
+                        {medicalRows.map((item) => (
+                          <DesktopProfileRow key={item.label} label={item.label} value={item.value} />
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="font-comfortaa text-[12.25px] font-semibold uppercase leading-[17.5px] tracking-[0.3063px] text-[#0F172B]">
+                        Behavioral habits
+                      </p>
+                      <div className="mt-[10.5px] space-y-[7px]">
+                        {behaviorRows.map((item) => (
+                          <DesktopProfileRow key={item.label} label={item.label} value={item.value} />
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="font-comfortaa text-[12.25px] font-semibold uppercase leading-[17.5px] tracking-[0.3063px] text-[#0F172B]">
+                        Clinical history
+                      </p>
+                      <div className="mt-[10.5px] space-y-[7px]">
+                        {clinicalRows.map((item) => (
+                          <DesktopProfileRow key={item.label} label={item.label} value={item.value} />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+              </section>
+            </div>
+          </section>
+        ) : null}
+
+        <section className="rounded-[18px] bg-white px-4 py-4 shadow-[0px_8px_20px_rgba(0,0,0,0.12)] sm:px-5">
+          <h2 className="font-comfortaa text-[16px] font-semibold leading-6 text-[#4A3C2A]">Photos</h2>
+          <div className="mt-4 space-y-4">
+            <PhotoGalleryCard title="Pet photos" photos={petPhotos} emptyText="The owner did not upload pet photos." />
+            <div className="h-px bg-[#E5E7EB]" />
+            <PhotoGalleryCard title="Reference photos" photos={referencePhotos} emptyText="The owner did not upload reference photos." />
+          </div>
+        </section>
+
+        <section className="hidden rounded-[18px] bg-white px-4 py-4 shadow-[0px_8px_20px_rgba(0,0,0,0.12)] sm:px-5">
+          <h2 className="font-comfortaa text-[16px] font-semibold leading-6 text-[#4A3C2A]">Special instruments or notes</h2>
+          <div className="mt-3 rounded-[12px] border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-4">
+            <p className="font-comfortaa text-[12px] leading-[19px] text-[#717182]">
+              {joinedNotes}
+            </p>
+          </div>
+        </section>
+
+        <section className="rounded-[18px] bg-white px-4 py-4 shadow-[0px_8px_20px_rgba(0,0,0,0.12)] sm:px-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-comfortaa text-[16px] font-semibold leading-6 text-[#4A3C2A]">Ready to head out?</p>
+              <p className="mt-1 font-comfortaa text-[12px] leading-[18px] text-[#717182]">
+                {scheduledTime
+                  ? `${canStartTravel ? "Appointment time" : "Start travel available within 2 hours"} • ${appointmentDateLabel} ${appointmentTimeLabel}`
+                  : "Appointment time unavailable"}
+              </p>
+            </div>
             <OrangeButton
               type="button"
-              variant="outline"
-              fullWidth
               onClick={() => void handleStartTravel()}
-              disabled={isStartingTravel}
-              className="border-[#314158]! text-[#314158]! hover:bg-[#f8fafc]! active:bg-[#f8fafc]! focus-visible:bg-[#f8fafc]! [&_p]:font-semibold [&_p]:text-[#314158]!"
+              disabled={!canStartTravel || isStartingTravel}
+              fullWidth
+              className="sm:w-auto sm:min-w-[180px]"
             >
-              {isStartingTravel ? <Spinner size="small" color="#314158" /> : "Start Travel"}
+              {isStartingTravel ? <Spinner size="small" color="white" /> : "Start Travel"}
             </OrangeButton>
-          ) : (
-            <button
-              type="button"
-              disabled
-              className="flex h-[56px] w-full items-center justify-center rounded-full border-2 border-[#314158] font-comfortaa text-[16px] font-semibold leading-6 text-[#314158] opacity-60"
-            >
-              Start Travel
-            </button>
-          )}
-          <p className="mt-2 font-comfortaa text-[10.5px] leading-[14px] text-[#62748e]">
-            {scheduledTime
-              ? `${canStartTravel ? "Appointment time" : "Available within 2 hours before appointment"}${scheduledTime ? ` • ${formatGroomerTimeLabel(scheduledTime, scheduledTime)}` : ""}`
-              : "Appointment time unavailable"}
-          </p>
-        </div>
+          </div>
+        </section>
       </div>
-    </div>
+    </AccountContentContainer>
   );
 }

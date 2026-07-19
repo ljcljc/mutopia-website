@@ -103,21 +103,15 @@ function AppointmentSummaryCard({
       appointment={appointment}
       timeBadgeTone="blue"
       showDuration={false}
+      onPetNameClick={onViewHealthDetails}
       footer={
         <>
-          <button
-            type="button"
-            onClick={onViewHealthDetails}
-            className="flex h-[38px] w-full items-center justify-center rounded-full border border-[#C7D2FE] bg-[#EEF2FF] font-comfortaa text-[13px] font-bold leading-[19.5px] text-[#3B5CCC] transition-transform active:scale-[0.99]"
-          >
-            Health details
-          </button>
           {showStartTravel ? (
             <button
               type="button"
               onClick={onStartTravel}
               disabled={isStartingTravel}
-              className="mt-3 flex h-[38px] w-full items-center justify-center rounded-full bg-[linear-gradient(180deg,#F7A01B_0%,#F08A12_100%)] font-comfortaa text-[14px] font-bold leading-[21px] text-white shadow-[0px_10px_18px_rgba(240,138,18,0.28)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
+              className="flex h-[38px] w-full items-center justify-center rounded-full bg-[linear-gradient(180deg,#F7A01B_0%,#F08A12_100%)] font-comfortaa text-[14px] font-bold leading-[21px] text-white shadow-[0px_10px_18px_rgba(240,138,18,0.28)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
             >
               {isStartingTravel ? <Spinner size="small" color="white" /> : "Start Travel"}
             </button>
