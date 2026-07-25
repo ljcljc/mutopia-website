@@ -929,11 +929,13 @@ function buildVisibleAddOns(items: AddOnOut[], selectedIds: number[]): AddOnOut[
 function GroomerCheckUpModal({
   open,
   appointment,
+  dismissible = true,
   onClose,
   onSubmitted,
 }: {
   open: boolean;
   appointment: DashboardAppointment | null;
+  dismissible?: boolean;
   onClose: () => void;
   onSubmitted: (payload: {
     bookingId: number;
@@ -1084,8 +1086,11 @@ function GroomerCheckUpModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
+    <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && dismissible && onClose()}>
       <DialogContent
+        showCloseButton={dismissible}
+        onEscapeKeyDown={dismissible ? undefined : (event) => event.preventDefault()}
+        onInteractOutside={dismissible ? undefined : (event) => event.preventDefault()}
         overlayClassName={isMobile ? "service-area-dialog-overlay z-[70]!" : "z-[70]!"}
         className={cn(
           "border-0! bg-white! p-0! gap-0! [&>button]:top-[calc(24*var(--px393))] [&>button]:right-[calc(24*var(--px393))] sm:[&>button]:top-6 sm:[&>button]:right-6",
@@ -1250,9 +1255,11 @@ function GroomerCheckUpModal({
                 <OrangeButton type="button" fullWidth textSize={14} loading={isSubmitting} onClick={handleNext}>
                   {activeTab === "personalization" ? "Submit" : "Next"}
                 </OrangeButton>
-                <OrangeButton type="button" variant="outline" fullWidth textSize={14} onClick={onClose}>
-                  Cancel
-                </OrangeButton>
+                {dismissible ? (
+                  <OrangeButton type="button" variant="outline" fullWidth textSize={14} onClick={onClose}>
+                    Cancel
+                  </OrangeButton>
+                ) : null}
               </div>
             </div>
           </div>
@@ -1573,6 +1580,7 @@ export default function GroomerDashboardPage() {
   const [devTravelStatus, setDevTravelStatus] = useState<"" | "traveling" | "checked_in" | "in_progress">("");
   const [isCancelAppointmentModalOpen, setIsCancelAppointmentModalOpen] = useState(false);
   const [isCheckUpOpen, setIsCheckUpOpen] = useState(false);
+  const [isCheckUpRequired, setIsCheckUpRequired] = useState(false);
   const [isHealthReportOpen, setIsHealthReportOpen] = useState(false);
   const [isSubmittingHealthReport, setIsSubmittingHealthReport] = useState(false);
   const [isTerminateServiceOpen, setIsTerminateServiceOpen] = useState(false);
@@ -1686,11 +1694,13 @@ export default function GroomerDashboardPage() {
     try {
       if (enableDevTravelTest) {
         setDevTravelStatus("checked_in");
+        setIsCheckUpRequired(true);
         setIsCheckUpOpen(true);
         toast.success("Checked in");
         return;
       }
       await checkIn(bookingId);
+      setIsCheckUpRequired(true);
       setIsCheckUpOpen(true);
       toast.success("Checked in");
     } catch (error) {
@@ -1906,7 +1916,13 @@ export default function GroomerDashboardPage() {
               />
             ) : effectiveAppointment && showCurrentJob ? (
               <>
-                <PackageAndAddonCard appointment={effectiveAppointment} onModify={() => setIsCheckUpOpen(true)} />
+                <PackageAndAddonCard
+                  appointment={effectiveAppointment}
+                  onModify={() => {
+                    setIsCheckUpRequired(false);
+                    setIsCheckUpOpen(true);
+                  }}
+                />
                 <CurrentJobCard
                   appointment={effectiveAppointment}
                   isStartingGrooming={isStartingGrooming}
@@ -1958,7 +1974,11 @@ export default function GroomerDashboardPage() {
       <GroomerCheckUpModal
         open={isCheckUpOpen}
         appointment={effectiveAppointment}
-        onClose={() => setIsCheckUpOpen(false)}
+        dismissible={!isCheckUpRequired}
+        onClose={() => {
+          setIsCheckUpRequired(false);
+          setIsCheckUpOpen(false);
+        }}
         onSubmitted={(payload) => {
           applyCheckUpCheckoutPreview(payload);
         }}
