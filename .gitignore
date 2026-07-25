@@ -70,7 +70,7 @@ web_modules/
 .yarn-integrity
 
 # dotenv environment variable files
-# Allow .env.development, .env.test, .env.production, .env.example to be committed
+# Allow .env.development, .env.test, .env.production, .env.example, .env.docker to be committed
 # But ignore .env, .env.local, and .env.*.local files
 .env
 .env.local
@@ -79,6 +79,7 @@ web_modules/
 !.env.development
 !.env.test
 !.env.production
+!.env.docker
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -171,6 +172,7 @@ coverage/
 !.env.development
 !.env.test
 !.env.production
+!.env.docker
 # But still ignore .env and .env.local files
 .env
 .env.local
