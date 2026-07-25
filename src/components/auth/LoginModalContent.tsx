@@ -1,6 +1,6 @@
 import { toast } from "sonner";
 import { z } from "zod";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   useAuthStore,
   validateEmail,
@@ -51,7 +51,12 @@ import { getSendCountFromError } from "./forgotPasswordUtils";
 // Maximum number of times a verification code can be sent
 const MAX_SEND_COUNT = 5;
 
+function normalizeEmailForComparison(value: string): string {
+  return value.trim().toLowerCase();
+}
+
 export function ModalContent({ onClose, onSuccess }: { onClose: () => void; onSuccess?: () => void }) {
+  const rememberedEmailRef = useRef<string | null>(null);
   const {
     step,
     email,
@@ -129,6 +134,7 @@ export function ModalContent({ onClose, onSuccess }: { onClose: () => void; onSu
       try {
         const rememberedEmail = await getEncryptedItem(STORAGE_KEYS.REMEMBERED_EMAIL);
         const rememberedPassword = await getEncryptedItem(STORAGE_KEYS.REMEMBERED_PASSWORD);
+        rememberedEmailRef.current = rememberedEmail;
         if (rememberedEmail && rememberedPassword) {
           setEmail(rememberedEmail);
           setPassword(rememberedPassword);
@@ -182,6 +188,17 @@ export function ModalContent({ onClose, onSuccess }: { onClose: () => void; onSu
 
   const handleEmailChange = (value: string) => {
     setEmail(value);
+
+    const rememberedEmail = rememberedEmailRef.current;
+    if (
+      rememberedEmail &&
+      normalizeEmailForComparison(value) !== normalizeEmailForComparison(rememberedEmail)
+    ) {
+      setPassword("");
+      setRememberMe(false);
+      removeEncryptedItem(STORAGE_KEYS.REMEMBERED_PASSWORD);
+      rememberedEmailRef.current = null;
+    }
   };
 
   // Handle blur event - validate when user leaves the input field

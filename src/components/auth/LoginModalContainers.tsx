@@ -193,21 +193,7 @@ export function PasswordContainer({
             <div className="bg-clip-padding border-0 border-transparent border-solid flex flex-col gap-[20px] items-start relative w-full">
               <div className="flex flex-col gap-[16px] items-start relative shrink-0 w-full">
                 <div className="flex flex-col gap-[8px] items-start relative shrink-0 w-full">
-                  {error ? (
-                    <div className="flex flex-col gap-[4px] items-start relative shrink-0 w-full">
-                      <PasswordInput
-                        value={password}
-                        onChange={setPassword}
-                        onEnter={onLogin}
-                        onBlur={onBlur}
-                        showPassword={showPassword}
-                        onTogglePassword={onTogglePassword}
-                        hasError={hasError}
-                        showValidation={isSignUp}
-                      />
-                      <ErrorMessage message={error} />
-                    </div>
-                  ) : (
+                  <div className="flex flex-col gap-[4px] items-start relative shrink-0 w-full">
                     <PasswordInput
                       value={password}
                       onChange={setPassword}
@@ -218,7 +204,8 @@ export function PasswordContainer({
                       hasError={hasError}
                       showValidation={isSignUp}
                     />
-                  )}
+                    {error ? <ErrorMessage message={error} /> : null}
+                  </div>
                   {isSignUp &&
                     confirmPassword !== undefined &&
                     setConfirmPassword && (
@@ -463,22 +450,7 @@ export function SignUpContainer({
             {passwordError && <ErrorMessage message={passwordError} />}
 
             {/* Confirm password */}
-            {confirmPasswordError ? (
-              <div className="flex flex-col gap-[4px] items-start w-full">
-                <PasswordInput
-                  value={confirmPassword}
-                  onChange={setConfirmPassword}
-                  onEnter={onSignUp}
-                  onBlur={onConfirmPasswordBlur}
-                  showPassword={showPassword}
-                  onTogglePassword={toggleShowPassword}
-                  hasError={!!confirmPasswordError}
-                  showValidation={false}
-                  label="Confirm password"
-                />
-                <ErrorMessage message={confirmPasswordError} />
-              </div>
-            ) : (
+            <div className="flex flex-col gap-[4px] items-start w-full">
               <PasswordInput
                 value={confirmPassword}
                 onChange={setConfirmPassword}
@@ -490,7 +462,8 @@ export function SignUpContainer({
                 showValidation={false}
                 label="Confirm password"
               />
-            )}
+              {confirmPasswordError ? <ErrorMessage message={confirmPasswordError} /> : null}
+            </div>
 
             {/* Promo code (optional) */}
             <div className="flex flex-col gap-[4px] items-start w-full">
