@@ -514,7 +514,7 @@ export const useBookingStore = create<BookingState>((set) => ({
       weight_value: weightValue,
       weight_unit: state.weightUnit,
       coat_condition: state.coatCondition || null,
-      approve_shave: state.approveShave,
+      approve_shave: state.approveShave ?? false,
       behavior: state.behavior || null,
       grooming_frequency: state.groomingFrequency || null,
       special_notes: state.specialNotes || null,
