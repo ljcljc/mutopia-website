@@ -965,12 +965,12 @@ export function DatePicker({
 
       {/* Helper text or Error message */}
       {(helperText || error) && (
-        <div className="flex gap-[4px] items-center relative shrink-0 mt-[4px]">
+        <div className="flex w-full gap-[4px] items-start relative mt-[4px]">
           {error && (
             <Icon name="alert-error" aria-label="Error" className="size-[14px]" />
           )}
           <p
-            className={`font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[12px] ${
+            className={`font-comfortaa font-medium leading-[17.5px] relative min-w-0 break-words text-[12px] ${
               error ? "text-[#de1507]" : "text-[#4c4c4c]"
             }`}
           >

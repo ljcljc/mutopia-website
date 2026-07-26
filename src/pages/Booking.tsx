@@ -1,11 +1,8 @@
 import { useEffect } from "react";
 import { ProgressSteps } from "@/components/booking/ProgressSteps";
-import { OrangeButton } from "@/components/common/OrangeButton";
-import { Icon } from "@/components/common/Icon";
 import { useAuthStore } from "@/components/auth/authStore";
 import { useBookingStore } from "@/components/booking/bookingStore";
 import { useAccountStore } from "@/components/account/accountStore";
-import { isValidCanadianPostalCode } from "@/lib/postalCode";
 import { Step1AddressAndServiceType } from "@/components/booking/Step1AddressAndServiceType";
 import { Step2 } from "@/components/booking/Step2";
 import { Step3 } from "@/components/booking/Step3";
@@ -21,16 +18,7 @@ export default function Booking() {
   const loadUserInfo = useBookingStore((state) => state.loadUserInfo);
   const {
     currentStep,
-    nextStep,
     petName,
-    address,
-    serviceType,
-    city,
-    province,
-    postCode,
-    selectedServiceAreaId,
-    selectedAddressId,
-    selectedStoreId,
   } = useBookingStore();
 
   // 当用户登出时，清空 bookingStore 的 userInfo
@@ -75,15 +63,6 @@ export default function Booking() {
     }
   };
 
-  const isStep1Valid =
-    serviceType === "in_store"
-      ? selectedStoreId !== null
-      : (selectedAddressId !== null || address.trim().length > 0) &&
-        city.trim().length > 0 &&
-        province.trim().length > 0 &&
-        isValidCanadianPostalCode(postCode) &&
-        selectedServiceAreaId !== null;
-
   return (
     <div className="relative flex min-h-full w-full flex-col items-center gap-[60px] bg-[#f9f1e8] px-0 pt-8 pb-[60px] sm:pt-[60px] sm:pb-[100px]">
       {/* Content */}
@@ -107,28 +86,6 @@ export default function Booking() {
         <div className="relative flex w-full shrink-0 flex-col items-start gap-8">
           {renderStepComponent()}
 
-          {/* Continue Button - Only show for Step 1 */}
-          {currentStep === 1 && (
-            <div className="relative flex w-full shrink-0 items-start gap-5 px-5 sm:px-0">
-              <OrangeButton
-                size="medium"
-                onClick={nextStep}
-                disabled={!isStep1Valid}
-                className="w-full sm:w-auto"
-              >
-                <div className="flex items-center gap-1">
-                  <p className="font-comfortaa font-medium leading-[17.5px] text-[14px] text-white">
-                    Continue
-                  </p>
-                  <Icon
-                    name="button-arrow"
-                    aria-label="Arrow"
-                    className="size-[14px] text-white"
-                  />
-                </div>
-              </OrangeButton>
-            </div>
-          )}
         </div>
       </div>
     </div>

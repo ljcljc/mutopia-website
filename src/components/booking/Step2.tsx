@@ -7,6 +7,7 @@ import type { PetOut } from "@/lib/api";
 
 export function Step2() {
   const [photoResetKey, setPhotoResetKey] = useState(0);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const user = useAuthStore((state) => state.user);
   const {
     selectedPetId,
@@ -125,17 +126,59 @@ export function Step2() {
     (coatCondition === "not_matted" || approveShave !== null);
   const isBreedComplete =
     petType === "other" ? precisePetType.trim().length > 0 : breed.trim().length > 0;
+  const isWeightValid = Number.isFinite(Number(weight)) && Number(weight) > 0;
   const isStep2Valid =
     petName.trim().length > 0 &&
     isBreedComplete &&
     dateOfBirth.trim().length > 0 &&
     gender !== "" &&
-    weight.trim().length > 0 &&
+    isWeightValid &&
     isCoatConditionComplete &&
     behavior !== "" &&
     groomingFrequency !== "";
 
+  useEffect(() => {
+    setValidationErrors((current) => {
+      const next = { ...current };
+      if (petName.trim()) delete next.petName;
+      if (isBreedComplete) { delete next.breed; delete next.precisePetType; }
+      if (dateOfBirth.trim()) delete next.dateOfBirth;
+      if (gender) delete next.gender;
+      if (isWeightValid) delete next.weight;
+      if (isCoatConditionComplete) delete next.coatCondition;
+      if (behavior) delete next.behavior;
+      if (groomingFrequency) delete next.groomingFrequency;
+      return next;
+    });
+  }, [behavior, dateOfBirth, gender, groomingFrequency, isBreedComplete, isCoatConditionComplete, isWeightValid, petName]);
+
+  const handleContinue = () => {
+    if (isStep2Valid) {
+      setValidationErrors({});
+      nextStep();
+      return;
+    }
+    const errors: Record<string, string> = {
+      ...(petName.trim() ? {} : { petName: "Pet name is required" }),
+      ...(isBreedComplete ? {} : petType === "other" ? { precisePetType: "Pet type is required" } : { breed: "Breed is required" }),
+      ...(dateOfBirth.trim() ? {} : { dateOfBirth: "Date of birth is required" }),
+      ...(gender ? {} : { gender: "Gender is required" }),
+      ...(isWeightValid ? {} : { weight: weight.trim() ? "Enter a weight greater than 0" : "Weight is required" }),
+      ...(isCoatConditionComplete ? {} : { coatCondition: coatCondition === "" ? "Coat condition is required" : "Please confirm the shaving option" }),
+      ...(behavior ? {} : { behavior: "Behavior is required" }),
+      ...(groomingFrequency ? {} : { groomingFrequency: "Grooming frequency is required" }),
+    };
+    setValidationErrors(errors);
+    const firstField = Object.keys(errors)[0];
+    requestAnimationFrame(() => {
+      const field = document.querySelector<HTMLElement>(`[data-booking-pet-field="${firstField}"]`);
+      field?.scrollIntoView?.({ behavior: "smooth", block: "center" });
+      field?.querySelector<HTMLElement>("input, button")?.focus();
+    });
+  };
+
   return (
+    <div data-booking-pet-form>
     <PetForm
       petOptions={user && pets.length > 0 ? pets : undefined}
       selectedPetId={selectedPetId}
@@ -185,9 +228,10 @@ export function Step2() {
       setReferencePhotoUrls={setReferencePhotoUrls}
       setPetPhoto={setPetPhoto}
       setReferenceStyles={setReferenceStyles}
-      primaryActionDisabled={!isStep2Valid}
-      onPrimaryAction={nextStep}
+      validationErrors={validationErrors}
+      onPrimaryAction={handleContinue}
       onBackAction={previousStep}
     />
+    </div>
   );
 }

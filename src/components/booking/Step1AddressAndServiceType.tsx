@@ -2,10 +2,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { LoginModal } from "@/components/auth/LoginModal";
 import { Icon } from "@/components/common/Icon";
 import { CustomInput, CustomRadio, CustomSelect, CustomSelectItem } from "@/components/common";
+import { OrangeButton } from "@/components/common/OrangeButton";
 import { useAuthStore } from "@/components/auth/authStore";
 import { formatCanadianPostalCodeInput, getCanadianPostalCodeError } from "@/lib/postalCode";
 import { useBookingStore } from "./bookingStore";
 import { getServiceAreaProvinces, getServiceAreas, type ProvinceOut, type ServiceAreaOut } from "@/lib/api";
+
+type Step1Field = "address" | "city" | "postCode" | "store";
+type Step1Errors = Partial<Record<Step1Field, string>>;
 
 const DEFAULT_PROVINCE_CODE = "BC";
 const DEFAULT_PROVINCE_NAME = "British Columbia";
@@ -35,6 +39,7 @@ export function Step1AddressAndServiceType() {
     loadAddresses,
     loadStores,
     setIsLoginModalOpen,
+    nextStep,
   } = useBookingStore();
 
   const [isAddressDropdownOpen, setIsAddressDropdownOpen] = useState(false);
@@ -42,7 +47,7 @@ export function Step1AddressAndServiceType() {
   const [provinces, setProvinces] = useState<ProvinceOut[]>([]);
   const [serviceAreas, setServiceAreas] = useState<ServiceAreaOut[]>([]);
   const [isLoadingAreas, setIsLoadingAreas] = useState(false);
-  const [postalCodeError, setPostalCodeError] = useState("");
+  const [errors, setErrors] = useState<Step1Errors>({});
   const addressDropdownRef = useRef<HTMLDivElement>(null);
   const storeDropdownRef = useRef<HTMLDivElement>(null);
   const cityRef = useRef(city);
@@ -195,6 +200,36 @@ export function Step1AddressAndServiceType() {
     if (selectedAddressId !== null) {
       setSelectedAddressId(null);
     }
+    setErrors((current) => ({ ...current, city: undefined }));
+  };
+
+  const getErrors = (): Step1Errors => {
+    if (serviceType === "in_store") {
+      return selectedStoreId === null ? { store: "Select a store location" } : {};
+    }
+
+    return {
+      ...((selectedAddressId === null && !address.trim()) ? { address: "Address is required" } : {}),
+      ...(!selectedServiceAreaId || !city.trim() ? { city: "Select a city" } : {}),
+      ...(getCanadianPostalCodeError(postCode) ? { postCode: getCanadianPostalCodeError(postCode) } : {}),
+    };
+  };
+
+  const validateAndContinue = () => {
+    const nextErrors = getErrors();
+    setErrors(nextErrors);
+    const firstField = Object.keys(nextErrors)[0] as Step1Field | undefined;
+    if (!firstField) {
+      nextStep();
+      return;
+    }
+    const element = document.querySelector<HTMLElement>(`[data-booking-field="${firstField}"]`);
+    element?.scrollIntoView?.({ behavior: "smooth", block: "center" });
+    element?.querySelector<HTMLElement>("input, button")?.focus();
+  };
+
+  const clearError = (field: Step1Field) => {
+    setErrors((current) => current[field] ? { ...current, [field]: undefined } : current);
   };
 
   // displayCity, displayProvince, displayPostCode are no longer needed
@@ -202,14 +237,14 @@ export function Step1AddressAndServiceType() {
 
   const locationField =
     (serviceType === "mobile" || serviceType === "in_home") && user && addresses.length > 0 ? (
-      <div className="flex flex-col items-start relative w-full sm:w-[320px]">
+      <div data-booking-field="address" className="flex flex-col items-start relative w-full sm:w-[320px]">
         <div className="relative mb-2 flex items-center gap-[7px]">
           <p className="relative font-comfortaa text-[14px] leading-[22.75px] font-normal text-[#4a3c2a]">
             Address
           </p>
         </div>
         <div className="relative w-full sm:w-[320px]" ref={addressDropdownRef}>
-          <div className="relative h-9 w-full rounded-lg border border-solid border-gray-200 bg-white transition-colors hover:border-[#633479]">
+          <div className={`relative h-9 w-full rounded-lg border border-solid bg-white transition-colors hover:border-[#633479] ${errors.address ? "border-[#de1507]" : "border-gray-200"}`}>
             <div className="relative flex h-9 w-full items-center overflow-clip rounded-[inherit] px-3 py-1">
               <div className="relative flex flex-1 items-center">
                 <input
@@ -217,11 +252,13 @@ export function Step1AddressAndServiceType() {
                   value={currentAddress?.address || address || ""}
                   onChange={(e) => {
                     setAddress(e.target.value);
+                    if (e.target.value.trim()) clearError("address");
                     if (selectedAddressId !== null) {
                       setSelectedAddressId(null);
                     }
                   }}
                   onFocus={() => setIsAddressDropdownOpen(true)}
+                  onBlur={() => setErrors(getErrors())}
                   placeholder="Select an address or type"
                   className="flex-1 font-comfortaa font-normal leading-[normal] relative text-[#717182] text-[12.25px] bg-transparent border-none outline-none placeholder:text-[#717182]"
                 />
@@ -254,6 +291,7 @@ export function Step1AddressAndServiceType() {
                   onClick={() => {
                     setSelectedAddressId(addr.id);
                     setIsAddressDropdownOpen(false);
+                    clearError("address");
                   }}
                 >
                   <p className="font-comfortaa text-[12.25px] text-[#4a3c2a]">{addr.address}</p>
@@ -265,9 +303,10 @@ export function Step1AddressAndServiceType() {
             </div>
           )}
         </div>
+        {errors.address && <p role="alert" className="mt-1 text-xs text-[#de1507]">{errors.address}</p>}
       </div>
     ) : serviceType === "in_store" && stores.length > 0 ? (
-      <div className="flex flex-col items-start relative w-full sm:w-[320px]">
+      <div data-booking-field="store" className="flex flex-col items-start relative w-full sm:w-[320px]">
         <div className="flex gap-[7px] items-center relative mb-2">
           <p className="font-comfortaa font-normal leading-[22.75px] relative text-[#4a3c2a] text-[14px]">
             Store Location
@@ -275,7 +314,7 @@ export function Step1AddressAndServiceType() {
         </div>
         <div className="relative w-full sm:w-[320px]" ref={storeDropdownRef}>
           <div
-            className="bg-white border border-gray-200 border-solid h-[36px] relative rounded-[8px] w-full cursor-pointer hover:border-[#633479] transition-colors"
+            className={`bg-white border border-solid h-[36px] relative rounded-[8px] w-full cursor-pointer hover:border-[#633479] transition-colors ${errors.store ? "border-[#de1507]" : "border-gray-200"}`}
             onClick={() => setIsStoreDropdownOpen(!isStoreDropdownOpen)}
           >
             <div className="flex h-[36px] items-center overflow-clip px-[12px] py-[4px] relative rounded-[inherit] w-full">
@@ -313,6 +352,7 @@ export function Step1AddressAndServiceType() {
                   onClick={() => {
                     setSelectedStoreId(store.id);
                     setIsStoreDropdownOpen(false);
+                    clearError("store");
                   }}
                 >
                   <p className="font-comfortaa text-[12.25px] text-[#4a3c2a] font-semibold">
@@ -326,15 +366,18 @@ export function Step1AddressAndServiceType() {
             </div>
           )}
         </div>
+        {errors.store && <p role="alert" className="mt-1 text-xs text-[#de1507]">{errors.store}</p>}
       </div>
     ) : (
-      <div className="w-full sm:w-[320px]">
+      <div data-booking-field="address" className="w-full sm:w-[320px]">
         <CustomInput
           label={serviceType === "in_store" ? "Store Location" : "Address"}
           type="text"
           placeholder={serviceType === "in_store" ? "Enter store address" : "Enter your address"}
           value={address}
-          onChange={(e) => setAddress(e.target.value)}
+          error={errors.address}
+          onChange={(e) => { setAddress(e.target.value); if (e.target.value.trim()) clearError("address"); }}
+          onBlur={() => setErrors(getErrors())}
         />
       </div>
     );
@@ -427,13 +470,14 @@ export function Step1AddressAndServiceType() {
                   ))}
                 </CustomSelect>
               </div>
-              <div className="flex flex-col items-start relative shrink-0 w-full sm:w-[192px]">
+              <div data-booking-field="city" className="flex flex-col items-start relative shrink-0 w-full sm:w-[192px]">
                 <CustomSelect
                   label="City"
                   placeholder={province ? "Select city" : "Select province first"}
                   value={selectedServiceAreaId ? String(selectedServiceAreaId) : ""}
                   displayValue={city || undefined}
                   onValueChange={handleCityChange}
+                  error={errors.city}
                   disabled={!province || isLoadingAreas || serviceType === "in_store"}
                 >
                   {serviceAreas.map((item) => (
@@ -450,22 +494,22 @@ export function Step1AddressAndServiceType() {
 
             {/* Post Code */}
             <div className="flex gap-[20px] items-start relative shrink-0 w-full">
-              <div className="flex flex-col items-start relative shrink-0 w-full sm:w-[192px]">
+              <div data-booking-field="postCode" className="flex flex-col items-start relative shrink-0 w-full sm:w-[192px]">
                 <CustomInput
                   label="Post code"
                   type="text"
                   placeholder="Enter post code"
                   value={postCode}
-                  error={postalCodeError}
+                  error={errors.postCode}
                   onChange={(e) => {
                     const nextValue = formatCanadianPostalCodeInput(e.target.value);
                     setPostCode(nextValue);
-                    if (postalCodeError) {
-                      setPostalCodeError(getCanadianPostalCodeError(nextValue));
+                    if (errors.postCode) {
+                      setErrors((current) => ({ ...current, postCode: getCanadianPostalCodeError(nextValue) || undefined }));
                     }
                   }}
                   onBlur={() => {
-                    setPostalCodeError(getCanadianPostalCodeError(postCode));
+                    setErrors((current) => ({ ...current, postCode: getCanadianPostalCodeError(postCode) || undefined }));
                   }}
                 />
               </div>
@@ -506,6 +550,9 @@ export function Step1AddressAndServiceType() {
             )}
           </div>
         </div>
+      </div>
+      <div className="relative flex w-full shrink-0 items-start gap-5 px-5 sm:px-0">
+        <OrangeButton size="medium" onClick={validateAndContinue} className="w-full sm:w-auto">Continue</OrangeButton>
       </div>
     </>
   );

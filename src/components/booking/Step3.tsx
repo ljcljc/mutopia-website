@@ -32,7 +32,12 @@ export function Step3() {
   const user = useAuthStore((state) => state.user);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const isLoggedIn = userInfo !== null || user !== null;
-  const canContinue = serviceId !== null;
+  const [serviceError, setServiceError] = useState("");
+  const handleContinue = () => {
+    if (serviceId !== null) return nextStep();
+    setServiceError("Select a service package");
+    document.querySelector<HTMLElement>("[data-booking-field=service]")?.scrollIntoView?.({ behavior: "smooth", block: "center" });
+  };
 
   const hasLoadedAddOns = useRef(false);
   const hasAutoSelectedMembership = useRef(false);
@@ -282,7 +287,7 @@ export function Step3() {
                 Choose the package that best fits your pet's needs
               </p>
             </div>
-            <div className="gap-[calc(16*var(--px393))] sm:gap-[16px] grid grid-cols-1 sm:grid-cols-2 relative shrink-0 w-full">
+            <div data-booking-field="service" className="gap-[calc(16*var(--px393))] sm:gap-[16px] grid grid-cols-1 sm:grid-cols-2 relative shrink-0 w-full">
               {isLoadingServices ? (
                 <div className="flex items-center justify-center gap-2 py-8 text-[#4a5565]">
                   <Spinner size="small" color="#4a5565" />
@@ -304,12 +309,13 @@ export function Step3() {
                       price={price}
                       duration="" // API 中没有 duration 字段，可以留空或根据 type 推断
                       isSelected={serviceId === service.id}
-                      onClick={() => setServiceId(service.id)}
+                      onClick={() => { setServiceId(service.id); setServiceError(""); }}
                     />
                   );
                 })
               )}
             </div>
+            {serviceError && <p role="alert" className="text-xs text-[#de1507]">{serviceError}</p>}
         </div>
       </div>
 
@@ -532,8 +538,7 @@ export function Step3() {
                 size="medium"
                 variant="primary"
                 showArrow={true}
-                onClick={nextStep}
-                disabled={!canContinue}
+                onClick={handleContinue}
                 className="w-full sm:w-auto"
               >
                 Continue

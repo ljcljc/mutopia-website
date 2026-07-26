@@ -231,6 +231,7 @@ export function AutoComplete({
           </div>
         )}
       </div>
+      {error ? <p role="alert" className="font-comfortaa text-xs text-[#de1507]">{error}</p> : null}
     </div>
   );
 }

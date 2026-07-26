@@ -76,6 +76,7 @@ export interface PetFormProps {
   setReferenceStyles: (value: File[]) => void;
   primaryActionLabel?: string;
   isPrimaryActionLoading?: boolean;
+  validationErrors?: Record<string, string>;
   primaryActionDisabled?: boolean;
   onPrimaryAction?: () => void;
   showBackButton?: boolean;
@@ -142,6 +143,7 @@ export function PetForm({
   setReferenceStyles,
   primaryActionLabel,
   isPrimaryActionLoading = false,
+  validationErrors = {},
   primaryActionDisabled = false,
   onPrimaryAction,
   showBackButton = true,
@@ -185,9 +187,9 @@ export function PetForm({
   const primaryLabel = primaryActionLabel ?? "Continue";
 
   const groomingFrequencyContent = (
-    <div className="flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full">
+    <div data-booking-pet-field="groomingFrequency" className="flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full">
       <div className="flex flex-col gap-[calc(3.5*var(--px393))] sm:gap-[3.5px] items-start relative shrink-0">
-        <p className="font-comfortaa font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px]">
+        <p className={`font-comfortaa font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[calc(16*var(--px393))] sm:text-[16px] ${validationErrors.groomingFrequency ? "text-[#de1507]" : "text-[#4a3c2a]"}`}>
           How often would you like grooming?
         </p>
         <div className="bg-blue-50 border border-[#bedbff] border-solid relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] shrink-0 w-full">
@@ -239,6 +241,7 @@ export function PetForm({
           variant="with-description"
         />
       </div>
+      {validationErrors.groomingFrequency ? <p role="alert" className="text-xs text-[#de1507]">{validationErrors.groomingFrequency}</p> : null}
     </div>
   );
 
@@ -1247,7 +1250,7 @@ export function PetForm({
 
             <div className="flex flex-col gap-[calc(16*var(--px393))] sm:gap-[16px] items-start relative shrink-0 w-full">
               {/* Pet Name */}
-              <div className="flex gap-[calc(20*var(--px393))] sm:gap-[20px] items-start relative shrink-0 w-full sm:w-[330px]">
+              <div data-booking-pet-field="petName" className="flex gap-[calc(20*var(--px393))] sm:gap-[20px] items-start relative shrink-0 w-full sm:w-[330px]">
                 <div className="flex flex-[1_0_0] flex-col items-start min-h-px min-w-px relative shrink-0">
                   {petOptions && petOptions.length > 0 && onPetSelect && setSelectedPetId ? (
                     <div className="flex flex-col items-start relative w-full" ref={petDropdownRef}>
@@ -1316,6 +1319,7 @@ export function PetForm({
                       type="text"
                       placeholder="Enter pet name"
                       value={petName}
+                      error={validationErrors.petName}
                       onChange={(e) => setPetName(e.target.value)}
                     />
                   )}
@@ -1353,10 +1357,10 @@ export function PetForm({
 
               {/* Breed - Hidden only when pet type is other */}
               {petType !== "other" && (
-                <div className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full sm:w-[330px]">
+                <div data-booking-pet-field="breed" className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full sm:w-[330px]">
                   <div className="flex h-[calc(12.25*var(--px393))] sm:h-[12.25px] items-center justify-between relative shrink-0 w-full">
                     <p className="font-comfortaa font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
-                      {isMixedBreed ? "Primary breed" : "Breed"}
+                      <span className={validationErrors.breed ? "text-[#de1507]" : undefined}>{isMixedBreed ? "Primary breed" : "Breed"}</span>
                     </p>
                     <div className="flex gap-[calc(4*var(--px393))] sm:gap-[4px] items-center justify-end relative shrink-0">
                       <Switch 
@@ -1375,6 +1379,7 @@ export function PetForm({
                     onValueChange={setBreed}
                     options={getBreedOptions(petType, petBreeds)}
                     disabled={isLoadingBreeds}
+                    error={validationErrors.breed}
                     leftElement={
                       <Icon
                         name="search"
@@ -1387,10 +1392,10 @@ export function PetForm({
 
               {/* Precise pet type - Only shown when pet type is other */}
               {petType === "other" && (
-                <div className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full sm:w-[330px]">
+                <div data-booking-pet-field="precisePetType" className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full sm:w-[330px]">
                   <div className="flex gap-[7px] h-[calc(12.25*var(--px393))] sm:h-[12.25px] items-center relative shrink-0 w-full">
                     <p className="font-comfortaa font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
-                      Precise pet type
+                      <span className={validationErrors.precisePetType ? "text-[#de1507]" : undefined}>Precise pet type</span>
                     </p>
                   </div>
                   <CustomInput
@@ -1398,6 +1403,7 @@ export function PetForm({
                     type="text"
                     placeholder="Enter pet type"
                     value={precisePetType}
+                    error={validationErrors.precisePetType}
                     onChange={(e) => setPrecisePetType(e.target.value)}
                   />
                 </div>
@@ -1405,7 +1411,7 @@ export function PetForm({
 
               {/* Date of Birth and Gender */}
               <div className="flex flex-col sm:flex-row gap-[calc(16*var(--px393))] sm:gap-[16px] items-start relative shrink-0 w-full">
-                <div className="flex flex-col items-start relative shrink-0 w-full sm:w-[140px]">
+                <div data-booking-pet-field="dateOfBirth" className="flex flex-col items-start relative shrink-0 w-full sm:w-[140px]">
                   <DatePicker
                     label="Date of birth"
                     placeholder="YYYY-MM"
@@ -1414,9 +1420,10 @@ export function PetForm({
                     mode="month"
                     minDate={minDate}
                     maxDate={maxDate}
+                    error={validationErrors.dateOfBirth}
                   />
                 </div>
-                <div className="flex flex-col items-start relative shrink-0 w-full sm:w-[140px]">
+                <div data-booking-pet-field="gender" className="flex flex-col items-start relative shrink-0 w-full sm:w-[140px]">
                   <CustomSelect
                     className="cursor-pointer"
                     label="Gender"
@@ -1424,6 +1431,7 @@ export function PetForm({
                     value={gender}
                     displayValue={gender ? `${gender[0].toUpperCase()}${gender.slice(1)}` : ""}
                     onValueChange={(value) => setGender(value === "unknown" ? "" : (value as Gender))}
+                    error={validationErrors.gender}
                   >
                     <CustomSelectItem value="male">Male</CustomSelectItem>
                     <CustomSelectItem value="female">Female</CustomSelectItem>
@@ -1433,10 +1441,10 @@ export function PetForm({
               </div>
 
               {/* Weight */}
-              <div className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full">
+              <div data-booking-pet-field="weight" className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full">
                 <div className="flex gap-[7px] h-[calc(12.25*var(--px393))] sm:h-[12.25px] items-center relative shrink-0 w-full">
                   <p className="font-comfortaa font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
-                    Weight (lb or kg)
+                    <span className={validationErrors.weight ? "text-[#de1507]" : undefined}>Weight (lb or kg)</span>
                   </p>
                 </div>
                 <div className="flex items-start relative shrink-0 w-full sm:w-[200px] group">
@@ -1453,7 +1461,7 @@ export function PetForm({
                     {/* Border with states */}
                     <div
                       aria-hidden="true"
-                      className="absolute border border-solid inset-0 pointer-events-none rounded-bl-[calc(12*var(--px393))] rounded-tl-[calc(12*var(--px393))] sm:rounded-bl-[12px] sm:rounded-tl-[12px] transition-colors duration-200 border-gray-200 group-hover:border-[#717182] group-focus-within:border-[#2374ff]!"
+                      className={`absolute border border-solid inset-0 pointer-events-none rounded-bl-[calc(12*var(--px393))] rounded-tl-[calc(12*var(--px393))] sm:rounded-bl-[12px] sm:rounded-tl-[12px] transition-colors duration-200 ${validationErrors.weight ? "border-[#de1507]" : "border-gray-200 group-hover:border-[#717182] group-focus-within:border-[#2374ff]!"}`}
                     />
                   </div>
                   <div className="relative shrink-0 opacity-80">
@@ -1469,13 +1477,14 @@ export function PetForm({
                     </CustomSelect>
                   </div>
                 </div>
+                {validationErrors.weight ? <p role="alert" className="text-xs text-[#de1507]">{validationErrors.weight}</p> : null}
               </div>
 
               {/* Coat Condition */}
-              <div className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0">
+              <div data-booking-pet-field="coatCondition" className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0">
                 <div className="flex gap-[7px] h-[calc(12.25*var(--px393))] sm:h-[12.25px] items-center relative shrink-0">
                   <p className="font-comfortaa font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
-                    Coat condition
+                    <span className={validationErrors.coatCondition ? "text-[#de1507]" : undefined}>Coat condition</span>
                   </p>
                 </div>
                 <div className="flex flex-row flex-wrap gap-[calc(8*var(--px393))] sm:gap-[8px] items-stretch relative shrink-0 w-full">
@@ -1498,13 +1507,14 @@ export function PetForm({
                     className="w-auto flex-none self-stretch h-[calc(53*var(--px393))] sm:h-[53px]"
                   />
                 </div>
+                {validationErrors.coatCondition ? <p role="alert" className="text-xs text-[#de1507]">{validationErrors.coatCondition}</p> : null}
               </div>
 
               {/* Behavior */}
-              <div className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0">
+              <div data-booking-pet-field="behavior" className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0">
                 <div className="flex gap-[7px] h-[calc(12.25*var(--px393))] sm:h-[12.25px] items-center relative shrink-0">
                   <p className="font-comfortaa font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
-                    Behavior
+                    <span className={validationErrors.behavior ? "text-[#de1507]" : undefined}>Behavior</span>
                   </p>
                 </div>
                 <div className="flex flex-row flex-wrap gap-[calc(8*var(--px393))] sm:gap-[8px] items-stretch relative shrink-0 w-full">
@@ -1527,6 +1537,7 @@ export function PetForm({
                     className="w-auto flex-none self-stretch h-[calc(53*var(--px393))] sm:h-[53px]"
                   />
                 </div>
+                {validationErrors.behavior ? <p role="alert" className="text-xs text-[#de1507]">{validationErrors.behavior}</p> : null}
               </div>
             </div>
           </div>

@@ -138,6 +138,7 @@ export const CustomSelect = forwardRef<HTMLButtonElement, CustomSelectProps>(
             )}
           />
         </div>
+        {error ? <p role="alert" className="font-comfortaa text-xs text-[#de1507]">{error}</p> : null}
       </div>
     );
   }

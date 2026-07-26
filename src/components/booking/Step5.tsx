@@ -11,7 +11,7 @@ import type { TimeSlotIn } from "@/lib/api";
 export function Step5() {
   const { previousStep, nextStep, selectedTimeSlots, setSelectedTimeSlots } = useBookingStore();
   const maxTimeSlots = 6;
-  const canContinue = selectedTimeSlots.length > 0;
+  const [timeError, setTimeError] = useState("");
   const remainingSlots = Math.max(0, maxTimeSlots - selectedTimeSlots.length);
   const isMaxSlotsReached = selectedTimeSlots.length >= maxTimeSlots;
   
@@ -164,6 +164,7 @@ export function Step5() {
         slot: periodId,
       };
       setSelectedTimeSlots([...selectedTimeSlots, newSlot]);
+      setTimeError("");
     }
   };
 
@@ -192,7 +193,10 @@ export function Step5() {
   };
 
   const handleContinue = () => {
-    // Selected time slots are already in bookingStore, no need to save again
+    if (selectedTimeSlots.length === 0) {
+      setTimeError("Select at least one date and time period");
+      return;
+    }
     nextStep();
   };
 
@@ -317,7 +321,8 @@ export function Step5() {
         </div>
 
         <div className="flex flex-col gap-[calc(20*var(--px393))] items-start justify-center relative shrink-0 w-full">
-          <OrangeButton size="medium" onClick={handleContinue} disabled={!canContinue} fullWidth>
+          {timeError && <p role="alert" className="text-xs text-[#de1507]">{timeError}</p>}
+          <OrangeButton size="medium" onClick={handleContinue} fullWidth>
             <div className="flex gap-[calc(4*var(--px393))] items-center">
               <p className="font-comfortaa font-medium leading-[calc(17.5*var(--px393))] text-[calc(14*var(--px393))] text-white">
                 Continue
@@ -566,7 +571,8 @@ export function Step5() {
         {/* Buttons */}
         <div className="flex items-start relative shrink-0 w-full">
           <div className="flex gap-[20px] items-center relative shrink-0">
-            <OrangeButton size="medium" onClick={handleContinue} disabled={!canContinue}>
+            {timeError && <p role="alert" className="mb-2 text-xs text-[#de1507]">{timeError}</p>}
+            <OrangeButton size="medium" onClick={handleContinue}>
               <div className="flex gap-[4px] items-center">
                 <p className="font-comfortaa font-medium leading-[17.5px] text-[14px] text-white">
                   Continue
