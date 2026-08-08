@@ -167,13 +167,12 @@ export function FileUpload({
         className={cn(
           "relative flex w-full shrink-0 flex-col items-center justify-center rounded-[calc(16*var(--px393))] border-[1.5px] border-dashed border-[#de6a07] bg-neutral-50 p-[calc(16*var(--px393))] transition-colors shadow-[0px_4px_10px_0px_rgba(0,0,0,0.15)] sm:rounded-[16px] sm:p-[24px]",
           isDragging && "border-[#de6a07] bg-[rgba(222,106,7,0.05)]",
-          (disabled || isUploadDisabled) && "opacity-60 cursor-not-allowed",
           (state === "error-size" || state === "error-format") && "gap-[12px]"
         )}
-        onDragEnter={!isUploadDisabled ? handleDragEnter : undefined}
-        onDragOver={!isUploadDisabled ? handleDragOver : undefined}
-        onDragLeave={!isUploadDisabled ? handleDragLeave : undefined}
-        onDrop={!isUploadDisabled ? handleDrop : undefined}
+        onDragEnter={!disabled && !isUploadDisabled ? handleDragEnter : undefined}
+        onDragOver={!disabled && !isUploadDisabled ? handleDragOver : undefined}
+        onDragLeave={!disabled && !isUploadDisabled ? handleDragLeave : undefined}
+        onDrop={!disabled && !isUploadDisabled ? handleDrop : undefined}
       >
         <div className={cn(
           "relative flex shrink-0 flex-col items-center justify-center gap-[calc(14*var(--px393))] sm:gap-[18px]",
@@ -319,20 +318,33 @@ export function FileUpload({
           {/* Text Group: 上传按钮和提示文字（移动端：按钮与 or drag and drop 纵向；PC：横向） */}
           <div className="relative flex w-full flex-col items-center justify-center gap-[calc(6*var(--px393))] sm:gap-[3px]">
             <div className="relative flex w-full flex-col items-center justify-center gap-[calc(6*var(--px393))] sm:w-auto sm:flex-row sm:gap-[9px]">
-              <div className="relative flex h-[calc(32*var(--px393))] w-full items-center justify-center rounded-[calc(32*var(--px393))] border-2 border-solid border-[#de6a07] px-[calc(18*var(--px393))] sm:h-[28px] sm:w-auto sm:rounded-[32px] sm:border-[#8b6357] sm:px-[26px]">
+              <div
+                className={cn(
+                  "relative flex h-[calc(32*var(--px393))] w-full items-center justify-center rounded-[calc(32*var(--px393))] border-2 border-solid border-[#de6a07] px-[calc(18*var(--px393))] sm:h-[28px] sm:w-auto sm:rounded-[32px] sm:border-[#8b6357] sm:px-[26px]",
+                  (disabled || isUploadDisabled) && "border-[rgba(222,106,7,0.35)] sm:border-[rgba(139,99,87,0.35)]"
+                )}
+              >
                 <div className="relative flex items-center gap-[5px] border-0 border-solid border-transparent bg-clip-padding">
                   <button
                     type="button"
                     onClick={handleClick}
                     disabled={disabled || isUploadDisabled}
-                    className="relative w-full cursor-pointer text-center font-comfortaa text-[calc(12*var(--px393))] font-bold leading-[calc(17.5*var(--px393))] text-[#de6a07] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:text-[12px] sm:leading-[17.5px] sm:text-[#8b6357]"
+                    className={cn(
+                      "relative w-full cursor-pointer text-center font-comfortaa text-[calc(12*var(--px393))] font-bold leading-[calc(17.5*var(--px393))] text-[#de6a07] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:text-[12px] sm:leading-[17.5px] sm:text-[#8b6357]",
+                      (disabled || isUploadDisabled) && "text-[rgba(222,106,7,0.35)] sm:text-[rgba(139,99,87,0.35)]"
+                    )}
                   >
                     {buttonText}
                   </button>
                 </div>
               </div>
               {showDragHint && (
-                <p className="relative text-center font-comfortaa text-[calc(13*var(--px393))] font-bold leading-[calc(18*var(--px393))] text-neutral-600 sm:shrink-0 sm:text-[14px] sm:leading-[20px]">
+                <p
+                  className={cn(
+                    "relative text-center font-comfortaa text-[calc(13*var(--px393))] font-bold leading-[calc(18*var(--px393))] text-neutral-600 sm:shrink-0 sm:text-[14px] sm:leading-[20px]",
+                    (disabled || isUploadDisabled) && "text-[rgba(96,104,122,0.35)]"
+                  )}
+                >
                   or drag and drop
                 </p>
               )}
