@@ -2400,6 +2400,46 @@
         "security": [{ "JWTAuth": [] }]
       }
     },
+    "/api/groomers/bookings/{booking_id}/check_up/upload_photo": {
+      "post": {
+        "operationId": "api_groomer_portal_groomer_check_up_upload_photo",
+        "summary": "Groomer Check Up Upload Photo",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "schema": { "title": "Booking Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GroomerCheckUpPhotoUploadOut" }
+              }
+            }
+          }
+        },
+        "tags": ["groomer-portal"],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": { "type": "string", "format": "binary" }
+                },
+                "required": ["file"]
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
     "/api/groomers/bookings/{booking_id}/start_grooming": {
       "post": {
         "operationId": "api_groomer_portal_start_grooming",
@@ -5214,6 +5254,15 @@
         },
         "required": ["ok", "amount", "status"],
         "title": "GroomerCheckUpCheckoutOut",
+        "type": "object"
+      },
+      "GroomerCheckUpPhotoUploadOut": {
+        "properties": {
+          "id": { "title": "Id", "type": "integer" },
+          "url": { "title": "Url", "type": "string" }
+        },
+        "required": ["id", "url"],
+        "title": "GroomerCheckUpPhotoUploadOut",
         "type": "object"
       },
       "TerminateServiceIn": {

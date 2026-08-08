@@ -1750,7 +1750,7 @@ export interface GroomerCheckUpCheckoutIn {
   add_on_ids?: number[];
   personalization?: Record<string, unknown>;
   description?: string;
-  before_photo_file?: File | null;
+  before_photo_image_id?: number | null;
 }
 
 export interface GroomerCheckUpCheckoutOut {
@@ -1762,6 +1762,11 @@ export interface GroomerCheckUpCheckoutOut {
   payment_url?: string | null;
   session_id?: string | null;
   payment_id?: number | null;
+}
+
+export interface GroomerCheckUpPhotoUploadOut {
+  id: number;
+  url: string;
 }
 
 export interface TerminateServiceIn {
@@ -2274,17 +2279,23 @@ export async function submitGroomerCheckUpCheckout(
   bookingId: number,
   data: GroomerCheckUpCheckoutIn
 ): Promise<GroomerCheckUpCheckoutOut> {
-  const { before_photo_file, ...payload } = data;
-  const requestData = new FormData();
-  requestData.append("payload", JSON.stringify(payload));
-  if (before_photo_file) {
-    requestData.append("evidence", before_photo_file);
-  }
   const response = await http.post<GroomerCheckUpCheckoutOut>(
     `/api/groomers/bookings/${bookingId}/check_up/checkout`,
-    requestData
+    data
   );
   return response.data;
+}
+
+export async function uploadGroomerCheckUpPhoto(
+  bookingId: number,
+  file: File,
+  onProgress?: (progress: number) => void
+): Promise<GroomerCheckUpPhotoUploadOut> {
+  return uploadFileWithProgress(
+    `/api/groomers/bookings/${bookingId}/check_up/upload_photo`,
+    file,
+    onProgress,
+  ) as Promise<GroomerCheckUpPhotoUploadOut>;
 }
 
 /**

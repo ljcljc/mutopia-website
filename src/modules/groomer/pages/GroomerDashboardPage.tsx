@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import IdentitySwitchAction from "@/components/account/IdentitySwitchAction";
 import {
@@ -40,6 +40,7 @@ import {
   getAddOns,
   submitGroomerCheckUpCheckout,
   submitGroomerHealthReport,
+  uploadGroomerCheckUpPhoto,
   type AddOnOut,
   type HealthReportIn,
   type TerminateServiceIn,
@@ -950,9 +951,9 @@ function GroomerCheckUpModal({
 }) {
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<CheckUpTab>("weight");
-  const [beforePhotoFile, setBeforePhotoFile] = useState<File | null>(null);
+  const [beforePhotoUploadItems, setBeforePhotoUploadItems] = useState<FileUploadItem[]>([]);
+  const [beforePhotoImageId, setBeforePhotoImageId] = useState<number | null>(null);
   const [beforePhotoError, setBeforePhotoError] = useState("");
-  const [beforePhotoPreviewUrl, setBeforePhotoPreviewUrl] = useState<string | null>(null);
   const [weightValue, setWeightValue] = useState("60");
   const [weightUnit, setWeightUnit] = useState("lbs");
   const [addOns, setAddOns] = useState<AddOnOut[]>(FALLBACK_ADD_ONS);
@@ -965,7 +966,8 @@ function GroomerCheckUpModal({
   useEffect(() => {
     if (!open) return;
     setActiveTab("photo");
-    setBeforePhotoFile(null);
+    setBeforePhotoUploadItems([]);
+    setBeforePhotoImageId(null);
     setBeforePhotoError("");
     setWeightValue(appointment?.weightValue || "60");
     setWeightUnit(normalizeCheckUpWeightUnit(appointment?.weightUnit));
@@ -986,42 +988,79 @@ function GroomerCheckUpModal({
       });
   }, [appointment?.weightUnit, appointment?.weightValue, open]);
 
-  useEffect(() => {
-    if (!beforePhotoFile) {
-      setBeforePhotoPreviewUrl(null);
+  const toggleAddOn = (id: number, checked: boolean) => {
+    setSelectedAddOnIds((current) => checked ? [...new Set([...current, id])] : current.filter((itemId) => itemId !== id));
+  };
+
+  const handleBeforePhotoChange = async (files: File[]) => {
+    const file = files[0] ?? null;
+    setBeforePhotoError("");
+    if (!file || !appointment?.id) {
+      beforePhotoUploadItems.forEach((item) => {
+        if (item.previewUrl.startsWith("blob:")) {
+          URL.revokeObjectURL(item.previewUrl);
+        }
+      });
+      setBeforePhotoUploadItems([]);
+      setBeforePhotoImageId(null);
       return;
     }
 
-    const previewUrl = URL.createObjectURL(beforePhotoFile);
-    setBeforePhotoPreviewUrl(previewUrl);
+    beforePhotoUploadItems.forEach((item) => {
+      if (item.previewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(item.previewUrl);
+      }
+    });
+    const previewUrl = URL.createObjectURL(file);
+    const nextItem: FileUploadItem = {
+      file,
+      previewUrl,
+      uploadProgress: 0,
+      uploadStatus: "uploading",
+    };
+    setBeforePhotoUploadItems([nextItem]);
+    setBeforePhotoImageId(null);
 
-    return () => URL.revokeObjectURL(previewUrl);
-  }, [beforePhotoFile]);
-
-  const beforePhotoUploadItems = useMemo<FileUploadItem[]>(
-    () =>
-      beforePhotoFile && beforePhotoPreviewUrl
-        ? [
-            {
-              file: beforePhotoFile,
-              previewUrl: beforePhotoPreviewUrl,
-              uploadProgress: 100,
+    try {
+      const bookingId = Number(appointment.id);
+      if (!Number.isFinite(bookingId)) return;
+      const uploaded = await uploadGroomerCheckUpPhoto(bookingId, file, (progress) => {
+        setBeforePhotoUploadItems((current) =>
+          current.length > 0
+            ? [{ ...current[0], uploadStatus: "uploading", uploadProgress: progress }]
+            : current,
+        );
+      });
+      setBeforePhotoUploadItems((current) =>
+        current.length > 0
+          ? [{
+              ...current[0],
               uploadStatus: "uploaded",
-            },
-          ]
-        : [],
-    [beforePhotoFile, beforePhotoPreviewUrl],
-  );
-
-  const toggleAddOn = (id: number, checked: boolean) => {
-    setSelectedAddOnIds((current) => checked ? [...new Set([...current, id])] : current.filter((itemId) => itemId !== id));
+              uploadProgress: 100,
+              photoId: uploaded.id,
+              serverUrl: uploaded.url,
+              previewUrl: uploaded.url || current[0].previewUrl,
+            }]
+          : current,
+      );
+      setBeforePhotoImageId(uploaded.id);
+    } catch (error) {
+      console.error("Failed to upload before service photo:", error);
+      setBeforePhotoUploadItems((current) =>
+        current.length > 0
+          ? [{ ...current[0], uploadStatus: "error", errorType: "upload" }]
+          : current,
+      );
+      setBeforePhotoImageId(null);
+      setBeforePhotoError("Failed to upload before service photo");
+    }
   };
 
   const handleNext = async () => {
     if (!appointment?.id) return;
 
     if (activeTab === "photo") {
-      if (!beforePhotoFile) {
+      if (!beforePhotoImageId) {
         setBeforePhotoError("Before service photo is required");
         return;
       }
@@ -1039,7 +1078,7 @@ function GroomerCheckUpModal({
 
     const bookingId = Number(appointment.id);
     if (!Number.isFinite(bookingId)) return;
-    if (!beforePhotoFile) {
+    if (!beforePhotoImageId) {
       setBeforePhotoError("Before service photo is required");
       setActiveTab("photo");
       return;
@@ -1054,7 +1093,7 @@ function GroomerCheckUpModal({
         return next;
       }, {});
       const result = await submitGroomerCheckUpCheckout(bookingId, {
-        before_photo_file: beforePhotoFile,
+        before_photo_image_id: beforePhotoImageId,
         weight_value: weightValue,
         weight_unit: weightUnit,
         add_on_ids: selectedAddOnIds,
@@ -1137,16 +1176,24 @@ function GroomerCheckUpModal({
                     maxFiles={1}
                     multiple={false}
                     uploadItems={beforePhotoUploadItems}
-                    onChange={(files) => {
-                      setBeforePhotoFile(files[0] ?? null);
-                      setBeforePhotoError("");
-                    }}
+                    onChange={handleBeforePhotoChange}
                     onRemove={() => {
-                      setBeforePhotoFile(null);
+                      beforePhotoUploadItems.forEach((item) => {
+                        if (item.previewUrl.startsWith("blob:")) {
+                          URL.revokeObjectURL(item.previewUrl);
+                        }
+                      });
+                      setBeforePhotoUploadItems([]);
+                      setBeforePhotoImageId(null);
                       setBeforePhotoError("");
                     }}
                     className="[&_p]:whitespace-normal"
                   />
+                  {beforePhotoImageId ? (
+                    <p className="font-comfortaa text-[12px] leading-[18px] text-[#2F7A35]">
+                      Uploaded. Ready to submit.
+                    </p>
+                  ) : null}
                   {beforePhotoError ? (
                     <p className="font-comfortaa text-[12px] leading-[18px] text-[#DE1507]">{beforePhotoError}</p>
                   ) : null}
