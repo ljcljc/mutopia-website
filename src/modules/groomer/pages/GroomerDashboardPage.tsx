@@ -1127,7 +1127,7 @@ function GroomerCheckUpModal({
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && dismissible && onClose()}>
       <DialogContent
-        showCloseButton={dismissible}
+        showCloseButton={false}
         onEscapeKeyDown={dismissible ? undefined : (event) => event.preventDefault()}
         onInteractOutside={dismissible ? undefined : (event) => event.preventDefault()}
         overlayClassName={isMobile ? "service-area-dialog-overlay" : undefined}
