@@ -18,6 +18,15 @@ function getSnapshotValue(snapshot: Record<string, unknown> | undefined, key: st
   return typeof value === "string" ? value : "";
 }
 
+const HEALTH_INFO_EDITABLE_STATUSES = new Set([
+  "confirmed",
+  "checked_in",
+  "in_progress",
+  "completed",
+  "awaiting_final_payment",
+  "terminated",
+]);
+
 function buildLegacyHealthFields(questionnaire: BookingHealthQuestionnaire): Partial<BookingHealthInfoUpdateIn> {
   const groomingDays = questionnaire.lifestyle.groomingIntervalDays;
   let groomingFrequency: string | null = null;
@@ -106,7 +115,7 @@ export default function BookingHealthInfo() {
     };
   }, [navigate, parsedBookingId]);
 
-  const canSubmit = detail?.status === "confirmed";
+  const canSubmit = detail != null && detail.health_report == null && HEALTH_INFO_EDITABLE_STATUSES.has(detail.status);
   const petSnapshot = useMemo(() => ((detail?.pet_snapshot ?? {}) as Record<string, unknown>), [detail]);
   const petName = getSnapshotValue(petSnapshot, "name") || "Your pet";
   const stepMeta = BOOKING_HEALTH_STEPS[currentStep];
@@ -125,7 +134,7 @@ export default function BookingHealthInfo() {
         bookingStatus: detail?.status ?? null,
         bookingId: detail.id,
       });
-      toast.error("Health information can only be submitted while the appointment is in the confirmed state.");
+      toast.error("Health information can no longer be submitted for this appointment.");
       return;
     }
 
@@ -236,7 +245,7 @@ export default function BookingHealthInfo() {
               <div className="px-4 py-7 sm:px-[21px] sm:py-[28px]">
                 {!canSubmit ? (
                   <div className="mx-auto mb-5 w-full max-w-[588px] rounded-[18px] border border-[#ef4444] bg-[#fef2f2] px-4 py-3 font-comfortaa text-[13px] text-[#b91c1c]">
-                    This appointment is currently `{detail?.status ?? "unavailable"}`. You can review the form, but submission is only available when the appointment is in the confirmed state.
+                    This health form is no longer available for submission. You can still review the information entered here.
                   </div>
                 ) : null}
 

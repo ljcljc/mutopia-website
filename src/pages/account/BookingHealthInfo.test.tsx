@@ -30,7 +30,7 @@ describe("BookingHealthInfo", () => {
     vi.mocked(getBookingDetail).mockResolvedValue({
       id: 42,
       order_code: "#MUTOP-42",
-      status: "confirmed",
+      status: "checked_in",
       scheduled_time: "2026-07-10 15:00",
       notes: "",
       preferred_time_slots: [],
