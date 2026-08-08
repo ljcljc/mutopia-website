@@ -304,7 +304,8 @@ export function ImagePreview({
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose?.()}>
       <DialogContent
-        className="image-preview-dialog bg-white border border-[rgba(0,0,0,0.2)] border-solid flex flex-col gap-[16px] items-start px-0 py-[12px] rounded-none sm:rounded-[20px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] w-screen h-screen max-w-none max-h-none sm:w-[80vw]! sm:h-[80vh]! sm:max-w-[80vw]! sm:max-h-[80vh]! overflow-visible [&>button]:hidden left-0 top-0 translate-x-0 translate-y-0 sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%]"
+        overlayClassName="z-[79]!"
+        className="image-preview-dialog z-[80]! bg-white border border-[rgba(0,0,0,0.2)] border-solid flex flex-col gap-[16px] items-start px-0 py-[12px] rounded-none sm:rounded-[20px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] w-screen h-screen max-w-none max-h-none sm:w-[80vw]! sm:h-[80vh]! sm:max-w-[80vw]! sm:max-h-[80vh]! overflow-visible [&>button]:hidden left-0 top-0 translate-x-0 translate-y-0 sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%]"
       >
         {/* 屏幕阅读器可访问的标题和描述（视觉上隐藏） */}
         <DialogTitle className="sr-only">

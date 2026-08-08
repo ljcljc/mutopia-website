@@ -555,12 +555,12 @@ function ServiceTerminationModal({
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && !isSubmitting && onClose()}>
       <DialogContent
-        overlayClassName={isMobile ? "service-area-dialog-overlay z-[70]!" : "z-[70]!"}
+        overlayClassName={isMobile ? "service-area-dialog-overlay" : undefined}
         className={cn(
           "border-0! bg-white! p-0! gap-0! [&>button]:hidden",
           isMobile
-            ? "service-area-dialog inset-x-0! bottom-0! top-auto! z-[75]! mx-auto! flex! max-h-[88vh]! w-full! max-w-none! translate-x-0! translate-y-0! flex-col! rounded-b-none rounded-t-[calc(24*var(--px393))] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
-            : "left-1/2! top-1/2! z-[75]! grid! w-[min(520px,calc(100vw-48px))]! max-h-[88vh]! max-w-[520px]! -translate-x-1/2! -translate-y-1/2! overflow-hidden! rounded-[20px]! shadow-[0px_24px_60px_rgba(74,44,85,0.16)]",
+            ? "service-area-dialog inset-x-0! bottom-0! top-auto! mx-auto! flex! max-h-[88vh]! w-full! max-w-none! translate-x-0! translate-y-0! flex-col! rounded-b-none rounded-t-[calc(24*var(--px393))] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
+            : "left-1/2! top-1/2! grid! w-[min(520px,calc(100vw-48px))]! max-h-[88vh]! max-w-[520px]! -translate-x-1/2! -translate-y-1/2! overflow-hidden! rounded-[20px]! shadow-[0px_24px_60px_rgba(74,44,85,0.16)]",
         )}
       >
         <DialogTitle className="sr-only">Terminate service</DialogTitle>
@@ -697,12 +697,12 @@ function HealthReportModal({
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && !isSubmitting && onClose()}>
       <DialogContent
-        overlayClassName={isMobile ? "service-area-dialog-overlay z-[70]!" : "z-[70]!"}
+        overlayClassName={isMobile ? "service-area-dialog-overlay" : undefined}
         className={cn(
           "border-0! bg-white! p-0! gap-0! [&>button]:hidden",
           isMobile
-            ? "service-area-dialog inset-x-0! bottom-0! top-auto! z-[75]! mx-auto! flex! max-h-[88vh]! w-full! max-w-none! translate-x-0! translate-y-0! flex-col! rounded-b-none rounded-t-[calc(24*var(--px393))] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
-            : "left-1/2! top-1/2! z-[75]! grid! w-[min(560px,calc(100vw-48px))]! max-h-[88vh]! max-w-[560px]! -translate-x-1/2! -translate-y-1/2! overflow-hidden! rounded-[20px]! shadow-[0px_24px_60px_rgba(74,44,85,0.16)]",
+            ? "service-area-dialog inset-x-0! bottom-0! top-auto! mx-auto! flex! max-h-[88vh]! w-full! max-w-none! translate-x-0! translate-y-0! flex-col! rounded-b-none rounded-t-[calc(24*var(--px393))] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
+            : "left-1/2! top-1/2! grid! w-[min(560px,calc(100vw-48px))]! max-h-[88vh]! max-w-[560px]! -translate-x-1/2! -translate-y-1/2! overflow-hidden! rounded-[20px]! shadow-[0px_24px_60px_rgba(74,44,85,0.16)]",
         )}
       >
         <DialogTitle className="sr-only">Health report</DialogTitle>
@@ -1130,12 +1130,12 @@ function GroomerCheckUpModal({
         showCloseButton={dismissible}
         onEscapeKeyDown={dismissible ? undefined : (event) => event.preventDefault()}
         onInteractOutside={dismissible ? undefined : (event) => event.preventDefault()}
-        overlayClassName={isMobile ? "service-area-dialog-overlay z-[70]!" : "z-[70]!"}
+        overlayClassName={isMobile ? "service-area-dialog-overlay" : undefined}
         className={cn(
           "border-0! bg-white! p-0! gap-0! [&>button]:top-[calc(24*var(--px393))] [&>button]:right-[calc(24*var(--px393))] sm:[&>button]:top-6 sm:[&>button]:right-6",
           isMobile
-            ? "service-area-dialog inset-x-0! bottom-0! top-auto! z-[75]! mx-auto! flex! max-h-[88vh]! w-full! max-w-none! translate-x-0! translate-y-0! flex-col! rounded-b-none rounded-t-[calc(24*var(--px393))] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
-            : "left-1/2! top-1/2! z-[75]! grid! w-[min(100%-32px,420px)]! max-h-[min(88vh,760px)]! -translate-x-1/2! -translate-y-1/2! overflow-hidden! rounded-[20px]! shadow-[0px_18px_40px_rgba(0,0,0,0.18)]",
+            ? "service-area-dialog inset-x-0! bottom-0! top-auto! mx-auto! flex! max-h-[88vh]! w-full! max-w-none! translate-x-0! translate-y-0! flex-col! rounded-b-none rounded-t-[calc(24*var(--px393))] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
+            : "left-1/2! top-1/2! grid! w-[min(100%-32px,420px)]! max-h-[min(88vh,760px)]! -translate-x-1/2! -translate-y-1/2! overflow-hidden! rounded-[20px]! shadow-[0px_18px_40px_rgba(0,0,0,0.18)]",
         )}
       >
         <DialogTitle className="sr-only">Groomer check up</DialogTitle>
