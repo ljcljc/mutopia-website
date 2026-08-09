@@ -49,6 +49,7 @@ export type DashboardAppointment = GroomerUpNextAppointment & {
   priceAdjustmentLines: DashboardAmountLine[];
   pendingCheckUp?: PendingCheckUpSummary | null;
   review?: ReviewSummaryOut | null;
+  hasPublishedHealthReport?: boolean;
   invitationId?: number;
   proposalSlots?: string[];
   proposedTimeOptions?: Array<{ date: string; slot: "am" | "pm"; time: string; datetime_local: string }>;
@@ -65,6 +66,15 @@ export type PendingCheckUpSummary = {
   amount: string;
   actionLabel: string;
   direction: "charge" | "refund";
+  details?: {
+    items?: Array<{
+      kind?: string;
+      amount?: string;
+      description?: string;
+      details?: Record<string, unknown>;
+    }>;
+    proposed_final_amount?: string;
+  };
   statusLabel: string;
   summary: string;
 };
@@ -407,9 +417,11 @@ function buildCheckUpPersonalizationLines(
 function buildPendingCheckUpSummary({
   amount,
   summary,
+  details,
 }: {
   amount: unknown;
   summary?: string;
+  details?: Record<string, unknown>;
 }): PendingCheckUpSummary | null {
   const parsedAmount = parseAmount(amount);
   if (parsedAmount === null || parsedAmount === 0) return null;
@@ -423,6 +435,13 @@ function buildPendingCheckUpSummary({
     direction,
     statusLabel: direction === "refund" ? "Waiting for refund" : "Waiting for payment",
     summary: summary?.trim() || `Check-in adjustment ${direction === "refund" ? "refund" : "payment"} pending`,
+    details: details
+      ? {
+          items: Array.isArray(details.items) ? details.items.filter((item): item is NonNullable<(typeof details.items)[number]> => Boolean(item)) : [],
+          proposed_final_amount:
+            typeof details.proposed_final_amount === "string" ? details.proposed_final_amount : undefined,
+        }
+      : undefined,
   };
 }
 
@@ -557,6 +576,7 @@ function mapDashboardAppointment(raw: unknown): DashboardAppointment | null {
     time: formatTimeLabel(scheduledTime),
     scheduledTime,
     status: getString(record, ["status"]),
+    hasPublishedHealthReport: record.has_published_health_report === true,
     weightValue: getString(record, ["weight_value", "weight_kg", "weight"], getString(pet, ["weight_value", "weight_kg", "weight"])),
     weightUnit: getString(record, ["weight_unit"], getString(pet, ["weight_unit"])),
     ...estimate,
@@ -564,6 +584,7 @@ function mapDashboardAppointment(raw: unknown): DashboardAppointment | null {
     pendingCheckUp: buildPendingCheckUpSummary({
       amount: getAmount(pendingCheckUp, ["amount"]),
       summary: getString(pendingCheckUp, ["summary"]),
+      details: asRecord(pendingCheckUp.details),
     }),
     estimateBreakdown: getString(record, ["estimate_breakdown"]) || getString(price, ["estimate_breakdown"]) || estimate.estimateBreakdown,
     review: record.review ? (record.review as ReviewSummaryOut) : null,

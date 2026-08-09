@@ -1,19 +1,20 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import GroomerDashboardPage from "./GroomerDashboardPage";
 import {
   type BookingDetailOut,
   completeGroomerService,
+  getCheckInObservation,
   getAddOns,
   getGroomerBookingDetail,
   getGroomerCurrentBooking,
   getGroomerDashboardSummary,
   getGroomerPerformance,
   getGroomerPendingBookingInvitations,
+  saveCheckInObservation,
   submitGroomerCheckUpCheckout,
-  submitGroomerHealthReport,
-  uploadGroomerCheckUpPhoto,
+  uploadCheckInObservationPhoto,
 } from "@/lib/api";
 import { useGroomerDashboardStore } from "@/modules/groomer/groomerStore";
 
@@ -24,15 +25,16 @@ vi.mock("@/lib/api", async (importOriginal) => {
     ...actual,
     buildImageUrl: vi.fn((value: string) => value),
     completeGroomerService: vi.fn(),
+    getCheckInObservation: vi.fn(),
     getAddOns: vi.fn(),
     getGroomerBookingDetail: vi.fn(),
     getGroomerCurrentBooking: vi.fn(),
     getGroomerDashboardSummary: vi.fn(),
     getGroomerPerformance: vi.fn(),
     getGroomerPendingBookingInvitations: vi.fn(),
+    saveCheckInObservation: vi.fn(),
     submitGroomerCheckUpCheckout: vi.fn(),
-    submitGroomerHealthReport: vi.fn(),
-    uploadGroomerCheckUpPhoto: vi.fn(),
+    uploadCheckInObservationPhoto: vi.fn(),
   };
 });
 
@@ -54,12 +56,32 @@ describe("GroomerDashboardPage complete service", () => {
       },
     });
     await waitFor(() => {
-      expect(uploadGroomerCheckUpPhoto).toHaveBeenCalled();
+      expect(uploadCheckInObservationPhoto).toHaveBeenCalled();
     });
+    const preview = await screen.findByRole("dialog", { name: /Image Preview:/ });
+    fireEvent.click(within(preview).getAllByRole("button", { name: "Close" })[0]);
+  };
+
+  const advanceFromPhoto = async () => {
+    fireEvent.click(await screen.findByRole("button", { name: "Next" }));
+    await waitFor(() => expect(saveCheckInObservation).toHaveBeenCalled());
+    await screen.findByText("Verify weight with pet owner");
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(getCheckInObservation).mockResolvedValue({
+      id: null,
+      arrival_note: "",
+      locked: false,
+      photos: [],
+    });
+    vi.mocked(saveCheckInObservation).mockResolvedValue({
+      id: 1,
+      arrival_note: "",
+      locked: false,
+      photos: [],
+    });
     Object.defineProperty(window, "matchMedia", {
       writable: true,
       value: vi.fn().mockImplementation((query: string) => ({
@@ -180,7 +202,7 @@ describe("GroomerDashboardPage complete service", () => {
     expect(screen.getByRole("button", { name: "Fill report for Momo" })).toBeInTheDocument();
   });
 
-  it("opens and submits the health report form from a completed booking", async () => {
+  it("opens the photo health inspection flow from a completed booking", async () => {
     vi.mocked(getGroomerDashboardSummary).mockResolvedValue({});
     vi.mocked(getGroomerPendingBookingInvitations).mockResolvedValue([]);
     vi.mocked(getGroomerBookingDetail).mockResolvedValue({
@@ -203,37 +225,34 @@ describe("GroomerDashboardPage complete service", () => {
       pet_breed: "Poodle",
       service_name: "Full grooming",
     });
-    vi.mocked(submitGroomerHealthReport).mockResolvedValue({ ok: true });
-
     render(
-      <MemoryRouter>
-        <GroomerDashboardPage />
+      <MemoryRouter initialEntries={["/groomer/dashboard"]}>
+        <Routes>
+          <Route path="/groomer/dashboard" element={<GroomerDashboardPage />} />
+          <Route path="/groomer/bookings/:bookingId/photo-health-inspection" element={<div>Photo health inspection route</div>} />
+        </Routes>
       </MemoryRouter>,
     );
 
     fireEvent.click(await screen.findByRole("button", { name: "Fill report for Momo" }));
-    fireEvent.change(screen.getByPlaceholderText("Enter report summary"), {
-      target: { value: "Momo had a smooth grooming session." },
-    });
-    fireEvent.change(screen.getByPlaceholderText("Enter pet condition"), {
-      target: { value: "Healthy coat" },
-    });
-    fireEvent.change(screen.getByPlaceholderText("Enter behavior notes"), {
-      target: { value: "Calm" },
-    });
-    fireEvent.change(screen.getByPlaceholderText("Enter recommendations"), {
-      target: { value: "Brush weekly" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: "Submit report" }));
+    expect(await screen.findByText("Photo health inspection route")).toBeInTheDocument();
+  });
 
-    await waitFor(() => {
-      expect(submitGroomerHealthReport).toHaveBeenCalledWith(123, {
-        summary: "Momo had a smooth grooming session.",
-        pet_condition: "Healthy coat",
-        behavior_notes: "Calm",
-        recommendations: "Brush weekly",
-      });
+  it("shows View health report after the report is published", async () => {
+    vi.mocked(getGroomerDashboardSummary).mockResolvedValue({});
+    vi.mocked(getGroomerPendingBookingInvitations).mockResolvedValue([]);
+    vi.mocked(getGroomerBookingDetail).mockResolvedValue({ id: 123, status: "completed" } as BookingDetailOut);
+    vi.mocked(getGroomerCurrentBooking).mockResolvedValue({
+      id: 123,
+      status: "completed",
+      pet_name: "Momo",
+      pet_breed: "Poodle",
+      service_name: "Full grooming",
+      has_published_health_report: true,
     });
+    render(<MemoryRouter><GroomerDashboardPage /></MemoryRouter>);
+
+    expect(await screen.findByRole("button", { name: "View health report" })).toBeInTheDocument();
   });
 
   it("shows the reviewed completion card when the booking has a review", async () => {
@@ -307,9 +326,13 @@ describe("GroomerDashboardPage complete service", () => {
       pet_breed: "Poodle",
       service_name: "Full grooming",
     });
-    vi.mocked(uploadGroomerCheckUpPhoto).mockResolvedValue({
+    vi.mocked(uploadCheckInObservationPhoto).mockResolvedValue({
       id: 55,
       url: "/media/checkup/photo.jpg",
+      original_filename: "before.jpg",
+      source_mime_type: "image/jpeg",
+      normalized_mime_type: "image/jpeg",
+      size_bytes: 5,
     });
     vi.mocked(getAddOns).mockResolvedValue([
       { id: 1, name: "A", price: "1.00", is_variable: false },
@@ -323,8 +346,8 @@ describe("GroomerDashboardPage complete service", () => {
     vi.mocked(submitGroomerCheckUpCheckout).mockResolvedValue({
       ok: true,
       request_ids: [1],
-      amount: "12.00",
-      status: "client_confirmation_required",
+      amount: "0.00",
+      status: "no_change",
     });
 
     render(
@@ -335,7 +358,7 @@ describe("GroomerDashboardPage complete service", () => {
 
     fireEvent.click(await screen.findByRole("button", { name: "Modify" }));
     await selectBeforePhoto();
-    fireEvent.click(await screen.findByRole("button", { name: "Next" }));
+    await advanceFromPhoto();
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     await waitFor(() => {
       expect(screen.getAllByText("Selected add-on").length).toBeGreaterThan(0);
@@ -345,8 +368,7 @@ describe("GroomerDashboardPage complete service", () => {
 
     await waitFor(() => {
       expect(submitGroomerCheckUpCheckout).toHaveBeenCalledWith(123, expect.objectContaining({
-        add_on_ids: [7],
-        before_photo_image_id: 55,
+        add_on_ids: [],
       }));
     });
   });
@@ -377,9 +399,13 @@ describe("GroomerDashboardPage complete service", () => {
       pet_breed: "Poodle",
       service_name: "Full grooming",
     });
-    vi.mocked(uploadGroomerCheckUpPhoto).mockResolvedValue({
+    vi.mocked(uploadCheckInObservationPhoto).mockResolvedValue({
       id: 56,
       url: "/media/checkup/photo.jpg",
+      original_filename: "before.jpg",
+      source_mime_type: "image/jpeg",
+      normalized_mime_type: "image/jpeg",
+      size_bytes: 5,
     });
     vi.mocked(getAddOns).mockResolvedValue([
       { id: 8, name: "Special add-on", price: "12.00", is_variable: false },
@@ -402,7 +428,7 @@ describe("GroomerDashboardPage complete service", () => {
 
     fireEvent.click(await screen.findByRole("button", { name: "Modify" }));
     await selectBeforePhoto();
-    fireEvent.click(await screen.findByRole("button", { name: "Next" }));
+    await advanceFromPhoto();
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     fireEvent.click(await screen.findByRole("checkbox"));
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
@@ -411,7 +437,6 @@ describe("GroomerDashboardPage complete service", () => {
     await waitFor(() => {
       expect(submitGroomerCheckUpCheckout).toHaveBeenCalledWith(123, expect.objectContaining({
         add_on_ids: [8],
-        before_photo_image_id: 56,
       }));
     });
 
@@ -445,9 +470,13 @@ describe("GroomerDashboardPage complete service", () => {
       pet_breed: "Poodle",
       service_name: "Full grooming",
     });
-    vi.mocked(uploadGroomerCheckUpPhoto).mockResolvedValue({
+    vi.mocked(uploadCheckInObservationPhoto).mockResolvedValue({
       id: 57,
       url: "/media/checkup/photo.jpg",
+      original_filename: "before.jpg",
+      source_mime_type: "image/jpeg",
+      normalized_mime_type: "image/jpeg",
+      size_bytes: 5,
     });
     vi.mocked(getAddOns).mockResolvedValue([]);
     vi.mocked(submitGroomerCheckUpCheckout).mockResolvedValue({
@@ -466,13 +495,13 @@ describe("GroomerDashboardPage complete service", () => {
 
     fireEvent.click(await screen.findByRole("button", { name: "Modify" }));
     await selectBeforePhoto();
-    fireEvent.click(await screen.findByRole("button", { name: "Next" }));
+    await advanceFromPhoto();
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     fireEvent.click(screen.getByRole("button", { name: "Submit" }));
 
     expect(await screen.findByText("Waiting for refund")).toBeInTheDocument();
-    expect(screen.getByText("Refund $8.00")).toBeInTheDocument();
+    expect(screen.getByText("-$8.00")).toBeInTheDocument();
     expect(screen.getByText("$87.00")).toBeInTheDocument();
   });
 });

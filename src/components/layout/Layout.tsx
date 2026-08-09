@@ -4,6 +4,7 @@ import HeaderApp from "@/components/layout/HeaderApp";
 import Footer from "@/components/layout/Footer";
 import { ScrollToTop } from "@/components/common";
 import { Toaster } from "@/components/ui/sonner";
+import HealthReportDeepLinkHandler from "@/components/account/HealthReportDeepLinkHandler";
 
 export default function Layout() {
   const location = useLocation();
@@ -11,6 +12,7 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <HealthReportDeepLinkHandler />
       {isHomePage ? <Header /> : <HeaderApp />}
       <main className="flex-1">
         <Outlet />
@@ -21,4 +23,3 @@ export default function Layout() {
     </div>
   );
 }
-

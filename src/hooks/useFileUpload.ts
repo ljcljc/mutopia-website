@@ -11,6 +11,8 @@ export interface UseFileUploadOptions {
   maxFiles?: number;
   /** 文件变化回调 */
   onChange?: (files: File[]) => void;
+  /** 本次选择中新增且通过校验的文件 */
+  onFilesAdded?: (files: File[]) => void;
   /** 是否禁用 */
   disabled?: boolean;
   /** 是否追加文件（用于多文件上传时追加到现有列表） */
@@ -83,6 +85,7 @@ export function useFileUpload({
   maxSizeMB = 10,
   maxFiles,
   onChange,
+  onFilesAdded,
   disabled = false,
   append = false,
 }: UseFileUploadOptions = {}): UseFileUploadReturn {
@@ -116,8 +119,10 @@ export function useFileUpload({
       
       setFiles(limitedFiles);
       onChange?.(limitedFiles);
+      const acceptedCount = Math.max(0, limitedFiles.length - (append ? files.length : 0));
+      onFilesAdded?.(validFiles.slice(0, acceptedCount));
     },
-    [maxSizeMB, maxFiles, onChange, append, files]
+    [maxSizeMB, maxFiles, onChange, onFilesAdded, append, files]
   );
 
   const handleClick = useCallback(() => {
@@ -207,4 +212,3 @@ export function useFileUpload({
     removeFile,
   };
 }
-

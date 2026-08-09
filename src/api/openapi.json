@@ -2169,7 +2169,11 @@
         "operationId": "api_groomer_portal_current_booking",
         "summary": "Current Booking",
         "parameters": [],
-        "responses": { "200": { "description": "OK" } },
+        "responses": {
+          "200": {
+            "description": "Current dashboard booking; booking.has_published_health_report controls the report action label."
+          }
+        },
         "tags": ["groomer-portal"],
         "security": [{ "JWTAuth": [] }]
       }
@@ -2740,6 +2744,804 @@
         "tags": ["groomer-portal"],
         "security": [{ "JWTAuth": [] }]
       }
+    },
+    "/api/pets/{pet_id}/health_reports": {
+        "get": {
+            "operationId": "api_pets_list_pet_health_reports",
+            "summary": "List Pet Health Reports",
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "pet_id",
+                    "schema": {
+                        "title": "Pet Id",
+                        "type": "integer"
+                    },
+                    "required": true
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK"
+                }
+            },
+            "tags": [
+                "pets"
+            ],
+            "security": [
+                {
+                    "JWTAuth": []
+                }
+            ]
+        }
+    },
+    "/api/pets/{pet_id}/health_reports/{report_id}/pdf": {
+        "get": {
+            "operationId": "api_pets_stream_pet_health_report",
+            "summary": "Stream Pet Health Report",
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "pet_id",
+                    "schema": {
+                        "title": "Pet Id",
+                        "type": "integer"
+                    },
+                    "required": true
+                },
+                {
+                    "in": "path",
+                    "name": "report_id",
+                    "schema": {
+                        "title": "Report Id",
+                        "type": "integer"
+                    },
+                    "required": true
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK"
+                }
+            },
+            "tags": [
+                "pets"
+            ],
+            "security": [
+                {
+                    "JWTAuth": []
+                }
+            ]
+        }
+    },
+    "/api/groomers/bookings/{booking_id}/check_in_observation": {
+        "get": {
+            "operationId": "api_photo_health_get_check_in_observation",
+            "summary": "Get Check In Observation",
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "booking_id",
+                    "schema": {
+                        "title": "Booking Id",
+                        "type": "integer"
+                    },
+                    "required": true
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK"
+                }
+            },
+            "tags": [
+                "photo-health"
+            ],
+            "security": [
+                {
+                    "JWTAuth": []
+                }
+            ]
+        },
+        "put": {
+            "operationId": "api_photo_health_save_check_in_observation",
+            "summary": "Save Check In Observation",
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "booking_id",
+                    "schema": {
+                        "title": "Booking Id",
+                        "type": "integer"
+                    },
+                    "required": true
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK"
+                }
+            },
+            "tags": [
+                "photo-health"
+            ],
+            "requestBody": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/CheckInObservationIn"
+                        }
+                    }
+                },
+                "required": true
+            },
+            "security": [
+                {
+                    "JWTAuth": []
+                }
+            ]
+        }
+    },
+    "/api/groomers/bookings/{booking_id}/check_in_observation/photos": {
+        "post": {
+            "operationId": "api_photo_health_upload_check_in_observation_photo",
+            "summary": "Upload Check In Observation Photo",
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "booking_id",
+                    "schema": {
+                        "title": "Booking Id",
+                        "type": "integer"
+                    },
+                    "required": true
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK"
+                }
+            },
+            "tags": [
+                "photo-health"
+            ],
+            "requestBody": {
+                "content": {
+                    "multipart/form-data": {
+                        "schema": {
+                            "properties": {
+                                "file": {
+                                    "format": "binary",
+                                    "title": "File",
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "file"
+                            ],
+                            "title": "FileParams",
+                            "type": "object"
+                        }
+                    }
+                },
+                "required": true
+            },
+            "security": [
+                {
+                    "JWTAuth": []
+                }
+            ]
+        }
+    },
+    "/api/groomers/bookings/{booking_id}/check_in_observation/photos/{photo_id}": {
+        "delete": {
+            "operationId": "api_photo_health_delete_check_in_observation_photo",
+            "summary": "Delete Check In Observation Photo",
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "booking_id",
+                    "schema": {
+                        "title": "Booking Id",
+                        "type": "integer"
+                    },
+                    "required": true
+                },
+                {
+                    "in": "path",
+                    "name": "photo_id",
+                    "schema": {
+                        "title": "Photo Id",
+                        "type": "integer"
+                    },
+                    "required": true
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK"
+                }
+            },
+            "tags": [
+                "photo-health"
+            ],
+            "security": [
+                {
+                    "JWTAuth": []
+                }
+            ]
+        }
+    },
+    "/api/groomers/bookings/{booking_id}/photo_health_inspection": {
+        "post": {
+            "operationId": "api_photo_health_start_photo_health_inspection",
+            "summary": "Start Photo Health Inspection",
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "booking_id",
+                    "schema": {
+                        "title": "Booking Id",
+                        "type": "integer"
+                    },
+                    "required": true
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK"
+                }
+            },
+            "tags": [
+                "photo-health"
+            ],
+            "security": [
+                {
+                    "JWTAuth": []
+                }
+            ]
+        },
+        "get": {
+            "operationId": "api_photo_health_get_photo_health_inspection",
+            "summary": "Get Photo Health Inspection",
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "booking_id",
+                    "schema": {
+                        "title": "Booking Id",
+                        "type": "integer"
+                    },
+                    "required": true
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK"
+                }
+            },
+            "tags": [
+                "photo-health"
+            ],
+            "security": [
+                {
+                    "JWTAuth": []
+                }
+            ]
+        },
+        "put": {
+            "operationId": "api_photo_health_save_photo_health_inspection_progress",
+            "summary": "Save Photo Health Inspection Progress",
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "booking_id",
+                    "schema": {
+                        "title": "Booking Id",
+                        "type": "integer"
+                    },
+                    "required": true
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK"
+                }
+            },
+            "tags": [
+                "photo-health"
+            ],
+            "requestBody": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/InspectionProgressIn"
+                        }
+                    }
+                },
+                "required": true
+            },
+            "security": [
+                {
+                    "JWTAuth": []
+                }
+            ]
+        }
+    },
+    "/api/groomers/bookings/{booking_id}/health_report_alert_tags": {
+        "get": {
+            "operationId": "api_photo_health_get_health_report_alert_tags",
+            "summary": "Get Health Report Alert Tags",
+            "parameters": [{"in":"path","name":"booking_id","schema":{"title":"Booking Id","type":"integer"},"required":true}],
+            "responses": {"200": {"description": "OK"}},
+            "tags": ["photo-health"],
+            "security": [{"JWTAuth": []}]
+        },
+        "put": {
+            "operationId": "api_photo_health_update_health_report_alert_tags",
+            "summary": "Update Health Report Alert Tags",
+            "parameters": [{"in":"path","name":"booking_id","schema":{"title":"Booking Id","type":"integer"},"required":true}],
+            "responses": {"200": {"description": "OK"}},
+            "tags": ["photo-health"],
+            "requestBody": {"content":{"application/json":{"schema":{"$ref":"#/components/schemas/HealthReportAlertTagsIn"}}},"required":true},
+            "security": [{"JWTAuth": []}]
+        }
+    },
+    "/api/groomers/bookings/{booking_id}/photo_health_inspection/pet_notes": {
+        "get": {
+            "operationId": "api_photo_health_get_photo_health_inspection_pet_notes",
+            "summary": "Get Photo Health Inspection Pet Notes",
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "booking_id",
+                    "schema": {
+                        "title": "Booking Id",
+                        "type": "integer"
+                    },
+                    "required": true
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK"
+                }
+            },
+            "tags": [
+                "photo-health"
+            ],
+            "security": [
+                {
+                    "JWTAuth": []
+                }
+            ]
+        }
+    },
+    "/api/groomers/bookings/{booking_id}/photo_health_inspection/photos": {
+        "post": {
+            "operationId": "api_photo_health_upload_inspection_photo",
+            "summary": "Upload Inspection Photo",
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "booking_id",
+                    "schema": {
+                        "title": "Booking Id",
+                        "type": "integer"
+                    },
+                    "required": true
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK"
+                }
+            },
+            "tags": [
+                "photo-health"
+            ],
+            "requestBody": {
+                "content": {
+                    "multipart/form-data": {
+                        "schema": {
+                            "properties": {
+                                "file": {
+                                    "format": "binary",
+                                    "title": "File",
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "file"
+                            ],
+                            "title": "FileParams",
+                            "type": "object"
+                        }
+                    }
+                },
+                "required": true
+            },
+            "security": [
+                {
+                    "JWTAuth": []
+                }
+            ]
+        }
+    },
+    "/api/groomers/bookings/{booking_id}/photo_health_inspection/photos/{photo_id}": {
+        "put": {
+            "operationId": "api_photo_health_update_inspection_photo",
+            "summary": "Update Inspection Photo",
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "booking_id",
+                    "schema": {
+                        "title": "Booking Id",
+                        "type": "integer"
+                    },
+                    "required": true
+                },
+                {
+                    "in": "path",
+                    "name": "photo_id",
+                    "schema": {
+                        "title": "Photo Id",
+                        "type": "integer"
+                    },
+                    "required": true
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK"
+                }
+            },
+            "tags": [
+                "photo-health"
+            ],
+            "requestBody": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/InspectionPhotoUpdateIn"
+                        }
+                    }
+                },
+                "required": true
+            },
+            "security": [
+                {
+                    "JWTAuth": []
+                }
+            ]
+        },
+        "delete": {
+            "operationId": "api_photo_health_delete_inspection_photo",
+            "summary": "Delete Inspection Photo",
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "booking_id",
+                    "schema": {
+                        "title": "Booking Id",
+                        "type": "integer"
+                    },
+                    "required": true
+                },
+                {
+                    "in": "path",
+                    "name": "photo_id",
+                    "schema": {
+                        "title": "Photo Id",
+                        "type": "integer"
+                    },
+                    "required": true
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK"
+                }
+            },
+            "tags": [
+                "photo-health"
+            ],
+            "security": [
+                {
+                    "JWTAuth": []
+                }
+            ]
+        }
+    },
+    "/api/groomers/bookings/{booking_id}/photo_health_inspection/submit": {
+        "post": {
+            "operationId": "api_photo_health_submit_photo_health_inspection",
+            "summary": "Submit Photo Health Inspection",
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "booking_id",
+                    "schema": {
+                        "title": "Booking Id",
+                        "type": "integer"
+                    },
+                    "required": true
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK"
+                }
+            },
+            "tags": [
+                "photo-health"
+            ],
+            "requestBody": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/InspectionSubmitIn"
+                        }
+                    }
+                },
+                "required": true
+            },
+            "security": [
+                {
+                    "JWTAuth": []
+                }
+            ]
+        }
+    },
+    "/api/groomers/bookings/{booking_id}/photo_health_inspection/analysis": {
+        "get": {
+            "operationId": "api_photo_health_get_photo_health_analysis",
+            "summary": "Get Photo Health Analysis",
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "booking_id",
+                    "schema": {
+                        "title": "Booking Id",
+                        "type": "integer"
+                    },
+                    "required": true
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK"
+                }
+            },
+            "tags": [
+                "photo-health"
+            ],
+            "security": [
+                {
+                    "JWTAuth": []
+                }
+            ]
+        }
+    },
+    "/api/groomers/bookings/{booking_id}/photo_health_inspection/analysis/retry": {
+        "post": {
+            "operationId": "api_photo_health_retry_photo_health_analysis",
+            "summary": "Retry Photo Health Analysis",
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "booking_id",
+                    "schema": {
+                        "title": "Booking Id",
+                        "type": "integer"
+                    },
+                    "required": true
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK"
+                }
+            },
+            "tags": [
+                "photo-health"
+            ],
+            "security": [
+                {
+                    "JWTAuth": []
+                }
+            ]
+        }
+    },
+    "/api/groomers/bookings/{booking_id}/photo_health_report/draft": {
+        "get": {
+            "operationId": "api_photo_health_get_photo_health_report_draft",
+            "summary": "Get Photo Health Report Draft",
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "booking_id",
+                    "schema": {
+                        "title": "Booking Id",
+                        "type": "integer"
+                    },
+                    "required": true
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK"
+                }
+            },
+            "tags": [
+                "photo-health"
+            ],
+            "security": [
+                {
+                    "JWTAuth": []
+                }
+            ]
+        }
+    },
+    "/api/groomers/bookings/{booking_id}/photo_health_report/draft/insights": {
+        "put": {
+            "operationId": "api_photo_health_update_photo_health_report_insights",
+            "summary": "Update Photo Health Report Insights",
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "booking_id",
+                    "schema": {
+                        "title": "Booking Id",
+                        "type": "integer"
+                    },
+                    "required": true
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK"
+                }
+            },
+            "tags": [
+                "photo-health"
+            ],
+            "requestBody": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/PhotoHealthInsightsIn"
+                        }
+                    }
+                },
+                "required": true
+            },
+            "security": [
+                {
+                    "JWTAuth": []
+                }
+            ]
+        }
+    },
+    "/api/groomers/bookings/{booking_id}/photo_health_report/draft/pdf-preview": {
+        "post": {
+            "operationId": "api_photo_health_preview_photo_health_report_pdf",
+            "summary": "Preview Photo Health Report Pdf",
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "booking_id",
+                    "schema": {
+                        "title": "Booking Id",
+                        "type": "integer"
+                    },
+                    "required": true
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK"
+                }
+            },
+            "tags": [
+                "photo-health"
+            ],
+            "security": [
+                {
+                    "JWTAuth": []
+                }
+            ]
+        }
+    },
+    "/api/groomers/bookings/{booking_id}/photo_health_report/draft/pdf-preview/{artifact_id}": {
+        "get": {
+            "operationId": "api_photo_health_stream_photo_health_report_pdf_preview",
+            "summary": "Stream Photo Health Report Pdf Preview",
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "booking_id",
+                    "schema": {
+                        "title": "Booking Id",
+                        "type": "integer"
+                    },
+                    "required": true
+                },
+                {
+                    "in": "path",
+                    "name": "artifact_id",
+                    "schema": {
+                        "title": "Artifact Id",
+                        "type": "integer"
+                    },
+                    "required": true
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK"
+                }
+            },
+            "tags": [
+                "photo-health"
+            ],
+            "security": [
+                {
+                    "JWTAuth": []
+                }
+            ]
+        }
+    },
+    "/api/groomers/bookings/{booking_id}/photo_health_report/published": {
+        "get": {
+            "operationId": "api_photo_health_get_published_photo_health_report",
+            "summary": "Get Published Photo Health Report",
+            "parameters": [{"in": "path", "name": "booking_id", "schema": {"title": "Booking Id", "type": "integer"}, "required": true}],
+            "responses": {"200": {"description": "OK"}},
+            "tags": ["photo-health"],
+            "security": [{"JWTAuth": []}]
+        }
+    },
+    "/api/groomers/bookings/{booking_id}/photo_health_report/published/pdf": {
+        "get": {
+            "operationId": "api_photo_health_stream_published_photo_health_report",
+            "summary": "Stream Published Photo Health Report",
+            "parameters": [{"in": "path", "name": "booking_id", "schema": {"title": "Booking Id", "type": "integer"}, "required": true}],
+            "responses": {"200": {"description": "OK"}},
+            "tags": ["photo-health"],
+            "security": [{"JWTAuth": []}]
+        }
+    },
+    "/api/groomers/bookings/{booking_id}/photo_health_report/publish": {
+        "post": {
+            "operationId": "api_photo_health_publish_photo_health_report",
+            "summary": "Publish Photo Health Report",
+            "parameters": [
+                {
+                    "in": "path",
+                    "name": "booking_id",
+                    "schema": {
+                        "title": "Booking Id",
+                        "type": "integer"
+                    },
+                    "required": true
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "OK"
+                }
+            },
+            "tags": [
+                "photo-health"
+            ],
+            "security": [
+                {
+                    "JWTAuth": []
+                }
+            ]
+        }
     }
   },
   "components": {

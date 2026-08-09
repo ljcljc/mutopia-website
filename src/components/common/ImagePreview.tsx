@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import type { MouseEvent as ReactMouseEvent, WheelEvent as ReactWheelEvent } from "react";
+import type { MouseEvent as ReactMouseEvent, ReactNode, WheelEvent as ReactWheelEvent } from "react";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +27,7 @@ export interface ImagePreviewProps {
   minZoom?: number;
   /** 最大缩放比例（默认 200） */
   maxZoom?: number;
+  footer?: ReactNode;
 }
 
 export function ImagePreview({
@@ -38,6 +39,7 @@ export function ImagePreview({
   initialZoom = 100,
   minZoom = 50,
   maxZoom = 200,
+  footer,
 }: ImagePreviewProps) {
   const PREVIEW_DIALOG_LAYER = 80;
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
@@ -520,6 +522,7 @@ export function ImagePreview({
             </div>
           </div>
         )}
+        {footer ? <div className="w-full shrink-0 px-3 pb-2">{footer}</div> : null}
       </DialogContent>
     </Dialog>
   );

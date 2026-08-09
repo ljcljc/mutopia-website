@@ -3,7 +3,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAccountStore } from "@/components/account/accountStore";
 import { useBookingStore } from "@/components/booking/bookingStore";
-import type { PetOut } from "@/lib/api";
+import { getPetHealthReportPdf, listPetHealthReports, type PetOut } from "@/lib/api";
 import MyPets from "./MyPets";
 
 vi.mock("@/lib/api", async () => {
@@ -11,6 +11,8 @@ vi.mock("@/lib/api", async () => {
   return {
     ...actual,
     getPetBreeds: vi.fn().mockResolvedValue([]),
+    listPetHealthReports: vi.fn().mockResolvedValue([]),
+    getPetHealthReportPdf: vi.fn(),
   };
 });
 
@@ -85,5 +87,17 @@ describe("MyPets", () => {
       expect(useBookingStore.getState().selectedPetId).toBe(42);
       expect(useBookingStore.getState().getPetPayload().id).toBe(42);
     });
+  });
+
+  it("lists published reports newest-first and opens the selected immutable PDF", async () => {
+    vi.mocked(listPetHealthReports).mockResolvedValue([{ id: 8, service_date: "2026-08-01T10:00:00Z", groomer_name: "Alex", service_name: "Full Groom", grade: "B", published_at: "2026-08-01T12:00:00Z" }]);
+    vi.mocked(getPetHealthReportPdf).mockResolvedValue(new Blob(["pdf"], { type: "application/pdf" }));
+    vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:report");
+    renderMyPets();
+
+    fireEvent.click(await screen.findByRole("button", { name: /Full Groom.*Alex/i }));
+
+    await waitFor(() => expect(getPetHealthReportPdf).toHaveBeenCalledWith(42, 8));
+    expect(await screen.findByRole("dialog", { name: "PDF preview" })).toBeInTheDocument();
   });
 });

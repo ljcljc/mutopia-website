@@ -1769,6 +1769,104 @@ export interface GroomerCheckUpPhotoUploadOut {
   url: string;
 }
 
+export interface CheckInObservationPhotoOut {
+  id: number;
+  url: string;
+  original_filename: string;
+  source_mime_type: string;
+  normalized_mime_type: string;
+  size_bytes: number;
+}
+
+export interface CheckInObservationOut {
+  id: number | null;
+  arrival_note: string;
+  locked: boolean;
+  photos: CheckInObservationPhotoOut[];
+}
+
+export type InspectionArea = "skin" | "left_ear" | "right_ear" | "mouth" | "left_eye" | "right_eye" | "posture";
+export type InspectionPhotoClassification = "normal" | "ai_scan";
+
+export interface InspectionPhotoOut {
+  id: number;
+  area: InspectionArea;
+  url: string;
+  original_filename?: string;
+  source_mime_type?: string;
+  normalized_mime_type?: string;
+  size_bytes?: number;
+  classification: InspectionPhotoClassification | null;
+  finding_hints: string[];
+  confirmed: boolean;
+}
+
+export interface PhotoHealthInspectionOut {
+  id: number;
+  booking_id: number;
+  status: "draft" | "submitted" | "analyzing" | "review" | "published" | "analysis_failed";
+  current_step: number;
+  observation_tags: string[];
+  current_note: string;
+  locked: boolean;
+  photos: InspectionPhotoOut[];
+}
+
+export interface PhotoHealthAreaResult {
+  status: "normal" | "attention_needed";
+  description: string;
+}
+
+export interface PhotoHealthAnalysisOut {
+  job_id: number;
+  status: "pending" | "running" | "succeeded" | "failed";
+  area_results: Partial<Record<"skin" | "ear" | "mouth" | "eye" | "mobility", PhotoHealthAreaResult>>;
+  area_errors: Record<string, string>;
+  attempts: number;
+  review_ready: boolean;
+}
+
+export interface PhotoHealthReportDraftOut {
+  id: number;
+  booking_id: number;
+  pet: Record<string, unknown>;
+  appointment: { scheduled_time?: string | null; service_name?: string; status: string };
+  original_insights: string;
+  groomer_insights: string;
+  wellness_summary: Record<"skin" | "ear" | "mouth" | "eye" | "mobility", PhotoHealthAreaResult>;
+  source_version: number;
+  previewed_source_version: number | null;
+  photos: InspectionPhotoOut[];
+  published?: boolean;
+  report_id?: number;
+  published_at?: string;
+  pdf_url?: string;
+}
+
+export interface HealthReportPdfPreviewOut {
+  artifact_id: number;
+  version: number;
+  checksum_sha256: string;
+  url: string;
+}
+
+export interface PublishedPetHealthReportOut {
+  id: number;
+  service_date?: string | null;
+  groomer_name: string;
+  service_name: string;
+  grade: "A" | "B" | "C" | "D" | "not_enough_data";
+  published_at: string;
+}
+
+export interface GroomerPetNoteOut {
+  id: number;
+  body: string;
+  author_name: string;
+  booking_id: number;
+  created_at: string;
+}
+
 export interface TerminateServiceIn {
   reason: string;
   description?: string;
@@ -2296,6 +2394,172 @@ export async function uploadGroomerCheckUpPhoto(
     file,
     onProgress,
   ) as Promise<GroomerCheckUpPhotoUploadOut>;
+}
+
+export async function getCheckInObservation(bookingId: number): Promise<CheckInObservationOut> {
+  const response = await http.get<CheckInObservationOut>(
+    `/api/groomers/bookings/${bookingId}/check_in_observation`,
+  );
+  return response.data;
+}
+
+export async function saveCheckInObservation(
+  bookingId: number,
+  arrivalNote: string,
+): Promise<CheckInObservationOut> {
+  const response = await http.put<CheckInObservationOut>(
+    `/api/groomers/bookings/${bookingId}/check_in_observation`,
+    { arrival_note: arrivalNote },
+  );
+  return response.data;
+}
+
+export async function uploadCheckInObservationPhoto(
+  bookingId: number,
+  file: File,
+  onProgress?: (progress: number) => void,
+): Promise<CheckInObservationPhotoOut> {
+  return uploadFileWithProgress(
+    `/api/groomers/bookings/${bookingId}/check_in_observation/photos`,
+    file,
+    onProgress,
+  ) as Promise<CheckInObservationPhotoOut>;
+}
+
+export async function deleteCheckInObservationPhoto(bookingId: number, photoId: number): Promise<OkOut> {
+  const response = await http.delete<OkOut>(
+    `/api/groomers/bookings/${bookingId}/check_in_observation/photos/${photoId}`,
+  );
+  return response.data;
+}
+
+export async function getPhotoHealthInspection(bookingId: number): Promise<PhotoHealthInspectionOut> {
+  const response = await http.get<PhotoHealthInspectionOut>(`/api/groomers/bookings/${bookingId}/photo_health_inspection`);
+  return response.data;
+}
+
+export async function startPhotoHealthInspection(bookingId: number): Promise<PhotoHealthInspectionOut> {
+  const response = await http.post<PhotoHealthInspectionOut>(`/api/groomers/bookings/${bookingId}/photo_health_inspection`);
+  return response.data;
+}
+
+export async function savePhotoHealthInspectionProgress(
+  bookingId: number,
+  data: { current_step: number; observation_tags: string[]; current_note: string },
+): Promise<PhotoHealthInspectionOut> {
+  const response = await http.put<PhotoHealthInspectionOut>(`/api/groomers/bookings/${bookingId}/photo_health_inspection`, data);
+  return response.data;
+}
+
+export async function uploadInspectionPhoto(
+  bookingId: number,
+  area: InspectionArea,
+  file: File,
+  idempotencyKey: string,
+): Promise<InspectionPhotoOut> {
+  const formData = new FormData();
+  formData.append("area", area);
+  formData.append("file", file);
+  const response = await http.post<InspectionPhotoOut>(
+    `/api/groomers/bookings/${bookingId}/photo_health_inspection/photos`,
+    formData,
+    {
+      headers: { "Content-Type": "multipart/form-data", "X-Idempotency-Key": idempotencyKey },
+    },
+  );
+  return response.data;
+}
+
+export async function updateInspectionPhoto(
+  bookingId: number,
+  photoId: number,
+  data: { classification: InspectionPhotoClassification; finding_hints: string[] },
+): Promise<InspectionPhotoOut> {
+  const response = await http.put<InspectionPhotoOut>(
+    `/api/groomers/bookings/${bookingId}/photo_health_inspection/photos/${photoId}`,
+    data,
+  );
+  return response.data;
+}
+
+export async function deleteInspectionPhoto(bookingId: number, photoId: number): Promise<OkOut> {
+  const response = await http.delete<OkOut>(
+    `/api/groomers/bookings/${bookingId}/photo_health_inspection/photos/${photoId}`,
+  );
+  return response.data;
+}
+
+export async function getInspectionPetNotes(bookingId: number): Promise<{
+  internal_service_instruction: string;
+  notes: GroomerPetNoteOut[];
+}> {
+  const response = await http.get<{
+    internal_service_instruction: string;
+    notes: GroomerPetNoteOut[];
+  }>(`/api/groomers/bookings/${bookingId}/photo_health_inspection/pet_notes`);
+  return response.data;
+}
+
+export async function submitPhotoHealthInspection(
+  bookingId: number,
+  observationTags: string[],
+): Promise<{ job_id: number; status: string; reused: boolean }> {
+  const response = await http.post<{ job_id: number; status: string; reused: boolean }>(
+    `/api/groomers/bookings/${bookingId}/photo_health_inspection/submit`,
+    { observation_tags: observationTags },
+  );
+  return response.data;
+}
+
+export async function getPhotoHealthAnalysis(bookingId: number): Promise<PhotoHealthAnalysisOut> {
+  const response = await http.get<PhotoHealthAnalysisOut>(`/api/groomers/bookings/${bookingId}/photo_health_inspection/analysis`);
+  return response.data;
+}
+
+export async function retryPhotoHealthAnalysis(bookingId: number): Promise<PhotoHealthAnalysisOut> {
+  const response = await http.post<PhotoHealthAnalysisOut>(`/api/groomers/bookings/${bookingId}/photo_health_inspection/analysis/retry`);
+  return response.data;
+}
+
+export async function getPhotoHealthReportDraft(bookingId: number): Promise<PhotoHealthReportDraftOut> {
+  const response = await http.get<PhotoHealthReportDraftOut>(`/api/groomers/bookings/${bookingId}/photo_health_report/draft`);
+  return response.data;
+}
+
+export async function getPublishedPhotoHealthReport(bookingId: number): Promise<PhotoHealthReportDraftOut> {
+  const response = await http.get<PhotoHealthReportDraftOut>(`/api/groomers/bookings/${bookingId}/photo_health_report/published`);
+  return response.data;
+}
+
+export async function updatePhotoHealthReportInsights(bookingId: number, groomerInsights: string): Promise<PhotoHealthReportDraftOut> {
+  const response = await http.put<PhotoHealthReportDraftOut>(`/api/groomers/bookings/${bookingId}/photo_health_report/draft/insights`, {
+    groomer_insights: groomerInsights,
+  });
+  return response.data;
+}
+
+export async function previewPhotoHealthReportPdf(bookingId: number): Promise<HealthReportPdfPreviewOut> {
+  const response = await http.post<HealthReportPdfPreviewOut>(`/api/groomers/bookings/${bookingId}/photo_health_report/draft/pdf-preview`);
+  return response.data;
+}
+
+export async function fetchAuthenticatedBlob(url: string): Promise<Blob> {
+  const response = await http.get<Blob>(url);
+  return response.data;
+}
+
+export async function publishPhotoHealthReport(bookingId: number): Promise<{ report_id: number; grade: string; email_status: string; reused: boolean }> {
+  const response = await http.post<{ report_id: number; grade: string; email_status: string; reused: boolean }>(`/api/groomers/bookings/${bookingId}/photo_health_report/publish`);
+  return response.data;
+}
+
+export async function listPetHealthReports(petId: number): Promise<PublishedPetHealthReportOut[]> {
+  const response = await http.get<{ reports: PublishedPetHealthReportOut[] }>(`/api/pets/${petId}/health_reports`);
+  return response.data.reports;
+}
+
+export async function getPetHealthReportPdf(petId: number, reportId: number): Promise<Blob> {
+  return fetchAuthenticatedBlob(`/api/pets/${petId}/health_reports/${reportId}/pdf`);
 }
 
 /**

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Icon } from "./Icon";
 import { cn } from "@/components/ui/utils";
 import { useFileUpload } from "@/hooks/useFileUpload";
@@ -14,9 +14,13 @@ export interface FileUploadItem {
   errorType?: "size" | "format" | "upload" | null;
   photoId?: number; // 上传成功后的照片 ID
   serverUrl?: string; // 上传成功后服务器返回的 URL（相对路径）
+  /** 缩略图状态标签，仅用于需要在图片上展示业务状态的布局 */
+  badge?: string;
 }
 
 export interface FileUploadProps {
+  /** 隐藏文件输入的无障碍标签 */
+  inputAriaLabel?: string;
   /** 接受的文件类型，例如 "image/*" */
   accept?: string;
   /** 是否支持多文件上传 */
@@ -27,8 +31,14 @@ export interface FileUploadProps {
   maxFiles?: number;
   /** 文件变化回调 */
   onChange?: (files: File[]) => void;
+  /** 仅返回本次新增文件；适合由服务端状态控制列表的上传器 */
+  onFilesAdded?: (files: File[]) => void;
   /** 删除项回调（用于已上传的图片） */
   onRemove?: (index: number) => void;
+  /** 点击上传项预览时交由业务组件处理；未提供时使用通用图片预览 */
+  onPreviewItem?: (index: number) => void;
+  /** 上传器布局；inspection 为健康检查的紧凑图片槽 */
+  layout?: "default" | "inspection";
   /** 上传按钮文字 */
   buttonText?: string;
   /** 文件类型提示文字 */
@@ -41,6 +51,8 @@ export interface FileUploadProps {
   disabled?: boolean;
   /** 上传项列表（包含上传状态） */
   uploadItems?: FileUploadItem[];
+  /** 每个新上传成功的图片按顺序自动打开预览 */
+  autoPreviewOnUpload?: boolean;
   /** 上传进度回调（按文件索引） */
   onUploadProgress?: (index: number, progress: number) => void;
   /** 错误类型 */
@@ -49,19 +61,30 @@ export interface FileUploadProps {
   onError?: (error: { type: "size" | "format"; message: string }) => void;
 }
 
+function getUploadItemKey(item: FileUploadItem) {
+  return item.photoId !== undefined
+    ? `photo-${item.photoId}`
+    : `file-${item.file.name}-${item.file.size}-${item.file.lastModified}`;
+}
+
 export function FileUpload({
+  inputAriaLabel = "Upload files",
   accept = "image/*",
   multiple = false,
   maxSizeMB = 10,
   maxFiles,
   onChange,
+  onFilesAdded,
   onRemove,
+  onPreviewItem,
+  layout = "default",
   buttonText = "Click to upload",
   fileTypeHint = "JPG, JPEG, PNG less than 10MB",
   showDragHint = true,
   className,
   disabled = false,
   uploadItems,
+  autoPreviewOnUpload = false,
   onUploadProgress: _onUploadProgress,
   errorType,
   onError,
@@ -91,8 +114,8 @@ export function FileUpload({
       newFiles.forEach((file) => {
         const fileSizeMB = file.size / (1024 * 1024);
         const fileType = file.type.toLowerCase();
-        const isValidType = fileType.startsWith("image/") && 
-          (fileType.includes("jpeg") || fileType.includes("jpg") || fileType.includes("png"));
+        const isValidType = fileType.startsWith("image/") &&
+          (fileType.includes("jpeg") || fileType.includes("jpg") || fileType.includes("png") || fileType.includes("heic") || fileType.includes("heif"));
 
         if (fileSizeMB > maxSizeMB) {
           onError?.({ type: "size", message: "The uploaded image is too big." });
@@ -102,6 +125,7 @@ export function FileUpload({
       });
       onChange?.(newFiles);
     },
+    onFilesAdded,
     disabled,
   });
 
@@ -109,9 +133,50 @@ export function FileUpload({
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
   const [internalUploadItems, setInternalUploadItems] = useState<FileUploadItem[]>([]);
+  const observedUploadedKeysRef = useRef<Set<string> | null>(null);
+  const previewQueueRef = useRef<number[]>([]);
 
   // 如果提供了 uploadItems，使用外部状态；否则使用内部状态
   const displayItems = uploadItems || internalUploadItems;
+
+  useEffect(() => {
+    if (!autoPreviewOnUpload) return;
+    const uploadedEntries = displayItems
+      .map((item, index) => ({ item, index }))
+      .filter(({ item }) => item.uploadStatus === "uploaded" && item.previewUrl);
+
+    if (observedUploadedKeysRef.current === null) {
+      observedUploadedKeysRef.current = new Set(uploadedEntries.map(({ item }) => getUploadItemKey(item)));
+      return;
+    }
+
+    const newIndexes: number[] = [];
+    uploadedEntries.forEach(({ item, index }) => {
+      const key = getUploadItemKey(item);
+      if (!observedUploadedKeysRef.current?.has(key)) {
+        observedUploadedKeysRef.current?.add(key);
+        newIndexes.push(index);
+      }
+    });
+    if (newIndexes.length === 0) return;
+    if (!previewOpen) {
+      const [nextIndex, ...remaining] = newIndexes;
+      setPreviewIndex(nextIndex);
+      previewQueueRef.current.push(...remaining);
+      setPreviewOpen(true);
+    } else {
+      previewQueueRef.current.push(...newIndexes);
+    }
+  }, [autoPreviewOnUpload, displayItems, previewOpen]);
+
+  const closePreview = () => {
+    const nextIndex = previewQueueRef.current.shift();
+    if (nextIndex !== undefined) {
+      setPreviewIndex(nextIndex);
+      return;
+    }
+    setPreviewOpen(false);
+  };
 
   // 使用 useMemo 稳定 images 和 fileNames 数组，避免不必要的重新渲染
   const previewImages = useMemo(
@@ -166,6 +231,7 @@ export function FileUpload({
       <div
         className={cn(
           "relative flex w-full shrink-0 flex-col items-center justify-center rounded-[calc(16*var(--px393))] border-[1.5px] border-dashed border-[#de6a07] bg-neutral-50 p-[calc(16*var(--px393))] transition-colors shadow-[0px_4px_10px_0px_rgba(0,0,0,0.15)] sm:rounded-[16px] sm:p-[24px]",
+          layout === "inspection" && "rounded-2xl border-2 border-solid border-[#633479] bg-white p-3 sm:rounded-2xl sm:p-4",
           isDragging && "border-[#de6a07] bg-[rgba(222,106,7,0.05)]",
           (state === "error-size" || state === "error-format") && "gap-[12px]"
         )}
@@ -179,8 +245,11 @@ export function FileUpload({
           hasFiles && "w-full"
         )}>
           {/* 文件列表：显示在按钮和文字上方 */}
-          {hasFiles && (
-            <div className="relative flex w-full flex-wrap items-center gap-[calc(10*var(--px393))] sm:flex-nowrap sm:gap-[12px]">
+          {(hasFiles || layout === "inspection") && (
+            <div className={cn(
+              "relative flex w-full flex-wrap items-center gap-[calc(10*var(--px393))] sm:flex-nowrap sm:gap-[12px]",
+              layout === "inspection" && "flex-wrap gap-2 overflow-visible pb-3 sm:flex-wrap sm:gap-2",
+            )}>
               {/* 已上传的图片缩略图列表 */}
               {displayItems.map((item, index) => {
                 const file = item.file;
@@ -191,26 +260,31 @@ export function FileUpload({
 
                 // 使用稳定的 key：优先使用 photoId（已上传的图片），否则使用 file 的唯一标识
                 // 这样可以避免在删除时因索引变化导致重新渲染
-                const stableKey = item.photoId !== undefined 
-                  ? `photo-${item.photoId}` 
-                  : `file-${file.name}-${file.size}-${file.lastModified}`;
+                const stableKey = getUploadItemKey(item);
 
                 return (
                   <div
                     key={stableKey}
-                    className="h-[calc(80*var(--px393))] w-[calc(80*var(--px393))] sm:h-[80px] sm:w-[96px] overflow-visible relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] shrink-0 border border-neutral-200"
+                    className={cn(
+                      "h-[calc(80*var(--px393))] w-[calc(80*var(--px393))] sm:h-[80px] sm:w-[96px] overflow-visible relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] shrink-0 border border-neutral-200",
+                      layout === "inspection" && "h-32 w-[calc(50%-4px)] min-w-[132px] rounded-2xl border-dashed border-[#D9D0E5] sm:h-36 sm:w-[calc(50%-4px)] sm:rounded-2xl",
+                    )}
                   >
                     {previewUrl && (
                       <>
                         <div
-                          className="absolute inset-0 rounded-[calc(8*var(--px393))] sm:rounded-[8px] cursor-pointer"
+                          className={cn("absolute inset-0 cursor-pointer rounded-[calc(8*var(--px393))] sm:rounded-[8px]", layout === "inspection" && "rounded-2xl sm:rounded-2xl")}
                           onClick={() => {
+                            if (onPreviewItem) {
+                              onPreviewItem(index);
+                              return;
+                            }
                             setPreviewIndex(index);
                             setPreviewOpen(true);
                           }}
                         >
                           <img
-                            className="absolute inset-0 max-w-none object-cover pointer-events-none rounded-[calc(8*var(--px393))] sm:rounded-[8px] size-full"
+                            className={cn("absolute inset-0 size-full max-w-none pointer-events-none rounded-[calc(8*var(--px393))] object-cover sm:rounded-[8px]", layout === "inspection" && "rounded-2xl sm:rounded-2xl")}
                             alt={file.name}
                             src={previewUrl}
                             loading="lazy"
@@ -281,6 +355,12 @@ export function FileUpload({
                             </div>
                           </div>
                         )}
+                        {layout === "inspection" && item.badge ? (
+                          <div className="pointer-events-none absolute -bottom-3 left-2 z-10 flex items-center gap-1 rounded-full border border-[#F1C9CC] bg-[#FFF6F6] px-3 py-1 font-comfortaa text-xs text-[#B23A48] shadow-sm">
+                            <Icon name="alert-error" className="size-3" />
+                            {item.badge}
+                          </div>
+                        ) : null}
                       </>
                     )}
                   </div>
@@ -290,7 +370,10 @@ export function FileUpload({
               {/* 添加更多图片按钮 */}
               {canAddMore && (
                 <div
-                  className="bg-white border border-dashed border-neutral-300 h-[calc(80*var(--px393))] w-[calc(80*var(--px393))] sm:h-[80px] sm:w-[96px] overflow-clip relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] shrink-0 cursor-pointer hover:border-[#de6a07] transition-colors"
+                  className={cn(
+                    "bg-white border border-dashed border-neutral-300 h-[calc(80*var(--px393))] w-[calc(80*var(--px393))] sm:h-[80px] sm:w-[96px] overflow-clip relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] shrink-0 cursor-pointer hover:border-[#de6a07] transition-colors",
+                    layout === "inspection" && "h-32 w-[calc(50%-4px)] min-w-[132px] rounded-2xl border-2 border-[#D9D0E5] sm:h-36 sm:w-[calc(50%-4px)] sm:rounded-2xl",
+                  )}
                   onClick={handleClick}
                 >
                   <div className="absolute bg-neutral-100 -inset-px rounded-[calc(8*var(--px393))] sm:rounded-[8px]" />
@@ -300,13 +383,14 @@ export function FileUpload({
                       className="block size-full text-[#A3A3A3]"
                     />
                   </div>
+                  {layout === "inspection" ? <span className="absolute inset-x-0 bottom-5 text-center font-comfortaa text-sm text-[#633479]">Add photo</span> : null}
                 </div>
               )}
             </div>
           )}
 
           {/* Default State: 显示上传图标（仅在没有文件时显示） */}
-          {state === "default" && (
+          {state === "default" && layout === "default" && (
             <div className="overflow-clip relative shrink-0 size-[calc(48*var(--px393))] sm:size-[48px]">
               <Icon
                 name="image"
@@ -316,7 +400,7 @@ export function FileUpload({
           )}
 
           {/* Text Group: 上传按钮和提示文字（移动端：按钮与 or drag and drop 纵向；PC：横向） */}
-          <div className="relative flex w-full flex-col items-center justify-center gap-[calc(6*var(--px393))] sm:gap-[3px]">
+          <div className={cn("relative flex w-full flex-col items-center justify-center gap-[calc(6*var(--px393))] sm:gap-[3px]", layout === "inspection" && "hidden")}>
             <div className="relative flex w-full flex-col items-center justify-center gap-[calc(6*var(--px393))] sm:w-auto sm:flex-row sm:gap-[9px]">
               <div
                 className={cn(
@@ -377,6 +461,7 @@ export function FileUpload({
       <input
         ref={fileInputRef}
         type="file"
+        aria-label={inputAriaLabel}
         accept={accept}
         multiple={multiple}
         onChange={handleFileChange}
@@ -390,7 +475,7 @@ export function FileUpload({
           images={previewImages}
           currentIndex={previewIndex}
           open={previewOpen}
-          onClose={() => setPreviewOpen(false)}
+          onClose={closePreview}
           fileNames={previewFileNames}
         />
       )}

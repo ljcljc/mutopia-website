@@ -479,7 +479,6 @@ export default function Header() {
   const userInfo = useAuthStore((state) => state.userInfo);
   const setUserInfo = useAuthStore((state) => state.setUserInfo);
   const setIsResolvingUserInfo = useAuthStore((state) => state.setIsResolvingUserInfo);
-
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };

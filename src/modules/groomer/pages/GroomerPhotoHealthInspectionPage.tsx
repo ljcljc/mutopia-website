@@ -1,0 +1,493 @@
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { CustomTextarea, OrangeButton } from "@/components/common";
+import { Spinner } from "@/components/common/Spinner";
+import AccountContentContainer from "@/components/layout/AccountContentContainer";
+import {
+  deleteInspectionPhoto,
+  getCheckInObservation,
+  getGroomerBookingDetail,
+  getInspectionPetNotes,
+  getPhotoHealthAnalysis,
+  getPhotoHealthReportDraft,
+  getPublishedPhotoHealthReport,
+  fetchAuthenticatedBlob,
+  getPhotoHealthInspection,
+  savePhotoHealthInspectionProgress,
+  retryPhotoHealthAnalysis,
+  previewPhotoHealthReportPdf,
+  publishPhotoHealthReport,
+  startPhotoHealthInspection,
+  submitPhotoHealthInspection,
+  updateInspectionPhoto,
+  updatePhotoHealthReportInsights,
+  uploadInspectionPhoto,
+  type GroomerPetNoteOut,
+  type InspectionArea,
+  type InspectionPhotoClassification,
+  type InspectionPhotoOut,
+  type PhotoHealthInspectionOut,
+  type PhotoHealthReportDraftOut,
+} from "@/lib/api";
+import { InspectionAreaSection } from "@/modules/groomer/components/InspectionAreaSection";
+import { InspectionPhotoReview } from "@/modules/groomer/components/InspectionPhotoReview";
+import { InspectionTagGroup } from "@/modules/groomer/components/InspectionTagGroup";
+import { PhotoHealthReportReview } from "@/modules/groomer/components/PhotoHealthReportReview";
+import { INSPECTION_STEPS, OBSERVATION_GROUPS } from "@/modules/groomer/photoHealthConfig";
+
+interface InspectionLocalDraft {
+  currentStep: number;
+  currentNote: string;
+  observationTags: string[];
+  photos: Array<Pick<InspectionPhotoOut, "id" | "classification" | "finding_hints" | "confirmed">>;
+  lastReviewPhotoId: number | null;
+  panelSnap: "collapsed" | "default" | "expanded";
+}
+
+const inspectionDraftKey = (bookingId: number, petId: number) => `photo-health-draft:${bookingId}:${petId}`;
+
+function getPetCacheId(petSnapshot?: Record<string, unknown>): number | null {
+  const value = petSnapshot?.id ?? petSnapshot?.pet_id;
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function restoreLocalDraft(inspection: PhotoHealthInspectionOut, draft: InspectionLocalDraft): PhotoHealthInspectionOut {
+  const photoDrafts = new Map(draft.photos.map((photo) => [photo.id, photo]));
+  return {
+    ...inspection,
+    current_step: Math.max(1, Math.min(6, draft.currentStep || inspection.current_step)),
+    current_note: draft.currentNote,
+    observation_tags: draft.observationTags,
+    photos: inspection.photos.map((photo) => ({ ...photo, ...photoDrafts.get(photo.id) })),
+  };
+}
+
+function ReportPageShell({ breadcrumbLabel, children }: { breadcrumbLabel: string; children: ReactNode }) {
+  return (
+    <main className="min-h-screen bg-[#633479] pb-28">
+      <AccountContentContainer className="px-4 pb-8 pt-4 sm:px-6">
+        <div className="space-y-4">
+        <nav
+          aria-label="Breadcrumb"
+          className="flex items-center gap-1.5 whitespace-nowrap font-comfortaa text-[14px] font-bold leading-[20px] text-white"
+        >
+          <Link to="/groomer/dashboard" className="transition-colors hover:text-[#FFE4C7]">
+            Dashboard
+          </Link>
+          <span aria-hidden="true">{">"}</span>
+          <span className="truncate">{breadcrumbLabel}</span>
+        </nav>
+        {children}
+        </div>
+      </AccountContentContainer>
+    </main>
+  );
+}
+
+function InspectionStepActions({
+  disabled,
+  nextLabel,
+  onNext,
+  onPrevious,
+}: {
+  disabled: boolean;
+  nextLabel: string;
+  onNext: () => void;
+  onPrevious: () => void;
+}) {
+  return (
+    <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-between">
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={onPrevious}
+        className="h-12 w-full cursor-pointer rounded-full border-2 border-white bg-transparent px-5 font-comfortaa text-white transition-colors hover:bg-white/10 active:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#633479] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 sm:max-w-[228px]"
+      >
+        Previous
+      </button>
+      <OrangeButton type="button" fullWidth disabled={disabled} onClick={onNext} className="sm:max-w-[228px]">
+        {nextLabel}
+      </OrangeButton>
+    </div>
+  );
+}
+
+export default function GroomerPhotoHealthInspectionPage() {
+  const navigate = useNavigate();
+  const bookingId = Number(useParams().bookingId);
+  const [inspection, setInspection] = useState<PhotoHealthInspectionOut | null>(null);
+  const [booking, setBooking] = useState<Awaited<ReturnType<typeof getGroomerBookingDetail>> | null>(null);
+  const [arrival, setArrival] = useState<Awaited<ReturnType<typeof getCheckInObservation>> | null>(null);
+  const [notes, setNotes] = useState<GroomerPetNoteOut[]>([]);
+  const [internalInstruction, setInternalInstruction] = useState("");
+  const [currentNote, setCurrentNote] = useState("");
+  const [observationTags, setObservationTags] = useState<string[]>([]);
+  const [reviewQueue, setReviewQueue] = useState<number[]>([]);
+  const [reviewPanelSnap, setReviewPanelSnap] = useState<"collapsed" | "default" | "expanded">("default");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [analysisFailed, setAnalysisFailed] = useState(false);
+  const [draft, setDraft] = useState<PhotoHealthReportDraftOut | null>(null);
+  const [showOverview, setShowOverview] = useState(false);
+  const inspectionStatus = inspection?.status;
+  const petId = getPetCacheId(booking?.pet_snapshot) ?? bookingId;
+  const localDraftKey = Number.isFinite(petId) ? inspectionDraftKey(bookingId, petId as number) : null;
+
+  useEffect(() => {
+    if (!Number.isFinite(bookingId)) return;
+    Promise.all([
+      getGroomerBookingDetail(bookingId),
+      getCheckInObservation(bookingId),
+      getPhotoHealthInspection(bookingId).catch(() => null),
+    ]).then(([bookingData, arrivalData, inspectionData]) => {
+      setBooking(bookingData);
+      setArrival(arrivalData);
+      let restoredInspection = inspectionData;
+      if (inspectionData?.status === "draft") {
+        try {
+          const raw = window.localStorage.getItem(inspectionDraftKey(bookingId, getPetCacheId(bookingData.pet_snapshot) ?? bookingId));
+          if (raw) {
+            const localDraft = JSON.parse(raw) as InspectionLocalDraft;
+            restoredInspection = restoreLocalDraft(inspectionData, localDraft);
+            setReviewPanelSnap(localDraft.panelSnap ?? "default");
+          }
+        } catch {
+          // Ignore malformed or unavailable local storage and continue with server state.
+        }
+      }
+      setInspection(restoredInspection);
+      if (inspectionData) {
+        setCurrentNote(restoredInspection?.current_note ?? inspectionData.current_note);
+        setObservationTags(restoredInspection?.observation_tags ?? inspectionData.observation_tags);
+        getInspectionPetNotes(bookingId).then((timeline) => {
+          setNotes(timeline.notes);
+          setInternalInstruction(timeline.internal_service_instruction);
+        });
+        if (inspectionData.status === "published") {
+          getPublishedPhotoHealthReport(bookingId).then(setDraft);
+        }
+      }
+    }).finally(() => setLoading(false));
+  }, [bookingId]);
+
+  useEffect(() => {
+    if (!localDraftKey || !inspection || inspection.status !== "draft") return;
+    const draft: InspectionLocalDraft = {
+      currentStep: inspection.current_step,
+      currentNote,
+      observationTags,
+      photos: inspection.photos.map(({ id, classification, finding_hints, confirmed }) => ({ id, classification, finding_hints, confirmed })),
+      lastReviewPhotoId: reviewQueue[0] ?? null,
+      panelSnap: reviewPanelSnap,
+    };
+    window.localStorage.setItem(localDraftKey, JSON.stringify(draft));
+  }, [currentNote, inspection, localDraftKey, observationTags, reviewPanelSnap, reviewQueue]);
+
+  useEffect(() => {
+    if (!inspectionStatus || !["submitted", "analyzing", "analysis_failed", "review"].includes(inspectionStatus)) return;
+    if (inspectionStatus === "review") {
+      getPhotoHealthReportDraft(bookingId).then(setDraft);
+      return;
+    }
+    if (inspectionStatus === "analysis_failed") {
+      setAnalysisFailed(true);
+      setSubmitting(false);
+      return;
+    }
+    setSubmitting(true);
+    let cancelled = false;
+    let timer: number | undefined;
+    const poll = async () => {
+      try {
+        const analysis = await getPhotoHealthAnalysis(bookingId);
+        if (cancelled) return;
+        if (analysis.review_ready) {
+          const reportDraft = await getPhotoHealthReportDraft(bookingId);
+          if (!cancelled) {
+            setDraft(reportDraft);
+            setInspection((current) => current ? { ...current, status: "review" } : current);
+            setSubmitting(false);
+          }
+        } else if (analysis.status === "failed") {
+          setAnalysisFailed(true);
+          setSubmitting(false);
+        } else {
+          timer = window.setTimeout(() => void poll(), 2000);
+        }
+      } catch {
+        if (!cancelled) timer = window.setTimeout(() => void poll(), 3000);
+      }
+    };
+    void poll();
+    return () => {
+      cancelled = true;
+      if (timer) window.clearTimeout(timer);
+    };
+  }, [bookingId, inspectionStatus]);
+
+  const step = inspection?.current_step ?? 0;
+  const stepConfig = step >= 1 && step <= 5 ? INSPECTION_STEPS[step] : null;
+  const activeReviewPhoto = useMemo(
+    () => inspection?.photos.find((photo) => photo.id === reviewQueue[0]) ?? null,
+    [inspection?.photos, reviewQueue],
+  );
+  const activeReviewConfig = stepConfig?.areas.find((area) => area.area === activeReviewPhoto?.area) ?? null;
+  const activeAreaPhotos = useMemo(
+    () => inspection?.photos.filter((photo) => photo.area === activeReviewPhoto?.area) ?? [],
+    [activeReviewPhoto?.area, inspection?.photos],
+  );
+
+  const begin = async () => {
+    if (inspection) {
+      setShowOverview(false);
+      return;
+    }
+    setSaving(true);
+    try {
+      const data = await startPhotoHealthInspection(bookingId);
+      setInspection(data);
+      setCurrentNote(data.current_note);
+      setObservationTags(data.observation_tags);
+      const timeline = await getInspectionPetNotes(bookingId);
+      setNotes(timeline.notes);
+      setInternalInstruction(timeline.internal_service_instruction);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const goToPreviousStep = () => {
+    if (!inspection) return;
+    const previousStep = step === 1 ? 1 : step - 1;
+    if (step === 1) setShowOverview(true);
+    else setInspection((current) => current ? { ...current, current_step: previousStep } : current);
+    setErrors({});
+  };
+
+  const upload = async (area: InspectionArea, files: File[]) => {
+    setErrors((current) => ({ ...current, [area]: "" }));
+    const uploaded: InspectionPhotoOut[] = [];
+    for (const file of files) {
+      try {
+        const requestId = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${file.name}-${file.lastModified}`;
+        uploaded.push(await uploadInspectionPhoto(bookingId, area, file, requestId));
+      } catch {
+        setErrors((current) => ({ ...current, [area]: "Some photos failed to upload. Accepted photos were kept." }));
+      }
+    }
+    if (uploaded.length > 0) {
+      setInspection((current) => current ? { ...current, photos: [...current.photos, ...uploaded] } : current);
+      setReviewQueue((current) => [...current, ...uploaded.map((photo) => photo.id)]);
+    }
+  };
+
+  const confirmPhoto = (photoId: number, classification: InspectionPhotoClassification, findingHints: string[]) => {
+    setInspection((current) => current ? {
+      ...current,
+      photos: current.photos.map((photo) => photo.id === photoId ? {
+        ...photo,
+        classification,
+        finding_hints: findingHints,
+        confirmed: true,
+      } : photo),
+    } : current);
+  };
+
+  const removePhoto = async (photo: InspectionPhotoOut) => {
+    await deleteInspectionPhoto(bookingId, photo.id);
+    setInspection((current) => current ? { ...current, photos: current.photos.filter((item) => item.id !== photo.id) } : current);
+  };
+
+  const saveStep = (nextStep: number) => {
+    if (!inspection) return;
+    if (stepConfig) {
+      const missing = stepConfig.areas.filter((area) => !inspection.photos.some((photo) => photo.area === area.area && photo.confirmed));
+      if (missing.length > 0) {
+        setErrors((current) => ({ ...current, page: `Confirm at least one photo for ${missing.map((item) => item.label).join(", ")}.` }));
+        return;
+      }
+    }
+    setInspection((current) => current ? { ...current, current_step: nextStep } : current);
+    setErrors({});
+  };
+
+  const submit = async () => {
+    if (!inspection) return;
+    setSubmitting(true);
+    try {
+      for (const photo of inspection.photos) {
+        await updateInspectionPhoto(bookingId, photo.id, {
+          classification: photo.classification ?? "normal",
+          finding_hints: photo.classification === "ai_scan" ? photo.finding_hints : [],
+        });
+      }
+      await savePhotoHealthInspectionProgress(bookingId, {
+        current_step: 6,
+        observation_tags: observationTags,
+        current_note: currentNote,
+      });
+      await submitPhotoHealthInspection(bookingId, observationTags);
+      if (localDraftKey) window.localStorage.removeItem(localDraftKey);
+      setAnalysisFailed(false);
+      setInspection((current) => current ? { ...current, status: "analyzing", locked: true } : current);
+    } catch {
+      setErrors((current) => ({ ...current, page: "Unable to generate the report. Please try again." }));
+      setSubmitting(false);
+    }
+  };
+
+  if (loading) return <ReportPageShell breadcrumbLabel="Fill health report"><div className="flex justify-center py-24"><Spinner size={48} color="#fff" /></div></ReportPageShell>;
+
+  if (draft) {
+    return (
+      <ReportPageShell breadcrumbLabel={draft.published ? "View health report" : "Review health report"}>
+        <PhotoHealthReportReview
+          draft={draft}
+          readOnly={Boolean(draft.published)}
+          onSaveInsights={async (value) => {
+            const updated = await updatePhotoHealthReportInsights(bookingId, value);
+            setDraft(updated);
+          }}
+          onPreviewPdf={async () => {
+            if (draft.pdf_url) return fetchAuthenticatedBlob(draft.pdf_url);
+            const preview = await previewPhotoHealthReportPdf(bookingId);
+            return fetchAuthenticatedBlob(preview.url);
+          }}
+          onPublish={async () => {
+            await publishPhotoHealthReport(bookingId);
+            navigate("/groomer/dashboard");
+          }}
+        />
+      </ReportPageShell>
+    );
+  }
+
+  if (!inspection || showOverview) {
+    const petName = typeof booking?.pet_snapshot?.name === "string" ? booking.pet_snapshot.name : "Pet";
+    const petBreed = typeof booking?.pet_snapshot?.breed === "string" ? booking.pet_snapshot.breed : "Breed not provided";
+    return (
+      <ReportPageShell breadcrumbLabel="Fill health report">
+        <h1 className="font-comfortaa text-3xl text-white">Fill health report</h1>
+        <div className="mt-6 grid gap-5 md:grid-cols-2">
+          <section className="rounded-2xl bg-white p-6 shadow-lg">
+            <h2 className="font-comfortaa text-xl text-[#4A3C2A]">{petName}</h2>
+            <p className="mt-2 text-sm text-[#6B625B]">{petBreed}</p>
+          </section>
+          <section className="rounded-2xl bg-white p-6 shadow-lg">
+            <h2 className="font-comfortaa text-xl text-[#4A3C2A]">Check-in observation</h2>
+            <div className="mt-3 flex gap-2 overflow-x-auto">
+              {arrival?.photos.map((photo) => <img key={photo.id} src={photo.url} alt={photo.original_filename} className="size-24 rounded-xl object-cover" />)}
+            </div>
+            <p className="mt-3 text-sm text-[#6B625B]">{arrival?.arrival_note || "No arrival note"}</p>
+          </section>
+        </div>
+        <OrangeButton type="button" fullWidth disabled={saving} onClick={() => void begin()} className="mt-8">
+          {inspection ? "Continue AI photo health inspection" : "Start AI photo health inspection"}
+        </OrangeButton>
+      </ReportPageShell>
+    );
+  }
+
+  return (
+    <ReportPageShell breadcrumbLabel={step <= 5 && stepConfig ? `Step ${step} of 6 - ${stepConfig.title}` : "Step 6 of 6 - Note (Optional)"}>
+      {step <= 5 && stepConfig ? (
+        <>
+          <div className="space-y-5">
+            {stepConfig.areas.map((area) => (
+              <InspectionAreaSection
+                key={area.area}
+                config={area}
+                photos={inspection.photos.filter((photo) => photo.area === area.area)}
+                disabled={inspection.locked || saving}
+                error={errors[area.area]}
+                onFilesSelected={(files) => void upload(area.area, files)}
+                onRemove={(photo) => void removePhoto(photo)}
+                onOpen={(photo) => setReviewQueue([photo.id])}
+              />
+            ))}
+            {step === 5 ? OBSERVATION_GROUPS.map((group) => (
+              <div key={group.label} className="rounded-2xl bg-[#121212] p-5">
+                <InspectionTagGroup label={group.label} tags={group.tags} selected={observationTags} onChange={setObservationTags} />
+              </div>
+            )) : null}
+          </div>
+          {errors.page ? <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-red-700">{errors.page}</p> : null}
+          {analysisFailed ? (
+            <div role="alert" className="mt-4 rounded-xl bg-red-50 p-4 text-red-700">
+              <p>Health report generation failed. Your inspection is saved and locked.</p>
+              <button type="button" className="mt-3 rounded-full border border-red-700 px-4 py-2" onClick={() => {
+                setAnalysisFailed(false);
+                setSubmitting(true);
+                void retryPhotoHealthAnalysis(bookingId).then(() => setInspection((current) => current ? { ...current, status: "analyzing" } : current)).catch(() => {
+                  setSubmitting(false);
+                  setAnalysisFailed(true);
+                });
+              }}>Retry generating report</button>
+            </div>
+          ) : null}
+          <InspectionStepActions
+            disabled={saving}
+            nextLabel={step === 5 ? "Add Notes & Generate Report" : "Next"}
+            onPrevious={goToPreviousStep}
+            onNext={() => saveStep(step + 1)}
+          />
+        </>
+      ) : (
+        <>
+          <section className="rounded-2xl bg-white p-6">
+            <CustomTextarea label="Note - After grooming" value={currentNote} onChange={(event) => setCurrentNote(event.target.value)} showResizeHandle={false} />
+          </section>
+          <section className="mt-5 rounded-2xl bg-[#D5AF78] p-6">
+            <h2 className="font-comfortaa text-xl text-[#4A3C2A]">Special instruments or notes</h2>
+            <p className="text-sm text-[#4A3C2A]">Only visible to groomers, not visible to client</p>
+            <div className="mt-4 rounded-xl bg-white p-4 text-[#4A3C2A]">{internalInstruction || "No special instructions"}</div>
+          </section>
+          {notes.length > 0 ? <div className="mt-5 space-y-3">{notes.map((note) => (
+            <article key={note.id} className="rounded-2xl bg-white p-5 shadow-lg">
+              <p className="text-[#4A3C2A]">{note.body}</p>
+              <p className="mt-2 text-xs text-[#8B817F]">{note.author_name} · {new Date(note.created_at).toLocaleDateString()}</p>
+            </article>
+          ))}</div> : null}
+          {errors.page ? <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-red-700">{errors.page}</p> : null}
+          <InspectionStepActions
+            disabled={submitting || inspection.locked}
+            nextLabel="All good! Generate Report"
+            onPrevious={goToPreviousStep}
+            onNext={() => void submit()}
+          />
+        </>
+      )}
+
+      <InspectionPhotoReview
+        photos={activeAreaPhotos}
+        activePhotoId={activeReviewPhoto?.id ?? null}
+        config={activeReviewConfig}
+        open={Boolean(activeReviewPhoto)}
+        onActivePhotoChange={(photoId) => setReviewQueue([photoId])}
+        onClose={() => setReviewQueue([])}
+        onChange={confirmPhoto}
+        onAddPhoto={(files) => {
+          if (activeReviewPhoto) void upload(activeReviewPhoto.area, files);
+        }}
+        observationTags={observationTags}
+        onObservationTagsChange={setObservationTags}
+        initialPanelSnap={reviewPanelSnap}
+        onPanelSnapChange={setReviewPanelSnap}
+        petName={typeof booking?.pet_snapshot?.name === "string" ? booking.pet_snapshot.name : "Current pet"}
+        petBreed={typeof booking?.pet_snapshot?.breed === "string" ? booking.pet_snapshot.breed : undefined}
+        onProceedToNotes={() => {
+          setReviewQueue([]);
+          setInspection((current) => current ? { ...current, current_step: 6 } : current);
+        }}
+      />
+
+      {submitting ? (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#6E5685]/80" role="status" aria-label="Generating health report">
+          <Spinner size={52} color="#7DE0C3" />
+        </div>
+      ) : null}
+    </ReportPageShell>
+  );
+}

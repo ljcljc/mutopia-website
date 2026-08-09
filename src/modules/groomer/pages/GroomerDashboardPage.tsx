@@ -8,7 +8,6 @@ import {
   CustomSelect,
   CustomSelectItem,
   CustomTextarea,
-  FileUpload,
   OrangeButton,
   type FileUploadItem,
 } from "@/components/common";
@@ -27,6 +26,7 @@ import {
   type CancelAppointmentFormData,
 } from "@/modules/groomer/components/CancelAppointmentModal";
 import { GroomerUpNextCard } from "@/modules/groomer/components/GroomerUpNextCard";
+import { CheckInObservationPhotoTab } from "@/modules/groomer/components/CheckInObservationPhotoTab";
 import {
   useGroomerDashboardStore,
   type DashboardAppointment,
@@ -37,12 +37,13 @@ import {
 import { shouldShowStartTravel } from "@/modules/groomer/utils/time";
 import {
   decideGroomerInvitation,
+  deleteCheckInObservationPhoto,
   getAddOns,
+  getCheckInObservation,
+  saveCheckInObservation,
   submitGroomerCheckUpCheckout,
-  submitGroomerHealthReport,
-  uploadGroomerCheckUpPhoto,
+  uploadCheckInObservationPhoto,
   type AddOnOut,
-  type HealthReportIn,
   type TerminateServiceIn,
 } from "@/lib/api";
 import { HttpError } from "@/lib/http";
@@ -53,7 +54,6 @@ type BookingRequest = DashboardAppointment;
 type CheckUpTab = "photo" | "weight" | "add-ons" | "personalization";
 type BookingRequestSuccessAlertKind = "confirm" | "propose";
 type TerminateServiceResolution = "owner_approved" | "mutopia_intervention";
-type HealthReportFormData = HealthReportIn;
 
 const FALLBACK_ADD_ONS: AddOnOut[] = [
   { id: 1, name: "Teeth brushing", description: "Professional dental cleaning", price: 15, is_variable: false },
@@ -400,7 +400,7 @@ function CompletedServiceCard({
         onClick={onFillReport}
         className="mt-4 border-[#FFF7ED]! text-[#FFF7ED]! hover:bg-white/10! active:bg-white/10! focus-visible:bg-white/10! [&_p]:font-semibold [&_p]:text-[#FFF7ED]!"
       >
-        Fill report for {appointment.petName}
+        {appointment.hasPublishedHealthReport ? "View health report" : `Fill report for ${appointment.petName}`}
       </OrangeButton>
     </article>
   );
@@ -496,7 +496,7 @@ function ReviewedServiceCard({
         onClick={onFillReport}
         className="mt-4 flex h-12 w-full items-center justify-center rounded-full border-2 border-[#FFF7ED] px-7 font-comfortaa text-[16px] font-semibold leading-[17.5px] text-[#FFF7ED] transition-colors hover:bg-white/10"
       >
-        Fill report for {appointment.petName}
+        {appointment.hasPublishedHealthReport ? "View health report" : `Fill report for ${appointment.petName}`}
       </button>
       <button
         type="button"
@@ -649,138 +649,6 @@ function ServiceTerminationModal({
   );
 }
 
-function HealthReportModal({
-  open,
-  isSubmitting,
-  appointment,
-  onClose,
-  onSubmit,
-}: {
-  open: boolean;
-  isSubmitting: boolean;
-  appointment: DashboardAppointment | null;
-  onClose: () => void;
-  onSubmit: (data: HealthReportFormData) => Promise<void>;
-}) {
-  const isMobile = useIsMobile();
-  const [summary, setSummary] = useState("");
-  const [petCondition, setPetCondition] = useState("");
-  const [behaviorNotes, setBehaviorNotes] = useState("");
-  const [recommendations, setRecommendations] = useState("");
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (!open) return;
-    setSummary("");
-    setPetCondition("");
-    setBehaviorNotes("");
-    setRecommendations("");
-    setError("");
-  }, [open]);
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const trimmedSummary = summary.trim();
-    if (!trimmedSummary) {
-      setError("Summary is required");
-      return;
-    }
-
-    await onSubmit({
-      summary: trimmedSummary,
-      pet_condition: petCondition.trim(),
-      behavior_notes: behaviorNotes.trim(),
-      recommendations: recommendations.trim(),
-    });
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && !isSubmitting && onClose()}>
-      <DialogContent
-        overlayClassName={isMobile ? "service-area-dialog-overlay" : undefined}
-        className={cn(
-          "border-0! bg-white! p-0! gap-0! [&>button]:hidden",
-          isMobile
-            ? "service-area-dialog inset-x-0! bottom-0! top-auto! mx-auto! flex! max-h-[88vh]! w-full! max-w-none! translate-x-0! translate-y-0! flex-col! rounded-b-none rounded-t-[calc(24*var(--px393))] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
-            : "left-1/2! top-1/2! grid! w-[min(560px,calc(100vw-48px))]! max-h-[88vh]! max-w-[560px]! -translate-x-1/2! -translate-y-1/2! overflow-hidden! rounded-[20px]! shadow-[0px_24px_60px_rgba(74,44,85,0.16)]",
-        )}
-      >
-        <DialogTitle className="sr-only">Health report</DialogTitle>
-        <DialogDescription className="sr-only">Fill the grooming health report.</DialogDescription>
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-4 overflow-y-auto px-[calc(24*var(--px393))] pb-[max(calc(24*var(--px393)),env(safe-area-inset-bottom))] pt-[calc(24*var(--px393))] sm:px-6 sm:pb-[max(24px,env(safe-area-inset-bottom))] sm:pt-6"
-        >
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h2 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">
-                Health report{appointment ? ` for ${appointment.petName}` : ""}
-              </h2>
-              <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
-                Share condition, behavior, and care recommendations
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="flex size-5 shrink-0 items-center justify-center text-[#4A5565] transition-colors hover:text-[#4A3C2A] disabled:cursor-not-allowed disabled:opacity-60"
-              aria-label="Close health report dialog"
-            >
-              <XIcon className="size-4 stroke-[1.5]" aria-hidden="true" />
-            </button>
-          </div>
-
-          <CustomTextarea
-            label="Summary"
-            value={summary}
-            onChange={(event) => {
-              setSummary(event.target.value);
-              setError("");
-            }}
-            disabled={isSubmitting}
-            placeholder="Enter report summary"
-            error={error}
-            className="min-h-[92px] text-[#4A3C2A]"
-          />
-          <CustomInput
-            label="Pet condition"
-            value={petCondition}
-            onChange={(event) => setPetCondition(event.target.value)}
-            disabled={isSubmitting}
-            placeholder="Enter pet condition"
-          />
-          <CustomTextarea
-            label="Behavior notes"
-            value={behaviorNotes}
-            onChange={(event) => setBehaviorNotes(event.target.value)}
-            disabled={isSubmitting}
-            placeholder="Enter behavior notes"
-            className="min-h-[82px] text-[#4A3C2A]"
-          />
-          <CustomTextarea
-            label="Recommendations"
-            value={recommendations}
-            onChange={(event) => setRecommendations(event.target.value)}
-            disabled={isSubmitting}
-            placeholder="Enter recommendations"
-            className="min-h-[82px] text-[#4A3C2A]"
-          />
-
-          <div className="flex flex-col gap-[10px]">
-            <OrangeButton type="submit" fullWidth textSize={14} loading={isSubmitting}>
-              Submit report
-            </OrangeButton>
-            <OrangeButton type="button" variant="outline" fullWidth textSize={14} onClick={onClose}>
-              Cancel
-            </OrangeButton>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 function TotalEstimationCard({ appointment }: { appointment: DashboardAppointment }) {
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -854,10 +722,6 @@ function formatAddOnPrice(value: number | string): string {
   const raw = typeof value === "number" ? value : Number(String(value).replace(/[^0-9.-]/g, ""));
   if (!Number.isFinite(raw)) return String(value).startsWith("$") ? String(value) : `$${value}`;
   return Number.isInteger(raw) ? `$${raw}` : `$${raw.toFixed(2)}`;
-}
-
-function formatActionAmount(value: string): string {
-  return value.startsWith("-$") ? value.slice(1) : value;
 }
 
 function normalizeCheckUpWeightUnit(value?: string): string {
@@ -952,12 +816,14 @@ function GroomerCheckUpModal({
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<CheckUpTab>("weight");
   const [beforePhotoUploadItems, setBeforePhotoUploadItems] = useState<FileUploadItem[]>([]);
-  const [beforePhotoImageId, setBeforePhotoImageId] = useState<number | null>(null);
+  const [arrivalObservationNote, setArrivalObservationNote] = useState("");
+  const [observationLocked, setObservationLocked] = useState(false);
   const [beforePhotoError, setBeforePhotoError] = useState("");
   const [weightValue, setWeightValue] = useState("60");
   const [weightUnit, setWeightUnit] = useState("lbs");
   const [addOns, setAddOns] = useState<AddOnOut[]>(FALLBACK_ADD_ONS);
   const [selectedAddOnIds, setSelectedAddOnIds] = useState<number[]>([]);
+  const [initialAddOnIds, setInitialAddOnIds] = useState<number[]>([]);
   const [personalization, setPersonalization] = useState<Record<string, string>>({});
   const [description, setDescription] = useState("");
   const [isApproved, setIsApproved] = useState(true);
@@ -967,12 +833,14 @@ function GroomerCheckUpModal({
     if (!open) return;
     setActiveTab("photo");
     setBeforePhotoUploadItems([]);
-    setBeforePhotoImageId(null);
+    setArrivalObservationNote("");
+    setObservationLocked(false);
     setBeforePhotoError("");
     setWeightValue(appointment?.weightValue || "60");
     setWeightUnit(normalizeCheckUpWeightUnit(appointment?.weightUnit));
     const initialSelectedAddOnIds = appointment?.addonIds ?? [];
     setSelectedAddOnIds(initialSelectedAddOnIds);
+    setInitialAddOnIds(initialSelectedAddOnIds);
     setPersonalization({});
     setDescription("");
     setIsApproved(true);
@@ -986,73 +854,91 @@ function GroomerCheckUpModal({
         console.error("Failed to load add-ons:", error);
         setAddOns(FALLBACK_ADD_ONS);
       });
-  }, [appointment?.weightUnit, appointment?.weightValue, open]);
+    const bookingId = Number(appointment?.id);
+    if (Number.isFinite(bookingId)) {
+      getCheckInObservation(bookingId)
+        .then((observation) => {
+          setArrivalObservationNote((current) => current || observation.arrival_note);
+          setObservationLocked(observation.locked);
+          setBeforePhotoUploadItems((current) => current.length > 0
+            ? current
+            : observation.photos.map((photo) => ({
+              file: new File([], photo.original_filename, { type: photo.normalized_mime_type }),
+              previewUrl: photo.url,
+              serverUrl: photo.url,
+              photoId: photo.id,
+              uploadStatus: "uploaded" as const,
+              uploadProgress: 100,
+            })));
+        })
+        .catch((error) => {
+          console.error("Failed to load check-in observation:", error);
+          setBeforePhotoError("Failed to load arrival photos");
+        });
+    }
+  }, [appointment?.addonIds, appointment?.id, appointment?.weightUnit, appointment?.weightValue, open]);
 
   const toggleAddOn = (id: number, checked: boolean) => {
     setSelectedAddOnIds((current) => checked ? [...new Set([...current, id])] : current.filter((itemId) => itemId !== id));
   };
 
   const handleBeforePhotoChange = async (files: File[]) => {
-    const file = files[0] ?? null;
     setBeforePhotoError("");
-    if (!file || !appointment?.id) {
-      beforePhotoUploadItems.forEach((item) => {
-        if (item.previewUrl.startsWith("blob:")) {
-          URL.revokeObjectURL(item.previewUrl);
-        }
-      });
-      setBeforePhotoUploadItems([]);
-      setBeforePhotoImageId(null);
-      return;
-    }
+    if (!appointment?.id) return;
+    const existingFiles = new Set(beforePhotoUploadItems.map((item) => item.file));
+    const newFiles = files.filter((file) => !existingFiles.has(file));
+    if (newFiles.length === 0) return;
+    const bookingId = Number(appointment.id);
+    if (!Number.isFinite(bookingId)) return;
 
-    beforePhotoUploadItems.forEach((item) => {
-      if (item.previewUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(item.previewUrl);
-      }
-    });
-    const previewUrl = URL.createObjectURL(file);
-    const nextItem: FileUploadItem = {
+    const localItems = newFiles.map<FileUploadItem>((file) => ({
       file,
-      previewUrl,
+      previewUrl: URL.createObjectURL(file),
       uploadProgress: 0,
       uploadStatus: "uploading",
-    };
-    setBeforePhotoUploadItems([nextItem]);
-    setBeforePhotoImageId(null);
+    }));
+    setBeforePhotoUploadItems((current) => [...current, ...localItems]);
 
+    await Promise.all(newFiles.map(async (file) => {
+      try {
+        const uploaded = await uploadCheckInObservationPhoto(bookingId, file, (progress) => {
+          setBeforePhotoUploadItems((current) => current.map((item) =>
+            item.file === file ? { ...item, uploadStatus: "uploading", uploadProgress: progress } : item,
+          ));
+        });
+        setBeforePhotoUploadItems((current) => current.map((item) => {
+          if (item.file !== file) return item;
+          if (item.previewUrl.startsWith("blob:")) URL.revokeObjectURL(item.previewUrl);
+          return {
+            ...item,
+            uploadStatus: "uploaded",
+            uploadProgress: 100,
+            photoId: uploaded.id,
+            serverUrl: uploaded.url,
+            previewUrl: uploaded.url,
+          };
+        }));
+      } catch (error) {
+        console.error("Failed to upload before service photo:", error);
+        setBeforePhotoUploadItems((current) => current.map((item) =>
+          item.file === file ? { ...item, uploadStatus: "error", errorType: "upload" } : item,
+        ));
+        setBeforePhotoError("Some arrival photos failed to upload");
+      }
+    }));
+  };
+
+  const handleRemoveBeforePhoto = async (index: number) => {
+    const item = beforePhotoUploadItems[index];
+    const bookingId = Number(appointment?.id);
+    if (!item || !Number.isFinite(bookingId)) return;
     try {
-      const bookingId = Number(appointment.id);
-      if (!Number.isFinite(bookingId)) return;
-      const uploaded = await uploadGroomerCheckUpPhoto(bookingId, file, (progress) => {
-        setBeforePhotoUploadItems((current) =>
-          current.length > 0
-            ? [{ ...current[0], uploadStatus: "uploading", uploadProgress: progress }]
-            : current,
-        );
-      });
-      setBeforePhotoUploadItems((current) =>
-        current.length > 0
-          ? [{
-              ...current[0],
-              uploadStatus: "uploaded",
-              uploadProgress: 100,
-              photoId: uploaded.id,
-              serverUrl: uploaded.url,
-              previewUrl: uploaded.url || current[0].previewUrl,
-            }]
-          : current,
-      );
-      setBeforePhotoImageId(uploaded.id);
+      if (item.photoId) await deleteCheckInObservationPhoto(bookingId, item.photoId);
+      if (item.previewUrl.startsWith("blob:")) URL.revokeObjectURL(item.previewUrl);
+      setBeforePhotoUploadItems((current) => current.filter((_, itemIndex) => itemIndex !== index));
     } catch (error) {
-      console.error("Failed to upload before service photo:", error);
-      setBeforePhotoUploadItems((current) =>
-        current.length > 0
-          ? [{ ...current[0], uploadStatus: "error", errorType: "upload" }]
-          : current,
-      );
-      setBeforePhotoImageId(null);
-      setBeforePhotoError("Failed to upload before service photo");
+      console.error("Failed to remove arrival photo:", error);
+      setBeforePhotoError("Failed to remove arrival photo");
     }
   };
 
@@ -1060,11 +946,20 @@ function GroomerCheckUpModal({
     if (!appointment?.id) return;
 
     if (activeTab === "photo") {
-      if (!beforePhotoImageId) {
-        setBeforePhotoError("Before service photo is required");
+      if (!beforePhotoUploadItems.some((item) => item.uploadStatus === "uploaded")) {
+        setBeforePhotoError("At least one before service photo is required");
         return;
       }
-      setActiveTab("weight");
+      setIsSubmitting(true);
+      try {
+        await saveCheckInObservation(Number(appointment.id), arrivalObservationNote);
+        setActiveTab("weight");
+      } catch (error) {
+        console.error("Failed to save check-in observation:", error);
+        setBeforePhotoError("Failed to save arrival observation");
+      } finally {
+        setIsSubmitting(false);
+      }
       return;
     }
     if (activeTab === "weight") {
@@ -1078,8 +973,8 @@ function GroomerCheckUpModal({
 
     const bookingId = Number(appointment.id);
     if (!Number.isFinite(bookingId)) return;
-    if (!beforePhotoImageId) {
-      setBeforePhotoError("Before service photo is required");
+    if (!beforePhotoUploadItems.some((item) => item.uploadStatus === "uploaded")) {
+      setBeforePhotoError("At least one before service photo is required");
       setActiveTab("photo");
       return;
     }
@@ -1087,16 +982,16 @@ function GroomerCheckUpModal({
     setIsSubmitting(true);
     try {
       const normalizedPersonalization = Object.entries(personalization).reduce<Record<string, string>>((next, [key, value]) => {
-        const normalizedValue = value.trim();
-        if (!normalizedValue) return next;
-        next[key === "extra_large" ? "gt_50kg" : key] = normalizedValue;
-        return next;
-      }, {});
+      const normalizedValue = value.trim();
+      if (!normalizedValue) return next;
+      next[key === "extra_large" ? "gt_50kg" : key] = normalizedValue;
+      return next;
+    }, {});
+      const newlySelectedAddOnIds = selectedAddOnIds.filter((id) => !initialAddOnIds.includes(id));
       const result = await submitGroomerCheckUpCheckout(bookingId, {
-        before_photo_image_id: beforePhotoImageId,
         weight_value: weightValue,
         weight_unit: weightUnit,
-        add_on_ids: selectedAddOnIds,
+        add_on_ids: newlySelectedAddOnIds,
         personalization: normalizedPersonalization,
         description,
       });
@@ -1168,36 +1063,15 @@ function GroomerCheckUpModal({
           >
             <div className="flex flex-col gap-[14px]">
               {activeTab === "photo" ? (
-                <div className="flex flex-col gap-3">
-                  <p className="font-comfortaa text-[14px] font-bold leading-5 text-[#DE6A07]">Upload before service photo</p>
-                  <FileUpload
-                    accept="image/jpeg,image/jpg,image/png"
-                    disabled={isSubmitting}
-                    maxFiles={1}
-                    multiple={false}
-                    uploadItems={beforePhotoUploadItems}
-                    onChange={handleBeforePhotoChange}
-                    onRemove={() => {
-                      beforePhotoUploadItems.forEach((item) => {
-                        if (item.previewUrl.startsWith("blob:")) {
-                          URL.revokeObjectURL(item.previewUrl);
-                        }
-                      });
-                      setBeforePhotoUploadItems([]);
-                      setBeforePhotoImageId(null);
-                      setBeforePhotoError("");
-                    }}
-                    className="[&_p]:whitespace-normal"
-                  />
-                  {beforePhotoImageId ? (
-                    <p className="font-comfortaa text-[12px] leading-[18px] text-[#2F7A35]">
-                      Uploaded. Ready to submit.
-                    </p>
-                  ) : null}
-                  {beforePhotoError ? (
-                    <p className="font-comfortaa text-[12px] leading-[18px] text-[#DE1507]">{beforePhotoError}</p>
-                  ) : null}
-                </div>
+                <CheckInObservationPhotoTab
+                  items={beforePhotoUploadItems}
+                  note={arrivalObservationNote}
+                  disabled={isSubmitting || observationLocked}
+                  error={beforePhotoError}
+                  onFilesSelected={handleBeforePhotoChange}
+                  onRemove={handleRemoveBeforePhoto}
+                  onNoteChange={setArrivalObservationNote}
+                />
               ) : null}
 
               {activeTab === "weight" ? (
@@ -1379,7 +1253,7 @@ function PackageAndAddonCard({
           </div>
         ) : null}
 
-        {pendingCheckUp ? <PendingCheckUpBanner pendingCheckUp={pendingCheckUp} /> : null}
+        {pendingCheckUp ? <PendingCheckUpBill pendingCheckUp={pendingCheckUp} /> : null}
 
         <OrangeButton
           type="button"
@@ -1395,30 +1269,61 @@ function PackageAndAddonCard({
   );
 }
 
-function PendingCheckUpBanner({ pendingCheckUp }: { pendingCheckUp: PendingCheckUpSummary }) {
+function PendingCheckUpBill({ pendingCheckUp }: { pendingCheckUp: PendingCheckUpSummary }) {
   const isRefund = pendingCheckUp.direction === "refund";
+  const statusText = isRefund ? "Waiting for refund" : "Waiting for client payment";
+  const billLabel = isRefund ? "Service refund 2" : "Service paid 2";
+  const detailItems = pendingCheckUp.details?.items ?? [];
+  const proposedFinalAmount = pendingCheckUp.details?.proposed_final_amount;
+  const displayItems = detailItems.length > 0 ? detailItems : [{ description: "Check-in adjustment", amount: pendingCheckUp.amount }];
 
   return (
     <div className="flex flex-col gap-3 rounded-[12px] bg-[#FAF9F7] p-4 shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)]">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="font-comfortaa text-[10px] leading-3 text-[#4A3C2A]">Check-in adjustment</p>
           <p className="mt-1 font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#4A3C2A]">
-            {pendingCheckUp.summary}
+            {billLabel}
           </p>
         </div>
-        <span className={`inline-flex rounded-[12px] px-2 py-1 font-comfortaa text-[10px] font-bold leading-[14px] text-white ${isRefund ? "bg-[#2563EB]" : "bg-[#DE6A07]"}`}>
-          {pendingCheckUp.statusLabel}
+        <span className={`inline-flex rounded-[12px] px-2 py-1 text-center font-comfortaa text-[10px] font-bold leading-[14px] text-white ${isRefund ? "bg-[#2563EB]" : "bg-[#DE6A07]"}`}>
+          {statusText}
         </span>
       </div>
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="font-comfortaa text-[10px] leading-3 text-[#4A3C2A]">Next step</p>
-          <p className="mt-1 font-comfortaa text-[12px] font-bold leading-4 text-[#4A3C2A]">Start grooming</p>
+
+      <div className="rounded-[12px] bg-white px-4 py-3">
+        <p className="font-comfortaa text-[10px] leading-3 text-[#4A3C2A]">Add-on</p>
+        <div className="mt-2 space-y-1.5">
+          {displayItems.map((item, index) => {
+            const itemAmount = typeof item.amount === "string" ? item.amount : "";
+            const itemLabel = typeof item.description === "string" && item.description.trim()
+              ? item.description.trim()
+              : typeof item.kind === "string" && item.kind.trim()
+                ? item.kind.trim()
+                : "Check-in adjustment";
+
+            return (
+              <div key={`${itemLabel}-${index}`} className="flex items-start justify-between gap-3 font-comfortaa text-[12px] leading-[18px] text-[#4A3C2A]">
+                <p className="min-w-0 flex-1 break-words">{itemLabel}</p>
+                <p className="shrink-0 text-right">{itemAmount || pendingCheckUp.amount}</p>
+              </div>
+            );
+          })}
         </div>
-        <div className={`inline-flex items-center gap-1 rounded-[32px] px-4 py-2 font-comfortaa text-[12px] font-bold leading-[17.5px] ${isRefund ? "bg-[#DBEAFE] text-[#1D4ED8]" : "bg-[#8B6357] text-[#FFF7ED]"}`}>
-          {isRefund ? `Refund ${formatActionAmount(pendingCheckUp.amount)}` : `Go pay ${pendingCheckUp.amount}`}
-          <Icon name="button-arrow" className="size-[14px]" aria-hidden="true" />
+        <div className="mt-3 border-t border-[#E5E7EB] pt-2">
+          <div className="flex items-center justify-between gap-3">
+            <span className="font-comfortaa text-[10px] leading-[12px] text-[#6B7280]">
+              {isRefund ? "Refund total" : "Subtotal 2"}
+            </span>
+            <span className={`font-comfortaa text-[16px] font-bold leading-6 ${isRefund ? "text-[#2563EB]" : "text-[#4A2C55]"}`}>
+              {isRefund ? `-${pendingCheckUp.amount}` : pendingCheckUp.amount}
+            </span>
+          </div>
+          {proposedFinalAmount ? (
+            <p className="mt-1 font-comfortaa text-[10px] leading-[12px] text-[#6B7280]">
+              New total: {proposedFinalAmount.startsWith("$") ? proposedFinalAmount : `$${proposedFinalAmount}`}
+            </p>
+          ) : null}
         </div>
       </div>
     </div>
@@ -1628,8 +1533,6 @@ export default function GroomerDashboardPage() {
   const [isCancelAppointmentModalOpen, setIsCancelAppointmentModalOpen] = useState(false);
   const [isCheckUpOpen, setIsCheckUpOpen] = useState(false);
   const [isCheckUpRequired, setIsCheckUpRequired] = useState(false);
-  const [isHealthReportOpen, setIsHealthReportOpen] = useState(false);
-  const [isSubmittingHealthReport, setIsSubmittingHealthReport] = useState(false);
   const [isTerminateServiceOpen, setIsTerminateServiceOpen] = useState(false);
   const [bookingRequestSuccessAlert, setBookingRequestSuccessAlert] = useState<BookingRequestSuccessAlertKind | null>(null);
   const {
@@ -1818,28 +1721,6 @@ export default function GroomerDashboardPage() {
     }
   };
 
-  const handleSubmitHealthReport = async (data: HealthReportFormData) => {
-    if (!effectiveAppointment?.id || isSubmittingHealthReport) return;
-
-    const bookingId = Number(effectiveAppointment.id);
-    if (!Number.isFinite(bookingId)) return;
-
-    setIsSubmittingHealthReport(true);
-    try {
-      await submitGroomerHealthReport(bookingId, data);
-      setIsHealthReportOpen(false);
-      toast.success("Health report submitted");
-      fetchDashboard().catch((error) => {
-        console.error("Failed to refresh groomer dashboard:", error);
-      });
-    } catch (error) {
-      console.error("Failed to submit health report:", error);
-      toast.error("Failed to submit health report");
-    } finally {
-      setIsSubmittingHealthReport(false);
-    }
-  };
-
   const handleConfirmOriginalTime = async (
     request: BookingRequest,
     confirmedTime: BookingRequestDecisionTimeOption,
@@ -1946,13 +1827,13 @@ export default function GroomerDashboardPage() {
             {effectiveAppointment && showReviewedServiceJob ? (
               <ReviewedServiceCard
                 appointment={effectiveAppointment}
-                onFillReport={() => setIsHealthReportOpen(true)}
+                onFillReport={() => navigate(`/groomer/bookings/${effectiveAppointment.id}/photo-health-inspection`)}
                 onViewNextJob={() => navigate("/groomer/my-work")}
               />
             ) : effectiveAppointment && showCompletedServiceJob ? (
               <CompletedServiceCard
                 appointment={effectiveAppointment}
-                onFillReport={() => setIsHealthReportOpen(true)}
+                onFillReport={() => navigate(`/groomer/bookings/${effectiveAppointment.id}/photo-health-inspection`)}
               />
             ) : effectiveAppointment && showInProgressJob ? (
               <InProgressJobCard
@@ -2035,13 +1916,6 @@ export default function GroomerDashboardPage() {
         isSubmitting={isCancelingTravel}
         onClose={() => setIsCancelAppointmentModalOpen(false)}
         onSubmit={handleCancelTravel}
-      />
-      <HealthReportModal
-        open={isHealthReportOpen}
-        isSubmitting={isSubmittingHealthReport}
-        appointment={effectiveAppointment}
-        onClose={() => setIsHealthReportOpen(false)}
-        onSubmit={handleSubmitHealthReport}
       />
       <ServiceTerminationModal
         open={isTerminateServiceOpen}

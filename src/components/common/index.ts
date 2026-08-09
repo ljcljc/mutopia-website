@@ -28,5 +28,7 @@ export * from "./TertiaryButton";
 export * from "./Icon";
 export * from "./MembershipCard";
 export * from "./PetForm";
+export * from "./PdfDocumentViewer";
+export * from "./ImagePreview";
 
 // 当添加新组件时，请在此文件中添加导出

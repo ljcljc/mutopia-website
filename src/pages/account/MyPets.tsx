@@ -7,11 +7,12 @@ import { Icon } from "@/components/common/Icon";
 import { OrangeButton } from "@/components/common/OrangeButton";
 import { FileUpload, type FileUploadItem } from "@/components/common/FileUpload";
 import { CustomTextarea } from "@/components/common/CustomTextarea";
+import { PdfDocumentViewer } from "@/components/common";
 import { PetForm } from "@/components/common/PetForm";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { useBookingStore } from "@/components/booking/bookingStore";
 import type { Behavior, CoatCondition, Gender, PetType, WeightUnit, GroomingFrequency } from "@/components/booking/bookingStore";
-import { buildImageUrl, getPetBreeds, updatePet, deletePet, memorializePet, uploadPetPhoto, uploadReferencePhoto, type PetBreedOut, type PetOut } from "@/lib/api";
+import { buildImageUrl, getPetBreeds, updatePet, deletePet, memorializePet, uploadPetPhoto, uploadReferencePhoto, listPetHealthReports, getPetHealthReportPdf, type PetBreedOut, type PetOut, type PublishedPetHealthReportOut } from "@/lib/api";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -98,6 +99,11 @@ export default function MyPets() {
   const [referencePhotoUrls, setReferencePhotoUrls] = useState<string[]>([]);
   const [petPhoto, setPetPhoto] = useState<File | null>(null);
   const [referenceStyles, setReferenceStyles] = useState<File[]>([]);
+  const [healthReports, setHealthReports] = useState<PublishedPetHealthReportOut[]>([]);
+  const [isLoadingReports, setIsLoadingReports] = useState(false);
+  const [reportPdfUrl, setReportPdfUrl] = useState("");
+  const [reportPdfOpen, setReportPdfOpen] = useState(false);
+  const healthReportRef = useRef<HTMLDivElement>(null);
   const {
     reset: resetBookingStore,
     setSelectedPetId: setBookingSelectedPetId,
@@ -129,6 +135,9 @@ export default function MyPets() {
   }, [resetBookingStore]);
 
   const petIdFromUrl = searchParams.get("pet");
+  const requestedPetUnavailable = Boolean(
+    !isLoadingPets && petIdFromUrl && !pets.some((pet) => pet.id === Number.parseInt(petIdFromUrl, 10)),
+  );
 
   useEffect(() => {
     if (hasFetchedPetsRef.current) return;
@@ -161,6 +170,8 @@ export default function MyPets() {
         setActivePetId(id);
         return;
       }
+      setActivePetId(null);
+      return;
     }
     if (activePetId === null) {
       setActivePetId(pets[0].id);
@@ -191,6 +202,44 @@ export default function MyPets() {
   const activePet = useMemo(() => pets.find((pet) => pet.id === activePetId) || null, [pets, activePetId]);
   const isMemorialized = Boolean(activePet?.is_memorialized);
   const isPetSelectDropdown = pets.length > 3;
+
+  useEffect(() => {
+    if (!activePetId) {
+      setHealthReports([]);
+      return;
+    }
+    setIsLoadingReports(true);
+    listPetHealthReports(activePetId)
+      .then(async (reports) => {
+        setHealthReports(reports);
+        if (searchParams.get("section") === "health-report") {
+          window.setTimeout(() => healthReportRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 0);
+          const requested = Number(searchParams.get("report"));
+          if (reports.some((report) => report.id === requested)) {
+            const blob = await getPetHealthReportPdf(activePetId, requested);
+            setReportPdfUrl(URL.createObjectURL(blob));
+            setReportPdfOpen(true);
+          }
+        }
+      })
+      .catch(() => setHealthReports([]))
+      .finally(() => setIsLoadingReports(false));
+  }, [activePetId, searchParams]);
+
+  useEffect(() => () => {
+    if (reportPdfUrl) URL.revokeObjectURL(reportPdfUrl);
+  }, [reportPdfUrl]);
+
+  const openHealthReport = async (reportId: number) => {
+    if (!activePetId) return;
+    try {
+      const blob = await getPetHealthReportPdf(activePetId, reportId);
+      setReportPdfUrl(URL.createObjectURL(blob));
+      setReportPdfOpen(true);
+    } catch {
+      toast.error("Report not found or unavailable");
+    }
+  };
 
   const applyPetToForm = (pet: PetOut) => {
     setPetName(pet.name || "");
@@ -771,6 +820,13 @@ export default function MyPets() {
             <div className="bg-white rounded-[12px] rounded-tr-none border-2 border-[#DE6A07] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[22px] sm:p-[20px]">
               {isLoadingPets ? (
                 <div className="text-[#4A3C2A] text-sm">Loading pets...</div>
+              ) : requestedPetUnavailable ? (
+                <div className="rounded-[16px] bg-white p-6 text-center shadow-sm">
+                  <p className="font-comfortaa text-[16px] font-bold text-[#4A3C2A]">Report not found or unavailable</p>
+                  <button type="button" className="mt-4 text-sm font-semibold text-[#DE6A07] underline" onClick={() => navigate("/account/pets", { replace: true })}>
+                    Return to My pets
+                  </button>
+                </div>
               ) : activePet ? (
                 <div className="flex gap-[16px]">
                   {/* 左侧：头像 */}
@@ -908,29 +964,29 @@ export default function MyPets() {
             </div>
           </div>
 
-          <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[12px] sm:p-[20px]">
+          <div ref={healthReportRef} className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[12px] sm:p-[20px]">
             <div className="flex flex-col gap-[12px]">
               <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
                 Health report
               </p>
-              <div className="border border-[#E5E7EB] rounded-[12px] px-[15px] py-[13px] flex items-center justify-between w-full">
-                <div>
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[16px] leading-[28px] text-[#DE6A07]">
-                    {activePet?.name || "-"}
-                  </p>
-                  <p className="font-['Comfortaa:Regular',sans-serif] font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
-                    2026-04-03 at 10H
-                  </p>
-                </div>
-                <div className="flex items-center gap-[7px]">
-                  <div className="bg-[#DCFCE7] h-[24px] px-[16px] py-[4px] rounded-[12px] flex items-center">
-                    <span className="font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-[#016630]">
-                      Ready
-                    </span>
+              {isLoadingReports ? <p className="text-sm text-[#4A5565]">Loading reports...</p> : null}
+              {!isLoadingReports && healthReports.length === 0 ? <p className="text-sm text-[#4A5565]">No published health reports yet.</p> : null}
+              {healthReports.map((report) => (
+                <button key={report.id} type="button" onClick={() => void openHealthReport(report.id)} className="border border-[#E5E7EB] rounded-[12px] px-[15px] py-[13px] flex items-center justify-between w-full text-left">
+                  <div>
+                    <p className="font-comfortaa text-[16px] leading-[28px] text-[#DE6A07]">{report.service_name}</p>
+                    <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
+                      {report.service_date ? new Date(report.service_date).toLocaleDateString() : "Date not provided"} · {report.groomer_name}
+                    </p>
                   </div>
-                  <Icon name="nav-next" className="text-[#8B6357]" size={16} />
-                </div>
-              </div>
+                  <div className="flex items-center gap-[7px]">
+                    <div className="bg-[#DCFCE7] min-w-[24px] px-[10px] py-[4px] rounded-[12px] text-center">
+                      <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#016630]">{report.grade === "not_enough_data" ? "N/A" : report.grade}</span>
+                    </div>
+                    <Icon name="nav-next" className="text-[#8B6357]" size={16} />
+                  </div>
+                </button>
+              ))}
             </div>
           </div>
 
@@ -1030,6 +1086,12 @@ export default function MyPets() {
           </div>
         </AlertDialogContent>
       </AlertDialog>
+      <PdfDocumentViewer
+        blobUrl={reportPdfUrl}
+        fileName={`${activePet?.name || "pet"}-health-report.pdf`}
+        open={reportPdfOpen}
+        onClose={() => setReportPdfOpen(false)}
+      />
     </div>
   );
 }
