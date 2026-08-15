@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Icon } from "./Icon";
 import { cn } from "@/components/ui/utils";
 import { useFileUpload } from "@/hooks/useFileUpload";
@@ -51,8 +51,6 @@ export interface FileUploadProps {
   disabled?: boolean;
   /** 上传项列表（包含上传状态） */
   uploadItems?: FileUploadItem[];
-  /** 每个新上传成功的图片按顺序自动打开预览 */
-  autoPreviewOnUpload?: boolean;
   /** 上传进度回调（按文件索引） */
   onUploadProgress?: (index: number, progress: number) => void;
   /** 错误类型 */
@@ -84,7 +82,6 @@ export function FileUpload({
   className,
   disabled = false,
   uploadItems,
-  autoPreviewOnUpload = false,
   onUploadProgress: _onUploadProgress,
   errorType,
   onError,
@@ -133,50 +130,9 @@ export function FileUpload({
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
   const [internalUploadItems, setInternalUploadItems] = useState<FileUploadItem[]>([]);
-  const observedUploadedKeysRef = useRef<Set<string> | null>(null);
-  const previewQueueRef = useRef<number[]>([]);
 
   // 如果提供了 uploadItems，使用外部状态；否则使用内部状态
   const displayItems = uploadItems || internalUploadItems;
-
-  useEffect(() => {
-    if (!autoPreviewOnUpload) return;
-    const uploadedEntries = displayItems
-      .map((item, index) => ({ item, index }))
-      .filter(({ item }) => item.uploadStatus === "uploaded" && item.previewUrl);
-
-    if (observedUploadedKeysRef.current === null) {
-      observedUploadedKeysRef.current = new Set(uploadedEntries.map(({ item }) => getUploadItemKey(item)));
-      return;
-    }
-
-    const newIndexes: number[] = [];
-    uploadedEntries.forEach(({ item, index }) => {
-      const key = getUploadItemKey(item);
-      if (!observedUploadedKeysRef.current?.has(key)) {
-        observedUploadedKeysRef.current?.add(key);
-        newIndexes.push(index);
-      }
-    });
-    if (newIndexes.length === 0) return;
-    if (!previewOpen) {
-      const [nextIndex, ...remaining] = newIndexes;
-      setPreviewIndex(nextIndex);
-      previewQueueRef.current.push(...remaining);
-      setPreviewOpen(true);
-    } else {
-      previewQueueRef.current.push(...newIndexes);
-    }
-  }, [autoPreviewOnUpload, displayItems, previewOpen]);
-
-  const closePreview = () => {
-    const nextIndex = previewQueueRef.current.shift();
-    if (nextIndex !== undefined) {
-      setPreviewIndex(nextIndex);
-      return;
-    }
-    setPreviewOpen(false);
-  };
 
   // 使用 useMemo 稳定 images 和 fileNames 数组，避免不必要的重新渲染
   const previewImages = useMemo(
@@ -230,8 +186,9 @@ export function FileUpload({
     <div className={cn("relative flex w-full flex-col items-start", className)}>
       <div
         className={cn(
-          "relative flex w-full shrink-0 flex-col items-center justify-center rounded-[calc(16*var(--px393))] border-[1.5px] border-dashed border-[#de6a07] bg-neutral-50 p-[calc(16*var(--px393))] transition-colors shadow-[0px_4px_10px_0px_rgba(0,0,0,0.15)] sm:rounded-[16px] sm:p-[24px]",
-          layout === "inspection" && "rounded-2xl border-2 border-solid border-[#633479] bg-white p-3 sm:rounded-2xl sm:p-4",
+          layout === "inspection"
+            ? "relative flex w-full shrink-0 flex-col items-center justify-center rounded-2xl border border-[#DE6A07] bg-[#FAFAFA] p-4 shadow-[0px_4px_10px_0px_rgba(0,0,0,0.15)]"
+            : "relative flex w-full shrink-0 flex-col items-center justify-center rounded-[calc(16*var(--px393))] border-[1.5px] border-dashed border-[#de6a07] bg-neutral-50 p-[calc(16*var(--px393))] transition-colors shadow-[0px_4px_10px_0px_rgba(0,0,0,0.15)] sm:rounded-[16px] sm:p-[24px]",
           isDragging && "border-[#de6a07] bg-[rgba(222,106,7,0.05)]",
           (state === "error-size" || state === "error-format") && "gap-[12px]"
         )}
@@ -248,7 +205,7 @@ export function FileUpload({
           {(hasFiles || layout === "inspection") && (
             <div className={cn(
               "relative flex w-full flex-wrap items-center gap-[calc(10*var(--px393))] sm:flex-nowrap sm:gap-[12px]",
-              layout === "inspection" && "flex-wrap gap-2 overflow-visible pb-3 sm:flex-wrap sm:gap-2",
+              layout === "inspection" && "flex-wrap gap-1 overflow-visible sm:flex-wrap sm:gap-1",
             )}>
               {/* 已上传的图片缩略图列表 */}
               {displayItems.map((item, index) => {
@@ -266,14 +223,15 @@ export function FileUpload({
                   <div
                     key={stableKey}
                     className={cn(
-                      "h-[calc(80*var(--px393))] w-[calc(80*var(--px393))] sm:h-[80px] sm:w-[96px] overflow-visible relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] shrink-0 border border-neutral-200",
-                      layout === "inspection" && "h-32 w-[calc(50%-4px)] min-w-[132px] rounded-2xl border-dashed border-[#D9D0E5] sm:h-36 sm:w-[calc(50%-4px)] sm:rounded-2xl",
+                      layout === "inspection"
+                        ? "relative overflow-hidden h-[84px] w-[95px] rounded-xl border border-[#D4D4D4] shrink-0"
+                        : "relative overflow-visible h-[calc(80*var(--px393))] w-[calc(80*var(--px393))] sm:h-[80px] sm:w-[96px] rounded-[calc(8*var(--px393))] sm:rounded-[8px] shrink-0 border border-neutral-200",
                     )}
                   >
                     {previewUrl && (
                       <>
                         <div
-                          className={cn("absolute inset-0 cursor-pointer rounded-[calc(8*var(--px393))] sm:rounded-[8px]", layout === "inspection" && "rounded-2xl sm:rounded-2xl")}
+                          className={cn("absolute inset-0 cursor-pointer rounded-[calc(8*var(--px393))] sm:rounded-[8px]", layout === "inspection" && "rounded-xl sm:rounded-xl")}
                           onClick={() => {
                             if (onPreviewItem) {
                               onPreviewItem(index);
@@ -284,7 +242,7 @@ export function FileUpload({
                           }}
                         >
                           <img
-                            className={cn("absolute inset-0 size-full max-w-none pointer-events-none rounded-[calc(8*var(--px393))] object-cover sm:rounded-[8px]", layout === "inspection" && "rounded-2xl sm:rounded-2xl")}
+                            className={cn("absolute inset-0 size-full max-w-none pointer-events-none rounded-[calc(8*var(--px393))] object-cover sm:rounded-[8px]", layout === "inspection" && "rounded-xl sm:rounded-xl")}
                             alt={file.name}
                             src={previewUrl}
                             loading="lazy"
@@ -371,8 +329,9 @@ export function FileUpload({
               {canAddMore && (
                 <div
                   className={cn(
-                    "bg-white border border-dashed border-neutral-300 h-[calc(80*var(--px393))] w-[calc(80*var(--px393))] sm:h-[80px] sm:w-[96px] overflow-clip relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] shrink-0 cursor-pointer hover:border-[#de6a07] transition-colors",
-                    layout === "inspection" && "h-32 w-[calc(50%-4px)] min-w-[132px] rounded-2xl border-2 border-[#D9D0E5] sm:h-36 sm:w-[calc(50%-4px)] sm:rounded-2xl",
+                    layout === "inspection"
+                      ? "relative overflow-hidden h-[84px] w-[95px] rounded-xl border border-[#D4D4D4] bg-white shrink-0 cursor-pointer transition-colors hover:border-[#de6a07]"
+                      : "relative overflow-clip h-[calc(80*var(--px393))] w-[calc(80*var(--px393))] sm:h-[80px] sm:w-[96px] rounded-[calc(8*var(--px393))] sm:rounded-[8px] bg-white border border-dashed border-neutral-300 shrink-0 cursor-pointer transition-colors hover:border-[#de6a07]",
                   )}
                   onClick={handleClick}
                 >
@@ -475,7 +434,7 @@ export function FileUpload({
           images={previewImages}
           currentIndex={previewIndex}
           open={previewOpen}
-          onClose={closePreview}
+          onClose={() => setPreviewOpen(false)}
           fileNames={previewFileNames}
         />
       )}

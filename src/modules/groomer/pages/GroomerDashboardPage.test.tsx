@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import GroomerDashboardPage from "./GroomerDashboardPage";
@@ -58,8 +58,8 @@ describe("GroomerDashboardPage complete service", () => {
     await waitFor(() => {
       expect(uploadCheckInObservationPhoto).toHaveBeenCalled();
     });
-    const preview = await screen.findByRole("dialog", { name: /Image Preview:/ });
-    fireEvent.click(within(preview).getAllByRole("button", { name: "Close" })[0]);
+    expect(await screen.findByRole("img", { name: "before.jpg" })).toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: /Image Preview:/ })).not.toBeInTheDocument();
   };
 
   const advanceFromPhoto = async () => {

@@ -3017,7 +3017,14 @@
             ],
             "responses": {
                 "200": {
-                    "description": "OK"
+                    "description": "OK",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PhotoHealthInspectionLookupOut"
+                            }
+                        }
+                    }
                 }
             },
             "tags": [
@@ -3066,25 +3073,6 @@
                     "JWTAuth": []
                 }
             ]
-        }
-    },
-    "/api/groomers/bookings/{booking_id}/health_report_alert_tags": {
-        "get": {
-            "operationId": "api_photo_health_get_health_report_alert_tags",
-            "summary": "Get Health Report Alert Tags",
-            "parameters": [{"in":"path","name":"booking_id","schema":{"title":"Booking Id","type":"integer"},"required":true}],
-            "responses": {"200": {"description": "OK"}},
-            "tags": ["photo-health"],
-            "security": [{"JWTAuth": []}]
-        },
-        "put": {
-            "operationId": "api_photo_health_update_health_report_alert_tags",
-            "summary": "Update Health Report Alert Tags",
-            "parameters": [{"in":"path","name":"booking_id","schema":{"title":"Booking Id","type":"integer"},"required":true}],
-            "responses": {"200": {"description": "OK"}},
-            "tags": ["photo-health"],
-            "requestBody": {"content":{"application/json":{"schema":{"$ref":"#/components/schemas/HealthReportAlertTagsIn"}}},"required":true},
-            "security": [{"JWTAuth": []}]
         }
     },
     "/api/groomers/bookings/{booking_id}/photo_health_inspection/pet_notes": {
@@ -5915,6 +5903,68 @@
           }
         },
         "title": "GroomerProfileUpdateIn",
+        "type": "object"
+      },
+      "InspectionPhotoOut": {
+        "properties": {
+          "id": { "title": "Id", "type": "integer" },
+          "area": { "title": "Area", "type": "string" },
+          "url": { "title": "Url", "type": "string" },
+          "original_filename": { "title": "Original Filename", "type": "string" },
+          "source_mime_type": { "title": "Source Mime Type", "type": "string" },
+          "normalized_mime_type": { "title": "Normalized Mime Type", "type": "string" },
+          "size_bytes": { "title": "Size Bytes", "type": "integer" },
+          "classification": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Classification"
+          },
+          "finding_hints": {
+            "items": { "type": "string" },
+            "title": "Finding Hints",
+            "type": "array"
+          },
+          "confirmed": { "title": "Confirmed", "type": "boolean" }
+        },
+        "required": ["id", "area", "url", "original_filename", "source_mime_type", "normalized_mime_type", "size_bytes", "classification", "finding_hints", "confirmed"],
+        "title": "InspectionPhotoOut",
+        "type": "object"
+      },
+      "PhotoHealthInspectionOut": {
+        "properties": {
+          "id": { "title": "Id", "type": "integer" },
+          "booking_id": { "title": "Booking Id", "type": "integer" },
+          "status": { "title": "Status", "type": "string" },
+          "current_step": { "title": "Current Step", "type": "integer" },
+          "observation_tags": {
+            "items": { "type": "string" },
+            "title": "Observation Tags",
+            "type": "array"
+          },
+          "current_note": { "title": "Current Note", "type": "string" },
+          "locked": { "title": "Locked", "type": "boolean" },
+          "photos": {
+            "items": { "$ref": "#/components/schemas/InspectionPhotoOut" },
+            "title": "Photos",
+            "type": "array"
+          }
+        },
+        "required": ["id", "booking_id", "status", "current_step", "observation_tags", "current_note", "locked", "photos"],
+        "title": "PhotoHealthInspectionOut",
+        "type": "object"
+      },
+      "PhotoHealthInspectionLookupOut": {
+        "properties": {
+          "exists": { "title": "Exists", "type": "boolean" },
+          "inspection": {
+            "anyOf": [
+              { "$ref": "#/components/schemas/PhotoHealthInspectionOut" },
+              { "type": "null" }
+            ],
+            "title": "Inspection"
+          }
+        },
+        "required": ["exists", "inspection"],
+        "title": "PhotoHealthInspectionLookupOut",
         "type": "object"
       },
       "ReviewReplyIn": {

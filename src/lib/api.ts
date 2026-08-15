@@ -528,6 +528,7 @@ export interface BookingDetailOut {
   time_options?: InvitationDecisionTimeOptionIn[];
   address_snapshot?: Record<string, unknown>;
   pet_snapshot?: Record<string, unknown>;
+  pet_avatar?: string | null;
   package_snapshot?: Record<string, unknown>;
   addons_snapshot?: Record<string, unknown>[];
   membership_snapshot?: Record<string, unknown>;
@@ -1812,6 +1813,11 @@ export interface PhotoHealthInspectionOut {
   photos: InspectionPhotoOut[];
 }
 
+export interface PhotoHealthInspectionLookupOut {
+  exists: boolean;
+  inspection: PhotoHealthInspectionOut | null;
+}
+
 export interface PhotoHealthAreaResult {
   status: "normal" | "attention_needed";
   description: string;
@@ -2433,8 +2439,8 @@ export async function deleteCheckInObservationPhoto(bookingId: number, photoId: 
   return response.data;
 }
 
-export async function getPhotoHealthInspection(bookingId: number): Promise<PhotoHealthInspectionOut> {
-  const response = await http.get<PhotoHealthInspectionOut>(`/api/groomers/bookings/${bookingId}/photo_health_inspection`);
+export async function getPhotoHealthInspection(bookingId: number): Promise<PhotoHealthInspectionLookupOut> {
+  const response = await http.get<PhotoHealthInspectionLookupOut>(`/api/groomers/bookings/${bookingId}/photo_health_inspection`);
   return response.data;
 }
 

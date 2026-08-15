@@ -33,6 +33,7 @@ import { InspectionAreaSection } from "@/modules/groomer/components/InspectionAr
 import { InspectionPhotoReview } from "@/modules/groomer/components/InspectionPhotoReview";
 import { InspectionTagGroup } from "@/modules/groomer/components/InspectionTagGroup";
 import { PhotoHealthReportReview } from "@/modules/groomer/components/PhotoHealthReportReview";
+import { PhotoHealthOverview } from "@/modules/groomer/components/PhotoHealthOverview";
 import { INSPECTION_STEPS, OBSERVATION_GROUPS } from "@/modules/groomer/photoHealthConfig";
 
 interface InspectionLocalDraft {
@@ -140,7 +141,7 @@ export default function GroomerPhotoHealthInspectionPage() {
     Promise.all([
       getGroomerBookingDetail(bookingId),
       getCheckInObservation(bookingId),
-      getPhotoHealthInspection(bookingId).catch(() => null),
+      getPhotoHealthInspection(bookingId).then((lookup) => lookup.inspection).catch(() => null),
     ]).then(([bookingData, arrivalData, inspectionData]) => {
       setBooking(bookingData);
       setArrival(arrivalData);
@@ -229,6 +230,15 @@ export default function GroomerPhotoHealthInspectionPage() {
 
   const step = inspection?.current_step ?? 0;
   const stepConfig = step >= 1 && step <= 5 ? INSPECTION_STEPS[step] : null;
+  const breadcrumbLabel = step >= 1 && step <= 5 && stepConfig
+    ? `Step ${step} of 6 - ${stepConfig.title}`
+    : "Step 6 of 6 - Note (Optional)";
+  const nextStepLabel = step >= 1 && step <= 5
+    ? `Next: ${(() => {
+        const title = (INSPECTION_STEPS[step + 1]?.title ?? "Note").replace(/\s*\(Optional\)$/, "");
+        return title.toLowerCase().endsWith("inspection") ? title : `${title} inspection`;
+      })()}`
+    : "Next";
   const activeReviewPhoto = useMemo(
     () => inspection?.photos.find((photo) => photo.id === reviewQueue[0]) ?? null,
     [inspection?.photos, reviewQueue],
@@ -365,33 +375,23 @@ export default function GroomerPhotoHealthInspectionPage() {
   }
 
   if (!inspection || showOverview) {
-    const petName = typeof booking?.pet_snapshot?.name === "string" ? booking.pet_snapshot.name : "Pet";
-    const petBreed = typeof booking?.pet_snapshot?.breed === "string" ? booking.pet_snapshot.breed : "Breed not provided";
     return (
       <ReportPageShell breadcrumbLabel="Fill health report">
-        <h1 className="font-comfortaa text-3xl text-white">Fill health report</h1>
-        <div className="mt-6 grid gap-5 md:grid-cols-2">
-          <section className="rounded-2xl bg-white p-6 shadow-lg">
-            <h2 className="font-comfortaa text-xl text-[#4A3C2A]">{petName}</h2>
-            <p className="mt-2 text-sm text-[#6B625B]">{petBreed}</p>
-          </section>
-          <section className="rounded-2xl bg-white p-6 shadow-lg">
-            <h2 className="font-comfortaa text-xl text-[#4A3C2A]">Check-in observation</h2>
-            <div className="mt-3 flex gap-2 overflow-x-auto">
-              {arrival?.photos.map((photo) => <img key={photo.id} src={photo.url} alt={photo.original_filename} className="size-24 rounded-xl object-cover" />)}
-            </div>
-            <p className="mt-3 text-sm text-[#6B625B]">{arrival?.arrival_note || "No arrival note"}</p>
-          </section>
+        <div className="mt-6">
+          <PhotoHealthOverview
+            booking={booking}
+            arrival={arrival}
+            saving={saving}
+            startLabel={inspection ? "Continue AI photo health inspection" : "Start AI photo health inspection"}
+            onStart={() => void begin()}
+          />
         </div>
-        <OrangeButton type="button" fullWidth disabled={saving} onClick={() => void begin()} className="mt-8">
-          {inspection ? "Continue AI photo health inspection" : "Start AI photo health inspection"}
-        </OrangeButton>
       </ReportPageShell>
     );
   }
 
   return (
-    <ReportPageShell breadcrumbLabel={step <= 5 && stepConfig ? `Step ${step} of 6 - ${stepConfig.title}` : "Step 6 of 6 - Note (Optional)"}>
+    <ReportPageShell breadcrumbLabel={breadcrumbLabel}>
       {step <= 5 && stepConfig ? (
         <>
           <div className="space-y-5">
@@ -429,7 +429,7 @@ export default function GroomerPhotoHealthInspectionPage() {
           ) : null}
           <InspectionStepActions
             disabled={saving}
-            nextLabel={step === 5 ? "Add Notes & Generate Report" : "Next"}
+            nextLabel={step === 5 ? "Add Notes & Generate Report" : nextStepLabel}
             onPrevious={goToPreviousStep}
             onNext={() => saveStep(step + 1)}
           />

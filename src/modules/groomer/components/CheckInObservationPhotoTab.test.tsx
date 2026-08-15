@@ -34,7 +34,7 @@ describe("CheckInObservationPhotoTab", () => {
     expect(onNoteChange).toHaveBeenCalledWith("Calm on arrival");
   });
 
-  it("opens a newly successful upload in the shared image preview", async () => {
+  it("does not automatically preview a newly successful upload", () => {
     const props = {
       note: "",
       onFilesSelected: vi.fn(),
@@ -57,6 +57,7 @@ describe("CheckInObservationPhotoTab", () => {
       />,
     );
 
-    expect(await screen.findByRole("dialog", { name: "Image Preview: arrival.jpg" })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "arrival.jpg" })).toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: "Image Preview: arrival.jpg" })).not.toBeInTheDocument();
   });
 });

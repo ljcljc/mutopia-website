@@ -53,22 +53,23 @@ function renderPage() {
 describe("GroomerPhotoHealthInspectionPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.localStorage.clear();
     vi.mocked(getGroomerBookingDetail).mockResolvedValue({ id: 42, status: "completed", pet_snapshot: { name: "Max", breed: "Yorkie" } } as never);
     vi.mocked(getCheckInObservation).mockResolvedValue({ arrival_note: "Calm on arrival", photos: [] } as never);
     vi.mocked(getInspectionPetNotes).mockResolvedValue({ notes: [], internal_service_instruction: "Use quiet dryer" });
   });
 
   it("shows the overview and starts the shared six-step flow", async () => {
-    vi.mocked(getPhotoHealthInspection).mockRejectedValue(new Error("not started"));
+    vi.mocked(getPhotoHealthInspection).mockResolvedValue({ exists: false, inspection: null });
     vi.mocked(startPhotoHealthInspection).mockResolvedValue(inspection);
     renderPage();
 
-    expect(await screen.findByText("Fill health report")).toBeInTheDocument();
     const breadcrumb = screen.getByRole("navigation", { name: "Breadcrumb" });
     expect(breadcrumb).toHaveTextContent(/Dashboard\s*>\s*Fill health report/);
     expect(screen.getByRole("link", { name: "Dashboard" })).toHaveAttribute("href", "/groomer/dashboard");
     expect(screen.queryByRole("button", { name: "‹ Dashboard" })).not.toBeInTheDocument();
-    expect(screen.getByText("Calm on arrival")).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Fill health report" })).not.toBeInTheDocument();
+    expect(await screen.findByText("Calm on arrival")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Start AI photo health inspection" }));
 
     await waitFor(() => expect(screen.getByRole("navigation", { name: "Breadcrumb" })).toHaveTextContent(
@@ -77,16 +78,15 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     expect(screen.queryByRole("heading", { name: "Step 1 of 6 - Skin inspection" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Previous" }));
 
-    expect(await screen.findByRole("heading", { name: "Fill health report" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Continue AI photo health inspection" })).toBeInTheDocument();
     expect(startPhotoHealthInspection).toHaveBeenCalledWith(42);
   });
 
   it("reconstructs the last saved step after reload", async () => {
-    vi.mocked(getPhotoHealthInspection).mockResolvedValue({ ...inspection, current_step: 3 });
+    vi.mocked(getPhotoHealthInspection).mockResolvedValue({ exists: true, inspection: { ...inspection, current_step: 3 } });
     renderPage();
 
-    expect(await screen.findByRole("heading", { name: "Mouth photo" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Mouth photo - Before grooming photos" })).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Breadcrumb" })).toHaveTextContent(
       /Dashboard\s*>\s*Step 3 of 6 - Mouth inspection/,
     );
@@ -95,7 +95,7 @@ describe("GroomerPhotoHealthInspectionPage", () => {
   });
 
   it("labels the optional note step in the breadcrumb", async () => {
-    vi.mocked(getPhotoHealthInspection).mockResolvedValue({ ...inspection, current_step: 6 });
+    vi.mocked(getPhotoHealthInspection).mockResolvedValue({ exists: true, inspection: { ...inspection, current_step: 6 } });
     renderPage();
 
     expect(await screen.findByText("Special instruments or notes")).toBeInTheDocument();
@@ -106,12 +106,11 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     expect(screen.getByRole("button", { name: "Previous" })).toBeInTheDocument();
   });
 
-  it("allows an incomplete step to go back and uses the shared responsive action layout", async () => {
-    vi.mocked(getPhotoHealthInspection).mockResolvedValue({ ...inspection, current_step: 2 });
-    vi.mocked(savePhotoHealthInspectionProgress).mockResolvedValue({ ...inspection, current_step: 1 });
+  it("allows an incomplete step to go back, persists locally, and uses the shared responsive action layout", async () => {
+    vi.mocked(getPhotoHealthInspection).mockResolvedValue({ exists: true, inspection: { ...inspection, current_step: 2 } });
     renderPage();
 
-    await screen.findByRole("heading", { name: "Left ear" });
+    await screen.findByRole("heading", { name: "Left ear - Before grooming photos" });
     const previous = screen.getByRole("button", { name: "Previous" });
     const actions = previous.parentElement;
     expect(previous).toHaveClass(
@@ -128,10 +127,8 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     await waitFor(() => expect(screen.getByRole("navigation", { name: "Breadcrumb" })).toHaveTextContent(
       /Dashboard\s*>\s*Step 1 of 6 - Skin inspection/,
     ));
-    expect(savePhotoHealthInspectionProgress).toHaveBeenCalledWith(42, {
-      current_step: 1,
-      observation_tags: [],
-      current_note: "",
-    });
+    expect(savePhotoHealthInspectionProgress).not.toHaveBeenCalled();
+    await waitFor(() => expect(JSON.parse(window.localStorage.getItem("photo-health-draft:42:42") ?? "{}"))
+      .toMatchObject({ currentStep: 1, observationTags: [], currentNote: "" }));
   });
 });

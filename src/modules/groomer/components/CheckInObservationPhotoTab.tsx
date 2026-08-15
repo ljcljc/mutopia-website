@@ -29,7 +29,6 @@ export function CheckInObservationPhotoTab({
           inputAriaLabel="Upload before service photos"
           accept="image/jpeg,image/jpg,image/png,image/heic,image/heif"
           disabled={disabled}
-          autoPreviewOnUpload
           maxSizeMB={10}
           multiple
           uploadItems={items}

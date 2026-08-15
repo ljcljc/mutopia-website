@@ -30,7 +30,7 @@ describe("InspectionAreaSection", () => {
     fireEvent.click(screen.getByAltText("skin.jpg").parentElement as HTMLElement);
     expect(onOpen).toHaveBeenCalledWith(photo);
     expect(screen.getByText("AI Scan")).toBeInTheDocument();
-    expect(screen.getByText("Skin - After grooming photos")).toBeInTheDocument();
+    expect(screen.getByText("Skin photo - Before grooming photos")).toBeInTheDocument();
     expect(screen.getByText("Add photo")).toBeInTheDocument();
     expect(screen.getByAltText("skin.jpg").closest(".flex-wrap")).toBeInTheDocument();
   });
