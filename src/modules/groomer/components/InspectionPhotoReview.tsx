@@ -194,7 +194,7 @@ export function InspectionPhotoReview({
             type="button"
             aria-pressed={classification === "normal"}
             onClick={() => apply("normal", [])}
-            className={`min-h-[94px] cursor-pointer rounded-[22px] border-[3px] px-3 font-comfortaa transition-colors ${classification === "normal" ? "border-[#C97A1B] text-[#DE8A19]" : "border-[#5D5D64] text-white hover:bg-white/10 active:bg-white/20 md:text-[#4F5060]"}`}
+            className={`min-h-[94px] cursor-pointer rounded-[22px] border-2 px-3 font-comfortaa transition-colors ${classification === "normal" ? "border-[#C97A1B] text-[#DE8A19]" : "border-[#5D5D64] text-white hover:bg-white/10 active:bg-white/20 md:text-[#4F5060]"}`}
           >
             <span className="block text-[15px] font-bold leading-[18px]">Normal</span><span className="mt-1 block text-[11px] leading-[14px]">Archives photo</span>
           </button>
@@ -208,7 +208,7 @@ export function InspectionPhotoReview({
               }
               apply("ai_scan");
             }}
-            className={`min-h-[94px] cursor-pointer rounded-[22px] border-[3px] px-3 font-comfortaa transition-colors ${classification === "ai_scan" ? "border-[#C97A1B] text-[#DE8A19]" : "border-[#5D5D64] text-white hover:bg-white/10 active:bg-white/20 md:text-[#4F5060]"}`}
+            className={`min-h-[94px] cursor-pointer rounded-[22px] border-2 px-3 font-comfortaa transition-colors ${classification === "ai_scan" ? "border-[#C97A1B] text-[#DE8A19]" : "border-[#5D5D64] text-white hover:bg-white/10 active:bg-white/20 md:text-[#4F5060]"}`}
           >
             <span className="block text-[15px] font-bold leading-[18px]">AI Scan</span><span className="mt-1 block text-[11px] leading-[14px]">Generates report</span>
           </button>

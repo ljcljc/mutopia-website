@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type PointerEvent as ReactPointerEvent } from "react";
 import { cn } from "@/components/ui/utils";
 
 export function InspectionTagGroup({
@@ -16,16 +16,23 @@ export function InspectionTagGroup({
 }) {
   const rowRef = useRef<HTMLDivElement>(null);
   const chipRefs = useRef(new Map<string, HTMLButtonElement>());
+  const dragState = useRef<{ pointerId: number; startX: number; startScrollLeft: number; dragging: boolean } | null>(null);
 
   const centerChip = (value: string) => {
     if (window.innerWidth >= 768) return;
     const row = rowRef.current;
     const chip = chipRefs.current.get(value);
     if (!row || !chip) return;
-    row.scrollTo({
-      left: chip.offsetLeft - (row.clientWidth - chip.offsetWidth) / 2,
-      behavior: "smooth",
-    });
+    if (typeof chip.scrollIntoView === "function") {
+      chip.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    } else {
+      const nextLeft = chip.offsetLeft - (row.clientWidth - chip.offsetWidth) / 2;
+      if (typeof row.scrollTo === "function") {
+        row.scrollTo({ left: nextLeft, behavior: "smooth" });
+      } else {
+        row.scrollLeft = nextLeft;
+      }
+    }
   };
 
   useEffect(() => {
@@ -38,14 +45,63 @@ export function InspectionTagGroup({
     window.requestAnimationFrame(() => centerChip(value));
   };
 
+  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0) return;
+    const row = rowRef.current;
+    if (!row) return;
+    dragState.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startScrollLeft: row.scrollLeft,
+      dragging: false,
+    };
+    if (typeof row.setPointerCapture === "function") {
+      row.setPointerCapture(event.pointerId);
+    }
+  };
+
+  const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const state = dragState.current;
+    const row = rowRef.current;
+    if (!state || !row || state.pointerId !== event.pointerId) return;
+    const deltaX = event.clientX - state.startX;
+    if (!state.dragging && Math.abs(deltaX) > 4) {
+      state.dragging = true;
+    }
+    if (state.dragging) {
+      event.preventDefault();
+      row.scrollLeft = state.startScrollLeft - deltaX;
+    }
+  };
+
+  const handlePointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const state = dragState.current;
+    const row = rowRef.current;
+    if (state && row && state.pointerId === event.pointerId) {
+      if (typeof row.hasPointerCapture === "function" && row.hasPointerCapture(event.pointerId) && typeof row.releasePointerCapture === "function") {
+        row.releasePointerCapture(event.pointerId);
+      }
+      dragState.current = null;
+    }
+  };
+
+  const handleChipClick = (value: string) => {
+    if (dragState.current?.dragging) return;
+    toggle(value);
+  };
+
   return (
     <fieldset disabled={disabled} className="w-full min-w-0 max-w-full space-y-2 overflow-hidden [min-inline-size:0]">
       <legend className="font-comfortaa text-[12px] uppercase tracking-[0.08em] text-[#8B817F]">{label}</legend>
       <div
         ref={rowRef}
         style={{ WebkitOverflowScrolling: "touch" }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
         className={cn(
-          "flex w-full min-w-0 max-w-full flex-nowrap gap-2 overflow-x-auto overflow-y-hidden overscroll-x-contain pb-1 touch-pan-x md:touch-pan-x",
+          "flex w-full min-w-0 flex-nowrap gap-2 overflow-x-auto overflow-y-hidden overscroll-x-contain pb-1 pr-1 touch-pan-x select-none md:touch-pan-x",
           "[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
         )}
       >
@@ -60,7 +116,7 @@ export function InspectionTagGroup({
               }}
               type="button"
               aria-pressed={active}
-              onClick={() => toggle(tag.value)}
+              onClick={() => handleChipClick(tag.value)}
               className={cn(
                 "shrink-0 cursor-pointer rounded-full border px-4 py-2 font-comfortaa text-[13px] transition-colors disabled:cursor-not-allowed",
                 active ? "border-[#DE8A19] text-[#DE8A19]" : "border-[#4B4B4B] text-[#B7B7B7]",
