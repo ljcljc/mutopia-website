@@ -205,7 +205,7 @@ export function FileUpload({
           {(hasFiles || layout === "inspection") && (
             <div className={cn(
               "relative flex w-full flex-wrap items-center gap-[calc(10*var(--px393))] sm:flex-nowrap sm:gap-[12px]",
-              layout === "inspection" && "flex-wrap gap-1 overflow-visible sm:flex-wrap sm:gap-1",
+              layout === "inspection" && "grid grid-cols-2 gap-x-1 gap-y-6 overflow-visible",
             )}>
               {/* 已上传的图片缩略图列表 */}
               {displayItems.map((item, index) => {
@@ -224,14 +224,14 @@ export function FileUpload({
                     key={stableKey}
                     className={cn(
                       layout === "inspection"
-                        ? "relative overflow-visible h-[84px] flex-1 rounded-[14px] border border-[#D4C9E0] shrink-0"
+                        ? "relative h-[84px] min-w-0 w-full overflow-visible rounded-[14px] border border-[#D4C9E0]"
                         : "relative overflow-visible h-[calc(80*var(--px393))] w-[calc(80*var(--px393))] sm:h-[80px] sm:w-[96px] rounded-[calc(8*var(--px393))] sm:rounded-[8px] shrink-0 border border-neutral-200",
                     )}
                   >
                     {previewUrl && (
                       <>
                         <div
-                          className={cn("absolute inset-0 cursor-pointer rounded-[calc(8*var(--px393))] sm:rounded-[8px]", layout === "inspection" && "rounded-[14px] sm:rounded-[14px]")}
+                          className={cn("absolute inset-0 cursor-pointer overflow-hidden rounded-[calc(8*var(--px393))] sm:rounded-[8px]", layout === "inspection" && "overflow-visible rounded-[14px] sm:rounded-[14px]")}
                           onClick={() => {
                             if (onPreviewItem) {
                               onPreviewItem(index);
@@ -242,7 +242,7 @@ export function FileUpload({
                           }}
                         >
                           <img
-                            className={cn("absolute inset-0 size-full max-w-none pointer-events-none rounded-[calc(8*var(--px393))] object-cover sm:rounded-[8px]", layout === "inspection" && "rounded-[14px] sm:rounded-[14px]")}
+                            className={cn("absolute inset-0 size-full max-w-none pointer-events-none rounded-[calc(8*var(--px393))] object-cover object-center sm:rounded-[8px]", layout === "inspection" && "object-top rounded-[14px] sm:rounded-[14px]")}
                             alt={file.name}
                             src={previewUrl}
                             loading="lazy"
@@ -314,7 +314,7 @@ export function FileUpload({
                           </div>
                         )}
                         {layout === "inspection" && item.badge ? (
-                          <div className="pointer-events-none absolute bottom-[-8px] left-[12px] z-10 flex items-center gap-1 rounded-full border border-[#F1C9CC] bg-[#FFF6F6] px-3 py-1 font-comfortaa text-xs text-[#B23A48] shadow-sm">
+                          <div className="pointer-events-none absolute bottom-[-8px] left-[12px] z-30 flex items-center gap-1 rounded-full border border-[#F1C9CC] bg-[#FFF6F6] px-3 py-1 font-comfortaa text-xs text-[#B23A48] shadow-sm">
                             <Icon name="alert-ai-scan" className="size-[13px]" />
                             {item.badge}
                           </div>
@@ -330,7 +330,7 @@ export function FileUpload({
                 <div
                   className={cn(
                     layout === "inspection"
-                      ? "relative flex h-[84px] flex-1 shrink-0 cursor-pointer flex-col items-center justify-center gap-[7px] rounded-[14px] border-[1.45px] border-dashed border-[#D4C9E0] bg-white shadow-[0px_1px_5px_0px_rgba(0,0,0,0.05)] transition-colors hover:border-[#de6a07]"
+                      ? "relative flex h-[84px] min-w-0 w-full cursor-pointer flex-col items-center justify-center gap-[7px] rounded-[14px] border-[1.45px] border-dashed border-[#D4C9E0] bg-white shadow-[0px_1px_5px_0px_rgba(0,0,0,0.05)] transition-colors hover:border-[#de6a07]"
                       : "relative overflow-clip h-[calc(80*var(--px393))] w-[calc(80*var(--px393))] sm:h-[80px] sm:w-[96px] rounded-[calc(8*var(--px393))] sm:rounded-[8px] bg-white border border-dashed border-neutral-300 shrink-0 cursor-pointer transition-colors hover:border-[#de6a07]",
                   )}
                   onClick={handleClick}
