@@ -115,7 +115,8 @@ describe("InspectionPhotoReview", () => {
         onAddPhoto={vi.fn()}
       />,
     );
-    expect(screen.getByRole("button", { name: "Close photo review" })).toHaveClass("ml-auto");
+    expect(screen.getByRole("button", { name: "Close photo review" })).toHaveClass("absolute");
+    expect(screen.getByRole("button", { name: "Close photo review" })).toHaveClass("rounded-full");
   });
 
   it("keeps a third photo unchanged and shows a toast when the AI limit is reached", () => {

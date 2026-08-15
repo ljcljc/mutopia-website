@@ -187,7 +187,7 @@ export function FileUpload({
       <div
         className={cn(
           layout === "inspection"
-            ? "relative flex w-full shrink-0 flex-col items-center justify-center rounded-2xl border border-[#DE6A07] bg-[#FAFAFA] p-4 shadow-[0px_4px_10px_0px_rgba(0,0,0,0.15)]"
+            ? "relative flex w-full shrink-0 flex-col items-center justify-center rounded-2xl border border-[#633479] bg-[#FAFAFA] p-4 shadow-[0px_4px_10px_0px_rgba(0,0,0,0.15)]"
             : "relative flex w-full shrink-0 flex-col items-center justify-center rounded-[calc(16*var(--px393))] border-[1.5px] border-dashed border-[#de6a07] bg-neutral-50 p-[calc(16*var(--px393))] transition-colors shadow-[0px_4px_10px_0px_rgba(0,0,0,0.15)] sm:rounded-[16px] sm:p-[24px]",
           isDragging && "border-[#de6a07] bg-[rgba(222,106,7,0.05)]",
           (state === "error-size" || state === "error-format") && "gap-[12px]"
@@ -224,14 +224,14 @@ export function FileUpload({
                     key={stableKey}
                     className={cn(
                       layout === "inspection"
-                        ? "relative overflow-hidden h-[84px] w-[95px] rounded-xl border border-[#D4D4D4] shrink-0"
+                        ? "relative overflow-visible h-[84px] flex-1 rounded-[14px] border border-[#D4C9E0] shrink-0"
                         : "relative overflow-visible h-[calc(80*var(--px393))] w-[calc(80*var(--px393))] sm:h-[80px] sm:w-[96px] rounded-[calc(8*var(--px393))] sm:rounded-[8px] shrink-0 border border-neutral-200",
                     )}
                   >
                     {previewUrl && (
                       <>
                         <div
-                          className={cn("absolute inset-0 cursor-pointer rounded-[calc(8*var(--px393))] sm:rounded-[8px]", layout === "inspection" && "rounded-xl sm:rounded-xl")}
+                          className={cn("absolute inset-0 cursor-pointer rounded-[calc(8*var(--px393))] sm:rounded-[8px]", layout === "inspection" && "rounded-[14px] sm:rounded-[14px]")}
                           onClick={() => {
                             if (onPreviewItem) {
                               onPreviewItem(index);
@@ -242,7 +242,7 @@ export function FileUpload({
                           }}
                         >
                           <img
-                            className={cn("absolute inset-0 size-full max-w-none pointer-events-none rounded-[calc(8*var(--px393))] object-cover sm:rounded-[8px]", layout === "inspection" && "rounded-xl sm:rounded-xl")}
+                            className={cn("absolute inset-0 size-full max-w-none pointer-events-none rounded-[calc(8*var(--px393))] object-cover sm:rounded-[8px]", layout === "inspection" && "rounded-[14px] sm:rounded-[14px]")}
                             alt={file.name}
                             src={previewUrl}
                             loading="lazy"
@@ -271,7 +271,7 @@ export function FileUpload({
                         {/* 删除按钮（位于缩略图右上角，上传成功后显示） */}
                         {isUploaded && !isUploading && (
                           <div
-                            className="absolute bg-neutral-100 border border-[#4c4c4c] border-solid overflow-clip rounded-[calc(8*var(--px393))] sm:rounded-[8px] size-[calc(20*var(--px393))] sm:size-[20px] top-[calc(-6*var(--px393))] right-[calc(-6*var(--px393))] sm:top-[-6px] sm:right-[-6px] cursor-pointer flex items-center justify-center z-20 shadow-[0px_2px_4px_0px_rgba(0,0,0,0.1)]"
+                            className="absolute bg-neutral-100 border border-[#4c4c4c] border-solid overflow-clip rounded-[calc(8*var(--px393))] sm:rounded-[8px] size-[calc(20*var(--px393))] sm:size-[20px] top-[-4px] right-[-4px] cursor-pointer flex items-center justify-center z-20 shadow-[0px_2px_4px_0px_rgba(0,0,0,0.1)]"
                             onClick={(e) => {
                               e.stopPropagation();
                               console.debug("[FileUpload] delete click", {
@@ -314,8 +314,8 @@ export function FileUpload({
                           </div>
                         )}
                         {layout === "inspection" && item.badge ? (
-                          <div className="pointer-events-none absolute -bottom-3 left-2 z-10 flex items-center gap-1 rounded-full border border-[#F1C9CC] bg-[#FFF6F6] px-3 py-1 font-comfortaa text-xs text-[#B23A48] shadow-sm">
-                            <Icon name="alert-error" className="size-3" />
+                          <div className="pointer-events-none absolute bottom-[-8px] left-[12px] z-10 flex items-center gap-1 rounded-full border border-[#F1C9CC] bg-[#FFF6F6] px-3 py-1 font-comfortaa text-xs text-[#B23A48] shadow-sm">
+                            <Icon name="alert-ai-scan" className="size-[13px]" />
                             {item.badge}
                           </div>
                         ) : null}
@@ -330,19 +330,29 @@ export function FileUpload({
                 <div
                   className={cn(
                     layout === "inspection"
-                      ? "relative overflow-hidden h-[84px] w-[95px] rounded-xl border border-[#D4D4D4] bg-white shrink-0 cursor-pointer transition-colors hover:border-[#de6a07]"
+                      ? "relative flex h-[84px] flex-1 shrink-0 cursor-pointer flex-col items-center justify-center gap-[7px] rounded-[14px] border-[1.45px] border-dashed border-[#D4C9E0] bg-white shadow-[0px_1px_5px_0px_rgba(0,0,0,0.05)] transition-colors hover:border-[#de6a07]"
                       : "relative overflow-clip h-[calc(80*var(--px393))] w-[calc(80*var(--px393))] sm:h-[80px] sm:w-[96px] rounded-[calc(8*var(--px393))] sm:rounded-[8px] bg-white border border-dashed border-neutral-300 shrink-0 cursor-pointer transition-colors hover:border-[#de6a07]",
                   )}
                   onClick={handleClick}
                 >
-                  <div className="absolute bg-neutral-100 -inset-px rounded-[calc(8*var(--px393))] sm:rounded-[8px]" />
-                  <div className="absolute left-1/2 size-[calc(32*var(--px393))] sm:size-[32px] top-1/2 -translate-x-1/2 -translate-y-1/2">
-                    <Icon
-                      name="add"
-                      className="block size-full text-[#A3A3A3]"
-                    />
-                  </div>
-                  {layout === "inspection" ? <span className="absolute inset-x-0 bottom-5 text-center font-comfortaa text-sm text-[#633479]">Add photo</span> : null}
+                  {layout === "inspection" ? (
+                    <>
+                      <div className="flex size-[29px] shrink-0 items-center justify-center rounded-full bg-[#F0EBF7]">
+                        <Icon name="add-inspection" className="block size-[28px]" />
+                      </div>
+                      <span className="text-center font-comfortaa text-xs font-medium leading-[18px] text-[#633479]">Add photo</span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="absolute bg-neutral-100 -inset-px rounded-[calc(8*var(--px393))] sm:rounded-[8px]" />
+                      <div className="absolute left-1/2 size-[calc(32*var(--px393))] sm:size-[32px] top-1/2 -translate-x-1/2 -translate-y-1/2">
+                        <Icon
+                          name="add"
+                          className="block size-full text-[#A3A3A3]"
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>

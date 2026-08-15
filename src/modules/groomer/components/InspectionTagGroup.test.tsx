@@ -20,15 +20,11 @@ describe("InspectionTagGroup", () => {
     );
 
     const chipRow = container.querySelector("fieldset > div");
-    expect(chipRow).toHaveClass("grid");
-    expect(chipRow).toHaveClass("grid-flow-col");
-    expect(chipRow).toHaveClass("auto-cols-max");
-    expect(chipRow).toHaveClass("overflow-x-scroll");
+    expect(chipRow).toHaveClass("flex");
+    expect(chipRow).toHaveClass("flex-nowrap");
+    expect(chipRow).toHaveClass("overflow-x-auto");
     expect(chipRow).toHaveClass("touch-pan-x");
     expect(chipRow).toHaveClass("overscroll-x-contain");
-    expect(chipRow).toHaveClass("md:flex");
-    expect(chipRow).toHaveClass("md:flex-wrap");
-    expect(chipRow).toHaveClass("md:overflow-x-visible");
     expect(container.querySelector("fieldset")).toHaveClass("min-w-0");
     expect(container.querySelector("fieldset")).toHaveClass("[min-inline-size:0]");
     expect(container.querySelector("fieldset")).toHaveClass("overflow-hidden");

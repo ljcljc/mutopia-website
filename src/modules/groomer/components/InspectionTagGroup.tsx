@@ -45,7 +45,7 @@ export function InspectionTagGroup({
         ref={rowRef}
         style={{ WebkitOverflowScrolling: "touch" }}
         className={cn(
-          "grid w-full min-w-0 max-w-full touch-pan-x auto-cols-max grid-flow-col justify-start gap-2 overflow-x-scroll overflow-y-hidden overscroll-x-contain pb-1 md:flex md:touch-auto md:flex-wrap md:overflow-x-visible md:overflow-y-visible",
+          "flex w-full min-w-0 max-w-full flex-nowrap gap-2 overflow-x-auto overflow-y-hidden overscroll-x-contain pb-1 touch-pan-x md:touch-pan-x",
           "[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
         )}
       >

@@ -38,6 +38,7 @@ import IconAlertErrorSvg from "@/assets/icons/icon-alert-error.svg?react";
 import IconAlertSuccessSvg from "@/assets/icons/icon-alert-success.svg?react";
 import IconAlertWarningSvg from "@/assets/icons/icon-alert-warning.svg?react";
 import IconAlertInfoSvg from "@/assets/icons/icon-alert-info.svg?react";
+import IconAlertAiScanSvg from "@/assets/icons/icon-alert-ai-scan.svg?react";
 import IconEyeVisibleSvg from "@/assets/icons/icon-eye-visible.svg?react";
 import IconEyeInvisibleSvg from "@/assets/icons/icon-eye-invisible.svg?react";
 import IconFacebookSvg from "@/assets/icons/icon-facebook.svg?react";
@@ -70,6 +71,7 @@ import IconSearchSvg from "@/assets/icons/icon-search.svg?react";
 import IconImageSvg from "@/assets/icons/icon-image.svg?react";
 import IconAddSvg from "@/assets/icons/icon-add.svg?react";
 import IconAdd2Svg from "@/assets/icons/icon-add-2.svg?react";
+import IconAddInspectionSvg from "@/assets/icons/icon-add-inspection.svg?react";
 import IconTrashSvg from "@/assets/icons/icon-trash.svg?react";
 import IconCheckSvg from "@/assets/icons/icon-check.svg?react";
 import IconCheckGreenSvg from "@/assets/icons/icon-check-green.svg?react";
@@ -124,6 +126,7 @@ const iconComponentMap = {
   "alert-success": IconAlertSuccessSvg,
   "alert-warning": IconAlertWarningSvg,
   "alert-info": IconAlertInfoSvg,
+  "alert-ai-scan": IconAlertAiScanSvg,
   "eye-visible": IconEyeVisibleSvg,
   "eye-invisible": IconEyeInvisibleSvg,
   "facebook": IconFacebookSvg,
@@ -156,6 +159,7 @@ const iconComponentMap = {
   "image": IconImageSvg,
   "add": IconAddSvg,
   "add-2": IconAdd2Svg,
+  "add-inspection": IconAddInspectionSvg,
   "trash": IconTrashSvg,
   "check": IconCheckSvg,
   "check-green": IconCheckGreenSvg,

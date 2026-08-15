@@ -102,11 +102,11 @@ function InspectionStepActions({
         type="button"
         disabled={disabled}
         onClick={onPrevious}
-        className="h-12 w-full cursor-pointer rounded-full border-2 border-white bg-transparent px-5 font-comfortaa text-white transition-colors hover:bg-white/10 active:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#633479] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 sm:max-w-[228px]"
+        className="h-12 w-full cursor-pointer rounded-full border border-white bg-transparent px-5 font-comfortaa text-[14px] text-white transition-colors hover:bg-white/10 active:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#633479] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 sm:max-w-[228px]"
       >
         Previous
       </button>
-      <OrangeButton type="button" fullWidth disabled={disabled} onClick={onNext} className="sm:max-w-[228px]">
+      <OrangeButton type="button" fullWidth disabled={disabled} onClick={onNext} textSize={14} className="sm:max-w-[228px]">
         {nextLabel}
       </OrangeButton>
     </div>

@@ -86,7 +86,7 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     vi.mocked(getPhotoHealthInspection).mockResolvedValue({ exists: true, inspection: { ...inspection, current_step: 3 } });
     renderPage();
 
-    expect(await screen.findByRole("heading", { name: "Mouth photo - Before grooming photos" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Mouth - after grooming photos" })).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Breadcrumb" })).toHaveTextContent(
       /Dashboard\s*>\s*Step 3 of 6 - Mouth inspection/,
     );
@@ -110,7 +110,7 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     vi.mocked(getPhotoHealthInspection).mockResolvedValue({ exists: true, inspection: { ...inspection, current_step: 2 } });
     renderPage();
 
-    await screen.findByRole("heading", { name: "Left ear - Before grooming photos" });
+    await screen.findByRole("heading", { name: "Left ear - after grooming photos" });
     const previous = screen.getByRole("button", { name: "Previous" });
     const actions = previous.parentElement;
     expect(previous).toHaveClass(
