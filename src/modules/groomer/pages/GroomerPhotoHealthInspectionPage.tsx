@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { CustomTextarea, OrangeButton } from "@/components/common";
 import { Spinner } from "@/components/common/Spinner";
@@ -132,6 +132,10 @@ export default function GroomerPhotoHealthInspectionPage() {
   const [analysisFailed, setAnalysisFailed] = useState(false);
   const [draft, setDraft] = useState<PhotoHealthReportDraftOut | null>(null);
   const [showOverview, setShowOverview] = useState(false);
+  const openFilePicker = (input: HTMLInputElement | null) => {
+    if (!input || input.disabled) return;
+    input.click();
+  };
   const inspectionStatus = inspection?.status;
   const petId = getPetCacheId(booking?.pet_snapshot) ?? bookingId;
   const localDraftKey = Number.isFinite(petId) ? inspectionDraftKey(bookingId, petId as number) : null;
@@ -248,6 +252,8 @@ export default function GroomerPhotoHealthInspectionPage() {
     () => inspection?.photos.filter((photo) => photo.area === activeReviewPhoto?.area) ?? [],
     [activeReviewPhoto?.area, inspection?.photos],
   );
+  const earAreas = step === 2 ? stepConfig?.areas ?? [] : [];
+  const earInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const begin = async () => {
     if (inspection) {
@@ -394,25 +400,109 @@ export default function GroomerPhotoHealthInspectionPage() {
     <ReportPageShell breadcrumbLabel={breadcrumbLabel}>
       {step <= 5 && stepConfig ? (
         <>
-          <div className="space-y-5">
-            {stepConfig.areas.map((area) => (
-              <InspectionAreaSection
-                key={area.area}
-                config={area}
-                photos={inspection.photos.filter((photo) => photo.area === area.area)}
-                disabled={inspection.locked || saving}
-                error={errors[area.area]}
-                onFilesSelected={(files) => void upload(area.area, files)}
-                onRemove={(photo) => void removePhoto(photo)}
-                onOpen={(photo) => setReviewQueue([photo.id])}
-              />
-            ))}
-            {step === 5 ? OBSERVATION_GROUPS.map((group) => (
-              <div key={group.label} className="rounded-2xl bg-[#121212] p-5">
-                <InspectionTagGroup label={group.label} tags={group.tags} selected={observationTags} onChange={setObservationTags} />
+          {step === 2 ? (
+            <section className="rounded-xl bg-white pb-[14px] pl-[13.995px] pr-[13.995px] pt-[13.995px] shadow-[0px_8px_6px_0px_rgba(0,0,0,0.1)]">
+              <div className="flex flex-col gap-3">
+                <div className="flex w-full justify-center">
+                  <p className="w-[323px] text-[0px] leading-[0] font-comfortaa font-semibold text-[#4A3C2A]">
+                    <span className="block text-[16px] leading-[28px]">Ear - After grooming photos</span>
+                    <span className="block font-comfortaa text-[12px] font-normal leading-[16px]">Add up to 2 photos for AI health inspection</span>
+                  </p>
+                </div>
+                <div className="flex flex-col gap-0">
+                  <p className="font-comfortaa text-[14px] leading-[22.75px] text-[#4A3C2A]">Ear photo</p>
+                  <div className="rounded-[16px] border border-[#633479] bg-[#FAFAFA] p-4 shadow-[0px_4px_5px_0px_rgba(0,0,0,0.15)]">
+                    <div className="flex h-[84px] w-full gap-1">
+                      {earAreas.map((area) => {
+                        const areaPhoto = inspection.photos.find((photo) => photo.area === area.area) ?? null;
+                        return (
+                          <div
+                            key={area.area}
+                            className="relative flex min-w-0 flex-1"
+                          >
+                            {areaPhoto ? (
+                              <>
+                                <button
+                                  type="button"
+                                  className="absolute inset-0 overflow-hidden rounded-[14px]"
+                                  onClick={() => setReviewQueue([areaPhoto.id])}
+                                >
+                                  <img
+                                    src={areaPhoto.url}
+                                    alt={areaPhoto.original_filename}
+                                    className="size-full rounded-[14px] object-cover object-center"
+                                  />
+                                </button>
+                                <button
+                                  type="button"
+                                  aria-label={`Remove ${area.label}`}
+                                  className="absolute right-[-4px] top-[-4px] z-20 flex size-[20px] cursor-pointer items-center justify-center rounded-[8px] border border-[#4c4c4c] bg-neutral-100 shadow-[0px_2px_4px_0px_rgba(0,0,0,0.1)]"
+                                  onClick={() => void removePhoto(areaPhoto)}
+                                >
+                                  <span className="relative flex size-[10px] items-center justify-center">
+                                    <span className="absolute h-[1.5px] w-full rotate-45 bg-[#4c4c4c]" />
+                                    <span className="absolute h-[1.5px] w-full rotate-[-45deg] bg-[#4c4c4c]" />
+                                  </span>
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                type="button"
+                                className="flex h-full w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-[14px] border-[1.451px] border-dashed border-[#D4C9E0] bg-white shadow-[0px_1px_2.5px_0px_rgba(0,0,0,0.05)]"
+                                onClick={() => openFilePicker(earInputRefs.current[area.area])}
+                                aria-label={`Upload ${area.label}`}
+                              >
+                                <div className="flex h-[29px] w-[28px] items-center justify-center rounded-full bg-[#F0EBF7]">
+                                  <img alt="" src="https://www.figma.com/api/mcp/asset/97e70b58-326c-44e7-aac1-fa2bb74c7fec.svg" className="size-[20.99px]" />
+                                </div>
+                                <span className="font-comfortaa text-[12px] font-medium leading-[18px] text-[#633479]">{area.label}</span>
+                                <input
+                                  ref={(element) => {
+                                    earInputRefs.current[area.area] = element;
+                                  }}
+                                  type="file"
+                                  accept="image/jpeg,image/jpg,image/png,image/heic,image/heif"
+                                  multiple={false}
+                                  className="hidden"
+                                  onChange={(event) => {
+                                    const selected = Array.from(event.currentTarget.files ?? []);
+                                    if (selected.length > 0) {
+                                      void upload(area.area, selected);
+                                    }
+                                    event.currentTarget.value = "";
+                                  }}
+                                />
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
               </div>
-            )) : null}
-          </div>
+            </section>
+          ) : (
+            <div className="space-y-5">
+              {stepConfig.areas.map((area) => (
+                <InspectionAreaSection
+                  key={area.area}
+                  config={area}
+                  photos={inspection.photos.filter((photo) => photo.area === area.area)}
+                  disabled={inspection.locked || saving}
+                  error={errors[area.area]}
+                  onFilesSelected={(files) => void upload(area.area, files)}
+                  onRemove={(photo) => void removePhoto(photo)}
+                  onOpen={(photo) => setReviewQueue([photo.id])}
+                />
+              ))}
+              {step === 5 ? OBSERVATION_GROUPS.map((group) => (
+                <div key={group.label} className="rounded-2xl bg-[#121212] p-5">
+                  <InspectionTagGroup label={group.label} tags={group.tags} selected={observationTags} onChange={setObservationTags} />
+                </div>
+              )) : null}
+            </div>
+          )}
           {errors.page ? <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-red-700">{errors.page}</p> : null}
           {analysisFailed ? (
             <div role="alert" className="mt-4 rounded-xl bg-red-50 p-4 text-red-700">

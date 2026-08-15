@@ -133,6 +133,7 @@ export function FileUpload({
 
   // 如果提供了 uploadItems，使用外部状态；否则使用内部状态
   const displayItems = uploadItems || internalUploadItems;
+  const inspectionSlotCount = layout === "inspection" ? Math.max(maxFiles ?? 2, displayItems.length) : 0;
 
   // 使用 useMemo 稳定 images 和 fileNames 数组，避免不必要的重新渲染
   const previewImages = useMemo(
@@ -222,11 +223,11 @@ export function FileUpload({
                 return (
                   <div
                     key={stableKey}
-                    className={cn(
-                      layout === "inspection"
+                  className={cn(
+                    layout === "inspection"
                         ? "relative h-[84px] min-w-0 w-full overflow-visible rounded-[14px] border border-[#D4C9E0]"
                         : "relative overflow-visible h-[calc(80*var(--px393))] w-[calc(80*var(--px393))] sm:h-[80px] sm:w-[96px] rounded-[calc(8*var(--px393))] sm:rounded-[8px] shrink-0 border border-neutral-200",
-                    )}
+                  )}
                   >
                     {previewUrl && (
                       <>
@@ -324,6 +325,22 @@ export function FileUpload({
                   </div>
                 );
               })}
+
+              {layout === "inspection" && inspectionSlotCount > displayItems.length
+                ? Array.from({ length: inspectionSlotCount - displayItems.length }, (_, index) => (
+                    <button
+                      key={`inspection-empty-${index}`}
+                      type="button"
+                      className="relative flex h-[84px] min-w-0 w-full cursor-pointer flex-col items-center justify-center gap-[7px] rounded-[14px] border-[1.45px] border-dashed border-[#D4C9E0] bg-white shadow-[0px_1px_5px_0px_rgba(0,0,0,0.05)] transition-colors hover:border-[#de6a07]"
+                      onClick={handleClick}
+                    >
+                      <div className="flex size-[29px] shrink-0 items-center justify-center rounded-full bg-[#F0EBF7]">
+                        <Icon name="add-inspection" className="block size-[28px]" />
+                      </div>
+                      <span className="text-center font-comfortaa text-xs font-medium leading-[18px] text-[#633479]">Add photo</span>
+                    </button>
+                  ))
+                : null}
 
               {/* 添加更多图片按钮 */}
               {canAddMore && (

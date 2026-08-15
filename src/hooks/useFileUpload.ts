@@ -93,6 +93,11 @@ export function useFileUpload({
   const [isDragging, setIsDragging] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
 
+  const openFilePicker = useCallback((input: HTMLInputElement | null) => {
+    if (!input || input.disabled) return;
+    input.click();
+  }, []);
+
   const handleFileSelect = useCallback(
     (selectedFiles: FileList | null) => {
       if (!selectedFiles || selectedFiles.length === 0) return;
@@ -127,9 +132,9 @@ export function useFileUpload({
 
   const handleClick = useCallback(() => {
     if (!disabled) {
-      fileInputRef.current?.click();
+      openFilePicker(fileInputRef.current);
     }
-  }, [disabled]);
+  }, [disabled, openFilePicker]);
 
   const handleFileChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {

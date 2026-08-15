@@ -47,6 +47,7 @@ describe("InspectionPhotoReview", () => {
   it("uses the approved posture preview actions", async () => {
     const onClose = vi.fn();
     const onProceedToNotes = vi.fn();
+    const onChange = vi.fn();
     render(
       <InspectionPhotoReview
         photos={[photo({ area: "posture" })]}
@@ -55,7 +56,7 @@ describe("InspectionPhotoReview", () => {
         open
         onActivePhotoChange={vi.fn()}
         onClose={onClose}
-        onChange={vi.fn()}
+        onChange={onChange}
         onAddPhoto={vi.fn()}
         observationTags={[]}
         onObservationTagsChange={vi.fn()}
@@ -63,9 +64,30 @@ describe("InspectionPhotoReview", () => {
       />,
     );
 
-    fireEvent.click(screen.getAllByRole("button", { name: "Add Notes & Generate Report" })[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: "Next - Add notes" })[0]);
 
     await waitFor(() => expect(onProceedToNotes).toHaveBeenCalled());
+    expect(onChange).toHaveBeenCalledWith(1, "normal", []);
+  });
+
+  it("uses the summary label when posture observations are selected", () => {
+    render(
+      <InspectionPhotoReview
+        photos={[photo({ area: "posture", confirmed: true })]}
+        activePhotoId={1}
+        config={{ area: "posture", label: "Posture photo", hints: [] }}
+        open
+        onActivePhotoChange={vi.fn()}
+        onClose={vi.fn()}
+        onChange={vi.fn()}
+        onAddPhoto={vi.fn()}
+        observationTags={["paw_licking"]}
+        onObservationTagsChange={vi.fn()}
+        onProceedToNotes={vi.fn()}
+      />,
+    );
+
+    expect(screen.getAllByRole("button", { name: "Next - Summary & notes" })).toHaveLength(1);
   });
 
   it("cycles through photos in the current area", () => {

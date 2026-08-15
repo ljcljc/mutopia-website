@@ -110,7 +110,9 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     vi.mocked(getPhotoHealthInspection).mockResolvedValue({ exists: true, inspection: { ...inspection, current_step: 2 } });
     renderPage();
 
-    await screen.findByRole("heading", { name: "Left ear - after grooming photos" });
+    expect(await screen.findByText("Ear - After grooming photos")).toBeInTheDocument();
+    expect(screen.getByText("Add up to 2 photos for AI health inspection")).toBeInTheDocument();
+    expect(screen.getByText("Ear photo")).toBeInTheDocument();
     const previous = screen.getByRole("button", { name: "Previous" });
     const actions = previous.parentElement;
     expect(previous).toHaveClass(

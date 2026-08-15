@@ -32,7 +32,161 @@ describe("InspectionAreaSection", () => {
     expect(screen.getByText("AI Scan")).toBeInTheDocument();
     expect(screen.getByText("Skin - after grooming photos")).toBeInTheDocument();
     expect(screen.getByText("Skin photo")).toBeInTheDocument();
-    expect(screen.getByText("Add photo")).toBeInTheDocument();
+    expect(screen.getAllByText("Add photo")).toHaveLength(2);
     expect(screen.getByAltText("skin.jpg").closest(".flex-wrap")).toBeInTheDocument();
+  });
+
+  it("shows the ear side badge for ear uploads", () => {
+    const photo: InspectionPhotoOut = {
+      id: 8,
+      area: "left_ear",
+      url: "/left-ear.jpg",
+      original_filename: "left-ear.jpg",
+      normalized_mime_type: "image/jpeg",
+      classification: "normal",
+      finding_hints: [],
+      confirmed: true,
+    };
+
+    render(
+      <InspectionAreaSection
+        config={{ area: "left_ear", label: "Left ear", hints: [] }}
+        photos={[photo]}
+        onFilesSelected={vi.fn()}
+        onRemove={vi.fn()}
+        onOpen={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByAltText("left-ear.jpg")).toBeInTheDocument();
+    expect(screen.getByLabelText("Upload Right ear")).toBeInTheDocument();
+  });
+
+  it("renders mouth as a single inspection upload card", () => {
+    render(
+      <InspectionAreaSection
+        config={{ area: "mouth", label: "Mouth photo", hints: [] }}
+        photos={[]}
+        onFilesSelected={vi.fn()}
+        onRemove={vi.fn()}
+        onOpen={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByLabelText("Upload Mouth area")).toBeInTheDocument();
+    expect(screen.getAllByText("Add photo")).toHaveLength(1);
+  });
+
+  it("opens the file picker from Add photo after a mouth photo is present", () => {
+    const photo: InspectionPhotoOut = {
+      id: 9,
+      area: "mouth",
+      url: "/mouth.jpg",
+      original_filename: "mouth.jpg",
+      normalized_mime_type: "image/jpeg",
+      classification: "normal",
+      finding_hints: [],
+      confirmed: true,
+    };
+    const clickSpy = vi.spyOn(HTMLInputElement.prototype, "click");
+
+    render(
+      <InspectionAreaSection
+        config={{ area: "mouth", label: "Mouth photo", hints: [] }}
+        photos={[photo]}
+        onFilesSelected={vi.fn()}
+        onRemove={vi.fn()}
+        onOpen={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByLabelText("Add Mouth photo"));
+    expect(clickSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders a second mouth photo in the Add photo card", () => {
+    const photos: InspectionPhotoOut[] = [
+      {
+        id: 10,
+        area: "mouth",
+        url: "/mouth-1.jpg",
+        original_filename: "mouth-1.jpg",
+        normalized_mime_type: "image/jpeg",
+        classification: "normal",
+        finding_hints: [],
+        confirmed: true,
+      },
+      {
+        id: 11,
+        area: "mouth",
+        url: "/mouth-2.jpg",
+        original_filename: "mouth-2.jpg",
+        normalized_mime_type: "image/jpeg",
+        classification: "ai_scan",
+        finding_hints: [],
+        confirmed: true,
+      },
+    ];
+
+    render(
+      <InspectionAreaSection
+        config={{ area: "mouth", label: "Mouth photo", hints: [] }}
+        photos={photos}
+        onFilesSelected={vi.fn()}
+        onRemove={vi.fn()}
+        onOpen={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByAltText("mouth-1.jpg")).toBeInTheDocument();
+    expect(screen.getByAltText("mouth-2.jpg")).toBeInTheDocument();
+    expect(screen.getByLabelText("Add Mouth photo")).toBeInTheDocument();
+  });
+
+  it("shows the AI Scan tag only for mouth photos selected for analysis", () => {
+    const photos: InspectionPhotoOut[] = [
+      {
+        id: 12,
+        area: "mouth",
+        url: "/mouth-ai.jpg",
+        original_filename: "mouth-ai.jpg",
+        normalized_mime_type: "image/jpeg",
+        classification: "ai_scan",
+        finding_hints: [],
+        confirmed: true,
+      },
+      {
+        id: 13,
+        area: "mouth",
+        url: "/mouth-normal.jpg",
+        original_filename: "mouth-normal.jpg",
+        normalized_mime_type: "image/jpeg",
+        classification: "normal",
+        finding_hints: [],
+        confirmed: true,
+      },
+      {
+        id: 14,
+        area: "mouth",
+        url: "/mouth-normal-2.jpg",
+        original_filename: "mouth-normal-2.jpg",
+        normalized_mime_type: "image/jpeg",
+        classification: "normal",
+        finding_hints: [],
+        confirmed: true,
+      },
+    ];
+
+    render(
+      <InspectionAreaSection
+        config={{ area: "mouth", label: "Mouth photo", hints: [] }}
+        photos={photos}
+        onFilesSelected={vi.fn()}
+        onRemove={vi.fn()}
+        onOpen={vi.fn()}
+      />,
+    );
+
+    expect(screen.getAllByText("AI Scan")).toHaveLength(1);
   });
 });

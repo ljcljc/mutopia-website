@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { Icon, OrangeButton } from "@/components/common";
 import { toast } from "sonner";
 import type { InspectionPhotoClassification, InspectionPhotoOut } from "@/lib/api";
@@ -57,27 +57,55 @@ export function InspectionPhotoReview({
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [dragHeight, setDragHeight] = useState<number | null>(null);
+  const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
+  const [imageNaturalSize, setImageNaturalSize] = useState({ width: 0, height: 0 });
   const dragStart = useRef<{ y: number; height: number; snap: PanelSnap } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const openFilePicker = (input: HTMLInputElement | null) => {
+    if (!input || input.disabled) return;
+    input.click();
+  };
+  const viewportRef = useRef<HTMLDivElement>(null);
   const imagePointers = useRef(new Map<number, { x: number; y: number }>());
   const imageGesture = useRef<{ x: number; y: number; positionX: number; positionY: number; distance?: number; scale: number } | null>(null);
+  const mobilePanelHeight = dragHeight ?? SNAP_HEIGHTS[panelSnap];
+  const mobilePanelHeightCss = typeof mobilePanelHeight === "number" ? `${mobilePanelHeight}px` : mobilePanelHeight;
 
   useEffect(() => {
-    setClassification(isPosture ? "ai_scan" : photo?.classification ?? "normal");
+    setClassification(photo?.classification ?? "normal");
     setHints(photo?.finding_hints ?? []);
-  }, [isPosture, photo]);
+  }, [photo]);
 
   useEffect(() => {
     if (!photo || photo.confirmed) return;
-    onChange(photo.id, isPosture ? "ai_scan" : photo.classification ?? "normal", photo.finding_hints ?? []);
-  }, [isPosture, onChange, photo]);
+    onChange(photo.id, photo.classification ?? "normal", photo.finding_hints ?? []);
+  }, [onChange, photo]);
 
   useEffect(() => setPanelSnap(initialPanelSnap), [initialPanelSnap, open]);
 
   useEffect(() => {
     setScale(1);
     setPosition({ x: 0, y: 0 });
+    setImageNaturalSize({ width: 0, height: 0 });
   }, [photo?.id]);
+
+  useEffect(() => {
+    const updateViewportSize = () => {
+      const rect = viewportRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      setViewportSize({ width: rect.width, height: rect.height });
+    };
+    updateViewportSize();
+    const observer = typeof ResizeObserver !== "undefined" && viewportRef.current
+      ? new ResizeObserver(() => updateViewportSize())
+      : null;
+    if (observer && viewportRef.current) observer.observe(viewportRef.current);
+    window.addEventListener("resize", updateViewportSize);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", updateViewportSize);
+    };
+  }, [mobilePanelHeight, photo?.id]);
 
   useEffect(() => {
     if (!open) return;
@@ -91,13 +119,58 @@ export function InspectionPhotoReview({
     [photos],
   );
   const aiLimitReached = classification !== "ai_scan" && aiSelectedCount >= 2;
+  const fitScale = viewportSize.width > 0 && viewportSize.height > 0 && imageNaturalSize.width > 0 && imageNaturalSize.height > 0
+    ? Math.max(viewportSize.width / imageNaturalSize.width, viewportSize.height / imageNaturalSize.height)
+    : 1;
+  const containScale = viewportSize.width > 0 && viewportSize.height > 0 && imageNaturalSize.width > 0 && imageNaturalSize.height > 0
+    ? Math.min(viewportSize.width / imageNaturalSize.width, viewportSize.height / imageNaturalSize.height)
+    : 1;
+  const scaleFloor = fitScale > 0 ? Math.max(0.5, containScale / fitScale) : 0.5;
+  const dragThreshold = 1.08;
+  const previewScale = fitScale * scale;
+  const getPanLimits = (scaleValue = scale) => {
+    const nextRenderedWidth = imageNaturalSize.width > 0 ? imageNaturalSize.width * fitScale * scaleValue : 0;
+    const nextRenderedHeight = imageNaturalSize.height > 0 ? imageNaturalSize.height * fitScale * scaleValue : 0;
+    const overflowX = Math.max(0, (nextRenderedWidth - viewportSize.width) / 2);
+    const overflowY = Math.max(0, (nextRenderedHeight - viewportSize.height) / 2);
+    const relaxedLimit = 24;
+    return {
+      x: scaleValue >= dragThreshold ? overflowX : Math.min(relaxedLimit, overflowX || relaxedLimit),
+      y: scaleValue >= dragThreshold ? overflowY : Math.min(relaxedLimit, overflowY || relaxedLimit),
+    };
+  };
+  const clampPosition = (nextPosition: { x: number; y: number }, scaleValue = scale) => {
+    const limits = getPanLimits(scaleValue);
+    return {
+      x: Math.max(-limits.x, Math.min(limits.x, nextPosition.x)),
+      y: Math.max(-limits.y, Math.min(limits.y, nextPosition.y)),
+    };
+  };
+  const previewStyle = imageNaturalSize.width > 0 && imageNaturalSize.height > 0
+    ? {
+        width: `${imageNaturalSize.width}px`,
+        height: `${imageNaturalSize.height}px`,
+        maxWidth: "none",
+        maxHeight: "none",
+        aspectRatio: `${imageNaturalSize.width} / ${imageNaturalSize.height}`,
+        transform: `translate(-50%, -50%) translate(${position.x}px, ${position.y}px) scale(${previewScale})`,
+        transformOrigin: "center center",
+      }
+    : {
+        transform: `translate(-50%, -50%) translate(${position.x}px, ${position.y}px) scale(${scale})`,
+        transformOrigin: "center center",
+      };
+
+  useEffect(() => {
+    setPosition((current) => clampPosition(current));
+  }, [previewScale, viewportSize.width, viewportSize.height, imageNaturalSize.width, imageNaturalSize.height, scale]);
 
   if (!open || !photo || !config) return null;
 
   const apply = (nextClassification: InspectionPhotoClassification, nextHints = hints) => {
     setClassification(nextClassification);
     setHints(nextHints);
-    onChange(photo.id, isPosture ? "ai_scan" : nextClassification, isPosture || nextClassification === "normal" ? [] : nextHints);
+    onChange(photo.id, nextClassification, nextClassification === "normal" ? [] : nextHints);
   };
   const selectHints = (nextHints: string[]) => {
     if (aiLimitReached && nextHints.length > hints.length) {
@@ -159,9 +232,27 @@ export function InspectionPhotoReview({
     if (!gesture) return;
     if (points.length === 2 && gesture.distance) {
       const distance = Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y);
-      setScale(Math.max(0.5, Math.min(4, gesture.scale * distance / gesture.distance)));
-    } else if (points.length === 1 && scale > 1) {
-      setPosition({ x: gesture.positionX + event.clientX - gesture.x, y: gesture.positionY + event.clientY - gesture.y });
+      const nextScale = Math.max(scaleFloor, Math.min(4, gesture.scale * distance / gesture.distance));
+      const midpoint = {
+        x: (points[0].x + points[1].x) / 2,
+        y: (points[0].y + points[1].y) / 2,
+      };
+      const nextPreviewScale = fitScale * nextScale;
+      const currentPreviewScale = fitScale * gesture.scale;
+      const centerX = viewportSize.width / 2;
+      const centerY = viewportSize.height / 2;
+      const focalX = currentPreviewScale > 0 ? (midpoint.x - centerX - gesture.positionX) / currentPreviewScale : 0;
+      const focalY = currentPreviewScale > 0 ? (midpoint.y - centerY - gesture.positionY) / currentPreviewScale : 0;
+      setScale(nextScale);
+      setPosition(clampPosition({
+        x: midpoint.x - centerX - focalX * nextPreviewScale,
+        y: midpoint.y - centerY - focalY * nextPreviewScale,
+      }, nextScale));
+    } else if (points.length === 1) {
+      setPosition(clampPosition({
+        x: gesture.positionX + event.clientX - gesture.x,
+        y: gesture.positionY + event.clientY - gesture.y,
+      }));
     }
   };
   const imagePointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -172,6 +263,8 @@ export function InspectionPhotoReview({
   };
 
   const title = `Any ${config.label.replace(/ photo$/i, "").toLowerCase()} issue?`;
+  const previewLabel = `${activeIndex + 1}. ${config.label.replace(/ photo$/i, "")}`;
+  const postureNextLabel = observationTags.length > 0 ? "Next - Summary & notes" : "Next - Add notes";
   const controls = (
     <>
       {!isPosture ? (
@@ -216,7 +309,7 @@ export function InspectionPhotoReview({
       ) : null}
       <div className={`mt-5 justify-end gap-3 ${isPosture ? "flex" : "hidden md:flex"}`}>
         {isPosture ? (
-          <OrangeButton type="button" variant="outline" onClick={() => onProceedToNotes?.()}>Add Notes &amp; Generate Report</OrangeButton>
+          <OrangeButton type="button" variant="outline" onClick={() => onProceedToNotes?.()}>{postureNextLabel}</OrangeButton>
         ) : null}
         <OrangeButton type="button" variant="outline" onClick={onClose} className="hidden md:block">Cancel</OrangeButton>
         <input
@@ -231,7 +324,7 @@ export function InspectionPhotoReview({
             event.target.value = "";
           }}
         />
-        <OrangeButton type="button" onClick={() => fileInputRef.current?.click()} className="hidden md:block">Add photo</OrangeButton>
+        <OrangeButton type="button" onClick={() => openFilePicker(fileInputRef.current)} className="hidden md:block">Add photo</OrangeButton>
       </div>
     </>
   );
@@ -254,7 +347,11 @@ export function InspectionPhotoReview({
 
         <div className="relative h-full md:min-h-0 md:flex-1 md:overflow-y-auto md:p-8">
           <div
-            className="relative w-full h-full touch-none overflow-hidden bg-[#EFEFEF] md:h-[360px]"
+            ref={viewportRef}
+            className="relative z-0 w-full touch-none overflow-hidden bg-[#EFEFEF] md:h-[360px] md:w-full"
+            style={{
+              ["--review-panel-height" as string]: mobilePanelHeightCss,
+            } as CSSProperties}
             onPointerDown={imagePointerDown}
             onPointerMove={imagePointerMove}
             onPointerUp={imagePointerUp}
@@ -268,33 +365,40 @@ export function InspectionPhotoReview({
               setScale((current) => Math.max(0.5, Math.min(4, current + (event.deltaY < 0 ? 0.25 : -0.25))));
             }}
           >
-            <div className="h-full overflow-hidden pt-4 md:block md:h-full md:pt-0">
-              <img
-                src={photo.url}
-                alt={photo.original_filename || config.label}
-                draggable={false}
-                className="h-full w-full select-none object-cover object-top transition-transform duration-75 md:h-full md:max-h-none md:w-full md:object-cover md:object-top"
-                style={{
-                  transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
-                  transformOrigin: "top center",
-                }}
-              />
-            </div>
-            {photos.length > 1 ? (
-              <>
-                <button type="button" aria-label="Previous photo" onClick={() => move(-1)} className="absolute left-[5%] top-1/2 z-10 flex size-[44px] -translate-y-1/2 cursor-pointer items-center justify-center rounded-[16777200px] border border-solid border-gray-200 bg-white shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] transition-colors hover:bg-neutral-50">
+            <div className="relative h-[calc(100dvh-var(--review-panel-height))] min-h-[120px] overflow-hidden md:h-full">
+              <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute bottom-1 left-4 z-20 flex items-center gap-2 rounded-full bg-[rgba(0,0,0,0.55)] px-4 py-2 font-comfortaa text-[12px] font-bold leading-[18px] text-white shadow-[0px_4px_12px_rgba(0,0,0,0.16)]">
+                  <span className="h-2 w-2 rounded-[24338400px] bg-white opacity-[0.5074]" />
+                  {previewLabel}
+                </div>
+                <img
+                  src={photo.url}
+                  alt={photo.original_filename || config.label}
+                  draggable={false}
+                  className="absolute left-1/2 top-1/2 select-none will-change-transform"
+                  style={previewStyle as CSSProperties}
+                  onLoad={(event) => {
+                    setImageNaturalSize({
+                      width: event.currentTarget.naturalWidth,
+                      height: event.currentTarget.naturalHeight,
+                    });
+                  }}
+                />
+              </div>
+              {photos.length > 1 ? <div className="pointer-events-none absolute inset-0 z-[70]">
+                <button type="button" aria-label="Previous photo" onClick={() => move(-1)} className="pointer-events-auto absolute left-[5%] top-1/2 flex size-[44px] -translate-y-1/2 cursor-pointer items-center justify-center rounded-[16777200px] border border-solid border-gray-200 bg-white shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] transition-colors hover:bg-neutral-50">
                   <Icon name="nav-prev" className="block size-4 text-[#4a3c2a]" />
                 </button>
-                <button type="button" aria-label="Next photo" onClick={() => move(1)} className="absolute right-[5%] top-1/2 z-10 flex size-[44px] -translate-y-1/2 cursor-pointer items-center justify-center rounded-[16777200px] border border-solid border-gray-200 bg-white shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] transition-colors hover:bg-neutral-50">
+                <button type="button" aria-label="Next photo" onClick={() => move(1)} className="pointer-events-auto absolute right-[5%] top-1/2 flex size-[44px] -translate-y-1/2 cursor-pointer items-center justify-center rounded-[16777200px] border border-solid border-gray-200 bg-white shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)] transition-colors hover:bg-neutral-50">
                   <Icon name="nav-next" className="block size-4 text-[#4a3c2a]" />
                 </button>
                 <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1.5">
                   {photos.map((item, index) => <span key={item.id} className={`h-1.5 rounded-full ${index === activeIndex ? "w-7 bg-white" : "w-3 bg-white/45"}`} />)}
                 </div>
-              </>
-            ) : null}
+              </div> : null}
+            </div>
             <div className="absolute bottom-4 left-1/2 hidden -translate-x-1/2 items-center gap-4 rounded-full bg-white/90 px-5 py-2 text-[#343443] shadow md:flex">
-              <button type="button" aria-label="Zoom out" className="cursor-pointer" onClick={() => setScale((current) => Math.max(0.75, current - 0.25))}>−</button>
+              <button type="button" aria-label="Zoom out" className="cursor-pointer" onClick={() => setScale((current) => Math.max(scaleFloor, current - 0.25))}>−</button>
               <span>{Math.round(scale * 100)}%</span>
               <button type="button" aria-label="Zoom in" className="cursor-pointer" onClick={() => setScale((current) => Math.min(4, current + 0.25))}>+</button>
             </div>
@@ -309,7 +413,7 @@ export function InspectionPhotoReview({
 
         <section
           className="absolute inset-x-0 bottom-0 flex flex-col rounded-t-[28px] bg-[#121212] text-white shadow-[0_-8px_32px_rgba(0,0,0,.35)] transition-[height] duration-200 md:hidden"
-          style={{ height: dragHeight ?? SNAP_HEIGHTS[panelSnap] }}
+          style={{ height: mobilePanelHeight }}
         >
           <div className="touch-none select-none cursor-grab px-5 pb-4 pt-3 active:cursor-grabbing" onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerUp}>
             <div className="mx-auto mb-3 h-1.5 w-14 rounded-full bg-white/35" />
