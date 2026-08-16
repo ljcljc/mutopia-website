@@ -2760,11 +2760,7 @@
                     "required": true
                 }
             ],
-            "responses": {
-                "200": {
-                    "description": "OK"
-                }
-            },
+            "responses": {"200": {"description": "OK"}},
             "tags": [
                 "pets"
             ],
@@ -3412,75 +3408,6 @@
             ]
         }
     },
-    "/api/groomers/bookings/{booking_id}/photo_health_report/draft/pdf-preview": {
-        "post": {
-            "operationId": "api_photo_health_preview_photo_health_report_pdf",
-            "summary": "Preview Photo Health Report Pdf",
-            "parameters": [
-                {
-                    "in": "path",
-                    "name": "booking_id",
-                    "schema": {
-                        "title": "Booking Id",
-                        "type": "integer"
-                    },
-                    "required": true
-                }
-            ],
-            "responses": {
-                "200": {
-                    "description": "OK"
-                }
-            },
-            "tags": [
-                "photo-health"
-            ],
-            "security": [
-                {
-                    "JWTAuth": []
-                }
-            ]
-        }
-    },
-    "/api/groomers/bookings/{booking_id}/photo_health_report/draft/pdf-preview/{artifact_id}": {
-        "get": {
-            "operationId": "api_photo_health_stream_photo_health_report_pdf_preview",
-            "summary": "Stream Photo Health Report Pdf Preview",
-            "parameters": [
-                {
-                    "in": "path",
-                    "name": "booking_id",
-                    "schema": {
-                        "title": "Booking Id",
-                        "type": "integer"
-                    },
-                    "required": true
-                },
-                {
-                    "in": "path",
-                    "name": "artifact_id",
-                    "schema": {
-                        "title": "Artifact Id",
-                        "type": "integer"
-                    },
-                    "required": true
-                }
-            ],
-            "responses": {
-                "200": {
-                    "description": "OK"
-                }
-            },
-            "tags": [
-                "photo-health"
-            ],
-            "security": [
-                {
-                    "JWTAuth": []
-                }
-            ]
-        }
-    },
     "/api/groomers/bookings/{booking_id}/photo_health_report/published": {
         "get": {
             "operationId": "api_photo_health_get_published_photo_health_report",
@@ -3518,7 +3445,28 @@
             ],
             "responses": {
                 "200": {
-                    "description": "OK"
+                    "description": "OK",
+                    "content": {
+                        "application/json": {
+                            "schema": { "$ref": "#/components/schemas/PhotoHealthReportPublishOut" }
+                        }
+                    }
+                },
+                "202": {
+                    "description": "PDF generation is in progress",
+                    "content": {
+                        "application/json": {
+                            "schema": { "$ref": "#/components/schemas/PhotoHealthReportPreparationOut" }
+                        }
+                    }
+                },
+                "409": {
+                    "description": "PDF generation failed and requires operations recovery",
+                    "content": {
+                        "application/json": {
+                            "schema": { "$ref": "#/components/schemas/ErrorOut" }
+                        }
+                    }
                 }
             },
             "tags": [
@@ -5929,6 +5877,33 @@
         "title": "InspectionPhotoOut",
         "type": "object"
       },
+      "PhotoHealthReportPublishOut": {
+        "properties": {
+          "report_id": { "title": "Report Id", "type": "integer" },
+          "grade": { "title": "Grade", "type": "string" },
+          "published_at": { "format": "date-time", "title": "Published At", "type": "string" },
+          "reused": { "title": "Reused", "type": "boolean" }
+        },
+        "required": ["report_id", "grade", "published_at", "reused"],
+        "title": "PhotoHealthReportPublishOut",
+        "type": "object"
+      },
+      "PhotoHealthReportPreparationOut": {
+        "properties": {
+          "status": { "title": "Status", "type": "string" }
+        },
+        "required": ["status"],
+        "title": "PhotoHealthReportPreparationOut",
+        "type": "object"
+      },
+      "ErrorOut": {
+        "properties": {
+          "error": { "title": "Error", "type": "string" }
+        },
+        "required": ["error"],
+        "title": "ErrorOut",
+        "type": "object"
+      },
       "PhotoHealthInspectionOut": {
         "properties": {
           "id": { "title": "Id", "type": "integer" },
@@ -5945,6 +5920,11 @@
           "overall_professional_impression": { "title": "Overall Professional Impression", "type": "string" },
           "step6_phase": { "title": "Step6 Phase", "type": "string" },
           "locked": { "title": "Locked", "type": "boolean" },
+          "pdf_generation_status": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "default": null,
+            "title": "Pdf Generation Status"
+          },
           "photos": {
             "items": { "$ref": "#/components/schemas/InspectionPhotoOut" },
             "title": "Photos",

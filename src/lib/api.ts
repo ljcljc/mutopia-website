@@ -1894,6 +1894,7 @@ export interface PhotoHealthInspectionOut {
     | "grade_d";
   step6_phase: "impression" | "notes";
   locked: boolean;
+  pdf_generation_status?: "retry" | "running" | "succeeded" | "failed" | null;
   photos: InspectionPhotoOut[];
 }
 
@@ -1935,18 +1936,12 @@ export interface PhotoHealthReportDraftOut {
   >;
   source_version: number;
   previewed_source_version: number | null;
+  pdf_generation_status?: "retry" | "running" | "succeeded" | "failed" | null;
   photos: InspectionPhotoOut[];
   published?: boolean;
   report_id?: number;
   published_at?: string;
   pdf_url?: string;
-}
-
-export interface HealthReportPdfPreviewOut {
-  artifact_id: number;
-  version: number;
-  checksum_sha256: string;
-  url: string;
 }
 
 export interface PublishedPetHealthReportOut {
@@ -2713,31 +2708,22 @@ export async function updatePhotoHealthReportInsights(
   return response.data;
 }
 
-export async function previewPhotoHealthReportPdf(
-  bookingId: number
-): Promise<HealthReportPdfPreviewOut> {
-  const response = await http.post<HealthReportPdfPreviewOut>(
-    `/api/groomers/bookings/${bookingId}/photo_health_report/draft/pdf-preview`
-  );
-  return response.data;
-}
-
 export async function fetchAuthenticatedBlob(url: string): Promise<Blob> {
   const response = await http.get<Blob>(url);
   return response.data;
 }
 
 export async function publishPhotoHealthReport(bookingId: number): Promise<{
-  report_id: number;
-  grade: string;
-  email_status: string;
-  reused: boolean;
+  status?: "preparing";
+  report_id?: number;
+  grade?: string;
+  reused?: boolean;
 }> {
   const response = await http.post<{
-    report_id: number;
-    grade: string;
-    email_status: string;
-    reused: boolean;
+    status?: "preparing";
+    report_id?: number;
+    grade?: string;
+    reused?: boolean;
   }>(`/api/groomers/bookings/${bookingId}/photo_health_report/publish`);
   return response.data;
 }

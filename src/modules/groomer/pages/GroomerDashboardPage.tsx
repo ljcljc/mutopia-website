@@ -400,7 +400,13 @@ function CompletedServiceCard({
         onClick={onFillReport}
         className="mt-4 border-[#FFF7ED]! text-[#FFF7ED]! hover:bg-white/10! active:bg-white/10! focus-visible:bg-white/10! [&_p]:font-semibold [&_p]:text-[#FFF7ED]!"
       >
-        {appointment.hasPublishedHealthReport ? "View health report" : `Fill report for ${appointment.petName}`}
+        {appointment.hasPublishedHealthReport
+          ? "View health report"
+          : appointment.healthReportPreparationStatus === "preparing"
+            ? "Preparing health report"
+            : appointment.healthReportPreparationStatus === "failed"
+              ? "Report preparation failed"
+              : `Fill report for ${appointment.petName}`}
       </OrangeButton>
     </article>
   );
@@ -496,7 +502,13 @@ function ReviewedServiceCard({
         onClick={onFillReport}
         className="mt-4 flex h-12 w-full items-center justify-center rounded-full border-2 border-[#FFF7ED] px-7 font-comfortaa text-[16px] font-semibold leading-[17.5px] text-[#FFF7ED] transition-colors hover:bg-white/10"
       >
-        {appointment.hasPublishedHealthReport ? "View health report" : `Fill report for ${appointment.petName}`}
+        {appointment.hasPublishedHealthReport
+          ? "View health report"
+          : appointment.healthReportPreparationStatus === "preparing"
+            ? "Preparing health report"
+            : appointment.healthReportPreparationStatus === "failed"
+              ? "Report preparation failed"
+              : `Fill report for ${appointment.petName}`}
       </button>
       <button
         type="button"

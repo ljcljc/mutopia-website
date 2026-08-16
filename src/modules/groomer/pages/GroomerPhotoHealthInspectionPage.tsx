@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
 import { OrangeButton } from "@/components/common";
 import { Spinner } from "@/components/common/Spinner";
 import AccountContentContainer from "@/components/layout/AccountContentContainer";
@@ -15,7 +16,6 @@ import {
   getPhotoHealthInspection,
   savePhotoHealthInspectionProgress,
   retryPhotoHealthAnalysis,
-  previewPhotoHealthReportPdf,
   publishPhotoHealthReport,
   startPhotoHealthInspection,
   submitPhotoHealthInspection,
@@ -644,13 +644,17 @@ export default function GroomerPhotoHealthInspectionPage() {
             );
             setDraft(updated);
           }}
-          onPreviewPdf={async () => {
-            if (draft.pdf_url) return fetchAuthenticatedBlob(draft.pdf_url);
-            const preview = await previewPhotoHealthReportPdf(bookingId);
-            return fetchAuthenticatedBlob(preview.url);
+          onViewPdf={async () => {
+            if (!draft.pdf_url) throw new Error("Published PDF is unavailable");
+            return fetchAuthenticatedBlob(draft.pdf_url);
           }}
           onPublish={async () => {
-            await publishPhotoHealthReport(bookingId);
+            const result = await publishPhotoHealthReport(bookingId);
+            toast.success(
+              result.status === "preparing"
+                ? "Report is being prepared"
+                : "Health report published"
+            );
             navigate("/groomer/dashboard");
           }}
         />

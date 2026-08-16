@@ -50,6 +50,7 @@ export type DashboardAppointment = GroomerUpNextAppointment & {
   pendingCheckUp?: PendingCheckUpSummary | null;
   review?: ReviewSummaryOut | null;
   hasPublishedHealthReport?: boolean;
+  healthReportPreparationStatus?: "preparing" | "failed";
   invitationId?: number;
   proposalSlots?: string[];
   proposedTimeOptions?: Array<{ date: string; slot: "am" | "pm"; time: string; datetime_local: string }>;
@@ -577,6 +578,10 @@ function mapDashboardAppointment(raw: unknown): DashboardAppointment | null {
     scheduledTime,
     status: getString(record, ["status"]),
     hasPublishedHealthReport: record.has_published_health_report === true,
+    healthReportPreparationStatus:
+      record.health_report_preparation_status === "preparing" || record.health_report_preparation_status === "failed"
+        ? record.health_report_preparation_status
+        : undefined,
     weightValue: getString(record, ["weight_value", "weight_kg", "weight"], getString(pet, ["weight_value", "weight_kg", "weight"])),
     weightUnit: getString(record, ["weight_unit"], getString(pet, ["weight_unit"])),
     ...estimate,

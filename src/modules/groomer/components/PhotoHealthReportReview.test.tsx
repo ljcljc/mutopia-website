@@ -24,7 +24,7 @@ describe("PhotoHealthReportReview", () => {
       <PhotoHealthReportReview
         draft={draft}
         onSaveInsights={vi.fn()}
-        onPreviewPdf={vi.fn()}
+        onViewPdf={vi.fn()}
         onPublish={vi.fn()}
       />,
     );
