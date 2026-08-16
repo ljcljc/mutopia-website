@@ -69,4 +69,20 @@ describe("PhotoHealthReportReview", () => {
     expect(screen.getByText("Friendly")).toBeInTheDocument();
     expect(screen.getByText("Completed")).toBeInTheDocument();
   });
+
+  it("allows a failed PDF generation to be retried", () => {
+    render(
+      <PhotoHealthReportReview
+        draft={{ ...draft, pdf_generation_status: "failed" }}
+        booking={booking}
+        onSaveInsights={vi.fn()}
+        onViewPdf={vi.fn()}
+        onPublish={vi.fn().mockResolvedValue(undefined)}
+      />
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Retry AI health report" })
+    ).toBeEnabled();
+  });
 });

@@ -13,3 +13,11 @@ _Avoid_: Saved login, cached password
 **Local Inspection Draft**:
 The unsubmitted health-inspection state stored only in the groomer's current browser. It is the sole source for resuming a draft inspection, includes image classifications such as AI Scan, and is removed after final submission succeeds.
 _Avoid_: Server draft, saved inspection
+
+**Health Report Draft**:
+The generated health report awaiting groomer review. It is visible to groomers only and is not a client-facing report.
+_Avoid_: Published report, preliminary client report
+
+**Published Health Report**:
+The groomer-approved health report available to the pet owner.
+_Avoid_: Draft report, generated report

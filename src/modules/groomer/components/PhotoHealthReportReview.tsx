@@ -178,7 +178,7 @@ export function PhotoHealthReportReview({
       ) : null}
       {generationFailed ? (
         <p className="mt-5 rounded-xl bg-[#FFF1F2] px-4 py-3 text-sm text-[#9F1239]">
-          Report preparation failed. Our operations team has been alerted.
+          Report preparation failed. You can retry generation now.
         </p>
       ) : null}
 
@@ -221,7 +221,7 @@ export function PhotoHealthReportReview({
         <OrangeButton
           type="button"
           fullWidth
-          disabled={editing || preparing || generationFailed || publishing}
+          disabled={editing || preparing || publishing}
           className="mt-7 !bg-[#00A63E] shadow-[0_4px_6px_rgba(0,166,62,0.3)] hover:!bg-[rgba(0,166,62,0.8)] active:!bg-[rgba(0,166,62,0.8)] focus-visible:!bg-[rgba(0,166,62,0.8)]"
           onClick={() => {
             setPublishing(true);
@@ -230,7 +230,7 @@ export function PhotoHealthReportReview({
         >
           <span className="flex items-center justify-center gap-3 font-comfortaa text-[16px] font-bold leading-6 text-white">
             <Icon name="submit-ai-health-report" size={20} />
-            Submit AI health report
+            {generationFailed ? "Retry AI health report" : "Submit AI health report"}
           </span>
         </OrangeButton>
       ) : null}
