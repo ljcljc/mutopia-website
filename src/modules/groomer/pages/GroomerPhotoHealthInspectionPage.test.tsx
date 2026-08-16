@@ -7,7 +7,6 @@ import {
   getGroomerBookingDetail,
   getPhotoHealthAnalysis,
   getPhotoHealthInspection,
-  savePhotoHealthInspectionProgress,
   startPhotoHealthInspection,
   type PhotoHealthInspectionOut,
 } from "@/lib/api";
@@ -21,7 +20,6 @@ vi.mock("@/lib/api", async (importOriginal) => {
     getPhotoHealthAnalysis: vi.fn(),
     getPhotoHealthInspection: vi.fn(),
     startPhotoHealthInspection: vi.fn(),
-    savePhotoHealthInspectionProgress: vi.fn(),
     updateInspectionPhoto: vi.fn(),
     uploadInspectionPhoto: vi.fn(),
     deleteInspectionPhoto: vi.fn(),
@@ -136,6 +134,42 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("persists an AI Scan classification to the local draft immediately", async () => {
+    vi.mocked(getPhotoHealthInspection).mockResolvedValue({
+      exists: true,
+      inspection: {
+        ...inspection,
+        photos: [
+          {
+            id: 1,
+            area: "skin",
+            url: "/photo.jpg",
+            original_filename: "photo.jpg",
+            source_mime_type: "image/jpeg",
+            normalized_mime_type: "image/jpeg",
+            size_bytes: 1,
+            classification: "normal",
+            finding_hints: [],
+            confirmed: true,
+          },
+        ],
+      },
+    });
+    renderPage();
+
+    fireEvent.click(await screen.findByRole("img", { name: "photo.jpg" }));
+    fireEvent.click(screen.getAllByRole("button", { name: /AI Scan/ })[0]);
+
+    expect(
+      JSON.parse(window.localStorage.getItem("photo-health-draft:42:42") ?? "{}")
+        .photos
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: 1, classification: "ai_scan" }),
+      ])
+    );
+  });
+
   it("requires an overall professional impression before showing the two note fields", async () => {
     vi.mocked(getPhotoHealthInspection).mockResolvedValue({
       exists: true,
@@ -157,12 +191,6 @@ describe("GroomerPhotoHealthInspectionPage", () => {
       screen.getByRole("button", { name: "Previous: Posture" })
     ).toBeInTheDocument();
 
-    vi.mocked(savePhotoHealthInspectionProgress).mockResolvedValue({
-      ...inspection,
-      current_step: 6,
-      overall_professional_impression: "grade_b",
-      step6_phase: "notes",
-    });
     fireEvent.click(
       screen.getByRole("button", { name: /Grade B: Minor Care/ })
     );
@@ -173,13 +201,13 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     expect(
       screen.getByRole("button", { name: "Previous: Summary" })
     ).toBeInTheDocument();
-    expect(savePhotoHealthInspectionProgress).toHaveBeenCalledWith(
-      42,
-      expect.objectContaining({
-        overall_professional_impression: "grade_b",
-        step6_phase: "notes",
-      })
-    );
+    expect(
+      JSON.parse(window.localStorage.getItem("photo-health-draft:42:42") ?? "{}")
+    ).toMatchObject({
+      currentStep: 6,
+      overallProfessionalImpression: "grade_b",
+      step6Phase: "notes",
+    });
   });
 
   it("defaults a legacy Step 6 response without a phase to the impression page", async () => {
@@ -263,7 +291,6 @@ describe("GroomerPhotoHealthInspectionPage", () => {
         screen.getByRole("navigation", { name: "Breadcrumb" })
       ).toHaveTextContent(/Dashboard\s*>\s*Step 1 of 6 - Skin inspection/)
     );
-    expect(savePhotoHealthInspectionProgress).not.toHaveBeenCalled();
     await waitFor(() =>
       expect(
         JSON.parse(

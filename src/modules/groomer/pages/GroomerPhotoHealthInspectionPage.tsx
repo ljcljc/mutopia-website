@@ -15,7 +15,6 @@ import {
   getPublishedPhotoHealthReport,
   fetchAuthenticatedBlob,
   getPhotoHealthInspection,
-  savePhotoHealthInspectionProgress,
   retryPhotoHealthAnalysis,
   publishPhotoHealthReport,
   startPhotoHealthInspection,
@@ -184,6 +183,7 @@ export default function GroomerPhotoHealthInspectionPage() {
   const [inspection, setInspection] = useState<PhotoHealthInspectionOut | null>(
     null
   );
+  const inspectionRef = useRef<PhotoHealthInspectionOut | null>(null);
   const [booking, setBooking] = useState<Awaited<
     ReturnType<typeof getGroomerBookingDetail>
   > | null>(null);
@@ -217,6 +217,39 @@ export default function GroomerPhotoHealthInspectionPage() {
   const localDraftKey = Number.isFinite(petId)
     ? inspectionDraftKey(bookingId, petId as number)
     : null;
+
+  const persistLocalDraft = (
+    nextInspection: PhotoHealthInspectionOut,
+    overrides: Partial<InspectionLocalDraft> = {}
+  ) => {
+    if (!localDraftKey || nextInspection.status !== "draft") return;
+    const nextDraft: InspectionLocalDraft = {
+      currentStep: nextInspection.current_step,
+      currentNote,
+      handoverNote,
+      overallProfessionalImpression,
+      step6Phase,
+      observationTags,
+      photos: nextInspection.photos.map(
+        ({ id, classification, finding_hints, confirmed }) => ({
+          id,
+          classification,
+          finding_hints,
+          confirmed,
+        })
+      ),
+      lastReviewPhotoId: reviewQueue[0] ?? null,
+      panelSnap: reviewPanelSnap,
+    };
+    window.localStorage.setItem(
+      localDraftKey,
+      JSON.stringify({ ...nextDraft, ...overrides })
+    );
+  };
+
+  useEffect(() => {
+    inspectionRef.current = inspection;
+  }, [inspection]);
 
   useEffect(() => {
     if (!Number.isFinite(bookingId)) return;
@@ -430,21 +463,28 @@ export default function GroomerPhotoHealthInspectionPage() {
   };
 
   const goToPreviousStep = () => {
-    if (!inspection) return;
+    const latestInspection = inspectionRef.current ?? inspection;
+    if (!latestInspection) return;
     if (step === 6 && step6Phase === "notes") {
+      const nextInspection = {
+        ...latestInspection,
+        step6_phase: "impression" as const,
+      };
       setStep6Phase("impression");
-      setInspection((current) =>
-        current ? { ...current, step6_phase: "impression" } : current
-      );
+      inspectionRef.current = nextInspection;
+      setInspection(nextInspection);
+      persistLocalDraft(nextInspection, { step6Phase: "impression" });
       setErrors({});
       return;
     }
     const previousStep = step === 1 ? 1 : step - 1;
     if (step === 1) setShowOverview(true);
-    else
-      setInspection((current) =>
-        current ? { ...current, current_step: previousStep } : current
-      );
+    else {
+      const nextInspection = { ...latestInspection, current_step: previousStep };
+      inspectionRef.current = nextInspection;
+      setInspection(nextInspection);
+      persistLocalDraft(nextInspection, { currentStep: previousStep });
+    }
     setErrors({});
   };
 
@@ -484,23 +524,25 @@ export default function GroomerPhotoHealthInspectionPage() {
     classification: InspectionPhotoClassification,
     findingHints: string[]
   ) => {
-    setInspection((current) =>
-      current
-        ? {
-            ...current,
-            photos: current.photos.map((photo) =>
-              photo.id === photoId
-                ? {
-                    ...photo,
-                    classification,
-                    finding_hints: findingHints,
-                    confirmed: true,
-                  }
-                : photo
-            ),
-          }
-        : current
-    );
+    const current = inspectionRef.current;
+    if (!current) return;
+    const nextInspection = {
+      ...current,
+      photos: current.photos.map((photo) =>
+        photo.id === photoId
+          ? {
+              ...photo,
+              classification,
+              finding_hints: findingHints,
+              confirmed: true,
+            }
+          : photo
+      ),
+    };
+    inspectionRef.current = nextInspection;
+    setInspection(nextInspection);
+    // Classification stays client-side until final submission, so persist it immediately.
+    persistLocalDraft(nextInspection);
   };
 
   const removePhoto = async (photo: InspectionPhotoOut) => {
@@ -515,13 +557,14 @@ export default function GroomerPhotoHealthInspectionPage() {
     );
   };
 
-  const saveStep = async (nextStep: number) => {
-    if (!inspection) return;
+  const saveStep = (nextStep: number) => {
+    const latestInspection = inspectionRef.current ?? inspection;
+    if (!latestInspection) return;
     if (stepConfig) {
       const minimumPhotos = isPairedInspection ? 2 : 1;
       const missing = stepConfig.areas.filter(
         (area) =>
-          inspection.photos.filter(
+          latestInspection.photos.filter(
             (photo) => photo.area === area.area && photo.confirmed
           ).length < minimumPhotos
       );
@@ -534,60 +577,47 @@ export default function GroomerPhotoHealthInspectionPage() {
       }
     }
     const nextPhase = nextStep === 6 ? "impression" : step6Phase;
-    setSaving(true);
-    try {
-      const updated = await savePhotoHealthInspectionProgress(bookingId, {
-        current_step: nextStep,
-        observation_tags: observationTags,
-        current_note: currentNote,
-        handover_note: handoverNote,
-        overall_professional_impression: overallProfessionalImpression,
-        step6_phase: nextPhase,
-      });
-      setInspection(updated);
-      setStep6Phase(normalizeStep6Phase(updated.step6_phase));
-      setErrors({});
-    } catch {
-      setErrors((current) => ({
-        ...current,
-        page: "Unable to save progress. Please try again.",
-      }));
-    } finally {
-      setSaving(false);
-    }
+    const nextInspection = {
+      ...latestInspection,
+      current_step: nextStep,
+      step6_phase: nextPhase,
+    };
+    inspectionRef.current = nextInspection;
+    setInspection(nextInspection);
+    setStep6Phase(nextPhase);
+    persistLocalDraft(nextInspection, {
+      currentStep: nextStep,
+      step6Phase: nextPhase,
+    });
+    setErrors({});
   };
 
-  const continueToNotes = async () => {
-    if (!inspection || !overallProfessionalImpression) return;
-    setSaving(true);
-    try {
-      const updated = await savePhotoHealthInspectionProgress(bookingId, {
-        current_step: 6,
-        observation_tags: observationTags,
-        current_note: currentNote,
-        handover_note: handoverNote,
-        overall_professional_impression: overallProfessionalImpression,
-        step6_phase: "notes",
-      });
-      setInspection(updated);
-      setStep6Phase("notes");
-      setErrors({});
-    } catch {
-      setErrors((current) => ({
-        ...current,
-        page: "Unable to save progress. Please try again.",
-      }));
-    } finally {
-      setSaving(false);
-    }
+  const continueToNotes = () => {
+    const latestInspection = inspectionRef.current ?? inspection;
+    if (!latestInspection || !overallProfessionalImpression) return;
+    const nextInspection = {
+      ...latestInspection,
+      current_step: 6,
+      step6_phase: "notes" as const,
+    };
+    inspectionRef.current = nextInspection;
+    setInspection(nextInspection);
+    setStep6Phase("notes");
+    persistLocalDraft(nextInspection, {
+      currentStep: 6,
+      step6Phase: "notes",
+      overallProfessionalImpression,
+    });
+    setErrors({});
   };
 
   const submit = async () => {
-    if (!inspection) return;
+    const latestInspection = inspectionRef.current ?? inspection;
+    if (!latestInspection) return;
     setSubmitting(true);
     try {
       await submitPhotoHealthInspection(bookingId, {
-        photos: inspection.photos.map((photo) => ({
+        photos: latestInspection.photos.map((photo) => ({
           id: photo.id,
           classification:
             photo.area === "posture" ? null : photo.classification,
@@ -861,7 +891,7 @@ export default function GroomerPhotoHealthInspectionPage() {
               step === 5 ? "Add Notes & Generate Report" : nextStepLabel
             }
             onPrevious={goToPreviousStep}
-            onNext={() => void saveStep(step + 1)}
+            onNext={() => saveStep(step + 1)}
           />
         </>
       ) : (
@@ -904,7 +934,7 @@ export default function GroomerPhotoHealthInspectionPage() {
                       key={value}
                       type="button"
                       aria-pressed={selected}
-                      className={`rounded-xl border-2 p-4 text-left transition-colors ${selected ? "border-[#D99C2B] bg-[#FFF7E7]" : "border-[#D4C9E0] bg-white"}`}
+                      className={`cursor-pointer rounded-xl border-2 p-4 text-left transition-colors ${selected ? "border-[#D99C2B] bg-[#FFF7E7]" : "border-[#D4C9E0] bg-white"}`}
                       onClick={() =>
                         setOverallProfessionalImpression(
                           value as PhotoHealthInspectionOut["overall_professional_impression"]
@@ -1003,7 +1033,7 @@ export default function GroomerPhotoHealthInspectionPage() {
             }
             onPrevious={goToPreviousStep}
             onNext={() =>
-              void (step6Phase === "impression" ? continueToNotes() : submit())
+              step6Phase === "impression" ? continueToNotes() : void submit()
             }
           />
         </>
@@ -1036,7 +1066,7 @@ export default function GroomerPhotoHealthInspectionPage() {
         }
         onProceedToNotes={() => {
           setReviewQueue([]);
-          void saveStep(6);
+          saveStep(6);
         }}
       />
     </ReportPageShell>
