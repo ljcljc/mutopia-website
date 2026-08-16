@@ -5877,6 +5877,46 @@
         "title": "InspectionPhotoOut",
         "type": "object"
       },
+      "InspectionPhotoSubmissionIn": {
+        "properties": {
+          "id": { "title": "Id", "type": "integer" },
+          "classification": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Classification"
+          },
+          "finding_hints": {
+            "items": { "type": "string" },
+            "title": "Finding Hints",
+            "type": "array"
+          }
+        },
+        "required": ["id", "classification"],
+        "title": "InspectionPhotoSubmissionIn",
+        "type": "object"
+      },
+      "InspectionSubmitIn": {
+        "properties": {
+          "photos": {
+            "items": { "$ref": "#/components/schemas/InspectionPhotoSubmissionIn" },
+            "title": "Photos",
+            "type": "array"
+          },
+          "observation_tags": {
+            "items": { "type": "string" },
+            "title": "Observation Tags",
+            "type": "array"
+          },
+          "current_note": { "title": "Current Note", "type": "string" },
+          "handover_note": { "title": "Handover Note", "type": "string" },
+          "overall_professional_impression": {
+            "title": "Overall Professional Impression",
+            "type": "string"
+          }
+        },
+        "required": ["photos", "observation_tags", "current_note", "handover_note", "overall_professional_impression"],
+        "title": "InspectionSubmitIn",
+        "type": "object"
+      },
       "PhotoHealthReportPublishOut": {
         "properties": {
           "report_id": { "title": "Report Id", "type": "integer" },

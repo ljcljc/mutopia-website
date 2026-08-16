@@ -2647,15 +2647,23 @@ export async function getInspectionPetNotes(bookingId: number): Promise<{
 
 export async function submitPhotoHealthInspection(
   bookingId: number,
-  observationTags: string[]
+  data: {
+    photos: Array<{
+      id: number;
+      classification: InspectionPhotoClassification | null;
+      finding_hints: string[];
+    }>;
+    observation_tags: string[];
+    current_note: string;
+    handover_note: string;
+    overall_professional_impression: PhotoHealthInspectionOut["overall_professional_impression"];
+  }
 ): Promise<{ job_id: number; status: string; reused: boolean }> {
   const response = await http.post<{
     job_id: number;
     status: string;
     reused: boolean;
-  }>(`/api/groomers/bookings/${bookingId}/photo_health_inspection/submit`, {
-    observation_tags: observationTags,
-  });
+  }>(`/api/groomers/bookings/${bookingId}/photo_health_inspection/submit`, data);
   return response.data;
 }
 

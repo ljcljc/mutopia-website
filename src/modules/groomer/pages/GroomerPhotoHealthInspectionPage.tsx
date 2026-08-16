@@ -5,6 +5,7 @@ import { OrangeButton } from "@/components/common";
 import { Spinner } from "@/components/common/Spinner";
 import AccountContentContainer from "@/components/layout/AccountContentContainer";
 import { Textarea } from "@/components/ui/textarea";
+import { HttpError } from "@/lib/http";
 import {
   deleteInspectionPhoto,
   getCheckInObservation,
@@ -19,7 +20,6 @@ import {
   publishPhotoHealthReport,
   startPhotoHealthInspection,
   submitPhotoHealthInspection,
-  updateInspectionPhoto,
   updatePhotoHealthReportInsights,
   uploadInspectionPhoto,
   type InspectionArea,
@@ -586,31 +586,29 @@ export default function GroomerPhotoHealthInspectionPage() {
     if (!inspection) return;
     setSubmitting(true);
     try {
-      for (const photo of inspection.photos) {
-        await updateInspectionPhoto(bookingId, photo.id, {
-          classification: photo.classification ?? "normal",
-          finding_hints:
-            photo.classification === "ai_scan" ? photo.finding_hints : [],
-        });
-      }
-      await savePhotoHealthInspectionProgress(bookingId, {
-        current_step: 6,
+      await submitPhotoHealthInspection(bookingId, {
+        photos: inspection.photos.map((photo) => ({
+          id: photo.id,
+          classification: photo.area === "posture" ? null : photo.classification,
+          finding_hints: photo.classification === "ai_scan" ? photo.finding_hints : [],
+        })),
         observation_tags: observationTags,
         current_note: currentNote,
         handover_note: handoverNote,
         overall_professional_impression: overallProfessionalImpression,
-        step6_phase: "notes",
       });
-      await submitPhotoHealthInspection(bookingId, observationTags);
       if (localDraftKey) window.localStorage.removeItem(localDraftKey);
       setAnalysisFailed(false);
       setInspection((current) =>
         current ? { ...current, status: "analyzing", locked: true } : current
       );
-    } catch {
+    } catch (error) {
+      const validationFailed = error instanceof HttpError && error.status === 422;
       setErrors((current) => ({
         ...current,
-        page: "Unable to generate the report. Please try again.",
+        page: validationFailed
+          ? "Please correct the missing or invalid inspection details before generating the report."
+          : "Unable to submit this inspection. Your changes were not saved. Please try again.",
       }));
       setSubmitting(false);
     }
