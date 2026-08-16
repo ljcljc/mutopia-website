@@ -1,4 +1,8 @@
-import { useEffect, useRef, type PointerEvent as ReactPointerEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import { cn } from "@/components/ui/utils";
 
 export function InspectionTagGroup({
@@ -16,7 +20,12 @@ export function InspectionTagGroup({
 }) {
   const rowRef = useRef<HTMLDivElement>(null);
   const chipRefs = useRef(new Map<string, HTMLButtonElement>());
-  const dragState = useRef<{ pointerId: number; startX: number; startScrollLeft: number; dragging: boolean } | null>(null);
+  const dragState = useRef<{
+    pointerId: number;
+    startX: number;
+    startScrollLeft: number;
+    dragging: boolean;
+  } | null>(null);
 
   const centerChip = (value: string) => {
     if (window.innerWidth >= 768) return;
@@ -24,9 +33,14 @@ export function InspectionTagGroup({
     const chip = chipRefs.current.get(value);
     if (!row || !chip) return;
     if (typeof chip.scrollIntoView === "function") {
-      chip.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      chip.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center",
+      });
     } else {
-      const nextLeft = chip.offsetLeft - (row.clientWidth - chip.offsetWidth) / 2;
+      const nextLeft =
+        chip.offsetLeft - (row.clientWidth - chip.offsetWidth) / 2;
       if (typeof row.scrollTo === "function") {
         row.scrollTo({ left: nextLeft, behavior: "smooth" });
       } else {
@@ -41,7 +55,11 @@ export function InspectionTagGroup({
   }, [selected]);
 
   const toggle = (value: string) => {
-    onChange(selected.includes(value) ? selected.filter((item) => item !== value) : [...selected, value]);
+    onChange(
+      selected.includes(value)
+        ? selected.filter((item) => item !== value)
+        : [...selected, value]
+    );
     window.requestAnimationFrame(() => centerChip(value));
   };
 
@@ -78,7 +96,11 @@ export function InspectionTagGroup({
     const state = dragState.current;
     const row = rowRef.current;
     if (state && row && state.pointerId === event.pointerId) {
-      if (typeof row.hasPointerCapture === "function" && row.hasPointerCapture(event.pointerId) && typeof row.releasePointerCapture === "function") {
+      if (
+        typeof row.hasPointerCapture === "function" &&
+        row.hasPointerCapture(event.pointerId) &&
+        typeof row.releasePointerCapture === "function"
+      ) {
         row.releasePointerCapture(event.pointerId);
       }
       dragState.current = null;
@@ -91,8 +113,13 @@ export function InspectionTagGroup({
   };
 
   return (
-    <fieldset disabled={disabled} className="w-full min-w-0 max-w-full space-y-2 overflow-hidden [min-inline-size:0]">
-      <legend className="font-comfortaa text-[12px] uppercase tracking-[0.08em] text-[#8B817F]">{label}</legend>
+    <fieldset
+      disabled={disabled}
+      className="w-full min-w-0 max-w-full space-y-2 overflow-hidden [min-inline-size:0]"
+    >
+      <legend className="font-comfortaa text-[12px] uppercase tracking-[0.08em] text-[#8B817F]">
+        {label}
+      </legend>
       <div
         ref={rowRef}
         style={{ WebkitOverflowScrolling: "touch" }}
@@ -102,7 +129,7 @@ export function InspectionTagGroup({
         onPointerCancel={handlePointerUp}
         className={cn(
           "flex w-full min-w-0 flex-nowrap gap-2 overflow-x-auto overflow-y-hidden overscroll-x-contain pb-1 pr-1 touch-pan-x select-none md:touch-pan-x",
-          "[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
+          "[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
         )}
       >
         {tags.map((tag) => {
@@ -118,8 +145,11 @@ export function InspectionTagGroup({
               aria-pressed={active}
               onClick={() => handleChipClick(tag.value)}
               className={cn(
-                "shrink-0 cursor-pointer rounded-full border px-4 py-2 font-comfortaa text-[13px] transition-colors disabled:cursor-not-allowed",
-                active ? "border-[#DE8A19] text-[#DE8A19]" : "border-[#4B4B4B] text-[#B7B7B7]",
+                "shrink-0 cursor-pointer rounded-full border font-comfortaa transition-colors disabled:cursor-not-allowed",
+                "px-4 py-2 text-[13px]",
+                active
+                  ? "border-[#DE8A19] text-[#DE8A19]"
+                  : "border-[#4B4B4B] text-[#B7B7B7]"
               )}
             >
               {tag.label}

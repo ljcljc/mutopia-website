@@ -6,7 +6,9 @@ import { toast } from "sonner";
 
 vi.mock("sonner", () => ({ toast: vi.fn() }));
 
-const photo = (overrides: Partial<InspectionPhotoOut> = {}): InspectionPhotoOut => ({
+const photo = (
+  overrides: Partial<InspectionPhotoOut> = {}
+): InspectionPhotoOut => ({
   id: 1,
   area: "skin",
   url: "/skin.jpg",
@@ -25,23 +27,35 @@ describe("InspectionPhotoReview", () => {
       <InspectionPhotoReview
         photos={[photo()]}
         activePhotoId={1}
-        config={{ area: "skin", label: "Skin photo", hints: [{ value: "redness", label: "Redness" }] }}
+        config={{
+          area: "skin",
+          label: "Skin photo",
+          hints: [{ value: "redness", label: "Redness" }],
+        }}
         open
         onActivePhotoChange={vi.fn()}
         onClose={vi.fn()}
         onChange={onChange}
         onAddPhoto={vi.fn()}
-      />,
+      />
     );
 
-    expect(screen.getByRole("heading", { name: "Skin photo review" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Skin photo review" })
+    ).toBeInTheDocument();
 
     fireEvent.click(screen.getAllByRole("button", { name: /AI Scan/ })[0]);
-    expect(screen.getAllByRole("button", { name: /Normal/ })[0]).toHaveAttribute("aria-pressed", "false");
-    expect(screen.getAllByRole("button", { name: /AI Scan/ })[0]).toHaveAttribute("aria-pressed", "true");
+    expect(
+      screen.getAllByRole("button", { name: /Normal/ })[0]
+    ).toHaveAttribute("aria-pressed", "false");
+    expect(
+      screen.getAllByRole("button", { name: /AI Scan/ })[0]
+    ).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(screen.getAllByRole("button", { name: "Redness" })[0]);
 
-    await waitFor(() => expect(onChange).toHaveBeenLastCalledWith(1, "ai_scan", ["redness"]));
+    await waitFor(() =>
+      expect(onChange).toHaveBeenLastCalledWith(1, "ai_scan", ["redness"])
+    );
   });
 
   it("uses the approved posture preview actions", async () => {
@@ -61,10 +75,24 @@ describe("InspectionPhotoReview", () => {
         observationTags={[]}
         onObservationTagsChange={vi.fn()}
         onProceedToNotes={onProceedToNotes}
-      />,
+      />
     );
 
-    fireEvent.click(screen.getAllByRole("button", { name: "Next - Add notes" })[0]);
+    expect(
+      screen.getAllByRole("heading", {
+        name: "Almost done! How was Current pet today?",
+      })
+    ).toHaveLength(2);
+    expect(
+      screen.getAllByText("Tap unusual behaviours to help generate AI report.")
+    ).toHaveLength(2);
+    expect(
+      screen.getAllByRole("button", { name: "Paw licking" })[0]
+    ).toHaveClass("text-[13px]");
+
+    fireEvent.click(
+      screen.getAllByRole("button", { name: "Next - Add notes" })[0]
+    );
 
     await waitFor(() => expect(onProceedToNotes).toHaveBeenCalled());
     expect(onChange).toHaveBeenCalledWith(1, "normal", []);
@@ -84,10 +112,12 @@ describe("InspectionPhotoReview", () => {
         observationTags={["paw_licking"]}
         onObservationTagsChange={vi.fn()}
         onProceedToNotes={vi.fn()}
-      />,
+      />
     );
 
-    expect(screen.getAllByRole("button", { name: "Next - Summary & notes" })).toHaveLength(1);
+    expect(
+      screen.getAllByRole("button", { name: "Next - Summary & notes" })
+    ).toHaveLength(2);
   });
 
   it("cycles through photos in the current area", () => {
@@ -102,10 +132,40 @@ describe("InspectionPhotoReview", () => {
         onClose={vi.fn()}
         onChange={vi.fn()}
         onAddPhoto={vi.fn()}
-      />,
+      />
     );
     fireEvent.click(screen.getByRole("button", { name: "Next photo" }));
     expect(onActivePhotoChange).toHaveBeenCalledWith(2);
+  });
+
+  it("shows the preview area tag only for left and right ear or eye photos", () => {
+    const baseProps = {
+      activePhotoId: 1,
+      open: true,
+      onActivePhotoChange: vi.fn(),
+      onClose: vi.fn(),
+      onChange: vi.fn(),
+      onAddPhoto: vi.fn(),
+    };
+    const { rerender } = render(
+      <InspectionPhotoReview
+        {...baseProps}
+        photos={[photo()]}
+        config={{ area: "skin", label: "Skin photo", hints: [] }}
+      />
+    );
+
+    expect(screen.queryByText("1. Skin")).not.toBeInTheDocument();
+
+    rerender(
+      <InspectionPhotoReview
+        {...baseProps}
+        photos={[photo({ area: "left_ear" })]}
+        config={{ area: "left_ear", label: "Left ear", hints: [] }}
+      />
+    );
+
+    expect(screen.getByText("1. Left ear")).toBeInTheDocument();
   });
 
   it("prevents text selection from the mobile panel drag handle", () => {
@@ -119,9 +179,11 @@ describe("InspectionPhotoReview", () => {
         onClose={vi.fn()}
         onChange={vi.fn()}
         onAddPhoto={vi.fn()}
-      />,
+      />
     );
-    expect(screen.getAllByText("Any skin issue?")[1].parentElement).toHaveClass("select-none");
+    expect(screen.getAllByText("Any skin issue?")[1].parentElement).toHaveClass(
+      "select-none"
+    );
   });
 
   it("anchors the close action to the right on mobile", () => {
@@ -135,10 +197,14 @@ describe("InspectionPhotoReview", () => {
         onClose={vi.fn()}
         onChange={vi.fn()}
         onAddPhoto={vi.fn()}
-      />,
+      />
     );
-    expect(screen.getByRole("button", { name: "Close photo review" })).toHaveClass("absolute");
-    expect(screen.getByRole("button", { name: "Close photo review" })).toHaveClass("rounded-full");
+    expect(
+      screen.getByRole("button", { name: "Close photo review" })
+    ).toHaveClass("absolute");
+    expect(
+      screen.getByRole("button", { name: "Close photo review" })
+    ).toHaveClass("rounded-full");
   });
 
   it("keeps a third photo unchanged and shows a toast when the AI limit is reached", () => {
@@ -151,19 +217,25 @@ describe("InspectionPhotoReview", () => {
           photo({ id: 3, classification: "normal", confirmed: true }),
         ]}
         activePhotoId={3}
-        config={{ area: "skin", label: "Skin photo", hints: [{ value: "redness", label: "Redness" }] }}
+        config={{
+          area: "skin",
+          label: "Skin photo",
+          hints: [{ value: "redness", label: "Redness" }],
+        }}
         open
         onActivePhotoChange={vi.fn()}
         onClose={vi.fn()}
         onChange={onChange}
         onAddPhoto={vi.fn()}
-      />,
+      />
     );
 
     fireEvent.click(screen.getAllByRole("button", { name: /AI Scan/ })[0]);
     fireEvent.click(screen.getAllByRole("button", { name: "Redness" })[0]);
 
-    expect(toast).toHaveBeenCalledWith("You can select up to 2 photos for AI Scan.");
+    expect(toast).toHaveBeenCalledWith(
+      "You can select up to 2 photos for AI Scan."
+    );
     expect(onChange).not.toHaveBeenCalled();
   });
 });

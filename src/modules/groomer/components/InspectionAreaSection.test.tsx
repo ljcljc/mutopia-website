@@ -24,16 +24,22 @@ describe("InspectionAreaSection", () => {
         onFilesSelected={vi.fn()}
         onRemove={vi.fn()}
         onOpen={onOpen}
-      />,
+      />
     );
 
-    fireEvent.click(screen.getByAltText("skin.jpg").parentElement as HTMLElement);
+    fireEvent.click(
+      screen.getByAltText("skin.jpg").parentElement as HTMLElement
+    );
     expect(onOpen).toHaveBeenCalledWith(photo);
     expect(screen.getByText("AI Scan")).toBeInTheDocument();
-    expect(screen.getByText("Skin - after grooming photos")).toBeInTheDocument();
+    expect(
+      screen.getByText("Skin - after grooming photos")
+    ).toBeInTheDocument();
     expect(screen.getByText("Skin photo")).toBeInTheDocument();
     expect(screen.getAllByText("Add photo")).toHaveLength(2);
-    expect(screen.getByAltText("skin.jpg").closest(".flex-wrap")).toBeInTheDocument();
+    expect(
+      screen.getByAltText("skin.jpg").closest(".flex-wrap")
+    ).toBeInTheDocument();
   });
 
   it("shows the ear side badge for ear uploads", () => {
@@ -55,7 +61,7 @@ describe("InspectionAreaSection", () => {
         onFilesSelected={vi.fn()}
         onRemove={vi.fn()}
         onOpen={vi.fn()}
-      />,
+      />
     );
 
     expect(screen.getByAltText("left-ear.jpg")).toBeInTheDocument();
@@ -70,7 +76,7 @@ describe("InspectionAreaSection", () => {
         onFilesSelected={vi.fn()}
         onRemove={vi.fn()}
         onOpen={vi.fn()}
-      />,
+      />
     );
 
     expect(screen.getByLabelText("Upload Mouth area")).toBeInTheDocument();
@@ -97,7 +103,7 @@ describe("InspectionAreaSection", () => {
         onFilesSelected={vi.fn()}
         onRemove={vi.fn()}
         onOpen={vi.fn()}
-      />,
+      />
     );
 
     fireEvent.click(screen.getByLabelText("Add Mouth photo"));
@@ -135,7 +141,7 @@ describe("InspectionAreaSection", () => {
         onFilesSelected={vi.fn()}
         onRemove={vi.fn()}
         onOpen={vi.fn()}
-      />,
+      />
     );
 
     expect(screen.getByAltText("mouth-1.jpg")).toBeInTheDocument();
@@ -184,9 +190,64 @@ describe("InspectionAreaSection", () => {
         onFilesSelected={vi.fn()}
         onRemove={vi.fn()}
         onOpen={vi.fn()}
-      />,
+      />
     );
 
     expect(screen.getAllByText("AI Scan")).toHaveLength(1);
+  });
+
+  it("renders Posture as a cumulative storage-only upload card", () => {
+    const photos: InspectionPhotoOut[] = [
+      {
+        id: 15,
+        area: "posture",
+        url: "/posture-1.jpg",
+        original_filename: "posture-1.jpg",
+        normalized_mime_type: "image/jpeg",
+        classification: "ai_scan",
+        finding_hints: [],
+        confirmed: true,
+      },
+      {
+        id: 16,
+        area: "posture",
+        url: "/posture-2.jpg",
+        original_filename: "posture-2.jpg",
+        normalized_mime_type: "image/jpeg",
+        classification: "normal",
+        finding_hints: [],
+        confirmed: true,
+      },
+      {
+        id: 17,
+        area: "posture",
+        url: "/posture-3.jpg",
+        original_filename: "posture-3.jpg",
+        normalized_mime_type: "image/jpeg",
+        classification: "normal",
+        finding_hints: [],
+        confirmed: true,
+      },
+    ];
+
+    render(
+      <InspectionAreaSection
+        config={{ area: "posture", label: "Posture photo", hints: [] }}
+        photos={photos}
+        onFilesSelected={vi.fn()}
+        onRemove={vi.fn()}
+        onOpen={vi.fn()}
+      />
+    );
+
+    expect(
+      screen.getByText("Posture - after grooming photos")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Help to complete health report")
+    ).toBeInTheDocument();
+    expect(screen.getByAltText("posture-3.jpg")).toBeInTheDocument();
+    expect(screen.getByLabelText("Add Posture photo")).toBeInTheDocument();
+    expect(screen.queryByText("AI Scan")).not.toBeInTheDocument();
   });
 });

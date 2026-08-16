@@ -26,35 +26,45 @@ export function InspectionAreaSection({
     input.click();
   };
   const items: FileUploadItem[] = photos.map((photo) => ({
-    file: new File([], photo.original_filename || `${photo.area}.jpg`, { type: photo.normalized_mime_type || "image/jpeg" }),
+    file: new File([], photo.original_filename || `${photo.area}.jpg`, {
+      type: photo.normalized_mime_type || "image/jpeg",
+    }),
     previewUrl: photo.url,
     serverUrl: photo.url,
     photoId: photo.id,
     uploadStatus: "uploaded",
     uploadProgress: 100,
-    badge: photo.classification === "ai_scan"
-      ? "AI Scan"
-      : photo.area === "left_ear"
-        ? "Left ear"
-        : photo.area === "right_ear"
-          ? "Right ear"
-          : undefined,
+    badge:
+      photo.classification === "ai_scan"
+        ? "AI Scan"
+        : photo.area === "left_ear"
+          ? "Left ear"
+          : photo.area === "right_ear"
+            ? "Right ear"
+            : undefined,
   }));
 
   const areaName = config.label.replace(/ photo$/i, "");
-  const isEarSection = config.area === "left_ear" || config.area === "right_ear";
+  const isEarSection =
+    config.area === "left_ear" || config.area === "right_ear";
   const isMouthSection = config.area === "mouth";
-  const slots = isEarSection ? ["left_ear", "right_ear"] as const : [];
+  const isPostureSection = config.area === "posture";
+  const isPersistentPhotoSection = isMouthSection || isPostureSection;
+  const slots = isEarSection ? (["left_ear", "right_ear"] as const) : [];
+  const persistentSlotLabel = isPostureSection ? "Posture" : "Mouth area";
+  const sectionDescription = isPostureSection
+    ? "Help to complete health report"
+    : "Add photos for AI health inspection";
 
-  // The second mouth slot remains available after the first photo replaces its card.
-  const renderMouthInput = () => (
+  // The Add photo slot remains available after the first named photo slot is filled.
+  const renderPersistentPhotoInput = () => (
     <input
       ref={(element) => {
-        earInputRefs.current.mouth = element;
+        earInputRefs.current[config.area] = element;
       }}
       type="file"
       accept="image/jpeg,image/jpg,image/png,image/heic,image/heif"
-      multiple={false}
+      multiple={isPostureSection}
       className="hidden"
       onChange={(event) => {
         const selected = Array.from(event.currentTarget.files ?? []);
@@ -70,7 +80,10 @@ export function InspectionAreaSection({
     const areaPhoto = photos.find((photo) => photo.area === slotArea) ?? null;
     const label = slotArea === "left_ear" ? "Left ear" : "Right ear";
     return (
-      <div key={slotArea} className="relative h-[84px] min-w-0 flex-1 overflow-visible rounded-[14px] border border-[#D4C9E0]">
+      <div
+        key={slotArea}
+        className="relative h-[84px] min-w-0 flex-1 overflow-visible rounded-[14px] border border-[#D4C9E0]"
+      >
         {areaPhoto ? (
           <>
             <button
@@ -110,7 +123,9 @@ export function InspectionAreaSection({
             <div className="flex h-[29px] w-[28px] items-center justify-center rounded-full bg-[#F0EBF7]">
               <Icon name="add-inspection" className="block size-[28px]" />
             </div>
-            <span className="font-comfortaa text-[12px] font-medium leading-[18px] text-[#633479]">{label}</span>
+            <span className="font-comfortaa text-[12px] font-medium leading-[18px] text-[#633479]">
+              {label}
+            </span>
             <input
               ref={(element) => {
                 earInputRefs.current[slotArea] = element;
@@ -133,35 +148,38 @@ export function InspectionAreaSection({
     );
   };
 
-  const renderMouthSlot = (mouthPhoto: InspectionPhotoOut | null, index: number) => {
-    const label = "Mouth area";
+  const renderPersistentPhotoSlot = (
+    photo: InspectionPhotoOut | null,
+    index: number
+  ) => {
+    const label = persistentSlotLabel;
     return (
       <div className="relative h-[84px] min-w-0 flex-1 overflow-visible rounded-[14px]">
-        {mouthPhoto ? (
+        {photo ? (
           <>
             <button
               type="button"
               className="absolute inset-0 cursor-pointer overflow-hidden rounded-[14px]"
-              onClick={() => onOpen(mouthPhoto)}
+              onClick={() => onOpen(photo)}
             >
               <img
-                src={mouthPhoto.url}
-                alt={mouthPhoto.original_filename}
+                src={photo.url}
+                alt={photo.original_filename}
                 className="absolute inset-0 size-full max-w-none pointer-events-none rounded-[14px] object-cover object-center"
               />
             </button>
             <button
               type="button"
-              aria-label={`Remove Mouth photo ${index + 1}`}
+              aria-label={`Remove ${config.label} ${index + 1}`}
               className="absolute right-[-4px] top-[-4px] z-20 flex size-[20px] cursor-pointer items-center justify-center rounded-[8px] border border-[#4c4c4c] bg-neutral-100 shadow-[0px_2px_4px_0px_rgba(0,0,0,0.1)]"
-              onClick={() => void onRemove(mouthPhoto)}
+              onClick={() => void onRemove(photo)}
             >
               <span className="relative flex size-[10px] items-center justify-center">
                 <span className="absolute h-[1.5px] w-full rotate-45 bg-[#4c4c4c]" />
                 <span className="absolute h-[1.5px] w-full rotate-[-45deg] bg-[#4c4c4c]" />
               </span>
             </button>
-            {mouthPhoto.classification === "ai_scan" ? (
+            {!isPostureSection && photo.classification === "ai_scan" ? (
               <div className="pointer-events-none absolute bottom-[-8px] left-[12px] z-30 flex items-center gap-1 rounded-full border border-[#F1C9CC] bg-[#FFF6F6] px-3 py-1 font-comfortaa text-xs text-[#B23A48] shadow-sm">
                 <Icon name="alert-ai-scan" className="size-[13px]" />
                 AI Scan
@@ -172,13 +190,15 @@ export function InspectionAreaSection({
           <button
             type="button"
             className="flex h-full w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-[14px] border-[1.451px] border-dashed border-[#D4C9E0] bg-white shadow-[0px_1px_2.5px_0px_rgba(0,0,0,0.05)]"
-            onClick={() => openFilePicker(earInputRefs.current.mouth)}
-            aria-label="Upload Mouth area"
+            onClick={() => openFilePicker(earInputRefs.current[config.area])}
+            aria-label={`Upload ${label}`}
           >
             <div className="flex h-[29px] w-[28px] items-center justify-center rounded-full bg-[#F0EBF7]">
               <Icon name="add-inspection" className="block size-[28px]" />
             </div>
-            <span className="font-comfortaa text-[12px] font-medium leading-[18px] text-[#633479]">{label}</span>
+            <span className="font-comfortaa text-[12px] font-medium leading-[18px] text-[#633479]">
+              {label}
+            </span>
           </button>
         )}
       </div>
@@ -189,11 +209,17 @@ export function InspectionAreaSection({
     <section className="rounded-xl bg-white p-3.5 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center">
-          <h2 className="font-comfortaa text-base font-semibold leading-[28px] text-[#4A3C2A]">{areaName} - after grooming photos</h2>
-          <span className="font-comfortaa text-xs leading-4 text-[#4A3C2A]">Add photos for AI health inspection</span>
+          <h2 className="font-comfortaa text-base font-semibold leading-[28px] text-[#4A3C2A]">
+            {areaName} - after grooming photos
+          </h2>
+          <span className="font-comfortaa text-xs leading-4 text-[#4A3C2A]">
+            {sectionDescription}
+          </span>
         </div>
         <div className="flex flex-col">
-          <p className="font-comfortaa text-sm leading-[22.75px] text-[#4A3C2A]">{config.label}</p>
+          <p className="font-comfortaa text-sm leading-[22.75px] text-[#4A3C2A]">
+            {config.label}
+          </p>
           <div className="mt-2">
             {isEarSection ? (
               <div className="relative flex w-full flex-col items-center justify-center rounded-[16px] bg-[#FAFAFA] p-4 shadow-[0px_4px_5px_0px_rgba(0,0,0,0.15)]">
@@ -201,21 +227,32 @@ export function InspectionAreaSection({
                   {slots.map((slotArea) => renderEarSlot(slotArea))}
                 </div>
               </div>
-            ) : isMouthSection ? (
+            ) : isPersistentPhotoSection ? (
               <div className="relative flex w-full flex-col items-center justify-center rounded-[16px] border border-[#633479] bg-[#FAFAFA] p-4 shadow-[0px_4px_5px_0px_rgba(0,0,0,0.15)]">
                 <div className="grid w-full grid-cols-2 gap-x-1 gap-y-4 overflow-visible">
-                  {renderMouthSlot(photos[0] ?? null, 0)}
-                  {photos.slice(1).map((photo, index) => renderMouthSlot(photo, index + 1))}
+                  {renderPersistentPhotoSlot(photos[0] ?? null, 0)}
+                  {photos
+                    .slice(1)
+                    .map((photo, index) =>
+                      renderPersistentPhotoSlot(photo, index + 1)
+                    )}
                   <button
                     type="button"
                     className="relative flex h-[84px] min-w-0 cursor-pointer flex-col items-center justify-center gap-2 rounded-[14px] border-[1.451px] border-dashed border-[#D4C9E0] bg-white shadow-[0px_1px_2.5px_0px_rgba(0,0,0,0.05)] transition-colors hover:border-[#de6a07]"
-                    onClick={() => openFilePicker(earInputRefs.current.mouth)}
-                    aria-label="Add Mouth photo"
+                    onClick={() =>
+                      openFilePicker(earInputRefs.current[config.area])
+                    }
+                    aria-label={`Add ${config.label}`}
                   >
                     <div className="flex size-[29px] shrink-0 items-center justify-center rounded-full bg-[#F0EBF7]">
-                      <Icon name="add-inspection" className="block size-[28px]" />
+                      <Icon
+                        name="add-inspection"
+                        className="block size-[28px]"
+                      />
                     </div>
-                    <span className="text-center font-comfortaa text-xs font-medium leading-[18px] text-[#633479]">Add photo</span>
+                    <span className="text-center font-comfortaa text-xs font-medium leading-[18px] text-[#633479]">
+                      Add photo
+                    </span>
                   </button>
                 </div>
               </div>
@@ -225,7 +262,13 @@ export function InspectionAreaSection({
                 inputAriaLabel={`Upload ${config.label}`}
                 accept="image/jpeg,image/jpg,image/png,image/heic,image/heif"
                 multiple={config.area !== "posture"}
-                maxFiles={config.area === "posture" ? 2 : config.area === "mouth" ? 1 : undefined}
+                maxFiles={
+                  config.area === "posture"
+                    ? 2
+                    : config.area === "mouth"
+                      ? 1
+                      : undefined
+                }
                 maxSizeMB={10}
                 disabled={disabled}
                 uploadItems={items}
@@ -242,7 +285,7 @@ export function InspectionAreaSection({
         </div>
       </div>
       {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
-      {isMouthSection ? renderMouthInput() : null}
+      {isPersistentPhotoSection ? renderPersistentPhotoInput() : null}
     </section>
   );
 }

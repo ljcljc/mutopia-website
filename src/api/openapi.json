@@ -5941,6 +5941,9 @@
             "type": "array"
           },
           "current_note": { "title": "Current Note", "type": "string" },
+          "handover_note": { "title": "Handover Note", "type": "string" },
+          "overall_professional_impression": { "title": "Overall Professional Impression", "type": "string" },
+          "step6_phase": { "title": "Step6 Phase", "type": "string" },
           "locked": { "title": "Locked", "type": "boolean" },
           "photos": {
             "items": { "$ref": "#/components/schemas/InspectionPhotoOut" },
@@ -5948,7 +5951,7 @@
             "type": "array"
           }
         },
-        "required": ["id", "booking_id", "status", "current_step", "observation_tags", "current_note", "locked", "photos"],
+        "required": ["id", "booking_id", "status", "current_step", "observation_tags", "current_note", "handover_note", "overall_professional_impression", "step6_phase", "locked", "photos"],
         "title": "PhotoHealthInspectionOut",
         "type": "object"
       },

@@ -2,7 +2,10 @@
 import { http, setAuthToken, setRefreshToken, clearAuthTokens } from "./http";
 import { getEncryptedItem } from "./encryption";
 import { STORAGE_KEYS } from "./storageKeys";
-import { formatLocalDateTimeForApi, getLocalOffsetMinutes } from "./localDateTime";
+import {
+  formatLocalDateTimeForApi,
+  getLocalOffsetMinutes,
+} from "./localDateTime";
 
 // ==================== 类型定义 ====================
 
@@ -718,7 +721,11 @@ export async function uploadAvatar(
   file: File,
   onProgress?: (progress: number) => void
 ): Promise<AvatarOut> {
-  return uploadFileWithProgress("/api/auth/avatar", file, onProgress) as Promise<AvatarOut>;
+  return uploadFileWithProgress(
+    "/api/auth/avatar",
+    file,
+    onProgress
+  ) as Promise<AvatarOut>;
 }
 
 /**
@@ -831,14 +838,21 @@ export interface GetServicesIn {
   weight_unit?: string;
 }
 
-export async function getServices(params?: GetServicesIn): Promise<ServiceOut[]> {
+export async function getServices(
+  params?: GetServicesIn
+): Promise<ServiceOut[]> {
   const queryParams = new URLSearchParams();
   if (params?.pet_type) queryParams.append("pet_type", params.pet_type);
   if (params?.breed) queryParams.append("breed", params.breed);
-  if (params?.weight !== undefined && params.weight !== null && String(params.weight).trim() !== "") {
+  if (
+    params?.weight !== undefined &&
+    params.weight !== null &&
+    String(params.weight).trim() !== ""
+  ) {
     queryParams.append("weight", String(params.weight));
   }
-  if (params?.weight_unit) queryParams.append("weight_unit", params.weight_unit);
+  if (params?.weight_unit)
+    queryParams.append("weight_unit", params.weight_unit);
 
   const url = `/api/catalog/services${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
   const response = await http.get<ServiceOut[]>(url);
@@ -972,7 +986,8 @@ export async function getMyCoupons(params?: {
 }): Promise<CouponPageOut> {
   const queryParams = new URLSearchParams();
   if (params?.page) queryParams.append("page", String(params.page));
-  if (params?.page_size) queryParams.append("page_size", String(params.page_size));
+  if (params?.page_size)
+    queryParams.append("page_size", String(params.page_size));
   if (params?.category !== undefined) {
     queryParams.append("category", params.category || "");
   }
@@ -986,10 +1001,7 @@ export async function getMyCoupons(params?: {
  * 绑定邀请码
  */
 export async function bindInvitation(data: InviteBindIn): Promise<OkOut> {
-  const response = await http.post<OkOut>(
-    "/api/promotions/invite/bind",
-    data
-  );
+  const response = await http.post<OkOut>("/api/promotions/invite/bind", data);
   return response.data;
 }
 
@@ -1004,7 +1016,8 @@ export async function getPets(params?: {
 }): Promise<PetPageOut> {
   const queryParams = new URLSearchParams();
   if (params?.page) queryParams.append("page", String(params.page));
-  if (params?.page_size) queryParams.append("page_size", String(params.page_size));
+  if (params?.page_size)
+    queryParams.append("page_size", String(params.page_size));
 
   const url = `/api/pets/pets${queryParams.toString() ? "?" + queryParams.toString() : ""}`;
   const response = await http.get<PetPageOut>(url);
@@ -1031,24 +1044,28 @@ export async function createPet(
     name: params.name,
     ...(params.pet_type && { pet_type: params.pet_type }),
     ...(params.breed && { breed: params.breed }),
-    ...(params.mixed_breed !== undefined && { mixed_breed: params.mixed_breed }),
+    ...(params.mixed_breed !== undefined && {
+      mixed_breed: params.mixed_breed,
+    }),
     ...(params.precise_type && { precise_type: params.precise_type }),
     ...(params.birthday && { birthday: params.birthday }),
     ...(params.gender && { gender: params.gender }),
-    ...(params.weight_value !== undefined && params.weight_value !== null && { weight_value: params.weight_value }),
+    ...(params.weight_value !== undefined &&
+      params.weight_value !== null && { weight_value: params.weight_value }),
     ...(params.weight_unit && { weight_unit: params.weight_unit }),
     ...(params.coat_condition && { coat_condition: params.coat_condition }),
-    ...(params.approve_shave !== undefined && { approve_shave: params.approve_shave }),
+    ...(params.approve_shave !== undefined && {
+      approve_shave: params.approve_shave,
+    }),
     ...(params.behavior && { behavior: params.behavior }),
-    ...(params.grooming_frequency && { grooming_frequency: params.grooming_frequency }),
+    ...(params.grooming_frequency && {
+      grooming_frequency: params.grooming_frequency,
+    }),
     ...(params.special_notes && { special_notes: params.special_notes }),
     ...(body || { photo_ids: null, reference_photo_ids: null }),
   };
 
-  const response = await http.post<PetOut>(
-    `/api/pets/pets`,
-    data
-  );
+  const response = await http.post<PetOut>(`/api/pets/pets`, data);
   return response.data;
 }
 
@@ -1088,18 +1105,37 @@ export async function updatePet(
     ...(params.name !== undefined && { name: params.name }),
     ...(params.pet_type !== undefined && { pet_type: params.pet_type }),
     ...(params.breed !== undefined && { breed: params.breed }),
-    ...(params.mixed_breed !== undefined && { mixed_breed: params.mixed_breed }),
-    ...(params.precise_type !== undefined && { precise_type: params.precise_type }),
+    ...(params.mixed_breed !== undefined && {
+      mixed_breed: params.mixed_breed,
+    }),
+    ...(params.precise_type !== undefined && {
+      precise_type: params.precise_type,
+    }),
     ...(params.birthday !== undefined && { birthday: params.birthday }),
     ...(params.gender !== undefined && { gender: params.gender }),
-    ...(params.weight_value !== undefined && { weight_value: params.weight_value }),
-    ...(params.weight_unit !== undefined && { weight_unit: params.weight_unit }),
-    ...(params.coat_condition !== undefined && { coat_condition: params.coat_condition }),
-    ...(params.approve_shave !== undefined && { approve_shave: params.approve_shave }),
+    ...(params.weight_value !== undefined && {
+      weight_value: params.weight_value,
+    }),
+    ...(params.weight_unit !== undefined && {
+      weight_unit: params.weight_unit,
+    }),
+    ...(params.coat_condition !== undefined && {
+      coat_condition: params.coat_condition,
+    }),
+    ...(params.approve_shave !== undefined && {
+      approve_shave: params.approve_shave,
+    }),
     ...(params.behavior !== undefined && { behavior: params.behavior }),
-    ...(params.grooming_frequency !== undefined && { grooming_frequency: params.grooming_frequency }),
-    ...(params.special_notes !== undefined && { special_notes: params.special_notes }),
-    ...(body && { photo_ids: body.photo_ids ?? null, reference_photo_ids: body.reference_photo_ids ?? null }),
+    ...(params.grooming_frequency !== undefined && {
+      grooming_frequency: params.grooming_frequency,
+    }),
+    ...(params.special_notes !== undefined && {
+      special_notes: params.special_notes,
+    }),
+    ...(body && {
+      photo_ids: body.photo_ids ?? null,
+      reference_photo_ids: body.reference_photo_ids ?? null,
+    }),
   };
   const response = await http.put<PetOut>(`/api/pets/pets/${petId}`, data);
   return response.data;
@@ -1122,7 +1158,8 @@ export async function getMemorializedPets(params?: {
 }): Promise<PetPageOut> {
   const queryParams = new URLSearchParams();
   if (params?.page) queryParams.append("page", String(params.page));
-  if (params?.page_size) queryParams.append("page_size", String(params.page_size));
+  if (params?.page_size)
+    queryParams.append("page_size", String(params.page_size));
 
   const url = `/api/pets/pets/memorialized${queryParams.toString() ? "?" + queryParams.toString() : ""}`;
   const response = await http.get<PetPageOut>(url);
@@ -1133,7 +1170,9 @@ export async function getMemorializedPets(params?: {
  * 纪念宠物
  */
 export async function memorializePet(petId: number): Promise<OkOut> {
-  const response = await http.post<OkOut>(`/api/pets/pets/${petId}/memorialize`);
+  const response = await http.post<OkOut>(
+    `/api/pets/pets/${petId}/memorialize`
+  );
   return response.data;
 }
 
@@ -1148,7 +1187,8 @@ export async function getMessages(params?: {
 }): Promise<MessagePageOut> {
   const queryParams = new URLSearchParams();
   if (params?.page) queryParams.append("page", String(params.page));
-  if (params?.page_size) queryParams.append("page_size", String(params.page_size));
+  if (params?.page_size)
+    queryParams.append("page_size", String(params.page_size));
   if (params?.channel) queryParams.append("channel", params.channel);
   if (params?.scope) queryParams.append("scope", params.scope);
   const url = `/api/messages${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
@@ -1182,7 +1222,10 @@ export async function markMessageRead(messageId: number): Promise<OkOut> {
 /**
  * 标记全部消息已读
  */
-export async function markAllMessagesRead(params?: { channel?: "in_app" | "email"; scope?: MessageScope }): Promise<OkOut> {
+export async function markAllMessagesRead(params?: {
+  channel?: "in_app" | "email";
+  scope?: MessageScope;
+}): Promise<OkOut> {
   const queryParams = new URLSearchParams();
   if (params?.channel) queryParams.append("channel", params.channel);
   if (params?.scope) queryParams.append("scope", params.scope);
@@ -1238,10 +1281,10 @@ export function buildImageUrl(relativeUrl: string): string {
   if (relativeUrl.startsWith("http://") || relativeUrl.startsWith("https://")) {
     return relativeUrl;
   }
-  
+
   // 确保 relativeUrl 以 / 开头
   const path = relativeUrl.startsWith("/") ? relativeUrl : `/${relativeUrl}`;
-  
+
   // 开发环境和生产环境都使用相对路径，通过代理转发
   // - 开发环境：通过 Vite 代理（vite.config.ts）
   // - 生产环境：通过 Cloudflare Pages Function（functions/media/[[path]].ts）
@@ -1325,7 +1368,9 @@ export interface ApplyStatusOut {
 /**
  * 获取美容师申请状态
  */
-export async function getGroomerApplyStatus(email?: string | null): Promise<ApplyStatusOut> {
+export async function getGroomerApplyStatus(
+  email?: string | null
+): Promise<ApplyStatusOut> {
   const queryParams = new URLSearchParams();
   if (email !== undefined && email !== null) queryParams.append("email", email);
   const url = `/api/groomers/apply/status${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
@@ -1336,8 +1381,13 @@ export async function getGroomerApplyStatus(email?: string | null): Promise<Appl
 /**
  * 提交美容师申请
  */
-export async function submitGroomerApply(data: ApplySubmitIn): Promise<ApplySubmitOut> {
-  const response = await http.post<ApplySubmitOut>("/api/groomers/apply/submit", data);
+export async function submitGroomerApply(
+  data: ApplySubmitIn
+): Promise<ApplySubmitOut> {
+  const response = await http.post<ApplySubmitOut>(
+    "/api/groomers/apply/submit",
+    data
+  );
   return response.data;
 }
 
@@ -1410,7 +1460,7 @@ async function uploadFileWithProgress<T = PhotoUploadResponse>(
 
     // 设置请求头（包括认证 token）
     xhr.open("POST", fullUrl);
-    
+
     // 获取并设置认证 token
     (async () => {
       try {
@@ -1448,7 +1498,8 @@ export async function getAddresses(params?: {
 }): Promise<AddressPageOut> {
   const queryParams = new URLSearchParams();
   if (params?.page) queryParams.append("page", String(params.page));
-  if (params?.page_size) queryParams.append("page_size", String(params.page_size));
+  if (params?.page_size)
+    queryParams.append("page_size", String(params.page_size));
 
   const url = `/api/bookings/addresses${queryParams.toString() ? "?" + queryParams.toString() : ""}`;
   const response = await http.get<AddressPageOut>(url);
@@ -1456,7 +1507,9 @@ export async function getAddresses(params?: {
 }
 
 export async function getServiceAreaProvinces(): Promise<ProvinceOut[]> {
-  const response = await http.get<ProvinceOut[]>("/api/bookings/service_areas/provinces");
+  const response = await http.get<ProvinceOut[]>(
+    "/api/bookings/service_areas/provinces"
+  );
   return response.data;
 }
 
@@ -1464,7 +1517,8 @@ export async function getServiceAreas(params?: {
   province_code?: string;
 }): Promise<ServiceAreaOut[]> {
   const queryParams = new URLSearchParams();
-  if (params?.province_code) queryParams.append("province_code", params.province_code);
+  if (params?.province_code)
+    queryParams.append("province_code", params.province_code);
   const url = `/api/bookings/service_areas${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
   const response = await http.get<ServiceAreaOut[]>(url);
   return response.data;
@@ -1473,7 +1527,9 @@ export async function getServiceAreas(params?: {
 /**
  * 创建地址
  */
-export async function createAddress(data: AddressManageIn): Promise<AddressOut> {
+export async function createAddress(
+  data: AddressManageIn
+): Promise<AddressOut> {
   const response = await http.post<AddressOut>("/api/bookings/addresses", data);
   return response.data;
 }
@@ -1496,7 +1552,9 @@ export async function updateAddress(
  * 删除地址
  */
 export async function deleteAddress(addressId: number): Promise<OkOut> {
-  const response = await http.delete<OkOut>(`/api/bookings/addresses/${addressId}`);
+  const response = await http.delete<OkOut>(
+    `/api/bookings/addresses/${addressId}`
+  );
   return response.data;
 }
 
@@ -1522,7 +1580,7 @@ export async function createBooking(
   // 请使用 submitBooking 函数代替
   console.warn(
     "createBooking is deprecated. The /api/bookings/bookings endpoint has been removed. " +
-    "Please use submitBooking with BookingSubmitIn format instead."
+      "Please use submitBooking with BookingSubmitIn format instead."
   );
   throw new Error(
     "createBooking is deprecated. Please use submitBooking with BookingSubmitIn format instead."
@@ -1548,10 +1606,7 @@ export async function getBookingQuote(
 export async function submitBooking(
   params: BookingSubmitIn
 ): Promise<BookingOut> {
-  const response = await http.post<BookingOut>(
-    "/api/bookings/submit",
-    params
-  );
+  const response = await http.post<BookingOut>("/api/bookings/submit", params);
   return response.data;
 }
 
@@ -1580,7 +1635,8 @@ export async function getMyBookings(params?: {
   const queryParams = new URLSearchParams();
   if (params?.group) queryParams.append("group", params.group);
   if (params?.page) queryParams.append("page", String(params.page));
-  if (params?.page_size) queryParams.append("page_size", String(params.page_size));
+  if (params?.page_size)
+    queryParams.append("page_size", String(params.page_size));
 
   const qs = queryParams.toString();
   const url = qs ? `/api/bookings/?${qs}` : "/api/bookings/";
@@ -1591,16 +1647,23 @@ export async function getMyBookings(params?: {
 /**
  * 获取预约详情
  */
-export async function getBookingDetail(bookingId: number): Promise<BookingDetailOut> {
-  const response = await http.get<BookingDetailOut>(`/api/bookings/${bookingId}`);
+export async function getBookingDetail(
+  bookingId: number
+): Promise<BookingDetailOut> {
+  const response = await http.get<BookingDetailOut>(
+    `/api/bookings/${bookingId}`
+  );
   return response.data;
 }
 
 export async function updateBookingHealthInfo(
   bookingId: number,
-  payload: BookingHealthInfoUpdateIn,
+  payload: BookingHealthInfoUpdateIn
 ): Promise<OkOut> {
-  const response = await http.patch<OkOut>(`/api/bookings/${bookingId}/health_info`, payload);
+  const response = await http.patch<OkOut>(
+    `/api/bookings/${bookingId}/health_info`,
+    payload
+  );
   return response.data;
 }
 
@@ -1786,7 +1849,14 @@ export interface CheckInObservationOut {
   photos: CheckInObservationPhotoOut[];
 }
 
-export type InspectionArea = "skin" | "left_ear" | "right_ear" | "mouth" | "left_eye" | "right_eye" | "posture";
+export type InspectionArea =
+  | "skin"
+  | "left_ear"
+  | "right_ear"
+  | "mouth"
+  | "left_eye"
+  | "right_eye"
+  | "posture";
 export type InspectionPhotoClassification = "normal" | "ai_scan";
 
 export interface InspectionPhotoOut {
@@ -1805,10 +1875,24 @@ export interface InspectionPhotoOut {
 export interface PhotoHealthInspectionOut {
   id: number;
   booking_id: number;
-  status: "draft" | "submitted" | "analyzing" | "review" | "published" | "analysis_failed";
+  status:
+    | "draft"
+    | "submitted"
+    | "analyzing"
+    | "review"
+    | "published"
+    | "analysis_failed";
   current_step: number;
   observation_tags: string[];
   current_note: string;
+  handover_note: string;
+  overall_professional_impression:
+    | ""
+    | "grade_a"
+    | "grade_b"
+    | "grade_c"
+    | "grade_d";
+  step6_phase: "impression" | "notes";
   locked: boolean;
   photos: InspectionPhotoOut[];
 }
@@ -1826,7 +1910,9 @@ export interface PhotoHealthAreaResult {
 export interface PhotoHealthAnalysisOut {
   job_id: number;
   status: "pending" | "running" | "succeeded" | "failed";
-  area_results: Partial<Record<"skin" | "ear" | "mouth" | "eye" | "mobility", PhotoHealthAreaResult>>;
+  area_results: Partial<
+    Record<"skin" | "ear" | "mouth" | "eye" | "mobility", PhotoHealthAreaResult>
+  >;
   area_errors: Record<string, string>;
   attempts: number;
   review_ready: boolean;
@@ -1836,10 +1922,17 @@ export interface PhotoHealthReportDraftOut {
   id: number;
   booking_id: number;
   pet: Record<string, unknown>;
-  appointment: { scheduled_time?: string | null; service_name?: string; status: string };
+  appointment: {
+    scheduled_time?: string | null;
+    service_name?: string;
+    status: string;
+  };
   original_insights: string;
   groomer_insights: string;
-  wellness_summary: Record<"skin" | "ear" | "mouth" | "eye" | "mobility", PhotoHealthAreaResult>;
+  wellness_summary: Record<
+    "skin" | "ear" | "mouth" | "eye" | "mobility",
+    PhotoHealthAreaResult
+  >;
   source_version: number;
   previewed_source_version: number | null;
   photos: InspectionPhotoOut[];
@@ -2101,8 +2194,12 @@ export async function clientDecideAddOn(
 /**
  * 取消预约
  */
-export async function getCancelQuote(bookingId: number): Promise<CancelQuoteOut> {
-  const response = await http.get<CancelQuoteOut>(`/api/bookings/${bookingId}/cancel_quote`);
+export async function getCancelQuote(
+  bookingId: number
+): Promise<CancelQuoteOut> {
+  const response = await http.get<CancelQuoteOut>(
+    `/api/bookings/${bookingId}/cancel_quote`
+  );
   return response.data;
 }
 
@@ -2110,10 +2207,9 @@ export async function cancelBooking(
   bookingId: number,
   reason: string = ""
 ): Promise<OkOut> {
-  const response = await http.post<OkOut>(
-    `/api/bookings/${bookingId}/cancel`,
-    { reason } satisfies CancelBookingIn
-  );
+  const response = await http.post<OkOut>(`/api/bookings/${bookingId}/cancel`, {
+    reason,
+  } satisfies CancelBookingIn);
   return response.data;
 }
 
@@ -2142,7 +2238,9 @@ export async function updateGroomerProfile(
  * 获取美容师打款摘要
  */
 export async function getGroomerPayoutSummary(): Promise<GroomerPayoutSummaryOut> {
-  const response = await http.get<GroomerPayoutSummaryOut>("/api/groomers/payout");
+  const response = await http.get<GroomerPayoutSummaryOut>(
+    "/api/groomers/payout"
+  );
   return response.data;
 }
 
@@ -2172,7 +2270,9 @@ export async function createGroomerPayoutLoginLink(): Promise<GroomerPayoutLinkO
  * 获取美容师表现数据
  */
 export async function getGroomerPerformance(): Promise<GroomerPerformanceOut> {
-  const response = await http.get<GroomerPerformanceOut>("/api/groomers/performance");
+  const response = await http.get<GroomerPerformanceOut>(
+    "/api/groomers/performance"
+  );
   return response.data;
 }
 
@@ -2249,7 +2349,9 @@ export async function getGroomerCurrentBooking(): Promise<GroomerCurrentBookingO
 /**
  * 获取美容师订单详情
  */
-export async function getGroomerBookingDetail(bookingId: number): Promise<GroomerBookingDetailOut> {
+export async function getGroomerBookingDetail(
+  bookingId: number
+): Promise<GroomerBookingDetailOut> {
   const response = await http.get<GroomerBookingDetailOut>(
     `/api/groomers/bookings/${bookingId}`
   );
@@ -2264,15 +2366,20 @@ export async function getGroomerPendingBookingInvitations(
 ): Promise<GroomerPendingInvitationListOut> {
   const queryParams = new URLSearchParams();
   if (params?.page) queryParams.append("page", String(params.page));
-  if (params?.page_size) queryParams.append("page_size", String(params.page_size));
+  if (params?.page_size)
+    queryParams.append("page_size", String(params.page_size));
 
   const url = `/api/groomers/bookings/pending${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
   const response = await http.get<GroomerPendingInvitationListOut>(url);
   return response.data;
 }
 
-export async function getGroomerServiceAreas(): Promise<GroomerServiceAreaOut[]> {
-  const response = await http.get<GroomerServiceAreaOut[]>("/api/groomers/service_areas");
+export async function getGroomerServiceAreas(): Promise<
+  GroomerServiceAreaOut[]
+> {
+  const response = await http.get<GroomerServiceAreaOut[]>(
+    "/api/groomers/service_areas"
+  );
   return response.data;
 }
 
@@ -2398,24 +2505,26 @@ export async function uploadGroomerCheckUpPhoto(
   return uploadFileWithProgress(
     `/api/groomers/bookings/${bookingId}/check_up/upload_photo`,
     file,
-    onProgress,
+    onProgress
   ) as Promise<GroomerCheckUpPhotoUploadOut>;
 }
 
-export async function getCheckInObservation(bookingId: number): Promise<CheckInObservationOut> {
+export async function getCheckInObservation(
+  bookingId: number
+): Promise<CheckInObservationOut> {
   const response = await http.get<CheckInObservationOut>(
-    `/api/groomers/bookings/${bookingId}/check_in_observation`,
+    `/api/groomers/bookings/${bookingId}/check_in_observation`
   );
   return response.data;
 }
 
 export async function saveCheckInObservation(
   bookingId: number,
-  arrivalNote: string,
+  arrivalNote: string
 ): Promise<CheckInObservationOut> {
   const response = await http.put<CheckInObservationOut>(
     `/api/groomers/bookings/${bookingId}/check_in_observation`,
-    { arrival_note: arrivalNote },
+    { arrival_note: arrivalNote }
   );
   return response.data;
 }
@@ -2423,37 +2532,63 @@ export async function saveCheckInObservation(
 export async function uploadCheckInObservationPhoto(
   bookingId: number,
   file: File,
-  onProgress?: (progress: number) => void,
+  onProgress?: (progress: number) => void
 ): Promise<CheckInObservationPhotoOut> {
   return uploadFileWithProgress(
     `/api/groomers/bookings/${bookingId}/check_in_observation/photos`,
     file,
-    onProgress,
+    onProgress
   ) as Promise<CheckInObservationPhotoOut>;
 }
 
-export async function deleteCheckInObservationPhoto(bookingId: number, photoId: number): Promise<OkOut> {
+export async function deleteCheckInObservationPhoto(
+  bookingId: number,
+  photoId: number
+): Promise<OkOut> {
   const response = await http.delete<OkOut>(
-    `/api/groomers/bookings/${bookingId}/check_in_observation/photos/${photoId}`,
+    `/api/groomers/bookings/${bookingId}/check_in_observation/photos/${photoId}`
   );
   return response.data;
 }
 
-export async function getPhotoHealthInspection(bookingId: number): Promise<PhotoHealthInspectionLookupOut> {
-  const response = await http.get<PhotoHealthInspectionLookupOut>(`/api/groomers/bookings/${bookingId}/photo_health_inspection`);
+export async function getPhotoHealthInspection(
+  bookingId: number
+): Promise<PhotoHealthInspectionLookupOut> {
+  const response = await http.get<PhotoHealthInspectionLookupOut>(
+    `/api/groomers/bookings/${bookingId}/photo_health_inspection`
+  );
   return response.data;
 }
 
-export async function startPhotoHealthInspection(bookingId: number): Promise<PhotoHealthInspectionOut> {
-  const response = await http.post<PhotoHealthInspectionOut>(`/api/groomers/bookings/${bookingId}/photo_health_inspection`);
+export async function startPhotoHealthInspection(
+  bookingId: number
+): Promise<PhotoHealthInspectionOut> {
+  const response = await http.post<PhotoHealthInspectionOut>(
+    `/api/groomers/bookings/${bookingId}/photo_health_inspection`
+  );
   return response.data;
 }
 
 export async function savePhotoHealthInspectionProgress(
   bookingId: number,
-  data: { current_step: number; observation_tags: string[]; current_note: string },
+  data: {
+    current_step: number;
+    observation_tags: string[];
+    current_note: string;
+    handover_note: string;
+    overall_professional_impression:
+      | ""
+      | "grade_a"
+      | "grade_b"
+      | "grade_c"
+      | "grade_d";
+    step6_phase: "impression" | "notes";
+  }
 ): Promise<PhotoHealthInspectionOut> {
-  const response = await http.put<PhotoHealthInspectionOut>(`/api/groomers/bookings/${bookingId}/photo_health_inspection`, data);
+  const response = await http.put<PhotoHealthInspectionOut>(
+    `/api/groomers/bookings/${bookingId}/photo_health_inspection`,
+    data
+  );
   return response.data;
 }
 
@@ -2461,7 +2596,7 @@ export async function uploadInspectionPhoto(
   bookingId: number,
   area: InspectionArea,
   file: File,
-  idempotencyKey: string,
+  idempotencyKey: string
 ): Promise<InspectionPhotoOut> {
   const formData = new FormData();
   formData.append("area", area);
@@ -2470,8 +2605,11 @@ export async function uploadInspectionPhoto(
     `/api/groomers/bookings/${bookingId}/photo_health_inspection/photos`,
     formData,
     {
-      headers: { "Content-Type": "multipart/form-data", "X-Idempotency-Key": idempotencyKey },
-    },
+      headers: {
+        "Content-Type": "multipart/form-data",
+        "X-Idempotency-Key": idempotencyKey,
+      },
+    }
   );
   return response.data;
 }
@@ -2479,18 +2617,24 @@ export async function uploadInspectionPhoto(
 export async function updateInspectionPhoto(
   bookingId: number,
   photoId: number,
-  data: { classification: InspectionPhotoClassification; finding_hints: string[] },
+  data: {
+    classification: InspectionPhotoClassification;
+    finding_hints: string[];
+  }
 ): Promise<InspectionPhotoOut> {
   const response = await http.put<InspectionPhotoOut>(
     `/api/groomers/bookings/${bookingId}/photo_health_inspection/photos/${photoId}`,
-    data,
+    data
   );
   return response.data;
 }
 
-export async function deleteInspectionPhoto(bookingId: number, photoId: number): Promise<OkOut> {
+export async function deleteInspectionPhoto(
+  bookingId: number,
+  photoId: number
+): Promise<OkOut> {
   const response = await http.delete<OkOut>(
-    `/api/groomers/bookings/${bookingId}/photo_health_inspection/photos/${photoId}`,
+    `/api/groomers/bookings/${bookingId}/photo_health_inspection/photos/${photoId}`
   );
   return response.data;
 }
@@ -2508,44 +2652,73 @@ export async function getInspectionPetNotes(bookingId: number): Promise<{
 
 export async function submitPhotoHealthInspection(
   bookingId: number,
-  observationTags: string[],
+  observationTags: string[]
 ): Promise<{ job_id: number; status: string; reused: boolean }> {
-  const response = await http.post<{ job_id: number; status: string; reused: boolean }>(
-    `/api/groomers/bookings/${bookingId}/photo_health_inspection/submit`,
-    { observation_tags: observationTags },
-  );
-  return response.data;
-}
-
-export async function getPhotoHealthAnalysis(bookingId: number): Promise<PhotoHealthAnalysisOut> {
-  const response = await http.get<PhotoHealthAnalysisOut>(`/api/groomers/bookings/${bookingId}/photo_health_inspection/analysis`);
-  return response.data;
-}
-
-export async function retryPhotoHealthAnalysis(bookingId: number): Promise<PhotoHealthAnalysisOut> {
-  const response = await http.post<PhotoHealthAnalysisOut>(`/api/groomers/bookings/${bookingId}/photo_health_inspection/analysis/retry`);
-  return response.data;
-}
-
-export async function getPhotoHealthReportDraft(bookingId: number): Promise<PhotoHealthReportDraftOut> {
-  const response = await http.get<PhotoHealthReportDraftOut>(`/api/groomers/bookings/${bookingId}/photo_health_report/draft`);
-  return response.data;
-}
-
-export async function getPublishedPhotoHealthReport(bookingId: number): Promise<PhotoHealthReportDraftOut> {
-  const response = await http.get<PhotoHealthReportDraftOut>(`/api/groomers/bookings/${bookingId}/photo_health_report/published`);
-  return response.data;
-}
-
-export async function updatePhotoHealthReportInsights(bookingId: number, groomerInsights: string): Promise<PhotoHealthReportDraftOut> {
-  const response = await http.put<PhotoHealthReportDraftOut>(`/api/groomers/bookings/${bookingId}/photo_health_report/draft/insights`, {
-    groomer_insights: groomerInsights,
+  const response = await http.post<{
+    job_id: number;
+    status: string;
+    reused: boolean;
+  }>(`/api/groomers/bookings/${bookingId}/photo_health_inspection/submit`, {
+    observation_tags: observationTags,
   });
   return response.data;
 }
 
-export async function previewPhotoHealthReportPdf(bookingId: number): Promise<HealthReportPdfPreviewOut> {
-  const response = await http.post<HealthReportPdfPreviewOut>(`/api/groomers/bookings/${bookingId}/photo_health_report/draft/pdf-preview`);
+export async function getPhotoHealthAnalysis(
+  bookingId: number
+): Promise<PhotoHealthAnalysisOut> {
+  const response = await http.get<PhotoHealthAnalysisOut>(
+    `/api/groomers/bookings/${bookingId}/photo_health_inspection/analysis`
+  );
+  return response.data;
+}
+
+export async function retryPhotoHealthAnalysis(
+  bookingId: number
+): Promise<PhotoHealthAnalysisOut> {
+  const response = await http.post<PhotoHealthAnalysisOut>(
+    `/api/groomers/bookings/${bookingId}/photo_health_inspection/analysis/retry`
+  );
+  return response.data;
+}
+
+export async function getPhotoHealthReportDraft(
+  bookingId: number
+): Promise<PhotoHealthReportDraftOut> {
+  const response = await http.get<PhotoHealthReportDraftOut>(
+    `/api/groomers/bookings/${bookingId}/photo_health_report/draft`
+  );
+  return response.data;
+}
+
+export async function getPublishedPhotoHealthReport(
+  bookingId: number
+): Promise<PhotoHealthReportDraftOut> {
+  const response = await http.get<PhotoHealthReportDraftOut>(
+    `/api/groomers/bookings/${bookingId}/photo_health_report/published`
+  );
+  return response.data;
+}
+
+export async function updatePhotoHealthReportInsights(
+  bookingId: number,
+  groomerInsights: string
+): Promise<PhotoHealthReportDraftOut> {
+  const response = await http.put<PhotoHealthReportDraftOut>(
+    `/api/groomers/bookings/${bookingId}/photo_health_report/draft/insights`,
+    {
+      groomer_insights: groomerInsights,
+    }
+  );
+  return response.data;
+}
+
+export async function previewPhotoHealthReportPdf(
+  bookingId: number
+): Promise<HealthReportPdfPreviewOut> {
+  const response = await http.post<HealthReportPdfPreviewOut>(
+    `/api/groomers/bookings/${bookingId}/photo_health_report/draft/pdf-preview`
+  );
   return response.data;
 }
 
@@ -2554,18 +2727,37 @@ export async function fetchAuthenticatedBlob(url: string): Promise<Blob> {
   return response.data;
 }
 
-export async function publishPhotoHealthReport(bookingId: number): Promise<{ report_id: number; grade: string; email_status: string; reused: boolean }> {
-  const response = await http.post<{ report_id: number; grade: string; email_status: string; reused: boolean }>(`/api/groomers/bookings/${bookingId}/photo_health_report/publish`);
+export async function publishPhotoHealthReport(bookingId: number): Promise<{
+  report_id: number;
+  grade: string;
+  email_status: string;
+  reused: boolean;
+}> {
+  const response = await http.post<{
+    report_id: number;
+    grade: string;
+    email_status: string;
+    reused: boolean;
+  }>(`/api/groomers/bookings/${bookingId}/photo_health_report/publish`);
   return response.data;
 }
 
-export async function listPetHealthReports(petId: number): Promise<PublishedPetHealthReportOut[]> {
-  const response = await http.get<{ reports: PublishedPetHealthReportOut[] }>(`/api/pets/${petId}/health_reports`);
+export async function listPetHealthReports(
+  petId: number
+): Promise<PublishedPetHealthReportOut[]> {
+  const response = await http.get<{ reports: PublishedPetHealthReportOut[] }>(
+    `/api/pets/${petId}/health_reports`
+  );
   return response.data.reports;
 }
 
-export async function getPetHealthReportPdf(petId: number, reportId: number): Promise<Blob> {
-  return fetchAuthenticatedBlob(`/api/pets/${petId}/health_reports/${reportId}/pdf`);
+export async function getPetHealthReportPdf(
+  petId: number,
+  reportId: number
+): Promise<Blob> {
+  return fetchAuthenticatedBlob(
+    `/api/pets/${petId}/health_reports/${reportId}/pdf`
+  );
 }
 
 /**
@@ -2643,7 +2835,8 @@ export async function getGroomerEarningTransactions(
 ): Promise<GroomerEarningTransactionListOut> {
   const queryParams = new URLSearchParams();
   if (params?.page) queryParams.append("page", String(params.page));
-  if (params?.page_size) queryParams.append("page_size", String(params.page_size));
+  if (params?.page_size)
+    queryParams.append("page_size", String(params.page_size));
 
   const url = `/api/groomers/earnings/transactions${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
   const response = await http.get<GroomerEarningTransactionListOut>(url);
@@ -2653,7 +2846,9 @@ export async function getGroomerEarningTransactions(
 /**
  * 发起提现
  */
-export async function groomerCashOut(data: CashOutIn): Promise<GroomerCashOutOut> {
+export async function groomerCashOut(
+  data: CashOutIn
+): Promise<GroomerCashOutOut> {
   const response = await http.post<GroomerCashOutOut>(
     "/api/groomers/earnings/cash_out",
     data
@@ -2670,7 +2865,8 @@ export async function getGroomerSchedule(
   const queryParams = new URLSearchParams();
   queryParams.append("service_date", params.service_date);
   if (params.page) queryParams.append("page", String(params.page));
-  if (params.page_size) queryParams.append("page_size", String(params.page_size));
+  if (params.page_size)
+    queryParams.append("page_size", String(params.page_size));
 
   const response = await http.get<GroomerScheduleOut>(
     `/api/groomers/schedule?${queryParams.toString()}`
@@ -2686,7 +2882,8 @@ export async function getGroomerScheduleNearestConflict(
 ): Promise<GroomerScheduleNearestConflictOut> {
   const queryParams = new URLSearchParams();
   queryParams.append("datetime_local", params.datetime_local);
-  if (params.exclude_booking_id) queryParams.append("exclude_booking_id", String(params.exclude_booking_id));
+  if (params.exclude_booking_id)
+    queryParams.append("exclude_booking_id", String(params.exclude_booking_id));
 
   const response = await http.get<GroomerScheduleNearestConflictOut>(
     `/api/groomers/schedule/nearest_conflict?${queryParams.toString()}`
@@ -2705,7 +2902,8 @@ export async function getGroomerHistory(
   if (params?.date_from) queryParams.append("date_from", params.date_from);
   if (params?.date_to) queryParams.append("date_to", params.date_to);
   if (params?.page) queryParams.append("page", String(params.page));
-  if (params?.page_size) queryParams.append("page_size", String(params.page_size));
+  if (params?.page_size)
+    queryParams.append("page_size", String(params.page_size));
 
   const url = `/api/groomers/history${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
   const response = await http.get<GroomerHistoryOut>(url);
@@ -2724,7 +2922,9 @@ export async function getGroomerMyWork(): Promise<GroomerMyWorkOut> {
  * 获取 My Work 当月日历计数
  */
 export async function getGroomerMyWorkCalendar(): Promise<GroomerMyWorkCalendarOut> {
-  const response = await http.get<GroomerMyWorkCalendarOut>("/api/groomers/my_work/calendar");
+  const response = await http.get<GroomerMyWorkCalendarOut>(
+    "/api/groomers/my_work/calendar"
+  );
   return response.data;
 }
 
@@ -2732,7 +2932,9 @@ export async function getGroomerMyWorkCalendar(): Promise<GroomerMyWorkCalendarO
  * 获取 My Work schedule sections
  */
 export async function getGroomerMyWorkSchedule(): Promise<GroomerMyWorkScheduleOut> {
-  const response = await http.get<GroomerMyWorkScheduleOut>("/api/groomers/my_work/schedule");
+  const response = await http.get<GroomerMyWorkScheduleOut>(
+    "/api/groomers/my_work/schedule"
+  );
   return response.data;
 }
 
@@ -2743,7 +2945,8 @@ export async function getGroomerHistoryDetail(
   historyDetailRef: number | string
 ): Promise<GroomerHistoryDetailOut> {
   const baseUrl =
-    typeof historyDetailRef === "string" && historyDetailRef.startsWith("/api/groomers/history/")
+    typeof historyDetailRef === "string" &&
+    historyDetailRef.startsWith("/api/groomers/history/")
       ? historyDetailRef
       : `/api/groomers/history/${historyDetailRef}`;
   const separator = baseUrl.includes("?") ? "&" : "?";
@@ -2765,10 +2968,14 @@ export interface PaymentSessionOut {
   payment_id: number;
 }
 
-export function getPaymentSessionRedirectUrl(session: PaymentSessionOut): string | null {
+export function getPaymentSessionRedirectUrl(
+  session: PaymentSessionOut
+): string | null {
   try {
     const parsedUrl = new URL(session.url);
-    return parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:" ? parsedUrl.href : null;
+    return parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:"
+      ? parsedUrl.href
+      : null;
   } catch {
     return null;
   }
@@ -2869,7 +3076,8 @@ export async function getPaymentMethods(params?: {
 }): Promise<PaymentMethodPageOut> {
   const queryParams = new URLSearchParams();
   if (params?.page) queryParams.append("page", String(params.page));
-  if (params?.page_size) queryParams.append("page_size", String(params.page_size));
+  if (params?.page_size)
+    queryParams.append("page_size", String(params.page_size));
 
   const url = `/api/payments/payment_methods${queryParams.toString() ? "?" + queryParams.toString() : ""}`;
   const response = await http.get<PaymentMethodPageOut>(url);
@@ -2909,14 +3117,10 @@ export async function guestStart(
 /**
  * 升级访客账户为正式账户
  */
-export async function upgradeGuest(
-  data: UpgradeGuestIn
-): Promise<TokenOut> {
-  const response = await http.post<TokenOut>(
-    "/api/auth/guest/upgrade",
-    data,
-    { skipAuth: true }
-  );
+export async function upgradeGuest(data: UpgradeGuestIn): Promise<TokenOut> {
+  const response = await http.post<TokenOut>("/api/auth/guest/upgrade", data, {
+    skipAuth: true,
+  });
 
   // 自动保存 token（加密存储）
   await setAuthToken(response.data.access);
@@ -2962,10 +3166,8 @@ export interface FeedbackOut {
  * 提交反馈
  */
 export async function submitFeedback(data: FeedbackIn): Promise<FeedbackOut> {
-  const response = await http.post<FeedbackOut>(
-    "/api/public/feedback",
-    data,
-    { skipAuth: true }
-  );
+  const response = await http.post<FeedbackOut>("/api/public/feedback", data, {
+    skipAuth: true,
+  });
   return response.data;
 }
