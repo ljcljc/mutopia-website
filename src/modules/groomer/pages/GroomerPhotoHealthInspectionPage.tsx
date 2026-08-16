@@ -589,8 +589,10 @@ export default function GroomerPhotoHealthInspectionPage() {
       await submitPhotoHealthInspection(bookingId, {
         photos: inspection.photos.map((photo) => ({
           id: photo.id,
-          classification: photo.area === "posture" ? null : photo.classification,
-          finding_hints: photo.classification === "ai_scan" ? photo.finding_hints : [],
+          classification:
+            photo.area === "posture" ? null : photo.classification,
+          finding_hints:
+            photo.classification === "ai_scan" ? photo.finding_hints : [],
         })),
         observation_tags: observationTags,
         current_note: currentNote,
@@ -603,7 +605,8 @@ export default function GroomerPhotoHealthInspectionPage() {
         current ? { ...current, status: "analyzing", locked: true } : current
       );
     } catch (error) {
-      const validationFailed = error instanceof HttpError && error.status === 422;
+      const validationFailed =
+        error instanceof HttpError && error.status === 422;
       setErrors((current) => ({
         ...current,
         page: validationFailed
@@ -634,6 +637,7 @@ export default function GroomerPhotoHealthInspectionPage() {
       >
         <PhotoHealthReportReview
           draft={draft}
+          booking={booking}
           readOnly={Boolean(draft.published)}
           onSaveInsights={async (value) => {
             const updated = await updatePhotoHealthReportInsights(

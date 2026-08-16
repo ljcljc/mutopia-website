@@ -51,27 +51,61 @@ const arrival: CheckInObservationOut = {
 
 describe("PhotoHealthOverview", () => {
   it("renders the booking snapshot behavior as read-only", () => {
-    render(<PhotoHealthOverview booking={booking} arrival={arrival} saving={false} startLabel="Start inspection" onStart={vi.fn()} />);
+    render(
+      <PhotoHealthOverview
+        booking={booking}
+        arrival={arrival}
+        saving={false}
+        startLabel="Start inspection"
+        onStart={vi.fn()}
+      />
+    );
 
     expect(screen.getByText("Hard to handle")).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "Max" })).toHaveClass("size-14");
-    expect(screen.getByRole("img", { name: "Max" })).toHaveAttribute("src", expect.stringContaining("/media/max.jpg"));
-    expect(screen.getByText(/Aug 9, 10:30 AM · Full Groom/)).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /edit/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Max" })).toHaveAttribute(
+      "src",
+      expect.stringContaining("/media/max.jpg")
+    );
+    expect(
+      screen.getByText(/Aug 9, 10:30 AM · Full Groom/)
+    ).toBeInTheDocument();
+    expect(screen.getByText("Checked In")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /edit/i })
+    ).not.toBeInTheDocument();
   });
 
   it("opens the shared read-only preview at the clicked photo", () => {
-    render(<PhotoHealthOverview booking={booking} arrival={arrival} saving={false} startLabel="Start inspection" onStart={vi.fn()} />);
+    render(
+      <PhotoHealthOverview
+        booking={booking}
+        arrival={arrival}
+        saving={false}
+        startLabel="Start inspection"
+        onStart={vi.fn()}
+      />
+    );
 
     fireEvent.click(screen.getByRole("button", { name: "before-two.jpg" }));
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(screen.getByText("2 / 2")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /delete|remove|upload|replace/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /delete|remove|upload|replace/i })
+    ).not.toBeInTheDocument();
   });
 
   it("shows the agreed placeholder when the optional note is empty", () => {
-    render(<PhotoHealthOverview booking={booking} arrival={arrival} saving={false} startLabel="Start inspection" onStart={vi.fn()} />);
+    render(
+      <PhotoHealthOverview
+        booking={booking}
+        arrival={arrival}
+        saving={false}
+        startLabel="Start inspection"
+        onStart={vi.fn()}
+      />
+    );
 
     expect(screen.getByText("No note provided")).toBeInTheDocument();
   });
@@ -91,9 +125,12 @@ describe("PhotoHealthOverview", () => {
         saving={false}
         startLabel="Start inspection"
         onStart={vi.fn()}
-      />,
+      />
     );
 
-    expect(screen.getByRole("img", { name: "Max" })).toHaveAttribute("src", expect.stringContaining("/media/max-primary.jpg"));
+    expect(screen.getByRole("img", { name: "Max" })).toHaveAttribute(
+      "src",
+      expect.stringContaining("/media/max-primary.jpg")
+    );
   });
 });
