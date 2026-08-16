@@ -1,5 +1,9 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import type { MouseEvent as ReactMouseEvent, ReactNode, WheelEvent as ReactWheelEvent } from "react";
+import type {
+  MouseEvent as ReactMouseEvent,
+  ReactNode,
+  WheelEvent as ReactWheelEvent,
+} from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,6 +13,22 @@ import {
 } from "@/components/ui/dialog";
 import { Icon } from "./Icon";
 import { cn } from "@/components/ui/utils";
+
+const HEADER_FILE_NAME_MAX_LENGTH = 36;
+
+function truncateMiddle(
+  value: string,
+  maxLength = HEADER_FILE_NAME_MAX_LENGTH
+) {
+  const characters = Array.from(value);
+  if (characters.length <= maxLength) return value;
+
+  const trailingLength = Math.floor((maxLength - 3) / 2);
+  const leadingLength = maxLength - 3 - trailingLength;
+  return `${characters.slice(0, leadingLength).join("")}...${characters
+    .slice(-trailingLength)
+    .join("")}`;
+}
 
 export interface ImagePreviewProps {
   /** 图片 URL 数组 */
@@ -41,7 +61,6 @@ export function ImagePreview({
   maxZoom = 200,
   footer,
 }: ImagePreviewProps) {
-  const PREVIEW_DIALOG_LAYER = 80;
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [zoom, setZoom] = useState(initialZoom);
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -86,13 +105,14 @@ export function ImagePreview({
     setPan({ x: 0, y: 0 });
   }, [currentIndex, initialZoom]);
 
-
   // 使用 useMemo 稳定 currentImage，避免不必要的重新渲染
   const currentImage = useMemo(() => {
     return images[currentIndex] || images[0] || "";
   }, [images, currentIndex]);
-  
-  const currentFileName = fileNames?.[currentIndex] || fileNames?.[0] || `image_${currentIndex + 1}`;
+
+  const currentFileName =
+    fileNames?.[currentIndex] || fileNames?.[0] || `image_${currentIndex + 1}`;
+  const headerFileName = truncateMiddle(currentFileName);
   const totalImages = images.length;
 
   // 导航到上一张图片
@@ -192,12 +212,15 @@ export function ImagePreview({
     };
   }, [open, handleWheel]);
 
-  const handleDragStart = useCallback((e: ReactMouseEvent) => {
-    if (e.button !== 0 || zoom <= 100) return;
-    setIsDragging(true);
-    dragStartRef.current = { x: e.clientX, y: e.clientY };
-    panStartRef.current = { ...pan };
-  }, [zoom, pan]);
+  const handleDragStart = useCallback(
+    (e: ReactMouseEvent) => {
+      if (e.button !== 0 || zoom <= 100) return;
+      setIsDragging(true);
+      dragStartRef.current = { x: e.clientX, y: e.clientY };
+      panStartRef.current = { ...pan };
+    },
+    [zoom, pan]
+  );
 
   const handleDragMove = useCallback(
     (e: ReactMouseEvent) => {
@@ -250,7 +273,10 @@ export function ImagePreview({
         const nextDistance = getTouchDistance(e.touches);
         if (!nextDistance) return;
         const scale = nextDistance / pinchStartDistanceRef.current;
-        const nextZoom = Math.min(Math.max(zoomStartRef.current * scale, minZoom), maxZoom);
+        const nextZoom = Math.min(
+          Math.max(zoomStartRef.current * scale, minZoom),
+          maxZoom
+        );
         setZoom(nextZoom);
         setPan((prev) => clampPan(prev, nextZoom));
         return;
@@ -307,19 +333,20 @@ export function ImagePreview({
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose?.()}>
       <DialogContent
-        overlayClassName={`z-[${PREVIEW_DIALOG_LAYER - 1}]!`}
-        className={`image-preview-dialog z-[${PREVIEW_DIALOG_LAYER}]! bg-white border border-[rgba(0,0,0,0.2)] border-solid flex flex-col gap-[16px] items-start px-0 py-[12px] rounded-none sm:rounded-[20px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] w-screen h-screen max-w-none max-h-none sm:w-[80vw]! sm:h-[80vh]! sm:max-w-[80vw]! sm:max-h-[80vh]! overflow-visible [&>button]:hidden left-0 top-0 translate-x-0 translate-y-0 sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%]`}
+        overlayClassName="!z-[79]"
+        className="image-preview-dialog !z-[80] bg-white border border-[rgba(0,0,0,0.2)] border-solid flex flex-col gap-[16px] items-start px-0 py-[12px] rounded-none sm:rounded-[20px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] w-screen h-screen max-w-none max-h-none sm:w-[80vw]! sm:h-[80vh]! sm:max-w-[80vw]! sm:max-h-[80vh]! overflow-visible [&>button]:hidden left-0 top-0 translate-x-0 translate-y-0 sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%]"
       >
         {/* 屏幕阅读器可访问的标题和描述（视觉上隐藏） */}
         <DialogTitle className="sr-only">
           Image Preview: {currentFileName}
         </DialogTitle>
         <DialogDescription className="sr-only">
-          Viewing image {currentIndex + 1} of {totalImages}. Use arrow keys to navigate, + and - to zoom, and Escape to close.
+          Viewing image {currentIndex + 1} of {totalImages}. Use arrow keys to
+          navigate, + and - to zoom, and Escape to close.
         </DialogDescription>
-        
+
         {/* Header: 关闭按钮、文件名、索引 */}
-        <div className="h-[32px] relative shrink-0 w-full">
+        <div className="relative z-10 h-[32px] shrink-0 w-full">
           <div className="absolute flex flex-col gap-[8px] items-start left-0 top-0 w-full">
             <div className="flex items-center justify-between pl-[12px] pr-[28px] py-0 relative shrink-0 w-full">
               {/* 关闭按钮 */}
@@ -347,9 +374,12 @@ export function ImagePreview({
               </DialogClose>
 
               {/* 文件名（居中） */}
-              <div className="flex flex-1 items-center justify-center min-h-px min-w-px relative shrink-0">
-                <p className="font-comfortaa font-normal leading-[22.75px] relative shrink-0 text-[#4c4c4c] text-[14px] text-center">
-                  {currentFileName}
+              <div className="relative flex min-w-0 flex-1 items-center justify-center">
+                <p
+                  className="w-full truncate px-2 text-center font-comfortaa text-[14px] font-normal leading-[22.75px] text-[#4c4c4c]"
+                  title={currentFileName}
+                >
+                  {headerFileName}
                 </p>
               </div>
 
@@ -396,7 +426,9 @@ export function ImagePreview({
                   decoding="async"
                   style={{
                     transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom / 100})`,
-                    transition: isDragging ? "none" : "transform 0.2s ease-in-out",
+                    transition: isDragging
+                      ? "none"
+                      : "transform 0.2s ease-in-out",
                     maxWidth: "100%",
                     maxHeight: "100%",
                     width: "auto",
@@ -522,7 +554,9 @@ export function ImagePreview({
             </div>
           </div>
         )}
-        {footer ? <div className="w-full shrink-0 px-3 pb-2">{footer}</div> : null}
+        {footer ? (
+          <div className="w-full shrink-0 px-3 pb-2">{footer}</div>
+        ) : null}
       </DialogContent>
     </Dialog>
   );

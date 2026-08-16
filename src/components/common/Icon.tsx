@@ -1,19 +1,19 @@
 /**
  * SVG 图标组件 - 方案一：SVG 作为 React 组件（推荐）
- * 
+ *
  * 使用方式：
  * 1. 使用 Icon 组件（推荐，支持颜色和大小控制）
  * 2. 直接导入 SVG 作为 URL（兼容旧代码）
- * 
+ *
  * 示例：
  * ```tsx
  * // 方式1: 使用 Icon 组件（推荐）
  * <Icon name="nav-prev" size={16} className="text-[#8b6357]" />
- * 
+ *
  * // 方式2: 直接导入 SVG 组件（特殊场景）
  * import IconNavPrev from "@/assets/icons/icon-nav-prev.svg?react";
  * <IconNavPrev className="w-4 h-4 text-[#8b6357]" />
- * 
+ *
  * // 方式3: 直接导入 URL（兼容旧代码）
  * import iconNavPrev from "@/assets/icons/icon-nav-prev.svg";
  * <img src={iconNavPrev} alt="Previous" />
@@ -109,19 +109,25 @@ import IconOutLinkSvg from "@/assets/icons/icon-out-link.svg?react";
 import IconCreditSvg from "@/assets/icons/icon-credit.svg?react";
 import IconTargetSvg from "@/assets/icons/icon-target.svg?react";
 import IconBankSvg from "@/assets/icons/icon-bank.svg?react";
+import IconSubmitAiHealthReportSvg from "@/assets/icons/icon-submit-ai-health-report.svg?react";
+import IconWellnessEarSvg from "@/assets/icons/icon-wellness-ear.svg?react";
+import IconWellnessEyeSvg from "@/assets/icons/icon-wellness-eye.svg?react";
+import IconWellnessMobilitySvg from "@/assets/icons/icon-wellness-mobility.svg?react";
+import IconWellnessMouthSvg from "@/assets/icons/icon-wellness-mouth.svg?react";
+import IconWellnessSkinSvg from "@/assets/icons/icon-wellness-skin.svg?react";
 
 // 图标组件映射表
 const iconComponentMap = {
   "nav-prev": IconNavPrevSvg,
   "nav-next": IconNavNextSvg,
-  "location": IconLocationSvg,
-  "user": IconUserSvg,
-  "notify": IconNotifySvg,
+  location: IconLocationSvg,
+  user: IconUserSvg,
+  notify: IconNotifySvg,
   "chevron-down": IconChevronDownSvg,
-  "menu": IconMenuSvg,
-  "more": IconMoreSvg,
-  "email": IconEmailSvg,
-  "calendar": IconCalendarSvg,
+  menu: IconMenuSvg,
+  more: IconMoreSvg,
+  email: IconEmailSvg,
+  calendar: IconCalendarSvg,
   "alert-error": IconAlertErrorSvg,
   "alert-success": IconAlertSuccessSvg,
   "alert-warning": IconAlertWarningSvg,
@@ -129,16 +135,16 @@ const iconComponentMap = {
   "alert-ai-scan": IconAlertAiScanSvg,
   "eye-visible": IconEyeVisibleSvg,
   "eye-invisible": IconEyeInvisibleSvg,
-  "facebook": IconFacebookSvg,
+  facebook: IconFacebookSvg,
   "facebook-alt": IconFacebookAltSvg,
-  "instagram": IconInstagramSvg,
-  "twitter": IconTwitterSvg,
-  "google": IconGoogleSvg,
+  instagram: IconInstagramSvg,
+  twitter: IconTwitterSvg,
+  google: IconGoogleSvg,
   "footer-logo": IconFooterLogoSvg,
   "easy-booking": IconEasyBookingSvg,
   "pet-friendly": IconPetFriendlySvg,
   "professional-service": IconProfessionalServiceSvg,
-  "clock": IconClockSvg,
+  clock: IconClockSvg,
   "bath-brush": IconBathBrushSvg,
   "full-grooming": IconFullGroomingSvg,
   "express-groom": IconExpressGroomSvg,
@@ -150,53 +156,59 @@ const iconComponentMap = {
   "stress-free-experience": IconStressFreeExperienceSvg,
   "real-time-updates": IconRealTimeUpdatesSvg,
   "close-arrow": IconCloseArrowSvg,
-  "van": IconVanSvg,
-  "shop": IconShopSvg,
-  "dog": IconDogSvg,
-  "cat": IconCatSvg,
-  "pet": IconPetSvg,
-  "search": IconSearchSvg,
-  "image": IconImageSvg,
-  "add": IconAddSvg,
+  van: IconVanSvg,
+  shop: IconShopSvg,
+  dog: IconDogSvg,
+  cat: IconCatSvg,
+  pet: IconPetSvg,
+  search: IconSearchSvg,
+  image: IconImageSvg,
+  add: IconAddSvg,
   "add-2": IconAdd2Svg,
   "add-inspection": IconAddInspectionSvg,
-  "trash": IconTrashSvg,
-  "check": IconCheckSvg,
+  trash: IconTrashSvg,
+  check: IconCheckSvg,
   "check-green": IconCheckGreenSvg,
   "zoom-out": IconZoomOutSvg,
   "zoom-in": IconZoomInSvg,
-  "star": IconStarSvg,
-  "dashboard": IconDashboardSvg,
-  "pets": IconPetsSvg,
+  star: IconStarSvg,
+  dashboard: IconDashboardSvg,
+  pets: IconPetsSvg,
   "help-circle": IconHelpCircleSvg,
-  "logout": IconLogoutSvg,
-  "download": IconDownloadSvg,
-  "birthday": IconBirthdaySvg,
-  "lock": IconLockSvg,
-  "pencil": IconPencilSvg,
-  "gift": IconGiftSvg,
-  "phone": IconPhoneSvg,
-  "logo": IconLogoSvg,
+  logout: IconLogoutSvg,
+  download: IconDownloadSvg,
+  birthday: IconBirthdaySvg,
+  lock: IconLockSvg,
+  pencil: IconPencilSvg,
+  gift: IconGiftSvg,
+  phone: IconPhoneSvg,
+  logo: IconLogoSvg,
   "logo-mark": IconLogoMarkSvg,
-  "home": IconHomeSvg,
+  home: IconHomeSvg,
   "notification-confirmed": IconNotificationConfirmedSvg,
   "notification-reminder": IconNotificationReminderSvg,
   "notification-refer": IconNotificationReferSvg,
   "notification-refund": IconNotificationRefundSvg,
   "notification-empty": IconNotificationEmptySvg,
-  "account": IconAccountSvg,
+  account: IconAccountSvg,
   "account-2": IconAccount2Svg,
   "account-3": IconAccount3Svg,
-  "earning": IconEarningSvg,
-  "experience": IconExperienceSvg,
-  "identification": IconIdentificationSvg,
+  earning: IconEarningSvg,
+  experience: IconExperienceSvg,
+  identification: IconIdentificationSvg,
   "star-2": IconStar2Svg,
   "star-3": IconStar3Svg,
-  "dot": IconDotSvg,
+  dot: IconDotSvg,
   "out-link": IconOutLinkSvg,
-  "credit": IconCreditSvg,
-  "target": IconTargetSvg,
-  "bank": IconBankSvg,
+  credit: IconCreditSvg,
+  target: IconTargetSvg,
+  bank: IconBankSvg,
+  "submit-ai-health-report": IconSubmitAiHealthReportSvg,
+  "wellness-skin": IconWellnessSkinSvg,
+  "wellness-ear": IconWellnessEarSvg,
+  "wellness-mouth": IconWellnessMouthSvg,
+  "wellness-eye": IconWellnessEyeSvg,
+  "wellness-mobility": IconWellnessMobilitySvg,
 } as const;
 
 export type IconName = keyof typeof iconComponentMap;
@@ -218,24 +230,24 @@ export interface IconProps extends Omit<ComponentProps<"svg">, "name"> {
 
 /**
  * Icon 组件
- * 
+ *
  * 提供统一的图标使用接口，支持：
  * - 类型安全的图标名称
  * - 统一的大小控制
  * - 通过 className 控制样式（颜色、hover 等）
  * - SVG 内联，支持 currentColor
- * 
+ *
  * @example
  * ```tsx
  * // 基础使用
  * <Icon name="location" size={20} />
- * 
+ *
  * // 带颜色控制（推荐）
  * <Icon name="user" size={24} className="text-[#8b6357] hover:text-[#de6a07]" />
- * 
+ *
  * // 响应式大小
  * <Icon name="notify" className="w-4 h-4 md:w-6 md:h-6" />
- * 
+ *
  * // 使用 currentColor（SVG 会自动使用当前文本颜色）
  * <Icon name="nav-prev" className="text-[#8b6357]" />
  * ```
@@ -245,13 +257,23 @@ export const Icon = forwardRef<SVGSVGElement, IconProps>(
     const IconComponent = iconComponentMap[name];
 
     if (!IconComponent) {
-      console.warn(`Icon "${name}" not found. Available icons:`, Object.keys(iconComponentMap));
+      console.warn(
+        `Icon "${name}" not found. Available icons:`,
+        Object.keys(iconComponentMap)
+      );
       return null;
     }
 
     // 检查 IconComponent 是否是有效的 React 组件
-    if (typeof IconComponent !== "function" && typeof IconComponent !== "object") {
-      console.error(`Icon "${name}" is not a valid React component. It appears to be:`, typeof IconComponent, IconComponent);
+    if (
+      typeof IconComponent !== "function" &&
+      typeof IconComponent !== "object"
+    ) {
+      console.error(
+        `Icon "${name}" is not a valid React component. It appears to be:`,
+        typeof IconComponent,
+        IconComponent
+      );
       return null;
     }
 
@@ -264,7 +286,10 @@ export const Icon = forwardRef<SVGSVGElement, IconProps>(
         : {};
 
       // 确保 IconComponent 是 React 组件
-      if (typeof IconComponent === "function" || (typeof IconComponent === "object" && "$$typeof" in IconComponent)) {
+      if (
+        typeof IconComponent === "function" ||
+        (typeof IconComponent === "object" && "$$typeof" in IconComponent)
+      ) {
         return (
           <IconComponent
             ref={ref}
