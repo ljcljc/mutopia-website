@@ -119,7 +119,7 @@ export function PhotoHealthReportReview({
           {!editing && !readOnly && !preparing && !generationFailed ? (
             <button
               type="button"
-              aria-label="Edit Groomer and AI Insights"
+              aria-label="Edit Groomer’s note & AI Insights"
               onClick={() => setEditing(true)}
               className="size-5 shrink-0 cursor-pointer rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#92400E] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFF7ED]"
             >
@@ -230,7 +230,7 @@ export function PhotoHealthReportReview({
         >
           <span className="flex items-center justify-center gap-3 font-comfortaa text-[16px] font-bold leading-6 text-white">
             <Icon name="submit-ai-health-report" size={20} />
-            {generationFailed ? "Retry AI health report" : "Submit AI health report"}
+          {generationFailed ? "Retry publish" : "Publish report"}
           </span>
         </OrangeButton>
       ) : null}

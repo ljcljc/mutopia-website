@@ -82,7 +82,7 @@ describe("PhotoHealthReportReview", () => {
     );
 
     expect(
-      screen.getByRole("button", { name: "Retry AI health report" })
+      screen.getByRole("button", { name: "Retry publish" })
     ).toBeEnabled();
   });
 });
