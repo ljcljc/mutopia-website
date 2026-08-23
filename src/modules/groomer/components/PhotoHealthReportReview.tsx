@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   CustomTextarea,
   Icon,
   type IconName,
   OrangeButton,
-  PdfDocumentViewer,
+  PdfPreviewDialog,
 } from "@/components/common";
+import { usePdfPreview } from "@/components/common/usePdfPreview";
 import { ImagePreview } from "@/components/common";
 import GroomerAiInsightsEditIcon from "@/assets/icons/icon-groomer-ai-insights-edit.svg";
 import GroomerAiInsightsIcon from "@/assets/icons/icon-groomer-ai-insights.svg";
@@ -69,28 +70,19 @@ export function PhotoHealthReportReview({
   const [value, setValue] = useState(draft.groomer_insights);
   const [saving, setSaving] = useState(false);
   const [viewing, setViewing] = useState<InspectionPhotoOut[]>([]);
-  const [pdfUrl, setPdfUrl] = useState("");
-  const [pdfOpen, setPdfOpen] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const { blobUrl: pdfUrl, open: pdfOpen, loading: pdfLoading, openWithBlob: openPdfPreview, close: closePdfPreview } = usePdfPreview();
   const petName = typeof draft.pet.name === "string" ? draft.pet.name : "Pet";
   const preparing = ["retry", "running"].includes(
     draft.pdf_generation_status ?? ""
   );
   const generationFailed = draft.pdf_generation_status === "failed";
 
-  useEffect(
-    () => () => {
-      if (pdfUrl) URL.revokeObjectURL(pdfUrl);
-    },
-    [pdfUrl]
-  );
-
   const save = async () => {
     if (!value.trim()) return;
     setSaving(true);
     try {
       await onSaveInsights(value.trim());
-      setPdfUrl("");
       setEditing(false);
     } finally {
       setSaving(false);
@@ -207,12 +199,7 @@ export function PhotoHealthReportReview({
           type="button"
           fullWidth
           className="mt-7"
-          onClick={() =>
-            void onViewPdf().then((blob) => {
-              setPdfUrl(URL.createObjectURL(blob));
-              setPdfOpen(true);
-            })
-          }
+          onClick={() => void openPdfPreview(onViewPdf())}
         >
           View published PDF
         </OrangeButton>
@@ -243,11 +230,12 @@ export function PhotoHealthReportReview({
         open={viewing.length > 0}
         onClose={() => setViewing([])}
       />
-      <PdfDocumentViewer
+      <PdfPreviewDialog
         blobUrl={pdfUrl}
         fileName={`${petName}-health-report.pdf`}
         open={pdfOpen}
-        onClose={() => setPdfOpen(false)}
+        loading={pdfLoading}
+        onClose={closePdfPreview}
       />
     </>
   );

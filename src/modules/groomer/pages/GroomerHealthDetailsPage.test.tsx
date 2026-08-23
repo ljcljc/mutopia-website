@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getGroomerHealthDetailsAvatarUrl } from "./GroomerHealthDetailsPage";
+import { getGroomerHealthDetailsAvatarUrl, hasCurrentHealthReport } from "./GroomerHealthDetailsPage";
 
 describe("getGroomerHealthDetailsAvatarUrl", () => {
   it("prefers the booking pet_avatar over snapshot fallback fields", () => {
@@ -20,5 +20,15 @@ describe("getGroomerHealthDetailsAvatarUrl", () => {
         primary_photo: "/media/pets/anonymous/temp/photos/dog-primary.jpg",
       })
     ).toContain("/media/pets/anonymous/temp/photos/dog-primary.jpg");
+  });
+
+  it("shows the health report card whenever the API returns a report object", () => {
+    expect(
+      hasCurrentHealthReport({
+        report_id: 12,
+        grade: "not_enough_data",
+        insights: "Some report text",
+      })
+    ).toBe(true);
   });
 });

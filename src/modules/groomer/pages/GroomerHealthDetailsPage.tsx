@@ -5,9 +5,10 @@ import { toast } from "sonner";
 import DEFAULT_PET_AVATAR from "@/assets/icons/icon-pet-avatar-placeholder.svg";
 import { Icon } from "@/components/common/Icon";
 import { OrangeButton } from "@/components/common/OrangeButton";
-import { Spinner } from "@/components/common/Spinner";
+import { PdfPreviewDialog, Spinner } from "@/components/common";
+import { usePdfPreview } from "@/components/common/usePdfPreview";
 import AccountContentContainer from "@/components/layout/AccountContentContainer";
-import { buildImageUrl, getGroomerBookingDetail, startGroomerTravel, type GroomerBookingDetailOut } from "@/lib/api";
+import { buildImageUrl, fetchAuthenticatedBlob, getGroomerBookingDetail, startGroomerTravel, type GroomerBookingDetailOut } from "@/lib/api";
 import { formatGroomerTimeLabel, shouldShowStartTravel } from "@/modules/groomer/utils/time";
 import { BOOKING_HEALTH_STEPS, normalizeQuestionnaire } from "@/pages/account/booking-health/questionnaire";
 import type { BookingHealthQuestionnaire, TimelineEntry } from "@/pages/account/booking-health/types";
@@ -182,6 +183,10 @@ function buildPhotoUrls(snapshot: Record<string, unknown>, primaryKeys: string[]
     .filter(Boolean);
 
   return Array.from(new Set(urls));
+}
+
+export function hasCurrentHealthReport(healthReport: unknown): boolean {
+  return Boolean(healthReport && typeof healthReport === "object");
 }
 
 export function getGroomerHealthDetailsAvatarUrl(
@@ -578,6 +583,48 @@ function PhotoGalleryCard({ title, photos, emptyText }: { title: string; photos:
   );
 }
 
+function HealthReportCard({
+  petName,
+  updatedLabel,
+  pdfUrl,
+  onOpenPdf,
+  isOpeningPdf,
+}: {
+  petName: string;
+  updatedLabel: string;
+  pdfUrl?: string | null;
+  onOpenPdf: () => void;
+  isOpeningPdf: boolean;
+}) {
+  return (
+    <section className="rounded-[12px] border border-[#E5E7EB] bg-white p-[12px] shadow-[0px_8px_6px_rgba(0,0,0,0.08)]">
+      <p className="font-comfortaa text-[16px] font-semibold leading-[28px] text-[#4A3C2A]">Health report</p>
+      <button
+        type="button"
+        onClick={onOpenPdf}
+        disabled={!pdfUrl || isOpeningPdf}
+        className="mt-2 w-full cursor-pointer rounded-[12px] border border-[#E5E7EB] bg-white px-[15px] py-[13px] text-left transition-[border-color,background-color,box-shadow] hover:border-[#DE6A07]/40 hover:bg-[#FFF9F3] hover:shadow-[0px_8px_18px_rgba(222,106,7,0.08)] disabled:cursor-not-allowed disabled:hover:border-[#E5E7EB] disabled:hover:bg-white disabled:hover:shadow-none"
+      >
+        <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+          <div className="min-w-0">
+            <p className="truncate font-comfortaa text-[16px] leading-[28px] text-[#DE6A07]">{petName}</p>
+            <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
+              {updatedLabel ? `Updated: ${updatedLabel}` : "Updated recently"}
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center justify-between gap-3 lg:justify-end">
+            <div className="inline-flex h-6 items-center gap-1 rounded-[12px] bg-[#DCFCE7] px-3 py-1 font-comfortaa text-[10px] font-bold leading-[14px] text-[#27AE60]">
+              {isOpeningPdf ? <Spinner size="small" color="green" /> : <Icon name="check" className="size-[14px]" aria-hidden="true" />}
+              {isOpeningPdf ? "Opening" : "Ready"}
+            </div>
+            <ChevronRight className="size-4 shrink-0 text-[#8B6357]" strokeWidth={1.8} />
+          </div>
+        </div>
+      </button>
+    </section>
+  );
+}
+
 export default function GroomerHealthDetailsPage() {
   const navigate = useNavigate();
   const { bookingId } = useParams();
@@ -585,8 +632,16 @@ export default function GroomerHealthDetailsPage() {
   const [detail, setDetail] = useState<GroomerBookingDetailOut | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isStartingTravel, setIsStartingTravel] = useState(false);
+  const [isOpeningHealthReport, setIsOpeningHealthReport] = useState(false);
   const [isDesktopProfileExpanded, setIsDesktopProfileExpanded] = useState(true);
   const [isMobileInsightsExpanded, setIsMobileInsightsExpanded] = useState(true);
+  const {
+    blobUrl: healthReportBlobUrl,
+    open: isHealthReportViewerOpen,
+    loading: isHealthReportViewerLoading,
+    openWithBlob: openHealthReportPdf,
+    close: closeHealthReportPdf,
+  } = usePdfPreview();
 
   useEffect(() => {
     if (!Number.isFinite(parsedBookingId)) {
@@ -830,12 +885,9 @@ export default function GroomerHealthDetailsPage() {
   const canStartTravel = Boolean(detail?.id) && shouldShowStartTravel(scheduledTime, new Date(), detail?.status);
   const joinedNotes = noteItems.length > 0 ? noteItems.join(". ") : "No special notes were provided.";
   const healthReport = detail?.health_report ?? null;
-  const hasHealthReport = Boolean(
-    healthReport &&
-      [healthReport.summary, healthReport.pet_condition, healthReport.behavior_notes, healthReport.recommendations]
-        .some((value) => typeof value === "string" && value.trim().length > 0),
-  );
+  const hasHealthReport = hasCurrentHealthReport(healthReport);
   const healthReportUpdatedLabel = formatHealthReportUpdatedLabel(healthReport?.updated_at ?? "");
+  const healthReportSourceUrl = typeof healthReport?.pdf_url === "string" ? healthReport.pdf_url : null;
   const hasOwnerReport = BOOKING_HEALTH_STEPS.some((_, index) => {
     if (index === 0) return questionnaire.lifestyle.neighborhoods.length > 0 || questionnaire.lifestyle.neighborhoodDraft.trim().length > 0;
     if (index === 1) return questionnaire.prevention.primaryGoals.length > 0 || questionnaire.prevention.restrictions.trim().length > 0;
@@ -860,6 +912,25 @@ export default function GroomerHealthDetailsPage() {
       toast.error("Failed to start travel");
     } finally {
       setIsStartingTravel(false);
+    }
+  };
+
+  const handleOpenHealthReport = async () => {
+    if (!healthReportSourceUrl || isOpeningHealthReport) {
+      if (!healthReportSourceUrl) toast.error("Health report PDF is unavailable.");
+      return;
+    }
+
+    setIsOpeningHealthReport(true);
+    const loadingToastId = toast.loading("Opening health report...");
+    try {
+      await openHealthReportPdf(fetchAuthenticatedBlob(healthReportSourceUrl));
+      toast.success("Health report opened.", { id: loadingToastId });
+    } catch (error) {
+      console.error("Failed to open health report PDF:", error);
+      toast.error("Failed to open health report PDF.", { id: loadingToastId });
+    } finally {
+      setIsOpeningHealthReport(false);
     }
   };
 
@@ -1008,30 +1079,6 @@ export default function GroomerHealthDetailsPage() {
           </section>
         ) : null}
 
-        {hasHealthReport ? (
-          <section className="space-y-2 md:hidden">
-            <h2 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">Health report</h2>
-            <div className="rounded-[12px] border border-[#E5E7EB] bg-white px-[15px] py-[13px]">
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="truncate font-comfortaa text-[16px] leading-7 text-[#DE6A07]">{petName}</p>
-                  <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
-                    {healthReportUpdatedLabel ? `Updated: ${healthReportUpdatedLabel}` : "Updated recently"}
-                  </p>
-                </div>
-
-                <div className="flex shrink-0 items-center gap-[7px]">
-                  <span className="inline-flex items-center gap-1 rounded-[12px] bg-[#DCFCE7] px-3 py-1 font-comfortaa text-[10px] font-bold leading-[14px] text-[#27AE60]">
-                    <Icon name="check" className="size-[14px]" aria-hidden="true" />
-                    Ready
-                  </span>
-                  <ChevronRight className="size-4 text-[#8B6357]" strokeWidth={1.8} />
-                </div>
-              </div>
-            </div>
-          </section>
-        ) : null}
-
         {hasOwnerReport ? (
           <section className="hidden rounded-[18px] border-2 border-[#DE6A07] bg-white px-4 py-4 shadow-[0px_8px_20px_rgba(0,0,0,0.12)] sm:px-5 md:block">
             <div className="flex items-center gap-2">
@@ -1082,7 +1129,7 @@ export default function GroomerHealthDetailsPage() {
                       <p className="font-comfortaa text-[12.25px] font-semibold uppercase leading-[17.5px] tracking-[0.3063px] text-[#0F172B]">
                         Nutrition & diet
                       </p>
-                      <div className="mt-[10.5px] space-y-[7px]">
+                      <div className="mt-[10.5px] grid gap-[7px] lg:grid-cols-2">
                         {nutritionRows.map((item) => (
                           <DesktopProfileRow key={item.label} label={item.label} value={item.value} />
                         ))}
@@ -1093,7 +1140,7 @@ export default function GroomerHealthDetailsPage() {
                       <p className="font-comfortaa text-[12.25px] font-semibold uppercase leading-[17.5px] tracking-[0.3063px] text-[#0F172B]">
                         Prevention & core needs
                       </p>
-                      <div className="mt-[10.5px] space-y-[7px]">
+                      <div className="mt-[10.5px] grid gap-[7px] lg:grid-cols-2">
                         {preventionRows.map((item) => (
                           <DesktopProfileRow key={item.label} label={item.label} value={item.value} />
                         ))}
@@ -1104,7 +1151,7 @@ export default function GroomerHealthDetailsPage() {
                       <p className="font-comfortaa text-[12.25px] font-semibold uppercase leading-[17.5px] tracking-[0.3063px] text-[#0F172B]">
                         Vaccinations
                       </p>
-                      <div className="mt-[10.5px] space-y-[7px]">
+                      <div className="mt-[10.5px] grid gap-[7px] lg:grid-cols-2">
                         {vaccinationRows.length > 0 ? (
                           vaccinationRows.map((item) => (
                             <DesktopVaccinationRow
@@ -1124,7 +1171,7 @@ export default function GroomerHealthDetailsPage() {
                       <p className="font-comfortaa text-[12.25px] font-semibold uppercase leading-[17.5px] tracking-[0.3063px] text-[#0F172B]">
                         Medical management
                       </p>
-                      <div className="mt-[10.5px] space-y-[7px]">
+                      <div className="mt-[10.5px] grid gap-[7px] lg:grid-cols-2">
                         {medicalRows.map((item) => (
                           <DesktopProfileRow key={item.label} label={item.label} value={item.value} />
                         ))}
@@ -1135,7 +1182,7 @@ export default function GroomerHealthDetailsPage() {
                       <p className="font-comfortaa text-[12.25px] font-semibold uppercase leading-[17.5px] tracking-[0.3063px] text-[#0F172B]">
                         Behavioral habits
                       </p>
-                      <div className="mt-[10.5px] space-y-[7px]">
+                      <div className="mt-[10.5px] grid gap-[7px] lg:grid-cols-2">
                         {behaviorRows.map((item) => (
                           <DesktopProfileRow key={item.label} label={item.label} value={item.value} />
                         ))}
@@ -1146,7 +1193,7 @@ export default function GroomerHealthDetailsPage() {
                       <p className="font-comfortaa text-[12.25px] font-semibold uppercase leading-[17.5px] tracking-[0.3063px] text-[#0F172B]">
                         Clinical history
                       </p>
-                      <div className="mt-[10.5px] space-y-[7px]">
+                      <div className="mt-[10.5px] grid gap-[7px] lg:grid-cols-2">
                         {clinicalRows.map((item) => (
                           <DesktopProfileRow key={item.label} label={item.label} value={item.value} />
                         ))}
@@ -1167,6 +1214,16 @@ export default function GroomerHealthDetailsPage() {
             <PhotoGalleryCard title="Reference photos" photos={referencePhotos} emptyText="The owner did not upload reference photos." />
           </div>
         </section>
+
+        {hasHealthReport ? (
+          <HealthReportCard
+            petName={petName}
+            updatedLabel={healthReportUpdatedLabel}
+            pdfUrl={healthReportSourceUrl}
+            onOpenPdf={() => void handleOpenHealthReport()}
+            isOpeningPdf={isOpeningHealthReport}
+          />
+        ) : null}
 
         <section className="hidden rounded-[18px] bg-white px-4 py-4 shadow-[0px_8px_20px_rgba(0,0,0,0.12)] sm:px-5">
           <h2 className="font-comfortaa text-[16px] font-semibold leading-6 text-[#4A3C2A]">Special instruments or notes</h2>
@@ -1199,6 +1256,13 @@ export default function GroomerHealthDetailsPage() {
           </div>
         </section>
       </div>
+      <PdfPreviewDialog
+        blobUrl={healthReportBlobUrl}
+        fileName={`health-report-${detail?.id ?? "booking"}.pdf`}
+        open={isHealthReportViewerOpen}
+        loading={isHealthReportViewerLoading}
+        onClose={closeHealthReportPdf}
+      />
     </AccountContentContainer>
   );
 }

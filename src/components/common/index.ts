@@ -28,6 +28,7 @@ export * from "./TertiaryButton";
 export * from "./Icon";
 export * from "./MembershipCard";
 export * from "./PetForm";
+export * from "./PdfPreviewDialog";
 export * from "./PdfDocumentViewer";
 export * from "./ImagePreview";
 

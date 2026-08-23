@@ -7,7 +7,8 @@ import { Icon } from "@/components/common/Icon";
 import { OrangeButton } from "@/components/common/OrangeButton";
 import { FileUpload, type FileUploadItem } from "@/components/common/FileUpload";
 import { CustomTextarea } from "@/components/common/CustomTextarea";
-import { PdfDocumentViewer } from "@/components/common";
+import { PdfPreviewDialog } from "@/components/common";
+import { usePdfPreview } from "@/components/common/usePdfPreview";
 import { PetForm } from "@/components/common/PetForm";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { useBookingStore } from "@/components/booking/bookingStore";
@@ -101,8 +102,7 @@ export default function MyPets() {
   const [referenceStyles, setReferenceStyles] = useState<File[]>([]);
   const [healthReports, setHealthReports] = useState<PublishedPetHealthReportOut[]>([]);
   const [isLoadingReports, setIsLoadingReports] = useState(false);
-  const [reportPdfUrl, setReportPdfUrl] = useState("");
-  const [reportPdfOpen, setReportPdfOpen] = useState(false);
+  const { blobUrl: reportPdfUrl, open: reportPdfOpen, loading: reportPdfLoading, openWithBlob: openReportPdf, close: closeReportPdf } = usePdfPreview();
   const healthReportRef = useRef<HTMLDivElement>(null);
   const {
     reset: resetBookingStore,
@@ -216,26 +216,18 @@ export default function MyPets() {
           window.setTimeout(() => healthReportRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 0);
           const requested = Number(searchParams.get("report"));
           if (reports.some((report) => report.id === requested)) {
-            const blob = await getPetHealthReportPdf(activePetId, requested);
-            setReportPdfUrl(URL.createObjectURL(blob));
-            setReportPdfOpen(true);
+            void openReportPdf(getPetHealthReportPdf(activePetId, requested));
           }
         }
       })
       .catch(() => setHealthReports([]))
       .finally(() => setIsLoadingReports(false));
-  }, [activePetId, searchParams]);
-
-  useEffect(() => () => {
-    if (reportPdfUrl) URL.revokeObjectURL(reportPdfUrl);
-  }, [reportPdfUrl]);
+  }, [activePetId, openReportPdf, searchParams]);
 
   const openHealthReport = async (reportId: number) => {
     if (!activePetId) return;
     try {
-      const blob = await getPetHealthReportPdf(activePetId, reportId);
-      setReportPdfUrl(URL.createObjectURL(blob));
-      setReportPdfOpen(true);
+      await openReportPdf(getPetHealthReportPdf(activePetId, reportId));
     } catch {
       toast.error("Report not found or unavailable");
     }
@@ -971,22 +963,35 @@ export default function MyPets() {
               </p>
               {isLoadingReports ? <p className="text-sm text-[#4A5565]">Loading reports...</p> : null}
               {!isLoadingReports && healthReports.length === 0 ? <p className="text-sm text-[#4A5565]">No published health reports yet.</p> : null}
-              {healthReports.map((report) => (
-                <button key={report.id} type="button" onClick={() => void openHealthReport(report.id)} className="border border-[#E5E7EB] rounded-[12px] px-[15px] py-[13px] flex items-center justify-between w-full text-left">
-                  <div>
-                    <p className="font-comfortaa text-[16px] leading-[28px] text-[#DE6A07]">{report.service_name}</p>
-                    <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
-                      {report.service_date ? new Date(report.service_date).toLocaleDateString() : "Date not provided"} · {report.groomer_name}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-[7px]">
-                    <div className="bg-[#DCFCE7] min-w-[24px] px-[10px] py-[4px] rounded-[12px] text-center">
-                      <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#016630]">{report.grade === "not_enough_data" ? "N/A" : report.grade}</span>
-                    </div>
-                    <Icon name="nav-next" className="text-[#8B6357]" size={16} />
-                  </div>
-                </button>
-              ))}
+              {healthReports.length > 0 ? (
+                <div className="grid gap-3 lg:grid-cols-2">
+                  {healthReports.map((report) => (
+                    <button
+                      key={report.id}
+                      type="button"
+                      onClick={() => void openHealthReport(report.id)}
+                      className="cursor-pointer rounded-[12px] border border-[#E5E7EB] px-[15px] py-[13px] text-left transition-colors hover:bg-[#FAFAFA]"
+                    >
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="min-w-0">
+                          <p className="truncate font-comfortaa text-[16px] leading-[28px] text-[#DE6A07]">{report.service_name}</p>
+                          <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
+                            {report.service_date ? new Date(report.service_date).toLocaleDateString() : "Date not provided"} · {report.groomer_name}
+                          </p>
+                        </div>
+                        <div className="flex shrink-0 items-center justify-between gap-3 sm:justify-end">
+                          <div className="min-w-[24px] rounded-[12px] bg-[#DCFCE7] px-[10px] py-[4px] text-center">
+                            <span className="font-comfortaa text-[10px] font-bold leading-[14px] text-[#016630]">
+                              {report.grade === "not_enough_data" ? "N/A" : report.grade}
+                            </span>
+                          </div>
+                          <Icon name="nav-next" className="text-[#8B6357]" size={16} />
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
             </div>
           </div>
 
@@ -1086,11 +1091,12 @@ export default function MyPets() {
           </div>
         </AlertDialogContent>
       </AlertDialog>
-      <PdfDocumentViewer
+      <PdfPreviewDialog
         blobUrl={reportPdfUrl}
         fileName={`${activePet?.name || "pet"}-health-report.pdf`}
         open={reportPdfOpen}
-        onClose={() => setReportPdfOpen(false)}
+        loading={reportPdfLoading}
+        onClose={closeReportPdf}
       />
     </div>
   );
