@@ -1206,7 +1206,7 @@ export default function GroomerHealthDetailsPage() {
           </section>
         ) : null}
 
-        <section className="rounded-[18px] bg-white px-4 py-4 shadow-[0px_8px_20px_rgba(0,0,0,0.12)] sm:px-5">
+        <section className="rounded-[18px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0px_8px_20px_rgba(0,0,0,0.08)] sm:px-5">
           <h2 className="font-comfortaa text-[16px] font-semibold leading-6 text-[#4A3C2A]">Photos</h2>
           <div className="mt-4 space-y-4">
             <PhotoGalleryCard title="Pet photos" photos={petPhotos} emptyText="The owner did not upload pet photos." />
@@ -1225,7 +1225,7 @@ export default function GroomerHealthDetailsPage() {
           />
         ) : null}
 
-        <section className="hidden rounded-[18px] bg-white px-4 py-4 shadow-[0px_8px_20px_rgba(0,0,0,0.12)] sm:px-5">
+        <section className="hidden rounded-[18px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0px_8px_20px_rgba(0,0,0,0.08)] sm:px-5">
           <h2 className="font-comfortaa text-[16px] font-semibold leading-6 text-[#4A3C2A]">Special instruments or notes</h2>
           <div className="mt-3 rounded-[12px] border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-4">
             <p className="font-comfortaa text-[12px] leading-[19px] text-[#717182]">
@@ -1234,7 +1234,7 @@ export default function GroomerHealthDetailsPage() {
           </div>
         </section>
 
-        <section className="rounded-[18px] bg-white px-4 py-4 shadow-[0px_8px_20px_rgba(0,0,0,0.12)] sm:px-5">
+        <section className="rounded-[18px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0px_8px_20px_rgba(0,0,0,0.08)] sm:px-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="font-comfortaa text-[16px] font-semibold leading-6 text-[#4A3C2A]">Ready to head out?</p>
