@@ -184,6 +184,21 @@ function buildPhotoUrls(snapshot: Record<string, unknown>, primaryKeys: string[]
   return Array.from(new Set(urls));
 }
 
+export function getGroomerHealthDetailsAvatarUrl(
+  detail: Pick<GroomerBookingDetailOut, "pet_avatar"> | null,
+  petSnapshot: Record<string, unknown>
+): string {
+  return (
+    buildImageUrl(
+      getString(
+        detail ? asRecord(detail) : {},
+        ["pet_avatar"],
+      ) ||
+        getString(petSnapshot, ["avatar_url", "primary_photo", "pet_avatar", "avatar"])
+    ) || DEFAULT_PET_AVATAR
+  );
+}
+
 function SummaryField({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0">
@@ -283,7 +298,7 @@ function PetInfoCardMobile({
   hasHealthDetails = false,
   detailsContent,
 }: PetInfoCardProps) {
-  const [isExpanded, setIsExpanded] = useState(hasHealthDetails);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   return (
     <section className="rounded-[16px] border-2 border-[#DE6A07] bg-white px-[22px] py-[14px] md:hidden">
@@ -628,7 +643,7 @@ export default function GroomerHealthDetailsPage() {
   const addressLabel = getString(addressSnapshot, ["address", "full_address"], "Address unavailable");
   const appointmentDateLabel = formatScheduleLabel(detail?.scheduled_time ?? "");
   const appointmentTimeLabel = formatGroomerTimeLabel(detail?.scheduled_time ?? "", "-");
-  const avatarUrl = buildImageUrl(getString(petSnapshot, ["avatar_url", "primary_photo", "pet_avatar", "avatar"])) || DEFAULT_PET_AVATAR;
+  const avatarUrl = getGroomerHealthDetailsAvatarUrl(detail, petSnapshot);
 
   const alerts = buildAlerts(questionnaire);
   const actionPlan = buildActionPlan(questionnaire);
