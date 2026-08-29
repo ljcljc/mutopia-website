@@ -186,6 +186,7 @@ const request = async <T = unknown>(
     retry = 0, // 默认不重试
     retryDelay = 1000, // 默认重试延迟 1 秒
     skipAuth = false,
+    signal: externalSignal,
     headers = {},
     ...fetchConfig
   } = config;
@@ -238,6 +239,11 @@ const request = async <T = unknown>(
     }
 
     const controller = new AbortController();
+    const onExternalAbort = () => controller.abort();
+    if (externalSignal) {
+      if (externalSignal.aborted) controller.abort();
+      else externalSignal.addEventListener("abort", onExternalAbort, { once: true });
+    }
     const timeoutId =
       timeout > 0 ? setTimeout(() => controller.abort(), timeout) : null;
 
@@ -251,11 +257,17 @@ const request = async <T = unknown>(
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
+      externalSignal?.removeEventListener("abort", onExternalAbort);
 
       return response;
     } catch (error) {
       if (timeoutId) {
         clearTimeout(timeoutId);
+      }
+      externalSignal?.removeEventListener("abort", onExternalAbort);
+
+      if (externalSignal?.aborted) {
+        throw error;
       }
 
       // 处理超时错误
@@ -413,6 +425,9 @@ export const http = {
     url: string,
     config?: RequestConfig
   ): Promise<HttpResponse<T>> => {
+    if (config?.signal) {
+      return request<T>(url, { ...config, method: "GET" });
+    }
     const requestKey = getGetRequestKey(url, config);
     const inFlightRequest = inFlightGetRequests.get(requestKey);
     if (inFlightRequest) {

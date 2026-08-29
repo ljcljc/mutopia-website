@@ -62,7 +62,7 @@ export function PhotoHealthReportReview({
   draft: PhotoHealthReportDraftOut;
   booking: BookingDetailOut | null;
   onSaveInsights: (value: string) => Promise<void>;
-  onViewPdf: () => Promise<Blob>;
+  onViewPdf: (signal: AbortSignal) => Promise<Blob>;
   onPublish: () => Promise<void>;
   readOnly?: boolean;
 }) {
@@ -199,7 +199,7 @@ export function PhotoHealthReportReview({
           type="button"
           fullWidth
           className="mt-7"
-          onClick={() => void openPdfPreview(onViewPdf())}
+          onClick={() => void openPdfPreview(onViewPdf)}
         >
           View published PDF
         </OrangeButton>

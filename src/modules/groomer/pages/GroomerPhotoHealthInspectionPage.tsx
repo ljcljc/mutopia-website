@@ -676,9 +676,9 @@ export default function GroomerPhotoHealthInspectionPage() {
             );
             setDraft(updated);
           }}
-          onViewPdf={async () => {
+          onViewPdf={async (signal) => {
             if (!draft.pdf_url) throw new Error("Published PDF is unavailable");
-            return fetchAuthenticatedBlob(draft.pdf_url);
+            return fetchAuthenticatedBlob(draft.pdf_url, signal);
           }}
           onPublish={async () => {
             const result = await publishPhotoHealthReport(bookingId);

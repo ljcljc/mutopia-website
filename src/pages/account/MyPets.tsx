@@ -7,7 +7,7 @@ import { Icon } from "@/components/common/Icon";
 import { OrangeButton } from "@/components/common/OrangeButton";
 import { FileUpload, type FileUploadItem } from "@/components/common/FileUpload";
 import { CustomTextarea } from "@/components/common/CustomTextarea";
-import { PdfPreviewDialog } from "@/components/common";
+import { HealthReportSection, PdfPreviewDialog, type HealthReportItem } from "@/components/common";
 import { usePdfPreview } from "@/components/common/usePdfPreview";
 import { PetForm } from "@/components/common/PetForm";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
@@ -51,6 +51,13 @@ function formatLabel(value?: string | null): string {
     .split("_")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
+}
+
+function formatHealthReportUpdatedLabel(value?: string | null): string {
+  if (!value) return "Updated recently";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return `Updated: ${value}`;
+  return `Updated: ${date.toLocaleDateString()}`;
 }
 
 export default function MyPets() {
@@ -101,7 +108,6 @@ export default function MyPets() {
   const [petPhoto, setPetPhoto] = useState<File | null>(null);
   const [referenceStyles, setReferenceStyles] = useState<File[]>([]);
   const [healthReports, setHealthReports] = useState<PublishedPetHealthReportOut[]>([]);
-  const [isLoadingReports, setIsLoadingReports] = useState(false);
   const { blobUrl: reportPdfUrl, open: reportPdfOpen, loading: reportPdfLoading, openWithBlob: openReportPdf, close: closeReportPdf } = usePdfPreview();
   const healthReportRef = useRef<HTMLDivElement>(null);
   const {
@@ -208,7 +214,6 @@ export default function MyPets() {
       setHealthReports([]);
       return;
     }
-    setIsLoadingReports(true);
     listPetHealthReports(activePetId)
       .then(async (reports) => {
         setHealthReports(reports);
@@ -216,18 +221,17 @@ export default function MyPets() {
           window.setTimeout(() => healthReportRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 0);
           const requested = Number(searchParams.get("report"));
           if (reports.some((report) => report.id === requested)) {
-            void openReportPdf(getPetHealthReportPdf(activePetId, requested));
+            void openReportPdf((signal) => getPetHealthReportPdf(activePetId, requested, signal));
           }
         }
       })
       .catch(() => setHealthReports([]))
-      .finally(() => setIsLoadingReports(false));
   }, [activePetId, openReportPdf, searchParams]);
 
-  const openHealthReport = async (reportId: number) => {
+  const openHealthReport = async (report: HealthReportItem) => {
     if (!activePetId) return;
     try {
-      await openReportPdf(getPetHealthReportPdf(activePetId, reportId));
+      await openReportPdf((signal) => getPetHealthReportPdf(activePetId, report.reportId, signal));
     } catch {
       toast.error("Report not found or unavailable");
     }
@@ -956,43 +960,17 @@ export default function MyPets() {
             </div>
           </div>
 
-          <div ref={healthReportRef} className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[12px] sm:p-[20px]">
-            <div className="flex flex-col gap-[12px]">
-              <p className="font-['Comfortaa:SemiBold',sans-serif] font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
-                Health report
-              </p>
-              {isLoadingReports ? <p className="text-sm text-[#4A5565]">Loading reports...</p> : null}
-              {!isLoadingReports && healthReports.length === 0 ? <p className="text-sm text-[#4A5565]">No published health reports yet.</p> : null}
-              {healthReports.length > 0 ? (
-                <div className="grid gap-3 lg:grid-cols-2">
-                  {healthReports.map((report) => (
-                    <button
-                      key={report.id}
-                      type="button"
-                      onClick={() => void openHealthReport(report.id)}
-                      className="cursor-pointer rounded-[12px] border border-[#E5E7EB] px-[15px] py-[13px] text-left transition-colors hover:bg-[#FAFAFA]"
-                    >
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="min-w-0">
-                          <p className="truncate font-comfortaa text-[16px] leading-[28px] text-[#DE6A07]">{report.service_name}</p>
-                          <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
-                            {report.service_date ? new Date(report.service_date).toLocaleDateString() : "Date not provided"} · {report.groomer_name}
-                          </p>
-                        </div>
-                        <div className="flex shrink-0 items-center justify-between gap-3 sm:justify-end">
-                          <div className="min-w-[24px] rounded-[12px] bg-[#DCFCE7] px-[10px] py-[4px] text-center">
-                            <span className="font-comfortaa text-[10px] font-bold leading-[14px] text-[#016630]">
-                              {report.grade === "not_enough_data" ? "N/A" : report.grade}
-                            </span>
-                          </div>
-                          <Icon name="nav-next" className="text-[#8B6357]" size={16} />
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              ) : null}
-            </div>
+          <div ref={healthReportRef}>
+            <HealthReportSection
+              reports={healthReports.map((report) => ({
+                petId: activePetId ?? 0,
+                petName: activePet?.name || "Pet",
+                updatedAt: formatHealthReportUpdatedLabel(report.published_at),
+                status: "ready",
+                reportId: report.id,
+              }))}
+              onOpenPdf={(report) => void openHealthReport(report)}
+            />
           </div>
 
           <div className="bg-white rounded-[12px] shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)] p-[12px] sm:p-[20px]">

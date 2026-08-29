@@ -30,6 +30,7 @@ export * from "./MembershipCard";
 export * from "./PetForm";
 export * from "./PdfPreviewDialog";
 export * from "./PdfDocumentViewer";
+export * from "./HealthReportSection";
 export * from "./ImagePreview";
 
 // 当添加新组件时，请在此文件中添加导出

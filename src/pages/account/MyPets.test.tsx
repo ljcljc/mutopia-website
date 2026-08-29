@@ -95,9 +95,11 @@ describe("MyPets", () => {
     vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:report");
     renderMyPets();
 
-    fireEvent.click(await screen.findByRole("button", { name: /Full Groom.*Alex/i }));
+    const reportButton = await screen.findByRole("button", { name: /Max.*Updated:.*Ready/i });
+    expect(reportButton).toBeInTheDocument();
+    fireEvent.click(reportButton);
 
-    await waitFor(() => expect(getPetHealthReportPdf).toHaveBeenCalledWith(42, 8));
+    await waitFor(() => expect(getPetHealthReportPdf).toHaveBeenCalledWith(42, 8, expect.any(AbortSignal)));
     expect(await screen.findByRole("dialog", { name: "PDF preview" })).toBeInTheDocument();
   });
 });

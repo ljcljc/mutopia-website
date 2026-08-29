@@ -1,5 +1,10 @@
 // API utility functions
-import { http, setAuthToken, setRefreshToken, clearAuthTokens } from "./http";
+import { http, setAuthToken, setRefreshToken, clearAuthTokens, getAuthToken } from "./http";
+import {
+  cacheHealthReportPdf,
+  getCachedHealthReportPdf,
+  getHealthReportPdfCacheKey,
+} from "./healthReportPdfCache";
 import { getEncryptedItem } from "./encryption";
 import { STORAGE_KEYS } from "./storageKeys";
 import {
@@ -555,6 +560,7 @@ export interface BookingDetailOut {
     behavior_notes?: string | null;
     recommendations?: string | null;
     updated_at?: string | null;
+    pdf_url?: string | null;
   } | null;
 }
 
@@ -2716,8 +2722,16 @@ export async function updatePhotoHealthReportInsights(
   return response.data;
 }
 
-export async function fetchAuthenticatedBlob(url: string): Promise<Blob> {
-  const response = await http.get<Blob>(url);
+export async function fetchAuthenticatedBlob(url: string, signal?: AbortSignal): Promise<Blob> {
+  const authToken = await getAuthToken();
+  const cacheKey = await getHealthReportPdfCacheKey(url, authToken);
+  if (cacheKey) {
+    const cachedBlob = await getCachedHealthReportPdf(cacheKey);
+    if (cachedBlob) return cachedBlob;
+  }
+
+  const response = await http.get<Blob>(url, signal ? { signal } : undefined);
+  if (cacheKey) await cacheHealthReportPdf(cacheKey, response.data);
   return response.data;
 }
 
@@ -2747,10 +2761,12 @@ export async function listPetHealthReports(
 
 export async function getPetHealthReportPdf(
   petId: number,
-  reportId: number
+  reportId: number,
+  signal?: AbortSignal,
 ): Promise<Blob> {
   return fetchAuthenticatedBlob(
-    `/api/pets/${petId}/health_reports/${reportId}/pdf`
+    `/api/pets/${petId}/health_reports/${reportId}/pdf`,
+    signal,
   );
 }
 

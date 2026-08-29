@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronDown, ChevronRight, CircleAlert, Lightbulb } from "lucide-react";
+import { ChevronDown, CircleAlert, Lightbulb } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import DEFAULT_PET_AVATAR from "@/assets/icons/icon-pet-avatar-placeholder.svg";
 import { Icon } from "@/components/common/Icon";
 import { OrangeButton } from "@/components/common/OrangeButton";
-import { PdfPreviewDialog, Spinner } from "@/components/common";
+import { HealthReportSection, PdfPreviewDialog, Spinner, type HealthReportItem } from "@/components/common";
 import { usePdfPreview } from "@/components/common/usePdfPreview";
 import AccountContentContainer from "@/components/layout/AccountContentContainer";
 import { buildImageUrl, fetchAuthenticatedBlob, getGroomerBookingDetail, startGroomerTravel, type GroomerBookingDetailOut } from "@/lib/api";
@@ -583,48 +583,6 @@ function PhotoGalleryCard({ title, photos, emptyText }: { title: string; photos:
   );
 }
 
-function HealthReportCard({
-  petName,
-  updatedLabel,
-  pdfUrl,
-  onOpenPdf,
-  isOpeningPdf,
-}: {
-  petName: string;
-  updatedLabel: string;
-  pdfUrl?: string | null;
-  onOpenPdf: () => void;
-  isOpeningPdf: boolean;
-}) {
-  return (
-    <section className="rounded-[12px] border border-[#E5E7EB] bg-white p-[12px] shadow-[0px_8px_6px_rgba(0,0,0,0.08)]">
-      <p className="font-comfortaa text-[16px] font-semibold leading-[28px] text-[#4A3C2A]">Health report</p>
-      <button
-        type="button"
-        onClick={onOpenPdf}
-        disabled={!pdfUrl || isOpeningPdf}
-        className="mt-2 w-full cursor-pointer rounded-[12px] border border-[#E5E7EB] bg-white px-[15px] py-[13px] text-left transition-[border-color,background-color,box-shadow] hover:border-[#DE6A07]/40 hover:bg-[#FFF9F3] hover:shadow-[0px_8px_18px_rgba(222,106,7,0.08)] disabled:cursor-not-allowed disabled:hover:border-[#E5E7EB] disabled:hover:bg-white disabled:hover:shadow-none"
-      >
-        <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-          <div className="min-w-0">
-            <p className="truncate font-comfortaa text-[16px] leading-[28px] text-[#DE6A07]">{petName}</p>
-            <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
-              {updatedLabel ? `Updated: ${updatedLabel}` : "Updated recently"}
-            </p>
-          </div>
-          <div className="flex shrink-0 items-center justify-between gap-3 lg:justify-end">
-            <div className="inline-flex h-6 items-center gap-1 rounded-[12px] bg-[#DCFCE7] px-3 py-1 font-comfortaa text-[10px] font-bold leading-[14px] text-[#27AE60]">
-              {isOpeningPdf ? <Spinner size="small" color="green" /> : <Icon name="check" className="size-[14px]" aria-hidden="true" />}
-              {isOpeningPdf ? "Opening" : "Ready"}
-            </div>
-            <ChevronRight className="size-4 shrink-0 text-[#8B6357]" strokeWidth={1.8} />
-          </div>
-        </div>
-      </button>
-    </section>
-  );
-}
-
 export default function GroomerHealthDetailsPage() {
   const navigate = useNavigate();
   const { bookingId } = useParams();
@@ -632,7 +590,6 @@ export default function GroomerHealthDetailsPage() {
   const [detail, setDetail] = useState<GroomerBookingDetailOut | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isStartingTravel, setIsStartingTravel] = useState(false);
-  const [isOpeningHealthReport, setIsOpeningHealthReport] = useState(false);
   const [isDesktopProfileExpanded, setIsDesktopProfileExpanded] = useState(true);
   const [isMobileInsightsExpanded, setIsMobileInsightsExpanded] = useState(true);
   const {
@@ -888,6 +845,7 @@ export default function GroomerHealthDetailsPage() {
   const hasHealthReport = hasCurrentHealthReport(healthReport);
   const healthReportUpdatedLabel = formatHealthReportUpdatedLabel(healthReport?.updated_at ?? "");
   const healthReportSourceUrl = typeof healthReport?.pdf_url === "string" ? healthReport.pdf_url : null;
+  const healthReportPetId = Number(getString(petSnapshot, ["id", "pet_id"], "0")) || 0;
   const hasOwnerReport = BOOKING_HEALTH_STEPS.some((_, index) => {
     if (index === 0) return questionnaire.lifestyle.neighborhoods.length > 0 || questionnaire.lifestyle.neighborhoodDraft.trim().length > 0;
     if (index === 1) return questionnaire.prevention.primaryGoals.length > 0 || questionnaire.prevention.restrictions.trim().length > 0;
@@ -916,21 +874,16 @@ export default function GroomerHealthDetailsPage() {
   };
 
   const handleOpenHealthReport = async () => {
-    if (!healthReportSourceUrl || isOpeningHealthReport) {
+    if (!healthReportSourceUrl) {
       if (!healthReportSourceUrl) toast.error("Health report PDF is unavailable.");
       return;
     }
 
-    setIsOpeningHealthReport(true);
-    const loadingToastId = toast.loading("Opening health report...");
     try {
-      await openHealthReportPdf(fetchAuthenticatedBlob(healthReportSourceUrl));
-      toast.success("Health report opened.", { id: loadingToastId });
+      await openHealthReportPdf((signal) => fetchAuthenticatedBlob(healthReportSourceUrl, signal));
     } catch (error) {
       console.error("Failed to open health report PDF:", error);
-      toast.error("Failed to open health report PDF.", { id: loadingToastId });
-    } finally {
-      setIsOpeningHealthReport(false);
+      toast.error("Failed to open health report PDF.");
     }
   };
 
@@ -1216,12 +1169,17 @@ export default function GroomerHealthDetailsPage() {
         </section>
 
         {hasHealthReport ? (
-          <HealthReportCard
-            petName={petName}
-            updatedLabel={healthReportUpdatedLabel}
-            pdfUrl={healthReportSourceUrl}
+          <HealthReportSection
+            reports={[
+              {
+                petId: healthReportPetId,
+                petName,
+                updatedAt: healthReportUpdatedLabel ? `Updated: ${healthReportUpdatedLabel}` : "Updated recently",
+                status: "ready",
+                reportId: healthReport?.id ?? 0,
+              } satisfies HealthReportItem,
+            ]}
             onOpenPdf={() => void handleOpenHealthReport()}
-            isOpeningPdf={isOpeningHealthReport}
           />
         ) : null}
 
