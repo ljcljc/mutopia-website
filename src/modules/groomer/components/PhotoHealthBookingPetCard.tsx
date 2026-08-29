@@ -4,6 +4,7 @@ import DEFAULT_PET_AVATAR from "@/assets/icons/icon-pet-avatar-placeholder.svg";
 import { buildImageUrl, type BookingDetailOut } from "@/lib/api";
 
 const BEHAVIOR_LABELS: Record<string, string> = {
+  normal: "Normal",
   friendly: "Friendly",
   anxious: "Anxious",
   hard_to_handle: "Hard to handle",
@@ -98,7 +99,7 @@ export function PhotoHealthBookingPetCard({
     ? `${scheduledDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${scheduledDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`
     : "Time not provided";
   const behavior = text(snapshot, "behavior", "").trim().toLowerCase();
-  const behaviorNeedsAttention = behavior !== "friendly";
+  const behaviorNeedsAttention = behavior !== "normal" && behavior !== "friendly";
 
   return (
     <section className="rounded-[12px] border-2 border-[#DE6A07] bg-white px-[22px] py-[14px] shadow-[0px_8px_6px_rgba(0,0,0,0.1)]">

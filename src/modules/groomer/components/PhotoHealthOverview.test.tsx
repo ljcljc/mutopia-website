@@ -76,6 +76,25 @@ describe("PhotoHealthOverview", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("uses the green normal styling for a normal pet", () => {
+    render(
+      <PhotoHealthOverview
+        booking={{
+          ...booking,
+          pet_snapshot: { ...booking.pet_snapshot, behavior: "normal" },
+        }}
+        arrival={arrival}
+        saving={false}
+        startLabel="Start inspection"
+        onStart={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText("Normal")).toHaveClass("border-[#CDEBD8]");
+    expect(screen.getByText("Normal")).toHaveClass("bg-[#F3FFF7]");
+    expect(screen.getByText("Normal")).toHaveClass("text-[#3D8056]");
+  });
+
   it("opens the shared read-only preview at the clicked photo", () => {
     render(
       <PhotoHealthOverview
@@ -96,7 +115,7 @@ describe("PhotoHealthOverview", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("shows the agreed placeholder when the optional note is empty", () => {
+  it("does not render the optional note module when the note is empty", () => {
     render(
       <PhotoHealthOverview
         booking={booking}
@@ -107,7 +126,8 @@ describe("PhotoHealthOverview", () => {
       />
     );
 
-    expect(screen.getByText("No note provided")).toBeInTheDocument();
+    expect(screen.queryByText("Note - Before grooming")).not.toBeInTheDocument();
+    expect(screen.queryByText("No note provided")).not.toBeInTheDocument();
   });
 
   it("uses the same pet avatar fallback chain as the groomer request cards", () => {

@@ -20,6 +20,7 @@ export function PhotoHealthOverview({
 }: PhotoHealthOverviewProps) {
   const [previewIndex, setPreviewIndex] = useState(0);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const arrivalNote = arrival?.arrival_note?.trim() ?? "";
 
   return (
     <>
@@ -51,14 +52,16 @@ export function PhotoHealthOverview({
               ))}
             </div>
           </div>
-          <div className="mt-5 rounded-[14px] bg-[linear-gradient(135deg,rgba(255,247,237,1)_0%,rgba(255,251,235,1)_100%)] p-[14px] shadow-[0px_1px_6px_0px_rgba(0,0,0,0.05)]">
-            <h3 className="font-comfortaa text-xs font-bold tracking-[0.08em] text-[#A89BBB]">
-              Note - Before grooming
-            </h3>
-            <p className="mt-[6px] whitespace-pre-wrap font-comfortaa text-[13px] leading-[20.8px] text-[#5A4A6A]">
-              {arrival?.arrival_note?.trim() || "No note provided"}
-            </p>
-          </div>
+          {arrivalNote ? (
+            <div className="mt-5 rounded-[14px] bg-[linear-gradient(135deg,rgba(255,247,237,1)_0%,rgba(255,251,235,1)_100%)] p-[14px] shadow-[0px_1px_6px_0px_rgba(0,0,0,0.05)]">
+              <h3 className="font-comfortaa text-xs font-bold tracking-[0.08em] text-[#A89BBB]">
+                Note - Before grooming
+              </h3>
+              <p className="mt-[6px] whitespace-pre-wrap font-comfortaa text-[13px] leading-[20.8px] text-[#5A4A6A]">
+                {arrivalNote}
+              </p>
+            </div>
+          ) : null}
         </section>
       </div>
 
