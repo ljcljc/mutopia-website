@@ -8,8 +8,15 @@ import { OrangeButton } from "@/components/common/OrangeButton";
 import { HealthReportSection, PdfPreviewDialog, Spinner, type HealthReportItem } from "@/components/common";
 import { usePdfPreview } from "@/components/common/usePdfPreview";
 import AccountContentContainer from "@/components/layout/AccountContentContainer";
-import { buildImageUrl, fetchAuthenticatedBlob, getGroomerBookingDetail, startGroomerTravel, type GroomerBookingDetailOut } from "@/lib/api";
-import { formatGroomerTimeLabel, shouldShowStartTravel } from "@/modules/groomer/utils/time";
+import {
+  buildImageUrl,
+  fetchAuthenticatedBlob,
+  getGroomerBookingDetail,
+  getInspectionPetNotes,
+  startGroomerTravel,
+  type GroomerBookingDetailOut,
+} from "@/lib/api";
+import { formatGroomerTimeLabel, isGroomerStartTravelStatus, shouldShowStartTravel } from "@/modules/groomer/utils/time";
 import { BOOKING_HEALTH_STEPS, normalizeQuestionnaire } from "@/pages/account/booking-health/questionnaire";
 import type { BookingHealthQuestionnaire, TimelineEntry } from "@/pages/account/booking-health/types";
 
@@ -93,12 +100,6 @@ function formatHealthReportUpdatedLabel(value: string): string {
 function formatListValue(values: string[], fallback = "Not provided"): string {
   const normalized = values.map((item) => item.trim()).filter(Boolean);
   return normalized.length > 0 ? normalized.join(", ") : fallback;
-}
-
-function formatBooleanValue(value: boolean | null, trueLabel = "Yes", falseLabel = "No", fallback = "Not provided"): string {
-  if (value === true) return trueLabel;
-  if (value === false) return falseLabel;
-  return fallback;
 }
 
 function formatNumberValue(value: number, suffix = "", fallback = "Not provided"): string {
@@ -590,6 +591,7 @@ export default function GroomerHealthDetailsPage() {
   const [detail, setDetail] = useState<GroomerBookingDetailOut | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isStartingTravel, setIsStartingTravel] = useState(false);
+  const [previousGroomerNote, setPreviousGroomerNote] = useState("");
   const [isDesktopProfileExpanded, setIsDesktopProfileExpanded] = useState(true);
   const [isMobileInsightsExpanded, setIsMobileInsightsExpanded] = useState(true);
   const {
@@ -608,12 +610,24 @@ export default function GroomerHealthDetailsPage() {
     }
 
     let cancelled = false;
+    setPreviousGroomerNote("");
 
     const loadDetail = async () => {
       setIsLoading(true);
       try {
         const result = await getGroomerBookingDetail(parsedBookingId);
         if (!cancelled) setDetail(result);
+
+        try {
+          const petNotes = await getInspectionPetNotes(parsedBookingId);
+          const previousNote = petNotes.notes.find(
+            (note) => note.booking_id !== parsedBookingId && note.body.trim(),
+          );
+          if (!cancelled) setPreviousGroomerNote(previousNote?.body.trim() ?? "");
+        } catch (error) {
+          console.error("Failed to load previous groomer note:", error);
+          if (!cancelled) setPreviousGroomerNote("");
+        }
       } catch (error) {
         console.error("Failed to load groomer health details:", error);
         if (!cancelled) {
@@ -745,101 +759,9 @@ export default function GroomerHealthDetailsPage() {
     },
   ];
 
-  const preventionRows = [
-    {
-      label: "Spayed / neutered",
-      value: formatBooleanValue(questionnaire.prevention.spayedNeutered),
-    },
-    {
-      label: "Microchip number",
-      value: questionnaire.prevention.microchipNumber.trim() || "Not provided",
-    },
-    {
-      label: "Internal parasite prevention",
-      value: formatNumberValue(questionnaire.prevention.internalParasiteIntervalDays, "days"),
-    },
-    {
-      label: "External parasite prevention",
-      value: formatNumberValue(questionnaire.prevention.externalParasiteIntervalDays, "days"),
-    },
-    {
-      label: "Recent treatments",
-      value:
-        questionnaire.prevention.recentTreatments
-          .filter((entry) => entry.type.trim())
-          .map((entry) => `${titleCase(entry.type)}${entry.date ? ` (${entry.date})` : ""}`)
-          .join(", ") || "Not provided",
-    },
-    {
-      label: "Primary goals",
-      value: formatListValue(questionnaire.prevention.primaryGoals),
-    },
-    {
-      label: "Restrictions",
-      value: questionnaire.prevention.restrictions.trim() || "Not provided",
-    },
-  ];
-
-  const medicalRows = [
-    {
-      label: "Recent medical management",
-      value: formatListValue(questionnaire.medical.recentMedicalManagement),
-    },
-    {
-      label: "Topical medications",
-      value: questionnaire.medical.topicalMedications.trim() || "Not provided",
-    },
-    {
-      label: "Oral medications",
-      value: questionnaire.medical.oralMedications.trim() || "Not provided",
-    },
-    {
-      label: "Vet visits per year",
-      value: formatNumberValue(questionnaire.medical.vetVisitFrequencyPerYear),
-    },
-    {
-      label: "Recent vet visit date",
-      value: questionnaire.medical.recentVetVisitDate || "Not provided",
-    },
-    {
-      label: "Recent vet visit reason",
-      value: questionnaire.medical.recentVetVisitReason.trim() || "Not provided",
-    },
-    {
-      label: "Known food allergies",
-      value: formatListValue(questionnaire.medical.knownFoodAllergies),
-    },
-    {
-      label: "Other allergies",
-      value: questionnaire.medical.otherAllergies.trim() || "Not provided",
-    },
-  ];
-
-  const clinicalRows = [
-    {
-      label: "No known medical conditions",
-      value: formatBooleanValue(questionnaire.clinical.noKnownMedicalConditions),
-    },
-    {
-      label: "Metabolic & general health",
-      value: formatListValue(questionnaire.clinical.metabolicAndGeneralHealth),
-    },
-    {
-      label: "Pre-existing health conditions",
-      value: formatListValue(questionnaire.clinical.preExistingHealthConditions),
-    },
-    {
-      label: "Chronic conditions",
-      value: formatListValue(questionnaire.clinical.chronicConditions),
-    },
-    {
-      label: "Surgery history",
-      value: formatListValue(questionnaire.clinical.surgeryHistory),
-    },
-  ];
-
   const scheduledTime = detail?.scheduled_time ?? "";
   const canStartTravel = Boolean(detail?.id) && shouldShowStartTravel(scheduledTime, new Date(), detail?.status);
+  const showStartTravelButton = isGroomerStartTravelStatus(detail?.status);
   const joinedNotes = noteItems.length > 0 ? noteItems.join(". ") : "No special notes were provided.";
   const healthReport = detail?.health_report ?? null;
   const hasHealthReport = hasCurrentHealthReport(healthReport);
@@ -960,12 +882,6 @@ export default function GroomerHealthDetailsPage() {
                     <MobileDetailRow key={item.label} label={item.label} value={item.value} />
                   ))}
                 </MobileDetailSection>
-
-                {noteItems.length > 0 ? (
-                  <MobileDetailSection title="Special notes">
-                    <p className="font-comfortaa text-[14px] leading-[21px] text-[#0F172B]">{noteItems.join(". ")}</p>
-                  </MobileDetailSection>
-                ) : null}
               </div>
             }
           />
@@ -1091,17 +1007,6 @@ export default function GroomerHealthDetailsPage() {
 
                     <div>
                       <p className="font-comfortaa text-[12.25px] font-semibold uppercase leading-[17.5px] tracking-[0.3063px] text-[#0F172B]">
-                        Prevention & core needs
-                      </p>
-                      <div className="mt-[10.5px] grid gap-[7px] lg:grid-cols-2">
-                        {preventionRows.map((item) => (
-                          <DesktopProfileRow key={item.label} label={item.label} value={item.value} />
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <p className="font-comfortaa text-[12.25px] font-semibold uppercase leading-[17.5px] tracking-[0.3063px] text-[#0F172B]">
                         Vaccinations
                       </p>
                       <div className="mt-[10.5px] grid gap-[7px] lg:grid-cols-2">
@@ -1122,32 +1027,10 @@ export default function GroomerHealthDetailsPage() {
 
                     <div>
                       <p className="font-comfortaa text-[12.25px] font-semibold uppercase leading-[17.5px] tracking-[0.3063px] text-[#0F172B]">
-                        Medical management
-                      </p>
-                      <div className="mt-[10.5px] grid gap-[7px] lg:grid-cols-2">
-                        {medicalRows.map((item) => (
-                          <DesktopProfileRow key={item.label} label={item.label} value={item.value} />
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <p className="font-comfortaa text-[12.25px] font-semibold uppercase leading-[17.5px] tracking-[0.3063px] text-[#0F172B]">
                         Behavioral habits
                       </p>
                       <div className="mt-[10.5px] grid gap-[7px] lg:grid-cols-2">
                         {behaviorRows.map((item) => (
-                          <DesktopProfileRow key={item.label} label={item.label} value={item.value} />
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <p className="font-comfortaa text-[12.25px] font-semibold uppercase leading-[17.5px] tracking-[0.3063px] text-[#0F172B]">
-                        Clinical history
-                      </p>
-                      <div className="mt-[10.5px] grid gap-[7px] lg:grid-cols-2">
-                        {clinicalRows.map((item) => (
                           <DesktopProfileRow key={item.label} label={item.label} value={item.value} />
                         ))}
                       </div>
@@ -1183,36 +1066,39 @@ export default function GroomerHealthDetailsPage() {
           />
         ) : null}
 
-        <section className="hidden rounded-[18px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0px_8px_20px_rgba(0,0,0,0.08)] sm:px-5">
-          <h2 className="font-comfortaa text-[16px] font-semibold leading-6 text-[#4A3C2A]">Special instruments or notes</h2>
-          <div className="mt-3 rounded-[12px] border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-4">
-            <p className="font-comfortaa text-[12px] leading-[19px] text-[#717182]">
-              {joinedNotes}
-            </p>
-          </div>
-        </section>
-
-        <section className="rounded-[18px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0px_8px_20px_rgba(0,0,0,0.08)] sm:px-5">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="font-comfortaa text-[16px] font-semibold leading-6 text-[#4A3C2A]">Ready to head out?</p>
-              <p className="mt-1 font-comfortaa text-[12px] leading-[18px] text-[#717182]">
-                {scheduledTime
-                  ? `${canStartTravel ? "Appointment time" : "Start travel available within 2 hours"} • ${appointmentDateLabel} ${appointmentTimeLabel}`
-                  : "Appointment time unavailable"}
-              </p>
+        {previousGroomerNote ? (
+          <section className="rounded-[18px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0px_8px_20px_rgba(0,0,0,0.08)] sm:px-5">
+            <h2 className="font-comfortaa text-[16px] font-semibold leading-6 text-[#4A3C2A]">Special instruments or notes</h2>
+            <p className="mt-1 font-comfortaa text-[12px] leading-[18px] text-[#717182]">Only visible to groomers, not visible to client</p>
+            <div className="mt-3 rounded-[12px] border border-[#E5E7EB] bg-[#FAFAFA] px-4 py-4">
+              <p className="font-comfortaa text-[12px] leading-[19px] text-[#717182]">{previousGroomerNote}</p>
             </div>
-            <OrangeButton
-              type="button"
-              onClick={() => void handleStartTravel()}
-              disabled={!canStartTravel || isStartingTravel}
-              fullWidth
-              className="sm:w-auto sm:min-w-[180px]"
-            >
-              {isStartingTravel ? <Spinner size="small" color="white" /> : "Start Travel"}
-            </OrangeButton>
-          </div>
-        </section>
+          </section>
+        ) : null}
+
+        {showStartTravelButton ? (
+          <section className="rounded-[18px] border border-[#E5E7EB] bg-white px-4 py-4 shadow-[0px_8px_20px_rgba(0,0,0,0.08)] sm:px-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="font-comfortaa text-[16px] font-semibold leading-6 text-[#4A3C2A]">Ready to head out?</p>
+                <p className="mt-1 font-comfortaa text-[12px] leading-[18px] text-[#717182]">
+                  {scheduledTime
+                    ? `${canStartTravel ? "Appointment time" : "Start travel available within 2 hours"} • ${appointmentDateLabel} ${appointmentTimeLabel}`
+                    : "Appointment time unavailable"}
+                </p>
+              </div>
+              <OrangeButton
+                type="button"
+                onClick={() => void handleStartTravel()}
+                disabled={!canStartTravel || isStartingTravel}
+                fullWidth
+                className="sm:w-auto sm:min-w-[180px]"
+              >
+                {isStartingTravel ? <Spinner size="small" color="white" /> : "Start Travel"}
+              </OrangeButton>
+            </div>
+          </section>
+        ) : null}
       </div>
       <PdfPreviewDialog
         blobUrl={healthReportBlobUrl}
