@@ -3,6 +3,11 @@ import { FileUpload, Icon, type FileUploadItem } from "@/components/common";
 import type { InspectionPhotoOut } from "@/lib/api";
 import type { InspectionAreaConfig } from "@/modules/groomer/photoHealthConfig";
 
+export type InspectionPhotoUploadState = {
+  status: "uploading" | "error";
+  progress: number;
+};
+
 export function InspectionAreaSection({
   config,
   photos,
@@ -11,6 +16,7 @@ export function InspectionAreaSection({
   onFilesSelected,
   onRemove,
   onOpen,
+  uploadStates = {},
 }: {
   config: InspectionAreaConfig;
   photos: InspectionPhotoOut[];
@@ -19,6 +25,7 @@ export function InspectionAreaSection({
   onFilesSelected: (files: File[]) => void;
   onRemove: (photo: InspectionPhotoOut) => void;
   onOpen: (photo: InspectionPhotoOut) => void;
+  uploadStates?: Record<number, InspectionPhotoUploadState>;
 }) {
   const earInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const openFilePicker = (input: HTMLInputElement | null) => {
@@ -32,8 +39,9 @@ export function InspectionAreaSection({
     previewUrl: photo.url,
     serverUrl: photo.url,
     photoId: photo.id,
-    uploadStatus: "uploaded",
-    uploadProgress: 100,
+    uploadStatus: uploadStates[photo.id]?.status ?? "uploaded",
+    uploadProgress: uploadStates[photo.id]?.progress ?? 100,
+    errorType: uploadStates[photo.id]?.status === "error" ? "upload" : null,
     badge:
       photo.classification === "ai_scan"
         ? "AI Scan"
@@ -59,7 +67,37 @@ export function InspectionAreaSection({
       : "Mouth area";
   const sectionDescription = isPostureSection
     ? "Help to complete health report"
-    : "Add up to 2 photos for AI health inspection";
+    : "Add photos for AI health inspection";
+
+  const renderUploadState = (photo: InspectionPhotoOut) => {
+    const uploadState = uploadStates[photo.id];
+    if (!uploadState) return null;
+    if (uploadState.status === "error") {
+      return (
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-[14px] bg-[rgba(190,18,60,0.22)]">
+          <span className="rounded-full bg-white/90 px-2 py-1 font-comfortaa text-[10px] font-bold text-[#BE123C]">
+            Upload failed
+          </span>
+        </div>
+      );
+    }
+    return (
+      <>
+        <div className="pointer-events-none absolute inset-0 z-10 rounded-[14px] bg-[rgba(0,0,0,0.2)] backdrop-blur-[2px]" />
+        <div className="pointer-events-none absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2">
+          <p className="font-comfortaa text-[11px] font-medium leading-4 text-center text-white">
+            Uploading
+          </p>
+          <div className="relative h-1 w-20 overflow-clip rounded-2xl border border-neutral-200 bg-white">
+            <div
+              className="absolute left-0 top-0 h-1 rounded-2xl bg-green-500 transition-all duration-300"
+              style={{ width: `${uploadState.progress}%` }}
+            />
+          </div>
+        </div>
+      </>
+    );
+  };
 
   // The Add photo slot remains available after the first named photo slot is filled.
   const renderPersistentPhotoInput = () => (
@@ -74,7 +112,11 @@ export function InspectionAreaSection({
       onChange={(event) => {
         const selected = Array.from(event.currentTarget.files ?? []);
         if (selected.length > 0) {
-          onFilesSelected(selected.slice(0, Math.max(0, 2 - photos.length)));
+          onFilesSelected(
+            config.area === "skin"
+              ? selected
+              : selected.slice(0, Math.max(0, 2 - photos.length))
+          );
         }
         event.currentTarget.value = "";
       }}
@@ -102,6 +144,7 @@ export function InspectionAreaSection({
                 className="absolute inset-0 size-full max-w-none pointer-events-none rounded-[14px] object-cover object-top"
               />
             </button>
+            {renderUploadState(areaPhoto)}
             <button
               type="button"
               aria-label={`Remove ${label}`}
@@ -159,7 +202,10 @@ export function InspectionAreaSection({
   ) => {
     const label = persistentSlotLabel;
     return (
-      <div className="relative h-[84px] min-w-0 flex-1 overflow-visible rounded-[14px]">
+      <div
+        key={`${config.area}-${photo?.id ?? "empty"}-${index}`}
+        className="relative h-[84px] min-w-0 flex-1 overflow-visible rounded-[14px]"
+      >
         {photo ? (
           <>
             <button
@@ -173,6 +219,7 @@ export function InspectionAreaSection({
                 className="absolute inset-0 size-full max-w-none pointer-events-none rounded-[14px] object-cover object-center"
               />
             </button>
+            {renderUploadState(photo)}
             <button
               type="button"
               aria-label={`Remove ${config.label} ${index + 1}`}
@@ -241,26 +288,24 @@ export function InspectionAreaSection({
                     .map((photo, index) =>
                       renderPersistentPhotoSlot(photo, index + 1)
                     )}
-                  {config.area !== "skin" || photos.length < 2 ? (
-                    <button
-                      type="button"
-                      className="relative flex h-[84px] min-w-0 cursor-pointer flex-col items-center justify-center gap-2 rounded-[14px] border-[1.451px] border-dashed border-[#D4C9E0] bg-white shadow-[0px_1px_2.5px_0px_rgba(0,0,0,0.05)] transition-colors hover:border-[#de6a07]"
-                      onClick={() =>
-                        openFilePicker(earInputRefs.current[config.area])
-                      }
-                      aria-label={`Add ${config.label}`}
-                    >
-                      <div className="flex size-[29px] shrink-0 items-center justify-center rounded-full bg-[#F0EBF7]">
-                        <Icon
-                          name="add-inspection"
-                          className="block size-[28px]"
-                        />
-                      </div>
-                      <span className="text-center font-comfortaa text-xs font-medium leading-[18px] text-[#633479]">
-                        Add photo
-                      </span>
-                    </button>
-                  ) : null}
+                  <button
+                    type="button"
+                    className="relative flex h-[84px] min-w-0 cursor-pointer flex-col items-center justify-center gap-2 rounded-[14px] border-[1.451px] border-dashed border-[#D4C9E0] bg-white shadow-[0px_1px_2.5px_0px_rgba(0,0,0,0.05)] transition-colors hover:border-[#de6a07]"
+                    onClick={() =>
+                      openFilePicker(earInputRefs.current[config.area])
+                    }
+                    aria-label={`Add ${config.label}`}
+                  >
+                    <div className="flex size-[29px] shrink-0 items-center justify-center rounded-full bg-[#F0EBF7]">
+                      <Icon
+                        name="add-inspection"
+                        className="block size-[28px]"
+                      />
+                    </div>
+                    <span className="text-center font-comfortaa text-xs font-medium leading-[18px] text-[#633479]">
+                      Add photo
+                    </span>
+                  </button>
                 </div>
               </div>
             ) : (

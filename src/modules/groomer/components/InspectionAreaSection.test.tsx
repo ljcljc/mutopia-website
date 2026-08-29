@@ -38,8 +38,33 @@ describe("InspectionAreaSection", () => {
     expect(screen.getByText("Skin photo")).toBeInTheDocument();
     expect(screen.getAllByText("Add photo")).toHaveLength(1);
     expect(
-      screen.getByText("Add up to 2 photos for AI health inspection")
+      screen.getByText("Add photos for AI health inspection")
     ).toBeInTheDocument();
+  });
+
+  it("keeps the Skin add-photo slot available after two photos", () => {
+    const photos: InspectionPhotoOut[] = [1, 2, 3].map((id) => ({
+      id,
+      area: "skin",
+      url: `/skin-${id}.jpg`,
+      original_filename: `skin-${id}.jpg`,
+      normalized_mime_type: "image/jpeg",
+      classification: "normal",
+      finding_hints: [],
+      confirmed: true,
+    }));
+
+    render(
+      <InspectionAreaSection
+        config={{ area: "skin", label: "Skin photo", hints: [] }}
+        photos={photos}
+        onFilesSelected={vi.fn()}
+        onRemove={vi.fn()}
+        onOpen={vi.fn()}
+      />
+    );
+
+    expect(screen.getByLabelText("Add Skin photo")).toBeInTheDocument();
   });
 
   it("shows the ear side badge for ear uploads", () => {

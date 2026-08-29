@@ -1,5 +1,11 @@
 // API utility functions
-import { http, setAuthToken, setRefreshToken, clearAuthTokens, getAuthToken } from "./http";
+import {
+  http,
+  setAuthToken,
+  setRefreshToken,
+  clearAuthTokens,
+  getAuthToken,
+} from "./http";
 import {
   cacheHealthReportPdf,
   getCachedHealthReportPdf,
@@ -1419,12 +1425,17 @@ export async function uploadGroomerApplyImage(
 async function uploadFileWithProgress<T = PhotoUploadResponse>(
   url: string,
   file: File,
-  onProgress?: (progress: number) => void
+  onProgress?: (progress: number) => void,
+  fields?: Record<string, string>,
+  headers?: Record<string, string>
 ): Promise<T> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     const formData = new FormData();
     formData.append("file", file);
+    Object.entries(fields ?? {}).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
 
     // 获取 API base URL
     const API_BASE_URL = import.meta.env.DEV
@@ -1466,6 +1477,9 @@ async function uploadFileWithProgress<T = PhotoUploadResponse>(
 
     // 设置请求头（包括认证 token）
     xhr.open("POST", fullUrl);
+    Object.entries(headers ?? {}).forEach(([key, value]) => {
+      xhr.setRequestHeader(key, value);
+    });
 
     // 获取并设置认证 token
     (async () => {
@@ -2597,22 +2611,16 @@ export async function uploadInspectionPhoto(
   bookingId: number,
   area: InspectionArea,
   file: File,
-  idempotencyKey: string
+  idempotencyKey: string,
+  onProgress?: (progress: number) => void
 ): Promise<InspectionPhotoOut> {
-  const formData = new FormData();
-  formData.append("area", area);
-  formData.append("file", file);
-  const response = await http.post<InspectionPhotoOut>(
+  return uploadFileWithProgress<InspectionPhotoOut>(
     `/api/groomers/bookings/${bookingId}/photo_health_inspection/photos`,
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        "X-Idempotency-Key": idempotencyKey,
-      },
-    }
+    file,
+    onProgress,
+    { area },
+    { "X-Idempotency-Key": idempotencyKey }
   );
-  return response.data;
 }
 
 export async function updateInspectionPhoto(
@@ -2669,7 +2677,10 @@ export async function submitPhotoHealthInspection(
     job_id: number;
     status: string;
     reused: boolean;
-  }>(`/api/groomers/bookings/${bookingId}/photo_health_inspection/submit`, data);
+  }>(
+    `/api/groomers/bookings/${bookingId}/photo_health_inspection/submit`,
+    data
+  );
   return response.data;
 }
 
@@ -2722,7 +2733,10 @@ export async function updatePhotoHealthReportInsights(
   return response.data;
 }
 
-export async function fetchAuthenticatedBlob(url: string, signal?: AbortSignal): Promise<Blob> {
+export async function fetchAuthenticatedBlob(
+  url: string,
+  signal?: AbortSignal
+): Promise<Blob> {
   const authToken = await getAuthToken();
   const cacheKey = await getHealthReportPdfCacheKey(url, authToken);
   if (cacheKey) {
@@ -2762,11 +2776,11 @@ export async function listPetHealthReports(
 export async function getPetHealthReportPdf(
   petId: number,
   reportId: number,
-  signal?: AbortSignal,
+  signal?: AbortSignal
 ): Promise<Blob> {
   return fetchAuthenticatedBlob(
     `/api/pets/${petId}/health_reports/${reportId}/pdf`,
-    signal,
+    signal
   );
 }
 

@@ -27,7 +27,10 @@ import {
   type PhotoHealthInspectionOut,
   type PhotoHealthReportDraftOut,
 } from "@/lib/api";
-import { InspectionAreaSection } from "@/modules/groomer/components/InspectionAreaSection";
+import {
+  InspectionAreaSection,
+  type InspectionPhotoUploadState,
+} from "@/modules/groomer/components/InspectionAreaSection";
 import { InspectionPhotoReview } from "@/modules/groomer/components/InspectionPhotoReview";
 import { PhotoHealthReportReview } from "@/modules/groomer/components/PhotoHealthReportReview";
 import { PhotoHealthOverview } from "@/modules/groomer/components/PhotoHealthOverview";
@@ -198,6 +201,9 @@ export default function GroomerPhotoHealthInspectionPage() {
     useState<PhotoHealthInspectionOut["step6_phase"]>("impression");
   const [observationTags, setObservationTags] = useState<string[]>([]);
   const [reviewQueue, setReviewQueue] = useState<number[]>([]);
+  const [photoUploadStates, setPhotoUploadStates] = useState<
+    Record<number, InspectionPhotoUploadState>
+  >({});
   const [reviewPanelSnap, setReviewPanelSnap] = useState<
     "collapsed" | "default" | "expanded"
   >("default");
@@ -443,6 +449,36 @@ export default function GroomerPhotoHealthInspectionPage() {
   );
   const pairedInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
+  const renderPhotoUploadState = (photo: InspectionPhotoOut) => {
+    const uploadState = photoUploadStates[photo.id];
+    if (!uploadState) return null;
+    if (uploadState.status === "error") {
+      return (
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-[14px] bg-[rgba(190,18,60,0.22)]">
+          <span className="rounded-full bg-white/90 px-2 py-1 font-comfortaa text-[10px] font-bold text-[#BE123C]">
+            Upload failed
+          </span>
+        </div>
+      );
+    }
+    return (
+      <>
+        <div className="pointer-events-none absolute inset-0 z-10 rounded-[14px] bg-[rgba(0,0,0,0.2)] backdrop-blur-[2px]" />
+        <div className="pointer-events-none absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2">
+          <p className="text-center font-comfortaa text-[11px] font-medium leading-4 text-white">
+            Uploading
+          </p>
+          <div className="relative h-1 w-20 overflow-clip rounded-2xl border border-neutral-200 bg-white">
+            <div
+              className="absolute left-0 top-0 h-1 rounded-2xl bg-green-500 transition-all duration-300"
+              style={{ width: `${uploadState.progress}%` }}
+            />
+          </div>
+        </div>
+      </>
+    );
+  };
+
   const begin = async () => {
     if (inspection) {
       setShowOverview(false);
@@ -480,7 +516,10 @@ export default function GroomerPhotoHealthInspectionPage() {
     const previousStep = step === 1 ? 1 : step - 1;
     if (step === 1) setShowOverview(true);
     else {
-      const nextInspection = { ...latestInspection, current_step: previousStep };
+      const nextInspection = {
+        ...latestInspection,
+        current_step: previousStep,
+      };
       inspectionRef.current = nextInspection;
       setInspection(nextInspection);
       persistLocalDraft(nextInspection, { currentStep: previousStep });
@@ -490,33 +529,88 @@ export default function GroomerPhotoHealthInspectionPage() {
 
   const upload = async (area: InspectionArea, files: File[]) => {
     setErrors((current) => ({ ...current, [area]: "" }));
-    const uploaded: InspectionPhotoOut[] = [];
-    for (const file of files) {
-      try {
-        const requestId =
-          globalThis.crypto?.randomUUID?.() ??
-          `${Date.now()}-${file.name}-${file.lastModified}`;
-        uploaded.push(
-          await uploadInspectionPhoto(bookingId, area, file, requestId)
-        );
-      } catch {
-        setErrors((current) => ({
-          ...current,
-          [area]: "Some photos failed to upload. Accepted photos were kept.",
-        }));
-      }
-    }
-    if (uploaded.length > 0) {
-      setInspection((current) =>
-        current
-          ? { ...current, photos: [...current.photos, ...uploaded] }
-          : current
-      );
-      setReviewQueue((current) => [
-        ...current,
-        ...uploaded.map((photo) => photo.id),
-      ]);
-    }
+    const localPhotos = files.map((file, index) => ({
+      file,
+      tempId: -(Date.now() + index),
+      previewUrl: URL.createObjectURL(file),
+    }));
+    setInspection((current) =>
+      current
+        ? {
+            ...current,
+            photos: [
+              ...current.photos,
+              ...localPhotos.map(({ file, tempId, previewUrl }) => ({
+                id: tempId,
+                area,
+                url: previewUrl,
+                original_filename: file.name,
+                normalized_mime_type: file.type || "image/jpeg",
+                classification: "normal" as const,
+                finding_hints: [],
+                confirmed: false,
+              })),
+            ],
+          }
+        : current
+    );
+    setPhotoUploadStates((current) => ({
+      ...current,
+      ...Object.fromEntries(
+        localPhotos.map(({ tempId }) => [
+          tempId,
+          { status: "uploading" as const, progress: 0 },
+        ])
+      ),
+    }));
+
+    await Promise.all(
+      localPhotos.map(async ({ file, tempId, previewUrl }) => {
+        try {
+          const requestId =
+            globalThis.crypto?.randomUUID?.() ??
+            `${Date.now()}-${file.name}-${file.lastModified}`;
+          const uploaded = await uploadInspectionPhoto(
+            bookingId,
+            area,
+            file,
+            requestId,
+            (progress) =>
+              setPhotoUploadStates((current) => ({
+                ...current,
+                [tempId]: { status: "uploading", progress },
+              }))
+          );
+          setInspection((current) =>
+            current
+              ? {
+                  ...current,
+                  photos: current.photos.map((photo) =>
+                    photo.id === tempId
+                      ? { ...uploaded, url: previewUrl }
+                      : photo
+                  ),
+                }
+              : current
+          );
+          setPhotoUploadStates((current) => {
+            const next = { ...current };
+            delete next[tempId];
+            return next;
+          });
+          setReviewQueue((current) => [...current, uploaded.id]);
+        } catch {
+          setPhotoUploadStates((current) => ({
+            ...current,
+            [tempId]: { status: "error", progress: 0 },
+          }));
+          setErrors((current) => ({
+            ...current,
+            [area]: "Some photos failed to upload. Accepted photos were kept.",
+          }));
+        }
+      })
+    );
   };
 
   const confirmPhoto = (
@@ -546,7 +640,25 @@ export default function GroomerPhotoHealthInspectionPage() {
   };
 
   const removePhoto = async (photo: InspectionPhotoOut) => {
+    if (photo.id < 0) {
+      if (photo.url.startsWith("blob:")) URL.revokeObjectURL(photo.url);
+      setInspection((current) =>
+        current
+          ? {
+              ...current,
+              photos: current.photos.filter((item) => item.id !== photo.id),
+            }
+          : current
+      );
+      setPhotoUploadStates((current) => {
+        const next = { ...current };
+        delete next[photo.id];
+        return next;
+      });
+      return;
+    }
     await deleteInspectionPhoto(bookingId, photo.id);
+    if (photo.url.startsWith("blob:")) URL.revokeObjectURL(photo.url);
     setInspection((current) =>
       current
         ? {
@@ -758,6 +870,7 @@ export default function GroomerPhotoHealthInspectionPage() {
                                 className="size-full object-cover object-center"
                               />
                             </button>
+                            {renderPhotoUploadState(photo)}
                             {photo.classification === "ai_scan" ? (
                               <span className="pointer-events-none absolute bottom-[-8px] left-[12px] z-30 rounded-full border border-[#F1C9CC] bg-[#FFF6F6] px-3 py-1 font-comfortaa text-xs text-[#B23A48] shadow-sm">
                                 AI Scan
@@ -840,6 +953,7 @@ export default function GroomerPhotoHealthInspectionPage() {
                   disabled={inspection.locked || saving}
                   error={errors[area.area]}
                   onFilesSelected={(files) => void upload(area.area, files)}
+                  uploadStates={photoUploadStates}
                   onRemove={(photo) => void removePhoto(photo)}
                   onOpen={(photo) => setReviewQueue([photo.id])}
                 />
