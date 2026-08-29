@@ -16,6 +16,7 @@ export interface FileUploadItem {
   previewUrl: string; // blob URL 或服务器 URL
   uploadProgress?: number;
   uploadStatus?: "uploading" | "uploaded" | "error";
+  uploadPhase?: "compressing" | "uploading";
   errorType?: "size" | "format" | "upload" | null;
   photoId?: number; // 上传成功后的照片 ID
   serverUrl?: string; // 上传成功后服务器返回的 URL（相对路径）
@@ -302,7 +303,9 @@ export function FileUpload({
                             <div className="absolute backdrop-blur-[2px] backdrop-filter bg-[rgba(0,0,0,0.2)] inset-0 rounded-[calc(8*var(--px393))] sm:rounded-[8px]" />
                             <div className="absolute flex flex-col gap-[calc(6*var(--px393))] sm:gap-[8px] items-center left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
                               <p className="font-['Inter:Medium',sans-serif] font-medium leading-[calc(16*var(--px393))] sm:leading-[16px] not-italic relative shrink-0 text-[calc(11*var(--px393))] sm:text-[11px] text-center text-white">
-                                Uploading
+                                {item.uploadPhase === "compressing"
+                                  ? "Preparing image"
+                                  : "Uploading"}
                               </p>
                               <div className="bg-white border border-neutral-200 h-[4px] overflow-clip relative rounded-[16px] shrink-0 w-[calc(80*var(--px393))] sm:w-[80px]">
                                 <div

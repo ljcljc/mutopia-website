@@ -470,7 +470,9 @@ export default function GroomerPhotoHealthInspectionPage() {
         <div className="pointer-events-none absolute inset-0 z-10 rounded-[14px] bg-[rgba(0,0,0,0.2)] backdrop-blur-[2px]" />
         <div className="pointer-events-none absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2">
           <p className="text-center font-comfortaa text-[11px] font-medium leading-4 text-white">
-            Uploading
+            {uploadState.phase === "compressing"
+              ? "Preparing image"
+              : "Uploading"}
           </p>
           <div className="relative h-1 w-20 overflow-clip rounded-2xl border border-neutral-200 bg-white">
             <div
@@ -537,8 +539,40 @@ export default function GroomerPhotoHealthInspectionPage() {
 
     await Promise.all(
       files.map(async (originalFile) => {
+        const tempId = createTemporaryPhotoId();
+        const placeholderUrl =
+          "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+        const placeholderPhoto: InspectionPhotoOut = {
+          id: tempId,
+          area,
+          url: placeholderUrl,
+          original_filename: originalFile.name,
+          normalized_mime_type: originalFile.type || "image/jpeg",
+          classification: "normal",
+          finding_hints: [],
+          confirmed: false,
+        };
+        setInspection((current) =>
+          current
+            ? { ...current, photos: [...current.photos, placeholderPhoto] }
+            : current
+        );
+        setPhotoUploadStates((current) => ({
+          ...current,
+          [tempId]: { status: "uploading", phase: "compressing", progress: 0 },
+        }));
+
         const compressionTask = compressionQueue.then(() =>
-          compressInspectionImage(originalFile)
+          compressInspectionImage(originalFile, (progress) =>
+            setPhotoUploadStates((current) => ({
+              ...current,
+              [tempId]: {
+                status: "uploading",
+                phase: "compressing",
+                progress,
+              },
+            }))
+          )
         );
         compressionQueue = compressionTask.then(
           () => undefined,
@@ -549,6 +583,10 @@ export default function GroomerPhotoHealthInspectionPage() {
         try {
           file = await compressionTask;
         } catch {
+          setPhotoUploadStates((current) => ({
+            ...current,
+            [tempId]: { status: "error", phase: "compressing", progress: 0 },
+          }));
           setErrors((current) => ({
             ...current,
             [area]:
@@ -557,31 +595,27 @@ export default function GroomerPhotoHealthInspectionPage() {
           return;
         }
 
-        const tempId = createTemporaryPhotoId();
         const previewUrl = URL.createObjectURL(file);
         setInspection((current) =>
           current
             ? {
                 ...current,
-                photos: [
-                  ...current.photos,
-                  {
-                    id: tempId,
-                    area,
-                    url: previewUrl,
-                    original_filename: file.name,
-                    normalized_mime_type: file.type || "image/jpeg",
-                    classification: "normal" as const,
-                    finding_hints: [],
-                    confirmed: false,
-                  },
-                ],
+                photos: current.photos.map((photo) =>
+                  photo.id === tempId
+                    ? {
+                        ...photo,
+                        url: previewUrl,
+                        original_filename: file.name,
+                        normalized_mime_type: file.type || "image/jpeg",
+                      }
+                    : photo
+                ),
               }
             : current
         );
         setPhotoUploadStates((current) => ({
           ...current,
-          [tempId]: { status: "uploading", progress: 0 },
+          [tempId]: { status: "uploading", phase: "uploading", progress: 0 },
         }));
 
         try {
@@ -616,7 +650,10 @@ export default function GroomerPhotoHealthInspectionPage() {
             delete next[tempId];
             return next;
           });
-          setReviewQueue((current) => [...current, uploaded.id]);
+          setReviewQueue((current) => [
+            uploaded.id,
+            ...current.filter((id) => id !== uploaded.id),
+          ]);
         } catch {
           setPhotoUploadStates((current) => ({
             ...current,

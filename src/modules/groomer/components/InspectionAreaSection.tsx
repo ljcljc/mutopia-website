@@ -5,6 +5,7 @@ import type { InspectionAreaConfig } from "@/modules/groomer/photoHealthConfig";
 
 export type InspectionPhotoUploadState = {
   status: "uploading" | "error";
+  phase?: "compressing" | "uploading";
   progress: number;
 };
 
@@ -41,6 +42,7 @@ export function InspectionAreaSection({
     photoId: photo.id,
     uploadStatus: uploadStates[photo.id]?.status ?? "uploaded",
     uploadProgress: uploadStates[photo.id]?.progress ?? 100,
+    uploadPhase: uploadStates[photo.id]?.phase,
     errorType: uploadStates[photo.id]?.status === "error" ? "upload" : null,
     badge:
       photo.classification === "ai_scan"
@@ -86,7 +88,9 @@ export function InspectionAreaSection({
         <div className="pointer-events-none absolute inset-0 z-10 rounded-[14px] bg-[rgba(0,0,0,0.2)] backdrop-blur-[2px]" />
         <div className="pointer-events-none absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2">
           <p className="font-comfortaa text-[11px] font-medium leading-4 text-center text-white">
-            Uploading
+            {uploadState.phase === "compressing"
+              ? "Preparing image"
+              : "Uploading"}
           </p>
           <div className="relative h-1 w-20 overflow-clip rounded-2xl border border-neutral-200 bg-white">
             <div
@@ -321,16 +325,16 @@ export function InspectionAreaSection({
                       ? 1
                       : undefined
                 }
-                maxSizeMB={10}
+                maxSizeMB={100}
                 disabled={disabled}
                 uploadItems={items}
                 onFilesAdded={onFilesSelected}
                 onRemove={(index) => onRemove(photos[index])}
                 onPreviewItem={(index) => {
                   const photo = photos[index];
-                  if (photo) onOpen(photo);
+                  if (photo && !uploadStates[photo.id]) onOpen(photo);
                 }}
-                fileTypeHint="JPG, JPEG, PNG, HEIC, or HEIF — up to 10MB each"
+                fileTypeHint="JPG, JPEG, PNG, HEIC, or HEIF — images are compressed before upload"
               />
             )}
           </div>
