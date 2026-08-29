@@ -2171,7 +2171,7 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Current dashboard booking; booking.has_published_health_report controls the report action label."
+            "description": "Current same-day dashboard booking plus report_interactions for published health-report bookings awaiting an owner review or groomer reply."
           }
         },
         "tags": ["groomer-portal"],

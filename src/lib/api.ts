@@ -2038,7 +2038,10 @@ export type GroomerPayoutSummaryOut = UnknownObjectOut;
 export type GroomerPayoutLinkOut = UnknownObjectOut;
 export type GroomerPerformanceOut = UnknownObjectOut;
 export type GroomerDashboardSummaryOut = UnknownObjectOut;
-export type GroomerCurrentBookingOut = UnknownObjectOut | null;
+export type GroomerCurrentBookingOut = (UnknownObjectOut & {
+  booking?: UnknownObjectOut | null;
+  report_interactions?: UnknownObjectOut[];
+}) | null;
 export type GroomerBookingDetailOut = BookingDetailOut;
 export interface GroomerPendingTimeSlotOut {
   date: string;
@@ -2354,6 +2357,7 @@ export async function getGroomerDashboardSummary(): Promise<GroomerDashboardSumm
 export async function getGroomerCurrentBooking(): Promise<GroomerCurrentBookingOut> {
   const queryParams = new URLSearchParams({
     local_now: formatLocalDateTimeForApi(),
+    local_offset_minutes: String(getLocalOffsetMinutes()),
   });
   const response = await http.get<GroomerCurrentBookingOut>(
     `/api/groomers/dashboard/current_booking?${queryParams.toString()}`
