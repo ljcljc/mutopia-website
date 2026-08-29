@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { HttpError } from "@/lib/http";
 import {
   compressInspectionImage,
+  createInspectionImagePreview,
   createTemporaryPhotoId,
 } from "@/lib/imageCompression";
 import {
@@ -460,7 +461,9 @@ export default function GroomerPhotoHealthInspectionPage() {
       return (
         <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-[14px] bg-[rgba(190,18,60,0.22)]">
           <span className="rounded-full bg-white/90 px-2 py-1 font-comfortaa text-[10px] font-bold text-[#BE123C]">
-            Upload failed
+            {uploadState.errorOperation === "delete"
+              ? "Remove failed"
+              : "Upload failed"}
           </span>
         </div>
       );
@@ -470,9 +473,11 @@ export default function GroomerPhotoHealthInspectionPage() {
         <div className="pointer-events-none absolute inset-0 z-10 rounded-[14px] bg-[rgba(0,0,0,0.2)] backdrop-blur-[2px]" />
         <div className="pointer-events-none absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2">
           <p className="text-center font-comfortaa text-[11px] font-medium leading-4 text-white">
-            {uploadState.phase === "compressing"
-              ? "Preparing image"
-              : "Uploading"}
+            {uploadState.status === "deleting"
+              ? "Removing"
+              : uploadState.phase === "compressing"
+                ? "Preparing image"
+                : "Uploading"}
           </p>
           <div className="relative h-1 w-20 overflow-clip rounded-2xl border border-neutral-200 bg-white">
             <div
@@ -562,8 +567,8 @@ export default function GroomerPhotoHealthInspectionPage() {
           [tempId]: { status: "uploading", phase: "compressing", progress: 0 },
         }));
 
-        const compressionTask = compressionQueue.then(() =>
-          compressInspectionImage(originalFile, (progress) =>
+        const compressionTask = compressionQueue.then(async () => {
+          const updateCompressionProgress = (progress: number) =>
             setPhotoUploadStates((current) => ({
               ...current,
               [tempId]: {
@@ -571,17 +576,39 @@ export default function GroomerPhotoHealthInspectionPage() {
                 phase: "compressing",
                 progress,
               },
-            }))
-          )
-        );
+            }));
+          const previewFile = await createInspectionImagePreview(
+            originalFile,
+            updateCompressionProgress
+          );
+          const previewUrl = URL.createObjectURL(previewFile);
+          setInspection((current) =>
+            current
+              ? {
+                  ...current,
+                  photos: current.photos.map((photo) =>
+                    photo.id === tempId ? { ...photo, url: previewUrl } : photo
+                  ),
+                }
+              : current
+          );
+          const uploadFile = await compressInspectionImage(
+            originalFile,
+            updateCompressionProgress
+          );
+          return { previewUrl, uploadFile };
+        });
         compressionQueue = compressionTask.then(
           () => undefined,
           () => undefined
         );
 
         let file: File;
+        let previewUrl: string;
         try {
-          file = await compressionTask;
+          const prepared = await compressionTask;
+          file = prepared.uploadFile;
+          previewUrl = prepared.previewUrl;
         } catch {
           setPhotoUploadStates((current) => ({
             ...current,
@@ -595,24 +622,6 @@ export default function GroomerPhotoHealthInspectionPage() {
           return;
         }
 
-        const previewUrl = URL.createObjectURL(file);
-        setInspection((current) =>
-          current
-            ? {
-                ...current,
-                photos: current.photos.map((photo) =>
-                  photo.id === tempId
-                    ? {
-                        ...photo,
-                        url: previewUrl,
-                        original_filename: file.name,
-                        normalized_mime_type: file.type || "image/jpeg",
-                      }
-                    : photo
-                ),
-              }
-            : current
-        );
         setPhotoUploadStates((current) => ({
           ...current,
           [tempId]: { status: "uploading", phase: "uploading", progress: 0 },
@@ -633,18 +642,17 @@ export default function GroomerPhotoHealthInspectionPage() {
                 [tempId]: { status: "uploading", progress },
               }))
           );
-          setInspection((current) =>
-            current
-              ? {
-                  ...current,
-                  photos: current.photos.map((photo) =>
-                    photo.id === tempId
-                      ? { ...uploaded, url: previewUrl }
-                      : photo
-                  ),
-                }
-              : current
-          );
+          setInspection((current) => {
+            if (!current) return current;
+            const nextInspection = {
+              ...current,
+              photos: current.photos.map((photo) =>
+                photo.id === tempId ? { ...uploaded, url: previewUrl } : photo
+              ),
+            };
+            inspectionRef.current = nextInspection;
+            return nextInspection;
+          });
           setPhotoUploadStates((current) => {
             const next = { ...current };
             delete next[tempId];
@@ -712,16 +720,40 @@ export default function GroomerPhotoHealthInspectionPage() {
       });
       return;
     }
-    await deleteInspectionPhoto(bookingId, photo.id);
-    if (photo.url.startsWith("blob:")) URL.revokeObjectURL(photo.url);
-    setInspection((current) =>
-      current
-        ? {
-            ...current,
-            photos: current.photos.filter((item) => item.id !== photo.id),
-          }
-        : current
-    );
+    setPhotoUploadStates((current) => ({
+      ...current,
+      [photo.id]: { status: "deleting", progress: 0 },
+    }));
+    try {
+      await deleteInspectionPhoto(bookingId, photo.id);
+      if (photo.url.startsWith("blob:")) URL.revokeObjectURL(photo.url);
+      setInspection((current) =>
+        current
+          ? {
+              ...current,
+              photos: current.photos.filter((item) => item.id !== photo.id),
+            }
+          : current
+      );
+      setPhotoUploadStates((current) => {
+        const next = { ...current };
+        delete next[photo.id];
+        return next;
+      });
+    } catch {
+      setPhotoUploadStates((current) => ({
+        ...current,
+        [photo.id]: {
+          status: "error",
+          errorOperation: "delete",
+          progress: 0,
+        },
+      }));
+      setErrors((current) => ({
+        ...current,
+        [photo.area]: "Could not remove this photo. Please try again.",
+      }));
+    }
   };
 
   const saveStep = (nextStep: number) => {
@@ -935,6 +967,10 @@ export default function GroomerPhotoHealthInspectionPage() {
                               type="button"
                               aria-label={`Remove ${photo.original_filename}`}
                               className="absolute right-[-4px] top-[-4px] z-20 flex size-[20px] cursor-pointer items-center justify-center rounded-[8px] border border-[#4c4c4c] bg-neutral-100 shadow-[0px_2px_4px_0px_rgba(0,0,0,0.1)]"
+                              disabled={
+                                photoUploadStates[photo.id]?.status ===
+                                "deleting"
+                              }
                               onClick={() => void removePhoto(photo)}
                             >
                               <span className="relative flex size-[10px] items-center justify-center">

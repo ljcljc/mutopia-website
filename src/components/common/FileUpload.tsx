@@ -15,7 +15,7 @@ export interface FileUploadItem {
   file: File;
   previewUrl: string; // blob URL 或服务器 URL
   uploadProgress?: number;
-  uploadStatus?: "uploading" | "uploaded" | "error";
+  uploadStatus?: "uploading" | "deleting" | "uploaded" | "error";
   uploadPhase?: "compressing" | "uploading";
   errorType?: "size" | "format" | "upload" | null;
   photoId?: number; // 上传成功后的照片 ID
@@ -250,6 +250,7 @@ export function FileUpload({
                 const file = item.file;
                 const previewUrl = item.previewUrl;
                 const isUploading = item.uploadStatus === "uploading";
+                const isDeleting = item.uploadStatus === "deleting";
 
                 const isUploaded = item.uploadStatus === "uploaded";
                 const isUploadError = item.uploadStatus === "error";
@@ -298,14 +299,16 @@ export function FileUpload({
                         </div>
 
                         {/* 上传进度遮罩（上传中时显示） */}
-                        {isUploading && (
+                        {(isUploading || isDeleting) && (
                           <>
                             <div className="absolute backdrop-blur-[2px] backdrop-filter bg-[rgba(0,0,0,0.2)] inset-0 rounded-[calc(8*var(--px393))] sm:rounded-[8px]" />
                             <div className="absolute flex flex-col gap-[calc(6*var(--px393))] sm:gap-[8px] items-center left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
                               <p className="font-['Inter:Medium',sans-serif] font-medium leading-[calc(16*var(--px393))] sm:leading-[16px] not-italic relative shrink-0 text-[calc(11*var(--px393))] sm:text-[11px] text-center text-white">
-                                {item.uploadPhase === "compressing"
-                                  ? "Preparing image"
-                                  : "Uploading"}
+                                {isDeleting
+                                  ? "Removing"
+                                  : item.uploadPhase === "compressing"
+                                    ? "Preparing image"
+                                    : "Uploading"}
                               </p>
                               <div className="bg-white border border-neutral-200 h-[4px] overflow-clip relative rounded-[16px] shrink-0 w-[calc(80*var(--px393))] sm:w-[80px]">
                                 <div
@@ -327,71 +330,75 @@ export function FileUpload({
                         )}
 
                         {/* 删除按钮（位于缩略图右上角，上传成功后显示） */}
-                        {(isUploaded || isUploadError) && !isUploading && (
-                          <div
-                            className="absolute bg-neutral-100 border border-[#4c4c4c] border-solid overflow-clip rounded-[calc(8*var(--px393))] sm:rounded-[8px] size-[calc(20*var(--px393))] sm:size-[20px] top-[-4px] right-[-4px] cursor-pointer flex items-center justify-center z-20 shadow-[0px_2px_4px_0px_rgba(0,0,0,0.1)]"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              console.debug("[FileUpload] delete click", {
-                                index,
-                                hasUploadItems: Boolean(uploadItems),
-                                item: displayItems[index],
-                              });
-                              // 清理预览 URL（只清理 blob URL，不清理服务器 URL）
-                              if (
-                                displayItems[index]?.previewUrl &&
-                                displayItems[index].previewUrl.startsWith(
-                                  "blob:"
-                                )
-                              ) {
-                                URL.revokeObjectURL(
-                                  displayItems[index].previewUrl
-                                );
-                              }
-                              // 如果是从外部传入的 uploadItems，需要通过回调通知父组件
-                              if (uploadItems) {
-                                // 外部传入 uploadItems：已上传项直接走 onRemove（即便没有 photoId）
+                        {(isUploaded || isUploadError) &&
+                          !isUploading &&
+                          !isDeleting && (
+                            <div
+                              className="absolute bg-neutral-100 border border-[#4c4c4c] border-solid overflow-clip rounded-[calc(8*var(--px393))] sm:rounded-[8px] size-[calc(20*var(--px393))] sm:size-[20px] top-[-4px] right-[-4px] cursor-pointer flex items-center justify-center z-20 shadow-[0px_2px_4px_0px_rgba(0,0,0,0.1)]"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                console.debug("[FileUpload] delete click", {
+                                  index,
+                                  hasUploadItems: Boolean(uploadItems),
+                                  item: displayItems[index],
+                                });
+                                // 清理预览 URL（只清理 blob URL，不清理服务器 URL）
                                 if (
-                                  displayItems[index]?.uploadStatus ===
-                                  "uploaded"
+                                  displayItems[index]?.previewUrl &&
+                                  displayItems[index].previewUrl.startsWith(
+                                    "blob:"
+                                  )
                                 ) {
-                                  console.debug(
-                                    "[FileUpload] onRemove uploaded",
-                                    {
-                                      index,
-                                      photoId: displayItems[index]?.photoId,
-                                    }
+                                  URL.revokeObjectURL(
+                                    displayItems[index].previewUrl
                                   );
-                                  onRemove?.(index);
-                                } else {
-                                  // 未上传的文件，使用 onChange 回调
-                                  const remainingFiles = files.filter(
-                                    (_, i) => i !== index
-                                  );
-                                  console.debug(
-                                    "[FileUpload] onChange remaining files",
-                                    {
-                                      remainingCount: remainingFiles.length,
-                                    }
-                                  );
-                                  onChange?.(remainingFiles);
                                 }
-                              } else {
-                                console.debug(
-                                  "[FileUpload] removeFile internal",
-                                  { index }
-                                );
-                                removeFile(index);
-                              }
-                            }}
-                          >
-                            {/* X 图标：两条交叉的线 */}
-                            <div className="relative shrink-0 size-[calc(10*var(--px393))] sm:size-[10px] flex items-center justify-center">
-                              <div className="absolute bg-[#4c4c4c] h-[1.5px] w-full rotate-45" />
-                              <div className="absolute bg-[#4c4c4c] h-[1.5px] w-full rotate-135" />
+                                // 如果是从外部传入的 uploadItems，需要通过回调通知父组件
+                                if (uploadItems) {
+                                  // 外部传入 uploadItems：已上传项直接走 onRemove（即便没有 photoId）
+                                  if (
+                                    displayItems[index]?.uploadStatus ===
+                                      "uploaded" ||
+                                    displayItems[index]?.uploadStatus ===
+                                      "error"
+                                  ) {
+                                    console.debug(
+                                      "[FileUpload] onRemove uploaded",
+                                      {
+                                        index,
+                                        photoId: displayItems[index]?.photoId,
+                                      }
+                                    );
+                                    onRemove?.(index);
+                                  } else {
+                                    // 未上传的文件，使用 onChange 回调
+                                    const remainingFiles = files.filter(
+                                      (_, i) => i !== index
+                                    );
+                                    console.debug(
+                                      "[FileUpload] onChange remaining files",
+                                      {
+                                        remainingCount: remainingFiles.length,
+                                      }
+                                    );
+                                    onChange?.(remainingFiles);
+                                  }
+                                } else {
+                                  console.debug(
+                                    "[FileUpload] removeFile internal",
+                                    { index }
+                                  );
+                                  removeFile(index);
+                                }
+                              }}
+                            >
+                              {/* X 图标：两条交叉的线 */}
+                              <div className="relative shrink-0 size-[calc(10*var(--px393))] sm:size-[10px] flex items-center justify-center">
+                                <div className="absolute bg-[#4c4c4c] h-[1.5px] w-full rotate-45" />
+                                <div className="absolute bg-[#4c4c4c] h-[1.5px] w-full rotate-135" />
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          )}
                         {layout === "inspection" && item.badge ? (
                           <div className="pointer-events-none absolute bottom-[-8px] left-[12px] z-30 flex items-center gap-1 rounded-full border border-[#F1C9CC] bg-[#FFF6F6] px-3 py-1 font-comfortaa text-xs text-[#B23A48] shadow-sm">
                             <Icon

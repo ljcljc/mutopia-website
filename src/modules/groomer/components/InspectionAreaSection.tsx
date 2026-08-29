@@ -4,8 +4,9 @@ import type { InspectionPhotoOut } from "@/lib/api";
 import type { InspectionAreaConfig } from "@/modules/groomer/photoHealthConfig";
 
 export type InspectionPhotoUploadState = {
-  status: "uploading" | "error";
+  status: "uploading" | "deleting" | "error";
   phase?: "compressing" | "uploading";
+  errorOperation?: "upload" | "delete";
   progress: number;
 };
 
@@ -78,7 +79,9 @@ export function InspectionAreaSection({
       return (
         <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-[14px] bg-[rgba(190,18,60,0.22)]">
           <span className="rounded-full bg-white/90 px-2 py-1 font-comfortaa text-[10px] font-bold text-[#BE123C]">
-            Upload failed
+            {uploadState.errorOperation === "delete"
+              ? "Remove failed"
+              : "Upload failed"}
           </span>
         </div>
       );
@@ -88,9 +91,11 @@ export function InspectionAreaSection({
         <div className="pointer-events-none absolute inset-0 z-10 rounded-[14px] bg-[rgba(0,0,0,0.2)] backdrop-blur-[2px]" />
         <div className="pointer-events-none absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2">
           <p className="font-comfortaa text-[11px] font-medium leading-4 text-center text-white">
-            {uploadState.phase === "compressing"
-              ? "Preparing image"
-              : "Uploading"}
+            {uploadState.status === "deleting"
+              ? "Removing"
+              : uploadState.phase === "compressing"
+                ? "Compressing"
+                : "Uploading"}
           </p>
           <div className="relative h-1 w-20 overflow-clip rounded-2xl border border-neutral-200 bg-white">
             <div
@@ -153,6 +158,7 @@ export function InspectionAreaSection({
               type="button"
               aria-label={`Remove ${label}`}
               className="absolute right-[-4px] top-[-4px] z-20 flex size-[20px] cursor-pointer items-center justify-center rounded-[8px] border border-[#4c4c4c] bg-neutral-100 shadow-[0px_2px_4px_0px_rgba(0,0,0,0.1)]"
+              disabled={uploadStates[areaPhoto.id]?.status === "deleting"}
               onClick={() => void onRemove(areaPhoto)}
             >
               <span className="relative flex size-[10px] items-center justify-center">
@@ -228,6 +234,7 @@ export function InspectionAreaSection({
               type="button"
               aria-label={`Remove ${config.label} ${index + 1}`}
               className="absolute right-[-4px] top-[-4px] z-20 flex size-[20px] cursor-pointer items-center justify-center rounded-[8px] border border-[#4c4c4c] bg-neutral-100 shadow-[0px_2px_4px_0px_rgba(0,0,0,0.1)]"
+              disabled={uploadStates[photo.id]?.status === "deleting"}
               onClick={() => void onRemove(photo)}
             >
               <span className="relative flex size-[10px] items-center justify-center">

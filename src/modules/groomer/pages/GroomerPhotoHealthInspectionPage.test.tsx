@@ -3,11 +3,13 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import GroomerPhotoHealthInspectionPage from "./GroomerPhotoHealthInspectionPage";
 import {
+  deleteInspectionPhoto,
   getCheckInObservation,
   getGroomerBookingDetail,
   getPhotoHealthAnalysis,
   getPhotoHealthInspection,
   startPhotoHealthInspection,
+  uploadInspectionPhoto,
   type PhotoHealthInspectionOut,
 } from "@/lib/api";
 
@@ -26,6 +28,12 @@ vi.mock("@/lib/api", async (importOriginal) => {
     submitPhotoHealthInspection: vi.fn(),
   };
 });
+
+vi.mock("@/lib/imageCompression", () => ({
+  compressInspectionImage: vi.fn(async (file: File) => file),
+  createInspectionImagePreview: vi.fn(async (file: File) => file),
+  createTemporaryPhotoId: vi.fn(() => -1),
+}));
 
 const inspection: PhotoHealthInspectionOut = {
   id: 9,
@@ -60,6 +68,7 @@ describe("GroomerPhotoHealthInspectionPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     window.localStorage.clear();
+    vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:compressed-photo");
     vi.mocked(getGroomerBookingDetail).mockResolvedValue({
       id: 42,
       status: "completed",
@@ -161,13 +170,80 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     fireEvent.click(screen.getAllByRole("button", { name: /AI Scan/ })[0]);
 
     expect(
-      JSON.parse(window.localStorage.getItem("photo-health-draft:42:42") ?? "{}")
-        .photos
+      JSON.parse(
+        window.localStorage.getItem("photo-health-draft:42:42") ?? "{}"
+      ).photos
     ).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ id: 1, classification: "ai_scan" }),
       ])
     );
+  });
+
+  it("keeps the review panel open after a newly uploaded photo is auto-confirmed", async () => {
+    vi.mocked(getPhotoHealthInspection).mockResolvedValue({
+      exists: true,
+      inspection,
+    });
+    vi.mocked(uploadInspectionPhoto).mockResolvedValue({
+      id: 101,
+      area: "skin",
+      url: "/uploaded-skin.jpg",
+      original_filename: "skin.jpg",
+      normalized_mime_type: "image/jpeg",
+      classification: "normal",
+      finding_hints: [],
+      confirmed: false,
+    });
+    renderPage();
+
+    await screen.findByRole("button", { name: "Add Skin photo" });
+    const input =
+      document.querySelector<HTMLInputElement>('input[type="file"]');
+    expect(input).not.toBeNull();
+    fireEvent.change(input!, {
+      target: {
+        files: [new File(["image"], "skin.jpg", { type: "image/jpeg" })],
+      },
+    });
+
+    expect(
+      await screen.findByRole("dialog", { name: "Skin photo review" })
+    ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(
+        screen.getByRole("dialog", { name: "Skin photo review" })
+      ).toBeInTheDocument()
+    );
+  });
+
+  it("shows removal feedback while a photo deletion is pending", async () => {
+    vi.mocked(getPhotoHealthInspection).mockResolvedValue({
+      exists: true,
+      inspection: {
+        ...inspection,
+        photos: [
+          {
+            id: 21,
+            area: "skin",
+            url: "/skin.jpg",
+            original_filename: "skin.jpg",
+            normalized_mime_type: "image/jpeg",
+            classification: "normal",
+            finding_hints: [],
+            confirmed: true,
+          },
+        ],
+      },
+    });
+    vi.mocked(deleteInspectionPhoto).mockReturnValue(new Promise(() => {}));
+    renderPage();
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Remove Skin photo 1" })
+    );
+
+    expect(screen.getByText("Removing")).toBeInTheDocument();
   });
 
   it("requires an overall professional impression before showing the two note fields", async () => {
@@ -202,7 +278,9 @@ describe("GroomerPhotoHealthInspectionPage", () => {
       screen.getByRole("button", { name: "Previous: Summary" })
     ).toBeInTheDocument();
     expect(
-      JSON.parse(window.localStorage.getItem("photo-health-draft:42:42") ?? "{}")
+      JSON.parse(
+        window.localStorage.getItem("photo-health-draft:42:42") ?? "{}"
+      )
     ).toMatchObject({
       currentStep: 6,
       overallProfessionalImpression: "grade_b",
