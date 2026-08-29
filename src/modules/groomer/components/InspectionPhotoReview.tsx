@@ -568,7 +568,7 @@ export function InspectionPhotoReview({
         <div className="relative h-full md:min-h-0 md:flex-1 md:overflow-y-auto md:p-8">
           <div
             ref={viewportRef}
-            className="relative z-0 w-full touch-none overflow-hidden bg-[#EFEFEF] md:h-[360px] md:w-full"
+            className={`relative z-0 h-[calc(100dvh-var(--review-panel-height))] min-h-[120px] w-full touch-none overflow-hidden bg-[#EFEFEF] md:h-[360px] md:w-full ${dragHeight === null ? "transition-[height] duration-200 ease-out" : "transition-none"}`}
             style={
               {
                 ["--review-panel-height" as string]: mobilePanelHeightCss,
@@ -592,7 +592,7 @@ export function InspectionPhotoReview({
               );
             }}
           >
-            <div className="relative h-[calc(100dvh-var(--review-panel-height))] min-h-[120px] overflow-hidden md:h-full">
+            <div className="relative h-full min-h-0 overflow-hidden">
               <div className="absolute inset-0 overflow-hidden">
                 {showPreviewLabel ? (
                   <div className="absolute bottom-1 left-4 z-20 flex items-center gap-2 rounded-full bg-[rgba(0,0,0,0.55)] px-4 py-2 font-comfortaa text-[12px] font-bold leading-[18px] text-white shadow-[0px_4px_12px_rgba(0,0,0,0.16)]">
@@ -695,7 +695,7 @@ export function InspectionPhotoReview({
         </div>
 
         <section
-          className="absolute inset-x-0 bottom-0 flex flex-col rounded-t-[28px] bg-[#121212] text-white shadow-[0_-8px_32px_rgba(0,0,0,.35)] transition-[height] duration-200 md:hidden"
+          className={`absolute inset-x-0 bottom-0 flex flex-col rounded-t-[28px] bg-[#121212] text-white shadow-[0_-8px_32px_rgba(0,0,0,.35)] md:hidden ${dragHeight === null ? "transition-[height] duration-200 ease-out" : "transition-none"}`}
           style={{ height: mobilePanelHeight }}
         >
           <div

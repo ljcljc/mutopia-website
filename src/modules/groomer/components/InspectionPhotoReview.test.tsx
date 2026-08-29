@@ -205,6 +205,69 @@ describe("InspectionPhotoReview", () => {
     );
   });
 
+  it("keeps the image viewport height tied to the dragged panel height", () => {
+    render(
+      <InspectionPhotoReview
+        photos={[photo({ confirmed: true })]}
+        activePhotoId={1}
+        config={{ area: "skin", label: "Skin photo", hints: [] }}
+        open
+        onActivePhotoChange={vi.fn()}
+        onClose={vi.fn()}
+        onChange={vi.fn()}
+        onAddPhoto={vi.fn()}
+      />
+    );
+
+    const panelTitle = screen.getAllByText("Any skin issue?")[1];
+    const panelHandle = panelTitle.parentElement as HTMLDivElement;
+    const viewport = document.querySelector('[style*="--review-panel-height"]');
+    expect(viewport).toHaveClass("h-[calc(100dvh-var(--review-panel-height))]");
+
+    panelHandle.setPointerCapture = vi.fn();
+    vi.spyOn(
+      panelHandle.parentElement!,
+      "getBoundingClientRect"
+    ).mockReturnValue({ height: 300 } as DOMRect);
+    fireEvent.pointerDown(panelHandle, { clientY: 500, pointerId: 1 });
+    fireEvent.pointerMove(panelHandle, { clientY: 400, pointerId: 1 });
+
+    expect(viewport).toHaveStyle({ "--review-panel-height": "400px" });
+    expect(panelHandle.parentElement).toHaveClass("transition-none");
+  });
+
+  it("transitions the image viewport with the panel after snap", () => {
+    render(
+      <InspectionPhotoReview
+        photos={[photo({ confirmed: true })]}
+        activePhotoId={1}
+        config={{ area: "skin", label: "Skin photo", hints: [] }}
+        open
+        onActivePhotoChange={vi.fn()}
+        onClose={vi.fn()}
+        onChange={vi.fn()}
+        onAddPhoto={vi.fn()}
+      />
+    );
+
+    const panelTitle = screen.getAllByText("Any skin issue?")[1];
+    const panelHandle = panelTitle.parentElement as HTMLDivElement;
+    const panel = panelHandle.parentElement as HTMLElement;
+    const viewport = document.querySelector('[style*="--review-panel-height"]');
+    panelHandle.setPointerCapture = vi.fn();
+    vi.spyOn(panel, "getBoundingClientRect").mockReturnValue({
+      height: 300,
+    } as DOMRect);
+
+    fireEvent.pointerDown(panelHandle, { clientY: 500, pointerId: 1 });
+    fireEvent.pointerUp(panelHandle, { clientY: 400, pointerId: 1 });
+
+    expect(viewport).toHaveClass("transition-[height]");
+    expect(viewport).toHaveClass("duration-200");
+    expect(panel).toHaveClass("transition-[height]");
+    expect(panel).toHaveClass("duration-200");
+  });
+
   it("anchors the close action to the right on mobile", () => {
     render(
       <InspectionPhotoReview
