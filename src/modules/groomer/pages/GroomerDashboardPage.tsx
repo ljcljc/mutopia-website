@@ -14,7 +14,12 @@ import {
 import { Icon } from "@/components/common/Icon";
 import { Spinner } from "@/components/common/Spinner";
 import AccountContentContainer from "@/components/layout/AccountContentContainer";
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useIsMobile } from "@/components/ui/use-mobile";
 import { cn } from "@/components/ui/utils";
 import {
@@ -55,15 +60,6 @@ type CheckUpTab = "photo" | "weight" | "add-ons" | "personalization";
 type BookingRequestSuccessAlertKind = "confirm" | "propose";
 type TerminateServiceResolution = "owner_approved" | "mutopia_intervention";
 
-const FALLBACK_ADD_ONS: AddOnOut[] = [
-  { id: 1, name: "Teeth brushing", description: "Professional dental cleaning", price: 15, is_variable: false },
-  { id: 2, name: "De-shedding treatment", description: "Reduce shedding by up to 80%", price: 10, is_variable: false },
-  { id: 3, name: "Anal Gland Expression", description: "Manually emptying the small sacs", price: 12, is_variable: false },
-  { id: 4, name: "Pet cologne", description: "Long-lasting fresh scent", price: 8, is_variable: false },
-  { id: 5, name: "Paw Treatment", description: "Moisturizing paw balm", price: 18, is_variable: false },
-  { id: 6, name: "Flea & Tick", description: "Kills fleas, ticks, larvae and eggs by contact", price: 12, is_variable: false },
-];
-
 const PERSONALIZATION_FIELDS = [
   { key: "senior_pets", label: "Senior pets" },
   { key: "hard_to_handle", label: "Hard to handle" },
@@ -74,14 +70,19 @@ const PERSONALIZATION_FIELDS = [
 ] as const;
 
 function normalizeStatus(status?: string): string {
-  return (status ?? "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+  return (status ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
 }
 
 function LoadingStateCard() {
   return (
     <div className="flex min-h-[112px] flex-col items-center justify-center gap-3 rounded-[16px] bg-white px-4 py-5 shadow-[0px_4px_12px_rgba(0,0,0,0.08)]">
       <Spinner size={36} color="#DE6A07" showTrack trackOpacity={0.22} />
-      <p className="font-comfortaa text-[13px] font-medium leading-5 text-[#8B6357]">Loading dashboard...</p>
+      <p className="font-comfortaa text-[13px] font-medium leading-5 text-[#8B6357]">
+        Loading dashboard...
+      </p>
     </div>
   );
 }
@@ -114,7 +115,11 @@ function AppointmentSummaryCard({
               disabled={isStartingTravel}
               className="flex h-[38px] w-full items-center justify-center rounded-full bg-[linear-gradient(180deg,#F7A01B_0%,#F08A12_100%)] font-comfortaa text-[14px] font-bold leading-[21px] text-white shadow-[0px_10px_18px_rgba(240,138,18,0.28)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {isStartingTravel ? <Spinner size="small" color="white" /> : "Start Travel"}
+              {isStartingTravel ? (
+                <Spinner size="small" color="white" />
+              ) : (
+                "Start Travel"
+              )}
             </button>
           ) : null}
         </>
@@ -142,20 +147,34 @@ function TravelMapCard({
     <article className="rounded-[16px] bg-white px-5 py-5 shadow-[0px_4px_14px_rgba(0,0,0,0.1)]">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="font-comfortaa text-[11px] leading-[16.5px] tracking-[0.5px] text-[#A07D72]">UP NEXT</p>
-          <h2 className="mt-1 font-comfortaa text-[20px] leading-[30px] text-[#4A2C55]">Check In</h2>
+          <p className="font-comfortaa text-[11px] leading-[16.5px] tracking-[0.5px] text-[#A07D72]">
+            UP NEXT
+          </p>
+          <h2 className="mt-1 font-comfortaa text-[20px] leading-[30px] text-[#4A2C55]">
+            Check In
+          </h2>
         </div>
         <div className="rounded-[12px] bg-[#DBEAFE] px-3.5 py-[7px]">
-          <span className="font-comfortaa text-[14px] font-bold leading-[21px] text-[#5B7FE8]">{appointment.time}</span>
+          <span className="font-comfortaa text-[14px] font-bold leading-[21px] text-[#5B7FE8]">
+            {appointment.time}
+          </span>
         </div>
       </div>
 
       <div className="mt-4 rounded-[14px] bg-[#FAF8F4] px-3 py-3">
         <div className="flex min-w-0 items-center gap-3">
-          <img src={appointment.avatarUrl} alt={appointment.petName} className="size-[56px] rounded-full object-cover" />
+          <img
+            src={appointment.avatarUrl}
+            alt={appointment.petName}
+            className="size-[56px] rounded-full object-cover"
+          />
           <div className="min-w-0">
-            <p className="font-comfortaa text-[16px] leading-6 text-[#4A2C55]">{appointment.petName}</p>
-            <p className="font-comfortaa text-[12px] leading-[18px] text-[#8B6357]">{appointment.breed}</p>
+            <p className="font-comfortaa text-[16px] leading-6 text-[#4A2C55]">
+              {appointment.petName}
+            </p>
+            <p className="font-comfortaa text-[12px] leading-[18px] text-[#8B6357]">
+              {appointment.breed}
+            </p>
             <p className="font-comfortaa text-[11px] leading-[16.5px] text-[#15A34A]">
               <span aria-hidden="true">• </span>
               Owner: {appointment.owner}
@@ -177,16 +196,30 @@ function TravelMapCard({
 
       <div className="mt-4 space-y-3">
         <div className="flex items-start gap-2.5">
-          <Icon name="location" className="mt-[2px] size-4 text-[#F08A12]" aria-hidden="true" />
+          <Icon
+            name="location"
+            className="mt-[2px] size-4 text-[#F08A12]"
+            aria-hidden="true"
+          />
           <div className="min-w-0">
-            <p className="font-comfortaa text-[11px] leading-[16.5px] text-[#A07D72]">ADDRESS</p>
-            <p className="mt-0.5 font-comfortaa text-[14px] leading-[21px] text-[#F08A12] underline underline-offset-[2px]">{appointment.address}</p>
+            <p className="font-comfortaa text-[11px] leading-[16.5px] text-[#A07D72]">
+              ADDRESS
+            </p>
+            <p className="mt-0.5 font-comfortaa text-[14px] leading-[21px] text-[#F08A12] underline underline-offset-[2px]">
+              {appointment.address}
+            </p>
           </div>
         </div>
         {appointment.phone ? (
           <div className="flex items-center gap-2.5">
-            <Icon name="phone" className="size-4 text-[#F08A12]" aria-hidden="true" />
-            <p className="font-comfortaa text-[13px] leading-[19.5px] text-[#4A5565] underline underline-offset-[2px]">{appointment.phone}</p>
+            <Icon
+              name="phone"
+              className="size-4 text-[#F08A12]"
+              aria-hidden="true"
+            />
+            <p className="font-comfortaa text-[13px] leading-[19.5px] text-[#4A5565] underline underline-offset-[2px]">
+              {appointment.phone}
+            </p>
           </div>
         ) : null}
       </div>
@@ -219,7 +252,11 @@ function TravelMapCard({
           disabled={isCheckingIn || isCancelingTravel || isCheckedIn}
           className="mt-4 flex w-full items-center justify-center font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357] underline underline-offset-[3px] disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isCancelingTravel ? <Spinner size="small" color="#8B6357" /> : "Cancel appointment"}
+          {isCancelingTravel ? (
+            <Spinner size="small" color="#8B6357" />
+          ) : (
+            "Cancel appointment"
+          )}
         </button>
       </div>
     </article>
@@ -227,7 +264,9 @@ function TravelMapCard({
 }
 
 function getStartServiceLabel(service: string): string {
-  return service.toLowerCase().includes("bath") ? "Start bathing" : "Start grooming";
+  return service.toLowerCase().includes("bath")
+    ? "Start bathing"
+    : "Start grooming";
 }
 
 function getInProgressTitle(service: string, petName: string): string {
@@ -236,7 +275,9 @@ function getInProgressTitle(service: string, petName: string): string {
 
 function getCompactDurationLabel(duration: string): string {
   const minutes = duration.match(/(\d+)\s*(?:min|minute)/i)?.[1];
-  return minutes ? `${minutes} min` : duration.replace(/^Est\. duration:\s*/i, "");
+  return minutes
+    ? `${minutes} min`
+    : duration.replace(/^Est\. duration:\s*/i, "");
 }
 
 function CurrentJobCard({
@@ -253,7 +294,9 @@ function CurrentJobCard({
   return (
     <article className="rounded-[16px] bg-white p-5 shadow-[0px_4px_6px_rgba(0,0,0,0.08)]">
       <div>
-        <p className="font-comfortaa text-[12px] leading-[18px] text-[#8B6357]">CURRENT JOB</p>
+        <p className="font-comfortaa text-[12px] leading-[18px] text-[#8B6357]">
+          CURRENT JOB
+        </p>
         <h2 className="mt-1 font-comfortaa text-[20px] font-bold leading-[30px] text-[#4A2C55]">
           Checking {appointment.petName}
         </h2>
@@ -261,10 +304,18 @@ function CurrentJobCard({
 
       <div className="mt-4 rounded-[12px] bg-[#FAF9F7] px-3 py-4">
         <div className="flex min-w-0 items-center gap-3">
-          <img src={appointment.avatarUrl} alt={appointment.petName} className="size-14 rounded-full object-cover" />
+          <img
+            src={appointment.avatarUrl}
+            alt={appointment.petName}
+            className="size-14 rounded-full object-cover"
+          />
           <div className="min-w-0">
-            <p className="truncate font-comfortaa text-[16px] leading-6 text-[#4A2C55]">{appointment.petName}</p>
-            <p className="truncate font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357]">{appointment.breed}</p>
+            <p className="truncate font-comfortaa text-[16px] leading-6 text-[#4A2C55]">
+              {appointment.petName}
+            </p>
+            <p className="truncate font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357]">
+              {appointment.breed}
+            </p>
             <p className="truncate font-comfortaa text-[11px] leading-[16.5px] text-[#00A63E]">
               <span aria-hidden="true">• </span>
               Owner: {appointment.owner}
@@ -284,7 +335,9 @@ function CurrentJobCard({
         ) : (
           <>
             <Icon name="target" className="size-5" aria-hidden="true" />
-            {isInProgress ? "Service in progress" : getStartServiceLabel(appointment.service)}
+            {isInProgress
+              ? "Service in progress"
+              : getStartServiceLabel(appointment.service)}
           </>
         )}
       </button>
@@ -307,7 +360,9 @@ function InProgressJobCard({
     <article className="rounded-[16px] bg-[linear-gradient(180deg,#743782_0%,#8A527C_55%,#9A7658_100%)] p-5 shadow-[0px_4px_14px_rgba(0,0,0,0.12)]">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="font-comfortaa text-[12px] leading-[18px] text-white/70">IN PROGRESS</p>
+          <p className="font-comfortaa text-[12px] leading-[18px] text-white/70">
+            IN PROGRESS
+          </p>
           <h2 className="mt-1 truncate font-comfortaa text-[20px] leading-[30px] text-white">
             {getInProgressTitle(appointment.service, appointment.petName)}
           </h2>
@@ -321,9 +376,15 @@ function InProgressJobCard({
 
       <div className="mt-6 rounded-[12px] bg-white/14 px-3 py-3">
         <div className="flex min-w-0 items-center gap-3">
-          <img src={appointment.avatarUrl} alt={appointment.petName} className="size-14 rounded-full object-cover" />
+          <img
+            src={appointment.avatarUrl}
+            alt={appointment.petName}
+            className="size-14 rounded-full object-cover"
+          />
           <div className="min-w-0">
-            <p className="truncate font-comfortaa text-[16px] leading-6 text-white">{appointment.petName}</p>
+            <p className="truncate font-comfortaa text-[16px] leading-6 text-white">
+              {appointment.petName}
+            </p>
             <p className="truncate font-comfortaa text-[13px] leading-[19.5px] text-white/75">
               {appointment.breed} • {appointment.service}
             </p>
@@ -368,7 +429,9 @@ function CompletedServiceCard({
   return (
     <article className="rounded-[16px] bg-[linear-gradient(180deg,#633479_0%,#7A4777_52%,#8B6357_100%)] p-5 shadow-[0px_4px_6px_rgba(74,44,85,0.3)]">
       <div className="min-w-0">
-        <p className="font-comfortaa text-[12px] leading-[18px] text-white/70">IN PROGRESS</p>
+        <p className="font-comfortaa text-[12px] leading-[18px] text-white/70">
+          IN PROGRESS
+        </p>
         <h2 className="truncate font-comfortaa text-[20px] font-bold leading-[30px] text-white">
           {getInProgressTitle(appointment.service, appointment.petName)}
         </h2>
@@ -376,9 +439,15 @@ function CompletedServiceCard({
 
       <div className="mt-4 rounded-[12px] bg-white/10 px-3 py-3">
         <div className="flex min-w-0 items-center gap-3">
-          <img src={appointment.avatarUrl} alt={appointment.petName} className="size-14 rounded-full object-cover" />
+          <img
+            src={appointment.avatarUrl}
+            alt={appointment.petName}
+            className="size-14 rounded-full object-cover"
+          />
           <div className="min-w-0">
-            <p className="truncate font-comfortaa text-[16px] leading-6 text-white">{appointment.petName}</p>
+            <p className="truncate font-comfortaa text-[16px] leading-6 text-white">
+              {appointment.petName}
+            </p>
             <p className="truncate font-comfortaa text-[13px] leading-[19.5px] text-white/70">
               {appointment.breed} • {appointment.service}
             </p>
@@ -387,7 +456,10 @@ function CompletedServiceCard({
       </div>
 
       <div className="mt-4 flex h-9 items-center gap-2 rounded-[8px] border border-[#6AA31C] bg-[#F4FFDE] px-4">
-        <CheckCircleIcon className="size-3 shrink-0 fill-[#6AA31C] text-[#F4FFDE]" aria-hidden="true" />
+        <CheckCircleIcon
+          className="size-3 shrink-0 fill-[#6AA31C] text-[#F4FFDE]"
+          aria-hidden="true"
+        />
         <p className="truncate font-comfortaa text-[12px] font-bold leading-4 text-[#467900]">
           Completed. Waiting for client confirmation
         </p>
@@ -443,9 +515,14 @@ function ReviewedServiceCard({
     <article className="rounded-[16px] bg-[linear-gradient(180deg,#DE6A07_0%,#E67E22_100%)] p-5 shadow-[0px_4px_6px_rgba(236,72,153,0.4)]">
       <div className="flex flex-col items-center text-center">
         <div className="flex size-16 items-center justify-center rounded-full bg-white">
-          <StarIcon className="size-8 fill-[#DE6A07] text-[#DE6A07]" aria-hidden="true" />
+          <StarIcon
+            className="size-8 fill-[#DE6A07] text-[#DE6A07]"
+            aria-hidden="true"
+          />
         </div>
-        <h2 className="mt-5 font-comfortaa text-[24px] font-bold leading-9 text-white">Excellent Work!</h2>
+        <h2 className="mt-5 font-comfortaa text-[24px] font-bold leading-9 text-white">
+          Excellent Work!
+        </h2>
         <p className="mt-1 font-comfortaa text-[14px] leading-[21px] text-white/90">
           {appointment.petName}&apos;s grooming is complete.
           <br />
@@ -455,12 +532,19 @@ function ReviewedServiceCard({
 
       <div className="mt-8 rounded-[12px] bg-white/20 p-4">
         <div className="flex min-w-0 items-center gap-3">
-          <img src={appointment.avatarUrl} alt={appointment.petName} className="size-12 rounded-full object-cover" />
+          <img
+            src={appointment.avatarUrl}
+            alt={appointment.petName}
+            className="size-12 rounded-full object-cover"
+          />
           <div className="min-w-0 flex-1">
             <p className="truncate font-comfortaa text-[14px] font-medium leading-[21px] text-white">
               {appointment.owner || "Client"} rated you
             </p>
-            <div className="mt-1 flex gap-1" aria-label={`${rating} out of 5 stars`}>
+            <div
+              className="mt-1 flex gap-1"
+              aria-label={`${rating} out of 5 stars`}
+            >
               {Array.from({ length: 5 }, (_, index) => (
                 <StarIcon
                   key={index}
@@ -485,7 +569,9 @@ function ReviewedServiceCard({
         <div className="mt-4 rounded-[12px] bg-[#FFF7ED] px-3 py-3">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="font-comfortaa text-[12px] leading-[18px] text-[#92400E]">You earned a tip!</p>
+              <p className="font-comfortaa text-[12px] leading-[18px] text-[#92400E]">
+                You earned a tip!
+              </p>
               <p className="font-comfortaa text-[20px] font-bold leading-[30px] text-[#E67E22]">
                 + {formatMoneyValue(tipAmount)}
               </p>
@@ -536,7 +622,8 @@ function ServiceTerminationModal({
   const [reason, setReason] = useState("");
   const [description, setDescription] = useState("");
   const [refundableFee, setRefundableFee] = useState("0");
-  const [resolution, setResolution] = useState<TerminateServiceResolution>("owner_approved");
+  const [resolution, setResolution] =
+    useState<TerminateServiceResolution>("owner_approved");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -565,26 +652,35 @@ function ServiceTerminationModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && !isSubmitting && onClose()}>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => !nextOpen && !isSubmitting && onClose()}
+    >
       <DialogContent
         overlayClassName={isMobile ? "service-area-dialog-overlay" : undefined}
         className={cn(
           "border-0! bg-white! p-0! gap-0! [&>button]:hidden",
           isMobile
             ? "service-area-dialog inset-x-0! bottom-0! top-auto! mx-auto! flex! max-h-[88vh]! w-full! max-w-none! translate-x-0! translate-y-0! flex-col! rounded-b-none rounded-t-[calc(24*var(--px393))] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
-            : "left-1/2! top-1/2! grid! w-[min(520px,calc(100vw-48px))]! max-h-[88vh]! max-w-[520px]! -translate-x-1/2! -translate-y-1/2! overflow-hidden! rounded-[20px]! shadow-[0px_24px_60px_rgba(74,44,85,0.16)]",
+            : "left-1/2! top-1/2! grid! w-[min(520px,calc(100vw-48px))]! max-h-[88vh]! max-w-[520px]! -translate-x-1/2! -translate-y-1/2! overflow-hidden! rounded-[20px]! shadow-[0px_24px_60px_rgba(74,44,85,0.16)]"
         )}
       >
         <DialogTitle className="sr-only">Terminate service</DialogTitle>
-        <DialogDescription className="sr-only">Document the reason for terminating this service.</DialogDescription>
+        <DialogDescription className="sr-only">
+          Document the reason for terminating this service.
+        </DialogDescription>
         <form
           onSubmit={handleSubmit}
           className="flex flex-col gap-4 overflow-y-auto px-[calc(24*var(--px393))] pb-[max(calc(24*var(--px393)),env(safe-area-inset-bottom))] pt-[calc(24*var(--px393))] sm:px-6 sm:pb-[max(24px,env(safe-area-inset-bottom))] sm:pt-6"
         >
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">Terminate service</h2>
-              <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">Document the reason</p>
+              <h2 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">
+                Terminate service
+              </h2>
+              <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
+                Document the reason
+              </p>
             </div>
             <button
               type="button"
@@ -627,7 +723,11 @@ function ServiceTerminationModal({
             onChange={(event) => setRefundableFee(event.target.value)}
             disabled={isSubmitting}
             placeholder="Enter price"
-            leftElement={<span className="mr-1 font-comfortaa text-[12.25px] text-[#717182]">$</span>}
+            leftElement={
+              <span className="mr-1 font-comfortaa text-[12.25px] text-[#717182]">
+                $
+              </span>
+            }
           />
 
           <div className="flex flex-col items-start gap-3">
@@ -648,10 +748,21 @@ function ServiceTerminationModal({
           </div>
 
           <div className="flex flex-col gap-[10px]">
-            <OrangeButton type="submit" fullWidth textSize={14} loading={isSubmitting}>
+            <OrangeButton
+              type="submit"
+              fullWidth
+              textSize={14}
+              loading={isSubmitting}
+            >
               Submit
             </OrangeButton>
-            <OrangeButton type="button" variant="outline" fullWidth textSize={14} onClick={onClose}>
+            <OrangeButton
+              type="button"
+              variant="outline"
+              fullWidth
+              textSize={14}
+              onClick={onClose}
+            >
               Cancel
             </OrangeButton>
           </div>
@@ -661,7 +772,11 @@ function ServiceTerminationModal({
   );
 }
 
-function TotalEstimationCard({ appointment }: { appointment: DashboardAppointment }) {
+function TotalEstimationCard({
+  appointment,
+}: {
+  appointment: DashboardAppointment;
+}) {
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
@@ -680,7 +795,9 @@ function TotalEstimationCard({ appointment }: { appointment: DashboardAppointmen
           <div className="flex min-w-0 flex-1 flex-col items-end">
             <p className="text-right font-comfortaa text-[16px] font-semibold leading-7 text-[#DE6A07]">
               {appointment.originalEstimate ? (
-                <span className="font-normal leading-[22.75px] text-[#4A5565]">was {appointment.originalEstimate} </span>
+                <span className="font-normal leading-[22.75px] text-[#4A5565]">
+                  was {appointment.originalEstimate}{" "}
+                </span>
               ) : null}
               {appointment.totalEstimate}
             </p>
@@ -689,7 +806,11 @@ function TotalEstimationCard({ appointment }: { appointment: DashboardAppointmen
                 <div className="flex flex-wrap items-end justify-end gap-2">
                   {appointment.savingsLabel ? (
                     <span className="inline-flex h-6 items-center gap-1 rounded-full bg-[#DCFCE7] px-3 py-1 font-comfortaa text-[10px] font-bold leading-[14px] text-[#27AE60]">
-                      <Icon name="target" className="size-3.5" aria-hidden="true" />
+                      <Icon
+                        name="target"
+                        className="size-3.5"
+                        aria-hidden="true"
+                      />
                       {appointment.savingsLabel}
                     </span>
                   ) : null}
@@ -699,7 +820,9 @@ function TotalEstimationCard({ appointment }: { appointment: DashboardAppointmen
                     </span>
                   ) : null}
                 </div>
-                <span className="font-comfortaa text-[10px] font-bold leading-[14px] text-[#4A5565]">tax included</span>
+                <span className="font-comfortaa text-[10px] font-bold leading-[14px] text-[#4A5565]">
+                  tax included
+                </span>
               </>
             ) : null}
           </div>
@@ -725,14 +848,20 @@ function AmountRow({ line }: { line: DashboardAmountLine }) {
   return (
     <div className="flex items-start justify-between gap-3 font-comfortaa text-[12px] font-bold leading-4 text-[#4A3C2A]">
       <p className="min-w-0 flex-1 break-words">{line.label}</p>
-      {line.amount ? <p className="shrink-0 text-right">{line.amount}</p> : null}
+      {line.amount ? (
+        <p className="shrink-0 text-right">{line.amount}</p>
+      ) : null}
     </div>
   );
 }
 
 function formatAddOnPrice(value: number | string): string {
-  const raw = typeof value === "number" ? value : Number(String(value).replace(/[^0-9.-]/g, ""));
-  if (!Number.isFinite(raw)) return String(value).startsWith("$") ? String(value) : `$${value}`;
+  const raw =
+    typeof value === "number"
+      ? value
+      : Number(String(value).replace(/[^0-9.-]/g, ""));
+  if (!Number.isFinite(raw))
+    return String(value).startsWith("$") ? String(value) : `$${value}`;
   return Number.isInteger(raw) ? `$${raw}` : `$${raw.toFixed(2)}`;
 }
 
@@ -764,11 +893,19 @@ function CheckUpTabBadge({
       type="button"
       onClick={onClick}
       className={`inline-flex h-6 cursor-pointer items-center gap-1 rounded-xl border px-[9px] py-[5px] font-comfortaa text-[10px] font-bold leading-[14px] ${
-        isActive ? "border-[#DE6A07] text-[#DE6A07]" : "border-[#4C4C4C] text-[#4C4C4C]"
+        isActive
+          ? "border-[#DE6A07] text-[#DE6A07]"
+          : "border-[#4C4C4C] text-[#4C4C4C]"
       }`}
     >
       {labelByTab[tab]}
-      {isActive ? <Icon name="chevron-down" className="size-3 rotate-180 text-current" aria-hidden="true" /> : null}
+      {isActive ? (
+        <Icon
+          name="chevron-down"
+          className="size-3 rotate-180 text-current"
+          aria-hidden="true"
+        />
+      ) : null}
     </button>
   );
 }
@@ -790,16 +927,25 @@ function PriceInput({
       value={value}
       onChange={(event) => onChange(event.target.value)}
       placeholder="Enter price"
-      leftElement={<span className="mr-1 font-comfortaa text-[12.25px] text-[#717182]">$</span>}
+      leftElement={
+        <span className="mr-1 font-comfortaa text-[12.25px] text-[#717182]">
+          $
+        </span>
+      }
     />
   );
 }
 
-function buildVisibleAddOns(items: AddOnOut[], selectedIds: number[]): AddOnOut[] {
+function buildVisibleAddOns(
+  items: AddOnOut[],
+  selectedIds: number[]
+): AddOnOut[] {
   const baseItems = items.filter((item) => !item.is_variable);
   const visibleItems = baseItems.slice(0, 6);
   const visibleItemIds = new Set(visibleItems.map((item) => item.id));
-  const selectedItems = baseItems.filter((item) => selectedIds.includes(item.id) && !visibleItemIds.has(item.id));
+  const selectedItems = baseItems.filter(
+    (item) => selectedIds.includes(item.id) && !visibleItemIds.has(item.id)
+  );
   return [...visibleItems, ...selectedItems];
 }
 
@@ -827,16 +973,20 @@ function GroomerCheckUpModal({
 }) {
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<CheckUpTab>("weight");
-  const [beforePhotoUploadItems, setBeforePhotoUploadItems] = useState<FileUploadItem[]>([]);
+  const [beforePhotoUploadItems, setBeforePhotoUploadItems] = useState<
+    FileUploadItem[]
+  >([]);
   const [arrivalObservationNote, setArrivalObservationNote] = useState("");
   const [observationLocked, setObservationLocked] = useState(false);
   const [beforePhotoError, setBeforePhotoError] = useState("");
   const [weightValue, setWeightValue] = useState("60");
   const [weightUnit, setWeightUnit] = useState("lbs");
-  const [addOns, setAddOns] = useState<AddOnOut[]>(FALLBACK_ADD_ONS);
+  const [addOns, setAddOns] = useState<AddOnOut[]>([]);
   const [selectedAddOnIds, setSelectedAddOnIds] = useState<number[]>([]);
   const [initialAddOnIds, setInitialAddOnIds] = useState<number[]>([]);
-  const [personalization, setPersonalization] = useState<Record<string, string>>({});
+  const [personalization, setPersonalization] = useState<
+    Record<string, string>
+  >({});
   const [description, setDescription] = useState("");
   const [isApproved, setIsApproved] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -850,6 +1000,7 @@ function GroomerCheckUpModal({
     setBeforePhotoError("");
     setWeightValue(appointment?.weightValue || "60");
     setWeightUnit(normalizeCheckUpWeightUnit(appointment?.weightUnit));
+    setAddOns([]);
     const initialSelectedAddOnIds = appointment?.addonIds ?? [];
     setSelectedAddOnIds(initialSelectedAddOnIds);
     setInitialAddOnIds(initialSelectedAddOnIds);
@@ -860,44 +1011,62 @@ function GroomerCheckUpModal({
     getAddOns()
       .then((items) => {
         const visibleItems = buildVisibleAddOns(items, initialSelectedAddOnIds);
-        setAddOns(visibleItems.length > 0 ? visibleItems : FALLBACK_ADD_ONS);
+        setAddOns(visibleItems);
       })
       .catch((error) => {
         console.error("Failed to load add-ons:", error);
-        setAddOns(FALLBACK_ADD_ONS);
+        setAddOns([]);
       });
     const bookingId = Number(appointment?.id);
     if (Number.isFinite(bookingId)) {
       getCheckInObservation(bookingId)
         .then((observation) => {
-          setArrivalObservationNote((current) => current || observation.arrival_note);
+          setArrivalObservationNote(
+            (current) => current || observation.arrival_note
+          );
           setObservationLocked(observation.locked);
-          setBeforePhotoUploadItems((current) => current.length > 0
-            ? current
-            : observation.photos.map((photo) => ({
-              file: new File([], photo.original_filename, { type: photo.normalized_mime_type }),
-              previewUrl: photo.url,
-              serverUrl: photo.url,
-              photoId: photo.id,
-              uploadStatus: "uploaded" as const,
-              uploadProgress: 100,
-            })));
+          setBeforePhotoUploadItems((current) =>
+            current.length > 0
+              ? current
+              : observation.photos.map((photo) => ({
+                  file: new File([], photo.original_filename, {
+                    type: photo.normalized_mime_type,
+                  }),
+                  previewUrl: photo.url,
+                  serverUrl: photo.url,
+                  photoId: photo.id,
+                  uploadStatus: "uploaded" as const,
+                  uploadProgress: 100,
+                }))
+          );
         })
         .catch((error) => {
           console.error("Failed to load check-in observation:", error);
           setBeforePhotoError("Failed to load arrival photos");
         });
     }
-  }, [appointment?.addonIds, appointment?.id, appointment?.weightUnit, appointment?.weightValue, open]);
+  }, [
+    appointment?.addonIds,
+    appointment?.id,
+    appointment?.weightUnit,
+    appointment?.weightValue,
+    open,
+  ]);
 
   const toggleAddOn = (id: number, checked: boolean) => {
-    setSelectedAddOnIds((current) => checked ? [...new Set([...current, id])] : current.filter((itemId) => itemId !== id));
+    setSelectedAddOnIds((current) =>
+      checked
+        ? [...new Set([...current, id])]
+        : current.filter((itemId) => itemId !== id)
+    );
   };
 
   const handleBeforePhotoChange = async (files: File[]) => {
     setBeforePhotoError("");
     if (!appointment?.id) return;
-    const existingFiles = new Set(beforePhotoUploadItems.map((item) => item.file));
+    const existingFiles = new Set(
+      beforePhotoUploadItems.map((item) => item.file)
+    );
     const newFiles = files.filter((file) => !existingFiles.has(file));
     if (newFiles.length === 0) return;
     const bookingId = Number(appointment.id);
@@ -911,33 +1080,54 @@ function GroomerCheckUpModal({
     }));
     setBeforePhotoUploadItems((current) => [...current, ...localItems]);
 
-    await Promise.all(newFiles.map(async (file) => {
-      try {
-        const uploaded = await uploadCheckInObservationPhoto(bookingId, file, (progress) => {
-          setBeforePhotoUploadItems((current) => current.map((item) =>
-            item.file === file ? { ...item, uploadStatus: "uploading", uploadProgress: progress } : item,
-          ));
-        });
-        setBeforePhotoUploadItems((current) => current.map((item) => {
-          if (item.file !== file) return item;
-          if (item.previewUrl.startsWith("blob:")) URL.revokeObjectURL(item.previewUrl);
-          return {
-            ...item,
-            uploadStatus: "uploaded",
-            uploadProgress: 100,
-            photoId: uploaded.id,
-            serverUrl: uploaded.url,
-            previewUrl: uploaded.url,
-          };
-        }));
-      } catch (error) {
-        console.error("Failed to upload before service photo:", error);
-        setBeforePhotoUploadItems((current) => current.map((item) =>
-          item.file === file ? { ...item, uploadStatus: "error", errorType: "upload" } : item,
-        ));
-        setBeforePhotoError("Some arrival photos failed to upload");
-      }
-    }));
+    await Promise.all(
+      newFiles.map(async (file) => {
+        try {
+          const uploaded = await uploadCheckInObservationPhoto(
+            bookingId,
+            file,
+            (progress) => {
+              setBeforePhotoUploadItems((current) =>
+                current.map((item) =>
+                  item.file === file
+                    ? {
+                        ...item,
+                        uploadStatus: "uploading",
+                        uploadProgress: progress,
+                      }
+                    : item
+                )
+              );
+            }
+          );
+          setBeforePhotoUploadItems((current) =>
+            current.map((item) => {
+              if (item.file !== file) return item;
+              if (item.previewUrl.startsWith("blob:"))
+                URL.revokeObjectURL(item.previewUrl);
+              return {
+                ...item,
+                uploadStatus: "uploaded",
+                uploadProgress: 100,
+                photoId: uploaded.id,
+                serverUrl: uploaded.url,
+                previewUrl: uploaded.url,
+              };
+            })
+          );
+        } catch (error) {
+          console.error("Failed to upload before service photo:", error);
+          setBeforePhotoUploadItems((current) =>
+            current.map((item) =>
+              item.file === file
+                ? { ...item, uploadStatus: "error", errorType: "upload" }
+                : item
+            )
+          );
+          setBeforePhotoError("Some arrival photos failed to upload");
+        }
+      })
+    );
   };
 
   const handleRemoveBeforePhoto = async (index: number) => {
@@ -945,9 +1135,13 @@ function GroomerCheckUpModal({
     const bookingId = Number(appointment?.id);
     if (!item || !Number.isFinite(bookingId)) return;
     try {
-      if (item.photoId) await deleteCheckInObservationPhoto(bookingId, item.photoId);
-      if (item.previewUrl.startsWith("blob:")) URL.revokeObjectURL(item.previewUrl);
-      setBeforePhotoUploadItems((current) => current.filter((_, itemIndex) => itemIndex !== index));
+      if (item.photoId)
+        await deleteCheckInObservationPhoto(bookingId, item.photoId);
+      if (item.previewUrl.startsWith("blob:"))
+        URL.revokeObjectURL(item.previewUrl);
+      setBeforePhotoUploadItems((current) =>
+        current.filter((_, itemIndex) => itemIndex !== index)
+      );
     } catch (error) {
       console.error("Failed to remove arrival photo:", error);
       setBeforePhotoError("Failed to remove arrival photo");
@@ -958,13 +1152,18 @@ function GroomerCheckUpModal({
     if (!appointment?.id) return;
 
     if (activeTab === "photo") {
-      if (!beforePhotoUploadItems.some((item) => item.uploadStatus === "uploaded")) {
+      if (
+        !beforePhotoUploadItems.some((item) => item.uploadStatus === "uploaded")
+      ) {
         setBeforePhotoError("At least one before service photo is required");
         return;
       }
       setIsSubmitting(true);
       try {
-        await saveCheckInObservation(Number(appointment.id), arrivalObservationNote);
+        await saveCheckInObservation(
+          Number(appointment.id),
+          arrivalObservationNote
+        );
         setActiveTab("weight");
       } catch (error) {
         console.error("Failed to save check-in observation:", error);
@@ -985,7 +1184,9 @@ function GroomerCheckUpModal({
 
     const bookingId = Number(appointment.id);
     if (!Number.isFinite(bookingId)) return;
-    if (!beforePhotoUploadItems.some((item) => item.uploadStatus === "uploaded")) {
+    if (
+      !beforePhotoUploadItems.some((item) => item.uploadStatus === "uploaded")
+    ) {
       setBeforePhotoError("At least one before service photo is required");
       setActiveTab("photo");
       return;
@@ -993,13 +1194,17 @@ function GroomerCheckUpModal({
 
     setIsSubmitting(true);
     try {
-      const normalizedPersonalization = Object.entries(personalization).reduce<Record<string, string>>((next, [key, value]) => {
-      const normalizedValue = value.trim();
-      if (!normalizedValue) return next;
-      next[key === "extra_large" ? "gt_50kg" : key] = normalizedValue;
-      return next;
-    }, {});
-      const newlySelectedAddOnIds = selectedAddOnIds.filter((id) => !initialAddOnIds.includes(id));
+      const normalizedPersonalization = Object.entries(personalization).reduce<
+        Record<string, string>
+      >((next, [key, value]) => {
+        const normalizedValue = value.trim();
+        if (!normalizedValue) return next;
+        next[key === "extra_large" ? "gt_50kg" : key] = normalizedValue;
+        return next;
+      }, {});
+      const newlySelectedAddOnIds = selectedAddOnIds.filter(
+        (id) => !initialAddOnIds.includes(id)
+      );
       const result = await submitGroomerCheckUpCheckout(bookingId, {
         weight_value: weightValue,
         weight_unit: weightUnit,
@@ -1008,7 +1213,11 @@ function GroomerCheckUpModal({
         description,
       });
       if (result.status === "client_confirmation_required") {
-        toast.success(Number(result.amount) < 0 ? "Refund request sent to pet owner" : "Payment request sent to pet owner");
+        toast.success(
+          Number(result.amount) < 0
+            ? "Refund request sent to pet owner"
+            : "Payment request sent to pet owner"
+        );
       } else {
         toast.success("No check-in adjustment required");
       }
@@ -1032,34 +1241,57 @@ function GroomerCheckUpModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && dismissible && onClose()}>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => !nextOpen && dismissible && onClose()}
+    >
       <DialogContent
         showCloseButton={false}
-        onEscapeKeyDown={dismissible ? undefined : (event) => event.preventDefault()}
-        onInteractOutside={dismissible ? undefined : (event) => event.preventDefault()}
+        onEscapeKeyDown={
+          dismissible ? undefined : (event) => event.preventDefault()
+        }
+        onInteractOutside={
+          dismissible ? undefined : (event) => event.preventDefault()
+        }
         overlayClassName={isMobile ? "service-area-dialog-overlay" : undefined}
         className={cn(
           "border-0! bg-white! p-0! gap-0! [&>button]:top-[calc(24*var(--px393))] [&>button]:right-[calc(24*var(--px393))] sm:[&>button]:top-6 sm:[&>button]:right-6",
           isMobile
-            ? "service-area-dialog inset-x-0! bottom-0! top-auto! mx-auto! flex! max-h-[88vh]! w-full! max-w-none! translate-x-0! translate-y-0! flex-col! rounded-b-none rounded-t-[calc(24*var(--px393))] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
-            : "left-1/2! top-1/2! grid! w-[min(100%-32px,420px)]! max-h-[min(88vh,760px)]! -translate-x-1/2! -translate-y-1/2! overflow-hidden! rounded-[20px]! shadow-[0px_18px_40px_rgba(0,0,0,0.18)]",
+            ? "service-area-dialog inset-x-0! bottom-0! top-auto! mx-auto! flex! h-[88vh]! max-h-[88vh]! w-full! max-w-none! translate-x-0! translate-y-0! flex-col! rounded-b-none rounded-t-[calc(24*var(--px393))] shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.25)]"
+            : "left-1/2! top-1/2! flex! h-[min(88vh,760px)]! max-h-[min(88vh,760px)]! w-[min(100%-32px,420px)]! -translate-x-1/2! -translate-y-1/2! flex-col! overflow-hidden! rounded-[20px]! shadow-[0px_18px_40px_rgba(0,0,0,0.18)]"
         )}
       >
         <DialogTitle className="sr-only">Groomer check up</DialogTitle>
-        <DialogDescription className="sr-only">Confirm with pet owner before add extra service.</DialogDescription>
+        <DialogDescription className="sr-only">
+          Confirm with pet owner before add extra service.
+        </DialogDescription>
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="shrink-0 px-[calc(24*var(--px393))] pb-[calc(12*var(--px393))] pt-[calc(24*var(--px393))] sm:px-6 sm:pb-3 sm:pt-6">
             <div className="flex flex-col gap-[14px]">
               <div>
-                <h2 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">Groomer check up</h2>
+                <h2 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">
+                  Groomer check up
+                </h2>
                 <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
                   We&apos;ll show before and after photo to pet owner
                 </p>
               </div>
 
               <div className="flex flex-wrap gap-2">
-                {(["photo", "weight", "add-ons", "personalization"] as CheckUpTab[]).map((tab) => (
-                  <CheckUpTabBadge key={tab} tab={tab} activeTab={activeTab} onClick={() => setActiveTab(tab)} />
+                {(
+                  [
+                    "photo",
+                    "weight",
+                    "add-ons",
+                    "personalization",
+                  ] as CheckUpTab[]
+                ).map((tab) => (
+                  <CheckUpTabBadge
+                    key={tab}
+                    tab={tab}
+                    activeTab={activeTab}
+                    onClick={() => setActiveTab(tab)}
+                  />
                 ))}
               </div>
             </div>
@@ -1067,10 +1299,10 @@ function GroomerCheckUpModal({
 
           <div
             className={cn(
-              "min-h-0 flex-1 overflow-y-auto px-[calc(24*var(--px393))] sm:px-6",
+              "min-h-0 flex-1 touch-pan-y overscroll-contain overflow-y-auto px-[calc(24*var(--px393))] [-webkit-overflow-scrolling:touch] sm:px-6",
               isMobile
                 ? "pb-[max(calc(24*var(--px393)),env(safe-area-inset-bottom))] sm:pb-[max(24px,env(safe-area-inset-bottom))]"
-                : "pb-6",
+                : "pb-6"
             )}
           >
             <div className="flex flex-col gap-[14px]">
@@ -1088,10 +1320,14 @@ function GroomerCheckUpModal({
 
               {activeTab === "weight" ? (
                 <div className="flex min-h-[130px] flex-col gap-3 rounded-[12px] bg-white p-5 shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)]">
-                  <p className="font-comfortaa text-[14px] font-bold leading-5 text-[#DE6A07]">Verify weight with pet owner</p>
+                  <p className="font-comfortaa text-[14px] font-bold leading-5 text-[#DE6A07]">
+                    Verify weight with pet owner
+                  </p>
                   <div className="flex w-full flex-col items-start gap-2">
                     <div className="flex h-[12.25px] w-full items-center gap-[7px]">
-                      <p className="font-comfortaa text-[14px] leading-[22.75px] text-[#4a3c2a]">Weight (lb or kg)</p>
+                      <p className="font-comfortaa text-[14px] leading-[22.75px] text-[#4a3c2a]">
+                        Weight (lb or kg)
+                      </p>
                     </div>
                     <div className="group flex w-full items-start sm:w-[200px]">
                       <div className="relative h-9 flex-1 shrink-0 rounded-bl-[12px] rounded-tl-[12px] bg-white">
@@ -1100,7 +1336,9 @@ function GroomerCheckUpModal({
                             type="text"
                             placeholder="Enter weight"
                             value={weightValue}
-                            onChange={(event) => setWeightValue(event.target.value)}
+                            onChange={(event) =>
+                              setWeightValue(event.target.value)
+                            }
                             className="flex-1 border-none bg-transparent font-comfortaa text-[12.25px] text-[#717182] outline-none placeholder:text-[#717182]"
                           />
                         </div>
@@ -1113,7 +1351,9 @@ function GroomerCheckUpModal({
                         <CustomSelect
                           placeholder="Select"
                           value={weightUnit}
-                          displayValue={weightUnit === "lbs" ? "lb" : weightUnit}
+                          displayValue={
+                            weightUnit === "lbs" ? "lb" : weightUnit
+                          }
                           onValueChange={(value) => setWeightUnit(value)}
                           className="w-auto"
                           noLeftRadius
@@ -1130,10 +1370,14 @@ function GroomerCheckUpModal({
               {activeTab === "add-ons" ? (
                 <div className="flex w-full flex-col items-start gap-5 rounded-[12px] bg-white p-5 shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)]">
                   <div className="flex w-full flex-col items-start gap-1">
-                    <p className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4a3c2a]">Most popular add-ons</p>
-                    <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4a5565]">Add extra pampering for your furry friend</p>
+                    <p className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4a3c2a]">
+                      Most popular add-ons
+                    </p>
+                    <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4a5565]">
+                      Add extra pampering for your furry friend
+                    </p>
                   </div>
-                  <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="grid w-full grid-cols-1 gap-4">
                     {addOns.map((addOn) => (
                       <CommonCheckbox
                         key={addOn.id}
@@ -1142,7 +1386,9 @@ function GroomerCheckUpModal({
                         price={formatAddOnPrice(addOn.price)}
                         duration={addOn.service_time || undefined}
                         checked={selectedAddOnIds.includes(addOn.id)}
-                        onCheckedChange={(checked) => toggleAddOn(addOn.id, checked)}
+                        onCheckedChange={(checked) =>
+                          toggleAddOn(addOn.id, checked)
+                        }
                       />
                     ))}
                   </div>
@@ -1151,7 +1397,9 @@ function GroomerCheckUpModal({
 
               {activeTab === "personalization" ? (
                 <div className="flex flex-col gap-3">
-                  <p className="font-comfortaa text-[14px] font-bold leading-5 text-[#DE6A07]">Personalized service</p>
+                  <p className="font-comfortaa text-[14px] font-bold leading-5 text-[#DE6A07]">
+                    Personalized service
+                  </p>
                   <p className="font-comfortaa text-[10px] leading-4 text-[#4A5565]">
                     Enter a negative amount when this item should be refunded.
                   </p>
@@ -1160,7 +1408,12 @@ function GroomerCheckUpModal({
                       key={field.key}
                       label={field.label}
                       value={personalization[field.key] ?? ""}
-                      onChange={(value) => setPersonalization((current) => ({ ...current, [field.key]: value }))}
+                      onChange={(value) =>
+                        setPersonalization((current) => ({
+                          ...current,
+                          [field.key]: value,
+                        }))
+                      }
                     />
                   ))}
                   <CustomTextarea
@@ -1176,8 +1429,16 @@ function GroomerCheckUpModal({
                     onClick={() => setIsApproved((current) => !current)}
                     className="flex items-center gap-2 text-left font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#4A3C2A]"
                   >
-                    <span className={`flex size-4 items-center justify-center border ${isApproved ? "border-[#DE6A07] bg-[#DE6A07]" : "border-[#717182] bg-white"}`}>
-                      {isApproved ? <Icon name="check" className="size-3 text-white" aria-hidden="true" /> : null}
+                    <span
+                      className={`flex size-4 items-center justify-center border ${isApproved ? "border-[#DE6A07] bg-[#DE6A07]" : "border-[#717182] bg-white"}`}
+                    >
+                      {isApproved ? (
+                        <Icon
+                          name="check"
+                          className="size-3 text-white"
+                          aria-hidden="true"
+                        />
+                      ) : null}
                     </span>
                     Service and price approved by pet owner
                   </button>
@@ -1185,11 +1446,23 @@ function GroomerCheckUpModal({
               ) : null}
 
               <div className="flex flex-col gap-[10px]">
-                <OrangeButton type="button" fullWidth textSize={14} loading={isSubmitting} onClick={handleNext}>
+                <OrangeButton
+                  type="button"
+                  fullWidth
+                  textSize={14}
+                  loading={isSubmitting}
+                  onClick={handleNext}
+                >
                   {activeTab === "personalization" ? "Submit" : "Next"}
                 </OrangeButton>
                 {dismissible ? (
-                  <OrangeButton type="button" variant="outline" fullWidth textSize={14} onClick={onClose}>
+                  <OrangeButton
+                    type="button"
+                    variant="outline"
+                    fullWidth
+                    textSize={14}
+                    onClick={onClose}
+                  >
                     Cancel
                   </OrangeButton>
                 ) : null}
@@ -1227,32 +1500,44 @@ function PackageAndAddonCard({
             <p className="text-right font-comfortaa text-[16px] font-semibold leading-7 text-[#DE6A07]">
               {appointment.totalEstimate}
             </p>
-            <Icon name="chevron-down" className="mt-1 size-5 rotate-180 text-[#8B6357]" aria-hidden="true" />
+            <Icon
+              name="chevron-down"
+              className="mt-1 size-5 rotate-180 text-[#8B6357]"
+              aria-hidden="true"
+            />
           </div>
         </div>
 
         <div className="flex flex-col gap-1">
-          <p className="font-comfortaa text-[10px] leading-3 text-[#4A3C2A]">{appointment.packageLabel}</p>
+          <p className="font-comfortaa text-[10px] leading-3 text-[#4A3C2A]">
+            {appointment.packageLabel}
+          </p>
           <div>
             {appointment.packageLines.map((line) => (
               <AmountRow key={`${line.label}-${line.amount}`} line={line} />
             ))}
           </div>
           <div className="border-t border-[#4A3C2A] pt-1">
-            <AmountRow line={{ label: "Subtotal", amount: appointment.packageSubtotal }} />
+            <AmountRow
+              line={{ label: "Subtotal", amount: appointment.packageSubtotal }}
+            />
           </div>
         </div>
 
         {hasAddons ? (
           <div className="flex flex-col gap-1">
-            <p className="font-comfortaa text-[10px] leading-3 text-[#4A3C2A]">Add-on</p>
+            <p className="font-comfortaa text-[10px] leading-3 text-[#4A3C2A]">
+              Add-on
+            </p>
             <div>
               {appointment.addonLines.map((line) => (
                 <AmountRow key={`${line.label}-${line.amount}`} line={line} />
               ))}
             </div>
             <div className="border-t border-[#4A3C2A] pt-1">
-              <AmountRow line={{ label: "Subtotal", amount: appointment.addonSubtotal }} />
+              <AmountRow
+                line={{ label: "Subtotal", amount: appointment.addonSubtotal }}
+              />
             </div>
           </div>
         ) : null}
@@ -1265,7 +1550,9 @@ function PackageAndAddonCard({
           </div>
         ) : null}
 
-        {pendingCheckUp ? <PendingCheckUpBill pendingCheckUp={pendingCheckUp} /> : null}
+        {pendingCheckUp ? (
+          <PendingCheckUpBill pendingCheckUp={pendingCheckUp} />
+        ) : null}
 
         <OrangeButton
           type="button"
@@ -1281,43 +1568,65 @@ function PackageAndAddonCard({
   );
 }
 
-function PendingCheckUpBill({ pendingCheckUp }: { pendingCheckUp: PendingCheckUpSummary }) {
+function PendingCheckUpBill({
+  pendingCheckUp,
+}: {
+  pendingCheckUp: PendingCheckUpSummary;
+}) {
   const isRefund = pendingCheckUp.direction === "refund";
-  const statusText = isRefund ? "Waiting for refund" : "Waiting for client payment";
+  const statusText = isRefund
+    ? "Waiting for refund"
+    : "Waiting for client payment";
   const billLabel = isRefund ? "Service refund 2" : "Service paid 2";
   const detailItems = pendingCheckUp.details?.items ?? [];
   const proposedFinalAmount = pendingCheckUp.details?.proposed_final_amount;
-  const displayItems = detailItems.length > 0 ? detailItems : [{ description: "Check-in adjustment", amount: pendingCheckUp.amount }];
+  const displayItems =
+    detailItems.length > 0
+      ? detailItems
+      : [{ description: "Check-in adjustment", amount: pendingCheckUp.amount }];
 
   return (
     <div className="flex flex-col gap-3 rounded-[12px] bg-[#FAF9F7] p-4 shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)]">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="font-comfortaa text-[10px] leading-3 text-[#4A3C2A]">Check-in adjustment</p>
+          <p className="font-comfortaa text-[10px] leading-3 text-[#4A3C2A]">
+            Check-in adjustment
+          </p>
           <p className="mt-1 font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#4A3C2A]">
             {billLabel}
           </p>
         </div>
-        <span className={`inline-flex rounded-[12px] px-2 py-1 text-center font-comfortaa text-[10px] font-bold leading-[14px] text-white ${isRefund ? "bg-[#2563EB]" : "bg-[#DE6A07]"}`}>
+        <span
+          className={`inline-flex rounded-[12px] px-2 py-1 text-center font-comfortaa text-[10px] font-bold leading-[14px] text-white ${isRefund ? "bg-[#2563EB]" : "bg-[#DE6A07]"}`}
+        >
           {statusText}
         </span>
       </div>
 
       <div className="rounded-[12px] bg-white px-4 py-3">
-        <p className="font-comfortaa text-[10px] leading-3 text-[#4A3C2A]">Add-on</p>
+        <p className="font-comfortaa text-[10px] leading-3 text-[#4A3C2A]">
+          Add-on
+        </p>
         <div className="mt-2 space-y-1.5">
           {displayItems.map((item, index) => {
-            const itemAmount = typeof item.amount === "string" ? item.amount : "";
-            const itemLabel = typeof item.description === "string" && item.description.trim()
-              ? item.description.trim()
-              : typeof item.kind === "string" && item.kind.trim()
-                ? item.kind.trim()
-                : "Check-in adjustment";
+            const itemAmount =
+              typeof item.amount === "string" ? item.amount : "";
+            const itemLabel =
+              typeof item.description === "string" && item.description.trim()
+                ? item.description.trim()
+                : typeof item.kind === "string" && item.kind.trim()
+                  ? item.kind.trim()
+                  : "Check-in adjustment";
 
             return (
-              <div key={`${itemLabel}-${index}`} className="flex items-start justify-between gap-3 font-comfortaa text-[12px] leading-[18px] text-[#4A3C2A]">
+              <div
+                key={`${itemLabel}-${index}`}
+                className="flex items-start justify-between gap-3 font-comfortaa text-[12px] leading-[18px] text-[#4A3C2A]"
+              >
                 <p className="min-w-0 flex-1 break-words">{itemLabel}</p>
-                <p className="shrink-0 text-right">{itemAmount || pendingCheckUp.amount}</p>
+                <p className="shrink-0 text-right">
+                  {itemAmount || pendingCheckUp.amount}
+                </p>
               </div>
             );
           })}
@@ -1327,13 +1636,18 @@ function PendingCheckUpBill({ pendingCheckUp }: { pendingCheckUp: PendingCheckUp
             <span className="font-comfortaa text-[10px] leading-[12px] text-[#6B7280]">
               {isRefund ? "Refund total" : "Subtotal 2"}
             </span>
-            <span className={`font-comfortaa text-[16px] font-bold leading-6 ${isRefund ? "text-[#2563EB]" : "text-[#4A2C55]"}`}>
+            <span
+              className={`font-comfortaa text-[16px] font-bold leading-6 ${isRefund ? "text-[#2563EB]" : "text-[#4A2C55]"}`}
+            >
               {isRefund ? `-${pendingCheckUp.amount}` : pendingCheckUp.amount}
             </span>
           </div>
           {proposedFinalAmount ? (
             <p className="mt-1 font-comfortaa text-[10px] leading-[12px] text-[#6B7280]">
-              New total: {proposedFinalAmount.startsWith("$") ? proposedFinalAmount : `$${proposedFinalAmount}`}
+              New total:{" "}
+              {proposedFinalAmount.startsWith("$")
+                ? proposedFinalAmount
+                : `$${proposedFinalAmount}`}
             </p>
           ) : null}
         </div>
@@ -1351,11 +1665,11 @@ function BookingRequestItem({
   request: BookingRequest;
   onConfirmOriginalTime: (
     request: BookingRequest,
-    confirmedTime: BookingRequestDecisionTimeOption,
+    confirmedTime: BookingRequestDecisionTimeOption
   ) => Promise<void>;
   onProposeNewTime: (
     request: BookingRequest,
-    timeOptions: BookingRequestDecisionTimeOption[],
+    timeOptions: BookingRequestDecisionTimeOption[]
   ) => Promise<void>;
   onDecline: (request: BookingRequest) => Promise<void>;
 }) {
@@ -1380,18 +1694,22 @@ function BookingRequestCard({
   requests: BookingRequest[];
   onConfirmOriginalTime: (
     request: BookingRequest,
-    confirmedTime: BookingRequestDecisionTimeOption,
+    confirmedTime: BookingRequestDecisionTimeOption
   ) => Promise<void>;
   onProposeNewTime: (
     request: BookingRequest,
-    timeOptions: BookingRequestDecisionTimeOption[],
+    timeOptions: BookingRequestDecisionTimeOption[]
   ) => Promise<void>;
   onDecline: (request: BookingRequest) => Promise<void>;
 }) {
   return (
     <article className="rounded-[16px] bg-white px-5 py-5 shadow-[0px_4px_12px_rgba(0,0,0,0.08)]">
-      <p className="font-comfortaa text-[12px] leading-[18px] tracking-[0.5px] text-[#8B6357]">BOOKING REQUEST</p>
-      <h3 className="mt-1 font-comfortaa text-[20px] font-bold leading-[30px] text-[#4A2C55]">Confirm appointment</h3>
+      <p className="font-comfortaa text-[12px] leading-[18px] tracking-[0.5px] text-[#8B6357]">
+        BOOKING REQUEST
+      </p>
+      <h3 className="mt-1 font-comfortaa text-[20px] font-bold leading-[30px] text-[#4A2C55]">
+        Confirm appointment
+      </h3>
 
       <div className="mt-4 flex flex-col gap-4">
         {requests.map((request) => (
@@ -1414,7 +1732,8 @@ function getInvitationErrorMessage(error: unknown, fallback: string): string {
       error.data && typeof error.data === "object" && !Array.isArray(error.data)
         ? (error.data as { error?: string })
         : null;
-    if (typeof data?.error === "string" && data.error.trim()) return data.error.trim();
+    if (typeof data?.error === "string" && data.error.trim())
+      return data.error.trim();
     if (error.message.trim()) return error.message.trim();
   }
 
@@ -1422,38 +1741,82 @@ function getInvitationErrorMessage(error: unknown, fallback: string): string {
 }
 
 function DailyGoalProgressCard({ dailyGoal }: { dailyGoal: DashboardGoal }) {
-  const hasJobProgress = dailyGoal.completed !== null && dailyGoal.total !== null;
-  const safeTotal = dailyGoal.total && dailyGoal.total > 0 ? dailyGoal.total : 1;
-  const progress = hasJobProgress ? `${Math.min(((dailyGoal.completed ?? 0) / safeTotal) * 100, 100)}%` : "0%";
-  const completedLabel = dailyGoal.completed === null ? "-" : String(dailyGoal.completed);
+  const hasJobProgress =
+    dailyGoal.completed !== null && dailyGoal.total !== null;
+  const safeTotal =
+    dailyGoal.total && dailyGoal.total > 0 ? dailyGoal.total : 1;
+  const progress = hasJobProgress
+    ? `${Math.min(((dailyGoal.completed ?? 0) / safeTotal) * 100, 100)}%`
+    : "0%";
+  const completedLabel =
+    dailyGoal.completed === null ? "-" : String(dailyGoal.completed);
   const totalLabel = dailyGoal.total === null ? "-" : String(dailyGoal.total);
   const isUnavailable = dailyGoal.isUnavailable;
 
   return (
     <article className="rounded-[16px] bg-white px-4 py-4 shadow-[0px_4px_12px_rgba(0,0,0,0.08)]">
-      <h2 className="font-comfortaa text-[16px] leading-6 text-[#4A2C55]">Today&apos;s work progress</h2>
+      <h2 className="font-comfortaa text-[16px] leading-6 text-[#4A2C55]">
+        Today&apos;s work progress
+      </h2>
       <div className="mt-3 h-[6px] rounded-full bg-[#E5E7EB]">
-        <div className="h-full rounded-full bg-[#00A63E]" style={{ width: progress }} />
+        <div
+          className="h-full rounded-full bg-[#00A63E]"
+          style={{ width: progress }}
+        />
       </div>
-      <div className={`mt-3 inline-flex rounded-full px-[10px] py-[2px] ${isUnavailable ? "bg-[#F3F4F6]" : "bg-[#DCFCE7]"}`}>
+      <div
+        className={`mt-3 inline-flex rounded-full px-[10px] py-[2px] ${isUnavailable ? "bg-[#F3F4F6]" : "bg-[#DCFCE7]"}`}
+      >
         <div className="flex items-center gap-1.5">
-          <Icon name="target" className={`size-4 ${isUnavailable ? "text-[#6B7280]" : "text-[#16A34A]"}`} aria-hidden="true" />
-          <span className={`font-comfortaa text-[10px] font-bold leading-[15px] ${isUnavailable ? "text-[#6B7280]" : "text-[#16A34A]"}`}>
-            {isUnavailable ? "Today’s progress is temporarily unavailable" : `${completedLabel} of ${totalLabel} jobs completed`}
+          <Icon
+            name="target"
+            className={`size-4 ${isUnavailable ? "text-[#6B7280]" : "text-[#16A34A]"}`}
+            aria-hidden="true"
+          />
+          <span
+            className={`font-comfortaa text-[10px] font-bold leading-[15px] ${isUnavailable ? "text-[#6B7280]" : "text-[#16A34A]"}`}
+          >
+            {isUnavailable
+              ? "Today’s progress is temporarily unavailable"
+              : `${completedLabel} of ${totalLabel} jobs completed`}
           </span>
         </div>
       </div>
-      <div className={`mt-3 rounded-[12px] px-3 py-3 ${isUnavailable ? "border border-[#E5E7EB] bg-[#F9FAFB]" : "border border-[#BBF7D0] bg-[#F0FDF4]"}`}>
+      <div
+        className={`mt-3 rounded-[12px] px-3 py-3 ${isUnavailable ? "border border-[#E5E7EB] bg-[#F9FAFB]" : "border border-[#BBF7D0] bg-[#F0FDF4]"}`}
+      >
         <div className="flex items-start gap-2">
-          <div className={`mt-0.5 flex h-6 w-6 items-center justify-center rounded-full ${isUnavailable ? "bg-[#9CA3AF]" : "bg-[#00A63E]"}`}>
-            <Icon name="star-2" className="size-4 text-white" aria-hidden="true" />
+          <div
+            className={`mt-0.5 flex h-6 w-6 items-center justify-center rounded-full ${isUnavailable ? "bg-[#9CA3AF]" : "bg-[#00A63E]"}`}
+          >
+            <Icon
+              name="star-2"
+              className="size-4 text-white"
+              aria-hidden="true"
+            />
           </div>
           <div>
-            <p className={`font-comfortaa text-[13px] leading-[19.5px] ${isUnavailable ? "text-[#4B5563]" : "text-[#166534]"}`}>
-              {isUnavailable ? "We couldn’t load your goal summary right now." : <>You&apos;re <span className="text-[#00A63E]">{dailyGoal.remainingAmount}</span> away from your daily goal!</>}
+            <p
+              className={`font-comfortaa text-[13px] leading-[19.5px] ${isUnavailable ? "text-[#4B5563]" : "text-[#166534]"}`}
+            >
+              {isUnavailable ? (
+                "We couldn’t load your goal summary right now."
+              ) : (
+                <>
+                  You&apos;re{" "}
+                  <span className="text-[#00A63E]">
+                    {dailyGoal.remainingAmount}
+                  </span>{" "}
+                  away from your daily goal!
+                </>
+              )}
             </p>
-            <p className={`mt-0.5 font-comfortaa text-[10px] leading-[15px] ${isUnavailable ? "text-[#6B7280]" : "text-[#16A34A]"}`}>
-              {isUnavailable ? "Please refresh in a moment." : `Goal: ${dailyGoal.goalAmount} • Current: ${dailyGoal.currentAmount}`}
+            <p
+              className={`mt-0.5 font-comfortaa text-[10px] leading-[15px] ${isUnavailable ? "text-[#6B7280]" : "text-[#16A34A]"}`}
+            >
+              {isUnavailable
+                ? "Please refresh in a moment."
+                : `Goal: ${dailyGoal.goalAmount} • Current: ${dailyGoal.currentAmount}`}
             </p>
           </div>
         </div>
@@ -1475,15 +1838,27 @@ function DashboardMetricCard({
     <article className="rounded-[16px] bg-white px-4 py-4 text-center shadow-[0px_4px_12px_rgba(0,0,0,0.08)]">
       <div className="flex justify-center">
         {icon === "logo-mark" ? (
-          <Icon name={icon} className="size-10 text-[#633479]" aria-hidden="true" />
+          <Icon
+            name={icon}
+            className="size-10 text-[#633479]"
+            aria-hidden="true"
+          />
         ) : (
           <div className="flex size-10 items-center justify-center rounded-full bg-[#FFF5D6]">
-            <Icon name={icon} className="size-5 text-[#F59E0B]" aria-hidden="true" />
+            <Icon
+              name={icon}
+              className="size-5 text-[#F59E0B]"
+              aria-hidden="true"
+            />
           </div>
         )}
       </div>
-      <p className="mt-3 font-comfortaa text-[22px] leading-[28px] text-[#4A2C55]">{value}</p>
-      <p className="mt-1 font-comfortaa text-[11px] leading-[16.5px] text-[#8B6357]">{label}</p>
+      <p className="mt-3 font-comfortaa text-[22px] leading-[28px] text-[#4A2C55]">
+        {value}
+      </p>
+      <p className="mt-1 font-comfortaa text-[11px] leading-[16.5px] text-[#8B6357]">
+        {label}
+      </p>
     </article>
   );
 }
@@ -1492,7 +1867,11 @@ function NoUpcomingAppointmentsCard() {
   return (
     <article className="flex h-[213px] flex-col items-center justify-center rounded-[16px] bg-white px-5 shadow-[0px_4px_6px_rgba(0,0,0,0.08)]">
       <div className="flex size-16 items-center justify-center rounded-full bg-[#F3F1EE]">
-        <Icon name="clock" className="size-8 text-[#9B6F5F]" aria-hidden="true" />
+        <Icon
+          name="clock"
+          className="size-8 text-[#9B6F5F]"
+          aria-hidden="true"
+        />
       </div>
       <p className="mt-5 text-center font-comfortaa text-[18px] font-bold leading-[27px] text-[#4A2C55]">
         No upcoming appointments
@@ -1541,12 +1920,16 @@ function BookingRequestSuccessAlert({
 export default function GroomerDashboardPage() {
   const navigate = useNavigate();
   const [now, setNow] = useState(() => new Date());
-  const [devTravelStatus, setDevTravelStatus] = useState<"" | "traveling" | "checked_in" | "in_progress">("");
-  const [isCancelAppointmentModalOpen, setIsCancelAppointmentModalOpen] = useState(false);
+  const [devTravelStatus, setDevTravelStatus] = useState<
+    "" | "traveling" | "checked_in" | "in_progress"
+  >("");
+  const [isCancelAppointmentModalOpen, setIsCancelAppointmentModalOpen] =
+    useState(false);
   const [isCheckUpOpen, setIsCheckUpOpen] = useState(false);
   const [isCheckUpRequired, setIsCheckUpRequired] = useState(false);
   const [isTerminateServiceOpen, setIsTerminateServiceOpen] = useState(false);
-  const [bookingRequestSuccessAlert, setBookingRequestSuccessAlert] = useState<BookingRequestSuccessAlertKind | null>(null);
+  const [bookingRequestSuccessAlert, setBookingRequestSuccessAlert] =
+    useState<BookingRequestSuccessAlertKind | null>(null);
   const {
     nextAppointment,
     bookingRequests,
@@ -1565,7 +1948,6 @@ export default function GroomerDashboardPage() {
     applyCheckUpCheckoutPreview,
     startTravel,
     cancelTravel,
-    checkIn,
     startGrooming,
     completeService,
     terminateService,
@@ -1584,29 +1966,52 @@ export default function GroomerDashboardPage() {
 
   useEffect(() => {
     if (!bookingRequestSuccessAlert) return;
-    const timeoutId = window.setTimeout(() => setBookingRequestSuccessAlert(null), 5000);
+    const timeoutId = window.setTimeout(
+      () => setBookingRequestSuccessAlert(null),
+      5000
+    );
     return () => window.clearTimeout(timeoutId);
   }, [bookingRequestSuccessAlert]);
 
   const enableDevTravelTest =
-    import.meta.env.DEV && new URLSearchParams(window.location.search).get("devTravelTest") === "1";
-  const effectiveAppointment = nextAppointment && devTravelStatus
-    ? { ...nextAppointment, status: devTravelStatus }
-    : nextAppointment;
-  const showStartTravel = enableDevTravelTest || (effectiveAppointment?.scheduledTime
-    ? shouldShowStartTravel(effectiveAppointment.scheduledTime, now, effectiveAppointment.status)
-    : false);
-  const normalizedAppointmentStatus = normalizeStatus(effectiveAppointment?.status);
-  const showTravelActions = ["traveling", "travel_started", "en_route", "on_the_way", "checked_in"].includes(
-    normalizedAppointmentStatus,
+    import.meta.env.DEV &&
+    new URLSearchParams(window.location.search).get("devTravelTest") === "1";
+  const effectiveAppointment =
+    nextAppointment && devTravelStatus
+      ? { ...nextAppointment, status: devTravelStatus }
+      : nextAppointment;
+  const showStartTravel =
+    enableDevTravelTest ||
+    (effectiveAppointment?.scheduledTime
+      ? shouldShowStartTravel(
+          effectiveAppointment.scheduledTime,
+          now,
+          effectiveAppointment.status
+        )
+      : false);
+  const normalizedAppointmentStatus = normalizeStatus(
+    effectiveAppointment?.status
   );
+  const showTravelActions = [
+    "traveling",
+    "travel_started",
+    "en_route",
+    "on_the_way",
+    "checked_in",
+  ].includes(normalizedAppointmentStatus);
   const showCurrentJob = normalizedAppointmentStatus === "checked_in";
   const showInProgressJob = normalizedAppointmentStatus === "in_progress";
-  const showCompletedServiceJob = ["completed", "awaiting_final_payment", "reviewed"].includes(normalizedAppointmentStatus);
-  const showReviewedServiceJob = showCompletedServiceJob && Boolean(effectiveAppointment?.review);
+  const showCompletedServiceJob = [
+    "completed",
+    "awaiting_final_payment",
+    "reviewed",
+  ].includes(normalizedAppointmentStatus);
+  const showReviewedServiceJob =
+    showCompletedServiceJob && Boolean(effectiveAppointment?.review);
 
   const handleStartTravel = async () => {
-    if (!effectiveAppointment?.id || isStartingTravel || !showStartTravel) return;
+    if (!effectiveAppointment?.id || isStartingTravel || !showStartTravel)
+      return;
 
     const bookingId = Number(effectiveAppointment.id);
     if (!Number.isFinite(bookingId)) return;
@@ -1650,29 +2055,17 @@ export default function GroomerDashboardPage() {
   const handleCheckIn = async () => {
     if (!effectiveAppointment?.id || isCheckingIn) return;
 
-    const bookingId = Number(effectiveAppointment.id);
-    if (!Number.isFinite(bookingId)) return;
-
-    try {
-      if (enableDevTravelTest) {
-        setDevTravelStatus("checked_in");
-        setIsCheckUpRequired(true);
-        setIsCheckUpOpen(true);
-        toast.success("Checked in");
-        return;
-      }
-      await checkIn(bookingId);
-      setIsCheckUpRequired(true);
-      setIsCheckUpOpen(true);
-      toast.success("Checked in");
-    } catch (error) {
-      console.error("Failed to check in:", error);
-      toast.error("Failed to check in");
-    }
+    setIsCheckUpRequired(true);
+    setIsCheckUpOpen(true);
   };
 
   const handleStartGrooming = async () => {
-    if (!effectiveAppointment?.id || isStartingGrooming || normalizedAppointmentStatus !== "checked_in") return;
+    if (
+      !effectiveAppointment?.id ||
+      isStartingGrooming ||
+      normalizedAppointmentStatus !== "checked_in"
+    )
+      return;
 
     const bookingId = Number(effectiveAppointment.id);
     if (!Number.isFinite(bookingId)) return;
@@ -1692,7 +2085,12 @@ export default function GroomerDashboardPage() {
   };
 
   const handleCompleteService = async () => {
-    if (!effectiveAppointment?.id || isCompletingService || normalizedAppointmentStatus !== "in_progress") return;
+    if (
+      !effectiveAppointment?.id ||
+      isCompletingService ||
+      normalizedAppointmentStatus !== "in_progress"
+    )
+      return;
 
     const bookingId = Number(effectiveAppointment.id);
     if (!Number.isFinite(bookingId)) return;
@@ -1712,7 +2110,12 @@ export default function GroomerDashboardPage() {
   };
 
   const handleTerminateService = async (data: TerminateServiceIn) => {
-    if (!effectiveAppointment?.id || isTerminatingService || normalizedAppointmentStatus !== "in_progress") return;
+    if (
+      !effectiveAppointment?.id ||
+      isTerminatingService ||
+      normalizedAppointmentStatus !== "in_progress"
+    )
+      return;
 
     const bookingId = Number(effectiveAppointment.id);
     if (!Number.isFinite(bookingId)) return;
@@ -1735,7 +2138,7 @@ export default function GroomerDashboardPage() {
 
   const handleConfirmOriginalTime = async (
     request: BookingRequest,
-    confirmedTime: BookingRequestDecisionTimeOption,
+    confirmedTime: BookingRequestDecisionTimeOption
   ) => {
     if (!request.invitationId || !Number.isFinite(request.invitationId)) {
       toast.error("Missing booking invitation");
@@ -1750,18 +2153,23 @@ export default function GroomerDashboardPage() {
       });
       setBookingRequestSuccessAlert("confirm");
       fetchPendingBookingRequests().catch((refreshError) => {
-        console.error("Failed to refresh pending booking requests:", refreshError);
+        console.error(
+          "Failed to refresh pending booking requests:",
+          refreshError
+        );
       });
     } catch (error) {
       console.error("Failed to confirm booking invitation:", error);
-      toast.error(getInvitationErrorMessage(error, "Failed to confirm appointment"));
+      toast.error(
+        getInvitationErrorMessage(error, "Failed to confirm appointment")
+      );
       throw error;
     }
   };
 
   const handleProposeNewTime = async (
     request: BookingRequest,
-    timeOptions: BookingRequestDecisionTimeOption[],
+    timeOptions: BookingRequestDecisionTimeOption[]
   ) => {
     if (!request.invitationId || !Number.isFinite(request.invitationId)) {
       toast.error("Missing booking invitation");
@@ -1776,11 +2184,16 @@ export default function GroomerDashboardPage() {
       });
       setBookingRequestSuccessAlert("propose");
       fetchPendingBookingRequests().catch((refreshError) => {
-        console.error("Failed to refresh pending booking requests:", refreshError);
+        console.error(
+          "Failed to refresh pending booking requests:",
+          refreshError
+        );
       });
     } catch (error) {
       console.error("Failed to propose new time:", error);
-      toast.error(getInvitationErrorMessage(error, "Failed to propose new time"));
+      toast.error(
+        getInvitationErrorMessage(error, "Failed to propose new time")
+      );
       throw error;
     }
   };
@@ -1800,116 +2213,143 @@ export default function GroomerDashboardPage() {
       await fetchPendingBookingRequests();
     } catch (error) {
       console.error("Failed to pass booking invitation:", error);
-      toast.error(getInvitationErrorMessage(error, "Failed to pass appointment"));
+      toast.error(
+        getInvitationErrorMessage(error, "Failed to pass appointment")
+      );
       throw error;
     }
   };
 
   const showInitialLoading = isLoadingDashboard && !hasLoadedDashboard;
-  const hasUpcomingAppointmentContent = Boolean(nextAppointment) || bookingRequests.length > 0;
+  const hasUpcomingAppointmentContent =
+    Boolean(nextAppointment) || bookingRequests.length > 0;
 
   return (
     <div className="min-h-[calc(100vh-64px)] w-full bg-[#633479] px-[calc(20*var(--px393))] pb-[calc(112*var(--px393))] pt-[calc(8*var(--px393))] sm:px-5 sm:pb-28 sm:pt-2">
       <AccountContentContainer>
         <div className="space-y-3.5">
-        <div className="flex items-center gap-4">
-          <h1 className="font-comfortaa text-[20px] font-bold leading-[22px] text-white">Dashboard</h1>
-          <IdentitySwitchAction
-            mode="groomer"
-            targetPath="/account/dashboard"
-            className="ml-auto flex items-center"
-            controlClassName="flex items-center gap-3"
-            labelClassName="cursor-pointer font-comfortaa text-[14px] font-bold leading-[22px] text-[#FFF7ED]"
-            switchClassName="cursor-pointer data-[state=checked]:border-[#DE6A07] data-[state=checked]:bg-[#DE6A07]"
-            labelFirst
-          />
+          <div className="flex items-center gap-4">
+            <h1 className="font-comfortaa text-[20px] font-bold leading-[22px] text-white">
+              Dashboard
+            </h1>
+            <IdentitySwitchAction
+              mode="groomer"
+              targetPath="/account/dashboard"
+              className="ml-auto flex items-center"
+              controlClassName="flex items-center gap-3"
+              labelClassName="cursor-pointer font-comfortaa text-[14px] font-bold leading-[22px] text-[#FFF7ED]"
+              switchClassName="cursor-pointer data-[state=checked]:border-[#DE6A07] data-[state=checked]:bg-[#DE6A07]"
+              labelFirst
+            />
+          </div>
+
+          {bookingRequestSuccessAlert ? (
+            <BookingRequestSuccessAlert
+              kind={bookingRequestSuccessAlert}
+              onScheduleClick={() => navigate("/groomer/my-work")}
+            />
+          ) : null}
+
+          {showInitialLoading ? (
+            <LoadingStateCard />
+          ) : (
+            <>
+              {effectiveAppointment && showReviewedServiceJob ? (
+                <ReviewedServiceCard
+                  appointment={effectiveAppointment}
+                  onFillReport={() =>
+                    navigate(
+                      `/groomer/bookings/${effectiveAppointment.id}/photo-health-inspection`
+                    )
+                  }
+                  onViewNextJob={() => navigate("/groomer/my-work")}
+                />
+              ) : effectiveAppointment && showCompletedServiceJob ? (
+                <CompletedServiceCard
+                  appointment={effectiveAppointment}
+                  onFillReport={() =>
+                    navigate(
+                      `/groomer/bookings/${effectiveAppointment.id}/photo-health-inspection`
+                    )
+                  }
+                />
+              ) : effectiveAppointment && showInProgressJob ? (
+                <InProgressJobCard
+                  appointment={effectiveAppointment}
+                  isCompletingService={isCompletingService}
+                  onCompleteService={handleCompleteService}
+                  onTerminateService={() => setIsTerminateServiceOpen(true)}
+                />
+              ) : effectiveAppointment && showCurrentJob ? (
+                <>
+                  <PackageAndAddonCard
+                    appointment={effectiveAppointment}
+                    onModify={() => {
+                      setIsCheckUpRequired(false);
+                      setIsCheckUpOpen(true);
+                    }}
+                  />
+                  <CurrentJobCard
+                    appointment={effectiveAppointment}
+                    isStartingGrooming={isStartingGrooming}
+                    onStartGrooming={handleStartGrooming}
+                  />
+                </>
+              ) : effectiveAppointment && showTravelActions ? (
+                <>
+                  <TravelMapCard
+                    appointment={effectiveAppointment}
+                    isCheckingIn={isCheckingIn}
+                    isCancelingTravel={isCancelingTravel}
+                    onCheckIn={handleCheckIn}
+                    onCancelTravel={() => setIsCancelAppointmentModalOpen(true)}
+                  />
+                  <TotalEstimationCard appointment={effectiveAppointment} />
+                </>
+              ) : effectiveAppointment ? (
+                <AppointmentSummaryCard
+                  appointment={effectiveAppointment}
+                  showStartTravel={showStartTravel}
+                  isStartingTravel={isStartingTravel}
+                  onViewHealthDetails={() =>
+                    navigate(
+                      `/groomer/bookings/${effectiveAppointment.id}/health-details`
+                    )
+                  }
+                  onStartTravel={handleStartTravel}
+                />
+              ) : null}
+
+              {bookingRequests.length > 0 ? (
+                <BookingRequestCard
+                  requests={bookingRequests}
+                  onConfirmOriginalTime={handleConfirmOriginalTime}
+                  onProposeNewTime={handleProposeNewTime}
+                  onDecline={handleDeclineBookingRequest}
+                />
+              ) : null}
+
+              {!hasUpcomingAppointmentContent ? (
+                <NoUpcomingAppointmentsCard />
+              ) : null}
+
+              <DailyGoalProgressCard dailyGoal={dailyGoal} />
+
+              <div className="grid grid-cols-2 gap-3">
+                <DashboardMetricCard
+                  icon="logo-mark"
+                  value={metrics.partnerScore}
+                  label="Mutopia partner score"
+                />
+                <DashboardMetricCard
+                  icon="star-2"
+                  value={metrics.rating}
+                  label="Rating & review"
+                />
+              </div>
+            </>
+          )}
         </div>
-
-        {bookingRequestSuccessAlert ? (
-          <BookingRequestSuccessAlert
-            kind={bookingRequestSuccessAlert}
-            onScheduleClick={() => navigate("/groomer/my-work")}
-          />
-        ) : null}
-
-        {showInitialLoading ? (
-          <LoadingStateCard />
-        ) : (
-          <>
-            {effectiveAppointment && showReviewedServiceJob ? (
-              <ReviewedServiceCard
-                appointment={effectiveAppointment}
-                onFillReport={() => navigate(`/groomer/bookings/${effectiveAppointment.id}/photo-health-inspection`)}
-                onViewNextJob={() => navigate("/groomer/my-work")}
-              />
-            ) : effectiveAppointment && showCompletedServiceJob ? (
-              <CompletedServiceCard
-                appointment={effectiveAppointment}
-                onFillReport={() => navigate(`/groomer/bookings/${effectiveAppointment.id}/photo-health-inspection`)}
-              />
-            ) : effectiveAppointment && showInProgressJob ? (
-              <InProgressJobCard
-                appointment={effectiveAppointment}
-                isCompletingService={isCompletingService}
-                onCompleteService={handleCompleteService}
-                onTerminateService={() => setIsTerminateServiceOpen(true)}
-              />
-            ) : effectiveAppointment && showCurrentJob ? (
-              <>
-                <PackageAndAddonCard
-                  appointment={effectiveAppointment}
-                  onModify={() => {
-                    setIsCheckUpRequired(false);
-                    setIsCheckUpOpen(true);
-                  }}
-                />
-                <CurrentJobCard
-                  appointment={effectiveAppointment}
-                  isStartingGrooming={isStartingGrooming}
-                  onStartGrooming={handleStartGrooming}
-                />
-              </>
-            ) : effectiveAppointment && showTravelActions ? (
-              <>
-                <TravelMapCard
-                  appointment={effectiveAppointment}
-                  isCheckingIn={isCheckingIn}
-                  isCancelingTravel={isCancelingTravel}
-                  onCheckIn={handleCheckIn}
-                  onCancelTravel={() => setIsCancelAppointmentModalOpen(true)}
-                />
-                <TotalEstimationCard appointment={effectiveAppointment} />
-              </>
-            ) : effectiveAppointment ? (
-              <AppointmentSummaryCard
-                appointment={effectiveAppointment}
-                showStartTravel={showStartTravel}
-                isStartingTravel={isStartingTravel}
-                onViewHealthDetails={() => navigate(`/groomer/bookings/${effectiveAppointment.id}/health-details`)}
-                onStartTravel={handleStartTravel}
-              />
-            ) : null}
-
-            {bookingRequests.length > 0 ? (
-              <BookingRequestCard
-                requests={bookingRequests}
-                onConfirmOriginalTime={handleConfirmOriginalTime}
-                onProposeNewTime={handleProposeNewTime}
-                onDecline={handleDeclineBookingRequest}
-              />
-            ) : null}
-
-            {!hasUpcomingAppointmentContent ? <NoUpcomingAppointmentsCard /> : null}
-
-            <DailyGoalProgressCard dailyGoal={dailyGoal} />
-
-            <div className="grid grid-cols-2 gap-3">
-              <DashboardMetricCard icon="logo-mark" value={metrics.partnerScore} label="Mutopia partner score" />
-              <DashboardMetricCard icon="star-2" value={metrics.rating} label="Rating & review" />
-            </div>
-          </>
-        )}
-      </div>
       </AccountContentContainer>
       <GroomerCheckUpModal
         open={isCheckUpOpen}

@@ -927,6 +927,7 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
 
         return {
           ...appointment,
+          status: "checked_in",
           weightValue,
           weightUnit,
           totalEstimate: formatBreakdownAmount(totalEstimateAmount),
