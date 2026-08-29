@@ -36,9 +36,9 @@ describe("InspectionAreaSection", () => {
       screen.getByText("Skin - after grooming photos")
     ).toBeInTheDocument();
     expect(screen.getByText("Skin photo")).toBeInTheDocument();
-    expect(screen.getAllByText("Add photo")).toHaveLength(2);
+    expect(screen.getAllByText("Add photo")).toHaveLength(1);
     expect(
-      screen.getByAltText("skin.jpg").closest(".flex-wrap")
+      screen.getByText("Add up to 2 photos for AI health inspection")
     ).toBeInTheDocument();
   });
 

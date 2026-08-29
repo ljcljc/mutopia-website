@@ -49,12 +49,17 @@ export function InspectionAreaSection({
     config.area === "left_ear" || config.area === "right_ear";
   const isMouthSection = config.area === "mouth";
   const isPostureSection = config.area === "posture";
-  const isPersistentPhotoSection = isMouthSection || isPostureSection;
+  const isPersistentPhotoSection =
+    config.area === "skin" || isMouthSection || isPostureSection;
   const slots = isEarSection ? (["left_ear", "right_ear"] as const) : [];
-  const persistentSlotLabel = isPostureSection ? "Posture" : "Mouth area";
+  const persistentSlotLabel = isPostureSection
+    ? "Posture"
+    : config.area === "skin"
+      ? "Skin area"
+      : "Mouth area";
   const sectionDescription = isPostureSection
     ? "Help to complete health report"
-    : "Add photos for AI health inspection";
+    : "Add up to 2 photos for AI health inspection";
 
   // The Add photo slot remains available after the first named photo slot is filled.
   const renderPersistentPhotoInput = () => (
@@ -64,12 +69,12 @@ export function InspectionAreaSection({
       }}
       type="file"
       accept="image/jpeg,image/jpg,image/png,image/heic,image/heif"
-      multiple={isPostureSection}
+      multiple={config.area === "skin" || isPostureSection}
       className="hidden"
       onChange={(event) => {
         const selected = Array.from(event.currentTarget.files ?? []);
         if (selected.length > 0) {
-          onFilesSelected(selected);
+          onFilesSelected(selected.slice(0, Math.max(0, 2 - photos.length)));
         }
         event.currentTarget.value = "";
       }}
@@ -236,24 +241,26 @@ export function InspectionAreaSection({
                     .map((photo, index) =>
                       renderPersistentPhotoSlot(photo, index + 1)
                     )}
-                  <button
-                    type="button"
-                    className="relative flex h-[84px] min-w-0 cursor-pointer flex-col items-center justify-center gap-2 rounded-[14px] border-[1.451px] border-dashed border-[#D4C9E0] bg-white shadow-[0px_1px_2.5px_0px_rgba(0,0,0,0.05)] transition-colors hover:border-[#de6a07]"
-                    onClick={() =>
-                      openFilePicker(earInputRefs.current[config.area])
-                    }
-                    aria-label={`Add ${config.label}`}
-                  >
-                    <div className="flex size-[29px] shrink-0 items-center justify-center rounded-full bg-[#F0EBF7]">
-                      <Icon
-                        name="add-inspection"
-                        className="block size-[28px]"
-                      />
-                    </div>
-                    <span className="text-center font-comfortaa text-xs font-medium leading-[18px] text-[#633479]">
-                      Add photo
-                    </span>
-                  </button>
+                  {config.area !== "skin" || photos.length < 2 ? (
+                    <button
+                      type="button"
+                      className="relative flex h-[84px] min-w-0 cursor-pointer flex-col items-center justify-center gap-2 rounded-[14px] border-[1.451px] border-dashed border-[#D4C9E0] bg-white shadow-[0px_1px_2.5px_0px_rgba(0,0,0,0.05)] transition-colors hover:border-[#de6a07]"
+                      onClick={() =>
+                        openFilePicker(earInputRefs.current[config.area])
+                      }
+                      aria-label={`Add ${config.label}`}
+                    >
+                      <div className="flex size-[29px] shrink-0 items-center justify-center rounded-full bg-[#F0EBF7]">
+                        <Icon
+                          name="add-inspection"
+                          className="block size-[28px]"
+                        />
+                      </div>
+                      <span className="text-center font-comfortaa text-xs font-medium leading-[18px] text-[#633479]">
+                        Add photo
+                      </span>
+                    </button>
+                  ) : null}
                 </div>
               </div>
             ) : (
