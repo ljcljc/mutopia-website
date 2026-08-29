@@ -11,6 +11,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { useIsMobile } from "@/components/ui/use-mobile";
 import { Icon } from "./Icon";
 import { cn } from "@/components/ui/utils";
 
@@ -61,6 +62,7 @@ export function ImagePreview({
   maxZoom = 200,
   footer,
 }: ImagePreviewProps) {
+  const isMobile = useIsMobile();
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [zoom, setZoom] = useState(initialZoom);
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -333,8 +335,13 @@ export function ImagePreview({
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose?.()}>
       <DialogContent
-        overlayClassName="!z-[79]"
-        className="image-preview-dialog !z-[80] bg-white border border-[rgba(0,0,0,0.2)] border-solid flex flex-col gap-[16px] items-start px-0 py-[12px] rounded-none sm:rounded-[20px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] w-screen h-screen max-w-none max-h-none sm:w-[80vw]! sm:h-[80vh]! sm:max-w-[80vw]! sm:max-h-[80vh]! overflow-visible [&>button]:hidden left-0 top-0 translate-x-0 translate-y-0 sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%]"
+        overlayClassName={cn("!z-[79]", isMobile && "service-area-dialog-overlay")}
+        className={cn(
+          "image-preview-dialog !z-[80] flex flex-col items-start gap-[16px] overflow-visible border border-[rgba(0,0,0,0.2)] border-solid bg-white px-0 py-[12px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] [&>button]:hidden",
+          isMobile
+            ? "service-area-dialog inset-x-0! bottom-0! top-auto! left-0! h-screen! max-h-none! w-screen! max-w-none! translate-x-0! translate-y-0! rounded-none!"
+            : "left-0 top-0 w-screen max-w-none sm:left-[50%] sm:top-[50%] sm:h-[80vh]! sm:max-h-[80vh]! sm:w-[80vw]! sm:max-w-[80vw]! sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-[20px]",
+        )}
       >
         {/* 屏幕阅读器可访问的标题和描述（视觉上隐藏） */}
         <DialogTitle className="sr-only">

@@ -58,34 +58,6 @@ body.modal-open header.sticky.top-0 + div {
   padding-top: 65px;
 }
 
-@keyframes image-preview-slide-in {
-  from {
-    transform: translate3d(0, 100%, 0);
-  }
-  to {
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-@keyframes image-preview-slide-out {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-  to {
-    transform: translate3d(0, 100%, 0);
-  }
-}
-
-@media (max-width: 639px) {
-  .image-preview-dialog[data-state="open"] {
-    animation: image-preview-slide-in 280ms ease-out;
-  }
-
-  .image-preview-dialog[data-state="closed"] {
-    animation: image-preview-slide-out 240ms ease-in;
-  }
-}
-
 @keyframes service-area-dialog-slide-in {
   from {
     transform: translate3d(0, 100%, 0);
