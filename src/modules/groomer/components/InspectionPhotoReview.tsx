@@ -19,6 +19,7 @@ import {
 import { InspectionTagGroup } from "./InspectionTagGroup";
 
 type PanelSnap = "collapsed" | "default" | "expanded";
+type SlideDirection = "next" | "previous";
 
 export interface InspectionPhotoReviewProps {
   photos: InspectionPhotoOut[];
@@ -75,6 +76,9 @@ export function InspectionPhotoReview({
     useState<InspectionPhotoClassification>("normal");
   const [hints, setHints] = useState<string[]>([]);
   const [panelSnap, setPanelSnap] = useState<PanelSnap>(initialPanelSnap);
+  const [slideDirection, setSlideDirection] = useState<SlideDirection | null>(
+    null
+  );
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [dragHeight, setDragHeight] = useState<number | null>(null);
@@ -283,9 +287,19 @@ export function InspectionPhotoReview({
       nextClassification === "normal" ? [] : nextHints
     );
   };
+  const changePhoto = (nextPhotoId: number) => {
+    const nextIndex = photos.findIndex((item) => item.id === nextPhotoId);
+    if (nextIndex < 0 || nextIndex === activeIndex) return;
+    const forwardDistance =
+      (nextIndex - activeIndex + photos.length) % photos.length;
+    setSlideDirection(
+      forwardDistance <= photos.length / 2 ? "next" : "previous"
+    );
+    onActivePhotoChange(nextPhotoId);
+  };
   const move = (offset: number) => {
     const next = photos[(activeIndex + offset + photos.length) % photos.length];
-    if (next) onActivePhotoChange(next.id);
+    if (next) changePhoto(next.id);
   };
   const setSnap = (snap: PanelSnap) => {
     setPanelSnap(snap);
@@ -586,19 +600,24 @@ export function InspectionPhotoReview({
                     {previewLabel}
                   </div>
                 ) : null}
-                <img
-                  src={photo.url}
-                  alt={photo.original_filename || config.label}
-                  draggable={false}
-                  className="absolute left-1/2 top-1/2 select-none will-change-transform"
-                  style={previewStyle as CSSProperties}
-                  onLoad={(event) => {
-                    setImageNaturalSize({
-                      width: event.currentTarget.naturalWidth,
-                      height: event.currentTarget.naturalHeight,
-                    });
-                  }}
-                />
+                <div
+                  key={photo.id}
+                  className={`absolute inset-0 ${photos.length > 1 && slideDirection ? `review-photo-slide-in-${slideDirection}` : ""}`}
+                >
+                  <img
+                    src={photo.url}
+                    alt={photo.original_filename || config.label}
+                    draggable={false}
+                    className="absolute left-1/2 top-1/2 select-none will-change-transform"
+                    style={previewStyle as CSSProperties}
+                    onLoad={(event) => {
+                      setImageNaturalSize({
+                        width: event.currentTarget.naturalWidth,
+                        height: event.currentTarget.naturalHeight,
+                      });
+                    }}
+                  />
+                </div>
               </div>
               {photos.length > 1 ? (
                 <div className="pointer-events-none absolute inset-0 z-[70]">
@@ -626,9 +645,15 @@ export function InspectionPhotoReview({
                   </button>
                   <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1.5">
                     {photos.map((item, index) => (
-                      <span
+                      <button
+                        type="button"
+                        aria-label={`Go to photo ${index + 1}`}
+                        aria-current={
+                          index === activeIndex ? "true" : undefined
+                        }
+                        onClick={() => changePhoto(item.id)}
                         key={item.id}
-                        className={`h-1.5 rounded-full ${index === activeIndex ? "w-7 bg-white" : "w-3 bg-white/45"}`}
+                        className={`pointer-events-auto h-1.5 cursor-pointer rounded-full transition-[width,background-color] ${index === activeIndex ? "w-7 bg-white" : "w-3 bg-white/45 hover:bg-white/70"}`}
                       />
                     ))}
                   </div>

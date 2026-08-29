@@ -138,6 +138,25 @@ describe("InspectionPhotoReview", () => {
     expect(onActivePhotoChange).toHaveBeenCalledWith(2);
   });
 
+  it("switches to a photo when its pagination dot is clicked", () => {
+    const onActivePhotoChange = vi.fn();
+    render(
+      <InspectionPhotoReview
+        photos={[photo(), photo({ id: 2, url: "/skin-2.jpg" })]}
+        activePhotoId={1}
+        config={{ area: "skin", label: "Skin photo", hints: [] }}
+        open
+        onActivePhotoChange={onActivePhotoChange}
+        onClose={vi.fn()}
+        onChange={vi.fn()}
+        onAddPhoto={vi.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Go to photo 2" }));
+    expect(onActivePhotoChange).toHaveBeenCalledWith(2);
+  });
+
   it("shows the preview area tag only for left and right ear or eye photos", () => {
     const baseProps = {
       activePhotoId: 1,

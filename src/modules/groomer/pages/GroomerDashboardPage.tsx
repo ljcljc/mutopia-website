@@ -403,7 +403,7 @@ function InProgressJobCard({
         ) : (
           <>
             <Icon name="target" className="size-5" aria-hidden="true" />
-            Complete service
+            Finish grooming
           </>
         )}
       </button>
@@ -422,9 +422,11 @@ function InProgressJobCard({
 function CompletedServiceCard({
   appointment,
   onFillReport,
+  isPendingReport = false,
 }: {
   appointment: DashboardAppointment;
   onFillReport: () => void;
+  isPendingReport?: boolean;
 }) {
   return (
     <article className="rounded-[16px] bg-[linear-gradient(180deg,#633479_0%,#7A4777_52%,#8B6357_100%)] p-5 shadow-[0px_4px_6px_rgba(74,44,85,0.3)]">
@@ -433,7 +435,9 @@ function CompletedServiceCard({
           IN PROGRESS
         </p>
         <h2 className="truncate font-comfortaa text-[20px] font-bold leading-[30px] text-white">
-          {getInProgressTitle(appointment.service, appointment.petName)}
+          {isPendingReport
+            ? "Pending report"
+            : getInProgressTitle(appointment.service, appointment.petName)}
         </h2>
       </div>
 
@@ -455,15 +459,17 @@ function CompletedServiceCard({
         </div>
       </div>
 
-      <div className="mt-4 flex h-9 items-center gap-2 rounded-[8px] border border-[#6AA31C] bg-[#F4FFDE] px-4">
-        <CheckCircleIcon
-          className="size-3 shrink-0 fill-[#6AA31C] text-[#F4FFDE]"
-          aria-hidden="true"
-        />
-        <p className="truncate font-comfortaa text-[12px] font-bold leading-4 text-[#467900]">
-          Completed. Waiting for client confirmation
-        </p>
-      </div>
+      {isPendingReport ? null : (
+        <div className="mt-4 flex h-9 items-center gap-2 rounded-[8px] border border-[#6AA31C] bg-[#F4FFDE] px-4">
+          <CheckCircleIcon
+            className="size-3 shrink-0 fill-[#6AA31C] text-[#F4FFDE]"
+            aria-hidden="true"
+          />
+          <p className="truncate font-comfortaa text-[12px] font-bold leading-4 text-[#467900]">
+            Completed. Waiting for client confirmation
+          </p>
+        </div>
+      )}
 
       <OrangeButton
         type="button"
@@ -472,13 +478,15 @@ function CompletedServiceCard({
         onClick={onFillReport}
         className="mt-4 border-[#FFF7ED]! text-[#FFF7ED]! hover:bg-white/10! active:bg-white/10! focus-visible:bg-white/10! [&_p]:font-semibold [&_p]:text-[#FFF7ED]!"
       >
-        {appointment.hasPublishedHealthReport
-          ? "View health report"
-          : appointment.healthReportPreparationStatus === "preparing"
-            ? "Preparing health report"
-            : appointment.healthReportPreparationStatus === "failed"
-              ? "Report preparation failed"
-              : `Fill report for ${appointment.petName}`}
+        {isPendingReport
+          ? "Let's finish AI health report"
+          : appointment.hasPublishedHealthReport
+            ? "View health report"
+            : appointment.healthReportPreparationStatus === "preparing"
+              ? "Preparing health report"
+              : appointment.healthReportPreparationStatus === "failed"
+                ? "Report preparation failed"
+                : `Fill report for ${appointment.petName}`}
       </OrangeButton>
     </article>
   );
@@ -2001,6 +2009,7 @@ export default function GroomerDashboardPage() {
   ].includes(normalizedAppointmentStatus);
   const showCurrentJob = normalizedAppointmentStatus === "checked_in";
   const showInProgressJob = normalizedAppointmentStatus === "in_progress";
+  const showPendingReportJob = normalizedAppointmentStatus === "pending_report";
   const showCompletedServiceJob = [
     "completed",
     "awaiting_final_payment",
@@ -2263,6 +2272,16 @@ export default function GroomerDashboardPage() {
                     )
                   }
                   onViewNextJob={() => navigate("/groomer/my-work")}
+                />
+              ) : effectiveAppointment && showPendingReportJob ? (
+                <CompletedServiceCard
+                  appointment={effectiveAppointment}
+                  isPendingReport
+                  onFillReport={() =>
+                    navigate(
+                      `/groomer/bookings/${effectiveAppointment.id}/photo-health-inspection`
+                    )
+                  }
                 />
               ) : effectiveAppointment && showCompletedServiceJob ? (
                 <CompletedServiceCard

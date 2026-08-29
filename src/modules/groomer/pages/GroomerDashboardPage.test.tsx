@@ -178,7 +178,7 @@ describe("GroomerDashboardPage complete service", () => {
     });
     vi.mocked(completeGroomerService).mockResolvedValue({
       ok: true,
-      status: "completed",
+      status: "pending_report",
       total_service_minutes: 45,
     });
 
@@ -191,15 +191,15 @@ describe("GroomerDashboardPage complete service", () => {
     expect(await screen.findByText("92/100")).toBeInTheDocument();
     expect(screen.getByText("4.6")).toBeInTheDocument();
 
-    fireEvent.click(await screen.findByRole("button", { name: /complete service/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /finish grooming/i }));
 
     await waitFor(() => {
       expect(completeGroomerService).toHaveBeenCalledWith(123);
     });
     expect(await screen.findByText("3 of 5 jobs completed")).toBeInTheDocument();
     expect(screen.getByText("Goal: $200.00 • Current: $145.00")).toBeInTheDocument();
-    expect(await screen.findByText("Completed. Waiting for client confirmation")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Fill report for Momo" })).toBeInTheDocument();
+    expect(await screen.findByText("Pending report")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Let's finish AI health report" })).toBeInTheDocument();
   });
 
   it("opens the photo health inspection flow from a completed booking", async () => {

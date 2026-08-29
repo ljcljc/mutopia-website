@@ -475,6 +475,7 @@ function isActiveDashboardAppointmentStatus(status: string): boolean {
     "on_the_way",
     "checked_in",
     "in_progress",
+    "pending_report",
     "completed",
     "awaiting_final_payment",
     "reviewed",
