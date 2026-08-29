@@ -153,7 +153,10 @@ describe("InspectionPhotoReview", () => {
       />
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Go to photo 2" }));
+    const secondDot = screen.getByRole("button", { name: "Go to photo 2" });
+    fireEvent.pointerDown(secondDot, { clientX: 120, clientY: 120 });
+    fireEvent.pointerUp(secondDot, { clientX: 120, clientY: 120 });
+    fireEvent.click(secondDot);
     expect(onActivePhotoChange).toHaveBeenCalledWith(2);
   });
 

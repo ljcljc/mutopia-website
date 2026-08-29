@@ -79,6 +79,10 @@ export function InspectionPhotoReview({
   const [slideDirection, setSlideDirection] = useState<SlideDirection | null>(
     null
   );
+  const [carouselTarget, setCarouselTarget] =
+    useState<InspectionPhotoOut | null>(null);
+  const [carouselOffset, setCarouselOffset] = useState(0);
+  const [carouselTransition, setCarouselTransition] = useState(false);
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [dragHeight, setDragHeight] = useState<number | null>(null);
@@ -107,6 +111,9 @@ export function InspectionPhotoReview({
     distance?: number;
     scale: number;
   } | null>(null);
+  const carouselGesture = useRef<{ x: number; width: number } | null>(null);
+  const carouselTargetRef = useRef<InspectionPhotoOut | null>(null);
+  const carouselTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mobilePanelHeight = dragHeight ?? SNAP_HEIGHTS[panelSnap];
   const mobilePanelHeightCss =
     typeof mobilePanelHeight === "number"
@@ -258,6 +265,13 @@ export function InspectionPhotoReview({
     scale,
   ]);
 
+  useEffect(
+    () => () => {
+      if (carouselTimer.current) clearTimeout(carouselTimer.current);
+    },
+    []
+  );
+
   if (!open || !photo || !config) return null;
 
   const apply = (
@@ -287,15 +301,45 @@ export function InspectionPhotoReview({
       nextClassification === "normal" ? [] : nextHints
     );
   };
+  const finishCarouselTransition = () => {
+    const target = carouselTargetRef.current;
+    if (target) onActivePhotoChange(target.id);
+    carouselTargetRef.current = null;
+    setCarouselTarget(null);
+    setCarouselOffset(0);
+    setCarouselTransition(false);
+    carouselTimer.current = null;
+  };
+  const startCarouselTransition = (
+    target: InspectionPhotoOut,
+    direction: SlideDirection
+  ) => {
+    if (carouselTransition || carouselTarget) return;
+    const width = viewportRef.current?.clientWidth || viewportSize.width;
+    if (!width) {
+      onActivePhotoChange(target.id);
+      return;
+    }
+    setSlideDirection(direction);
+    carouselTargetRef.current = target;
+    setCarouselTarget(target);
+    setCarouselTransition(false);
+    setCarouselOffset(direction === "next" ? 0 : -width);
+    requestAnimationFrame(() => {
+      setCarouselTransition(true);
+      setCarouselOffset(direction === "next" ? -width : 0);
+    });
+    carouselTimer.current = setTimeout(finishCarouselTransition, 300);
+  };
   const changePhoto = (nextPhotoId: number) => {
     const nextIndex = photos.findIndex((item) => item.id === nextPhotoId);
     if (nextIndex < 0 || nextIndex === activeIndex) return;
     const forwardDistance =
       (nextIndex - activeIndex + photos.length) % photos.length;
-    setSlideDirection(
+    startCarouselTransition(
+      photos[nextIndex],
       forwardDistance <= photos.length / 2 ? "next" : "previous"
     );
-    onActivePhotoChange(nextPhotoId);
   };
   const move = (offset: number) => {
     const next = photos[(activeIndex + offset + photos.length) % photos.length];
@@ -344,6 +388,8 @@ export function InspectionPhotoReview({
     );
   };
   const imagePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if ((event.target as HTMLElement).closest("button")) return;
+    if (carouselTransition) return;
     event.currentTarget.setPointerCapture(event.pointerId);
     imagePointers.current.set(event.pointerId, {
       x: event.clientX,
@@ -361,6 +407,12 @@ export function InspectionPhotoReview({
           : undefined,
       scale,
     };
+    if (scale === 1 && points.length === 1) {
+      carouselGesture.current = {
+        x: event.clientX,
+        width: viewportRef.current?.clientWidth || viewportSize.width,
+      };
+    }
   };
   const imagePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (!imagePointers.current.has(event.pointerId)) return;
@@ -371,6 +423,30 @@ export function InspectionPhotoReview({
     const gesture = imageGesture.current;
     const points = [...imagePointers.current.values()];
     if (!gesture) return;
+    if (points.length === 1 && scale === 1 && carouselGesture.current) {
+      const delta = event.clientX - carouselGesture.current.x;
+      if (!carouselTarget && Math.abs(delta) > 2 && photos.length > 1) {
+        const direction: SlideDirection = delta < 0 ? "next" : "previous";
+        const next =
+          photos[
+            (activeIndex + (direction === "next" ? 1 : -1) + photos.length) %
+              photos.length
+          ];
+        if (next) {
+          setSlideDirection(direction);
+          carouselTargetRef.current = next;
+          setCarouselTarget(next);
+          setCarouselTransition(false);
+        }
+      }
+      const direction = slideDirection ?? (delta < 0 ? "next" : "previous");
+      setCarouselOffset(
+        direction === "next"
+          ? delta
+          : -(carouselGesture.current.width || viewportSize.width) + delta
+      );
+      return;
+    }
     if (points.length === 2 && gesture.distance) {
       const distance = Math.hypot(
         points[0].x - points[1].x,
@@ -417,9 +493,37 @@ export function InspectionPhotoReview({
   };
   const imagePointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
     const gesture = imageGesture.current;
+    const carouselStart = carouselGesture.current;
     imagePointers.current.delete(event.pointerId);
-    if (gesture && scale === 1 && Math.abs(event.clientX - gesture.x) > 48)
-      move(event.clientX < gesture.x ? 1 : -1);
+    carouselGesture.current = null;
+    if (carouselStart && scale === 1 && imagePointers.current.size === 0) {
+      const delta = event.clientX - carouselStart.x;
+      const width = carouselStart.width || window.innerWidth;
+      if (Math.abs(delta) > 48) {
+        const direction: SlideDirection = delta < 0 ? "next" : "previous";
+        const next =
+          carouselTarget ??
+          photos[
+            (activeIndex + (direction === "next" ? 1 : -1) + photos.length) %
+              photos.length
+          ];
+        if (next) {
+          setSlideDirection(direction);
+          setCarouselTarget(next);
+          setCarouselTransition(true);
+          setCarouselOffset(direction === "next" ? -width : 0);
+          carouselTimer.current = setTimeout(finishCarouselTransition, 300);
+          return;
+        }
+      }
+      setCarouselTransition(true);
+      setCarouselOffset(0);
+      carouselTimer.current = setTimeout(() => {
+        setCarouselTransition(false);
+        carouselTimer.current = null;
+      }, 300);
+      return;
+    }
     if (imagePointers.current.size === 0) imageGesture.current = null;
   };
 
@@ -437,6 +541,12 @@ export function InspectionPhotoReview({
     "left_eye",
     "right_eye",
   ].includes(photo.area);
+  const carouselPhotos = carouselTarget
+    ? slideDirection === "previous"
+      ? [carouselTarget, photo]
+      : [photo, carouselTarget]
+    : [photo];
+  const carouselSlideWidth = carouselTarget ? "50%" : "100%";
   const postureNextLabel =
     observationTags.length > 0 ? "Next - Summary & notes" : "Next - Add notes";
   const controls = (
@@ -601,22 +711,51 @@ export function InspectionPhotoReview({
                   </div>
                 ) : null}
                 <div
-                  key={photo.id}
-                  className={`absolute inset-0 ${photos.length > 1 && slideDirection ? `review-photo-slide-in-${slideDirection}` : ""}`}
+                  className="absolute inset-y-0 left-0 flex"
+                  style={{
+                    width: carouselTarget ? "200%" : "100%",
+                    transform: `translate3d(${carouselOffset}px, 0, 0)`,
+                    transition: carouselTransition
+                      ? "transform 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+                      : "none",
+                  }}
                 >
-                  <img
-                    src={photo.url}
-                    alt={photo.original_filename || config.label}
-                    draggable={false}
-                    className="absolute left-1/2 top-1/2 select-none will-change-transform"
-                    style={previewStyle as CSSProperties}
-                    onLoad={(event) => {
-                      setImageNaturalSize({
-                        width: event.currentTarget.naturalWidth,
-                        height: event.currentTarget.naturalHeight,
-                      });
-                    }}
-                  />
+                  {carouselPhotos.map((carouselPhoto) => {
+                    const isActive = carouselPhoto.id === photo.id;
+                    return (
+                      <div
+                        key={carouselPhoto.id}
+                        className="relative h-full shrink-0 overflow-hidden"
+                        style={{ width: carouselSlideWidth }}
+                      >
+                        <img
+                          src={carouselPhoto.url}
+                          alt={carouselPhoto.original_filename || config.label}
+                          draggable={false}
+                          className={
+                            isActive
+                              ? "absolute left-1/2 top-1/2 select-none will-change-transform"
+                              : "absolute inset-0 size-full select-none object-contain"
+                          }
+                          style={
+                            isActive
+                              ? (previewStyle as CSSProperties)
+                              : undefined
+                          }
+                          onLoad={
+                            isActive
+                              ? (event) => {
+                                  setImageNaturalSize({
+                                    width: event.currentTarget.naturalWidth,
+                                    height: event.currentTarget.naturalHeight,
+                                  });
+                                }
+                              : undefined
+                          }
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
               {photos.length > 1 ? (
