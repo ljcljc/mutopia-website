@@ -49,6 +49,7 @@ export type DashboardAppointment = GroomerUpNextAppointment & {
   priceAdjustmentLines: DashboardAmountLine[];
   pendingCheckUp?: PendingCheckUpSummary | null;
   review?: ReviewSummaryOut | null;
+  reportInteractionState?: "awaiting_review" | "awaiting_reply";
   hasPublishedHealthReport?: boolean;
   healthReportPreparationStatus?: "preparing" | "failed";
   invitationId?: number;
@@ -792,14 +793,22 @@ async function enrichDashboardAppointment(nextAppointment: DashboardAppointment 
 
 async function resolveNextAppointmentState(
   currentBookingResult: PromiseSettledResult<unknown>,
-): Promise<Pick<GroomerDashboardState, "nextAppointment">> {
+): Promise<Pick<GroomerDashboardState, "nextAppointment" | "reportInteractions">> {
   if (currentBookingResult.status !== "fulfilled") {
     console.error("Failed to load groomer current booking:", currentBookingResult.reason);
-    return { nextAppointment: null };
+    return { nextAppointment: null, reportInteractions: [] };
   }
 
-  const nextAppointment = await enrichDashboardAppointment(mapNearestDashboardAppointment(currentBookingResult.value));
-  return { nextAppointment };
+  const payload = asRecord(currentBookingResult.value);
+  const nextAppointment = await enrichDashboardAppointment(mapNearestDashboardAppointment(payload));
+  const reportInteractions = getRecordArray(payload, ["report_interactions", "health_report_interactions"])
+    .map((record) => mapDashboardAppointment(record))
+    .filter((appointment): appointment is DashboardAppointment => Boolean(appointment))
+    .map((appointment) => ({
+      ...appointment,
+      reportInteractionState: appointment.review ? "awaiting_reply" as const : "awaiting_review" as const,
+    }));
+  return { nextAppointment, reportInteractions };
 }
 
 function resolvePendingBookingRequestState(
@@ -828,6 +837,7 @@ function updateMatchingNextAppointment(
 
 interface GroomerDashboardState {
   nextAppointment: DashboardAppointment | null;
+  reportInteractions: DashboardAppointment[];
   bookingRequest: DashboardAppointment | null;
   bookingRequests: DashboardAppointment[];
   dailyGoal: DashboardGoal;
@@ -862,6 +872,7 @@ interface GroomerDashboardState {
 
 export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => ({
   nextAppointment: null,
+  reportInteractions: [],
   bookingRequest: null,
   bookingRequests: [],
   dailyGoal: EMPTY_GOAL,

@@ -45,6 +45,7 @@ import {
   deleteCheckInObservationPhoto,
   getAddOns,
   getCheckInObservation,
+  replyGroomerReview,
   saveCheckInObservation,
   submitGroomerCheckUpCheckout,
   uploadCheckInObservationPhoto,
@@ -611,6 +612,74 @@ function ReviewedServiceCard({
       >
         View next job
       </button>
+    </article>
+  );
+}
+
+function HealthReportInteractionCard({
+  appointment,
+  onReply,
+}: {
+  appointment: DashboardAppointment;
+  onReply: (reviewId: number, reply: string) => Promise<void>;
+}) {
+  const [reply, setReply] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const review = appointment.review;
+  const rating = Math.max(0, Math.min(5, Math.round(review?.rating ?? 0)));
+  const awaitingReply = appointment.reportInteractionState === "awaiting_reply";
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!review?.id || !reply.trim() || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await onReply(review.id, reply.trim());
+      setReply("");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <article className="rounded-[16px] bg-white p-5 shadow-[0px_4px_14px_rgba(0,0,0,0.1)]">
+      <p className="font-comfortaa text-[11px] tracking-[0.5px] text-[#A07D72]">HEALTH REPORT</p>
+      <h2 className="mt-1 font-comfortaa text-[20px] font-bold leading-[30px] text-[#4A2C55]">
+        {awaitingReply ? "Reply to client review" : "Health report sent"}
+      </h2>
+      <div className="mt-4 flex items-center gap-3 rounded-[12px] bg-[#FAF8F4] px-3 py-3">
+        <img src={appointment.avatarUrl} alt={appointment.petName} className="size-12 rounded-full object-cover" />
+        <div className="min-w-0">
+          <p className="font-comfortaa text-[15px] leading-[22px] text-[#4A2C55]">{appointment.petName}</p>
+          <p className="font-comfortaa text-[12px] leading-[18px] text-[#8B6357]">{appointment.service}</p>
+          {review ? (
+            <div className="mt-1 flex gap-1" aria-label={`${rating} out of 5 stars`}>
+              {Array.from({ length: 5 }, (_, index) => (
+                <StarIcon key={index} className={`size-3.5 ${index < rating ? "fill-[#F59E0B] text-[#F59E0B]" : "text-[#D6CCC6]"}`} aria-hidden="true" />
+              ))}
+            </div>
+          ) : null}
+        </div>
+      </div>
+      {review?.comment ? (
+        <p className="mt-3 rounded-[8px] bg-[#FFF7ED] px-3 py-2 font-comfortaa text-[12px] leading-[18px] text-[#4A2C55]">&quot;{review.comment}&quot;</p>
+      ) : null}
+      {awaitingReply ? (
+        <form className="mt-4 space-y-3" onSubmit={handleSubmit}>
+          <textarea
+            value={reply}
+            onChange={(event) => setReply(event.target.value)}
+            placeholder="Write a reply..."
+            aria-label="Reply to client review"
+            className="min-h-[88px] w-full rounded-[10px] border border-[#E6D9D2] px-3 py-2 font-comfortaa text-[13px] text-[#4A2C55] outline-none focus:border-[#DE6A07]"
+          />
+          <button type="submit" disabled={!reply.trim() || isSubmitting} className="flex h-11 w-full items-center justify-center rounded-full bg-[#DE6A07] font-comfortaa text-[14px] font-bold text-white disabled:cursor-not-allowed disabled:opacity-60">
+            {isSubmitting ? <Spinner size="small" color="white" /> : "Reply"}
+          </button>
+        </form>
+      ) : (
+        <p className="mt-4 rounded-[10px] bg-[#EEF6FF] px-3 py-3 text-center font-comfortaa text-[12px] leading-[18px] text-[#2F5FD4]">Waiting for the client&apos;s review.</p>
+      )}
     </article>
   );
 }
@@ -1871,23 +1940,6 @@ function DashboardMetricCard({
   );
 }
 
-function NoUpcomingAppointmentsCard() {
-  return (
-    <article className="flex h-[213px] flex-col items-center justify-center rounded-[16px] bg-white px-5 shadow-[0px_4px_6px_rgba(0,0,0,0.08)]">
-      <div className="flex size-16 items-center justify-center rounded-full bg-[#F3F1EE]">
-        <Icon
-          name="clock"
-          className="size-8 text-[#9B6F5F]"
-          aria-hidden="true"
-        />
-      </div>
-      <p className="mt-5 text-center font-comfortaa text-[18px] font-bold leading-[27px] text-[#4A2C55]">
-        No upcoming appointments
-      </p>
-    </article>
-  );
-}
-
 function BookingRequestSuccessAlert({
   kind,
   onScheduleClick,
@@ -1940,6 +1992,7 @@ export default function GroomerDashboardPage() {
     useState<BookingRequestSuccessAlertKind | null>(null);
   const {
     nextAppointment,
+    reportInteractions,
     bookingRequests,
     dailyGoal,
     metrics,
@@ -2229,10 +2282,19 @@ export default function GroomerDashboardPage() {
     }
   };
 
-  const showInitialLoading = isLoadingDashboard && !hasLoadedDashboard;
-  const hasUpcomingAppointmentContent =
-    Boolean(nextAppointment) || bookingRequests.length > 0;
+  const handleReplyToReportReview = async (reviewId: number, reply: string) => {
+    try {
+      await replyGroomerReview(reviewId, reply);
+      toast.success("Reply sent");
+      await fetchDashboard();
+    } catch (error) {
+      console.error("Failed to reply to report review:", error);
+      toast.error("Failed to send reply");
+      throw error;
+    }
+  };
 
+  const showInitialLoading = isLoadingDashboard && !hasLoadedDashboard;
   return (
     <div className="min-h-[calc(100vh-64px)] w-full bg-[#633479] px-[calc(20*var(--px393))] pb-[calc(112*var(--px393))] pt-[calc(8*var(--px393))] sm:px-5 sm:pb-28 sm:pt-2">
       <AccountContentContainer>
@@ -2339,6 +2401,14 @@ export default function GroomerDashboardPage() {
                 />
               ) : null}
 
+              {reportInteractions.map((appointment) => (
+                <HealthReportInteractionCard
+                  key={`health-report-${appointment.id}`}
+                  appointment={appointment}
+                  onReply={handleReplyToReportReview}
+                />
+              ))}
+
               {bookingRequests.length > 0 ? (
                 <BookingRequestCard
                   requests={bookingRequests}
@@ -2346,10 +2416,6 @@ export default function GroomerDashboardPage() {
                   onProposeNewTime={handleProposeNewTime}
                   onDecline={handleDeclineBookingRequest}
                 />
-              ) : null}
-
-              {!hasUpcomingAppointmentContent ? (
-                <NoUpcomingAppointmentsCard />
               ) : null}
 
               <DailyGoalProgressCard dailyGoal={dailyGoal} />
