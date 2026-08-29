@@ -8,7 +8,7 @@ import { formatCanadianPostalCodeInput, getCanadianPostalCodeError } from "@/lib
 import { useBookingStore } from "./bookingStore";
 import { getServiceAreaProvinces, getServiceAreas, type ProvinceOut, type ServiceAreaOut } from "@/lib/api";
 
-type Step1Field = "address" | "city" | "postCode" | "store";
+type Step1Field = "address" | "city" | "postCode";
 type Step1Errors = Partial<Record<Step1Field, string>>;
 
 const DEFAULT_PROVINCE_CODE = "BC";
@@ -25,9 +25,7 @@ export function Step1AddressAndServiceType() {
     selectedServiceAreaId,
     isLoginModalOpen,
     selectedAddressId,
-    selectedStoreId,
     addresses,
-    stores,
     setAddress,
     setServiceType,
     setCity,
@@ -35,21 +33,17 @@ export function Step1AddressAndServiceType() {
     setPostCode,
     setSelectedServiceAreaId,
     setSelectedAddressId,
-    setSelectedStoreId,
     loadAddresses,
-    loadStores,
     setIsLoginModalOpen,
     nextStep,
   } = useBookingStore();
 
   const [isAddressDropdownOpen, setIsAddressDropdownOpen] = useState(false);
-  const [isStoreDropdownOpen, setIsStoreDropdownOpen] = useState(false);
   const [provinces, setProvinces] = useState<ProvinceOut[]>([]);
   const [serviceAreas, setServiceAreas] = useState<ServiceAreaOut[]>([]);
   const [isLoadingAreas, setIsLoadingAreas] = useState(false);
   const [errors, setErrors] = useState<Step1Errors>({});
   const addressDropdownRef = useRef<HTMLDivElement>(null);
-  const storeDropdownRef = useRef<HTMLDivElement>(null);
   const cityRef = useRef(city);
 
   useEffect(() => {
@@ -71,12 +65,6 @@ export function Step1AddressAndServiceType() {
       ) {
         setIsAddressDropdownOpen(false);
       }
-      if (
-        storeDropdownRef.current &&
-        !storeDropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsStoreDropdownOpen(false);
-      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -92,13 +80,6 @@ export function Step1AddressAndServiceType() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
-
-  // 加载门店列表（如果选择 in_store 服务）
-  useEffect(() => {
-    if (serviceType === "in_store") {
-      loadStores();
-    }
-  }, [serviceType, loadStores]);
 
   useEffect(() => {
     let cancelled = false;
@@ -152,30 +133,15 @@ export function Step1AddressAndServiceType() {
     };
   }, [province, setCity, setSelectedServiceAreaId]);
 
-  // 当服务类型改变时，重置选择
-  useEffect(() => {
-    if (serviceType === "mobile" || serviceType === "in_home") {
-      setSelectedStoreId(null);
-    } else if (serviceType === "in_store") {
-      setSelectedAddressId(null);
-    }
-  }, [serviceType, setSelectedAddressId, setSelectedStoreId]);
-
   // 根据服务类型显示不同的信息文本
-  const infoText =
-    serviceType === "mobile" || serviceType === "in_home"
-      ? "We currently provide mobile grooming services throughout Grand Vancouver and surrounding areas."
-      : "Please select a store location for in-store grooming services.";
+  const infoText = "We currently provide mobile grooming services throughout Grand Vancouver and surrounding areas.";
 
   // 获取当前显示的地址或门店
   const currentAddress =
     (serviceType === "mobile" || serviceType === "in_home") && selectedAddressId
       ? addresses.find((addr) => addr.id === selectedAddressId)
       : null;
-  const currentStore =
-    serviceType === "in_store" && selectedStoreId
-      ? stores.find((store) => store.id === selectedStoreId)
-      : null;
+  const selectableAddresses = addresses.filter((addr) => addr.service_type !== "in_store");
 
   const selectedProvinceName = useMemo(
     () => provinces.find((item) => item.code === province)?.name ?? province,
@@ -204,10 +170,6 @@ export function Step1AddressAndServiceType() {
   };
 
   const getErrors = (): Step1Errors => {
-    if (serviceType === "in_store") {
-      return selectedStoreId === null ? { store: "Select a store location" } : {};
-    }
-
     return {
       ...((selectedAddressId === null && !address.trim()) ? { address: "Address is required" } : {}),
       ...(!selectedServiceAreaId || !city.trim() ? { city: "Select a city" } : {}),
@@ -282,7 +244,7 @@ export function Step1AddressAndServiceType() {
           </div>
           {isAddressDropdownOpen && (
             <div className="absolute z-10 mt-1 max-h-[200px] w-full overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg">
-              {addresses.map((addr) => (
+              {selectableAddresses.map((addr) => (
                 <div
                   key={addr.id}
                   className={`cursor-pointer px-3 py-2 transition-colors hover:bg-gray-50 ${
@@ -305,75 +267,12 @@ export function Step1AddressAndServiceType() {
         </div>
         {errors.address && <p role="alert" className="mt-1 text-xs text-[#de1507]">{errors.address}</p>}
       </div>
-    ) : serviceType === "in_store" && stores.length > 0 ? (
-      <div data-booking-field="store" className="flex flex-col items-start relative w-full sm:w-[320px]">
-        <div className="flex gap-[7px] items-center relative mb-2">
-          <p className="font-comfortaa font-normal leading-[22.75px] relative text-[#4a3c2a] text-[14px]">
-            Store Location
-          </p>
-        </div>
-        <div className="relative w-full sm:w-[320px]" ref={storeDropdownRef}>
-          <div
-            className={`bg-white border border-solid h-[36px] relative rounded-[8px] w-full cursor-pointer hover:border-[#633479] transition-colors ${errors.store ? "border-[#de1507]" : "border-gray-200"}`}
-            onClick={() => setIsStoreDropdownOpen(!isStoreDropdownOpen)}
-          >
-            <div className="flex h-[36px] items-center overflow-clip px-[12px] py-[4px] relative rounded-[inherit] w-full">
-              <div className="flex flex-1 items-center relative">
-                <div className="overflow-clip relative shrink-0 size-[24px]">
-                  <Icon
-                    name="location"
-                    aria-label="Location"
-                    className="block size-full text-[#de6a07]"
-                  />
-                </div>
-                <p className="flex-1 font-comfortaa font-normal leading-[normal] relative text-[#717182] text-[12.25px] ml-[4px] truncate">
-                  {currentStore?.name || "Select a store"}
-                </p>
-                <div className="h-[6.375px] relative shrink-0 w-[11.25px]">
-                  <Icon
-                    name="chevron-down"
-                    aria-label="Dropdown"
-                    className={`block size-full text-[#717182] transition-transform ${
-                      isStoreDropdownOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-          {isStoreDropdownOpen && (
-            <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-[8px] shadow-lg max-h-[200px] overflow-y-auto">
-              {stores.map((store) => (
-                <div
-                  key={store.id}
-                  className={`px-[12px] py-[8px] cursor-pointer hover:bg-gray-50 transition-colors ${
-                    selectedStoreId === store.id ? "bg-blue-50" : ""
-                  }`}
-                  onClick={() => {
-                    setSelectedStoreId(store.id);
-                    setIsStoreDropdownOpen(false);
-                    clearError("store");
-                  }}
-                >
-                  <p className="font-comfortaa text-[12.25px] text-[#4a3c2a] font-semibold">
-                    {store.name}
-                  </p>
-                  <p className="font-comfortaa text-[10px] text-[#717182] mt-1">
-                    {store.address}, {store.city}, {store.province} {store.postal_code}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        {errors.store && <p role="alert" className="mt-1 text-xs text-[#de1507]">{errors.store}</p>}
-      </div>
     ) : (
       <div data-booking-field="address" className="w-full sm:w-[320px]">
         <CustomInput
-          label={serviceType === "in_store" ? "Store Location" : "Address"}
+          label="Address"
           type="text"
-          placeholder={serviceType === "in_store" ? "Enter store address" : "Enter your address"}
+          placeholder="Enter your address"
           value={address}
           error={errors.address}
           onChange={(e) => { setAddress(e.target.value); if (e.target.value.trim()) clearError("address"); }}
@@ -478,7 +377,7 @@ export function Step1AddressAndServiceType() {
                   displayValue={city || undefined}
                   onValueChange={handleCityChange}
                   error={errors.city}
-                  disabled={!province || isLoadingAreas || serviceType === "in_store"}
+                  disabled={!province || isLoadingAreas}
                 >
                   {serviceAreas.map((item) => (
                     <CustomSelectItem key={item.id} value={String(item.id)}>
@@ -529,13 +428,6 @@ export function Step1AddressAndServiceType() {
                     icon="van"
                     isSelected={serviceType === "mobile"}
                     onClick={() => setServiceType("mobile")}
-                    className="w-full"
-                  />
-                  <CustomRadio
-                    label="In store"
-                    icon="shop"
-                    isSelected={serviceType === "in_store"}
-                    onClick={() => setServiceType("in_store")}
                     className="w-full"
                   />
                   <CustomRadio

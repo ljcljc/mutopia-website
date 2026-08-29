@@ -45,7 +45,7 @@ export default function AddAddressModal({
   const [city, setCity] = useState("");
   const [serviceAreaId, setServiceAreaId] = useState<number | null>(null);
   const [postalCode, setPostalCode] = useState("");
-  const [serviceType] = useState<"mobile" | "in_store" | "in_home">("mobile");
+  const serviceType = "mobile" as const;
   const [label, setLabel] = useState("");
   const [isDefault, setIsDefault] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
