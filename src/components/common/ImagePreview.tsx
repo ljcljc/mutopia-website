@@ -42,6 +42,8 @@ export interface ImagePreviewProps {
   onClose?: () => void;
   /** 图片文件名数组（可选，用于显示文件名） */
   fileNames?: string[];
+  /** 删除当前预览图片 */
+  onDelete?: (index: number) => void;
   /** 初始缩放比例（默认 100） */
   initialZoom?: number;
   /** 最小缩放比例（默认 50） */
@@ -57,6 +59,7 @@ export function ImagePreview({
   open = false,
   onClose,
   fileNames,
+  onDelete,
   initialZoom = 100,
   minZoom = 50,
   maxZoom = 200,
@@ -395,6 +398,16 @@ export function ImagePreview({
                 <p className="absolute font-comfortaa font-normal leading-[17.5px] left-0 text-[#101828] text-[12.25px] top-[-0.5px] w-full whitespace-pre-wrap">
                   {currentIndex + 1} / {totalImages}
                 </p>
+                {onDelete ? (
+                  <button
+                    type="button"
+                    onClick={() => onDelete(currentIndex)}
+                    className="absolute -right-7 top-[-2px] z-10 flex size-5 items-center justify-center text-[#4a3c2a] opacity-70 transition-opacity hover:opacity-100"
+                    aria-label={`Delete ${currentFileName}`}
+                  >
+                    <Icon name="trash" className="size-4" aria-hidden="true" />
+                  </button>
+                ) : null}
               </div>
             </div>
             {/* 分隔线 */}

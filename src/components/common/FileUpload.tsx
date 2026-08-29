@@ -140,9 +140,16 @@ export function FileUpload({
     () => displayItems.map((item) => item.previewUrl).filter((url) => url),
     [displayItems]
   );
-  const previewFileNames = useMemo(
-    () => displayItems.map((item) => item.file.name),
+  const previewItemIndices = useMemo(
+    () => displayItems.reduce<number[]>((indices, item, index) => {
+      if (item.previewUrl) indices.push(index);
+      return indices;
+    }, []),
     [displayItems]
+  );
+  const previewFileNames = useMemo(
+    () => previewItemIndices.map((index) => displayItems[index].file.name),
+    [displayItems, previewItemIndices]
   );
 
   useEffect(() => {
@@ -238,7 +245,7 @@ export function FileUpload({
                               onPreviewItem(index);
                               return;
                             }
-                            setPreviewIndex(index);
+                            setPreviewIndex(previewItemIndices.indexOf(index));
                             setPreviewOpen(true);
                           }}
                         >
@@ -463,6 +470,25 @@ export function FileUpload({
           open={previewOpen}
           onClose={() => setPreviewOpen(false)}
           fileNames={previewFileNames}
+          onDelete={(index) => {
+            const itemIndex = previewItemIndices[index];
+            if (itemIndex === undefined) return;
+
+            const item = displayItems[itemIndex];
+            if (item?.previewUrl?.startsWith("blob:")) {
+              URL.revokeObjectURL(item.previewUrl);
+            }
+            if (uploadItems) {
+              if (item?.uploadStatus === "uploaded") {
+                onRemove?.(itemIndex);
+              } else {
+                onChange?.(files.filter((_, fileIndex) => fileIndex !== itemIndex));
+              }
+            } else {
+              removeFile(itemIndex);
+            }
+            setPreviewOpen(false);
+          }}
         />
       )}
     </div>
