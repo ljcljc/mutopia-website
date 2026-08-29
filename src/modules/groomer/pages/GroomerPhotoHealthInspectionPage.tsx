@@ -7,6 +7,10 @@ import AccountContentContainer from "@/components/layout/AccountContentContainer
 import { Textarea } from "@/components/ui/textarea";
 import { HttpError } from "@/lib/http";
 import {
+  compressInspectionImage,
+  createTemporaryPhotoId,
+} from "@/lib/imageCompression";
+import {
   deleteInspectionPhoto,
   getCheckInObservation,
   getGroomerBookingDetail,
@@ -529,43 +533,57 @@ export default function GroomerPhotoHealthInspectionPage() {
 
   const upload = async (area: InspectionArea, files: File[]) => {
     setErrors((current) => ({ ...current, [area]: "" }));
-    const localPhotos = files.map((file, index) => ({
-      file,
-      tempId: -(Date.now() + index),
-      previewUrl: URL.createObjectURL(file),
-    }));
-    setInspection((current) =>
-      current
-        ? {
-            ...current,
-            photos: [
-              ...current.photos,
-              ...localPhotos.map(({ file, tempId, previewUrl }) => ({
-                id: tempId,
-                area,
-                url: previewUrl,
-                original_filename: file.name,
-                normalized_mime_type: file.type || "image/jpeg",
-                classification: "normal" as const,
-                finding_hints: [],
-                confirmed: false,
-              })),
-            ],
-          }
-        : current
-    );
-    setPhotoUploadStates((current) => ({
-      ...current,
-      ...Object.fromEntries(
-        localPhotos.map(({ tempId }) => [
-          tempId,
-          { status: "uploading" as const, progress: 0 },
-        ])
-      ),
-    }));
+    let compressionQueue = Promise.resolve();
 
     await Promise.all(
-      localPhotos.map(async ({ file, tempId, previewUrl }) => {
+      files.map(async (originalFile) => {
+        const compressionTask = compressionQueue.then(() =>
+          compressInspectionImage(originalFile)
+        );
+        compressionQueue = compressionTask.then(
+          () => undefined,
+          () => undefined
+        );
+
+        let file: File;
+        try {
+          file = await compressionTask;
+        } catch {
+          setErrors((current) => ({
+            ...current,
+            [area]:
+              "Some photos could not be prepared. Please try a smaller image.",
+          }));
+          return;
+        }
+
+        const tempId = createTemporaryPhotoId();
+        const previewUrl = URL.createObjectURL(file);
+        setInspection((current) =>
+          current
+            ? {
+                ...current,
+                photos: [
+                  ...current.photos,
+                  {
+                    id: tempId,
+                    area,
+                    url: previewUrl,
+                    original_filename: file.name,
+                    normalized_mime_type: file.type || "image/jpeg",
+                    classification: "normal" as const,
+                    finding_hints: [],
+                    confirmed: false,
+                  },
+                ],
+              }
+            : current
+        );
+        setPhotoUploadStates((current) => ({
+          ...current,
+          [tempId]: { status: "uploading", progress: 0 },
+        }));
+
         try {
           const requestId =
             globalThis.crypto?.randomUUID?.() ??
