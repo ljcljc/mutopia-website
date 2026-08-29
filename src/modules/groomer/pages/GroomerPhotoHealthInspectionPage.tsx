@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { OrangeButton } from "@/components/common";
+import { Icon } from "@/components/common/Icon";
 import { Spinner } from "@/components/common/Spinner";
 import AccountContentContainer from "@/components/layout/AccountContentContainer";
 import { Textarea } from "@/components/ui/textarea";
@@ -997,11 +998,7 @@ export default function GroomerPhotoHealthInspectionPage() {
                               aria-label={`Upload ${area.label}`}
                             >
                               <div className="flex h-[29px] w-[28px] items-center justify-center rounded-full bg-[#F0EBF7]">
-                                <img
-                                  alt=""
-                                  src="https://www.figma.com/api/mcp/asset/97e70b58-326c-44e7-aac1-fa2bb74c7fec.svg"
-                                  className="size-[20.99px]"
-                                />
+                                <Icon name="add-inspection" className="size-[28px]" />
                               </div>
                               <span className="font-comfortaa text-[12px] font-medium leading-[18px] text-[#633479]">
                                 {area.label}
