@@ -492,7 +492,6 @@ export function InspectionPhotoReview({
     }
   };
   const imagePointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const gesture = imageGesture.current;
     const carouselStart = carouselGesture.current;
     imagePointers.current.delete(event.pointerId);
     carouselGesture.current = null;
