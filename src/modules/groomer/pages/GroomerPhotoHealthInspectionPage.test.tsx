@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import GroomerPhotoHealthInspectionPage from "./GroomerPhotoHealthInspectionPage";
 import {
   deleteInspectionPhoto,
@@ -9,6 +9,8 @@ import {
   getPhotoHealthAnalysis,
   getPhotoHealthInspection,
   startPhotoHealthInspection,
+  submitPhotoHealthInspection,
+  updateInspectionPhoto,
   uploadInspectionPhoto,
   type PhotoHealthInspectionOut,
 } from "@/lib/api";
@@ -65,6 +67,10 @@ function renderPage() {
 }
 
 describe("GroomerPhotoHealthInspectionPage", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     window.localStorage.clear();
@@ -169,6 +175,13 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     fireEvent.click(await screen.findByRole("img", { name: "photo.jpg" }));
     fireEvent.click(screen.getAllByRole("button", { name: /AI Scan/ })[0]);
 
+    await waitFor(() =>
+      expect(updateInspectionPhoto).toHaveBeenCalledWith(42, 1, {
+        classification: "ai_scan",
+        finding_hints: [],
+        description: "",
+      })
+    );
     expect(
       JSON.parse(
         window.localStorage.getItem("photo-health-draft:42:42") ?? "{}"
@@ -178,6 +191,126 @@ describe("GroomerPhotoHealthInspectionPage", () => {
         expect.objectContaining({ id: 1, classification: "ai_scan" }),
       ])
     );
+  });
+
+  it("allows advancing with an unconfirmed remotely uploaded photo", async () => {
+    vi.mocked(getPhotoHealthInspection).mockResolvedValue({
+      exists: true,
+      inspection: {
+        ...inspection,
+        photos: [
+          {
+            id: 76,
+            area: "skin",
+            url: "/remote-skin.jpg",
+            original_filename: "remote-skin.jpg",
+            normalized_mime_type: "image/jpeg",
+            classification: null,
+            finding_hints: [],
+            confirmed: false,
+          },
+        ],
+      },
+    });
+    renderPage();
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: /Next: Ear inspection/ })
+    );
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole("navigation", { name: "Breadcrumb" })
+      ).toHaveTextContent(/Step 2 of 6 - Ear inspection/)
+    );
+    expect(
+      screen.queryByRole("dialog", { name: "Skin photo review" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows a description error when an AI Scan photo is missing description", async () => {
+    vi.mocked(getPhotoHealthInspection).mockResolvedValue({
+      exists: true,
+      inspection: {
+        ...inspection,
+        photos: [
+          {
+            id: 78,
+            area: "skin",
+            url: "/ai-skin.jpg",
+            original_filename: "ai-skin.jpg",
+            normalized_mime_type: "image/jpeg",
+            classification: "ai_scan",
+            finding_hints: [],
+            confirmed: true,
+            description: "",
+          },
+        ],
+      },
+    });
+    renderPage();
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: /Next: Ear inspection/ })
+    );
+
+    expect(
+      await screen.findByText(
+        "Add a description for every AI Scan photo before continuing."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("dialog", { name: "Skin photo review" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("navigation", { name: "Breadcrumb" })
+    ).toHaveTextContent(/Step 1 of 6 - Skin inspection/);
+  });
+
+  it("requires confirmation before final report generation", async () => {
+    vi.mocked(getPhotoHealthInspection).mockResolvedValue({
+      exists: true,
+      inspection: {
+        ...inspection,
+        current_step: 6,
+        step6_phase: "notes",
+        overall_professional_impression: "grade_b",
+        photos: [
+          {
+            id: 77,
+            area: "skin",
+            url: "/remote-skin.jpg",
+            original_filename: "remote-skin.jpg",
+            normalized_mime_type: "image/jpeg",
+            classification: null,
+            finding_hints: [],
+            confirmed: false,
+          },
+        ],
+      },
+    });
+    vi.mocked(submitPhotoHealthInspection).mockResolvedValue({
+      job_id: 1,
+    } as never);
+    renderPage();
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: "All good! Generate Report" })
+    );
+    expect(
+      await screen.findByRole("dialog", { name: "Skin photo review" })
+    ).toBeInTheDocument();
+    expect(submitPhotoHealthInspection).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getAllByRole("button", { name: /Normal/ })[0]);
+    await waitFor(() =>
+      expect(updateInspectionPhoto).toHaveBeenCalledWith(42, 77, {
+        classification: "normal",
+        finding_hints: [],
+        description: "",
+      })
+    );
+    await waitFor(() => expect(submitPhotoHealthInspection).toHaveBeenCalled());
   });
 
   it("keeps the review panel open after a newly uploaded photo is auto-confirmed", async () => {
@@ -214,6 +347,62 @@ describe("GroomerPhotoHealthInspectionPage", () => {
       expect(
         screen.getByRole("dialog", { name: "Skin photo review" })
       ).toBeInTheDocument()
+    );
+  });
+
+  it("keeps a Step 2 ear photo when its server image loads before the temporary state commits", async () => {
+    class LoadedImage {
+      onload: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+
+      set src(_url: string) {
+        queueMicrotask(() => this.onload?.());
+      }
+    }
+    vi.stubGlobal("Image", LoadedImage);
+    vi.mocked(getPhotoHealthInspection).mockResolvedValue({
+      exists: true,
+      inspection: { ...inspection, current_step: 2 },
+    });
+    vi.mocked(uploadInspectionPhoto).mockResolvedValue({
+      id: 102,
+      area: "left_ear",
+      url: "/uploaded-left-ear.jpg",
+      original_filename: "left-ear.jpg",
+      normalized_mime_type: "image/jpeg",
+      classification: "normal",
+      finding_hints: [],
+      confirmed: false,
+    });
+    const revokeObjectURL = vi.spyOn(URL, "revokeObjectURL");
+    renderPage();
+
+    const uploadLeftEar = await screen.findByRole("button", {
+      name: "Upload Left ear",
+    });
+    const input =
+      uploadLeftEar.parentElement?.querySelector<HTMLInputElement>(
+        'input[type="file"]'
+      );
+    expect(input).not.toBeNull();
+    fireEvent.change(input!, {
+      target: {
+        files: [new File(["image"], "left-ear.jpg", { type: "image/jpeg" })],
+      },
+    });
+
+    await waitFor(() => expect(uploadInspectionPhoto).toHaveBeenCalledOnce());
+    await waitFor(() =>
+      expect(revokeObjectURL).toHaveBeenCalledWith("blob:compressed-photo")
+    );
+    await waitFor(() =>
+      expect(
+        screen
+          .getAllByRole("img", { name: "left-ear.jpg" })
+          .some(
+            (image) => image.getAttribute("src") === "/uploaded-left-ear.jpg"
+          )
+      ).toBe(true)
     );
   });
 

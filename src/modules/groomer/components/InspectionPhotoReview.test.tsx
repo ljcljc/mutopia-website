@@ -16,6 +16,7 @@ const photo = (
   normalized_mime_type: "image/jpeg",
   classification: "normal",
   finding_hints: [],
+  description: "",
   confirmed: false,
   ...overrides,
 });
@@ -54,7 +55,39 @@ describe("InspectionPhotoReview", () => {
     fireEvent.click(screen.getAllByRole("button", { name: "Redness" })[0]);
 
     await waitFor(() =>
-      expect(onChange).toHaveBeenLastCalledWith(1, "ai_scan", ["redness"])
+      expect(onChange).toHaveBeenLastCalledWith(1, "ai_scan", ["redness"], "")
+    );
+  });
+
+  it("keeps an AI Scan description when classification is toggled", () => {
+    const onDescriptionChange = vi.fn();
+    render(
+      <InspectionPhotoReview
+        photos={[photo()]}
+        activePhotoId={1}
+        config={{ area: "skin", label: "Skin photo", hints: [] }}
+        open
+        onActivePhotoChange={vi.fn()}
+        onClose={vi.fn()}
+        onChange={vi.fn()}
+        onDescriptionChange={onDescriptionChange}
+        onAddPhoto={vi.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getAllByRole("button", { name: /AI Scan/ })[0]);
+    fireEvent.change(screen.getAllByRole("textbox", { name: "AI Scan description" })[0], {
+      target: { value: "Redness near the collar" },
+    });
+    fireEvent.click(screen.getAllByRole("button", { name: /Normal/ })[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: /AI Scan/ })[0]);
+
+    expect(screen.getAllByRole("textbox", { name: "AI Scan description" })[0]).toHaveValue(
+      "Redness near the collar"
+    );
+    expect(onDescriptionChange).toHaveBeenLastCalledWith(
+      1,
+      "Redness near the collar"
     );
   });
 
@@ -95,7 +128,7 @@ describe("InspectionPhotoReview", () => {
     );
 
     await waitFor(() => expect(onProceedToNotes).toHaveBeenCalled());
-    expect(onChange).toHaveBeenCalledWith(1, "normal", []);
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it("uses the summary label when posture observations are selected", () => {

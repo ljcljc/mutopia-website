@@ -1889,6 +1889,7 @@ export interface InspectionPhotoOut {
   size_bytes?: number;
   classification: InspectionPhotoClassification | null;
   finding_hints: string[];
+  description?: string;
   confirmed: boolean;
 }
 
@@ -2633,6 +2634,7 @@ export async function updateInspectionPhoto(
   data: {
     classification: InspectionPhotoClassification;
     finding_hints: string[];
+    description: string;
   }
 ): Promise<InspectionPhotoOut> {
   const response = await http.put<InspectionPhotoOut>(

@@ -5871,9 +5871,10 @@
             "title": "Finding Hints",
             "type": "array"
           },
+          "description": { "title": "Description", "type": "string" },
           "confirmed": { "title": "Confirmed", "type": "boolean" }
         },
-        "required": ["id", "area", "url", "original_filename", "source_mime_type", "normalized_mime_type", "size_bytes", "classification", "finding_hints", "confirmed"],
+        "required": ["id", "area", "url", "original_filename", "source_mime_type", "normalized_mime_type", "size_bytes", "classification", "finding_hints", "description", "confirmed"],
         "title": "InspectionPhotoOut",
         "type": "object"
       },
@@ -5888,7 +5889,8 @@
             "items": { "type": "string" },
             "title": "Finding Hints",
             "type": "array"
-          }
+          },
+          "description": { "default": "", "title": "Description", "type": "string" }
         },
         "required": ["id", "classification"],
         "title": "InspectionPhotoSubmissionIn",

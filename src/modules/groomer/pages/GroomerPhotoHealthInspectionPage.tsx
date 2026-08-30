@@ -25,6 +25,7 @@ import {
   publishPhotoHealthReport,
   startPhotoHealthInspection,
   submitPhotoHealthInspection,
+  updateInspectionPhoto,
   updatePhotoHealthReportInsights,
   uploadInspectionPhoto,
   type InspectionArea,
@@ -52,7 +53,7 @@ interface InspectionLocalDraft {
   photos: Array<
     Pick<
       InspectionPhotoOut,
-      "id" | "classification" | "finding_hints" | "confirmed"
+      "id" | "classification" | "finding_hints" | "description" | "confirmed"
     >
   >;
   lastReviewPhotoId: number | null;
@@ -149,10 +150,7 @@ function ReportGenerationLoadingScreen() {
   );
 }
 
-function preloadInspectionPhoto(
-  url: string,
-  onReady: () => void
-) {
+function preloadInspectionPhoto(url: string, onReady: () => void) {
   const image = new Image();
   let settled = false;
   const settle = () => {
@@ -227,6 +225,7 @@ export default function GroomerPhotoHealthInspectionPage() {
     useState<PhotoHealthInspectionOut["step6_phase"]>("impression");
   const [observationTags, setObservationTags] = useState<string[]>([]);
   const [reviewQueue, setReviewQueue] = useState<number[]>([]);
+  const [pendingSubmit, setPendingSubmit] = useState(false);
   const [photoUploadStates, setPhotoUploadStates] = useState<
     Record<number, InspectionPhotoUploadState>
   >({});
@@ -263,10 +262,11 @@ export default function GroomerPhotoHealthInspectionPage() {
       step6Phase,
       observationTags,
       photos: nextInspection.photos.map(
-        ({ id, classification, finding_hints, confirmed }) => ({
+        ({ id, classification, finding_hints, description, confirmed }) => ({
           id,
           classification,
           finding_hints,
+          description,
           confirmed,
         })
       ),
@@ -355,10 +355,11 @@ export default function GroomerPhotoHealthInspectionPage() {
       step6Phase,
       observationTags,
       photos: inspection.photos.map(
-        ({ id, classification, finding_hints, confirmed }) => ({
+        ({ id, classification, finding_hints, description, confirmed }) => ({
           id,
           classification,
           finding_hints,
+          description,
           confirmed,
         })
       ),
@@ -453,6 +454,9 @@ export default function GroomerPhotoHealthInspectionPage() {
   );
   const activeReviewConfig =
     stepConfig?.areas.find((area) => area.area === activeReviewPhoto?.area) ??
+    Object.values(INSPECTION_STEPS)
+      .flatMap((item) => item.areas)
+      .find((area) => area.area === activeReviewPhoto?.area) ??
     null;
   const isPairedInspection = step === 2 || step === 4;
   const pairedAreas = isPairedInspection ? (stepConfig?.areas ?? []) : [];
@@ -580,6 +584,7 @@ export default function GroomerPhotoHealthInspectionPage() {
           normalized_mime_type: originalFile.type || "image/jpeg",
           classification: "normal",
           finding_hints: [],
+          description: "",
           confirmed: false,
         };
         setInspection((current) =>
@@ -676,11 +681,16 @@ export default function GroomerPhotoHealthInspectionPage() {
           preloadInspectionPhoto(uploaded.url, () => {
             setInspection((current) => {
               if (!current) return current;
+              const hasTemporaryPhoto = current.photos.some(
+                (photo) => photo.id === tempId
+              );
               const nextInspection = {
                 ...current,
-                photos: current.photos.map((photo) =>
-                  photo.id === tempId ? uploaded : photo
-                ),
+                photos: hasTemporaryPhoto
+                  ? current.photos.map((photo) =>
+                      photo.id === tempId ? uploaded : photo
+                    )
+                  : [...current.photos, uploaded],
               };
               inspectionRef.current = nextInspection;
               return nextInspection;
@@ -709,13 +719,32 @@ export default function GroomerPhotoHealthInspectionPage() {
     );
   };
 
-  const confirmPhoto = (
+  const confirmPhoto = async (
     photoId: number,
     classification: InspectionPhotoClassification,
-    findingHints: string[]
+    findingHints: string[],
+    description: string
   ) => {
     const current = inspectionRef.current;
     if (!current) return;
+    const photo = current.photos.find((item) => item.id === photoId);
+    if (!photo) return;
+    const normalizedHints = classification === "normal" ? [] : findingHints;
+    try {
+      if (photoId >= 0) {
+        await updateInspectionPhoto(bookingId, photoId, {
+          classification,
+          finding_hints: normalizedHints,
+          description,
+        });
+      }
+    } catch {
+      setErrors((currentErrors) => ({
+        ...currentErrors,
+        [photo.area]: "Could not confirm this photo. Please try again.",
+      }));
+      return;
+    }
     const nextInspection = {
       ...current,
       photos: current.photos.map((photo) =>
@@ -723,7 +752,8 @@ export default function GroomerPhotoHealthInspectionPage() {
           ? {
               ...photo,
               classification,
-              finding_hints: findingHints,
+              finding_hints: normalizedHints,
+              description,
               confirmed: true,
             }
           : photo
@@ -731,7 +761,30 @@ export default function GroomerPhotoHealthInspectionPage() {
     };
     inspectionRef.current = nextInspection;
     setInspection(nextInspection);
-    // Classification stays client-side until final submission, so persist it immediately.
+    persistLocalDraft(nextInspection);
+    if (pendingSubmit) {
+      const hasUnconfirmedPhoto = nextInspection.photos.some(
+        (item) => !item.confirmed
+      );
+      if (!hasUnconfirmedPhoto) {
+        setReviewQueue([]);
+        setPendingSubmit(false);
+        void submit();
+      }
+    }
+  };
+
+  const updatePhotoDescription = (photoId: number, description: string) => {
+    const current = inspectionRef.current;
+    if (!current) return;
+    const nextInspection = {
+      ...current,
+      photos: current.photos.map((photo) =>
+        photo.id === photoId ? { ...photo, description } : photo
+      ),
+    };
+    inspectionRef.current = nextInspection;
+    setInspection(nextInspection);
     persistLocalDraft(nextInspection);
   };
 
@@ -789,16 +842,16 @@ export default function GroomerPhotoHealthInspectionPage() {
     }
   };
 
-  const saveStep = (nextStep: number) => {
-    const latestInspection = inspectionRef.current ?? inspection;
-    if (!latestInspection) return;
+  const saveStep = async (nextStep: number) => {
+    const currentInspection = inspectionRef.current ?? inspection;
+    if (!currentInspection) return;
+    let latestInspection: PhotoHealthInspectionOut = currentInspection;
     if (stepConfig) {
       const minimumPhotos = 1;
       const missing = stepConfig.areas.filter(
         (area) =>
-          latestInspection.photos.filter(
-            (photo) => photo.area === area.area
-          ).length < minimumPhotos
+          latestInspection.photos.filter((photo) => photo.area === area.area)
+            .length < minimumPhotos
       );
       if (missing.length > 0) {
         setErrors((current) => ({
@@ -806,6 +859,60 @@ export default function GroomerPhotoHealthInspectionPage() {
           page: `Confirm at least ${minimumPhotos} photo${minimumPhotos === 1 ? "" : "s"} for ${missing.map((item) => item.label).join(", ")}.`,
         }));
         return;
+      }
+      const missingDescription = latestInspection.photos.find(
+        (photo) =>
+          stepConfig.areas.some((area) => area.area === photo.area) &&
+          photo.classification === "ai_scan" &&
+          !photo.description?.trim()
+      );
+      if (missingDescription) {
+        setErrors((current) => ({
+          ...current,
+          page: "Add a description for every AI Scan photo before continuing.",
+        }));
+        return;
+      }
+      const nextPhotos = latestInspection.photos.map((photo) => {
+        if (!stepConfig.areas.some((area) => area.area === photo.area)) {
+          return photo;
+        }
+        return {
+          ...photo,
+          description:
+            photo.classification === "ai_scan"
+              ? (photo.description?.trim() ?? "")
+              : "",
+        };
+      });
+      const descriptionsChanged = nextPhotos.filter(
+        (photo, index) =>
+          photo.description !== latestInspection.photos[index].description
+      );
+      if (descriptionsChanged.length > 0) {
+        try {
+          await Promise.all(
+            descriptionsChanged
+              .filter((photo) => photo.id >= 0)
+              .map((photo) =>
+                updateInspectionPhoto(bookingId, photo.id, {
+                  classification: photo.classification ?? "normal",
+                  finding_hints: photo.finding_hints,
+                  description: photo.description ?? "",
+                })
+              )
+          );
+        } catch {
+          setErrors((current) => ({
+            ...current,
+            page: "Could not save photo descriptions. Please try again.",
+          }));
+          return;
+        }
+        latestInspection = { ...latestInspection, photos: nextPhotos };
+        inspectionRef.current = latestInspection;
+        setInspection(latestInspection);
+        persistLocalDraft(latestInspection);
       }
     }
     const nextPhase = nextStep === 6 ? "impression" : step6Phase;
@@ -846,6 +953,19 @@ export default function GroomerPhotoHealthInspectionPage() {
   const submit = async () => {
     const latestInspection = inspectionRef.current ?? inspection;
     if (!latestInspection) return;
+    const photosNeedingReview = latestInspection.photos
+      .filter(
+        (photo) =>
+          !photo.confirmed ||
+          (photo.classification === "ai_scan" && !photo.description?.trim())
+      )
+      .map((photo) => photo.id);
+    if (photosNeedingReview.length > 0) {
+      setPendingSubmit(true);
+      setReviewQueue(photosNeedingReview);
+      setErrors({});
+      return;
+    }
     setSubmitting(true);
     try {
       await submitPhotoHealthInspection(bookingId, {
@@ -857,6 +977,8 @@ export default function GroomerPhotoHealthInspectionPage() {
               : (photo.classification ?? "normal"),
           finding_hints:
             photo.classification === "ai_scan" ? photo.finding_hints : [],
+          description:
+            photo.classification === "ai_scan" ? (photo.description ?? "") : "",
         })),
         observation_tags: observationTags,
         current_note: currentNote,
@@ -1032,7 +1154,10 @@ export default function GroomerPhotoHealthInspectionPage() {
                               aria-label={`Upload ${area.label}`}
                             >
                               <div className="flex h-[29px] w-[28px] items-center justify-center rounded-full bg-[#F0EBF7]">
-                                <Icon name="add-inspection" className="size-[28px]" />
+                                <Icon
+                                  name="add-inspection"
+                                  className="size-[28px]"
+                                />
                               </div>
                               <span className="font-comfortaa text-[12px] font-medium leading-[18px] text-[#633479]">
                                 {area.label}
@@ -1127,7 +1252,7 @@ export default function GroomerPhotoHealthInspectionPage() {
               step === 5 ? "Add Notes & Generate Report" : nextStepLabel
             }
             onPrevious={goToPreviousStep}
-            onNext={() => saveStep(step + 1)}
+            onNext={() => void saveStep(step + 1)}
           />
         </>
       ) : (
@@ -1281,8 +1406,11 @@ export default function GroomerPhotoHealthInspectionPage() {
         config={activeReviewConfig}
         open={Boolean(activeReviewPhoto)}
         onActivePhotoChange={(photoId) => setReviewQueue([photoId])}
-        onClose={() => setReviewQueue([])}
+        onClose={() => {
+          setReviewQueue([]);
+        }}
         onChange={confirmPhoto}
+        onDescriptionChange={updatePhotoDescription}
         onAddPhoto={(files) => {
           if (activeReviewPhoto) void upload(activeReviewPhoto.area, files);
         }}
@@ -1301,8 +1429,13 @@ export default function GroomerPhotoHealthInspectionPage() {
             : undefined
         }
         onProceedToNotes={() => {
-          setReviewQueue([]);
-          saveStep(6);
+          if (activeReviewPhoto)
+            void confirmPhoto(
+              activeReviewPhoto.id,
+              activeReviewPhoto.classification ?? "normal",
+              activeReviewPhoto.finding_hints,
+              activeReviewPhoto.description ?? ""
+            );
         }}
       />
     </ReportPageShell>

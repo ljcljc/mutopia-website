@@ -31,8 +31,10 @@ export interface InspectionPhotoReviewProps {
   onChange: (
     photoId: number,
     classification: InspectionPhotoClassification,
-    hints: string[]
+    hints: string[],
+    description: string
   ) => void;
+  onDescriptionChange?: (photoId: number, description: string) => void;
   onAddPhoto: (files: File[]) => void;
   observationTags?: string[];
   onObservationTagsChange?: (tags: string[]) => void;
@@ -57,6 +59,7 @@ export function InspectionPhotoReview({
   onActivePhotoChange,
   onClose,
   onChange,
+  onDescriptionChange,
   onAddPhoto,
   observationTags = [],
   onObservationTagsChange,
@@ -75,6 +78,7 @@ export function InspectionPhotoReview({
   const [classification, setClassification] =
     useState<InspectionPhotoClassification>("normal");
   const [hints, setHints] = useState<string[]>([]);
+  const [description, setDescription] = useState("");
   const [panelSnap, setPanelSnap] = useState<PanelSnap>(initialPanelSnap);
   const [slideDirection, setSlideDirection] = useState<SlideDirection | null>(
     null
@@ -123,16 +127,8 @@ export function InspectionPhotoReview({
   useEffect(() => {
     setClassification(photo?.classification ?? "normal");
     setHints(photo?.finding_hints ?? []);
+    setDescription(photo?.description ?? "");
   }, [photo]);
-
-  useEffect(() => {
-    if (!photo || photo.confirmed) return;
-    onChange(
-      photo.id,
-      photo.classification ?? "normal",
-      photo.finding_hints ?? []
-    );
-  }, [onChange, photo]);
 
   useEffect(() => setPanelSnap(initialPanelSnap), [initialPanelSnap, open]);
 
@@ -283,7 +279,8 @@ export function InspectionPhotoReview({
     onChange(
       photo.id,
       nextClassification,
-      nextClassification === "normal" ? [] : nextHints
+      nextClassification === "normal" ? [] : nextHints,
+      description
     );
   };
   const selectHints = (nextHints: string[]) => {
@@ -298,7 +295,8 @@ export function InspectionPhotoReview({
     onChange(
       photo.id,
       nextClassification,
-      nextClassification === "normal" ? [] : nextHints
+      nextClassification === "normal" ? [] : nextHints,
+      description
     );
   };
   const finishCarouselTransition = () => {
@@ -605,6 +603,29 @@ export function InspectionPhotoReview({
             </span>
           </button>
         </div>
+      ) : null}
+      {!isPosture && classification === "ai_scan" ? (
+        <label className="mt-4 block font-comfortaa text-[14px] font-semibold text-inherit">
+          Description <span aria-hidden="true">*</span>
+          <textarea
+            value={description}
+            maxLength={500}
+            required
+            rows={4}
+            placeholder="Describe the issue shown in this photo"
+            aria-label="AI Scan description"
+            onChange={(event) => {
+              const nextDescription = event.target.value;
+              setDescription(nextDescription);
+              onDescriptionChange?.(photo.id, nextDescription);
+            }}
+            onBlur={() => apply(classification)}
+            className="mt-2 w-full resize-none rounded-xl border border-[#D4C9E0] bg-white p-3 text-[14px] leading-5 text-[#4A3C2A] outline-none transition focus:border-[#633479] focus:ring-2 focus:ring-[#E9DEF0]"
+          />
+          <span className="mt-1 block text-right text-[12px] font-normal text-[#666674]">
+            {description.length}/500
+          </span>
+        </label>
       ) : null}
       <div
         className={`mt-5 justify-end gap-3 ${isPosture ? "flex" : "hidden md:flex"}`}
