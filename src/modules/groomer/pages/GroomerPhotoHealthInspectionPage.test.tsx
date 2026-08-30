@@ -340,7 +340,7 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "Add at least 2 photos of each ear for AI health inspection"
+        "Add at least 1 photo of each ear for AI health inspection"
       )
     ).toBeInTheDocument();
     expect(screen.getByText("Ear photo")).toBeInTheDocument();
@@ -390,7 +390,7 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "Add at least 2 photos of each eye for AI health inspection"
+        "Add at least 1 photo of each eye for AI health inspection"
       )
     ).toBeInTheDocument();
     expect(screen.getByLabelText("Upload Left eye")).toContainHTML("<svg");

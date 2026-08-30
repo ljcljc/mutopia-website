@@ -7,6 +7,7 @@ export type InspectionPhotoUploadState = {
   status: "uploading" | "deleting" | "error";
   phase?: "compressing" | "uploading";
   errorOperation?: "upload" | "delete";
+  indeterminate?: boolean;
   progress: number;
 };
 
@@ -99,8 +100,12 @@ export function InspectionAreaSection({
           </p>
           <div className="relative h-1 w-20 overflow-clip rounded-2xl border border-neutral-200 bg-white">
             <div
-              className="absolute left-0 top-0 h-1 rounded-2xl bg-green-500 transition-all duration-300"
-              style={{ width: `${uploadState.progress}%` }}
+              className={`absolute top-0 h-1 rounded-2xl bg-green-500 ${uploadState.indeterminate ? "inspection-progress-indeterminate" : "left-0 transition-all duration-300"}`}
+              style={
+                uploadState.indeterminate
+                  ? undefined
+                  : { width: `${uploadState.progress}%` }
+              }
             />
           </div>
         </div>

@@ -482,8 +482,12 @@ export default function GroomerPhotoHealthInspectionPage() {
           </p>
           <div className="relative h-1 w-20 overflow-clip rounded-2xl border border-neutral-200 bg-white">
             <div
-              className="absolute left-0 top-0 h-1 rounded-2xl bg-green-500 transition-all duration-300"
-              style={{ width: `${uploadState.progress}%` }}
+              className={`absolute top-0 h-1 rounded-2xl bg-green-500 ${uploadState.indeterminate ? "inspection-progress-indeterminate" : "left-0 transition-all duration-300"}`}
+              style={
+                uploadState.indeterminate
+                  ? undefined
+                  : { width: `${uploadState.progress}%` }
+              }
             />
           </div>
         </div>
@@ -724,7 +728,7 @@ export default function GroomerPhotoHealthInspectionPage() {
     }
     setPhotoUploadStates((current) => ({
       ...current,
-      [photo.id]: { status: "deleting", progress: 0 },
+      [photo.id]: { status: "deleting", indeterminate: true, progress: 0 },
     }));
     try {
       await deleteInspectionPhoto(bookingId, photo.id);
@@ -762,11 +766,11 @@ export default function GroomerPhotoHealthInspectionPage() {
     const latestInspection = inspectionRef.current ?? inspection;
     if (!latestInspection) return;
     if (stepConfig) {
-      const minimumPhotos = isPairedInspection ? 2 : 1;
+      const minimumPhotos = 1;
       const missing = stepConfig.areas.filter(
         (area) =>
           latestInspection.photos.filter(
-            (photo) => photo.area === area.area && photo.confirmed
+            (photo) => photo.area === area.area
           ).length < minimumPhotos
       );
       if (missing.length > 0) {
@@ -821,7 +825,9 @@ export default function GroomerPhotoHealthInspectionPage() {
         photos: latestInspection.photos.map((photo) => ({
           id: photo.id,
           classification:
-            photo.area === "posture" ? null : photo.classification,
+            photo.area === "posture"
+              ? null
+              : (photo.classification ?? "normal"),
           finding_hints:
             photo.classification === "ai_scan" ? photo.finding_hints : [],
         })),
@@ -928,7 +934,7 @@ export default function GroomerPhotoHealthInspectionPage() {
                       {pairedAreaName} - After grooming photos
                     </span>
                     <span className="block font-comfortaa text-[12px] font-normal leading-[16px]">
-                      Add at least 2 photos of each{" "}
+                      Add at least 1 photo of each{" "}
                       {pairedAreaName.toLowerCase()} for AI health inspection
                     </span>
                   </p>
