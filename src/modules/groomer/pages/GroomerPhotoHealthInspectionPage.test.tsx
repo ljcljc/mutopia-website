@@ -355,9 +355,7 @@ describe("GroomerPhotoHealthInspectionPage", () => {
       onload: (() => void) | null = null;
       onerror: (() => void) | null = null;
 
-      set src(_url: string) {
-        queueMicrotask(() => this.onload?.());
-      }
+      set src(_url: string) {}
     }
     vi.stubGlobal("Image", LoadedImage);
     vi.mocked(getPhotoHealthInspection).mockResolvedValue({
@@ -404,6 +402,7 @@ describe("GroomerPhotoHealthInspectionPage", () => {
           )
       ).toBe(true)
     );
+    expect(screen.queryByText("Uploading")).not.toBeInTheDocument();
   });
 
   it("shows removal feedback while a photo deletion is pending", async () => {

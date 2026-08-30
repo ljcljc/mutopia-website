@@ -150,23 +150,6 @@ function ReportGenerationLoadingScreen() {
   );
 }
 
-function preloadInspectionPhoto(url: string, onReady: () => void) {
-  const image = new Image();
-  let settled = false;
-  const settle = () => {
-    if (settled) return;
-    settled = true;
-    onReady();
-  };
-
-  image.onload = settle;
-  // Do not leave the temporary preview and upload state stuck forever if the
-  // canonical image cannot be loaded. The server URL is still the source of
-  // truth, so fall back to it after the request has completed.
-  image.onerror = settle;
-  image.src = url;
-}
-
 function InspectionStepActions({
   disabled,
   nextLabel,
@@ -672,39 +655,30 @@ export default function GroomerPhotoHealthInspectionPage() {
                 [tempId]: { status: "uploading", progress },
               }))
           );
-          // Keep the local preview visible and open the review panel without
-          // waiting for the canonical image to download.
-          setReviewQueue((current) => [
-            tempId,
-            ...current.filter((id) => id !== tempId),
-          ]);
-          preloadInspectionPhoto(uploaded.url, () => {
-            setInspection((current) => {
-              if (!current) return current;
-              const hasTemporaryPhoto = current.photos.some(
-                (photo) => photo.id === tempId
-              );
-              const nextInspection = {
-                ...current,
-                photos: hasTemporaryPhoto
-                  ? current.photos.map((photo) =>
-                      photo.id === tempId ? uploaded : photo
-                    )
-                  : [...current.photos, uploaded],
-              };
-              inspectionRef.current = nextInspection;
-              return nextInspection;
-            });
-            URL.revokeObjectURL(previewUrl);
-            setPhotoUploadStates((current) => {
-              const next = { ...current };
-              delete next[tempId];
-              return next;
-            });
-            setReviewQueue((current) =>
-              current.map((id) => (id === tempId ? uploaded.id : id))
-            );
+          // The upload response is authoritative. Replace the temporary
+          // preview and clear the upload state immediately; image loading is
+          // only a display concern and must not keep the photo uploading.
+          setInspection((current) => {
+            if (!current) return current;
+            const nextInspection = {
+              ...current,
+              photos: current.photos.map((photo) =>
+                photo.id === tempId ? uploaded : photo
+              ),
+            };
+            inspectionRef.current = nextInspection;
+            return nextInspection;
           });
+          URL.revokeObjectURL(previewUrl);
+          setPhotoUploadStates((current) => {
+            const next = { ...current };
+            delete next[tempId];
+            return next;
+          });
+          setReviewQueue((current) => [
+            uploaded.id,
+            ...current.filter((id) => id !== tempId && id !== uploaded.id),
+          ]);
         } catch {
           setPhotoUploadStates((current) => ({
             ...current,
