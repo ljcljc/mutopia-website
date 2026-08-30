@@ -648,12 +648,13 @@ export default function GroomerPhotoHealthInspectionPage() {
             const nextInspection = {
               ...current,
               photos: current.photos.map((photo) =>
-                photo.id === tempId ? { ...uploaded, url: previewUrl } : photo
+                photo.id === tempId ? uploaded : photo
               ),
             };
             inspectionRef.current = nextInspection;
             return nextInspection;
           });
+          URL.revokeObjectURL(previewUrl);
           setPhotoUploadStates((current) => {
             const next = { ...current };
             delete next[tempId];
