@@ -1951,6 +1951,7 @@ export interface PhotoHealthReportDraftOut {
   };
   original_insights: string;
   groomer_insights: string;
+  ai_recommendation?: string;
   wellness_summary: Record<
     "skin" | "ear" | "mouth" | "eye" | "mobility",
     PhotoHealthAreaResult

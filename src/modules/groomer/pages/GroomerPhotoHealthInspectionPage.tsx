@@ -208,10 +208,17 @@ function ReportGenerationLoadingScreen() {
       aria-live="polite"
       aria-label="Generating health report"
     >
-      <div className="flex flex-col items-center gap-5 text-center">
-        <Spinner size={52} color="#7DE0C3" />
-        <p className="font-comfortaa text-[18px] font-semibold leading-7 text-white">
-          Generating health report...
+      <div className="flex w-full max-w-[238px] flex-col items-center gap-5 px-6 py-10 text-center">
+        <Spinner
+          size={48}
+          color="#7DE0C3"
+          showTrack
+          trackOpacity={0.28}
+        />
+        <p className="font-comfortaa text-[14px] font-normal leading-5 text-white">
+          Generating report.
+          <br />
+          It will take about 1-2 minutes.
         </p>
       </div>
     </main>

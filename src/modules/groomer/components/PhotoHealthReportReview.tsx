@@ -162,6 +162,21 @@ export function PhotoHealthReportReview({
         )}
       </section>
 
+      <section className="mt-5 rounded-2xl border border-[#FED7AA] bg-[#FFF7ED] p-5">
+        <div className="flex items-center gap-2">
+          <span className="text-[22px] leading-none text-[#92400E]" aria-hidden="true">
+            ♡
+          </span>
+          <h2 className="font-comfortaa text-[16px] font-bold leading-6 text-[#92400E]">
+            AI recommendation
+          </h2>
+        </div>
+        <p className="mt-2 whitespace-pre-wrap font-comfortaa text-[14px] font-normal leading-[22.75px] text-[#78350F]">
+          {draft.ai_recommendation ||
+            "Keep meals balanced, maintain regular grooming and coat care, provide daily exercise and enrichment, and arrange a veterinary check if any concerning symptom persists or worsens."}
+        </p>
+      </section>
+
       {preparing ? (
         <p className="mt-5 rounded-xl bg-white/15 px-4 py-3 text-sm text-white">
           Report is being prepared. It will be published automatically when

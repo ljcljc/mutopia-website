@@ -660,7 +660,9 @@ describe("GroomerPhotoHealthInspectionPage", () => {
       name: "Generating health report",
     });
     expect(loadingScreen).toHaveClass("bg-[#633479]");
-    expect(loadingScreen).toHaveTextContent("Generating health report...");
+    expect(loadingScreen).toHaveTextContent(
+      "Generating report.It will take about 1-2 minutes."
+    );
     expect(
       screen.queryByRole("navigation", { name: "Breadcrumb" })
     ).not.toBeInTheDocument();
