@@ -153,12 +153,14 @@ function ReportGenerationLoadingScreen() {
 
 function InspectionStepActions({
   disabled,
+  nextDisabled = false,
   nextLabel,
   previousLabel = "Previous",
   onNext,
   onPrevious,
 }: {
   disabled: boolean;
+  nextDisabled?: boolean;
   nextLabel: string;
   previousLabel?: string;
   onNext: () => void;
@@ -177,7 +179,7 @@ function InspectionStepActions({
       <OrangeButton
         type="button"
         fullWidth
-        disabled={disabled}
+        disabled={disabled || nextDisabled}
         onClick={onNext}
         textSize={14}
         className="sm:max-w-[228px]"
@@ -547,6 +549,18 @@ export default function GroomerPhotoHealthInspectionPage() {
   const goToPreviousStep = () => {
     const latestInspection = inspectionRef.current ?? inspection;
     if (!latestInspection) return;
+    if (step === 6 && step6Phase === "notes") {
+      const nextInspection = {
+        ...latestInspection,
+        step6_phase: "impression" as const,
+      };
+      setStep6Phase("impression");
+      inspectionRef.current = nextInspection;
+      setInspection(nextInspection);
+      persistLocalDraft(nextInspection, { step6Phase: "impression" });
+      setErrors({});
+      return;
+    }
     const previousStep = step === 1 ? 1 : step - 1;
     if (step === 1) setShowOverview(true);
     else {
@@ -933,6 +947,25 @@ export default function GroomerPhotoHealthInspectionPage() {
     setErrors({});
   };
 
+  const continueToNotes = () => {
+    const latestInspection = inspectionRef.current ?? inspection;
+    if (!latestInspection || !overallProfessionalImpression) return;
+    const nextInspection = {
+      ...latestInspection,
+      current_step: 6,
+      step6_phase: "notes" as const,
+    };
+    inspectionRef.current = nextInspection;
+    setInspection(nextInspection);
+    setStep6Phase("notes");
+    persistLocalDraft(nextInspection, {
+      currentStep: 6,
+      step6Phase: "notes",
+      overallProfessionalImpression,
+    });
+    setErrors({});
+  };
+
   const submit = async () => {
     const latestInspection = inspectionRef.current ?? inspection;
     if (!latestInspection) return;
@@ -1240,6 +1273,47 @@ export default function GroomerPhotoHealthInspectionPage() {
         </>
       ) : (
         <>
+          {step6Phase === "impression" ? (
+            <section className="rounded-2xl bg-white p-6 shadow-lg">
+              <h1 className="font-comfortaa text-[24px] font-semibold leading-8 text-[#4A3C2A]">
+                Overall professional impression
+              </h1>
+              <p className="mt-2 font-comfortaa text-[14px] leading-5 text-[#4A3C2A]">
+                Guide the AI! Select your overall professional impression to
+                ensure the most accurate report.
+              </p>
+              <div className="mt-6 grid gap-3">
+                {[
+                  ["grade_a", "Grade A: Optimal", "Healthy & stable. Routine grooming only."],
+                  ["grade_b", "Grade B: Minor Care", "Mild issues. Can be improved with targeted grooming/diet."],
+                  ["grade_c", "Grade C: Attention Needed", "Persistent symptoms. Vet checkup recommended."],
+                  ["grade_d", "Grade D: High Risk", "Multiple anomalies. Urgent veterinary intervention advised."],
+                ].map(([value, title, description]) => {
+                  const selected = overallProfessionalImpression === value;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      aria-pressed={selected}
+                      className={`cursor-pointer rounded-xl border-2 p-4 text-left transition-colors ${selected ? "border-[#D99C2B] bg-[#FFF7E7]" : "border-[#D4C9E0] bg-white"}`}
+                      onClick={() =>
+                        setOverallProfessionalImpression(
+                          value as PhotoHealthInspectionOut["overall_professional_impression"]
+                        )
+                      }
+                    >
+                      <span className="block font-comfortaa text-[15px] font-bold text-[#4A3C2A]">
+                        {title}
+                      </span>
+                      <span className="mt-1 block font-comfortaa text-[12px] leading-[18px] text-[#6B625D]">
+                        {description}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          ) : (
           <div className="space-y-5">
               <section className="rounded-[12px] bg-white px-[13.995px] pb-[14px] pt-[13.995px] shadow-[0px_8px_6px_0px_rgba(0,0,0,0.1)]">
                 <div className="flex flex-col gap-3">
@@ -1292,6 +1366,7 @@ export default function GroomerPhotoHealthInspectionPage() {
                 </div>
               </section>
           </div>
+          )}
           {errors.page ? (
             <p
               role="alert"
@@ -1301,11 +1376,28 @@ export default function GroomerPhotoHealthInspectionPage() {
             </p>
           ) : null}
           <InspectionStepActions
-            disabled={saving || submitting || inspection.locked}
-            nextLabel="All good! Generate Report"
-            previousLabel="Previous: Posture"
+            disabled={
+              saving ||
+              submitting ||
+              inspection.locked
+            }
+            nextDisabled={
+              step6Phase === "impression" && !overallProfessionalImpression
+            }
+            nextLabel={
+              step6Phase === "impression"
+                ? "Add notes"
+                : "All good! Generate Report"
+            }
+            previousLabel={
+              step6Phase === "impression"
+                ? "Previous: Posture"
+                : "Previous: Summary"
+            }
             onPrevious={goToPreviousStep}
-            onNext={() => void submit()}
+            onNext={() =>
+              step6Phase === "impression" ? continueToNotes() : void submit()
+            }
           />
         </>
       )}

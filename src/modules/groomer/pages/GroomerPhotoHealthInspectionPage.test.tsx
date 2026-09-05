@@ -473,14 +473,16 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     expect(screen.getByText("Removing")).toBeInTheDocument();
   });
 
-  it("shows the Step 6 note fields without an overall professional impression", async () => {
+  it("requires a Step 6 rating before showing notes and can return to posture", async () => {
     vi.mocked(getPhotoHealthInspection).mockResolvedValue({
       exists: true,
       inspection: { ...inspection, current_step: 6 },
     });
     renderPage();
 
-    expect(await screen.findByText("Groomer Note")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Overall professional impression")
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("navigation", { name: "Breadcrumb" })
     ).toHaveTextContent(/Dashboard\s*>\s*Step 6 of 6 - Summary & notes/);
@@ -488,17 +490,45 @@ describe("GroomerPhotoHealthInspectionPage", () => {
       screen.queryByRole("heading", { name: "Step 6 of 6 - Summary & notes" })
     ).not.toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "All good! Generate Report" })
-    ).not.toBeDisabled();
+      screen.getByRole("button", { name: "Add notes" })
+    ).toBeDisabled();
     expect(
       screen.getByRole("button", { name: "Previous: Posture" })
-    ).toBeInTheDocument();
+    ).not.toBeDisabled();
 
-    expect(screen.getByText("Note for your partner")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Previous: Posture" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Previous: Posture" }));
+    await waitFor(() =>
+      expect(screen.getByRole("navigation", { name: "Breadcrumb" })).toHaveTextContent(
+        /Step 5 of 6 - Posture/
+      )
+    );
   });
 
-  it("shows notes for a legacy Step 6 response without a phase", async () => {
+  it("returns from Step 6 notes to the rating summary", async () => {
+    vi.mocked(getPhotoHealthInspection).mockResolvedValue({
+      exists: true,
+      inspection: { ...inspection, current_step: 6 },
+    });
+    renderPage();
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: /Grade B: Minor Care/ })
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Add notes" }));
+
+    expect(await screen.findByText("Groomer Note")).toBeInTheDocument();
+    expect(screen.getByText("Note for your partner")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Previous: Summary" })
+    ).not.toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Previous: Summary" }));
+    expect(
+      await screen.findByText("Overall professional impression")
+    ).toBeInTheDocument();
+  });
+
+  it("defaults a legacy Step 6 response without a phase to the rating page", async () => {
     vi.mocked(getPhotoHealthInspection).mockResolvedValue({
       exists: true,
       inspection: {
@@ -509,8 +539,10 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     });
     renderPage();
 
-    expect(await screen.findByText("Groomer Note")).toBeInTheDocument();
-    expect(screen.getByText("Note for your partner")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Overall professional impression")
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Note for your partner")).not.toBeInTheDocument();
   });
 
   it("uses the dedicated full-screen generation state while an existing analysis is running", async () => {
