@@ -154,40 +154,42 @@ export default function BookingHealthInfo() {
     }
   };
 
-  const stepContent = useMemo(() => {
-    const handleSkipClinicalAndSubmit = async () => {
-      const nextQuestionnaire: BookingHealthQuestionnaire = {
-        ...questionnaire,
-        clinical: {
-          ...questionnaire.clinical,
-          noKnownMedicalConditions: true,
-          eatingHabitsAndBehaviors: [],
-          metabolicAndGeneralHealth: [],
-          preExistingHealthConditions: [],
-          chronicConditions: [],
-          surgeryHistory: [],
-        },
-      };
-
-      setQuestionnaire(nextQuestionnaire);
-      await handleSubmit(nextQuestionnaire);
+  const handleSkipClinicalAndSubmit = async () => {
+    const nextQuestionnaire: BookingHealthQuestionnaire = {
+      ...questionnaire,
+      clinical: {
+        ...questionnaire.clinical,
+        noKnownMedicalConditions: true,
+        eatingHabitsAndBehaviors: [],
+        metabolicAndGeneralHealth: [],
+        preExistingHealthConditions: [],
+        chronicConditions: [],
+        surgeryHistory: [],
+      },
     };
 
-    const props = {
-      value: questionnaire,
-      onChange: (updater: (current: BookingHealthQuestionnaire) => BookingHealthQuestionnaire) => setQuestionnaire(updater),
-    };
-    switch (currentStep) {
-      case 0:
-        return <LifestyleEnvironmentStep {...props} petName={petName} />;
-      case 1:
-        return <PreventionCoreNeedsStep {...props} petName={petName} />;
-      case 2:
-        return <NutritionDigestionStep {...props} />;
-      default:
-        return <ClinicalHistoryStep {...props} onSkipSubmit={() => void handleSkipClinicalAndSubmit()} isSubmitting={isSaving} />;
-    }
-  }, [currentStep, handleSubmit, isSaving, petName, questionnaire]);
+    setQuestionnaire(nextQuestionnaire);
+    await handleSubmit(nextQuestionnaire);
+  };
+
+  const props = {
+    value: questionnaire,
+    onChange: (updater: (current: BookingHealthQuestionnaire) => BookingHealthQuestionnaire) => setQuestionnaire(updater),
+  };
+  let stepContent;
+  switch (currentStep) {
+    case 0:
+      stepContent = <LifestyleEnvironmentStep {...props} petName={petName} />;
+      break;
+    case 1:
+      stepContent = <PreventionCoreNeedsStep {...props} petName={petName} />;
+      break;
+    case 2:
+      stepContent = <NutritionDigestionStep {...props} />;
+      break;
+    default:
+      stepContent = <ClinicalHistoryStep {...props} onSkipSubmit={() => void handleSkipClinicalAndSubmit()} isSubmitting={isSaving} />;
+  }
 
   const handleNext = async () => {
     if (currentStep === 0 && lifestyleStepIssues.length > 0) {
@@ -222,7 +224,7 @@ export default function BookingHealthInfo() {
                       <button
                         type="button"
                         onClick={() => setCurrentStep((step) => step - 1)}
-                        className="inline-flex size-[31px] cursor-pointer items-center justify-center rounded-full text-[#25314c]"
+                        className="inline-flex size-[31px] cursor-pointer items-center justify-center rounded-full text-[#25314c] hover:bg-[rgba(37,49,76,0.10)]"
                         aria-label="Go back"
                       >
                         <ArrowLeft className="size-[17px]" strokeWidth={1.8} />
@@ -271,7 +273,7 @@ export default function BookingHealthInfo() {
                       disabled={!canProceedCurrentStep}
                       loading={isSaving}
                       fullWidth
-                      className="min-h-[52px] w-full rounded-[16777200px] bg-[#8B6357] px-6 py-4 text-[15px] font-semibold text-white shadow-[0_4px_6px_-1px_rgba(0,0,0,0.10),0_2px_4px_-2px_rgba(0,0,0,0.10)] hover:bg-[#8B6357CC] active:bg-[#6F4B41] focus-visible:bg-[#8B6357CC] sm:w-auto sm:min-w-[330px]"
+                      className="min-h-[52px] w-full rounded-[16777200px] bg-[#8B6357] px-6 py-4 text-[15px] font-semibold text-white shadow-[0_4px_6px_-1px_rgba(0,0,0,0.10),0_2px_4px_-2px_rgba(0,0,0,0.10)] hover:bg-[#8B6357CC] active:bg-[#6F4B41] focus-visible:bg-[#8B6357CC] disabled:hover:bg-[#8B6357] disabled:active:bg-[#8B6357] disabled:focus-visible:bg-[#8B6357] sm:w-auto sm:min-w-[330px]"
                     >
                       <span className="inline-flex items-center gap-2 whitespace-nowrap">
                         <span>{stepMeta.cta}</span>

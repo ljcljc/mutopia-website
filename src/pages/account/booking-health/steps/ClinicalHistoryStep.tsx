@@ -155,7 +155,7 @@ export function ClinicalHistoryStep({ value, onChange, onSkipSubmit, isSubmittin
         onClick={onSkipSubmit}
         loading={isSubmitting}
         fullWidth
-        className="h-auto w-full bg-[#00a63e] px-6 py-[12px] text-[14px] font-bold leading-6 text-white shadow-[0px_4px_6px_rgba(0,166,62,0.3)] hover:bg-[#00a63e] active:bg-[#00a63e] focus-visible:bg-[#00a63e] sm:max-w-[481px]"
+        className="h-auto w-full bg-[#00a63e] px-6 py-[12px] text-[14px] font-bold leading-6 text-white shadow-[0px_4px_6px_rgba(0,166,62,0.3)] hover:bg-[rgba(0,166,62,0.8)] disabled:hover:bg-[#00a63e] active:bg-[rgba(0,166,62,0.8)] disabled:active:bg-[#00a63e] focus-visible:bg-[rgba(0,166,62,0.8)] sm:max-w-[481px]"
       >
         <span className="inline-flex items-center gap-2 whitespace-nowrap">
           <Icon name="target" className="size-4 shrink-0 text-white" aria-hidden="true" />

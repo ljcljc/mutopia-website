@@ -43,7 +43,7 @@ export function LifestyleEnvironmentStep({
               <button
                 type="button"
                 onClick={() => setIsAddingNeighborhood(true)}
-                className="inline-flex cursor-pointer items-center gap-2 self-start pt-1 font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#8b6357]"
+                className="inline-flex cursor-pointer items-center gap-2 self-start rounded-full px-2 py-1 font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#8b6357] hover:bg-[rgba(139,99,87,0.10)]"
               >
                 <Plus className="size-4" />
                 Add more
@@ -68,7 +68,7 @@ export function LifestyleEnvironmentStep({
                         },
                       }))
                     }
-                    className="ml-4 shrink-0 cursor-pointer text-[#7b869b]"
+                    className="ml-4 shrink-0 cursor-pointer rounded-full text-[#7b869b] hover:bg-[rgba(123,134,155,0.10)]"
                   >
                     <X className="size-4" />
                   </button>
@@ -107,7 +107,7 @@ export function LifestyleEnvironmentStep({
                       }));
                       setIsAddingNeighborhood(false);
                     }}
-                    className="ml-4 shrink-0 cursor-pointer text-[#7b869b]"
+                    className="ml-4 shrink-0 cursor-pointer rounded-full text-[#7b869b] hover:bg-[rgba(123,134,155,0.10)]"
                   >
                     <X className="size-4" />
                   </button>

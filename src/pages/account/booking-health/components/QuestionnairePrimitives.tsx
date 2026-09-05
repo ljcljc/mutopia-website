@@ -87,7 +87,7 @@ export function OptionPill({
       className={cn(
         "flex cursor-pointer items-center justify-center whitespace-normal rounded-full border-2 px-4 text-center font-comfortaa font-medium transition-colors",
         compact ? "min-h-[42.5px] py-[10px] text-[12.25px] leading-[17.5px]" : "min-h-[53px] py-3 text-[14px] leading-[21px]",
-        selected ? "border-[#00d492] bg-[#ecfdf5] text-[#007a55]" : "border-[#e5e7eb] bg-white text-[#314158]",
+        selected ? "border-[#00d492] bg-[#ecfdf5] text-[#007a55]" : "border-[#e5e7eb] bg-white text-[#314158] hover:border-[#00d492]",
         className
       )}
     >
@@ -189,7 +189,7 @@ export function ChipGroup({
                 "cursor-pointer rounded-full border px-4 py-2 font-comfortaa text-[13px] transition-colors",
                 selected
                   ? "border-[#8b6357] bg-[#8b6357] text-[#fff7ed]"
-                  : "border-[#e6d6c5] bg-[#fffaf5] text-[#6d5b49] hover:border-[#c7aa8b]"
+                  : "border-[#e6d6c5] bg-[#fffaf5] text-[#6d5b49] hover:border-[#00d492]"
               )}
             >
               {option}
@@ -228,7 +228,7 @@ export function BooleanChoice({
               onClick={() => onChange(item.key)}
               className={cn(
                 "cursor-pointer rounded-[18px] border px-4 py-3 text-left font-comfortaa text-[13px] transition-colors",
-                selected ? "border-[#8b6357] bg-[#f1e5d9] text-[#4a3c2a]" : "border-[#eadfd2] bg-[#fffdfb] text-[#7a6d5d]"
+                selected ? "border-[#8b6357] bg-[#f1e5d9] text-[#4a3c2a]" : "border-[#eadfd2] bg-[#fffdfb] text-[#7a6d5d] hover:border-[#00d492]"
               )}
             >
               {item.label}
@@ -322,7 +322,7 @@ function DateLineInput({
               type="button"
               aria-label={`${label} calendar`}
               onClick={() => setOpen((current) => !current)}
-              className="cursor-pointer text-[#9f8d79]"
+              className="cursor-pointer text-[#9f8d79] hover:opacity-70"
             >
               <CalendarDays className="size-4" />
             </button>
@@ -402,7 +402,7 @@ export function StepperField({
               type="button"
               aria-label={`${label} increase`}
               onClick={() => onChange(value + 1)}
-              className="cursor-pointer text-[#8b6357]"
+              className="cursor-pointer text-[#8b6357] hover:opacity-70"
             >
               <ChevronUp className="size-4" strokeWidth={1.75} />
             </button>
@@ -410,7 +410,7 @@ export function StepperField({
               type="button"
               aria-label={`${label} decrease`}
               onClick={() => onChange(Math.max(0, value - 1))}
-              className="cursor-pointer text-[#8b6357]"
+            className="cursor-pointer text-[#8b6357] hover:opacity-70"
             >
               <ChevronDown className="size-4" strokeWidth={1.75} />
             </button>
@@ -448,14 +448,14 @@ export function InlineStepperRow({
           className="w-8 bg-transparent text-center font-comfortaa text-[16px] font-normal leading-[28px] text-[#8b6357] outline-none"
         />
         <div className="flex flex-col">
-          <button type="button" aria-label={`${label} increase`} onClick={() => onChange(value + 1)} className="cursor-pointer text-[#8b6357]">
+          <button type="button" aria-label={`${label} increase`} onClick={() => onChange(value + 1)} className="cursor-pointer text-[#8b6357] hover:opacity-70">
             <ChevronUp className="size-4" strokeWidth={1.75} />
           </button>
           <button
             type="button"
             aria-label={`${label} decrease`}
             onClick={() => onChange(Math.max(0, value - 1))}
-            className="cursor-pointer text-[#8b6357]"
+            className="cursor-pointer text-[#8b6357] hover:opacity-70"
           >
             <ChevronDown className="size-4" strokeWidth={1.75} />
           </button>
@@ -522,7 +522,7 @@ export function UnderlinedFieldRow({
                 type="button"
                 aria-label={`${inputId} calendar`}
                 onClick={() => setOpen((current) => !current)}
-                className="cursor-pointer text-[#8b6357]"
+                className="cursor-pointer text-[#8b6357] hover:opacity-70"
               >
                 <CalendarDays className="size-[18px]" strokeWidth={1.8} />
               </button>
@@ -599,7 +599,7 @@ export function TimelineFields({
       <button
         type="button"
         onClick={onAdd}
-        className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[#d8c5b1] px-4 py-2 font-comfortaa text-[12px] font-bold text-[#8b6357]"
+        className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[#d8c5b1] px-4 py-2 font-comfortaa text-[12px] font-bold text-[#8b6357] hover:bg-[rgba(139,99,87,0.10)]"
       >
         <Plus className="size-4" />
         Add more

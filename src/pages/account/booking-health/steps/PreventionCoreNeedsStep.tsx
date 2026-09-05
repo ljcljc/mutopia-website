@@ -425,7 +425,7 @@ function ChoiceRow({
               onClick={() => onChange(item.value)}
               className={[
                 "min-h-[53px] cursor-pointer whitespace-normal rounded-full border-2 px-4 py-3 text-center font-comfortaa text-[14px] font-medium leading-[21px] transition-colors",
-                selected ? "border-[#00d492] bg-[#ecfdf5] text-[#007a55]" : "border-[#e5e7eb] bg-white text-[#314158]",
+                selected ? "border-[#00d492] bg-[#ecfdf5] text-[#007a55]" : "border-[#e5e7eb] bg-white text-[#314158] hover:border-[#00d492]",
               ].join(" ")}
             >
               {item.label}
@@ -536,7 +536,7 @@ function TimelineEntryFields({
           <button
             type="button"
             onClick={() => onRemove(entry.id)}
-            className="shrink-0 cursor-pointer text-[#b42318] sm:mb-1"
+            className="shrink-0 cursor-pointer text-[#b42318] hover:opacity-70 sm:mb-1"
             aria-label={`Remove ${index === 0 ? "entry" : `entry ${index + 1}`}`}
           >
             <X className="size-4" />

@@ -69,6 +69,7 @@ export default defineConfig(({ mode }) => {
       chunkSizeWarningLimit: 600, // 提高警告阈值到 600 KB
     },
     server: {
+      port: 3000,
       proxy: {
         // 代理所有 /api 请求到后端服务器，解决 CORS 问题
         '/api': {
