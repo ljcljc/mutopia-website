@@ -47,6 +47,22 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Prevent long-press text selection/copying on mobile page content. */
+@media (max-width: 767px) {
+  body {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  input,
+  textarea,
+  [contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+}
+
 body.modal-open header.sticky.top-0 {
   position: fixed;
   top: 0;
