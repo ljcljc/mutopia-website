@@ -876,6 +876,7 @@ export default function GroomerPhotoHealthInspectionPage() {
       const missingDescription = latestInspection.photos.find(
         (photo) =>
           stepConfig.areas.some((area) => area.area === photo.area) &&
+          photo.area !== "posture" &&
           photo.classification === "ai_scan" &&
           !photo.description?.trim()
       );
@@ -893,7 +894,7 @@ export default function GroomerPhotoHealthInspectionPage() {
         return {
           ...photo,
           description:
-            photo.classification === "ai_scan"
+            photo.area !== "posture" && photo.classification === "ai_scan"
               ? (photo.description?.trim() ?? "")
               : "",
         };
@@ -970,7 +971,9 @@ export default function GroomerPhotoHealthInspectionPage() {
       .filter(
         (photo) =>
           !photo.confirmed ||
-          (photo.classification === "ai_scan" && !photo.description?.trim())
+          (photo.area !== "posture" &&
+            photo.classification === "ai_scan" &&
+            !photo.description?.trim())
       )
       .map((photo) => photo.id);
     if (photosNeedingReview.length > 0) {

@@ -267,6 +267,47 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     ).toHaveTextContent(/Step 1 of 6 - Skin inspection/);
   });
 
+  it("allows Step 5 posture photos without an AI Scan description", async () => {
+    vi.mocked(getPhotoHealthInspection).mockResolvedValue({
+      exists: true,
+      inspection: {
+        ...inspection,
+        current_step: 5,
+        photos: [
+          {
+            id: 79,
+            area: "posture",
+            url: "/posture.jpg",
+            original_filename: "posture.jpg",
+            normalized_mime_type: "image/jpeg",
+            classification: "ai_scan",
+            finding_hints: [],
+            confirmed: true,
+            description: "",
+          },
+        ],
+      },
+    });
+    renderPage();
+
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Add Notes & Generate Report",
+      })
+    );
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole("navigation", { name: "Breadcrumb" })
+      ).toHaveTextContent(/Step 6 of 6 - Summary & notes/)
+    );
+    expect(
+      screen.queryByText(
+        "Add a description for every AI Scan photo before continuing."
+      )
+    ).not.toBeInTheDocument();
+  });
+
   it("requires confirmation before final report generation", async () => {
     vi.mocked(getPhotoHealthInspection).mockResolvedValue({
       exists: true,
