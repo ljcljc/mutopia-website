@@ -278,7 +278,6 @@ export default function GroomerPhotoHealthInspectionPage() {
     useState<PhotoHealthInspectionOut["step6_phase"]>("impression");
   const [observationTags, setObservationTags] = useState<string[]>([]);
   const [reviewQueue, setReviewQueue] = useState<number[]>([]);
-  const [pendingSubmit, setPendingSubmit] = useState(false);
   const [photoUploadStates, setPhotoUploadStates] = useState<
     Record<number, InspectionPhotoUploadState>
   >({});
@@ -879,16 +878,6 @@ export default function GroomerPhotoHealthInspectionPage() {
     inspectionRef.current = nextInspection;
     setInspection(nextInspection);
     persistLocalDraft(nextInspection);
-    if (pendingSubmit) {
-      const hasUnconfirmedPhoto = nextInspection.photos.some(
-        (item) => !item.confirmed
-      );
-      if (!hasUnconfirmedPhoto) {
-        setReviewQueue([]);
-        setPendingSubmit(false);
-        void submit();
-      }
-    }
   };
 
   const updatePhotoDescription = (photoId: number, description: string) => {
@@ -1079,19 +1068,11 @@ export default function GroomerPhotoHealthInspectionPage() {
   const submit = async () => {
     const latestInspection = inspectionRef.current ?? inspection;
     if (!latestInspection) return;
-    const photosNeedingReview = latestInspection.photos
-      .filter(
-        (photo) =>
-          !photo.confirmed ||
-          (photo.area !== "posture" &&
-            photo.classification === "ai_scan" &&
-            !photo.description?.trim())
-      )
-      .map((photo) => photo.id);
-    if (photosNeedingReview.length > 0) {
-      setPendingSubmit(true);
-      setReviewQueue(photosNeedingReview);
-      setErrors({});
+    if (!currentNote.trim()) {
+      setErrors((current) => ({
+        ...current,
+        page: "Groomer Note is required before generating the report.",
+      }));
       return;
     }
     setSubmitting(true);
@@ -1452,7 +1433,7 @@ export default function GroomerPhotoHealthInspectionPage() {
                       htmlFor="groomer-note"
                       className="block font-comfortaa text-[12px] font-bold uppercase leading-[18px] tracking-[0.96px] text-[#A89BBB]"
                     >
-                      Groomer Note
+                      Groomer Note <span className="text-red-600">*</span>
                     </label>
                     <Textarea
                       id="groomer-note"

@@ -357,7 +357,7 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("requires confirmation before final report generation", async () => {
+  it("requires a groomer note and skips unconfirmed photo review before final report generation", async () => {
     vi.mocked(getPhotoHealthInspection).mockResolvedValue({
       exists: true,
       inspection: {
@@ -388,19 +388,27 @@ describe("GroomerPhotoHealthInspectionPage", () => {
       await screen.findByRole("button", { name: "All good! Generate Report" })
     );
     expect(
-      await screen.findByRole("dialog", { name: "Skin photo review" })
+      await screen.findByText(
+        "Groomer Note is required before generating the report."
+      )
     ).toBeInTheDocument();
     expect(submitPhotoHealthInspection).not.toHaveBeenCalled();
+    expect(
+      screen.queryByRole("dialog", { name: "Skin photo review" })
+    ).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getAllByRole("button", { name: /Normal/ })[0]);
-    await waitFor(() =>
-      expect(updateInspectionPhoto).toHaveBeenCalledWith(42, 77, {
-        classification: "normal",
-        finding_hints: [],
-        description: "",
-      })
+    fireEvent.change(screen.getByLabelText("Groomer Note *"), {
+      target: { value: "Coat looks healthy after grooming." },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "All good! Generate Report" })
     );
-    await waitFor(() => expect(submitPhotoHealthInspection).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(submitPhotoHealthInspection).toHaveBeenCalled()
+    );
+    expect(
+      screen.queryByRole("dialog", { name: "Skin photo review" })
+    ).not.toBeInTheDocument();
   });
 
   it("keeps the review panel open after a newly uploaded photo is auto-confirmed", async () => {
