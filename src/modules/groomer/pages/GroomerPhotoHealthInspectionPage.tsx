@@ -931,7 +931,7 @@ export default function GroomerPhotoHealthInspectionPage() {
         persistLocalDraft(latestInspection);
       }
     }
-    const nextPhase = nextStep === 6 ? "notes" : step6Phase;
+    const nextPhase = nextStep === 6 ? "impression" : step6Phase;
     const nextInspection = {
       ...latestInspection,
       current_step: nextStep,

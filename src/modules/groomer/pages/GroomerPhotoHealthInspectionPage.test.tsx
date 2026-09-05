@@ -528,6 +528,47 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     ).toBeInTheDocument();
   });
 
+  it("opens Step 6 on rating before notes when advancing from posture", async () => {
+    vi.mocked(getPhotoHealthInspection).mockResolvedValue({
+      exists: true,
+      inspection: {
+        ...inspection,
+        current_step: 5,
+        photos: [
+          {
+            id: 80,
+            area: "posture",
+            url: "/posture.jpg",
+            original_filename: "posture.jpg",
+            normalized_mime_type: "image/jpeg",
+            classification: null,
+            finding_hints: [],
+            confirmed: true,
+          },
+        ],
+      },
+    });
+    renderPage();
+
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Add Notes & Generate Report",
+      })
+    );
+    expect(
+      await screen.findByText("Overall professional impression")
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Grade B: Minor Care/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Add notes" }));
+    expect(await screen.findByText("Groomer Note")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Previous: Summary" }));
+    expect(
+      await screen.findByText("Overall professional impression")
+    ).toBeInTheDocument();
+  });
+
   it("defaults a legacy Step 6 response without a phase to the rating page", async () => {
     vi.mocked(getPhotoHealthInspection).mockResolvedValue({
       exists: true,
