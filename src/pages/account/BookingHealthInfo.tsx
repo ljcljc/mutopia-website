@@ -154,25 +154,25 @@ export default function BookingHealthInfo() {
     }
   };
 
-  const handleSkipClinicalAndSubmit = async () => {
-    const nextQuestionnaire: BookingHealthQuestionnaire = {
-      ...questionnaire,
-      clinical: {
-        ...questionnaire.clinical,
-        noKnownMedicalConditions: true,
-        eatingHabitsAndBehaviors: [],
-        metabolicAndGeneralHealth: [],
-        preExistingHealthConditions: [],
-        chronicConditions: [],
-        surgeryHistory: [],
-      },
+  const stepContent = useMemo(() => {
+    const handleSkipClinicalAndSubmit = async () => {
+      const nextQuestionnaire: BookingHealthQuestionnaire = {
+        ...questionnaire,
+        clinical: {
+          ...questionnaire.clinical,
+          noKnownMedicalConditions: true,
+          eatingHabitsAndBehaviors: [],
+          metabolicAndGeneralHealth: [],
+          preExistingHealthConditions: [],
+          chronicConditions: [],
+          surgeryHistory: [],
+        },
+      };
+
+      setQuestionnaire(nextQuestionnaire);
+      await handleSubmit(nextQuestionnaire);
     };
 
-    setQuestionnaire(nextQuestionnaire);
-    await handleSubmit(nextQuestionnaire);
-  };
-
-  const stepContent = useMemo(() => {
     const props = {
       value: questionnaire,
       onChange: (updater: (current: BookingHealthQuestionnaire) => BookingHealthQuestionnaire) => setQuestionnaire(updater),
@@ -187,7 +187,7 @@ export default function BookingHealthInfo() {
       default:
         return <ClinicalHistoryStep {...props} onSkipSubmit={() => void handleSkipClinicalAndSubmit()} isSubmitting={isSaving} />;
     }
-  }, [currentStep, handleSkipClinicalAndSubmit, isSaving, petName, questionnaire]);
+  }, [currentStep, handleSubmit, isSaving, petName, questionnaire]);
 
   const handleNext = async () => {
     if (currentStep === 0 && lifestyleStepIssues.length > 0) {
@@ -200,6 +200,7 @@ export default function BookingHealthInfo() {
       return;
     }
     setCurrentStep((step) => Math.min(step + 1, BOOKING_HEALTH_STEPS.length - 1));
+    window.scrollTo(0, 0);
   };
 
   return (

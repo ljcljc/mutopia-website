@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import BookingHealthInfo from "./BookingHealthInfo";
 import { getBookingDetail, updateBookingHealthInfo } from "@/lib/api";
 import { toast } from "sonner";
@@ -24,6 +24,11 @@ vi.mock("sonner", () => ({
 describe("BookingHealthInfo", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("loads booking data and submits the health information form", async () => {
@@ -89,6 +94,7 @@ describe("BookingHealthInfo", () => {
     fireEvent.change(screen.getByLabelText("Grooming interval"), { target: { value: "45" } });
     fireEvent.click(screen.getByRole("button", { name: "Next: Prevention & Core needs" }));
     expect((await screen.findAllByText("Prevention & Core needs")).length).toBeGreaterThan(0);
+    expect(window.scrollTo).toHaveBeenCalledWith(0, 0);
 
     fireEvent.click(screen.getByRole("button", { name: "Yes" }));
     fireEvent.change(screen.getByLabelText("Important restrictions"), { target: { value: "Sensitive around paws." } });
