@@ -30,6 +30,8 @@ export function getStatusBadgeConfig(status: string): { label: string; tone: Boo
       return { label: "Waiting for payment", tone: "orange" };
     case "awaiting_final_payment":
       return { label: "Waiting for final payment", tone: "orange" };
+    case "pending_report":
+      return { label: "Health report pending", tone: "orange" };
     case "completed":
     case "reviewed":
       return { label: "Service completed", tone: "purple" };
@@ -52,7 +54,7 @@ function parseScheduledTime(value?: string | null): Date | null {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
-function isActiveCurrentBookingStatus(status: string): boolean {
+function isStartedUnfinishedStatus(status: string): boolean {
   return [
     "traveling",
     "travel_started",
@@ -60,23 +62,35 @@ function isActiveCurrentBookingStatus(status: string): boolean {
     "on_the_way",
     "checked_in",
     "in_progress",
+    "pending_report",
     "awaiting_final_payment",
-    "completed",
-    "reviewed",
   ].includes(normalizeBookingStatus(status));
 }
 
-function getCurrentBookingPriority(booking: BookingListOut, now: Date): number | null {
-  const normalizedStatus = normalizeBookingStatus(booking.status);
+function isNotStartedStatus(status: string): boolean {
+  return ["awaiting_client_confirmation", "confirmed", "pending"].includes(
+    normalizeBookingStatus(status),
+  );
+}
+
+export function isBookingAbnormal(
+  booking: Pick<BookingListOut, "status" | "scheduled_time">,
+  now = new Date(),
+): boolean {
+  const unfinished = isStartedUnfinishedStatus(booking.status) || isNotStartedStatus(booking.status);
   const scheduledTime = parseScheduledTime(booking.scheduled_time);
+  if (!unfinished || !scheduledTime || scheduledTime.getTime() >= now.getTime()) return false;
 
-  if (isActiveCurrentBookingStatus(normalizedStatus)) return 0;
-  if (normalizedStatus !== "confirmed" || !scheduledTime) return null;
+  return now.getTime() - scheduledTime.getTime() > 72 * 60 * 60 * 1000;
+}
 
-  if (scheduledTime.getTime() <= now.getTime()) return 1;
+function getCurrentBookingPriority(booking: BookingListOut, now: Date): number | null {
+  if (isBookingAbnormal(booking, now)) return null;
 
-  const within24Hours = scheduledTime.getTime() - now.getTime() <= 24 * 60 * 60 * 1000;
-  return within24Hours ? 2 : null;
+  if (isStartedUnfinishedStatus(booking.status)) return 0;
+  if (isNotStartedStatus(booking.status)) return 1;
+
+  return null;
 }
 
 export function selectCurrentDashboardBooking(bookings: BookingListOut[]): BookingListOut | null {
@@ -93,10 +107,6 @@ export function selectCurrentDashboardBooking(bookings: BookingListOut[]): Booki
       const leftTime = parseScheduledTime(left.scheduled_time)?.getTime();
       const rightTime = parseScheduledTime(right.scheduled_time)?.getTime();
 
-      if (leftPriority === 1 || leftPriority === 2) {
-        return (leftTime ?? Number.MAX_SAFE_INTEGER) - (rightTime ?? Number.MAX_SAFE_INTEGER);
-      }
-
       const leftDistance = leftTime === undefined ? Number.MAX_SAFE_INTEGER : Math.abs(leftTime - now.getTime());
       const rightDistance = rightTime === undefined ? Number.MAX_SAFE_INTEGER : Math.abs(rightTime - now.getTime());
 
@@ -107,8 +117,11 @@ export function selectCurrentDashboardBooking(bookings: BookingListOut[]): Booki
   return sorted[0] ?? null;
 }
 
-export function StatusBadge({ status }: { status: string }) {
-  const { label, tone } = getStatusBadgeConfig(status);
+export function StatusBadge({ status, scheduledTime }: { status: string; scheduledTime?: string | null }) {
+  const abnormal = isBookingAbnormal({ status, scheduled_time: scheduledTime });
+  const { label, tone } = abnormal
+    ? { label: "Service issue", tone: "outlined" as BookingStatusTone }
+    : getStatusBadgeConfig(status);
 
   if (tone === "green") {
     return (

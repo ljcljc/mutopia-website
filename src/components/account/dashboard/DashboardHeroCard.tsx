@@ -74,7 +74,7 @@ export default function DashboardHeroCard() {
           </div>
         </div>
         <div className="ml-3 flex shrink-0 items-center gap-1.5">
-          <StatusBadge status={currentBooking.status} />
+          <StatusBadge status={currentBooking.status} scheduledTime={currentBooking.scheduled_time} />
           <Icon name="nav-next" className="size-4 text-[#99A1AF]" />
         </div>
       </div>

@@ -48,7 +48,7 @@ function BookingItem({ booking }: { booking: BookingListOut }) {
       }}
     >
       <div className="flex flex-col gap-[12px] sm:hidden">
-        <StatusBadge status={booking.status} />
+        <StatusBadge status={booking.status} scheduledTime={booking.scheduled_time} />
         <div className="flex items-center justify-between gap-[12px]">
           <div className="min-w-0 flex-1">
             <div className="flex flex-col gap-[8px]">
@@ -95,7 +95,7 @@ function BookingItem({ booking }: { booking: BookingListOut }) {
           </div>
         </div>
         <div className="flex items-center gap-[7px]">
-          <StatusBadge status={booking.status} />
+          <StatusBadge status={booking.status} scheduledTime={booking.scheduled_time} />
           <Icon name="nav-next" className="size-[16px] text-[#99A1AF]" />
         </div>
       </div>

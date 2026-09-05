@@ -78,7 +78,7 @@ describe("DashboardHeroCard", () => {
     expect(screen.getByText("Booking detail page")).toBeInTheDocument();
   });
 
-  it("does not render when there is no eligible current booking", () => {
+  it("renders the nearest not-started booking when there is no started booking", () => {
     useAccountStore.setState({
       upcomingBookings: [
         makeBooking({ id: 1, status: "pending" }),
@@ -87,12 +87,13 @@ describe("DashboardHeroCard", () => {
       ],
     });
 
-    const { container } = render(
+    render(
       <MemoryRouter>
         <DashboardHeroCard />
       </MemoryRouter>,
     );
 
-    expect(container).toBeEmptyDOMElement();
+    expect(screen.getByText("Mochi")).toBeInTheDocument();
+    expect(screen.getByText("Waiting for groomer match")).toBeInTheDocument();
   });
 });
