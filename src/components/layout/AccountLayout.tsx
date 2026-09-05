@@ -23,6 +23,7 @@ export default function AccountLayout() {
     <BaseAccountLayoutShell
       rootClassName="bg-[#FFFBEB]"
       contentBackgroundClassName="bg-[#FFFBEB]"
+      themeColor="#FFFBEB"
       contentContainerClassName="w-full max-w-[1248px] mx-auto flex flex-1 overflow-hidden gap-6 my-6 lg:my-14"
       sidebar={<AccountSidebar className="hidden lg:block" />}
       header={<HeaderApp />}

@@ -32,6 +32,7 @@ export default function GroomerLayout() {
     <BaseAccountLayoutShell
       rootClassName="bg-[#633479]"
       contentBackgroundClassName="bg-[#633479]"
+      themeColor="#633479"
       contentContainerClassName="w-full max-w-[1248px] mx-auto flex flex-1 overflow-hidden gap-6 mt-6 mb-2 sm:mt-14 sm:mb-6"
       sidebar={<GroomerSidebar className="hidden lg:block" />}
       header={<GroomerHeader />}

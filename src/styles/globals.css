@@ -41,6 +41,7 @@
 /* Global font settings */
 body {
   font-family: "Comfortaa", cursive, ui-sans-serif, system-ui, sans-serif;
+  background-color: #fffbeb;
   font-feature-settings: "kern" 1;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;

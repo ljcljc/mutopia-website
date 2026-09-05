@@ -17,6 +17,7 @@ interface BaseAccountLayoutShellProps {
   bottomNavClassName: string;
   insetClassName?: string;
   contentGrow?: boolean;
+  themeColor?: string;
 }
 
 export default function BaseAccountLayoutShell({
@@ -31,9 +32,30 @@ export default function BaseAccountLayoutShell({
   bottomNavClassName,
   insetClassName,
   contentGrow = true,
+  themeColor,
 }: BaseAccountLayoutShellProps) {
   const location = useLocation();
   const contentRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!themeColor) return;
+
+    const themeMeta = document.querySelector<HTMLMetaElement>(
+      'meta[name="theme-color"]'
+    );
+    const previousThemeColor = themeMeta?.content;
+
+    if (themeMeta) themeMeta.content = themeColor;
+    document.documentElement.style.backgroundColor = themeColor;
+    document.body.style.backgroundColor = themeColor;
+
+    return () => {
+      if (themeMeta && previousThemeColor)
+        themeMeta.content = previousThemeColor;
+      document.documentElement.style.backgroundColor = "";
+      document.body.style.backgroundColor = "";
+    };
+  }, [themeColor]);
 
   useEffect(() => {
     if (contentRef.current) {
@@ -47,10 +69,19 @@ export default function BaseAccountLayoutShell({
       <div className={cn("min-h-screen flex flex-col w-full", rootClassName)}>
         {header}
 
-        <div className={cn("w-full", contentGrow && "flex-1", contentBackgroundClassName)}>
+        <div
+          className={cn(
+            "w-full",
+            contentGrow && "flex-1",
+            contentBackgroundClassName
+          )}
+        >
           <div className={contentContainerClassName}>
             {sidebar}
-            <SidebarInset ref={contentRef} className={cn("flex-1 overflow-auto rounded-lg", insetClassName)}>
+            <SidebarInset
+              ref={contentRef}
+              className={cn("flex-1 overflow-auto rounded-lg", insetClassName)}
+            >
               <main className="flex-1 min-h-full w-full flex flex-col">
                 <Outlet />
               </main>
