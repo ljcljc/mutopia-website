@@ -179,7 +179,7 @@ export function InspectionAreaSection({
         ) : (
           <button
             type="button"
-            className="flex h-full w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-[14px] border-[1.451px] border-dashed border-[#D4C9E0] bg-white shadow-[0px_1px_2.5px_0px_rgba(0,0,0,0.05)]"
+            className="flex h-full w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-[14px] border-[1.451px] border-dashed border-[#D4C9E0] bg-white shadow-[0px_1px_2.5px_0px_rgba(0,0,0,0.05)] transition-colors hover:border-[#de6a07]"
             onClick={() => openFilePicker(earInputRefs.current[slotArea])}
             aria-label={`Upload ${label}`}
           >
