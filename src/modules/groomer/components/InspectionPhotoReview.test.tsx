@@ -76,6 +76,8 @@ describe("InspectionPhotoReview", () => {
     );
 
     fireEvent.click(screen.getAllByRole("button", { name: /AI Scan/ })[0]);
+    expect(screen.getAllByText("*")).toHaveLength(2);
+    expect(screen.getAllByText("*").every((marker) => marker.classList.contains("text-[#de1507]"))).toBe(true);
     fireEvent.change(screen.getAllByRole("textbox", { name: "AI Scan description" })[0], {
       target: { value: "Redness near the collar" },
     });

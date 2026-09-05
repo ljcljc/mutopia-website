@@ -616,7 +616,7 @@ export function InspectionPhotoReview({
       ) : null}
       {!isPosture && classification === "ai_scan" ? (
         <label className="mt-4 block font-comfortaa text-[14px] font-semibold text-inherit">
-          Description <span aria-hidden="true">*</span>
+          Description <span aria-hidden="true" className="text-[#de1507]">*</span>
           <textarea
             value={description}
             maxLength={500}
