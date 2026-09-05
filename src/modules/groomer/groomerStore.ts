@@ -793,10 +793,10 @@ async function enrichDashboardAppointment(nextAppointment: DashboardAppointment 
 
 async function resolveNextAppointmentState(
   currentBookingResult: PromiseSettledResult<unknown>,
-): Promise<Pick<GroomerDashboardState, "nextAppointment" | "reportInteractions">> {
+): Promise<Pick<GroomerDashboardState, "nextAppointment" | "pendingReports" | "reportInteractions">> {
   if (currentBookingResult.status !== "fulfilled") {
     console.error("Failed to load groomer current booking:", currentBookingResult.reason);
-    return { nextAppointment: null, reportInteractions: [] };
+    return { nextAppointment: null, pendingReports: [], reportInteractions: [] };
   }
 
   const payload = asRecord(currentBookingResult.value);
@@ -808,7 +808,10 @@ async function resolveNextAppointmentState(
       ...appointment,
       reportInteractionState: appointment.review ? "awaiting_reply" as const : "awaiting_review" as const,
     }));
-  return { nextAppointment, reportInteractions };
+  const pendingReports = getRecordArray(payload, ["pending_reports"])
+    .map((record) => mapDashboardAppointment(record))
+    .filter((appointment): appointment is DashboardAppointment => Boolean(appointment));
+  return { nextAppointment, pendingReports, reportInteractions };
 }
 
 function resolvePendingBookingRequestState(
@@ -837,6 +840,7 @@ function updateMatchingNextAppointment(
 
 interface GroomerDashboardState {
   nextAppointment: DashboardAppointment | null;
+  pendingReports: DashboardAppointment[];
   reportInteractions: DashboardAppointment[];
   bookingRequest: DashboardAppointment | null;
   bookingRequests: DashboardAppointment[];
@@ -872,6 +876,7 @@ interface GroomerDashboardState {
 
 export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => ({
   nextAppointment: null,
+  pendingReports: [],
   reportInteractions: [],
   bookingRequest: null,
   bookingRequests: [],

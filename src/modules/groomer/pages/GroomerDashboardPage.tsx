@@ -70,6 +70,9 @@ const PERSONALIZATION_FIELDS = [
   { key: "others", label: "Others" },
 ] as const;
 
+const dashboardWhiteButtonClass =
+  "mt-4 flex h-12 w-full cursor-pointer items-center justify-center gap-3 rounded-full bg-white font-comfortaa text-[16px] font-bold leading-6 text-[#4A2C55] shadow-[0px_4px_8px_rgba(0,0,0,0.14)] transition-colors transition-transform hover:bg-[#F8F5FA] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70";
+
 function normalizeStatus(status?: string): string {
   return (status ?? "")
     .trim()
@@ -397,7 +400,7 @@ function InProgressJobCard({
         type="button"
         onClick={onCompleteService}
         disabled={isCompletingService}
-        className="mt-4 flex h-12 w-full items-center justify-center gap-3 rounded-full bg-white font-comfortaa text-[16px] font-bold leading-6 text-[#4A2C55] shadow-[0px_4px_8px_rgba(0,0,0,0.14)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
+        className={dashboardWhiteButtonClass}
       >
         {isCompletingService ? (
           <Spinner size="small" color="#4A2C55" />
@@ -472,23 +475,31 @@ function CompletedServiceCard({
         </div>
       )}
 
-      <OrangeButton
-        type="button"
-        variant="outline"
-        fullWidth
-        onClick={onFillReport}
-        className="mt-4 border-[#FFF7ED]! text-[#FFF7ED]! hover:bg-white/10! active:bg-white/10! focus-visible:bg-white/10! [&_p]:font-semibold [&_p]:text-[#FFF7ED]!"
-      >
-        {isPendingReport
-          ? "Let's finish AI health report"
-          : appointment.hasPublishedHealthReport
+      {isPendingReport ? (
+        <button
+          type="button"
+          onClick={onFillReport}
+          className={dashboardWhiteButtonClass}
+        >
+          Let's finish AI health report
+        </button>
+      ) : (
+        <OrangeButton
+          type="button"
+          variant="outline"
+          fullWidth
+          onClick={onFillReport}
+          className="mt-4 border-[#FFF7ED]! text-[#FFF7ED]! hover:bg-white/10! active:bg-white/10! focus-visible:bg-white/10! [&_p]:font-semibold [&_p]:text-[#FFF7ED]!"
+        >
+          {appointment.hasPublishedHealthReport
             ? "View health report"
             : appointment.healthReportPreparationStatus === "preparing"
               ? "Preparing health report"
               : appointment.healthReportPreparationStatus === "failed"
                 ? "Report preparation failed"
                 : `Fill report for ${appointment.petName}`}
-      </OrangeButton>
+        </OrangeButton>
+      )}
     </article>
   );
 }
@@ -1992,6 +2003,7 @@ export default function GroomerDashboardPage() {
     useState<BookingRequestSuccessAlertKind | null>(null);
   const {
     nextAppointment,
+    pendingReports,
     reportInteractions,
     bookingRequests,
     dailyGoal,
@@ -2400,6 +2412,19 @@ export default function GroomerDashboardPage() {
                   onStartTravel={handleStartTravel}
                 />
               ) : null}
+
+              {pendingReports.map((appointment) => (
+                <CompletedServiceCard
+                  key={`pending-report-${appointment.id}`}
+                  appointment={appointment}
+                  isPendingReport
+                  onFillReport={() =>
+                    navigate(
+                      `/groomer/bookings/${appointment.id}/photo-health-inspection`
+                    )
+                  }
+                />
+              ))}
 
               {reportInteractions.map((appointment) => (
                 <HealthReportInteractionCard
