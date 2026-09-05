@@ -473,49 +473,32 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     expect(screen.getByText("Removing")).toBeInTheDocument();
   });
 
-  it("requires an overall professional impression before showing the two note fields", async () => {
+  it("shows the Step 6 note fields without an overall professional impression", async () => {
     vi.mocked(getPhotoHealthInspection).mockResolvedValue({
       exists: true,
       inspection: { ...inspection, current_step: 6 },
     });
     renderPage();
 
-    expect(
-      await screen.findByText("Overall professional impression")
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Groomer Note")).toBeInTheDocument();
     expect(
       screen.getByRole("navigation", { name: "Breadcrumb" })
     ).toHaveTextContent(/Dashboard\s*>\s*Step 6 of 6 - Summary & notes/);
     expect(
       screen.queryByRole("heading", { name: "Step 6 of 6 - Summary & notes" })
     ).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Add notes" })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "All good! Generate Report" })
+    ).not.toBeDisabled();
     expect(
       screen.getByRole("button", { name: "Previous: Posture" })
     ).toBeInTheDocument();
 
-    fireEvent.click(
-      screen.getByRole("button", { name: /Grade B: Minor Care/ })
-    );
-    fireEvent.click(screen.getByRole("button", { name: "Add notes" }));
-
-    expect(await screen.findByText("Groomer Note")).toBeInTheDocument();
     expect(screen.getByText("Note for your partner")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Previous: Summary" })
-    ).toBeInTheDocument();
-    expect(
-      JSON.parse(
-        window.localStorage.getItem("photo-health-draft:42:42") ?? "{}"
-      )
-    ).toMatchObject({
-      currentStep: 6,
-      overallProfessionalImpression: "grade_b",
-      step6Phase: "notes",
-    });
+    expect(screen.getByRole("button", { name: "Previous: Posture" })).toBeInTheDocument();
   });
 
-  it("defaults a legacy Step 6 response without a phase to the impression page", async () => {
+  it("shows notes for a legacy Step 6 response without a phase", async () => {
     vi.mocked(getPhotoHealthInspection).mockResolvedValue({
       exists: true,
       inspection: {
@@ -526,10 +509,8 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     });
     renderPage();
 
-    expect(
-      await screen.findByText("Overall professional impression")
-    ).toBeInTheDocument();
-    expect(screen.queryByText("Note for your partner")).not.toBeInTheDocument();
+    expect(await screen.findByText("Groomer Note")).toBeInTheDocument();
+    expect(screen.getByText("Note for your partner")).toBeInTheDocument();
   });
 
   it("uses the dedicated full-screen generation state while an existing analysis is running", async () => {
