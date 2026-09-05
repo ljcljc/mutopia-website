@@ -1268,15 +1268,29 @@ export default function BookingDetail() {
                   ) : null}
 
                   {detailCardConfig.actionKind === "cancel" ? (
-                    <OrangeButton
-                      type="button"
-                      variant="secondary"
-                      size="compact"
-                      className="min-w-[100px]"
-                      onClick={() => handleCancelDialogOpenChange(true)}
-                    >
-                      Cancel
-                    </OrangeButton>
+                    <>
+                      <OrangeButton
+                        type="button"
+                        variant="secondary"
+                        size="compact"
+                        className="min-w-[100px]"
+                        onClick={() => handleCancelDialogOpenChange(true)}
+                      >
+                        Cancel
+                      </OrangeButton>
+                      {normalizedStatus === "confirmed" && detail?.id ? (
+                        <OrangeButton
+                          type="button"
+                          variant="primary"
+                          size="compact"
+                          textSize={12}
+                          className="min-w-[100px]"
+                          onClick={() => navigate(`/health-form/${detail.id}`)}
+                        >
+                          {`Personalize ${petName}'s care`}
+                        </OrangeButton>
+                      ) : null}
+                    </>
                   ) : null}
 
                   {detailCardConfig.actionKind === "review" ? (
