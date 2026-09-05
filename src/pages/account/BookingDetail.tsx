@@ -407,6 +407,7 @@ export default function BookingDetail() {
   const packageSnapshot = (detail?.package_snapshot as Record<string, unknown> | undefined) ?? {};
 
   const petName = (petSnapshot.name as string | undefined) ?? "Duke";
+  const hasHealthQuestionnaire = Boolean(petSnapshot.health_questionnaire);
   const bookingCode = formatBookingCode(detail?.order_code, detail?.id);
   const serviceName = (packageSnapshot.name as string | undefined) ?? "Full grooming";
   const serviceType =
@@ -1278,7 +1279,7 @@ export default function BookingDetail() {
                       >
                         Cancel
                       </OrangeButton>
-                      {normalizedStatus === "confirmed" && detail?.id ? (
+                      {normalizedStatus === "confirmed" && detail?.id && !hasHealthQuestionnaire ? (
                         <OrangeButton
                           type="button"
                           variant="primary"
