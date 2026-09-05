@@ -213,6 +213,9 @@ export default function GroomerPhotoHealthInspectionPage() {
   const [photoUploadStates, setPhotoUploadStates] = useState<
     Record<number, InspectionPhotoUploadState>
   >({});
+  const localPhotoUrlsRef = useRef<
+    Record<number, { previewUrl: string; originalUrl: string }>
+  >({});
   const [reviewPanelSnap, setReviewPanelSnap] = useState<
     "collapsed" | "default" | "expanded"
   >("default");
@@ -232,6 +235,19 @@ export default function GroomerPhotoHealthInspectionPage() {
   const localDraftKey = Number.isFinite(petId)
     ? inspectionDraftKey(bookingId, petId as number)
     : null;
+
+  useEffect(() => {
+    const localPhotoUrls = localPhotoUrlsRef.current;
+    return () => {
+      Object.values(localPhotoUrls).forEach(
+        ({ previewUrl, originalUrl }) => {
+          new Set([previewUrl, originalUrl]).forEach((url) =>
+            URL.revokeObjectURL(url)
+          );
+        }
+      );
+    };
+  }, []);
 
   const persistLocalDraft = (
     nextInspection: PhotoHealthInspectionOut,
@@ -446,14 +462,20 @@ export default function GroomerPhotoHealthInspectionPage() {
   const pairedAreas = isPairedInspection ? (stepConfig?.areas ?? []) : [];
   const pairedAreaName = step === 2 ? "Ear" : "Eye";
   const activeAreaPhotos = useMemo(
-    () =>
-      isPairedInspection
+    () => {
+      const photos = isPairedInspection
         ? (inspection?.photos.filter((photo) =>
             pairedAreas.some((area) => area.area === photo.area)
           ) ?? [])
         : (inspection?.photos.filter(
             (photo) => photo.area === activeReviewPhoto?.area
-          ) ?? []),
+          ) ?? []);
+      return photos.map((photo) => ({
+        ...photo,
+        url:
+          localPhotoUrlsRef.current[photo.id]?.originalUrl ?? photo.url,
+      }));
+    },
     [
       activeReviewPhoto?.area,
       inspection?.photos,
@@ -558,12 +580,15 @@ export default function GroomerPhotoHealthInspectionPage() {
     await Promise.all(
       files.map(async (originalFile) => {
         const tempId = createTemporaryPhotoId();
-        const placeholderUrl =
-          "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+        const originalUrl = URL.createObjectURL(originalFile);
+        localPhotoUrlsRef.current[tempId] = {
+          previewUrl: originalUrl,
+          originalUrl,
+        };
         const placeholderPhoto: InspectionPhotoOut = {
           id: tempId,
           area,
-          url: placeholderUrl,
+          url: originalUrl,
           original_filename: originalFile.name,
           normalized_mime_type: originalFile.type || "image/jpeg",
           classification: "normal",
@@ -596,6 +621,7 @@ export default function GroomerPhotoHealthInspectionPage() {
             updateCompressionProgress
           );
           const previewUrl = URL.createObjectURL(previewFile);
+          localPhotoUrlsRef.current[tempId].previewUrl = previewUrl;
           setInspection((current) =>
             current
               ? {
@@ -664,13 +690,17 @@ export default function GroomerPhotoHealthInspectionPage() {
             const nextInspection = {
               ...current,
               photos: current.photos.map((photo) =>
-                photo.id === tempId ? uploaded : photo
+                photo.id === tempId
+                  ? { ...uploaded, url: previewUrl }
+                  : photo
               ),
             };
             inspectionRef.current = nextInspection;
             return nextInspection;
           });
-          URL.revokeObjectURL(previewUrl);
+          localPhotoUrlsRef.current[uploaded.id] =
+            localPhotoUrlsRef.current[tempId];
+          delete localPhotoUrlsRef.current[tempId];
           setPhotoUploadStates((current) => {
             const next = { ...current };
             delete next[tempId];
@@ -764,8 +794,16 @@ export default function GroomerPhotoHealthInspectionPage() {
   };
 
   const removePhoto = async (photo: InspectionPhotoOut) => {
+    const revokeLocalPhotoUrls = (photoId: number) => {
+      const localUrls = localPhotoUrlsRef.current[photoId];
+      if (!localUrls) return;
+      new Set([localUrls.previewUrl, localUrls.originalUrl]).forEach((url) =>
+        URL.revokeObjectURL(url)
+      );
+      delete localPhotoUrlsRef.current[photoId];
+    };
     if (photo.id < 0) {
-      if (photo.url.startsWith("blob:")) URL.revokeObjectURL(photo.url);
+      revokeLocalPhotoUrls(photo.id);
       setInspection((current) =>
         current
           ? {
@@ -787,7 +825,7 @@ export default function GroomerPhotoHealthInspectionPage() {
     }));
     try {
       await deleteInspectionPhoto(bookingId, photo.id);
-      if (photo.url.startsWith("blob:")) URL.revokeObjectURL(photo.url);
+      revokeLocalPhotoUrls(photo.id);
       setInspection((current) =>
         current
           ? {

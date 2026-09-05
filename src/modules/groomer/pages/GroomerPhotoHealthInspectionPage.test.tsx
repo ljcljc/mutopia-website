@@ -350,7 +350,7 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     );
   });
 
-  it("keeps a Step 2 ear photo when its server image loads before the temporary state commits", async () => {
+  it("keeps a local thumbnail while the uploaded Step 2 ear photo settles", async () => {
     class LoadedImage {
       onload: (() => void) | null = null;
       onerror: (() => void) | null = null;
@@ -391,17 +391,15 @@ describe("GroomerPhotoHealthInspectionPage", () => {
 
     await waitFor(() => expect(uploadInspectionPhoto).toHaveBeenCalledOnce());
     await waitFor(() =>
-      expect(revokeObjectURL).toHaveBeenCalledWith("blob:compressed-photo")
-    );
-    await waitFor(() =>
       expect(
         screen
           .getAllByRole("img", { name: "left-ear.jpg" })
           .some(
-            (image) => image.getAttribute("src") === "/uploaded-left-ear.jpg"
+            (image) => image.getAttribute("src") === "blob:compressed-photo"
           )
       ).toBe(true)
     );
+    expect(revokeObjectURL).not.toHaveBeenCalledWith("blob:compressed-photo");
     expect(screen.queryByText("Uploading")).not.toBeInTheDocument();
   });
 
