@@ -164,6 +164,7 @@ export function ProposeNewTimeModal({
   const [currentDate, setCurrentDate] = useState(() => new Date());
   const [selectedEntries, setSelectedEntries] = useState<SelectedTimeEntry[]>([]);
   const [pendingTime, setPendingTime] = useState("");
+  const [validationError, setValidationError] = useState<string | null>(null);
   const [showYearPicker, setShowYearPicker] = useState(false);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
 
@@ -186,6 +187,7 @@ export function ProposeNewTimeModal({
     setCurrentDate(initialState.currentDate);
     setSelectedEntries(initialState.selectedEntries);
     setPendingTime(initialState.selectedEntries.find((entry) => entry.time)?.time ?? "");
+    setValidationError(null);
     closeCalendarPickers();
   }, [initialServiceSlot, initialServiceSlots, initialTimeOptions, open]);
 
@@ -211,6 +213,7 @@ export function ProposeNewTimeModal({
 
   const handleAddTime = (value: string) => {
     setPendingTime(value);
+    setValidationError(null);
 
     if (!selectedDate || !value) {
       return;
@@ -267,7 +270,11 @@ export function ProposeNewTimeModal({
       .map((entry) => buildDecisionTimeOption(entry))
       .filter((entry): entry is BookingRequestDecisionTimeOption => Boolean(entry));
 
-    if (!timeOptions.length) return;
+    if (!timeOptions.length) {
+      const message = "Please select at least one available time";
+      setValidationError(message);
+      return;
+    }
     await onSubmit(timeOptions);
   };
 
@@ -340,6 +347,11 @@ export function ProposeNewTimeModal({
                   onValueChange={handleAddTime}
                   options={ALL_AVAILABLE_TIME_OPTIONS}
                 />
+                {validationError ? (
+                  <p role="alert" className="mt-2 font-comfortaa text-[12px] font-bold leading-4 text-[#DE1507]">
+                    {validationError}
+                  </p>
+                ) : null}
               </div>
 
               {selectedEntries.length > 0 ? (
@@ -390,7 +402,7 @@ export function ProposeNewTimeModal({
               <button
                 type="button"
                 onClick={handleSubmit}
-                disabled={isSubmitting || selectedEntries.length === 0}
+                disabled={isSubmitting}
                 className="h-12 w-full rounded-[32px] bg-[#00A63E] font-comfortaa text-[15px] font-bold leading-[22.5px] text-white shadow-[0px_4px_12px_rgba(0,166,62,0.3)] transition-colors hover:bg-[#009638] active:bg-[#008730] cursor-pointer"
               >
                 {isSubmitting ? "Sending..." : "Send new time"}
