@@ -76,6 +76,24 @@ function normalizeStep6Phase(
   return value === "notes" ? "notes" : "impression";
 }
 
+async function waitForPublishedHealthReport(bookingId: number) {
+  const deadline = Date.now() + 5 * 60 * 1000;
+  while (Date.now() < deadline) {
+    const draft = await getPhotoHealthReportDraft(bookingId);
+    if (draft.pdf_generation_status === "failed") {
+      throw new Error("Health report PDF generation failed.");
+    }
+    try {
+      const published = await getPublishedPhotoHealthReport(bookingId);
+      if (published.published) return published;
+    } catch {
+      // The PDF worker may still be generating the report.
+    }
+    await new Promise((resolve) => window.setTimeout(resolve, 2000));
+  }
+  throw new Error("Health report generation timed out.");
+}
+
 function getPetCacheId(petSnapshot?: Record<string, unknown>): number | null {
   const value = petSnapshot?.id ?? petSnapshot?.pet_id;
   return typeof value === "number" && Number.isFinite(value) ? value : null;
@@ -1158,10 +1176,12 @@ export default function GroomerPhotoHealthInspectionPage() {
           }}
           onPublish={async () => {
             const result = await publishPhotoHealthReport(bookingId);
+            if (result.status === "preparing") {
+              toast.info("Generating PDF. Please wait...");
+              await waitForPublishedHealthReport(bookingId);
+            }
             toast.success(
-              result.status === "preparing"
-                ? "Report is being prepared"
-                : "Health report published"
+              "Health report published"
             );
             navigate("/groomer/dashboard");
           }}

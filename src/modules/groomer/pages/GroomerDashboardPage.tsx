@@ -422,6 +422,9 @@ function CompletedServiceCard({
   onFillReport: () => void;
   isPendingReport?: boolean;
 }) {
+  const isHandoverCheckout =
+    !isPendingReport && appointment.hasPublishedHealthReport && !appointment.review;
+
   return (
     <article className="rounded-[16px] bg-[linear-gradient(180deg,#633479_0%,#7A4777_52%,#8B6357_100%)] p-5 shadow-[0px_4px_6px_rgba(74,44,85,0.3)]">
       <div className="min-w-0">
@@ -431,6 +434,8 @@ function CompletedServiceCard({
         <h2 className="truncate font-comfortaa text-[20px] font-bold leading-[30px] text-white">
           {isPendingReport
             ? "Pending report"
+            : isHandoverCheckout
+              ? "Handover & Checkout"
             : getInProgressTitle(appointment.service, appointment.petName)}
         </h2>
       </div>
@@ -460,7 +465,9 @@ function CompletedServiceCard({
             aria-hidden="true"
           />
           <p className="truncate font-comfortaa text-[12px] font-bold leading-4 text-[#467900]">
-            Completed. Waiting for client confirmation
+            {isHandoverCheckout
+              ? "All done. Waiting for client confirmation."
+              : "Completed. Waiting for client confirmation"}
           </p>
         </div>
       )}
@@ -472,6 +479,14 @@ function CompletedServiceCard({
           className={dashboardWhiteButtonClass}
         >
           Let's finish AI health report
+        </button>
+      ) : isHandoverCheckout ? (
+        <button
+          type="button"
+          onClick={onFillReport}
+          className="mt-4 flex h-12 w-full items-center justify-center rounded-full border-2 border-[#FFF7ED] px-7 font-comfortaa text-[16px] font-semibold leading-[17.5px] text-[#FFF7ED] transition-colors hover:bg-white/10"
+        >
+          Add a quick review
         </button>
       ) : (
         <OrangeButton

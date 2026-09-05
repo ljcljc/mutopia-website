@@ -238,7 +238,7 @@ describe("GroomerDashboardPage complete service", () => {
     expect(await screen.findByText("Photo health inspection route")).toBeInTheDocument();
   });
 
-  it("shows View health report after the report is published", async () => {
+  it("shows the handover checkout card after the report is published", async () => {
     vi.mocked(getGroomerDashboardSummary).mockResolvedValue({});
     vi.mocked(getGroomerPendingBookingInvitations).mockResolvedValue([]);
     vi.mocked(getGroomerBookingDetail).mockResolvedValue({ id: 123, status: "completed" } as BookingDetailOut);
@@ -252,7 +252,9 @@ describe("GroomerDashboardPage complete service", () => {
     });
     render(<MemoryRouter><GroomerDashboardPage /></MemoryRouter>);
 
-    expect(await screen.findByRole("button", { name: "View health report" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Handover & Checkout" })).toBeInTheDocument();
+    expect(screen.getByText("All done. Waiting for client confirmation.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add a quick review" })).toBeInTheDocument();
   });
 
   it("shows the reviewed completion card when the booking has a review", async () => {

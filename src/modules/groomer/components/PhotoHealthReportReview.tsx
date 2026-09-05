@@ -223,7 +223,8 @@ export function PhotoHealthReportReview({
         <OrangeButton
           type="button"
           fullWidth
-          disabled={editing || preparing || publishing}
+          disabled={editing || preparing}
+          loading={publishing}
           className="mt-7 !bg-[#00A63E] shadow-[0_4px_6px_rgba(0,166,62,0.3)] hover:!bg-[rgba(0,166,62,0.8)] active:!bg-[rgba(0,166,62,0.8)] focus-visible:!bg-[rgba(0,166,62,0.8)]"
           onClick={() => {
             setPublishing(true);
