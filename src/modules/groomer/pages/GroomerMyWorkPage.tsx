@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Icon } from "@/components/common/Icon";
 import { Spinner } from "@/components/common/Spinner";
+import { PageLoadingCard } from "@/modules/groomer/components/PageLoadingCard";
 import AccountContentContainer from "@/components/layout/AccountContentContainer";
 import DEFAULT_PET_AVATAR from "@/assets/icons/icon-pet-avatar-placeholder.svg";
 import { useIsMobile } from "@/components/ui/use-mobile";
@@ -845,15 +846,6 @@ function StatusCard({ title, description }: { title: string; description: string
   );
 }
 
-function LoadingStateCard({ label }: { label: string }) {
-  return (
-    <div className="flex min-h-[112px] flex-col items-center justify-center gap-3 rounded-[16px] bg-[rgba(255,255,255,0.12)] px-4 py-5">
-      <Spinner size={36} color="#FFFFFF" showTrack trackOpacity={0.22} />
-      <p className="font-comfortaa text-[13px] font-medium leading-5 text-[rgba(255,255,255,0.82)]">{label}</p>
-    </div>
-  );
-}
-
 export default function GroomerMyWorkPage() {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
@@ -1101,7 +1093,7 @@ export default function GroomerMyWorkPage() {
         <div className="space-y-5">
           {activeTab === "schedule" ? (
             <>
-              {isLoadingMyWork ? <LoadingStateCard label="Loading schedule..." /> : null}
+              {isLoadingMyWork ? <PageLoadingCard label="Loading schedule..." /> : null}
               {!isLoadingMyWork && scheduleError ? <StatusCard title="Schedule unavailable" description={scheduleError} /> : null}
               {!isLoadingMyWork && !scheduleError && !hasScheduleContent ? (
                 <StatusCard title="No schedule found" description="There are no pending jobs or appointments for this month." />
@@ -1159,7 +1151,7 @@ export default function GroomerMyWorkPage() {
             </>
           ) : (
             <>
-              {isLoadingHistory ? <LoadingStateCard label="Loading history..." /> : null}
+              {isLoadingHistory ? <PageLoadingCard label="Loading history..." /> : null}
               {!isLoadingHistory && historyError ? <StatusCard title="History unavailable" description={historyError} /> : null}
               {!isLoadingHistory && !historyError && !hasHistoryAppointments ? (
                 <StatusCard title="No history found" description="No past bookings match the current filter." />

@@ -55,6 +55,7 @@ import {
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
 import { CheckCircleIcon, StarIcon, XIcon } from "lucide-react";
+import { PageLoadingCard } from "@/modules/groomer/components/PageLoadingCard";
 
 type BookingRequest = DashboardAppointment;
 type CheckUpTab = "photo" | "weight" | "add-ons" | "personalization";
@@ -78,17 +79,6 @@ function normalizeStatus(status?: string): string {
     .trim()
     .toLowerCase()
     .replace(/[\s-]+/g, "_");
-}
-
-function LoadingStateCard() {
-  return (
-    <div className="flex min-h-[112px] flex-col items-center justify-center gap-3 rounded-[16px] bg-white px-4 py-5 shadow-[0px_4px_12px_rgba(0,0,0,0.08)]">
-      <Spinner size={36} color="#DE6A07" showTrack trackOpacity={0.22} />
-      <p className="font-comfortaa text-[13px] font-medium leading-5 text-[#8B6357]">
-        Loading dashboard...
-      </p>
-    </div>
-  );
 }
 
 function AppointmentSummaryCard({
@@ -2334,7 +2324,7 @@ export default function GroomerDashboardPage() {
           ) : null}
 
           {showInitialLoading ? (
-            <LoadingStateCard />
+            <PageLoadingCard label="Loading dashboard..." />
           ) : (
             <>
               {effectiveAppointment && showReviewedServiceJob ? (

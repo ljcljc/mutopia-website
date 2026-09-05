@@ -19,6 +19,7 @@ import {
 import { formatCurrency, mapTransactionPage, type TransactionItemView } from "@/modules/groomer/components/earnings/transactionUtils";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
+import { PageLoadingCard } from "@/modules/groomer/components/PageLoadingCard";
 
 const timeframeOptions = ["Today", "This week", "Last week", "This month", "Last month", "Custom range"] as const;
 
@@ -103,17 +104,6 @@ function mapPayout(raw: unknown): PayoutData {
   return {
     cashOutFeeRate: getNumber(record, "cash_out_fee_rate", DEFAULT_PAYOUT.cashOutFeeRate),
   };
-}
-
-function LoadingCard({ label }: { label: string }) {
-  return (
-    <section className="flex min-h-[160px] items-center justify-center rounded-[20px] bg-white px-5 py-5 shadow-[0px_4px_12px_rgba(0,0,0,0.08)]">
-      <div className="flex flex-col items-center gap-3">
-        <Spinner size={36} color="#DE6A07" showTrack trackOpacity={0.22} />
-        <p className="font-comfortaa text-[13px] font-medium leading-5 text-[#8B6357]">{label}</p>
-      </div>
-    </section>
-  );
 }
 
 function RevenueBreakdownCard({
@@ -370,7 +360,7 @@ export default function GroomerEarningsPage() {
             <header>
               <h1 className="font-comfortaa text-[20px] font-bold leading-[22px] text-white">Earnings</h1>
             </header>
-            <LoadingCard label="Loading earnings..." />
+            <PageLoadingCard label="Loading earnings..." />
           </div>
         </AccountContentContainer>
       </div>
