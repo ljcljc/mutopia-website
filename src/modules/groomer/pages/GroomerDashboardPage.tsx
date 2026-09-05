@@ -163,7 +163,7 @@ function TravelMapCard({
             className="size-[56px] rounded-full object-cover"
           />
           <div className="min-w-0">
-            <p className="font-comfortaa text-[16px] leading-6 text-[#4A2C55]">
+            <p className="font-comfortaa text-[16px] font-bold leading-6 text-[#4A2C55]">
               {appointment.petName}
             </p>
             <p className="font-comfortaa text-[12px] leading-[18px] text-[#8B6357]">
@@ -376,7 +376,7 @@ function InProgressJobCard({
             className="size-14 rounded-full object-cover"
           />
           <div className="min-w-0">
-            <p className="truncate font-comfortaa text-[16px] leading-6 text-white">
+            <p className="truncate font-comfortaa text-[16px] font-bold leading-6 text-white">
               {appointment.petName}
             </p>
             <p className="truncate font-comfortaa text-[13px] leading-[19.5px] text-white/75">
@@ -443,7 +443,7 @@ function CompletedServiceCard({
             className="size-14 rounded-full object-cover"
           />
           <div className="min-w-0">
-            <p className="truncate font-comfortaa text-[16px] leading-6 text-white">
+            <p className="truncate font-comfortaa text-[16px] font-bold leading-6 text-white">
               {appointment.petName}
             </p>
             <p className="truncate font-comfortaa text-[13px] leading-[19.5px] text-white/70">
