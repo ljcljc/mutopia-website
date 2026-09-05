@@ -171,6 +171,36 @@ describe("InspectionPhotoReview", () => {
     expect(onActivePhotoChange).toHaveBeenCalledWith(2);
   });
 
+  it("does not expose photo navigation or swipe switching for a single photo", () => {
+    const onActivePhotoChange = vi.fn();
+    render(
+      <InspectionPhotoReview
+        photos={[photo()]}
+        activePhotoId={1}
+        config={{ area: "skin", label: "Skin photo", hints: [] }}
+        open
+        onActivePhotoChange={onActivePhotoChange}
+        onClose={vi.fn()}
+        onChange={vi.fn()}
+        onAddPhoto={vi.fn()}
+      />
+    );
+
+    expect(screen.queryByRole("button", { name: "Previous photo" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Next photo" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Go to photo 1" })).toBeNull();
+
+    const viewport = document.querySelector(
+      '[style*="--review-panel-height"]'
+    ) as HTMLElement;
+    viewport.setPointerCapture = vi.fn();
+    fireEvent.pointerDown(viewport, { clientX: 120, clientY: 120, pointerId: 1 });
+    fireEvent.pointerMove(viewport, { clientX: 20, clientY: 120, pointerId: 1 });
+    fireEvent.pointerUp(viewport, { clientX: 20, clientY: 120, pointerId: 1 });
+
+    expect(onActivePhotoChange).not.toHaveBeenCalled();
+  });
+
   it("switches to a photo when its pagination dot is clicked", () => {
     const onActivePhotoChange = vi.fn();
     render(

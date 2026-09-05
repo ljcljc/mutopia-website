@@ -405,7 +405,7 @@ export function InspectionPhotoReview({
           : undefined,
       scale,
     };
-    if (scale === 1 && points.length === 1) {
+    if (scale === 1 && points.length === 1 && photos.length > 1) {
       carouselGesture.current = {
         x: event.clientX,
         width: viewportRef.current?.clientWidth || viewportSize.width,
@@ -421,7 +421,12 @@ export function InspectionPhotoReview({
     const gesture = imageGesture.current;
     const points = [...imagePointers.current.values()];
     if (!gesture) return;
-    if (points.length === 1 && scale === 1 && carouselGesture.current) {
+    if (
+      points.length === 1 &&
+      scale === 1 &&
+      photos.length > 1 &&
+      carouselGesture.current
+    ) {
       const delta = event.clientX - carouselGesture.current.x;
       if (!carouselTarget && Math.abs(delta) > 2 && photos.length > 1) {
         const direction: SlideDirection = delta < 0 ? "next" : "previous";
@@ -493,7 +498,12 @@ export function InspectionPhotoReview({
     const carouselStart = carouselGesture.current;
     imagePointers.current.delete(event.pointerId);
     carouselGesture.current = null;
-    if (carouselStart && scale === 1 && imagePointers.current.size === 0) {
+    if (
+      carouselStart &&
+      scale === 1 &&
+      photos.length > 1 &&
+      imagePointers.current.size === 0
+    ) {
       const delta = event.clientX - carouselStart.x;
       const width = carouselStart.width || window.innerWidth;
       if (Math.abs(delta) > 48) {
