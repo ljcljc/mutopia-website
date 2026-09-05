@@ -51,7 +51,7 @@ const inspection: PhotoHealthInspectionOut = {
   photos: [],
 };
 
-function renderPage() {
+function renderPage(withDashboard = false) {
   render(
     <MemoryRouter
       initialEntries={["/groomer/bookings/42/photo-health-inspection"]}
@@ -61,6 +61,12 @@ function renderPage() {
           path="/groomer/bookings/:bookingId/photo-health-inspection"
           element={<GroomerPhotoHealthInspectionPage />}
         />
+        {withDashboard ? (
+          <Route
+            path="/groomer/dashboard"
+            element={<div>Groomer dashboard</div>}
+          />
+        ) : null}
       </Routes>
     </MemoryRouter>
   );
@@ -127,6 +133,49 @@ describe("GroomerPhotoHealthInspectionPage", () => {
       })
     ).toBeInTheDocument();
     expect(startPhotoHealthInspection).toHaveBeenCalledWith(42);
+  });
+
+  it("confirms leaving a step that already has content", async () => {
+    vi.mocked(getPhotoHealthInspection).mockResolvedValue({
+      exists: true,
+      inspection: {
+        ...inspection,
+        photos: [
+          {
+            id: 1,
+            area: "skin",
+            url: "/skin.jpg",
+            original_filename: "skin.jpg",
+            normalized_mime_type: "image/jpeg",
+            classification: "normal",
+            finding_hints: [],
+            confirmed: true,
+          },
+        ],
+      },
+    });
+    renderPage(true);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Dashboard" }));
+    expect(
+      await screen.findByRole("dialog", { name: "Incomplete Health Report" })
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Keep Editing" }));
+    expect(
+      screen.queryByRole("dialog", { name: "Incomplete Health Report" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/Skin\s*-\s*after grooming photos/i)
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Dashboard" }));
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Leave and defer to End of Day",
+      })
+    );
+    expect(await screen.findByText("Groomer dashboard")).toBeInTheDocument();
   });
 
   it("reconstructs the last saved step after reload", async () => {

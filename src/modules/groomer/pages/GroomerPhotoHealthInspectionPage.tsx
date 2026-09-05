@@ -6,6 +6,12 @@ import { Icon } from "@/components/common/Icon";
 import { Spinner } from "@/components/common/Spinner";
 import AccountContentContainer from "@/components/layout/AccountContentContainer";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { HttpError } from "@/lib/http";
 import {
   compressInspectionImage,
@@ -104,9 +110,13 @@ function restoreLocalDraft(
 
 function ReportPageShell({
   breadcrumbLabel,
+  onDashboardClick,
+  dashboardDialog,
   children,
 }: {
   breadcrumbLabel: string;
+  onDashboardClick?: () => void;
+  dashboardDialog?: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -117,19 +127,76 @@ function ReportPageShell({
             aria-label="Breadcrumb"
             className="flex items-center gap-1.5 whitespace-nowrap font-comfortaa text-[14px] font-bold leading-[20px] text-white"
           >
-            <Link
-              to="/groomer/dashboard"
-              className="transition-colors hover:text-[#FFE4C7]"
-            >
-              Dashboard
-            </Link>
+            {onDashboardClick ? (
+              <button
+                type="button"
+                onClick={onDashboardClick}
+                className="cursor-pointer transition-colors hover:text-[#FFE4C7]"
+              >
+                Dashboard
+              </button>
+            ) : (
+              <Link
+                to="/groomer/dashboard"
+                className="transition-colors hover:text-[#FFE4C7]"
+              >
+                Dashboard
+              </Link>
+            )}
             <span aria-hidden="true">{">"}</span>
             <span className="truncate">{breadcrumbLabel}</span>
           </nav>
           {children}
         </div>
       </AccountContentContainer>
+      {dashboardDialog}
     </main>
+  );
+}
+
+function IncompleteHealthReportDialog({
+  open,
+  onKeepEditing,
+  onLeave,
+}: {
+  open: boolean;
+  onKeepEditing: () => void;
+  onLeave: () => void;
+}) {
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => !nextOpen && onKeepEditing()}
+    >
+      <DialogContent
+        showCloseButton={false}
+        className="w-[calc(100%-32px)] max-w-[353px] rounded-[12px] border-none bg-white p-6 shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)]"
+      >
+        <DialogTitle className="font-comfortaa text-[20px] font-normal leading-7 text-[#4A3C2A]">
+          Incomplete Health Report
+        </DialogTitle>
+        <DialogDescription className="font-comfortaa text-[14px] leading-7 text-[#4A3C2A]">
+          The owner is expecting their AI health assessment. Completing this now
+          ensures a premium experience and locks in their payment.
+        </DialogDescription>
+        <div className="flex flex-col gap-2.5">
+          <button
+            type="button"
+            onClick={onKeepEditing}
+            className="h-12 rounded-full bg-[#C47B2D] px-4 font-comfortaa text-[14px] text-white transition-colors hover:bg-[#B66E24] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C47B2D] focus-visible:ring-offset-2"
+          >
+            Keep Editing
+          </button>
+          <button
+            type="button"
+            onClick={onLeave}
+            className="h-12 rounded-full border border-[#C47B2D] bg-white px-4 font-comfortaa text-[14px] text-[#C47B2D] transition-colors hover:bg-[#FFF7ED] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C47B2D] focus-visible:ring-offset-2"
+          >
+            Leave and defer to End of Day
+          </button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -228,6 +295,8 @@ export default function GroomerPhotoHealthInspectionPage() {
   const [analysisFailed, setAnalysisFailed] = useState(false);
   const [draft, setDraft] = useState<PhotoHealthReportDraftOut | null>(null);
   const [showOverview, setShowOverview] = useState(false);
+  const [showIncompleteReportDialog, setShowIncompleteReportDialog] =
+    useState(false);
   const openFilePicker = (input: HTMLInputElement | null) => {
     if (!input || input.disabled) return;
     input.click();
@@ -463,6 +532,47 @@ export default function GroomerPhotoHealthInspectionPage() {
   const isPairedInspection = step === 2 || step === 4;
   const pairedAreas = isPairedInspection ? (stepConfig?.areas ?? []) : [];
   const pairedAreaName = step === 2 ? "Ear" : "Eye";
+  const currentStepHasContent = useMemo(() => {
+    if (!inspection || inspection.status !== "draft") return false;
+    if (step >= 1 && step <= 5) {
+      const areas =
+        INSPECTION_STEPS[step]?.areas.map((area) => area.area) ?? [];
+      return inspection.photos.some((photo) => areas.includes(photo.area));
+    }
+    return Boolean(
+      overallProfessionalImpression ||
+        currentNote.trim() ||
+        handoverNote.trim() ||
+        observationTags.length
+    );
+  }, [
+    currentNote,
+    handoverNote,
+    inspection,
+    observationTags.length,
+    overallProfessionalImpression,
+    step,
+  ]);
+  const handleDashboardClick = () => {
+    if (currentStepHasContent) setShowIncompleteReportDialog(true);
+    else navigate("/groomer/dashboard");
+  };
+  const closeIncompleteReportDialog = () =>
+    setShowIncompleteReportDialog(false);
+  const leaveIncompleteReport = () => {
+    setShowIncompleteReportDialog(false);
+    navigate("/groomer/dashboard");
+  };
+  const dashboardDialog = (
+    <IncompleteHealthReportDialog
+      open={showIncompleteReportDialog}
+      onKeepEditing={closeIncompleteReportDialog}
+      onLeave={leaveIncompleteReport}
+    />
+  );
+  const dashboardAction = currentStepHasContent
+    ? handleDashboardClick
+    : undefined;
   const activeAreaPhotos = useMemo(
     () => {
       const photos = isPairedInspection
@@ -1023,7 +1133,11 @@ export default function GroomerPhotoHealthInspectionPage() {
 
   if (loading)
     return (
-      <ReportPageShell breadcrumbLabel="Fill health report">
+      <ReportPageShell
+        breadcrumbLabel="Fill health report"
+        onDashboardClick={dashboardAction}
+        dashboardDialog={dashboardDialog}
+      >
         <PageLoadingCard label="Loading health report..." />
       </ReportPageShell>
     );
@@ -1036,6 +1150,8 @@ export default function GroomerPhotoHealthInspectionPage() {
         breadcrumbLabel={
           draft.published ? "View health report" : "Review health report"
         }
+        onDashboardClick={dashboardAction}
+        dashboardDialog={dashboardDialog}
       >
         <PhotoHealthReportReview
           draft={draft}
@@ -1068,7 +1184,11 @@ export default function GroomerPhotoHealthInspectionPage() {
 
   if (!inspection || showOverview) {
     return (
-      <ReportPageShell breadcrumbLabel="Fill health report">
+      <ReportPageShell
+        breadcrumbLabel="Fill health report"
+        onDashboardClick={dashboardAction}
+        dashboardDialog={dashboardDialog}
+      >
         <div className="mt-6">
           <PhotoHealthOverview
             booking={booking}
@@ -1087,7 +1207,11 @@ export default function GroomerPhotoHealthInspectionPage() {
   }
 
   return (
-    <ReportPageShell breadcrumbLabel={breadcrumbLabel}>
+    <ReportPageShell
+      breadcrumbLabel={breadcrumbLabel}
+      onDashboardClick={dashboardAction}
+      dashboardDialog={dashboardDialog}
+    >
       {step <= 5 && stepConfig ? (
         <>
           {isPairedInspection ? (
