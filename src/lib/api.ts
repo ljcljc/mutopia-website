@@ -3059,32 +3059,6 @@ export async function createDepositSession(
 }
 
 /**
- * 创建最终支付意图
- */
-export async function createFinalIntent(
-  bookingId: number
-): Promise<PaymentIntentOut> {
-  const response = await http.post<PaymentIntentOut>(
-    `/api/payments/payments/create_final_intent?booking_id=${bookingId}`,
-    undefined
-  );
-  return response.data;
-}
-
-/**
- * 创建最终支付会话（Stripe Checkout）
- */
-export async function createFinalSession(
-  bookingId: number
-): Promise<PaymentSessionOut> {
-  const response = await http.post<PaymentSessionOut>(
-    `/api/payments/payments/create_final_session?booking_id=${bookingId}`,
-    undefined
-  );
-  return response.data;
-}
-
-/**
  * 创建小费支付会话（Stripe Checkout）
  */
 export async function createTipSession(

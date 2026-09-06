@@ -54,7 +54,7 @@ import {
 } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
-import { CheckCircleIcon, StarIcon, XIcon } from "lucide-react";
+import { StarIcon, XIcon } from "lucide-react";
 import { PageLoadingCard } from "@/modules/groomer/components/PageLoadingCard";
 
 type BookingRequest = DashboardAppointment;
@@ -416,14 +416,18 @@ function InProgressJobCard({
 function CompletedServiceCard({
   appointment,
   onFillReport,
+  onAddQuickReview,
   isPendingReport = false,
 }: {
   appointment: DashboardAppointment;
   onFillReport: () => void;
+  onAddQuickReview?: () => void;
   isPendingReport?: boolean;
 }) {
   const isHandoverCheckout =
-    !isPendingReport && appointment.hasPublishedHealthReport && !appointment.review;
+    !isPendingReport &&
+    appointment.hasPublishedHealthReport &&
+    !appointment.review;
 
   return (
     <article className="rounded-[16px] bg-[linear-gradient(180deg,#633479_0%,#7A4777_52%,#8B6357_100%)] p-5 shadow-[0px_4px_6px_rgba(74,44,85,0.3)]">
@@ -436,7 +440,7 @@ function CompletedServiceCard({
             ? "Pending report"
             : isHandoverCheckout
               ? "Handover & Checkout"
-            : getInProgressTitle(appointment.service, appointment.petName)}
+              : getInProgressTitle(appointment.service, appointment.petName)}
         </h2>
       </div>
 
@@ -459,12 +463,11 @@ function CompletedServiceCard({
       </div>
 
       {isPendingReport ? null : (
-        <div className="mt-4 flex h-9 items-center gap-2 rounded-[8px] border border-[#6AA31C] bg-[#F4FFDE] px-4">
-          <CheckCircleIcon
-            className="size-3 shrink-0 fill-[#6AA31C] text-[#F4FFDE]"
-            aria-hidden="true"
-          />
-          <p className="truncate font-comfortaa text-[12px] font-bold leading-4 text-[#467900]">
+        <div className="mt-4 flex min-h-9 items-center gap-2 rounded-[8px] border border-[#6AA31C] bg-[#F4FFDE] px-4 py-2">
+          <span className="flex size-3 shrink-0 items-center justify-center rounded-full bg-[#6AA31C]">
+            <Icon name="check" className="size-2 text-white" aria-hidden="true" />
+          </span>
+          <p className="min-w-0 whitespace-normal break-words font-comfortaa text-[12px] font-bold leading-4 text-[#467900]">
             {isHandoverCheckout
               ? "All done. Waiting for client confirmation."
               : "Completed. Waiting for client confirmation"}
@@ -483,8 +486,8 @@ function CompletedServiceCard({
       ) : isHandoverCheckout ? (
         <button
           type="button"
-          onClick={onFillReport}
-          className="mt-4 flex h-12 w-full items-center justify-center rounded-full border-2 border-[#FFF7ED] px-7 font-comfortaa text-[16px] font-semibold leading-[17.5px] text-[#FFF7ED] transition-colors hover:bg-white/10"
+          onClick={onAddQuickReview}
+          className="mt-4 flex h-12 w-full cursor-pointer items-center justify-center rounded-full border-2 border-[#FFF7ED] px-7 font-comfortaa text-[16px] font-semibold leading-[17.5px] text-[#FFF7ED] transition-colors hover:bg-white/10"
         >
           Add a quick review
         </button>
@@ -659,26 +662,45 @@ function HealthReportInteractionCard({
 
   return (
     <article className="rounded-[16px] bg-white p-5 shadow-[0px_4px_14px_rgba(0,0,0,0.1)]">
-      <p className="font-comfortaa text-[11px] tracking-[0.5px] text-[#A07D72]">HEALTH REPORT</p>
+      <p className="font-comfortaa text-[11px] tracking-[0.5px] text-[#A07D72]">
+        HEALTH REPORT
+      </p>
       <h2 className="mt-1 font-comfortaa text-[20px] font-bold leading-[30px] text-[#4A2C55]">
         {awaitingReply ? "Reply to client review" : "Health report sent"}
       </h2>
       <div className="mt-4 flex items-center gap-3 rounded-[12px] bg-[#FAF8F4] px-3 py-3">
-        <img src={appointment.avatarUrl} alt={appointment.petName} className="size-12 rounded-full object-cover" />
+        <img
+          src={appointment.avatarUrl}
+          alt={appointment.petName}
+          className="size-12 rounded-full object-cover"
+        />
         <div className="min-w-0">
-          <p className="font-comfortaa text-[15px] leading-[22px] text-[#4A2C55]">{appointment.petName}</p>
-          <p className="font-comfortaa text-[12px] leading-[18px] text-[#8B6357]">{appointment.service}</p>
+          <p className="font-comfortaa text-[15px] leading-[22px] text-[#4A2C55]">
+            {appointment.petName}
+          </p>
+          <p className="font-comfortaa text-[12px] leading-[18px] text-[#8B6357]">
+            {appointment.service}
+          </p>
           {review ? (
-            <div className="mt-1 flex gap-1" aria-label={`${rating} out of 5 stars`}>
+            <div
+              className="mt-1 flex gap-1"
+              aria-label={`${rating} out of 5 stars`}
+            >
               {Array.from({ length: 5 }, (_, index) => (
-                <StarIcon key={index} className={`size-3.5 ${index < rating ? "fill-[#F59E0B] text-[#F59E0B]" : "text-[#D6CCC6]"}`} aria-hidden="true" />
+                <StarIcon
+                  key={index}
+                  className={`size-3.5 ${index < rating ? "fill-[#F59E0B] text-[#F59E0B]" : "text-[#D6CCC6]"}`}
+                  aria-hidden="true"
+                />
               ))}
             </div>
           ) : null}
         </div>
       </div>
       {review?.comment ? (
-        <p className="mt-3 rounded-[8px] bg-[#FFF7ED] px-3 py-2 font-comfortaa text-[12px] leading-[18px] text-[#4A2C55]">&quot;{review.comment}&quot;</p>
+        <p className="mt-3 rounded-[8px] bg-[#FFF7ED] px-3 py-2 font-comfortaa text-[12px] leading-[18px] text-[#4A2C55]">
+          &quot;{review.comment}&quot;
+        </p>
       ) : null}
       {awaitingReply ? (
         <form className="mt-4 space-y-3" onSubmit={handleSubmit}>
@@ -689,12 +711,18 @@ function HealthReportInteractionCard({
             aria-label="Reply to client review"
             className="min-h-[88px] w-full rounded-[10px] border border-[#E6D9D2] px-3 py-2 font-comfortaa text-[13px] text-[#4A2C55] outline-none focus:border-[#DE6A07]"
           />
-          <button type="submit" disabled={!reply.trim() || isSubmitting} className="flex h-11 w-full items-center justify-center rounded-full bg-[#DE6A07] font-comfortaa text-[14px] font-bold text-white disabled:cursor-not-allowed disabled:opacity-60">
+          <button
+            type="submit"
+            disabled={!reply.trim() || isSubmitting}
+            className="flex h-11 w-full items-center justify-center rounded-full bg-[#DE6A07] font-comfortaa text-[14px] font-bold text-white disabled:cursor-not-allowed disabled:opacity-60"
+          >
             {isSubmitting ? <Spinner size="small" color="white" /> : "Reply"}
           </button>
         </form>
       ) : (
-        <p className="mt-4 rounded-[10px] bg-[#EEF6FF] px-3 py-3 text-center font-comfortaa text-[12px] leading-[18px] text-[#2F5FD4]">Waiting for the client&apos;s review.</p>
+        <p className="mt-4 rounded-[10px] bg-[#EEF6FF] px-3 py-3 text-center font-comfortaa text-[12px] leading-[18px] text-[#2F5FD4]">
+          Waiting for the client&apos;s review.
+        </p>
       )}
     </article>
   );
@@ -2087,6 +2115,11 @@ export default function GroomerDashboardPage() {
   ].includes(normalizedAppointmentStatus);
   const showReviewedServiceJob =
     showCompletedServiceJob && Boolean(effectiveAppointment?.review);
+  const visibleReportInteractions = reportInteractions.filter(
+    (appointment) =>
+      !effectiveAppointment ||
+      Number(appointment.id) !== Number(effectiveAppointment.id)
+  );
 
   const handleStartTravel = async () => {
     if (!effectiveAppointment?.id || isStartingTravel || !showStartTravel)
@@ -2365,6 +2398,9 @@ export default function GroomerDashboardPage() {
               ) : effectiveAppointment && showCompletedServiceJob ? (
                 <CompletedServiceCard
                   appointment={effectiveAppointment}
+                  onAddQuickReview={() =>
+                    toast("Waiting for the client's review.")
+                  }
                   onFillReport={() =>
                     navigate(
                       `/groomer/bookings/${effectiveAppointment.id}/photo-health-inspection`
@@ -2431,7 +2467,7 @@ export default function GroomerDashboardPage() {
                 />
               ))}
 
-              {reportInteractions.map((appointment) => (
+              {visibleReportInteractions.map((appointment) => (
                 <HealthReportInteractionCard
                   key={`health-report-${appointment.id}`}
                   appointment={appointment}

@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { toast } from "sonner";
 import GroomerDashboardPage from "./GroomerDashboardPage";
 import {
   type BookingDetailOut,
@@ -254,7 +255,10 @@ describe("GroomerDashboardPage complete service", () => {
 
     expect(await screen.findByRole("heading", { name: "Handover & Checkout" })).toBeInTheDocument();
     expect(screen.getByText("All done. Waiting for client confirmation.")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Add a quick review" })).toBeInTheDocument();
+    const addReviewButton = screen.getByRole("button", { name: "Add a quick review" });
+    expect(addReviewButton).toBeInTheDocument();
+    fireEvent.click(addReviewButton);
+    expect(toast).toHaveBeenCalledWith("Waiting for the client's review.");
   });
 
   it("shows the reviewed completion card when the booking has a review", async () => {

@@ -1496,32 +1496,6 @@
         "security": [{ "JWTAuth": [] }]
       }
     },
-    "/api/payments/payments/create_final_session": {
-      "post": {
-        "operationId": "api_payments_create_final_session",
-        "summary": "Create Final Session",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "booking_id",
-            "schema": { "title": "Booking Id", "type": "integer" },
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/PaymentSessionOut" }
-              }
-            }
-          }
-        },
-        "tags": ["payments"],
-        "security": [{ "JWTAuth": [] }]
-      }
-    },
     "/api/payments/payments/create_tip_session": {
       "post": {
         "operationId": "api_payments_create_tip_session",

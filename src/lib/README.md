@@ -318,7 +318,6 @@ async function getCurrentUser() {
 ### 支付管理
 
 - `createDepositSession(bookingId)` - 创建押金支付会话（Stripe Checkout）
-- `createFinalSession(bookingId)` - 创建最终支付会话（Stripe Checkout）
 - `getPaymentMethods(params?)` - 获取支付方式列表（分页）
 
 ### 促销相关
