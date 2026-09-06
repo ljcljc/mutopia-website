@@ -28,8 +28,6 @@ export function getStatusBadgeConfig(status: string): { label: string; tone: Boo
       return { label: "Service started", tone: "purple" };
     case "awaiting_payment":
       return { label: "Waiting for payment", tone: "orange" };
-    case "awaiting_final_payment":
-      return { label: "Waiting for final payment", tone: "orange" };
     case "pending_report":
       return { label: "Health report pending", tone: "orange" };
     case "completed":
@@ -63,7 +61,6 @@ function isStartedUnfinishedStatus(status: string): boolean {
     "checked_in",
     "in_progress",
     "pending_report",
-    "awaiting_final_payment",
   ].includes(normalizeBookingStatus(status));
 }
 

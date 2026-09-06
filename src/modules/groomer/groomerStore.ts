@@ -478,7 +478,6 @@ function isActiveDashboardAppointmentStatus(status: string): boolean {
     "in_progress",
     "pending_report",
     "completed",
-    "awaiting_final_payment",
     "reviewed",
   ].includes(normalizeStatus(status));
 }

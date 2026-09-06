@@ -23,7 +23,6 @@ const HEALTH_INFO_EDITABLE_STATUSES = new Set([
   "checked_in",
   "in_progress",
   "completed",
-  "awaiting_final_payment",
   "terminated",
 ]);
 

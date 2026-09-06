@@ -2110,7 +2110,6 @@ export default function GroomerDashboardPage() {
   const showPendingReportJob = normalizedAppointmentStatus === "pending_report";
   const showCompletedServiceJob = [
     "completed",
-    "awaiting_final_payment",
     "reviewed",
   ].includes(normalizedAppointmentStatus);
   const showReviewedServiceJob =
