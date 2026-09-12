@@ -5,15 +5,27 @@ import { toast } from "sonner";
 import IconButtonArrow from "@/assets/icons/icon-button-arrow.svg?react";
 import { BrownOutlineButton } from "@/components/common/BrownOutlineButton";
 import { OrangeButton } from "@/components/common/OrangeButton";
-import { getBookingDetail, updateBookingHealthInfo, type BookingDetailOut, type BookingHealthInfoUpdateIn } from "@/lib/api";
-import { BOOKING_HEALTH_STEPS, createDefaultQuestionnaire, normalizeQuestionnaire } from "./booking-health/questionnaire";
+import {
+  getBookingDetail,
+  updateBookingHealthInfo,
+  type BookingDetailOut,
+  type BookingHealthInfoUpdateIn,
+} from "@/lib/api";
+import {
+  BOOKING_HEALTH_STEPS,
+  createDefaultQuestionnaire,
+  normalizeQuestionnaire,
+} from "./booking-health/questionnaire";
 import { LifestyleEnvironmentStep } from "./booking-health/steps/LifestyleEnvironmentStep";
 import { PreventionCoreNeedsStep } from "./booking-health/steps/PreventionCoreNeedsStep";
 import { NutritionDigestionStep } from "./booking-health/steps/NutritionDigestionStep";
 import { ClinicalHistoryStep } from "./booking-health/steps/ClinicalHistoryStep";
 import type { BookingHealthQuestionnaire } from "./booking-health/types";
 
-function getSnapshotValue(snapshot: Record<string, unknown> | undefined, key: string): string {
+function getSnapshotValue(
+  snapshot: Record<string, unknown> | undefined,
+  key: string
+): string {
   const value = snapshot?.[key];
   return typeof value === "string" ? value : "";
 }
@@ -26,7 +38,9 @@ const HEALTH_INFO_EDITABLE_STATUSES = new Set([
   "terminated",
 ]);
 
-function buildLegacyHealthFields(questionnaire: BookingHealthQuestionnaire): Partial<BookingHealthInfoUpdateIn> {
+function buildLegacyHealthFields(
+  questionnaire: BookingHealthQuestionnaire
+): Partial<BookingHealthInfoUpdateIn> {
   const groomingDays = questionnaire.lifestyle.groomingIntervalDays;
   let groomingFrequency: string | null = null;
   if (groomingDays > 0 && groomingDays <= 10) groomingFrequency = "weekly";
@@ -37,15 +51,23 @@ function buildLegacyHealthFields(questionnaire: BookingHealthQuestionnaire): Par
   return {
     behavior: questionnaire.clinical.eatingHabitsAndBehaviors[0] ?? null,
     grooming_frequency: groomingFrequency,
-    special_notes: questionnaire.prevention.restrictions.trim() || questionnaire.medical.recentVetVisitReason.trim() || null,
+    special_notes:
+      questionnaire.prevention.restrictions.trim() ||
+      questionnaire.medical.recentVetVisitReason.trim() ||
+      null,
   };
 }
 
-function getLifestyleStepIssues(questionnaire: BookingHealthQuestionnaire): string[] {
+function getLifestyleStepIssues(
+  questionnaire: BookingHealthQuestionnaire
+): string[] {
   const lifestyle = questionnaire.lifestyle;
   const issues: string[] = [];
 
-  if (lifestyle.neighborhoods.length === 0 && lifestyle.neighborhoodDraft.trim().length === 0) {
+  if (
+    lifestyle.neighborhoods.length === 0 &&
+    lifestyle.neighborhoodDraft.trim().length === 0
+  ) {
     issues.push("Living neighborhood");
   }
   if (lifestyle.livingArrangement.length !== 1) {
@@ -78,7 +100,9 @@ export default function BookingHealthInfo() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [questionnaire, setQuestionnaire] = useState<BookingHealthQuestionnaire>(createDefaultQuestionnaire());
+  const [didClearPrefill, setDidClearPrefill] = useState(false);
+  const [questionnaire, setQuestionnaire] =
+    useState<BookingHealthQuestionnaire>(createDefaultQuestionnaire());
 
   useEffect(() => {
     if (!Number.isFinite(parsedBookingId)) {
@@ -91,10 +115,14 @@ export default function BookingHealthInfo() {
 
     const loadDetail = async () => {
       setIsLoading(true);
+      setDidClearPrefill(false);
       try {
         const bookingDetail = await getBookingDetail(parsedBookingId);
         if (cancelled) return;
-        const snapshot = (bookingDetail.pet_snapshot ?? {}) as Record<string, unknown>;
+        const snapshot = (bookingDetail.pet_snapshot ?? {}) as Record<
+          string,
+          unknown
+        >;
         setDetail(bookingDetail);
         setQuestionnaire(normalizeQuestionnaire(snapshot.health_questionnaire));
       } catch (error) {
@@ -114,26 +142,41 @@ export default function BookingHealthInfo() {
     };
   }, [navigate, parsedBookingId]);
 
-  const canSubmit = detail != null && detail.health_report == null && HEALTH_INFO_EDITABLE_STATUSES.has(detail.status);
-  const petSnapshot = useMemo(() => ((detail?.pet_snapshot ?? {}) as Record<string, unknown>), [detail]);
+  const canSubmit =
+    detail != null &&
+    detail.health_report == null &&
+    HEALTH_INFO_EDITABLE_STATUSES.has(detail.status);
+  const petSnapshot = useMemo(
+    () => (detail?.pet_snapshot ?? {}) as Record<string, unknown>,
+    [detail]
+  );
+  const isPrefilled =
+    petSnapshot.health_questionnaire_prefilled === true && !didClearPrefill;
   const petName = getSnapshotValue(petSnapshot, "name") || "Your pet";
   const stepMeta = BOOKING_HEALTH_STEPS[currentStep];
   const visualProgressStep = currentStep;
   const visualProgressSegments = BOOKING_HEALTH_STEPS.length;
-  const lifestyleStepIssues = useMemo(() => getLifestyleStepIssues(questionnaire), [questionnaire]);
+  const lifestyleStepIssues = useMemo(
+    () => getLifestyleStepIssues(questionnaire),
+    [questionnaire]
+  );
   const canProceedCurrentStep = useMemo(() => {
     if (currentStep === 0) return lifestyleStepIssues.length === 0;
     return true;
   }, [currentStep, lifestyleStepIssues]);
 
-  const handleSubmit = async (nextQuestionnaire: BookingHealthQuestionnaire = questionnaire) => {
+  const handleSubmit = async (
+    nextQuestionnaire: BookingHealthQuestionnaire = questionnaire
+  ) => {
     if (!detail) return;
     if (!canSubmit) {
       console.log("[health-form] submit blocked: booking not editable", {
         bookingStatus: detail?.status ?? null,
         bookingId: detail.id,
       });
-      toast.error("Health information can no longer be submitted for this appointment.");
+      toast.error(
+        "Health information can no longer be submitted for this appointment."
+      );
       return;
     }
 
@@ -173,7 +216,11 @@ export default function BookingHealthInfo() {
 
   const props = {
     value: questionnaire,
-    onChange: (updater: (current: BookingHealthQuestionnaire) => BookingHealthQuestionnaire) => setQuestionnaire(updater),
+    onChange: (
+      updater: (
+        current: BookingHealthQuestionnaire
+      ) => BookingHealthQuestionnaire
+    ) => setQuestionnaire(updater),
   };
   let stepContent;
   switch (currentStep) {
@@ -187,7 +234,13 @@ export default function BookingHealthInfo() {
       stepContent = <NutritionDigestionStep {...props} />;
       break;
     default:
-      stepContent = <ClinicalHistoryStep {...props} onSkipSubmit={() => void handleSkipClinicalAndSubmit()} isSubmitting={isSaving} />;
+      stepContent = (
+        <ClinicalHistoryStep
+          {...props}
+          onSkipSubmit={() => void handleSkipClinicalAndSubmit()}
+          isSubmitting={isSaving}
+        />
+      );
   }
 
   const handleNext = async () => {
@@ -200,7 +253,9 @@ export default function BookingHealthInfo() {
       await handleSubmit();
       return;
     }
-    setCurrentStep((step) => Math.min(step + 1, BOOKING_HEALTH_STEPS.length - 1));
+    setCurrentStep((step) =>
+      Math.min(step + 1, BOOKING_HEALTH_STEPS.length - 1)
+    );
     window.scrollTo(0, 0);
   };
 
@@ -229,15 +284,20 @@ export default function BookingHealthInfo() {
                         <ArrowLeft className="size-[17px]" strokeWidth={1.8} />
                       </button>
                     ) : null}
-                    <p className="shrink-0 font-comfortaa text-[14px] font-normal leading-[22.75px] text-black">{stepMeta.timeLabel}</p>
+                    <p className="shrink-0 font-comfortaa text-[14px] font-normal leading-[22.75px] text-black">
+                      {stepMeta.timeLabel}
+                    </p>
                     <div className="min-w-0 flex-1">
                       <div className="flex gap-[5.25px]">
-                        {Array.from({ length: visualProgressSegments }, (_, index) => (
-                          <span
-                            key={index}
-                            className={`h-[5.25px] flex-1 rounded-full ${index <= visualProgressStep ? "bg-[#8b6357]" : "bg-[#e5e7eb]"}`}
-                          />
-                        ))}
+                        {Array.from(
+                          { length: visualProgressSegments },
+                          (_, index) => (
+                            <span
+                              key={index}
+                              className={`h-[5.25px] flex-1 rounded-full ${index <= visualProgressStep ? "bg-[#8b6357]" : "bg-[#e5e7eb]"}`}
+                            />
+                          )
+                        )}
                       </div>
                     </div>
                   </div>
@@ -247,7 +307,27 @@ export default function BookingHealthInfo() {
               <div className="px-4 py-7 sm:px-[21px] sm:py-[28px]">
                 {!canSubmit ? (
                   <div className="mx-auto mb-5 w-full max-w-[588px] rounded-[18px] border border-[#ef4444] bg-[#fef2f2] px-4 py-3 font-comfortaa text-[13px] text-[#b91c1c]">
-                    This health form is no longer available for submission. You can still review the information entered here.
+                    This health form is no longer available for submission. You
+                    can still review the information entered here.
+                  </div>
+                ) : null}
+
+                {isPrefilled && canSubmit ? (
+                  <div className="mx-auto mb-5 flex w-full max-w-[588px] items-center justify-between gap-4 rounded-[18px] border border-[#e4c98d] bg-[#fff9ed] px-4 py-3 font-comfortaa text-[12px] leading-5 text-[#6f5a42]">
+                    <span>
+                      Prefilled from your last health form. Please review and
+                      update it before submitting.
+                    </span>
+                    <button
+                      type="button"
+                      className="shrink-0 font-bold text-[#8b6357] underline"
+                      onClick={() => {
+                        setQuestionnaire(createDefaultQuestionnaire());
+                        setDidClearPrefill(true);
+                      }}
+                    >
+                      Clear
+                    </button>
                   </div>
                 ) : null}
 
@@ -259,7 +339,9 @@ export default function BookingHealthInfo() {
                   <div className="flex w-full flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-center">
                     {currentStep > 0 ? (
                       <BrownOutlineButton
-                        onClick={() => setCurrentStep((step) => Math.max(0, step - 1))}
+                        onClick={() =>
+                          setCurrentStep((step) => Math.max(0, step - 1))
+                        }
                         disabled={isSaving}
                         size="standard"
                         className="w-full px-5 py-3 text-[13px] font-bold sm:w-auto"
@@ -276,7 +358,12 @@ export default function BookingHealthInfo() {
                     >
                       <span className="inline-flex items-center gap-2 whitespace-nowrap">
                         <span>{stepMeta.cta}</span>
-                        {!isSaving ? <IconButtonArrow className="size-[14px] shrink-0" aria-hidden="true" /> : null}
+                        {!isSaving ? (
+                          <IconButtonArrow
+                            className="size-[14px] shrink-0"
+                            aria-hidden="true"
+                          />
+                        ) : null}
                       </span>
                     </OrangeButton>
                   </div>
