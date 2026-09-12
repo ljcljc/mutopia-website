@@ -371,7 +371,6 @@ export default function BookingDetail() {
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [selectedTipPercent, setSelectedTipPercent] = useState(12);
   const [customTipAmount, setCustomTipAmount] = useState("");
-  const [isTipDeclined, setIsTipDeclined] = useState(false);
   const [isCreatingTipSession, setIsCreatingTipSession] = useState(false);
   const { addresses, isLoadingAddresses, fetchAddresses } = useAccountStore();
   const loadBookingDetailForEdit = useBookingStore((state) => state.loadBookingDetailForEdit);
@@ -387,7 +386,6 @@ export default function BookingDetail() {
 
     setIsLoading(true);
     setError(null);
-    setIsTipDeclined(false);
     getBookingDetail(id)
       .then((data) => {
         setDetail(data);
@@ -542,12 +540,23 @@ export default function BookingDetail() {
           showNextStep: true,
           actionKind: "none",
         };
+      case "pending_report":
+        return {
+          subtitleIncludesScheduled: true,
+          progressColor: "#633479",
+          progressWidth: 98.5,
+          badgeLabel: detail?.hero_stage === "handover_checkout" ? "Handover & Checkout" : "Health report pending",
+          badgeTone: "purple",
+          nextStep: detail?.hero_stage === "handover_checkout" ? "Review health report and tip your groomer" : "Waiting for health report",
+          showNextStep: true,
+          actionKind: detail?.hero_stage === "handover_checkout" ? "review" : "none",
+        };
       case "completed":
         return {
           subtitleIncludesScheduled: true,
           progressColor: detail?.review ? "#8B6357" : "#633479",
           progressWidth: 98.5,
-          badgeLabel: detail?.review ? "Service completed and reviewed" : "Service completed",
+          badgeLabel: detail?.review ? "Service completed and reviewed" : "Service completed!",
           badgeTone: detail?.review ? "brown" : "purple",
           nextStep: detail?.review ? "Review submitted" : "Pending review",
           showNextStep: !detail?.review,
@@ -612,7 +621,7 @@ export default function BookingDetail() {
           actionKind: "none",
         };
     }
-  }, [detail?.notes, detail?.review, detail?.scheduled_time, detail?.status, estimatedCompletionDisplay, normalizedStatus, paymentDueDisplay, scheduledDisplay]);
+  }, [detail?.hero_stage, detail?.notes, detail?.review, detail?.scheduled_time, detail?.status, estimatedCompletionDisplay, normalizedStatus, paymentDueDisplay, scheduledDisplay]);
 
   const reviewedDisplay = formatApiLocalDateTime(detail?.review?.created_at);
   const recommendationLabel = formatRecommendationMonth(detail?.scheduled_time);
@@ -735,24 +744,10 @@ export default function BookingDetail() {
         }, null) ?? null
     );
   }, [detail?.payments]);
-  const pendingTipAmount = pendingTipPayment ? parseAmount(pendingTipPayment.amount) : 0;
-  const isContinuingPendingTip =
-    Boolean(pendingTipPayment) && selectedTipAmount > 0 && isSameMoneyAmount(selectedTipAmount, pendingTipAmount);
   const hasPaidTip = Boolean(
-    detail?.payments?.some((payment) => payment.kind.toLowerCase() === "tip" && isPaidPaymentStatus(payment.status)),
+    detail?.tip_status === "succeeded" || detail?.payments?.some((payment) => payment.kind.toLowerCase() === "tip" && isPaidPaymentStatus(payment.status)),
   );
-  const isTipDecisionComplete = hasPaidTip || isTipDeclined;
-
-  useEffect(() => {
-    if (!pendingTipPayment || pendingTipAmount <= 0) return;
-    const matchingPreset = tipOptions.find((option) => isSameMoneyAmount(option.amount, pendingTipAmount));
-    if (matchingPreset) {
-      setSelectedTipPercent(matchingPreset.percent);
-      setCustomTipAmount("");
-      return;
-    }
-    setCustomTipAmount(pendingTipAmount.toFixed(2));
-  }, [pendingTipPayment?.id, pendingTipAmount, tipOptions]);
+  const isTipDecisionComplete = hasPaidTip;
 
   const pendingAdjustmentAmount = pendingAdjustment ? parseAmount(pendingAdjustment.amount) : 0;
   const pendingAdjustmentDirection = pendingAdjustmentAmount > 0 ? "payment" : pendingAdjustmentAmount < 0 ? "refund" : "none";
@@ -923,10 +918,7 @@ export default function BookingDetail() {
     if (!detail?.id || isCreatingTipSession) return;
 
     const customTipIsZero = customTipAmount.trim() !== "" && isSameMoneyAmount(selectedTipAmount, 0);
-    if (customTipIsZero) {
-      setIsTipDeclined(true);
-      return;
-    }
+    if (customTipIsZero) return;
 
     if (selectedTipAmount < 0 || selectedTipAmount === 0) {
       toast.error("Please choose a tip amount");
@@ -1296,7 +1288,7 @@ export default function BookingDetail() {
 
                   {detailCardConfig.actionKind === "review" ? (
                     <div className="flex w-full flex-col gap-4">
-                      {detail?.review ? (
+                      {detail?.review && hasPaidTip ? (
                         <div className="flex w-full flex-wrap items-center gap-2">
                           <div className="flex min-w-[220px] flex-1 flex-col gap-1 text-[#4A3C2A]">
                             <p className="font-comfortaa text-[10px] font-normal leading-[12px]">
@@ -1359,6 +1351,7 @@ export default function BookingDetail() {
                                   <button
                                     key={option.percent}
                                     type="button"
+                                    disabled={Boolean(pendingTipPayment) || isCreatingTipSession}
                                     onClick={() => {
                                       setSelectedTipPercent(option.percent);
                                       setCustomTipAmount("");
@@ -1382,7 +1375,7 @@ export default function BookingDetail() {
                               step="0.01"
                               value={customTipAmount}
                               onChange={(event) => setCustomTipAmount(event.target.value)}
-                              disabled={isCreatingTipSession}
+                              disabled={Boolean(pendingTipPayment) || isCreatingTipSession}
                               placeholder="Enter tip"
                               leftElement={<span className="mr-1 font-comfortaa text-[12.25px] text-[#717182]">$</span>}
                               inputClassName="font-normal"
@@ -1390,9 +1383,7 @@ export default function BookingDetail() {
 
                             {pendingTipPayment ? (
                               <p className="font-comfortaa text-[11px] font-normal leading-4 text-[#8B6357]">
-                                {isContinuingPendingTip
-                                  ? "Payment was not completed. You can continue or change the tip amount."
-                                  : "Changing the tip amount will start a new payment and cancel the previous one."}
+                                Your tip payment is processing. The tip entry will update after payment confirmation.
                               </p>
                             ) : null}
 
@@ -1403,9 +1394,10 @@ export default function BookingDetail() {
                               fullWidth
                               className="bg-[#8B6357] hover:bg-[#8B6357]/90 active:bg-[#8B6357]/90 focus-visible:bg-[#8B6357]/90"
                               loading={isCreatingTipSession}
+                              disabled={Boolean(pendingTipPayment)}
                               onClick={handleCreateTipSession}
                             >
-                              {isContinuingPendingTip ? "Continue payment" : "Confirm & release Groomer"}
+                              {pendingTipPayment ? "Tip payment processing" : "Confirm & release Groomer"}
                             </OrangeButton>
                           </>
                         </div>

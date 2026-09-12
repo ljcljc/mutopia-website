@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@/components/common/Icon";
 import { formatApiLocalDateTime } from "@/lib/localDateTime";
@@ -24,11 +24,20 @@ function parseAddress(address?: string | null): { line1: string; line2: string }
 
 export default function DashboardHeroCard() {
   const navigate = useNavigate();
-  const { upcomingBookings } = useAccountStore();
+  const { upcomingBookings, historyBookings, fetchHistoryBookings } = useAccountStore();
+  const hasFetchedHistoryRef = useRef(false);
+
+  useEffect(() => {
+    if (hasFetchedHistoryRef.current) return;
+    hasFetchedHistoryRef.current = true;
+    fetchHistoryBookings().catch((error) => {
+      console.error("Error fetching history bookings for hero:", error);
+    });
+  }, [fetchHistoryBookings]);
 
   const currentBooking = useMemo(
-    () => selectCurrentDashboardBooking(upcomingBookings),
-    [upcomingBookings]
+    () => selectCurrentDashboardBooking([...upcomingBookings, ...historyBookings]),
+    [upcomingBookings, historyBookings]
   );
 
   if (!currentBooking) {
@@ -74,7 +83,11 @@ export default function DashboardHeroCard() {
           </div>
         </div>
         <div className="ml-3 flex shrink-0 items-center gap-1.5">
-          <StatusBadge status={currentBooking.status} scheduledTime={currentBooking.scheduled_time} />
+          <StatusBadge
+            status={currentBooking.status}
+            heroStage={currentBooking.hero_stage}
+            scheduledTime={currentBooking.scheduled_time}
+          />
           <Icon name="nav-next" className="size-4 text-[#99A1AF]" />
         </div>
       </div>

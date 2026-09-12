@@ -4790,6 +4790,10 @@
           "scheduled_time": {
             "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Scheduled Time"
+          },
+          "hero_stage": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Hero Stage"
           }
         },
         "required": ["id", "status"],
@@ -4854,6 +4858,14 @@
         "properties": {
           "id": { "title": "Id", "type": "integer" },
           "status": { "title": "Status", "type": "string" },
+          "hero_stage": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Hero Stage"
+          },
+          "tip_status": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Tip Status"
+          },
           "scheduled_time": {
             "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Scheduled Time"

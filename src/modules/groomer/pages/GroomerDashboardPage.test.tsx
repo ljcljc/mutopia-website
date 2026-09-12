@@ -48,7 +48,9 @@ vi.mock("sonner", () => ({
 
 describe("GroomerDashboardPage complete service", () => {
   const selectBeforePhoto = async () => {
-    const input = document.querySelector('input[type="file"]') as HTMLInputElement | null;
+    const input = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement | null;
     expect(input).not.toBeNull();
     if (!input) return;
     fireEvent.change(input, {
@@ -59,8 +61,12 @@ describe("GroomerDashboardPage complete service", () => {
     await waitFor(() => {
       expect(uploadCheckInObservationPhoto).toHaveBeenCalled();
     });
-    expect(await screen.findByRole("img", { name: "before.jpg" })).toBeInTheDocument();
-    expect(screen.queryByRole("dialog", { name: /Image Preview:/ })).not.toBeInTheDocument();
+    expect(
+      await screen.findByRole("img", { name: "before.jpg" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("dialog", { name: /Image Preview:/ })
+    ).not.toBeInTheDocument();
   };
 
   const advanceFromPhoto = async () => {
@@ -186,21 +192,29 @@ describe("GroomerDashboardPage complete service", () => {
     render(
       <MemoryRouter>
         <GroomerDashboardPage />
-      </MemoryRouter>,
+      </MemoryRouter>
     );
 
     expect(await screen.findByText("92/100")).toBeInTheDocument();
     expect(screen.getByText("4.6")).toBeInTheDocument();
 
-    fireEvent.click(await screen.findByRole("button", { name: /finish grooming/i }));
+    fireEvent.click(
+      await screen.findByRole("button", { name: /finish grooming/i })
+    );
 
     await waitFor(() => {
       expect(completeGroomerService).toHaveBeenCalledWith(123);
     });
-    expect(await screen.findByText("3 of 5 jobs completed")).toBeInTheDocument();
-    expect(screen.getByText("Goal: $200.00 • Current: $145.00")).toBeInTheDocument();
+    expect(
+      await screen.findByText("3 of 5 jobs completed")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Goal: $200.00 • Current: $145.00")
+    ).toBeInTheDocument();
     expect(await screen.findByText("Pending report")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Let's finish AI health report" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Let's finish AI health report" })
+    ).toBeInTheDocument();
   });
 
   it("opens the photo health inspection flow from a completed booking", async () => {
@@ -230,19 +244,29 @@ describe("GroomerDashboardPage complete service", () => {
       <MemoryRouter initialEntries={["/groomer/dashboard"]}>
         <Routes>
           <Route path="/groomer/dashboard" element={<GroomerDashboardPage />} />
-          <Route path="/groomer/bookings/:bookingId/photo-health-inspection" element={<div>Photo health inspection route</div>} />
+          <Route
+            path="/groomer/bookings/:bookingId/photo-health-inspection"
+            element={<div>Photo health inspection route</div>}
+          />
         </Routes>
-      </MemoryRouter>,
+      </MemoryRouter>
     );
 
-    fireEvent.click(await screen.findByRole("button", { name: "Fill report for Momo" }));
-    expect(await screen.findByText("Photo health inspection route")).toBeInTheDocument();
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Fill report for Momo" })
+    );
+    expect(
+      await screen.findByText("Photo health inspection route")
+    ).toBeInTheDocument();
   });
 
   it("shows the handover checkout card after the report is published", async () => {
     vi.mocked(getGroomerDashboardSummary).mockResolvedValue({});
     vi.mocked(getGroomerPendingBookingInvitations).mockResolvedValue([]);
-    vi.mocked(getGroomerBookingDetail).mockResolvedValue({ id: 123, status: "completed" } as BookingDetailOut);
+    vi.mocked(getGroomerBookingDetail).mockResolvedValue({
+      id: 123,
+      status: "completed",
+    } as BookingDetailOut);
     vi.mocked(getGroomerCurrentBooking).mockResolvedValue({
       id: 123,
       status: "completed",
@@ -251,11 +275,21 @@ describe("GroomerDashboardPage complete service", () => {
       service_name: "Full grooming",
       has_published_health_report: true,
     });
-    render(<MemoryRouter><GroomerDashboardPage /></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <GroomerDashboardPage />
+      </MemoryRouter>
+    );
 
-    expect(await screen.findByRole("heading", { name: "Handover & Checkout" })).toBeInTheDocument();
-    expect(screen.getByText("All done. Waiting for client confirmation.")).toBeInTheDocument();
-    const addReviewButton = screen.getByRole("button", { name: "Add a quick review" });
+    expect(
+      await screen.findByRole("heading", { name: "Handover & Checkout" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("All done. Waiting for client confirmation.")
+    ).toBeInTheDocument();
+    const addReviewButton = screen.getByRole("button", {
+      name: "Add a quick review",
+    });
     expect(addReviewButton).toBeInTheDocument();
     fireEvent.click(addReviewButton);
     expect(toast).toHaveBeenCalledWith("Waiting for the client's review.");
@@ -279,7 +313,8 @@ describe("GroomerDashboardPage complete service", () => {
       review: {
         id: 9,
         rating: 5,
-        comment: "Amazing job! Max looks fantastic and seems so happy. Thank you!",
+        comment:
+          "Amazing job! Max looks fantastic and seems so happy. Thank you!",
         tip_amount: "15.00",
         created_at: "2026-05-24T10:00:00Z",
       },
@@ -296,14 +331,23 @@ describe("GroomerDashboardPage complete service", () => {
     render(
       <MemoryRouter>
         <GroomerDashboardPage />
-      </MemoryRouter>,
+      </MemoryRouter>
     );
 
-    expect(await screen.findByText("Excellent Work!")).toBeInTheDocument();
+    expect(await screen.findByText("Service completed!")).toBeInTheDocument();
     expect(screen.getByText("Emma Johnson rated you")).toBeInTheDocument();
     expect(screen.getByText("+ $15.00")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Fill report for Max" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "View next job" })).toBeInTheDocument();
+    expect(
+      screen.getByText("Groomers who leave a review get 2x more", {
+        exact: false,
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Add a quick review" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "View next job" })
+    ).not.toBeInTheDocument();
   });
 
   it("preselects existing add-ons in groomer check up and submits them back", async () => {
@@ -321,9 +365,7 @@ describe("GroomerDashboardPage complete service", () => {
       payable_amount: "107.00",
       deposit_amount: "20.00",
       final_amount: "107.00",
-      addons_snapshot: [
-        { id: 7, name: "Selected add-on", price: "12.00" },
-      ],
+      addons_snapshot: [{ id: 7, name: "Selected add-on", price: "12.00" }],
     } as BookingDetailOut);
     vi.mocked(getGroomerCurrentBooking).mockResolvedValue({
       id: 123,
@@ -359,7 +401,7 @@ describe("GroomerDashboardPage complete service", () => {
     render(
       <MemoryRouter>
         <GroomerDashboardPage />
-      </MemoryRouter>,
+      </MemoryRouter>
     );
 
     fireEvent.click(await screen.findByRole("button", { name: "Modify" }));
@@ -373,9 +415,12 @@ describe("GroomerDashboardPage complete service", () => {
     fireEvent.click(screen.getByRole("button", { name: "Submit" }));
 
     await waitFor(() => {
-      expect(submitGroomerCheckUpCheckout).toHaveBeenCalledWith(123, expect.objectContaining({
-        add_on_ids: [],
-      }));
+      expect(submitGroomerCheckUpCheckout).toHaveBeenCalledWith(
+        123,
+        expect.objectContaining({
+          add_on_ids: [],
+        })
+      );
     });
   });
 
@@ -427,10 +472,12 @@ describe("GroomerDashboardPage complete service", () => {
     render(
       <MemoryRouter>
         <GroomerDashboardPage />
-      </MemoryRouter>,
+      </MemoryRouter>
     );
 
-    expect(await screen.findByText("Verify package and add-on")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Verify package and add-on")
+    ).toBeInTheDocument();
 
     fireEvent.click(await screen.findByRole("button", { name: "Modify" }));
     await selectBeforePhoto();
@@ -441,9 +488,12 @@ describe("GroomerDashboardPage complete service", () => {
     fireEvent.click(screen.getByRole("button", { name: "Submit" }));
 
     await waitFor(() => {
-      expect(submitGroomerCheckUpCheckout).toHaveBeenCalledWith(123, expect.objectContaining({
-        add_on_ids: [8],
-      }));
+      expect(submitGroomerCheckUpCheckout).toHaveBeenCalledWith(
+        123,
+        expect.objectContaining({
+          add_on_ids: [8],
+        })
+      );
     });
 
     expect(await screen.findByText("$115.00")).toBeInTheDocument();
@@ -496,7 +546,7 @@ describe("GroomerDashboardPage complete service", () => {
     render(
       <MemoryRouter>
         <GroomerDashboardPage />
-      </MemoryRouter>,
+      </MemoryRouter>
     );
 
     fireEvent.click(await screen.findByRole("button", { name: "Modify" }));

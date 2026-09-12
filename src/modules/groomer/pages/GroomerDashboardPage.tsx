@@ -465,7 +465,11 @@ function CompletedServiceCard({
       {isPendingReport ? null : (
         <div className="mt-4 flex min-h-9 items-center gap-2 rounded-[8px] border border-[#6AA31C] bg-[#F4FFDE] px-4 py-2">
           <span className="flex size-3 shrink-0 items-center justify-center rounded-full bg-[#6AA31C]">
-            <Icon name="check" className="size-2 text-white" aria-hidden="true" />
+            <Icon
+              name="check"
+              className="size-2 text-white"
+              aria-hidden="true"
+            />
           </span>
           <p className="min-w-0 whitespace-normal break-words font-comfortaa text-[12px] font-bold leading-4 text-[#467900]">
             {isHandoverCheckout
@@ -527,12 +531,10 @@ function formatMoneyValue(value: unknown): string {
 
 function ReviewedServiceCard({
   appointment,
-  onFillReport,
-  onViewNextJob,
+  onAddQuickReview,
 }: {
   appointment: DashboardAppointment;
-  onFillReport: () => void;
-  onViewNextJob: () => void;
+  onAddQuickReview: () => void;
 }) {
   const review = appointment.review;
   const rating = Math.max(0, Math.min(5, Math.round(review?.rating ?? 0)));
@@ -540,25 +542,52 @@ function ReviewedServiceCard({
   const hasTip = tipAmount > 0;
 
   return (
-    <article className="rounded-[16px] bg-[linear-gradient(180deg,#DE6A07_0%,#E67E22_100%)] p-5 shadow-[0px_4px_6px_rgba(236,72,153,0.4)]">
+    <article className="rounded-[16px] bg-[linear-gradient(180deg,#C77A24_0%,#D28A2C_100%)] p-5 shadow-[0px_4px_6px_rgba(74,44,85,0.3)]">
       <div className="flex flex-col items-center text-center">
         <div className="flex size-16 items-center justify-center rounded-full bg-white">
           <StarIcon
-            className="size-8 fill-[#DE6A07] text-[#DE6A07]"
+            className="size-8 fill-[#C77A24] text-[#C77A24]"
             aria-hidden="true"
           />
         </div>
-        <h2 className="mt-5 font-comfortaa text-[24px] font-bold leading-9 text-white">
-          Excellent Work!
+        <h2 className="mt-5 font-comfortaa text-[24px] font-normal leading-9 text-white">
+          Service completed!
         </h2>
-        <p className="mt-1 font-comfortaa text-[14px] leading-[21px] text-white/90">
-          {appointment.petName}&apos;s grooming is complete.
-          <br />
-          You have to fill health report.
-        </p>
       </div>
 
-      <div className="mt-8 rounded-[12px] bg-white/20 p-4">
+      {hasTip ? (
+        <div className="mt-4 rounded-[20px] bg-[#FFF9EE] px-5 py-5">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="font-comfortaa text-[16px] leading-6 text-[#8B6357]">
+                You earned a tip!
+              </p>
+              <p className="mt-1 font-comfortaa text-[28px] leading-[34px] text-[#C77A24]">
+                + {formatMoneyValue(tipAmount)}
+              </p>
+            </div>
+            <span className="text-[40px] leading-[48px]" aria-hidden="true">
+              🎉
+            </span>
+          </div>
+        </div>
+      ) : null}
+
+      <p className="mt-8 text-center font-comfortaa text-[16px] leading-6 text-white">
+        Groomers who leave a review get 2x more
+        <br />
+        rebookings.
+      </p>
+
+      <button
+        type="button"
+        onClick={onAddQuickReview}
+        className="mt-6 flex h-12 w-full items-center justify-center rounded-full border-2 border-white px-7 font-comfortaa text-[16px] font-normal leading-6 text-white transition-colors hover:bg-white/10"
+      >
+        Add a quick review
+      </button>
+
+      <div className="mt-7 rounded-[20px] bg-white/20 p-5">
         <div className="flex min-w-0 items-center gap-3">
           <img
             src={appointment.avatarUrl}
@@ -585,52 +614,13 @@ function ReviewedServiceCard({
         </div>
 
         {review?.comment ? (
-          <div className="mt-4 rounded-[8px] bg-white/90 px-[10px] py-[10px]">
-            <p className="line-clamp-2 font-comfortaa text-[12px] leading-[18px] text-[#4A2C55]">
+          <div className="mt-4 rounded-[12px] bg-[#FFF9EE] px-4 py-4">
+            <p className="font-comfortaa text-[13px] leading-[21px] text-[#4A2C55]">
               &quot;{review.comment}&quot;
             </p>
           </div>
         ) : null}
       </div>
-
-      {hasTip ? (
-        <div className="mt-4 rounded-[12px] bg-[#FFF7ED] px-3 py-3">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="font-comfortaa text-[12px] leading-[18px] text-[#92400E]">
-                You earned a tip!
-              </p>
-              <p className="font-comfortaa text-[20px] font-bold leading-[30px] text-[#E67E22]">
-                + {formatMoneyValue(tipAmount)}
-              </p>
-            </div>
-            <span className="text-[32px] leading-[48px]" aria-hidden="true">
-              🎉
-            </span>
-          </div>
-        </div>
-      ) : null}
-
-      <button
-        type="button"
-        onClick={onFillReport}
-        className="mt-4 flex h-12 w-full items-center justify-center rounded-full border-2 border-[#FFF7ED] px-7 font-comfortaa text-[16px] font-semibold leading-[17.5px] text-[#FFF7ED] transition-colors hover:bg-white/10"
-      >
-        {appointment.hasPublishedHealthReport
-          ? "View health report"
-          : appointment.healthReportPreparationStatus === "preparing"
-            ? "Preparing health report"
-            : appointment.healthReportPreparationStatus === "failed"
-              ? "Report preparation failed"
-              : `Fill report for ${appointment.petName}`}
-      </button>
-      <button
-        type="button"
-        onClick={onViewNextJob}
-        className="mt-5 flex h-12 w-full items-center justify-center rounded-full bg-white px-7 font-comfortaa text-[16px] font-bold leading-6 text-[#DF6E0C] shadow-[0px_10px_8px_rgba(0,0,0,0.1),0px_4px_3px_rgba(0,0,0,0.1)] transition-transform active:scale-[0.99]"
-      >
-        View next job
-      </button>
     </article>
   );
 }
@@ -2108,10 +2098,9 @@ export default function GroomerDashboardPage() {
   const showCurrentJob = normalizedAppointmentStatus === "checked_in";
   const showInProgressJob = normalizedAppointmentStatus === "in_progress";
   const showPendingReportJob = normalizedAppointmentStatus === "pending_report";
-  const showCompletedServiceJob = [
-    "completed",
-    "reviewed",
-  ].includes(normalizedAppointmentStatus);
+  const showCompletedServiceJob = ["completed", "reviewed"].includes(
+    normalizedAppointmentStatus
+  );
   const showReviewedServiceJob =
     showCompletedServiceJob && Boolean(effectiveAppointment?.review);
   const visibleReportInteractions = reportInteractions.filter(
@@ -2377,12 +2366,9 @@ export default function GroomerDashboardPage() {
               {effectiveAppointment && showReviewedServiceJob ? (
                 <ReviewedServiceCard
                   appointment={effectiveAppointment}
-                  onFillReport={() =>
-                    navigate(
-                      `/groomer/bookings/${effectiveAppointment.id}/photo-health-inspection`
-                    )
+                  onAddQuickReview={() =>
+                    toast("Waiting for the client's review.")
                   }
-                  onViewNextJob={() => navigate("/groomer/my-work")}
                 />
               ) : effectiveAppointment && showPendingReportJob ? (
                 <CompletedServiceCard

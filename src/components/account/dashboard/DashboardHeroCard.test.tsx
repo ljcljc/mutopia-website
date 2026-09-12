@@ -96,4 +96,22 @@ describe("DashboardHeroCard", () => {
     expect(screen.getByText("Mochi")).toBeInTheDocument();
     expect(screen.getByText("Waiting for groomer match")).toBeInTheDocument();
   });
+
+  it("renders the latest completed booking from history", () => {
+    useAccountStore.setState({
+      historyBookings: [
+        makeBooking({
+          id: 9,
+          status: "completed",
+          hero_stage: "service_completed",
+          pet_name: "Mochi completed",
+        }),
+      ],
+    });
+
+    renderHeroCard();
+
+    expect(screen.getByText("Mochi completed")).toBeInTheDocument();
+    expect(screen.getByText("Service completed!")).toBeInTheDocument();
+  });
 });

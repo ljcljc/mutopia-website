@@ -7,7 +7,13 @@ export function normalizeBookingStatus(status: string): string {
   return status.trim().toLowerCase().replace(/[\s-]+/g, "_");
 }
 
-export function getStatusBadgeConfig(status: string): { label: string; tone: BookingStatusTone } {
+export function getStatusBadgeConfig(
+  status: string,
+  heroStage?: "handover_checkout" | "service_completed" | null,
+): { label: string; tone: BookingStatusTone } {
+  if (heroStage === "handover_checkout") return { label: "Handover & Checkout", tone: "purple" };
+  if (heroStage === "service_completed") return { label: "Service completed!", tone: "purple" };
+
   const normalized = normalizeBookingStatus(status);
 
   switch (normalized) {
@@ -86,6 +92,7 @@ function getCurrentBookingPriority(booking: BookingListOut, now: Date): number |
 
   if (isStartedUnfinishedStatus(booking.status)) return 0;
   if (isNotStartedStatus(booking.status)) return 1;
+  if (booking.hero_stage === "service_completed") return 2;
 
   return null;
 }
@@ -114,11 +121,19 @@ export function selectCurrentDashboardBooking(bookings: BookingListOut[]): Booki
   return sorted[0] ?? null;
 }
 
-export function StatusBadge({ status, scheduledTime }: { status: string; scheduledTime?: string | null }) {
+export function StatusBadge({
+  status,
+  heroStage,
+  scheduledTime,
+}: {
+  status: string;
+  heroStage?: "handover_checkout" | "service_completed" | null;
+  scheduledTime?: string | null;
+}) {
   const abnormal = isBookingAbnormal({ status, scheduled_time: scheduledTime });
   const { label, tone } = abnormal
     ? { label: "Service issue", tone: "outlined" as BookingStatusTone }
-    : getStatusBadgeConfig(status);
+    : getStatusBadgeConfig(status, heroStage);
 
   if (tone === "green") {
     return (

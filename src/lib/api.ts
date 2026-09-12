@@ -465,6 +465,7 @@ export interface BookingListOut {
   id: number;
   order_code?: string | null;
   status: string;
+  hero_stage?: "handover_checkout" | "service_completed" | null;
   pet_name?: string | null;
   service_name?: string | null;
   address?: string | null;
@@ -531,6 +532,8 @@ export interface BookingDetailOut {
   id: number;
   order_code?: string | null;
   status: string;
+  hero_stage?: "handover_checkout" | "service_completed" | null;
+  tip_status?: "not_tipped" | "processing" | "succeeded" | "failed";
   scheduled_time?: string | null;
   user_phone?: string | null;
   payment_due_at?: string | null;
