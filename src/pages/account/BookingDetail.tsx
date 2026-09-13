@@ -13,6 +13,7 @@ import {
   clientConfirmBookingTime,
   createDepositSession,
   createReview,
+  createPetOwnerComplaint,
   createTipSession,
   getCancelQuote,
   getBookingDetail,
@@ -369,6 +370,9 @@ export default function BookingDetail() {
   const [environmentRating, setEnvironmentRating] = useState(5);
   const [reviewComment, setReviewComment] = useState("");
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [isComplaintOpen, setIsComplaintOpen] = useState(false);
+  const [complaintContent, setComplaintContent] = useState("");
+  const [isSubmittingComplaint, setIsSubmittingComplaint] = useState(false);
   const [selectedTipPercent, setSelectedTipPercent] = useState(12);
   const [customTipAmount, setCustomTipAmount] = useState("");
   const [isCreatingTipSession, setIsCreatingTipSession] = useState(false);
@@ -998,6 +1002,35 @@ export default function BookingDetail() {
     }
   };
 
+  const handleSubmitComplaint = async () => {
+    if (!detail?.id || isSubmittingComplaint) return;
+    const content = complaintContent.trim();
+    if (!content) {
+      toast.error("Please share what happened");
+      return;
+    }
+    setIsSubmittingComplaint(true);
+    try {
+      await createPetOwnerComplaint(detail.id, content);
+      const updatedDetail = await getBookingDetail(detail.id);
+      setDetail(updatedDetail);
+      setIsComplaintOpen(false);
+      setComplaintContent("");
+      toast.success("Complaint submitted");
+    } catch (actionError) {
+      if (actionError instanceof HttpError && actionError.status === 409) {
+        const updatedDetail = await getBookingDetail(detail.id);
+        setDetail(updatedDetail);
+        setIsComplaintOpen(false);
+        toast.error("A complaint has already been submitted");
+      } else {
+        toast.error("Failed to submit complaint");
+      }
+    } finally {
+      setIsSubmittingComplaint(false);
+    }
+  };
+
   const handleEditAwaitingPaymentBooking = () => {
     if (!detail) return;
     loadBookingDetailForEdit(detail);
@@ -1411,9 +1444,10 @@ export default function BookingDetail() {
                       variant="secondary"
                       size="compact"
                       className="min-w-[100px]"
-                      onClick={() => handlePendingAction("Comment flow is not available yet")}
+                      disabled={Boolean(detail?.complaint) || isSubmittingComplaint}
+                      onClick={() => setIsComplaintOpen(true)}
                     >
-                      Comment
+                      {detail?.complaint ? "Complaint submitted" : "Submit a complaint"}
                     </OrangeButton>
                   ) : null}
 
@@ -2146,6 +2180,60 @@ export default function BookingDetail() {
                   loading={isSubmittingReview}
                   onClick={handleSubmitReview}
                 >
+                  Submit
+                </OrangeButton>
+              </div>
+            </AlertDialogFooter>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={isComplaintOpen} onOpenChange={(open) => !isSubmittingComplaint && setIsComplaintOpen(open)}>
+        <AlertDialogContent className="max-w-[calc(100%-32px)] rounded-[20px] border-[rgba(0,0,0,0.2)] px-0 py-0 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] sm:max-w-[560px]">
+          <div className="flex max-h-[85vh] flex-col gap-4 overflow-y-auto pb-6 pt-3">
+            <AlertDialogHeader className="gap-2 px-3">
+              <div className="flex w-full items-center justify-between">
+                <AlertDialogPrimitive.Cancel asChild>
+                  <button
+                    type="button"
+                    disabled={isSubmittingComplaint}
+                    className="flex size-4 items-center justify-center border-0 bg-transparent p-0 text-[#4A3C2A] opacity-70 hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-40"
+                    aria-label="Close complaint dialog"
+                  >
+                    <XIcon className="size-4 stroke-[1.5]" />
+                  </button>
+                </AlertDialogPrimitive.Cancel>
+                <AlertDialogTitle className="flex-1 text-center font-comfortaa text-[14px] font-normal leading-[22.75px] text-[#4C4C4C]">
+                  Submit a complaint
+                </AlertDialogTitle>
+                <span className="size-4" />
+              </div>
+            </AlertDialogHeader>
+            <div className="h-px bg-[rgba(0,0,0,0.1)]" />
+            <div className="flex flex-col gap-4 px-6">
+              <AlertDialogDescription className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
+                Tell us your experience
+              </AlertDialogDescription>
+              <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
+                What did you like or dislike?
+              </p>
+              <CustomTextarea
+                label=""
+                placeholder="Share your thoughts"
+                value={complaintContent}
+                onChange={(event) => setComplaintContent(event.target.value)}
+                className="text-[#4A5565]"
+                disabled={isSubmittingComplaint}
+              />
+            </div>
+            <AlertDialogFooter className="px-6">
+              <div className="flex w-full items-center justify-end gap-2.5">
+                <AlertDialogPrimitive.Cancel asChild>
+                  <OrangeButton variant="outline" size="medium" textSize={14} className="min-w-[120px]" disabled={isSubmittingComplaint}>
+                    Cancel
+                  </OrangeButton>
+                </AlertDialogPrimitive.Cancel>
+                <OrangeButton variant="primary" size="medium" textSize={14} className="min-w-[136px]" loading={isSubmittingComplaint} onClick={handleSubmitComplaint}>
                   Submit
                 </OrangeButton>
               </div>

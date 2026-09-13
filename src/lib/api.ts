@@ -528,6 +528,12 @@ export interface ReviewSummaryOut {
   created_at: string;
 }
 
+export interface PetOwnerComplaintOut {
+  id: number;
+  content: string;
+  submitted_at: string;
+}
+
 export interface BookingDetailOut {
   id: number;
   order_code?: string | null;
@@ -562,6 +568,7 @@ export interface BookingDetailOut {
   payments?: BookingPaymentOut[];
   adjustments?: BookingAdjustmentOut[];
   review?: ReviewSummaryOut | null;
+  complaint?: PetOwnerComplaintOut | null;
   health_report?: {
     id: number;
     summary?: string | null;
@@ -2159,6 +2166,17 @@ export async function createReview(
   const response = await http.post<ReviewCreatedOut>(
     `/api/bookings/${bookingId}/review`,
     data
+  );
+  return response.data;
+}
+
+export async function createPetOwnerComplaint(
+  bookingId: number,
+  content: string
+): Promise<{ ok: boolean; complaint_id: number }> {
+  const response = await http.post<{ ok: boolean; complaint_id: number }>(
+    `/api/bookings/${bookingId}/complaint`,
+    { content }
   );
   return response.data;
 }
