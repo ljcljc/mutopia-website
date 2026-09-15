@@ -6040,6 +6040,10 @@
       },
       "GroomerCheckUpCheckoutIn": {
         "properties": {
+          "service_id": {
+            "anyOf": [{ "type": "integer" }, { "type": "null" }],
+            "title": "Service Id"
+          },
           "weight_value": {
             "anyOf": [
               { "type": "number" },
@@ -6057,10 +6061,18 @@
             "type": "string"
           },
           "add_on_ids": {
-            "default": [],
-            "items": { "type": "integer" },
+            "anyOf": [
+              { "items": { "type": "integer" }, "type": "array" },
+              { "type": "null" }
+            ],
             "title": "Add On Ids",
-            "type": "array"
+            "default": null
+          },
+          "add_on_quantities": {
+            "additionalProperties": { "type": "integer" },
+            "default": {},
+            "title": "Add On Quantities",
+            "type": "object"
           },
           "personalization": {
             "additionalProperties": true,

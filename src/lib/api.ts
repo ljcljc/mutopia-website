@@ -513,6 +513,11 @@ export interface BookingAdjustmentOut {
   created_at: string;
   decided_at?: string | null;
   paid_at?: string | null;
+  subtotal_amount?: number | string;
+  discount_amount?: number | string;
+  gst_amount?: number | string;
+  quoted_total_amount?: number | string;
+  paid_before_amount?: number | string;
 }
 
 export interface ReviewSummaryOut {
@@ -1842,9 +1847,11 @@ export interface GroomerCheckUpIn {
 }
 
 export interface GroomerCheckUpCheckoutIn {
+  service_id?: number | null;
   weight_value?: number | string | null;
   weight_unit?: string;
-  add_on_ids?: number[];
+  add_on_ids?: number[] | null;
+  add_on_quantities?: Record<number, number>;
   personalization?: Record<string, unknown>;
   description?: string;
   before_photo_image_id?: number | null;

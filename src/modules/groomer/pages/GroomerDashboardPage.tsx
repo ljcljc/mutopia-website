@@ -1094,7 +1094,6 @@ function GroomerCheckUpModal({
   const [weightUnit, setWeightUnit] = useState("lbs");
   const [addOns, setAddOns] = useState<AddOnOut[]>([]);
   const [selectedAddOnIds, setSelectedAddOnIds] = useState<number[]>([]);
-  const [initialAddOnIds, setInitialAddOnIds] = useState<number[]>([]);
   const [personalization, setPersonalization] = useState<
     Record<string, string>
   >({});
@@ -1114,7 +1113,6 @@ function GroomerCheckUpModal({
     setAddOns([]);
     const initialSelectedAddOnIds = appointment?.addonIds ?? [];
     setSelectedAddOnIds(initialSelectedAddOnIds);
-    setInitialAddOnIds(initialSelectedAddOnIds);
     setPersonalization({});
     setDescription("");
     setIsApproved(true);
@@ -1313,13 +1311,10 @@ function GroomerCheckUpModal({
         next[key === "extra_large" ? "gt_50kg" : key] = normalizedValue;
         return next;
       }, {});
-      const newlySelectedAddOnIds = selectedAddOnIds.filter(
-        (id) => !initialAddOnIds.includes(id)
-      );
       const result = await submitGroomerCheckUpCheckout(bookingId, {
         weight_value: weightValue,
         weight_unit: weightUnit,
-        add_on_ids: newlySelectedAddOnIds,
+        add_on_ids: selectedAddOnIds,
         personalization: normalizedPersonalization,
         description,
       });

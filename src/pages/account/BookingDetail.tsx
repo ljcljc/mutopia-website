@@ -357,7 +357,6 @@ export default function BookingDetail() {
   const [isRejectingProposedTime, setIsRejectingProposedTime] = useState(false);
   const [isAdjustmentDialogOpen, setIsAdjustmentDialogOpen] = useState(false);
   const [isApprovingAdjustment, setIsApprovingAdjustment] = useState(false);
-  const [isRejectingAdjustment, setIsRejectingAdjustment] = useState(false);
   const [isReceiptOpen, setIsReceiptOpen] = useState(false);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [rating, setRating] = useState(5);
@@ -875,22 +874,6 @@ export default function BookingDetail() {
     }
   };
 
-  const handleRejectAdjustment = async () => {
-    if (!detail?.id || !pendingAdjustment) return;
-
-    setIsRejectingAdjustment(true);
-    try {
-      await clientDecideAddOn(detail.id, pendingAdjustment.id, false);
-      await refreshBookingDetail();
-      setIsAdjustmentDialogOpen(false);
-      toast.success("Booking update declined");
-    } catch (actionError) {
-      console.error("Failed to reject booking adjustment:", actionError);
-      toast.error("Failed to decline booking update");
-    } finally {
-      setIsRejectingAdjustment(false);
-    }
-  };
 
   const handleGoPay = async () => {
     if (!detail?.id) return;
@@ -1522,7 +1505,7 @@ export default function BookingDetail() {
                   <div className="rounded-[12px] bg-white px-4 py-3">
                     <p className="font-comfortaa text-[10px] leading-[12px] text-[#6B7280]">New total</p>
                     <p className="mt-1 font-comfortaa text-[16px] font-bold leading-6 text-[#4A3C2A]">
-                      {formatAmount(proposedTotalAmount, "$0.00")}
+                      {formatAmount(pendingAdjustment.quoted_total_amount ?? proposedTotalAmount, "$0.00")}
                     </p>
                   </div>
                 </div>
@@ -1863,7 +1846,7 @@ export default function BookingDetail() {
         </div>
       </AccountContentContainer>
 
-      <AlertDialog open={isAdjustmentDialogOpen} onOpenChange={(open) => !isApprovingAdjustment && !isRejectingAdjustment && setIsAdjustmentDialogOpen(open)}>
+      <AlertDialog open={isAdjustmentDialogOpen} onOpenChange={(open) => !isApprovingAdjustment && setIsAdjustmentDialogOpen(open)}>
         <AlertDialogContent className="max-w-[calc(100%-32px)] rounded-[20px] border-[rgba(0,0,0,0.2)] px-0 py-0 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] sm:max-w-[560px]">
           <div className="flex flex-col gap-4 pb-8 pt-3">
             <AlertDialogHeader className="gap-2 px-3">
@@ -1908,8 +1891,24 @@ export default function BookingDetail() {
                     </div>
                     <div className="mt-1 flex items-center justify-between gap-3">
                       <p className="font-comfortaa text-[12px] font-bold leading-4 text-[#4A3C2A]">New total</p>
-                      <p className="font-comfortaa text-[12px] font-bold leading-4 text-[#DE6A07]">{formatAmount(proposedTotalAmount, "$0.00")}</p>
+                      <p className="font-comfortaa text-[12px] font-bold leading-4 text-[#DE6A07]">{formatAmount(pendingAdjustment?.quoted_total_amount ?? proposedTotalAmount, "$0.00")}</p>
                     </div>
+                    {pendingAdjustment?.subtotal_amount !== undefined ? (
+                      <>
+                        <div className="mt-1 flex items-center justify-between gap-3">
+                          <p className="font-comfortaa text-[12px] leading-4 text-[#4A3C2A]">Subtotal before GST</p>
+                          <p className="font-comfortaa text-[12px] leading-4 text-[#4A3C2A]">{formatAmount(pendingAdjustment?.subtotal_amount, "$0.00")}</p>
+                        </div>
+                        <div className="mt-1 flex items-center justify-between gap-3">
+                          <p className="font-comfortaa text-[12px] leading-4 text-[#4A3C2A]">Membership discount</p>
+                          <p className="font-comfortaa text-[12px] leading-4 text-[#4A3C2A]">-{formatAmount(pendingAdjustment?.discount_amount, "$0.00")}</p>
+                        </div>
+                        <div className="mt-1 flex items-center justify-between gap-3">
+                          <p className="font-comfortaa text-[12px] leading-4 text-[#4A3C2A]">GST (5%)</p>
+                          <p className="font-comfortaa text-[12px] leading-4 text-[#4A3C2A]">{formatAmount(pendingAdjustment?.gst_amount, "$0.00")}</p>
+                        </div>
+                      </>
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -1917,24 +1916,13 @@ export default function BookingDetail() {
             <AlertDialogFooter className="px-6">
               <div className="flex w-full items-center justify-end gap-2.5">
                 <OrangeButton
-                  variant="outline"
-                  size="medium"
-                  textSize={14}
-                  className="min-w-[136px]"
-                  onClick={handleRejectAdjustment}
-                  loading={isRejectingAdjustment}
-                  disabled={isApprovingAdjustment}
-                >
-                  Decline
-                </OrangeButton>
-                <OrangeButton
                   variant="primary"
                   size="medium"
                   textSize={14}
                   className="min-w-[177px]"
                   onClick={handleApproveAdjustment}
                   loading={isApprovingAdjustment}
-                  disabled={isRejectingAdjustment}
+                  disabled={false}
                 >
                   {pendingAdjustmentDirection === "refund" ? "Confirm refund" : "Confirm and pay"}
                 </OrangeButton>

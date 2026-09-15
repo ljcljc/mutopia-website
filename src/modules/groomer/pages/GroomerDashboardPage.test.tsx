@@ -418,7 +418,7 @@ describe("GroomerDashboardPage complete service", () => {
       expect(submitGroomerCheckUpCheckout).toHaveBeenCalledWith(
         123,
         expect.objectContaining({
-          add_on_ids: [],
+          add_on_ids: [7],
         })
       );
     });
