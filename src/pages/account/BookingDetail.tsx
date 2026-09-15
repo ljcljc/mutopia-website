@@ -140,10 +140,6 @@ function isPendingCheckoutStatus(status: string) {
   );
 }
 
-function isSameMoneyAmount(left: number, right: number) {
-  return Math.round(left * 100) === Math.round(right * 100);
-}
-
 function formatPercentRate(value: number | string | undefined): string {
   const parsed = parseAmount(value);
   if (!Number.isFinite(parsed)) return "0";
@@ -553,7 +549,7 @@ export default function BookingDetail() {
           badgeTone: "purple",
           nextStep: detail?.hero_stage === "handover_checkout" ? "Review health report and tip your groomer" : "Waiting for health report",
           showNextStep: true,
-          actionKind: detail?.hero_stage === "handover_checkout" ? "review" : "none",
+          actionKind: "review",
         };
       case "completed":
         return {
@@ -564,6 +560,8 @@ export default function BookingDetail() {
           badgeTone: detail?.review ? "brown" : "purple",
           nextStep: detail?.review ? "Review submitted" : "Pending review",
           showNextStep: !detail?.review,
+          // Keep the completed-order action area visible for Receipt even when
+          // the separate customer-review window has expired.
           actionKind: "review",
         };
       case "terminated":
@@ -751,7 +749,7 @@ export default function BookingDetail() {
   const hasPaidTip = Boolean(
     detail?.tip_status === "succeeded" || detail?.payments?.some((payment) => payment.kind.toLowerCase() === "tip" && isPaidPaymentStatus(payment.status)),
   );
-  const isTipDecisionComplete = hasPaidTip;
+  const isTipDecisionComplete = hasPaidTip || detail?.tip_decision === "declined" || detail?.tip_decision === "system_closed";
 
   const pendingAdjustmentAmount = pendingAdjustment ? parseAmount(pendingAdjustment.amount) : 0;
   const pendingAdjustmentDirection = pendingAdjustmentAmount > 0 ? "payment" : pendingAdjustmentAmount < 0 ? "refund" : "none";
@@ -921,17 +919,23 @@ export default function BookingDetail() {
   const handleCreateTipSession = async () => {
     if (!detail?.id || isCreatingTipSession) return;
 
-    const customTipIsZero = customTipAmount.trim() !== "" && isSameMoneyAmount(selectedTipAmount, 0);
-    if (customTipIsZero) return;
-
-    if (selectedTipAmount < 0 || selectedTipAmount === 0) {
-      toast.error("Please choose a tip amount");
+    if (selectedTipAmount < 0) {
+      toast.error("Tip amount cannot be negative");
       return;
     }
 
     setIsCreatingTipSession(true);
     try {
       const session = await createTipSession(detail.id, selectedTipAmount.toFixed(2));
+      if ("tip_decision" in session && session.tip_decision === "declined") {
+        setDetail(await getBookingDetail(detail.id));
+        toast.success("No tip added");
+        setIsCreatingTipSession(false);
+        return;
+      }
+      if (!("url" in session)) {
+        throw new Error("Tip payment did not return a checkout URL");
+      }
       const redirectUrl = getPaymentSessionRedirectUrl(session);
       if (!redirectUrl) {
         throw new Error(`Invalid tip payment redirect URL: ${session.url}`);
@@ -1363,15 +1367,17 @@ export default function BookingDetail() {
                             >
                               Receipt
                             </OrangeButton>
-                            <OrangeButton
-                              type="button"
-                              variant="primary"
-                              size="compact"
-                              className="min-w-[136px] bg-[#633479]! hover:bg-[#734886]! active:bg-[#734886]! focus-visible:bg-[#734886]!"
-                              onClick={handleOpenReview}
-                            >
-                              Review
-                            </OrangeButton>
+                            {detail?.can_review !== false ? (
+                              <OrangeButton
+                                type="button"
+                                variant="primary"
+                                size="compact"
+                                className="min-w-[136px] bg-[#633479]! hover:bg-[#734886]! active:bg-[#734886]! focus-visible:bg-[#734886]!"
+                                onClick={handleOpenReview}
+                              >
+                                Review
+                              </OrangeButton>
+                            ) : null}
                         </div>
                       ) : (
                         <div className="flex flex-col gap-2">
@@ -1543,7 +1549,7 @@ export default function BookingDetail() {
             </div>
           ) : null}
 
-          {detail?.review ? (
+          {detail?.review && detail?.can_review !== false ? (
             <div className="rounded-xl bg-white p-6 shadow-[0px_8px_6px_0px_rgba(0,0,0,0.1)]">
               <div className="flex flex-col gap-2">
                 <p className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">

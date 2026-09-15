@@ -446,8 +446,7 @@ describe("BookingDetail", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Confirm & release Groomer" }));
 
-    expect(createTipSession).not.toHaveBeenCalled();
-    expect(screen.getByText("Tip your groomer?")).toBeInTheDocument();
+    expect(createTipSession).toHaveBeenCalledWith(127, "0.00");
   });
 
   it("shows only paid and succeeded payments in the receipt", async () => {

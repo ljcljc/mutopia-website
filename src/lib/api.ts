@@ -540,6 +540,9 @@ export interface BookingDetailOut {
   status: string;
   hero_stage?: "handover_checkout" | "service_completed" | null;
   tip_status?: "not_tipped" | "processing" | "succeeded" | "failed";
+  tip_decision?: "" | "tipped" | "declined" | "system_closed";
+  can_review?: boolean;
+  review_deadline?: string | null;
   scheduled_time?: string | null;
   user_phone?: string | null;
   payment_due_at?: string | null;
@@ -3085,8 +3088,8 @@ export async function createDepositSession(
 export async function createTipSession(
   bookingId: number,
   amount: number | string
-): Promise<PaymentSessionOut> {
-  const response = await http.post<PaymentSessionOut>(
+): Promise<PaymentSessionOut | { status: string; tip_decision: string; payment_id: number | null }> {
+  const response = await http.post<PaymentSessionOut | { status: string; tip_decision: string; payment_id: number | null }>(
     "/api/payments/payments/create_tip_session",
     { booking_id: bookingId, amount }
   );
