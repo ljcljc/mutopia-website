@@ -27,6 +27,7 @@ export function Step3() {
     breed,
     weight,
     weightUnit,
+    selectedServiceAreaId,
   } = useBookingStore();
 
   const user = useAuthStore((state) => state.user);
@@ -58,7 +59,7 @@ export function Step3() {
   // 根据当前宠物信息获取服务数据
   useEffect(() => {
     loadServices();
-  }, [loadServices, petType, breed, weight, weightUnit]);
+  }, [loadServices, petType, breed, weight, weightUnit, selectedServiceAreaId]);
 
   // 获取 add-ons 数据（只加载一次）
   useEffect(() => {
@@ -157,6 +158,9 @@ export function Step3() {
   // Calculate prices
   const selectedService = services.find((s) => s.id === serviceId);
   const packagePrice = getServicePrice(selectedService, weight, weightUnit);
+  const mobileVanServiceAmount = Number(selectedService?.mobile_van_service_amount ?? 0);
+  const safetyInsuranceAmount = Number(selectedService?.safety_insurance_amount ?? 0);
+  const packageSubtotal = packagePrice + mobileVanServiceAmount + safetyInsuranceAmount;
   
   // Calculate add-ons price and get selected add-ons details
   // If included_in_membership is true and user is a member, price should be 0
@@ -179,7 +183,7 @@ export function Step3() {
   }, [selectedAddOns, addOnsList, userInfo]);
 
   const addOnsPrice = selectedAddOnsDetails.reduce((total, addOn) => total + addOn.price, 0);
-  const totalPrice = packagePrice + addOnsPrice;
+  const totalPrice = packageSubtotal + addOnsPrice;
 
   const renderSelectedAddOnsPanel = (isFloating: boolean) => (
     <div
@@ -299,14 +303,16 @@ export function Step3() {
                 </div>
               ) : (
                 services.map((service) => {
-                  const price = getServicePrice(service, weight, weightUnit);
+                  const price = getServicePrice(service, weight, weightUnit)
+                    + Number(service.mobile_van_service_amount ?? 0)
+                    + Number(service.safety_insurance_amount ?? 0);
                   return (
                     <CustomRadio
                       key={service.id}
                       variant="package"
                       label={service.name}
                       description={service.description || ""}
-                      price={price}
+                      price={`$${price.toFixed(2)}`}
                       duration="" // API 中没有 duration 字段，可以留空或根据 type 推断
                       isSelected={serviceId === service.id}
                       onClick={() => { setServiceId(service.id); setServiceError(""); }}
@@ -462,25 +468,17 @@ export function Step3() {
                         ${packagePrice.toFixed(2)}
                       </p>
                     </div>
-                    {/* Service items list */}
-                    {selectedService.items && selectedService.items.length > 0 && (
-                      <>
-                        {selectedService.items
-                          .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
-                          .map((item) => {
-                            const itemPrice = typeof item.price === "string" ? parseFloat(item.price) : item.price;
-                            return (
-                              <div key={item.id} className="flex font-comfortaa font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
-                                <p className="relative shrink-0">
-                                  {item.name}
-                                </p>
-                                <p className="relative shrink-0">
-                                  ${itemPrice.toFixed(2)}
-                                </p>
-                              </div>
-                            );
-                          })}
-                      </>
+                    {mobileVanServiceAmount > 0 && (
+                      <div className="flex font-comfortaa font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
+                        <p className="relative shrink-0">Mobile van service</p>
+                        <p className="relative shrink-0">${mobileVanServiceAmount.toFixed(2)}</p>
+                      </div>
+                    )}
+                    {safetyInsuranceAmount > 0 && (
+                      <div className="flex font-comfortaa font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
+                        <p className="relative shrink-0">Safety insurance</p>
+                        <p className="relative shrink-0">${safetyInsuranceAmount.toFixed(2)}</p>
+                      </div>
                     )}
                     {/* Separator line */}
                     <div className="h-0 relative shrink-0 w-full border-t border-[#000000] my-[4px]" />
@@ -489,7 +487,7 @@ export function Step3() {
                         Subtotal
                       </p>
                       <p className="relative shrink-0">
-                        ${packagePrice.toFixed(2)}
+                        ${packageSubtotal.toFixed(2)}
                       </p>
                     </div>
                   </div>

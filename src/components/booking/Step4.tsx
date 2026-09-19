@@ -4,7 +4,7 @@ import { OrangeButton, TertiaryButton, Checkbox, MembershipCard, type FeatureIte
 import { useBookingStore } from "./bookingStore";
 import { cn } from "@/components/ui/utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getServicePrice } from "@/lib/pricing";
+import { calculateBookingDisplayPrice, getServicePrice } from "@/lib/pricing";
 import { useAccountStore } from "@/components/account/accountStore";
 import { useAuthStore } from "@/components/auth/authStore";
 import { getMembershipStepTitle } from "./stepTitles";
@@ -29,9 +29,19 @@ export function Step4() {
     nextStep,
     weight,
     weightUnit,
+    addresses,
+    selectedAddressId,
+    selectedMobileVanServiceAmount,
+    selectedSafetyInsuranceAmount,
+    selectedServiceAreaId,
+    loadServices,
   } = useBookingStore();
   const { membershipInfo, fetchMembershipInfo, isLoadingMembershipInfo } = useAccountStore();
   const authUserInfo = useAuthStore((state) => state.userInfo);
+
+  useEffect(() => {
+    void loadServices();
+  }, [loadServices, selectedServiceAreaId]);
 
   // Check if user is a member
   const isMember = authUserInfo?.is_member === true;
@@ -71,6 +81,40 @@ export function Step4() {
   // Calculate prices
   const selectedService = services.find((s) => s.id === serviceId);
   const packagePrice = getServicePrice(selectedService, weight, weightUnit);
+  const selectedServiceAddress = selectedAddressId
+    ? addresses.find((addr) => addr.id === selectedAddressId)
+    : null;
+  // Service-area pricing is copied onto the service response, but keep the
+  // address/store snapshot as a fallback while the area-specific request is
+  // refreshing. Do not use `||` here: a numeric zero must not hide a later
+  // fallback value.
+  const resolveComponentAmount = (...values: Array<number | string | null | undefined>) => {
+    for (const value of values) {
+      if (value !== null && value !== undefined && value !== "") {
+        const amount = Number(value);
+        if (Number.isFinite(amount) && amount > 0) return amount;
+      }
+    }
+    return 0;
+  };
+  const getLegacyServiceItemAmount = (name: string) => {
+    const item = selectedService?.items?.find(
+      (serviceItem) => serviceItem.name.trim().toLowerCase() === name,
+    );
+    return item?.price;
+  };
+  const mobileVanServiceAmount = resolveComponentAmount(
+    selectedService?.mobile_van_service_amount,
+    getLegacyServiceItemAmount("mobile van service"),
+    selectedServiceAddress?.mobile_van_service_amount,
+    selectedMobileVanServiceAmount,
+  );
+  const safetyInsuranceAmount = resolveComponentAmount(
+    selectedService?.safety_insurance_amount,
+    getLegacyServiceItemAmount("safety insurance"),
+    selectedServiceAddress?.safety_insurance_amount,
+    selectedSafetyInsuranceAmount,
+  );
 
   // Calculate add-ons price and get selected add-ons details
   // In Step4, we assume user will be a member, so if included_in_membership is true, price should be 0
@@ -137,7 +181,7 @@ export function Step4() {
   }, [membershipPlan, cashCouponCount]);
 
   const addOnsPrice = selectedAddOnsDetails.reduce((total, addOn) => total + addOn.price, 0);
-  const originalTotal = packagePrice + addOnsPrice;
+  const originalTotal = packagePrice + addOnsPrice + mobileVanServiceAmount + safetyInsuranceAmount;
 
   // Calculate discounts
   // discount_rate is the retention rate, so discount amount = original * (1 - discount_rate)
@@ -148,11 +192,25 @@ export function Step4() {
   const packagePriceWithDiscount = useMembershipDiscount && discountRate < 1
     ? packagePrice * discountRate
     : packagePrice;
+  const mobileVanServiceWithDiscount = useMembershipDiscount && discountRate < 1
+    ? mobileVanServiceAmount * discountRate
+    : mobileVanServiceAmount;
+  const safetyInsuranceWithDiscount = useMembershipDiscount && discountRate < 1
+    ? safetyInsuranceAmount * discountRate
+    : safetyInsuranceAmount;
+  const packageSubtotalWithDiscount = packagePriceWithDiscount + mobileVanServiceWithDiscount + safetyInsuranceWithDiscount;
   const addOnsPriceWithDiscount = useMembershipDiscount && discountRate < 1
     ? addOnsPrice * discountRate
     : addOnsPrice;
-  const subtotalWithDiscount = packagePriceWithDiscount + addOnsPriceWithDiscount;
-  const finalTotal = subtotalWithDiscount - cashCouponDiscount;
+  const displayPrice = calculateBookingDisplayPrice({
+    serviceFee: packagePrice,
+    addons: addOnsPrice,
+    mobileVanService: mobileVanServiceAmount,
+    safetyInsurance: safetyInsuranceAmount,
+    discountRate,
+    couponAmount: cashCouponDiscount,
+  });
+  const finalTotal = displayPrice.payableTotal;
 
   const handleMembershipDiscountChange = (checked: boolean) => {
     hasInitializedDiscounts.current = true;
@@ -392,6 +450,18 @@ export function Step4() {
                       </div>
                     </>
                   )}
+                  {mobileVanServiceAmount > 0 && (
+                    <div className="flex items-center justify-between text-[12px] text-[#4a3c2a]">
+                      <span>Mobile van service</span>
+                      <span>${(mobileVanServiceAmount * discountRate).toFixed(2)}</span>
+                    </div>
+                  )}
+                  {safetyInsuranceAmount > 0 && (
+                    <div className="flex items-center justify-between text-[12px] text-[#4a3c2a]">
+                      <span>Safety insurance</span>
+                      <span>${(safetyInsuranceAmount * discountRate).toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="h-0 relative shrink-0 w-full border-t border-[#e0e0e0] my-[calc(4*var(--px393))]" />
                   <div className="flex font-comfortaa font-bold items-start justify-between relative shrink-0 text-[#4a3c2a] w-full">
                     <p className="leading-[calc(16*var(--px393))] relative shrink-0 text-[calc(12*var(--px393))]">
@@ -400,11 +470,11 @@ export function Step4() {
                     <p className="leading-[calc(16*var(--px393))] relative shrink-0 text-[calc(12*var(--px393))]">
                       {useMembershipDiscount && discountRate < 1 ? (
                         <>
-                          <span className="line-through text-[#de6a07]">${packagePrice.toFixed(2)}</span>
-                          <span> ${packagePriceWithDiscount.toFixed(2)}</span>
+                          <span className="line-through text-[#de6a07]">${(packagePrice + mobileVanServiceAmount + safetyInsuranceAmount).toFixed(2)}</span>
+                          <span> ${packageSubtotalWithDiscount.toFixed(2)}</span>
                         </>
                       ) : (
-                        `$${packagePrice.toFixed(2)}`
+                        `$${packageSubtotalWithDiscount.toFixed(2)}`
                       )}
                     </p>
                   </div>
@@ -728,6 +798,10 @@ export function Step4() {
                       {selectedService.items && selectedService.items.length > 0 && (
                         <>
                           {selectedService.items
+                            .filter((item) => {
+                              const normalizedName = item.name.trim().toLowerCase();
+                              return normalizedName !== "mobile van service" && normalizedName !== "safety insurance";
+                            })
                             .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
                             .map((item) => {
                               const itemPrice = typeof item.price === "string" ? parseFloat(item.price) : item.price;
@@ -752,6 +826,26 @@ export function Step4() {
                             })}
                         </>
                       )}
+                      {mobileVanServiceAmount > 0 && (
+                        <div className="flex font-comfortaa font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
+                          <p className="relative shrink-0">Mobile van service</p>
+                          <p className="relative shrink-0">
+                            {useMembershipDiscount && discountRate < 1 ? (
+                              <><span className="line-through text-[#de6a07]">${mobileVanServiceAmount.toFixed(2)}</span><span> ${(mobileVanServiceAmount * discountRate).toFixed(2)}</span></>
+                            ) : `$${mobileVanServiceAmount.toFixed(2)}`}
+                          </p>
+                        </div>
+                      )}
+                      {safetyInsuranceAmount > 0 && (
+                        <div className="flex font-comfortaa font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
+                          <p className="relative shrink-0">Safety insurance</p>
+                          <p className="relative shrink-0">
+                            {useMembershipDiscount && discountRate < 1 ? (
+                              <><span className="line-through text-[#de6a07]">${safetyInsuranceAmount.toFixed(2)}</span><span> ${(safetyInsuranceAmount * discountRate).toFixed(2)}</span></>
+                            ) : `$${safetyInsuranceAmount.toFixed(2)}`}
+                          </p>
+                        </div>
+                      )}
                       {/* Separator line */}
                       <div className="h-0 relative shrink-0 w-full border-t border-[#000000] my-[4px]" />
                     </>
@@ -763,11 +857,11 @@ export function Step4() {
                     <p className="leading-[22.75px] relative shrink-0 text-[12px]">
                       {useMembershipDiscount && discountRate < 1 ? (
                         <>
-                          <span className="line-through text-[#de6a07]">${packagePrice.toFixed(2)}</span>
-                          <span> ${packagePriceWithDiscount.toFixed(2)}</span>
+                          <span className="line-through text-[#de6a07]">${(packagePrice + mobileVanServiceAmount + safetyInsuranceAmount).toFixed(2)}</span>
+                          <span> ${packageSubtotalWithDiscount.toFixed(2)}</span>
                         </>
                       ) : (
-                        `$${packagePrice.toFixed(2)}`
+                        `$${packageSubtotalWithDiscount.toFixed(2)}`
                       )}
                     </p>
                   </div>

@@ -13,8 +13,9 @@ import {
   type CouponOut,
 } from "@/lib/api";
 import { toast } from "sonner";
-import { getServicePrice } from "@/lib/pricing";
+import { calculateBookingDisplayPrice, getServicePrice } from "@/lib/pricing";
 import { formatPreferredTimeSlotLocal } from "@/lib/localDateTime";
+import { CheckCircleIcon } from "lucide-react";
 
 // Radio button component matching CustomRadio.tsx
 function RadioButton({ isChecked, className }: { isChecked: boolean; className?: string }) {
@@ -165,6 +166,8 @@ export function Step6() {
     stores,
     selectedAddressId,
     selectedStoreId,
+    selectedMobileVanServiceAmount,
+    selectedSafetyInsuranceAmount,
     setUseMembership,
     setMembershipPlanId,
     setUseMembershipDiscount,
@@ -214,6 +217,36 @@ export function Step6() {
 
   // Calculate prices
   const packagePrice = getServicePrice(selectedService, weight, weightUnit);
+  const selectedServiceAddress = selectedAddressId
+    ? addresses.find((addr) => addr.id === selectedAddressId)
+    : null;
+  const resolveComponentAmount = (...values: Array<number | string | null | undefined>) => {
+    for (const value of values) {
+      if (value !== null && value !== undefined && value !== "") {
+        const amount = Number(value);
+        if (Number.isFinite(amount) && amount > 0) return amount;
+      }
+    }
+    return 0;
+  };
+  const getLegacyServiceItemAmount = (name: string) => {
+    const item = selectedService?.items?.find(
+      (serviceItem) => serviceItem.name.trim().toLowerCase() === name,
+    );
+    return item?.price;
+  };
+  const mobileVanServiceAmount = resolveComponentAmount(
+    selectedService?.mobile_van_service_amount,
+    getLegacyServiceItemAmount("mobile van service"),
+    selectedServiceAddress?.mobile_van_service_amount,
+    selectedMobileVanServiceAmount,
+  );
+  const safetyInsuranceAmount = resolveComponentAmount(
+    selectedService?.safety_insurance_amount,
+    getLegacyServiceItemAmount("safety insurance"),
+    selectedServiceAddress?.safety_insurance_amount,
+    selectedSafetyInsuranceAmount,
+  );
 
   // Calculate add-ons price
   const selectedAddOnsDetails = useMemo(() => {
@@ -293,15 +326,8 @@ export function Step6() {
 
   // Calculate prices with discount
   const addOnsPrice = selectedAddOnsDetails.reduce((total, addOn) => total + addOn.price, 0);
-  const originalTotal = packagePrice + addOnsPrice;
+  const originalTotal = packagePrice + addOnsPrice + mobileVanServiceAmount + safetyInsuranceAmount;
   
-  const packagePriceWithDiscount = useMembershipDiscount && discountRate < 1
-    ? packagePrice * discountRate
-    : packagePrice;
-  const addOnsPriceWithDiscount = useMembershipDiscount && discountRate < 1
-    ? addOnsPrice * discountRate
-    : addOnsPrice;
-  const subtotalWithDiscount = packagePriceWithDiscount + addOnsPriceWithDiscount;
   
   // Generate virtual Cash credit coupons if user is purchasing membership
   // This applies both when:
@@ -718,21 +744,31 @@ export function Step6() {
       return total;
     }, 0);
   }, [selectedCouponIds, allCoupons]);
-  const serviceTotal = subtotalWithDiscount - couponDiscount;
-  const finalTotal = useMembership ? serviceTotal + membershipPrice : serviceTotal;
-  const totalPriceWithDiscount = serviceTotal;
+  const displayPrice = calculateBookingDisplayPrice({
+    serviceFee: packagePrice,
+    addons: addOnsPrice,
+    mobileVanService: mobileVanServiceAmount,
+    safetyInsurance: safetyInsuranceAmount,
+    discountRate,
+    couponAmount: couponDiscount,
+    membershipFee: useMembership ? membershipPrice : 0,
+  });
+  const serviceTotal = displayPrice.preGstTotal;
+  const finalTotal = displayPrice.payableTotal;
+  const gstAmount = displayPrice.gstAmount;
 
   // Calculate savings
-  const totalSavings = originalTotal - serviceTotal;
+  // Keep membership discount and coupon savings in the same pre-GST basis.
+  // `serviceTotal` is already after the coupon, so deriving savings from it
+  // can make the badge disagree with the displayed discount breakdown.
+  const totalSavings = displayPrice.discountAmount + displayPrice.couponAmount;
   const savingsPercentage = originalTotal > 0 ? Math.round((totalSavings / originalTotal) * 100) : 0;
 
   // Check if user is a member or purchasing membership
   const isMemberOrPurchasing = hasMembershipBenefit;
 
   // Get current address or store for display
-  const currentAddress = selectedAddressId
-    ? addresses.find((addr) => addr.id === selectedAddressId)
-    : null;
+  const currentAddress = selectedServiceAddress;
   const currentStore = selectedStoreId
     ? stores.find((store) => store.id === selectedStoreId)
     : null;
@@ -1067,7 +1103,7 @@ export function Step6() {
             </p>
             <div className="flex gap-[8px] items-center relative shrink-0">
               <p className="font-comfortaa font-semibold leading-[28px] relative shrink-0 text-[16px] text-[#de6a07]">
-                ${totalPriceWithDiscount.toFixed(2)}
+                ${originalTotal.toFixed(2)}
               </p>
               <button
                 onClick={() => setIsTotalExpanded(!isTotalExpanded)}
@@ -1087,63 +1123,39 @@ export function Step6() {
           {/* Expanded content */}
           {isTotalExpanded && (
             <div className="flex flex-col gap-[4px] items-start relative shrink-0 w-full">
-              {/* Full rooming package items */}
+              {/* Full rooming package */}
               {selectedService && (
-                <>
-                  {selectedService.items && selectedService.items.length > 0 ? (
-                    <>
-                      {selectedService.items
-                        .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
-                        .map((item) => {
-                          const itemPrice = typeof item.price === "string" ? parseFloat(item.price) : item.price;
-                          const itemPriceWithDiscount = useMembershipDiscount && discountRate < 1
-                            ? itemPrice * discountRate
-                            : itemPrice;
-                          return (
-                            <div
-                              key={item.id}
-                              className="flex font-comfortaa font-normal items-start justify-between leading-[calc(16*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full"
-                            >
-                              <p className="relative shrink-0">
-                                {item.name}
-                              </p>
-                              <p className="relative shrink-0">
-                                ${itemPriceWithDiscount.toFixed(2)}
-                              </p>
-                            </div>
-                          );
-                        })}
-                    </>
-                  ) : (
-                    <div className="flex font-comfortaa font-normal items-start justify-between leading-[calc(16*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
-                      <p className="relative shrink-0">
-                        {selectedService.name}
-                      </p>
-                      <p className="relative shrink-0">
-                        ${packagePriceWithDiscount.toFixed(2)}
-                      </p>
+                <div className="flex flex-col gap-[4px] items-start relative shrink-0 w-full">
+                  <div className="flex items-center relative shrink-0 w-full">
+                    <p className="font-comfortaa font-normal leading-[normal] relative shrink-0 text-[#4a3c2a] text-[10px]">
+                      Full rooming package
+                    </p>
+                  </div>
+                  <div className="flex font-comfortaa font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
+                    <p className="relative shrink-0">{selectedService.name}</p>
+                    <p className="relative shrink-0">${packagePrice.toFixed(2)}</p>
+                  </div>
+                  {mobileVanServiceAmount > 0 && (
+                    <div className="flex font-comfortaa font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
+                      <p className="relative shrink-0">Mobile van service</p>
+                      <p className="relative shrink-0">${mobileVanServiceAmount.toFixed(2)}</p>
                     </div>
                   )}
-                </>
-              )}
-              
-                {/* Separator line */}
-                <div className="h-0 relative shrink-0 w-full">
-                  <div className="absolute bottom-0 left-0 right-0 -top-px">
-                    <div className="bg-[rgba(0,0,0,0.1)] h-px w-full" />
+                  {safetyInsuranceAmount > 0 && (
+                    <div className="flex font-comfortaa font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
+                      <p className="relative shrink-0">Safety insurance</p>
+                      <p className="relative shrink-0">${safetyInsuranceAmount.toFixed(2)}</p>
+                    </div>
+                  )}
+                  <div className="h-0 relative shrink-0 w-full">
+                    <div className="absolute bottom-0 left-0 right-0 -top-px"><div className="bg-[rgba(0,0,0,0.1)] h-px w-full" /></div>
+                  </div>
+                  <div className="flex font-comfortaa font-bold items-start justify-between leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
+                    <p className="relative shrink-0">Subtotal</p>
+                    <p className="relative shrink-0">${(packagePrice + mobileVanServiceAmount + safetyInsuranceAmount).toFixed(2)}</p>
                   </div>
                 </div>
-              
-              {/* Package subtotal */}
-              <div className="flex font-comfortaa font-bold items-start justify-between leading-[calc(16*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[12px] w-full">
-                <p className="relative shrink-0">
-                  Subtotal
-                </p>
-                <p className="relative shrink-0">
-                  ${packagePriceWithDiscount.toFixed(2)}
-                </p>
-              </div>
-              
+              )}
               {/* Add-on section */}
               {selectedAddOnsDetails.length > 0 && (
                 <>
@@ -1156,12 +1168,6 @@ export function Step6() {
                   
                   {/* Add-on items */}
                   {selectedAddOnsDetails.map((addOn) => {
-                    const originalAddOn = addOnsList.find((a) => a.id === addOn.id);
-                    const originalPrice = originalAddOn
-                      ? typeof originalAddOn.price === "string"
-                        ? parseFloat(originalAddOn.price)
-                        : originalAddOn.price
-                      : addOn.price;
                     return (
                       <div
                         key={addOn.id}
@@ -1171,7 +1177,7 @@ export function Step6() {
                           {addOn.name}
                         </p>
                         <p className="relative shrink-0">
-                          ${originalPrice.toFixed(2)}
+                          ${addOn.price.toFixed(2)}
                         </p>
                       </div>
                     );
@@ -1330,15 +1336,15 @@ export function Step6() {
           <p className="font-comfortaa font-semibold leading-[calc(28*var(--px393))] sm:leading-[28px] relative shrink-0 text-[#4a3c2a] text-[calc(16*var(--px393))] sm:text-[16px]">
             Total estimation for the service
           </p>
-          <p className="font-comfortaa font-normal leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[calc(12.25*var(--px393))] sm:text-[12.25px]">
+          <p className="font-comfortaa font-normal leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[#4a5565] text-[calc(12.25*var(--px393))] sm:text-[12.25px]">
             Our groomer will evaluate the final price
           </p>
         </div>
 
         {/* Right side: Price and coupon options */}
-        <div className="flex flex-col sm:flex-row flex-[1_0_0] items-start gap-[calc(8*var(--px393))] sm:gap-[8px] relative shrink-0 w-full">
+        <div className="flex flex-col sm:flex-row flex-[1_0_0] items-start gap-[calc(8*var(--px393))] sm:gap-[8px] relative shrink-0 w-full sm:flex-none sm:w-[428px]">
           {/* Left: All content rows */}
-          <div className="flex flex-col gap-[calc(4*var(--px393))] sm:gap-[4px] items-end relative shrink-0 flex-1 w-full sm:w-auto">
+          <div className="flex flex-col gap-[calc(4*var(--px393))] sm:gap-[4px] items-end relative shrink-0 flex-1 w-full sm:w-[400px]">
             {/* First row: Price with original price and dropdown button */}
             <div className="flex items-center justify-end gap-[calc(8*var(--px393))] sm:gap-0 relative shrink-0 w-full sm:w-auto">
               <div className="flex items-center gap-[calc(8*var(--px393))] sm:gap-0 relative shrink-0">
@@ -1379,10 +1385,11 @@ export function Step6() {
               <div className="flex flex-col gap-0 items-end relative shrink-0 w-full sm:w-auto">
                 <div className="flex items-center gap-[calc(8*var(--px393))] sm:gap-[8px] relative shrink-0">
                   {/* Save percentage badge - show when there are savings */}
-                  {totalSavings > 0 && savingsPercentage > 0 && (
-                    <div className="bg-green-100 flex h-[calc(24*var(--px393))] sm:h-[24px] items-center justify-center overflow-clip px-[calc(16*var(--px393))] sm:px-[16px] py-[calc(4*var(--px393))] sm:py-[4px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shrink-0">
-                      <p className="font-comfortaa font-bold leading-[calc(14*var(--px393))] sm:leading-[14px] relative shrink-0 text-[#016630] text-[calc(10*var(--px393))] sm:text-[10px]">
-                        Save {savingsPercentage}%
+                  {useMembershipDiscount && discountRate < 1 && (
+                    <div className="bg-[#dcfce7] flex h-[calc(24*var(--px393))] sm:h-[24px] items-center justify-center gap-[4px] overflow-clip px-[calc(12*var(--px393))] sm:px-[12px] py-[calc(4*var(--px393))] sm:py-[4px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shrink-0">
+                      <CheckCircleIcon className="size-[14px] text-[#27ae60]" aria-hidden="true" />
+                      <p className="font-comfortaa font-bold leading-[calc(14*var(--px393))] sm:leading-[14px] relative shrink-0 text-[#27ae60] text-[calc(10*var(--px393))] sm:text-[10px]">
+                        {Math.round((1 - discountRate) * 100)}% OFF
                       </p>
                     </div>
                   )}
@@ -1394,8 +1401,8 @@ export function Step6() {
                   )}
                 </div>
                 {/* Tax included */}
-                <p className="font-comfortaa font-normal leading-[calc(12*var(--px393))] sm:leading-[12px] relative shrink-0 text-[#4a5565] text-[calc(10*var(--px393))] sm:text-[10px]">
-                  tax included
+                <p className="font-comfortaa font-bold leading-[calc(14*var(--px393))] sm:leading-[14px] relative shrink-0 text-[#4a5565] text-[calc(10*var(--px393))] sm:text-[10px]">
+                  plus tax
                 </p>
               </div>
             )}

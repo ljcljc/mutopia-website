@@ -66,7 +66,6 @@ const PERSONALIZATION_FIELDS = [
   { key: "senior_pets", label: "Senior pets" },
   { key: "hard_to_handle", label: "Hard to handle" },
   { key: "severely_matted", label: "Severely matted" },
-  { key: "extra_large", label: "> 50kg" },
   { key: "parking", label: "Parking" },
   { key: "others", label: "Others" },
 ] as const;
@@ -1308,7 +1307,7 @@ function GroomerCheckUpModal({
       >((next, [key, value]) => {
         const normalizedValue = value.trim();
         if (!normalizedValue) return next;
-        next[key === "extra_large" ? "gt_50kg" : key] = normalizedValue;
+        next[key] = normalizedValue;
         return next;
       }, {});
       const result = await submitGroomerCheckUpCheckout(bookingId, {

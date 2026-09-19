@@ -25,6 +25,8 @@ import {
 import { normalizeCanadianPostalCode } from "@/lib/postalCode";
 import { useAuthStore } from "@/components/auth/authStore";
 
+let servicesRequestId = 0;
+
 // 与后端枚举保持一致
 export type ServiceType = "mobile" | "in_store" | "in_home";
 export type PetType = "dog" | "cat" | "other";
@@ -49,6 +51,8 @@ interface BookingState {
   province: string;
   postCode: string;
   selectedServiceAreaId: number | null;
+  selectedMobileVanServiceAmount: number;
+  selectedSafetyInsuranceAmount: number;
   selectedAddressId: number | null; // 选中的地址 ID
   selectedStoreId: number | null; // 选中的门店 ID（用于 in_store 服务）
   addresses: AddressOut[]; // 用户已保存的地址列表
@@ -140,6 +144,7 @@ interface BookingState {
   setProvince: (province: string) => void;
   setPostCode: (postCode: string) => void;
   setSelectedServiceAreaId: (id: number | null) => void;
+  setSelectedServiceAreaPricing: (mobileVanServiceAmount: number, safetyInsuranceAmount: number) => void;
   setSelectedAddressId: (id: number | null) => void;
   setSelectedStoreId: (id: number | null) => void;
   loadAddresses: () => Promise<void>;
@@ -279,6 +284,8 @@ const initialState = {
   province: "",
   postCode: "",
   selectedServiceAreaId: null as number | null,
+  selectedMobileVanServiceAmount: 0,
+  selectedSafetyInsuranceAmount: 0,
   selectedAddressId: null as number | null,
   selectedStoreId: null as number | null,
   addresses: [] as AddressOut[],
@@ -371,12 +378,20 @@ export const useBookingStore = create<BookingState>((set) => ({
 
   setSelectedServiceAreaId: (id) => set({ selectedServiceAreaId: id }),
 
+  setSelectedServiceAreaPricing: (mobileVanServiceAmount, safetyInsuranceAmount) =>
+    set({
+      selectedMobileVanServiceAmount: mobileVanServiceAmount,
+      selectedSafetyInsuranceAmount: safetyInsuranceAmount,
+    }),
+
   setSelectedAddressId: (id) =>
     set((state) => {
       const selectedAddress = state.addresses.find((addr) => addr.id === id);
       if (selectedAddress) {
         return {
           selectedServiceAreaId: selectedAddress.service_area_id ?? null,
+          selectedMobileVanServiceAmount: Number(selectedAddress.mobile_van_service_amount ?? 0),
+          selectedSafetyInsuranceAmount: Number(selectedAddress.safety_insurance_amount ?? 0),
           selectedAddressId: id,
           address: selectedAddress.address,
           city: selectedAddress.city,
@@ -384,7 +399,7 @@ export const useBookingStore = create<BookingState>((set) => ({
           postCode: selectedAddress.postal_code,
         };
       }
-      return { selectedAddressId: id };
+      return { selectedAddressId: id, selectedMobileVanServiceAmount: 0, selectedSafetyInsuranceAmount: 0 };
     }),
 
   setSelectedStoreId: (id) =>
@@ -393,6 +408,8 @@ export const useBookingStore = create<BookingState>((set) => ({
       if (selectedStore) {
         return {
           selectedServiceAreaId: null,
+          selectedMobileVanServiceAmount: 0,
+          selectedSafetyInsuranceAmount: 0,
           selectedStoreId: id,
           address: selectedStore.address,
           city: selectedStore.city,
@@ -659,6 +676,8 @@ export const useBookingStore = create<BookingState>((set) => ({
       postCode: getStringValue(addressSnapshot, ["postal_code", "post_code"]),
       serviceType,
       selectedServiceAreaId: getNumberValue(addressSnapshot, ["service_area_id"]),
+      selectedMobileVanServiceAmount: getNumberValue(addressSnapshot, ["mobile_van_service_amount"]) ?? 0,
+      selectedSafetyInsuranceAmount: getNumberValue(addressSnapshot, ["safety_insurance_amount"]) ?? 0,
       selectedAddressId: getNumberValue(addressSnapshot, ["id", "address_id"]),
       selectedStoreId: serviceType === "in_store" ? selectedStoreId : null,
       petName: getStringValue(petSnapshot, ["name"]),
@@ -755,10 +774,7 @@ export const useBookingStore = create<BookingState>((set) => ({
 
   loadServices: async () => {
     const state = useBookingStore.getState();
-    // 如果已经在加载中，则不再请求
-    if (state.isLoadingServices) {
-      return;
-    }
+    const requestId = ++servicesRequestId;
     try {
       set({ isLoadingServices: true });
       const weight = state.weight.trim();
@@ -768,19 +784,34 @@ export const useBookingStore = create<BookingState>((set) => ({
         breed: state.breed.trim() || undefined,
         weight: weight || undefined,
         weight_unit: weight ? weightUnit : undefined,
+        service_area_id: state.selectedServiceAreaId,
       });
       const currentState = useBookingStore.getState();
+      // If the area/pet selection changed while this request was in flight,
+      // ignore the stale response and let the newer request own the state.
+      if (requestId !== servicesRequestId) return;
       const preselectedServiceId = currentState.serviceId
         ?? findServiceIdForPackage(services, currentState.servicePackage);
+      const servicesWithAreaPricing = services.map((service) => ({
+        ...service,
+        mobile_van_service_amount: Number(service.mobile_van_service_amount ?? 0) > 0
+          ? service.mobile_van_service_amount
+          : currentState.selectedMobileVanServiceAmount,
+        safety_insurance_amount: Number(service.safety_insurance_amount ?? 0) > 0
+          ? service.safety_insurance_amount
+          : currentState.selectedSafetyInsuranceAmount,
+      }));
 
       set({
-        services,
+        services: servicesWithAreaPricing,
         serviceId: preselectedServiceId,
         isLoadingServices: false,
       });
     } catch (error) {
       console.error("Failed to load services:", error);
-      set({ services: [], isLoadingServices: false });
+      if (requestId === servicesRequestId) {
+        set({ services: [], isLoadingServices: false });
+      }
     }
   },
 

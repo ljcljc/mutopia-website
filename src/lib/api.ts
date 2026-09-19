@@ -182,6 +182,8 @@ export interface ServiceOut {
   pricing_pet_type?: string | null;
   weight_price_id?: number | null;
   service_time?: string | null;
+  mobile_van_service_amount?: number | string;
+  safety_insurance_amount?: number | string;
   items?: ServiceItemOut[] | null;
 }
 
@@ -338,6 +340,8 @@ export interface AddressOut {
   label?: string | null;
   service_area_id?: number | null;
   service_area_label?: string | null;
+  mobile_van_service_amount?: number | string;
+  safety_insurance_amount?: number | string;
 }
 
 export interface AddressIn {
@@ -390,6 +394,8 @@ export interface ServiceAreaOut {
   province_name: string;
   city: string;
   label: string;
+  mobile_van_service_amount?: number | string;
+  safety_insurance_amount?: number | string;
 }
 
 export interface GroomerServiceAreaOut {
@@ -443,6 +449,8 @@ export interface BookingQuoteIn {
   use_gift_coupon?: boolean; // default: false
   use_birthday_coupon?: boolean; // default: false
   use_custom_coupon?: boolean; // default: false
+  service_area_id?: number | null;
+  service_type?: string;
 }
 
 export interface BookingPriceBreakdown {
@@ -452,10 +460,16 @@ export interface BookingPriceBreakdown {
   breed_surcharge_labels?: string[]; // default: []
   package_amount: number | string;
   addons_amount: number | string;
+  mobile_van_service_amount?: number | string;
+  safety_insurance_amount?: number | string;
   membership_fee: number | string;
   discount_rate: number | string;
   discount_amount: number | string;
   coupon_amount: number | string;
+  pre_gst_total?: number | string;
+  gst_rate?: number | string;
+  gst_amount?: number | string;
+  service_settlement_basis?: number | string;
   payable_amount: number | string;
   used_coupon_ids?: number[]; // default: []
   currency?: string; // default: "usd"
@@ -564,15 +578,24 @@ export interface BookingDetailOut {
   addons_snapshot?: Record<string, unknown>[];
   membership_snapshot?: Record<string, unknown>;
   coupon_snapshot?: Record<string, unknown>;
+  pricing_snapshot?: Record<string, unknown>;
   package_amount: number | string;
   addons_amount: number | string;
+  mobile_van_service_amount?: number | string;
+  safety_insurance_amount?: number | string;
   membership_fee: number | string;
   discount_rate: number | string;
   discount_amount: number | string;
   coupon_amount: number | string;
+  pre_gst_total?: number | string;
+  gst_rate?: number | string;
+  gst_amount?: number | string;
+  service_settlement_basis_amount?: number | string;
   payable_amount: number | string;
   deposit_amount: number | string;
   final_amount: number | string;
+  refunded_amount?: number | string;
+  refund_breakdown?: Record<string, number | string>[];
   payments?: BookingPaymentOut[];
   adjustments?: BookingAdjustmentOut[];
   review?: ReviewSummaryOut | null;
@@ -866,6 +889,7 @@ export interface GetServicesIn {
   breed?: string;
   weight?: number | string;
   weight_unit?: string;
+  service_area_id?: number | null;
 }
 
 export async function getServices(
@@ -883,6 +907,9 @@ export async function getServices(
   }
   if (params?.weight_unit)
     queryParams.append("weight_unit", params.weight_unit);
+  if (params?.service_area_id) {
+    queryParams.append("service_area_id", String(params.service_area_id));
+  }
 
   const url = `/api/catalog/services${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
   const response = await http.get<ServiceOut[]>(url);

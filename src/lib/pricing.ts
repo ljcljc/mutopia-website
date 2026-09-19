@@ -1,5 +1,68 @@
 import type { ServiceOut } from "./api";
 
+export interface BookingDisplayPriceInput {
+  serviceFee: number;
+  addons: number;
+  mobileVanService: number;
+  safetyInsurance: number;
+  discountRate?: number;
+  couponAmount?: number;
+  membershipFee?: number;
+}
+
+export interface BookingDisplayPrice {
+  discountedServiceFee: number;
+  discountedAddons: number;
+  discountedMobileVanService: number;
+  discountedSafetyInsurance: number;
+  discountAmount: number;
+  couponAmount: number;
+  preGstTotal: number;
+  gstAmount: number;
+  membershipFee: number;
+  payableTotal: number;
+}
+
+/** Mirrors the backend's unified pre-GST discount and GST calculation for checkout display. */
+export function calculateBookingDisplayPrice(input: BookingDisplayPriceInput): BookingDisplayPrice {
+  const rate = Math.max(0, Math.min(1, input.discountRate ?? 1));
+  const serviceFee = Math.max(0, input.serviceFee);
+  const addons = Math.max(0, input.addons);
+  const mobileVanService = Math.max(0, input.mobileVanService);
+  const safetyInsurance = Math.max(0, input.safetyInsurance);
+  const couponAmount = Math.min(
+    Math.max(0, input.couponAmount ?? 0),
+    (serviceFee + addons + mobileVanService + safetyInsurance) * rate,
+  );
+  const discountedServiceFee = Math.round(serviceFee * rate * 100) / 100;
+  const discountedAddons = Math.round(addons * rate * 100) / 100;
+  const discountedMobileVanService = Math.round(mobileVanService * rate * 100) / 100;
+  const discountedSafetyInsurance = Math.round(safetyInsurance * rate * 100) / 100;
+  const discountAmount = Math.round(
+    (serviceFee + addons + mobileVanService + safetyInsurance) * (1 - rate) * 100,
+  ) / 100;
+  const preGstTotal = Math.max(
+    0,
+    Math.round(
+      (discountedServiceFee + discountedAddons + discountedMobileVanService + discountedSafetyInsurance - couponAmount) * 100,
+    ) / 100,
+  );
+  const gstAmount = Math.round(preGstTotal * 0.05 * 100) / 100;
+  const membershipFee = Math.max(0, input.membershipFee ?? 0);
+  return {
+    discountedServiceFee,
+    discountedAddons,
+    discountedMobileVanService,
+    discountedSafetyInsurance,
+    discountAmount,
+    couponAmount,
+    preGstTotal,
+    gstAmount,
+    membershipFee,
+    payableTotal: Math.round((preGstTotal + gstAmount + membershipFee) * 100) / 100,
+  };
+}
+
 /**
  * 将体重转换为千克
  * @param weightValue 体重值（字符串）

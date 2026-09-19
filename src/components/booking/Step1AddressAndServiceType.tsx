@@ -23,6 +23,7 @@ export function Step1AddressAndServiceType() {
     province,
     postCode,
     selectedServiceAreaId,
+    setSelectedServiceAreaPricing,
     isLoginModalOpen,
     selectedAddressId,
     addresses,
@@ -114,6 +115,7 @@ export function Step1AddressAndServiceType() {
           if (cityRef.current && !data.some((item) => item.city === cityRef.current)) {
             setCity("");
             setSelectedServiceAreaId(null);
+            setSelectedServiceAreaPricing(0, 0);
           }
         }
       } catch (error) {
@@ -131,7 +133,7 @@ export function Step1AddressAndServiceType() {
     return () => {
       cancelled = true;
     };
-  }, [province, setCity, setSelectedServiceAreaId]);
+  }, [province, setCity, setSelectedServiceAreaId, setSelectedServiceAreaPricing]);
 
   // 根据服务类型显示不同的信息文本
   const infoText = "We currently provide mobile grooming services throughout Grand Vancouver and surrounding areas.";
@@ -152,6 +154,7 @@ export function Step1AddressAndServiceType() {
     setProvince(value);
     setCity("");
     setSelectedServiceAreaId(null);
+    setSelectedServiceAreaPricing(0, 0);
     if (selectedAddressId !== null) {
       setSelectedAddressId(null);
     }
@@ -161,6 +164,10 @@ export function Step1AddressAndServiceType() {
     const selectedArea = serviceAreas.find((item) => item.id === Number(value));
     if (!selectedArea) return;
     setSelectedServiceAreaId(selectedArea.id);
+    setSelectedServiceAreaPricing(
+      Number(selectedArea.mobile_van_service_amount ?? 0),
+      Number(selectedArea.safety_insurance_amount ?? 0),
+    );
     setCity(selectedArea.city);
     setProvince(selectedArea.province_code);
     if (selectedAddressId !== null) {

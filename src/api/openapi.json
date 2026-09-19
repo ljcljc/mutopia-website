@@ -3882,6 +3882,8 @@
             "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Service Time"
           },
+          "mobile_van_service_amount": { "anyOf": [{ "type": "number" }, { "type": "string" }], "title": "Mobile Van Service Amount" },
+          "safety_insurance_amount": { "anyOf": [{ "type": "number" }, { "type": "string" }], "title": "Safety Insurance Amount" },
           "items": {
             "anyOf": [
               {
@@ -4259,7 +4261,11 @@
           "label": {
             "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Label"
-          }
+          },
+          "service_area_id": { "anyOf": [{ "type": "integer" }, { "type": "null" }], "title": "Service Area Id" },
+          "service_area_label": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Service Area Label" },
+          "mobile_van_service_amount": { "anyOf": [{ "type": "number" }, { "type": "string" }], "title": "Mobile Van Service Amount" },
+          "safety_insurance_amount": { "anyOf": [{ "type": "number" }, { "type": "string" }], "title": "Safety Insurance Amount" }
         },
         "required": [
           "id",
@@ -4398,6 +4404,12 @@
             ],
             "title": "Addons Amount"
           },
+          "mobile_van_service_amount": { "anyOf": [{ "type": "number" }, { "type": "string" }], "title": "Mobile Van Service Amount" },
+          "safety_insurance_amount": { "anyOf": [{ "type": "number" }, { "type": "string" }], "title": "Safety Insurance Amount" },
+          "pre_gst_total": { "anyOf": [{ "type": "number" }, { "type": "string" }], "title": "Pre GST Total" },
+          "gst_rate": { "anyOf": [{ "type": "number" }, { "type": "string" }], "title": "Gst Rate" },
+          "gst_amount": { "anyOf": [{ "type": "number" }, { "type": "string" }], "title": "Gst Amount" },
+          "service_settlement_basis": { "anyOf": [{ "type": "number" }, { "type": "string" }], "title": "Service Settlement Basis" },
           "membership_fee": {
             "anyOf": [
               { "type": "number" },
@@ -4470,6 +4482,12 @@
           "discount_rate",
           "discount_amount",
           "coupon_amount",
+          "mobile_van_service_amount",
+          "safety_insurance_amount",
+          "pre_gst_total",
+          "gst_rate",
+          "gst_amount",
+          "service_settlement_basis",
           "payable_amount"
         ],
         "title": "BookingPriceBreakdown",
@@ -4532,6 +4550,14 @@
             "default": false,
             "title": "Use Custom Coupon",
             "type": "boolean"
+          },
+          "service_area_id": {
+            "anyOf": [{ "type": "integer" }, { "type": "null" }],
+            "title": "Service Area Id"
+          },
+          "service_type": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Service Type"
           }
         },
         "required": ["service_id"],
@@ -5006,6 +5032,15 @@
             ],
             "title": "Final Amount"
           },
+          "mobile_van_service_amount": { "anyOf": [{ "type": "number" }, { "type": "string" }], "title": "Mobile Van Service Amount" },
+          "safety_insurance_amount": { "anyOf": [{ "type": "number" }, { "type": "string" }], "title": "Safety Insurance Amount" },
+          "pre_gst_total": { "anyOf": [{ "type": "number" }, { "type": "string" }], "title": "Pre GST Total" },
+          "gst_rate": { "anyOf": [{ "type": "number" }, { "type": "string" }], "title": "Gst Rate" },
+          "gst_amount": { "anyOf": [{ "type": "number" }, { "type": "string" }], "title": "Gst Amount" },
+          "service_settlement_basis_amount": { "anyOf": [{ "type": "number" }, { "type": "string" }], "title": "Service Settlement Basis Amount" },
+          "pricing_snapshot": { "additionalProperties": true, "default": {}, "title": "Pricing Snapshot", "type": "object" },
+          "refunded_amount": { "anyOf": [{ "type": "number" }, { "type": "string" }], "title": "Refunded Amount" },
+          "refund_breakdown": { "default": [], "items": { "additionalProperties": true, "type": "object" }, "title": "Refund Breakdown", "type": "array" },
           "payments": {
             "default": [],
             "items": { "$ref": "#/components/schemas/BookingPaymentOut" },
@@ -5034,6 +5069,12 @@
           "discount_rate",
           "discount_amount",
           "coupon_amount",
+          "mobile_van_service_amount",
+          "safety_insurance_amount",
+          "pre_gst_total",
+          "gst_rate",
+          "gst_amount",
+          "service_settlement_basis_amount",
           "payable_amount",
           "deposit_amount",
           "final_amount"

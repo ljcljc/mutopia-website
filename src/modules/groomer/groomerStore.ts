@@ -135,7 +135,6 @@ const CHECK_UP_PERSONALIZATION_LABELS: Record<string, string> = {
   hard_to_handle: "Hard to handle",
   severely_matted: "Severely matted",
   gt_50kg: "> 50kg",
-  extra_large: "> 50kg",
   parking: "Parking",
   others: "Others",
 };
@@ -393,8 +392,7 @@ function normalizeCheckUpPersonalization(
   return Object.entries(personalization).reduce<Record<string, string>>((next, [key, value]) => {
     const normalizedValue = typeof value === "string" ? value.trim() : String(value ?? "").trim();
     if (!normalizedValue) return next;
-    const normalizedKey = key === "extra_large" ? "gt_50kg" : key;
-    next[normalizedKey] = normalizedValue;
+    next[key] = normalizedValue;
     return next;
   }, {});
 }

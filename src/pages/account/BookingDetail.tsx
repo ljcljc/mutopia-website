@@ -660,29 +660,6 @@ export default function BookingDetail() {
   const packageSubtotal = formatAmount(detail?.package_amount, "$0.00");
   const addOnSubtotal = formatAmount(detail?.addons_amount, "$0.00");
   
-  // 从 package_snapshot 中提取套餐详情
-  const packageItems = useMemo(() => {
-    if (!detail?.package_snapshot) return [];
-    
-    const pkg = detail.package_snapshot as Record<string, unknown>;
-    const items: Array<{ label: string; amount: string }> = [];
-    
-    // 套餐名称
-    if (pkg.name) {
-      const packagePrice = formatAmount(pkg.price as number | string | undefined, "$0.00");
-      items.push({ label: pkg.name as string, amount: packagePrice });
-    }
-    
-    // 服务类型（如果是 mobile，可能需要显示额外的费用）
-    const pkgServiceType = (pkg.service_type as string | undefined) ?? (pkg.type as string | undefined);
-    if (pkgServiceType && pkgServiceType.toLowerCase() === "mobile") {
-      // 如果有 mobile 服务费用，可以在这里添加
-      // 注意：实际费用可能已经在 package_amount 中包含了
-    }
-    
-    return items.length > 0 ? items : [{ label: serviceName, amount: packageSubtotal }];
-  }, [detail?.package_snapshot, serviceName, packageSubtotal]);
-
   // 从 addons_snapshot 中提取附加服务列表
   const addOnItems = useMemo(() => {
     if (!detail?.addons_snapshot || !Array.isArray(detail.addons_snapshot)) return [];
@@ -702,6 +679,24 @@ export default function BookingDetail() {
   const discountAmount = formatAmount(detail?.discount_amount, "$0.00");
   const couponAmount = formatAmount(detail?.coupon_amount, "$0.00");
   const membershipFee = formatAmount(detail?.membership_fee, "$0.00");
+  const mobileVanAmount = formatAmount(detail?.mobile_van_service_amount, "$0.00");
+  const safetyInsuranceAmount = formatAmount(detail?.safety_insurance_amount, "$0.00");
+  const preGstTotal = formatAmount(detail?.pre_gst_total, "$0.00");
+  const gstAmount = formatAmount(detail?.gst_amount, "$0.00");
+  const refundedAmount = formatAmount(detail?.refunded_amount, "$0.00");
+
+  const packageComponentItems = useMemo(
+    () => [
+      { label: serviceName, amount: packageSubtotal },
+      ...(parseAmount(detail?.mobile_van_service_amount) > 0
+        ? [{ label: "Mobile van service", amount: mobileVanAmount }]
+        : []),
+      ...(parseAmount(detail?.safety_insurance_amount) > 0
+        ? [{ label: "Safety insurance", amount: safetyInsuranceAmount }]
+        : []),
+    ],
+    [detail?.mobile_van_service_amount, detail?.safety_insurance_amount, mobileVanAmount, packageSubtotal, safetyInsuranceAmount, serviceName],
+  );
 
   const receiptLines = useMemo(() => {
     const lines = [
@@ -1695,13 +1690,13 @@ export default function BookingDetail() {
 
                   {isPackageExpanded ? (
                     <>
-                      {packageItems.length > 0 && (
+                      {packageComponentItems.length > 0 && (
                         <div className="flex flex-col gap-1">
                           <p className="font-comfortaa font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
                             {serviceName} package
                           </p>
                           <div className="flex flex-col gap-1">
-                            {packageItems.map((item, index) => (
+                            {packageComponentItems.map((item, index) => (
                               <div key={`package-${index}`} className="flex items-center justify-between">
                                 <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
                                   {item.label}
@@ -1718,7 +1713,12 @@ export default function BookingDetail() {
                               Subtotal
                             </p>
                             <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                              {packageSubtotal}
+                              {formatAmount(
+                                parseAmount(detail?.package_amount) +
+                                  parseAmount(detail?.mobile_van_service_amount) +
+                                  parseAmount(detail?.safety_insurance_amount),
+                                "$0.00",
+                              )}
                             </p>
                           </div>
                         </div>
@@ -1752,6 +1752,13 @@ export default function BookingDetail() {
                           </div>
                         </div>
                       )}
+
+                      {parseAmount(detail?.refunded_amount) > 0 && (
+                        <div className="flex items-center justify-between">
+                          <span className="font-comfortaa text-[12px] text-[#4A3C2A]">Refunded</span>
+                          <span className="font-comfortaa text-[12px] font-bold text-[#16A34A]">-{refundedAmount}</span>
+                        </div>
+                      )}
                     </>
                   ) : null}
                 </div>
@@ -1780,7 +1787,7 @@ export default function BookingDetail() {
                         </div>
                       )}
                       <p className="mt-1 font-comfortaa font-bold text-[10px] leading-[14px] text-[#4A5565]">
-                        tax included
+                        GST included in total
                       </p>
                     </div>
                   </div>
@@ -1825,6 +1832,18 @@ export default function BookingDetail() {
                       </div>
                     </>
                   )}
+                  <div className="border-t border-[#E5E7EB] pt-3">
+                    <div className="flex items-center justify-between">
+                      <p className="font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#4A3C2A]">
+                        Subtotal before GST
+                      </p>
+                      <p className="font-comfortaa text-[12px] font-bold leading-[16px] text-[#4A3C2A]">{preGstTotal}</p>
+                    </div>
+                    <div className="mt-1 flex items-center justify-between">
+                      <p className="font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#4A3C2A]">GST (5%)</p>
+                      <p className="font-comfortaa text-[12px] font-bold leading-[16px] text-[#4A3C2A]">{gstAmount}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
