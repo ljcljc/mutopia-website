@@ -340,6 +340,7 @@ export default function BookingDetail() {
   const [detail, setDetail] = useState<BookingDetailOut | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isPackageExpanded, setIsPackageExpanded] = useState(true);
+  const [isTotalExpanded, setIsTotalExpanded] = useState(true);
   const [isCanceling, setIsCanceling] = useState(false);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
@@ -654,12 +655,18 @@ export default function BookingDetail() {
       ? rawCanceledReason.replace(/^cancel\s+reason:\s*/i, "").trim()
       : "";
   const canModifyAddress = normalizedStatus === "pending_assignment";
+  const hasCheckedIn = ["checked_in", "in_progress", "pending_report", "completed", "terminated", "canceled", "refunded"].includes(normalizedStatus);
   
   // 价格信息（需要在 useMemo 之前定义）
   const totalEstimation = formatAmount(detail?.final_amount, "$0.00");
   const packageSubtotal = formatAmount(detail?.package_amount, "$0.00");
   const addOnSubtotal = formatAmount(detail?.addons_amount, "$0.00");
-  
+  const originalTotal = parseAmount(detail?.package_amount)
+    + parseAmount(detail?.addons_amount)
+    + parseAmount(detail?.mobile_van_service_amount)
+    + parseAmount(detail?.safety_insurance_amount);
+  const originalTotalFormatted = formatAmount(originalTotal, "$0.00");
+
   // 从 addons_snapshot 中提取附加服务列表
   const addOnItems = useMemo(() => {
     if (!detail?.addons_snapshot || !Array.isArray(detail.addons_snapshot)) return [];
@@ -676,13 +683,15 @@ export default function BookingDetail() {
   const discountRate = detail?.discount_rate
     ? (typeof detail.discount_rate === "number" ? detail.discount_rate : parseFloat(String(detail.discount_rate)) || 0)
     : 0;
+  const percentOff = discountRate > 0 && discountRate < 1
+    ? Math.round((1 - discountRate) * 100)
+    : 0;
   const discountAmount = formatAmount(detail?.discount_amount, "$0.00");
   const couponAmount = formatAmount(detail?.coupon_amount, "$0.00");
   const membershipFee = formatAmount(detail?.membership_fee, "$0.00");
   const mobileVanAmount = formatAmount(detail?.mobile_van_service_amount, "$0.00");
   const safetyInsuranceAmount = formatAmount(detail?.safety_insurance_amount, "$0.00");
   const preGstTotal = formatAmount(detail?.pre_gst_total, "$0.00");
-  const gstAmount = formatAmount(detail?.gst_amount, "$0.00");
   const refundedAmount = formatAmount(detail?.refunded_amount, "$0.00");
 
   const packageComponentItems = useMemo(
@@ -1684,7 +1693,7 @@ export default function BookingDetail() {
                       <button
                         type="button"
                         onClick={() => setIsPackageExpanded((value) => !value)}
-                        className="flex size-5 items-center justify-center rounded-lg hover:border hover:border-[#8B6357] transition-colors"
+                        className="flex size-5 cursor-pointer items-center justify-center rounded-[8px] hover:border hover:border-[#8b6357] hover:border-solid transition-colors"
                         aria-expanded={isPackageExpanded}
                         aria-label="Toggle package and add-on details"
                       >
@@ -1770,85 +1779,179 @@ export default function BookingDetail() {
                 </div>
               </div>
 
-              <div className="rounded-xl border-2 border-[#DE6A07] bg-white p-6 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
-                <div className="flex flex-col gap-5">
-                  <div className="flex items-start justify-between gap-3.5">
-                    <div>
-                      <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#4A3C2A]">
-                        Total estimation for the service
-                      </p>
-                      <p className="font-comfortaa font-normal text-[12.25px] leading-[17.5px] text-[#4A5565]">
-                        Our groomer will evaluate the final price
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#DE6A07]">
-                        {totalEstimation}
-                      </p>
-                      {discountRate > 0 && (
-                        <div className="mt-1 flex items-center justify-end gap-2">
-                          <span className="h-6 rounded-xl bg-[#DCFCE7] px-4 py-1 text-[10px] leading-[14px] font-comfortaa font-bold text-[#016630]">
-                            {discountRate}% OFF
-                          </span>
-                        </div>
-                      )}
-                      <p className="mt-1 font-comfortaa font-bold text-[10px] leading-[14px] text-[#4A5565]">
-                        GST included in total
-                      </p>
-                    </div>
+              <div className="rounded-[calc(12*var(--px393))] border-2 border-solid border-[#de6a07] bg-white p-[calc(20*var(--px393))] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] sm:rounded-xl sm:p-6">
+                <div className="flex items-start justify-between gap-6">
+                  {/* Left side: Title and subtitle */}
+                  <div className="flex flex-col gap-1 text-[#4a5565]">
+                    <p className="font-comfortaa font-semibold leading-[28px] text-[16px] text-[#4a3c2a]">
+                      Total estimation for the service
+                    </p>
+                    <p className="font-comfortaa font-normal leading-[17.5px] text-[12.25px]">
+                      {hasCheckedIn
+                        ? "Final price includes check-in adjustment"
+                        : "Our groomer will evaluate the final price"}
+                    </p>
                   </div>
 
-                  {(hasMembership || hasCoupon || couponAmount !== "$0.00" || discountAmount !== "$0.00") && (
-                    <>
-                      <div className="border-t border-[#E5E7EB]" />
-
-                      <div className="flex flex-col gap-3">
-                        {hasMembership && membershipFee !== "$0.00" && (
-                          <div className="flex items-center justify-between">
-                            <p className="font-comfortaa font-bold text-[12px] leading-[17.5px] text-[#4A3C2A]">
-                              Membership discount
-                            </p>
-                            <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                              -{membershipFee}
-                            </p>
-                          </div>
-                        )}
-
-                        {hasCoupon && couponAmount !== "$0.00" && (
-                          <div className="flex items-center justify-between">
-                            <p className="font-comfortaa font-bold text-[12px] leading-[17.5px] text-[#4A3C2A]">
-                              Coupon discount
-                            </p>
-                            <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                              -{couponAmount}
-                            </p>
-                          </div>
-                        )}
-
-                        {discountAmount !== "$0.00" && (
-                          <div className="flex items-center justify-between">
-                            <p className="font-comfortaa font-bold text-[12px] leading-[17.5px] text-[#4A3C2A]">
-                              Discount
-                            </p>
-                            <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                              -{discountAmount}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </>
-                  )}
-                  <div className="border-t border-[#E5E7EB] pt-3">
-                    <div className="flex items-center justify-between">
-                      <p className="font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#4A3C2A]">
-                        Subtotal before GST
+                  {/* Right side: Price + Accordion */}
+                  <div className="flex w-[428px] flex-col items-end gap-1.5">
+                    {/* Top row: was + final price + chevron */}
+                    <div className="flex items-center justify-end gap-2">
+                      {originalTotal > parseAmount(totalEstimation) && (
+                        <span className="font-comfortaa font-normal leading-[17.5px] text-[12.25px] text-[#4a3c2a]">
+                          was {originalTotalFormatted}
+                        </span>
+                      )}
+                      <p className="font-comfortaa font-bold leading-[24.5px] text-[16px] text-[#de6a07]">
+                        {totalEstimation}
                       </p>
-                      <p className="font-comfortaa text-[12px] font-bold leading-[16px] text-[#4A3C2A]">{preGstTotal}</p>
+                      <button
+                        type="button"
+                        onClick={() => setIsTotalExpanded((value) => !value)}
+                        className="flex size-5 cursor-pointer items-center justify-center rounded-[8px] hover:border hover:border-[#8b6357] hover:border-solid transition-colors"
+                        aria-expanded={isTotalExpanded}
+                        aria-label="Toggle total estimation details"
+                      >
+                        <AccordionChevron
+                          open={isTotalExpanded}
+                          className="size-5 text-[#4A3C2A]"
+                        />
+                      </button>
                     </div>
-                    <div className="mt-1 flex items-center justify-between">
-                      <p className="font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#4A3C2A]">GST (5%)</p>
-                      <p className="font-comfortaa text-[12px] font-bold leading-[16px] text-[#4A3C2A]">{gstAmount}</p>
-                    </div>
+
+                    {/* Second row: badge + breakdown + plus tax */}
+                    <AccordionPanel open={isTotalExpanded} className="w-full">
+                      <div className="flex flex-col items-end gap-0">
+                        <div className="flex items-center gap-2">
+                          {percentOff > 0 && (
+                            <div className="flex h-6 items-center justify-center gap-1 rounded-xl bg-[#dcfce7] px-3 py-1">
+                              <CheckCircleIcon className="size-3.5 text-[#27ae60]" aria-hidden="true" />
+                              <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#27ae60]">
+                                {percentOff}% OFF
+                              </span>
+                            </div>
+                          )}
+                          <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#DE6A07]">
+                            ({preGstTotal}
+                            {hasMembership && membershipFee !== "$0.00" && ` + ${membershipFee}`})
+                          </p>
+                        </div>
+                        <p className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#4a5565]">
+                          plus tax
+                        </p>
+                      </div>
+                    </AccordionPanel>
+
+                    {/* Divider + 券明细 —— 对齐 Figma：只有券分组，不单独显示 Discount/Membership */}
+                    <AccordionPanel open={isTotalExpanded} className="w-full">
+                      <div className="mt-2 flex flex-col gap-2">
+                        <div className="h-px w-full bg-[rgba(0,0,0,0.1)]" />
+                        {detail?.used_coupons && detail.used_coupons.length > 0
+                          ? (() => {
+                              const coupons = detail.used_coupons;
+                              const getCouponType = (coupon: (typeof coupons)[number]): "general" | "special" => {
+                                if (
+                                  coupon.category === "invite" ||
+                                  coupon.category === "cash" ||
+                                  coupon.type === "invite" ||
+                                  coupon.type === "membership" ||
+                                  coupon.type === "invitee_gift" ||
+                                  coupon.type === "membership_gift" ||
+                                  coupon.category === "invitee_gift"
+                                ) {
+                                  return "general";
+                                }
+                                return "special";
+                              };
+
+                              const formatCouponCategory = (category: string, type?: string): string => {
+                                const mapping: Record<string, string> = {
+                                  cash: "Cash credit",
+                                  gift: "Special gift",
+                                  birthday: "Birthday",
+                                  invite: "Invite credit",
+                                  custom: "Custom coupon",
+                                  invitee_gift: "Cash credit",
+                                };
+                                if (type && mapping[type]) {
+                                  return mapping[type];
+                                }
+                                return mapping[category] || category;
+                              };
+
+                              const groups = new Map<string, typeof coupons>([
+                                ["cash", []],
+                                ["invite", []],
+                                ["special_gift", []],
+                              ]);
+                              for (const coupon of coupons) {
+                                if (getCouponType(coupon) === "special") {
+                                  groups.get("special_gift")!.push(coupon);
+                                  continue;
+                                }
+                                const category =
+                                  coupon.category === "cash" ||
+                                  coupon.type === "cash" ||
+                                  coupon.type === "membership" ||
+                                  coupon.type === "membership_gift" ||
+                                  coupon.type === "invitee_gift" ||
+                                  coupon.category === "invitee_gift"
+                                    ? "cash"
+                                    : "invite";
+                                groups.get(category)!.push(coupon);
+                              }
+
+                              const itemLabel = (c: (typeof coupons)[number]) => {
+                                if (c.category === "birthday" && c.type === "cash") return "Birthday";
+                                if (c.category === "gift" || c.category === "custom") {
+                                  if (c.type && c.type !== "gift" && c.type !== "custom") return c.type;
+                                  return formatCouponCategory(c.category, c.type);
+                                }
+                                return formatCouponCategory(c.category, c.type);
+                              };
+                              const rows: React.ReactNode[] = [];
+                              for (const [groupKey, list] of groups) {
+                                if (list.length === 0) continue;
+                                const label = groupKey === "special_gift"
+                                  ? "Special gift"
+                                  : formatCouponCategory(groupKey, list[0].type);
+                                rows.push(
+                                  <div key={`cat-${label}`} className="flex items-center justify-between">
+                                    <p className="font-comfortaa font-bold text-[12px] leading-[17.5px] text-[#4a3c2a]">
+                                      {label}
+                                      {list.length > 1 && ` (${list.length} left)`}
+                                    </p>
+                                  </div>
+                                );
+                                // 所有券都做子条目（包括第一张）
+                                for (const c of list) {
+                                  rows.push(
+                                    <div key={`coupon-${c.id}`} className="flex items-center justify-between pl-4">
+                                      <p className="font-comfortaa text-[12px] leading-[17.5px] text-[#4a3c2a]">
+                                        {itemLabel(c)}
+                                      </p>
+                                      <p className="font-comfortaa font-bold text-[12px] text-[#4a3c2a]">
+                                        -{formatAmount(c.amount, "$0.00")}
+                                      </p>
+                                    </div>
+                                  );
+                                }
+                              }
+                              return rows;
+                            })()
+                          : /* fallback: 老 booking 没有 used_coupons，用聚合显示 */
+                            (hasCoupon && couponAmount !== "$0.00" && (
+                              <div className="flex items-center justify-between">
+                                <p className="font-comfortaa font-bold text-[12px] leading-[17.5px] text-[#4a3c2a]">
+                                  Coupon discount
+                                </p>
+                                <p className="font-comfortaa font-bold text-[12px] text-[#4a3c2a]">
+                                  -{couponAmount}
+                                </p>
+                              </div>
+                            ))}
+                      </div>
+                    </AccordionPanel>
                   </div>
                 </div>
               </div>

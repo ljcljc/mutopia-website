@@ -104,7 +104,6 @@ const formatCouponCategory = (category: string, type?: string): string => {
     custom: "Custom coupon",
     invitee_gift: "Cash credit", // invitee_gift should display as Cash credit
   };
-  // Check type first, then category
   if (type && mapping[type]) {
     return mapping[type];
   }
@@ -1384,12 +1383,10 @@ export function Step6() {
                       </p>
                     </div>
                   )}
-                  {/* Price breakdown */}
-                  {isMemberOrPurchasing && (
-                    <p className="font-comfortaa font-normal leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[#DE6A07] text-[calc(12.25*var(--px393))] sm:text-[12.25px]">
-                      (${serviceTotal.toFixed(2)}{useMembership && ` + $${Math.floor(membershipPrice)}`})
-                    </p>
-                  )}
+                  {/* Price breakdown - always show */}
+                  <p className="font-comfortaa font-normal leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[#DE6A07] text-[calc(12.25*var(--px393))] sm:text-[12.25px]">
+                    (${serviceTotal.toFixed(2)}{useMembership && ` + $${Math.floor(membershipPrice)}`})
+                  </p>
                 </div>
                 {/* Tax included */}
                 <p className="font-comfortaa font-bold leading-[calc(14*var(--px393))] sm:leading-[14px] relative shrink-0 text-[#4a5565] text-[calc(10*var(--px393))] sm:text-[10px]">
@@ -1399,15 +1396,9 @@ export function Step6() {
             </AccordionPanel>
 
             {/* Horizontal divider line - between tax info and coupon options */}
-            {(couponGroups.general.length > 0 || couponGroups.special.length > 0) && (
-              <AccordionPanel open={isTotalExpanded} className="w-full">
-                <div className="h-0 relative shrink-0 w-full">
-                  <div className="absolute bottom-0 left-0 right-0 -top-px">
-                    <div className="bg-[rgba(0,0,0,0.1)] h-px w-full" />
-                  </div>
-                </div>
-              </AccordionPanel>
-            )}
+            <AccordionPanel open={isTotalExpanded} className="w-full">
+              <div className="h-px w-full bg-[rgba(0,0,0,0.1)] mt-2" />
+            </AccordionPanel>
 
             {/* Third row and below: Coupon selection - Grouped by type */}
             {(couponGroups.general.length > 0 || couponGroups.special.length > 0) && (

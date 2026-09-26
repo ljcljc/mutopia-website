@@ -578,6 +578,14 @@ export interface BookingDetailOut {
   addons_snapshot?: Record<string, unknown>[];
   membership_snapshot?: Record<string, unknown>;
   coupon_snapshot?: Record<string, unknown>;
+  used_coupons?: Array<{
+    id: number;
+    template_name: string;
+    category: string;
+    type: string;
+    amount: number | string;
+    expires_at?: string | null;
+  }>;
   pricing_snapshot?: Record<string, unknown>;
   package_amount: number | string;
   addons_amount: number | string;
