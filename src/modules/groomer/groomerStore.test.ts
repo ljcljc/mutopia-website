@@ -172,6 +172,55 @@ describe("groomer dashboard current booking selection", () => {
     });
   });
 
+  it("uses final amount when estimate fields disagree with booking details", async () => {
+    apiMocks.getGroomerDashboardSummary.mockResolvedValue({});
+    apiMocks.getGroomerPerformance.mockResolvedValue({
+      score: "88.00",
+      level: "level_a",
+      level_label: "Gold Groomer",
+      service_fee_rate: "0.15",
+      breakdown: { customer_rating: "18.00" },
+      recent_feedback: [],
+    });
+    apiMocks.getGroomerPendingBookingInvitations.mockResolvedValue({ items: [] });
+    apiMocks.getGroomerCurrentBooking.mockResolvedValue({
+      id: 456,
+      status: "confirmed",
+      scheduled_time: "2026-05-16 12:05",
+      pet_name: "Momo",
+      service_name: "Bath",
+      total_amount: "80.96",
+      package_amount: "45.96",
+      addons_amount: "0.00",
+      mobile_van_service_amount: "20.00",
+      safety_insurance_amount: "15.00",
+      discount_rate: "0.90",
+    });
+    apiMocks.getGroomerBookingDetail.mockResolvedValue({
+      id: 456,
+      status: "confirmed",
+      package_amount: "45.96",
+      addons_amount: "0.00",
+      total_amount: "80.96",
+      final_amount: "71.25",
+      payable_amount: "71.25",
+      pre_gst_total: "67.86",
+      mobile_van_service_amount: "20.00",
+      safety_insurance_amount: "15.00",
+      membership_fee: "5.00",
+    });
+
+    await useGroomerDashboardStore.getState().fetchDashboard();
+
+    expect(useGroomerDashboardStore.getState().nextAppointment).toMatchObject({
+      id: 456,
+      totalEstimate: "$71.25",
+      originalEstimate: "$80.96",
+      savingsLabel: "10% OFF",
+      estimateBreakdown: "($67.86 + $5.00)",
+    });
+  });
+
   it("falls back to performance metrics when dashboard summary fails", async () => {
     apiMocks.getGroomerDashboardSummary.mockRejectedValue(new Error("summary failed"));
     apiMocks.getGroomerPerformance.mockResolvedValue({

@@ -52,6 +52,7 @@ import {
   formatPreferredTimeSlotLocal,
   toLocalDateTimeString,
 } from "@/lib/localDateTime";
+import { getBookingEstimateSummary } from "@/lib/bookingPricing";
 
 function formatAmount(value: number | string | undefined, fallback: string) {
   if (value === undefined || value === null || value === "") return fallback;
@@ -664,13 +665,11 @@ export default function BookingDetail() {
   const hasCheckedIn = ["checked_in", "in_progress", "pending_report", "completed", "terminated", "canceled", "refunded"].includes(normalizedStatus);
   
   // 价格信息（需要在 useMemo 之前定义）
-  const totalEstimation = formatAmount(detail?.final_amount, "$0.00");
+  const estimateSummary = getBookingEstimateSummary(detail ?? {});
+  const totalEstimation = formatAmount(estimateSummary.finalAmount ?? 0, "$0.00");
   const packageSubtotal = formatAmount(detail?.package_amount, "$0.00");
   const addOnSubtotal = formatAmount(detail?.addons_amount, "$0.00");
-  const originalTotal = parseAmount(detail?.package_amount)
-    + parseAmount(detail?.addons_amount)
-    + parseAmount(detail?.mobile_van_service_amount)
-    + parseAmount(detail?.safety_insurance_amount);
+  const originalTotal = estimateSummary.originalAmount;
   const originalTotalFormatted = formatAmount(originalTotal, "$0.00");
 
   // 从 addons_snapshot 中提取附加服务列表
@@ -686,18 +685,13 @@ export default function BookingDetail() {
   }, [detail?.addons_snapshot]);
 
   // 计算折扣信息
-  const discountRate = detail?.discount_rate
-    ? (typeof detail.discount_rate === "number" ? detail.discount_rate : parseFloat(String(detail.discount_rate)) || 0)
-    : 0;
-  const percentOff = discountRate > 0 && discountRate < 1
-    ? Math.round((1 - discountRate) * 100)
-    : 0;
+  const percentOff = estimateSummary.discountPercent;
   const discountAmount = formatAmount(detail?.discount_amount, "$0.00");
   const couponAmount = formatAmount(detail?.coupon_amount, "$0.00");
   const membershipFee = formatAmount(detail?.membership_fee, "$0.00");
   const mobileVanAmount = formatAmount(detail?.mobile_van_service_amount, "$0.00");
   const safetyInsuranceAmount = formatAmount(detail?.safety_insurance_amount, "$0.00");
-  const preGstTotal = formatAmount(detail?.pre_gst_total, "$0.00");
+  const preGstTotal = formatAmount(estimateSummary.preGstAmount ?? 0, "$0.00");
   const refundedAmount = formatAmount(detail?.refunded_amount, "$0.00");
 
   const packageComponentItems = useMemo(

@@ -891,61 +891,68 @@ function TotalEstimationCard({
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
-    <article className="rounded-[12px] bg-white p-6 shadow-[0px_8px_6px_rgba(0,0,0,0.10)]">
-      <div className="flex flex-col gap-3.5">
-        <div>
+    <article className="rounded-[calc(12*var(--px393))] border-2 border-solid border-[#DE6A07] bg-white p-[calc(20*var(--px393))] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] sm:rounded-xl sm:p-6">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+        <div className="flex flex-col gap-1 text-[#4A5565]">
           <h2 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">
             Total estimation for the service
           </h2>
-          <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
+          <p className="font-comfortaa text-[12.25px] leading-[17.5px]">
             Our groomer will evaluate the final price
           </p>
         </div>
 
-        <div className="flex items-start gap-2">
-          <div className="flex min-w-0 flex-1 flex-col items-end">
-            <p className="text-right font-comfortaa text-[16px] font-semibold leading-7 text-[#DE6A07]">
-              {appointment.originalEstimate ? (
-                <span className="font-normal leading-[22.75px] text-[#4A5565]">
-                  was {appointment.originalEstimate}{" "}
-                </span>
-              ) : null}
+        <div className="flex w-full flex-col items-end gap-1.5 sm:w-[428px]">
+          <div className="flex items-center justify-end gap-2">
+            {appointment.originalEstimate ? (
+              <span className="font-comfortaa text-[12.25px] font-normal leading-[17.5px] text-[#4A3C2A]">
+                was {appointment.originalEstimate}
+              </span>
+            ) : null}
+            <p className="font-comfortaa text-[16px] font-bold leading-[24.5px] text-[#DE6A07]">
               {appointment.totalEstimate}
             </p>
-            {isExpanded ? (
-              <>
-                <div className="flex flex-wrap items-end justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setIsExpanded((value) => !value)}
+              className="flex size-5 cursor-pointer items-center justify-center rounded-[8px] transition-colors hover:border hover:border-[#8B6357]"
+              aria-expanded={isExpanded}
+              aria-label="Toggle total estimation details"
+            >
+              <AccordionChevron open={isExpanded} className="size-5 text-[#4A3C2A]" />
+            </button>
+          </div>
+
+          {isExpanded ? (
+            <>
+              <div className="flex w-full flex-col items-end gap-0">
+                <div className="flex items-center gap-2">
                   {appointment.savingsLabel ? (
-                    <span className="inline-flex h-6 items-center gap-1 rounded-full bg-[#DCFCE7] px-3 py-1 font-comfortaa text-[10px] font-bold leading-[14px] text-[#27AE60]">
-                      <Icon
-                        name="target"
-                        className="size-3.5"
-                        aria-hidden="true"
-                      />
+                    <span className="inline-flex h-6 items-center justify-center gap-1 rounded-xl bg-[#DCFCE7] px-3 py-1 font-comfortaa text-[10px] font-bold leading-[14px] text-[#27AE60]">
+                      <Icon name="target" className="size-3.5" aria-hidden="true" />
                       {appointment.savingsLabel}
                     </span>
                   ) : null}
                   {appointment.estimateBreakdown ? (
-                    <span className="font-comfortaa text-[14px] leading-[22.75px] text-[#DE6A07]">
+                    <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#DE6A07]">
                       {appointment.estimateBreakdown}
-                    </span>
+                    </p>
                   ) : null}
                 </div>
-                <span className="font-comfortaa text-[10px] font-bold leading-[14px] text-[#4A5565]">
-                  tax included
-                </span>
-              </>
-            ) : null}
-          </div>
-          <button
-            type="button"
-            onClick={() => setIsExpanded((value) => !value)}
-            className="mt-1 flex size-5 shrink-0 items-center justify-center rounded-lg transition-colors hover:border hover:border-[#8B6357]"
-            aria-expanded={isExpanded}
-            aria-label="Toggle total estimation details"
-          >
-            <AccordionChevron open={isExpanded} className="size-5 text-[#8B6357]" />
-          </button>
+                <p className="font-comfortaa text-[10px] font-bold leading-[14px] text-[#4A5565]">
+                  plus tax
+                </p>
+              </div>
+
+              {appointment.priceAdjustmentLines.length > 0 ? (
+                <div className="mt-2 flex w-full flex-col gap-2 border-t border-[rgba(0,0,0,0.1)] pt-2">
+                  {appointment.priceAdjustmentLines.map((line) => (
+                    <AmountRow key={`${line.label}-${line.amount}`} line={line} />
+                  ))}
+                </div>
+              ) : null}
+            </>
+          ) : null}
         </div>
       </div>
     </article>

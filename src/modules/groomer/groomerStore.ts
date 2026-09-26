@@ -28,6 +28,7 @@ import {
 } from "@/modules/groomer/utils/time";
 import DEFAULT_PET_AVATAR from "@/assets/icons/icon-pet-avatar-placeholder.svg";
 import { formatPreferredTimeSlotLocal } from "@/lib/localDateTime";
+import { getBookingEstimateSummary } from "@/lib/bookingPricing";
 
 export type DashboardAppointment = GroomerUpNextAppointment & {
   id: number | string;
@@ -262,11 +263,6 @@ function formatBreakdownAmount(value: unknown, fallback = "$0.00"): string {
   return parsed === null ? fallback : `$${parsed.toFixed(2)}`;
 }
 
-function formatNegativeBreakdownAmount(value: unknown): string {
-  const parsed = parseAmount(value) ?? 0;
-  return parsed > 0 ? `-$${parsed.toFixed(2)}` : "$0.00";
-}
-
 function formatSignedBreakdownAmount(value: unknown, fallback = "$0.00"): string {
   const parsed = parseAmount(value);
   if (parsed === null) return fallback;
@@ -287,7 +283,7 @@ function getAmount(source: Record<string, unknown>, keys: string[]): unknown {
 }
 
 function buildEstimateBreakdown(price: Record<string, unknown>): string | undefined {
-  const serviceAmount = getAmount(price, ["payable_amount", "final_amount"]);
+  const serviceAmount = getAmount(price, ["pre_gst_total", "payable_amount", "final_amount"]);
   const membershipFee = getAmount(price, ["membership_fee"]);
   const membershipFeeNumber = parseAmount(membershipFee);
 
@@ -302,16 +298,26 @@ function formatDiscountRate(value: number): string {
 
 function buildSavingsLabel(price: Record<string, unknown>): string | undefined {
   const discountRate = parseAmount(getAmount(price, ["discount_rate"]));
-  if (discountRate && discountRate > 0) return `${formatDiscountRate(discountRate)}% OFF`;
+  if (discountRate && discountRate > 0) {
+    // discount_rate is the retained-price ratio (0.9 means 90% retained,
+    // therefore 10% off), not the percentage already saved.
+    const discountPercentage = discountRate < 1 ? (1 - discountRate) * 100 : discountRate;
+    return `${formatDiscountRate(discountPercentage)}% OFF`;
+  }
 
   const savingsAmount = sumAmounts(getAmount(price, ["discount_amount"]), getAmount(price, ["coupon_amount"]));
   return savingsAmount > 0 ? `${formatAmount(savingsAmount)} OFF` : undefined;
 }
 
 function mapEstimateFromPrice(price: Record<string, unknown>) {
-  const serviceSubtotal = sumAmounts(getAmount(price, ["package_amount"]), getAmount(price, ["addons_amount"]));
-  const membershipFee = parseAmount(getAmount(price, ["membership_fee"])) ?? 0;
-  const explicitTotal = parseAmount(getAmount(price, ["total_amount", "estimated_total"]));
+  const estimateSummary = getBookingEstimateSummary(price);
+  const serviceSubtotal = estimateSummary.originalAmount;
+  const membershipFee = estimateSummary.membershipFee;
+  // Booking details use final_amount as the authoritative customer total. Keep
+  // the older estimate fields only as compatibility fallbacks for incomplete
+  // responses from older endpoints.
+  const finalAmount = estimateSummary.finalAmount;
+  const explicitEstimate = parseAmount(getAmount(price, ["total_amount", "estimated_total"]));
   const serviceTotal =
     parseAmount(getAmount(price, ["payable_amount", "final_amount"])) ??
     Math.max(
@@ -319,13 +325,26 @@ function mapEstimateFromPrice(price: Record<string, unknown>) {
         sumAmounts(getAmount(price, ["discount_amount"]), getAmount(price, ["coupon_amount"])),
       0,
     );
-  const totalAmount = explicitTotal ?? serviceTotal + membershipFee;
+  const totalAmount = finalAmount ?? explicitEstimate ?? serviceTotal + membershipFee;
 
   return {
     totalEstimate: formatAmount(totalAmount),
-    originalEstimate: serviceSubtotal > 0 ? formatAmount(serviceSubtotal) : undefined,
-    savingsLabel: buildSavingsLabel(price),
-    estimateBreakdown: buildEstimateBreakdown(price),
+    originalEstimate:
+      serviceSubtotal > 0 && (finalAmount === null || serviceSubtotal > finalAmount)
+        ? formatAmount(serviceSubtotal)
+        : undefined,
+    savingsLabel:
+      estimateSummary.discountPercent > 0
+        ? `${formatDiscountRate(estimateSummary.discountPercent)}% OFF`
+        : buildSavingsLabel(price),
+    estimateBreakdown:
+      estimateSummary.preGstAmount !== null
+        ? `(${formatAmount(estimateSummary.preGstAmount)}${
+            estimateSummary.membershipFee > 0
+              ? ` + ${formatAmount(estimateSummary.membershipFee)}`
+              : ""
+          })`
+        : buildEstimateBreakdown(price),
   };
 }
 
@@ -359,18 +378,10 @@ function mapPackageAndAddonBreakdown(record: Record<string, unknown>) {
   const addonItems = getRecordArray(record, ["addons_snapshot", "addons", "add_ons"]);
   const addonLines = mapAmountLines(addonItems);
   const membershipFee = parseAmount(getAmount(record, ["membership_fee"])) ?? 0;
-  const discountAmount = parseAmount(getAmount(record, ["discount_amount"])) ?? 0;
-  const couponAmount = parseAmount(getAmount(record, ["coupon_amount"])) ?? 0;
   const priceAdjustmentLines: DashboardAmountLine[] = [];
 
   if (membershipFee > 0) {
     priceAdjustmentLines.push({ label: "Membership", amount: formatBreakdownAmount(membershipFee) });
-  }
-  if (discountAmount > 0) {
-    priceAdjustmentLines.push({ label: "Discount", amount: formatNegativeBreakdownAmount(discountAmount) });
-  }
-  if (couponAmount > 0) {
-    priceAdjustmentLines.push({ label: "Coupon", amount: formatNegativeBreakdownAmount(couponAmount) });
   }
 
   return {
@@ -482,7 +493,7 @@ function isActiveDashboardAppointmentStatus(status: string): boolean {
 
 function getDashboardAppointmentPriority(record: Record<string, unknown>, now: Date): number | null {
   const status = normalizeStatus(getString(record, ["status"]));
-  const scheduledTime = getString(record, ["scheduled_time", "appointment_time", "time"]);
+  const scheduledTime = getString(record, ["scheduled_time_utc", "scheduled_time", "appointment_time", "time"]);
   const parsedTime = parseGroomerDateTime(scheduledTime);
 
   if (isActiveDashboardAppointmentStatus(status)) return 0;
@@ -555,7 +566,8 @@ function mapDashboardAppointment(raw: unknown): DashboardAppointment | null {
   const service = getNestedRecord(record, ["service_detail", "service", "package", "package_snapshot"]);
   const price = getNestedRecord(record, ["price", "price_snapshot"]);
   const pendingCheckUp = asRecord(record.pending_check_up);
-  const scheduledTime = getString(record, ["scheduled_time", "appointment_time", "time"]);
+  const scheduledTime = getString(record, ["scheduled_time_utc", "scheduled_time", "appointment_time", "time"]);
+  const serviceScheduledTime = getString(record, ["service_scheduled_time", "scheduled_time", "appointment_time", "time"]);
   const estimate = mapEstimateFromPrice({ ...price, ...record });
   const packageAndAddonBreakdown = mapPackageAndAddonBreakdown({ ...price, ...record });
 
@@ -573,7 +585,7 @@ function mapDashboardAppointment(raw: unknown): DashboardAppointment | null {
     phone: getString(record, ["phone", "owner_phone", "user_phone", "contact_phone"]),
     service: getString(record, ["service_name"]),
     duration: formatDurationLabel({ ...service, ...record }),
-    time: formatTimeLabel(scheduledTime),
+    time: formatTimeLabel(serviceScheduledTime),
     scheduledTime,
     status: getString(record, ["status"]),
     hasPublishedHealthReport: record.has_published_health_report === true,
@@ -600,8 +612,8 @@ function mapNearestDashboardAppointment(raw: unknown): DashboardAppointment | nu
   const nearestRecord = getAppointmentItems(raw)
     .filter((record) => getDashboardAppointmentPriority(record, now) !== null)
     .sort((a, b) => {
-      const aTime = parseGroomerDateTime(getString(a, ["scheduled_time", "appointment_time", "time"]))?.getTime();
-      const bTime = parseGroomerDateTime(getString(b, ["scheduled_time", "appointment_time", "time"]))?.getTime();
+      const aTime = parseGroomerDateTime(getString(a, ["scheduled_time_utc", "scheduled_time", "appointment_time", "time"]))?.getTime();
+      const bTime = parseGroomerDateTime(getString(b, ["scheduled_time_utc", "scheduled_time", "appointment_time", "time"]))?.getTime();
       const aPriority = getDashboardAppointmentPriority(a, now) ?? Number.MAX_SAFE_INTEGER;
       const bPriority = getDashboardAppointmentPriority(b, now) ?? Number.MAX_SAFE_INTEGER;
       if (aPriority !== bPriority) return aPriority - bPriority;
