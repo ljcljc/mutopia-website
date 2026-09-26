@@ -41,6 +41,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 import { CheckCircleIcon, StarIcon, XIcon } from "lucide-react";
 import {
+  formatCouponCategory,
+  getGeneralCouponCategory,
+  getCouponDisplayName,
+  groupCoupons,
+} from "@/lib/couponUtils";
+import {
   addHoursToApiLocalDateTime,
   formatApiLocalDateTime,
   formatPreferredTimeSlotLocal,
@@ -1847,68 +1853,19 @@ export default function BookingDetail() {
                       <div className="mt-2 flex flex-col gap-2">
                         <div className="h-px w-full bg-[rgba(0,0,0,0.1)]" />
                         {detail?.used_coupons && detail.used_coupons.length > 0
-                          ? (() => {
+                            ? (() => {
                               const coupons = detail.used_coupons;
-                              const getCouponType = (coupon: (typeof coupons)[number]): "general" | "special" => {
-                                if (
-                                  coupon.category === "invite" ||
-                                  coupon.category === "cash" ||
-                                  coupon.type === "invite" ||
-                                  coupon.type === "membership" ||
-                                  coupon.type === "invitee_gift" ||
-                                  coupon.type === "membership_gift" ||
-                                  coupon.category === "invitee_gift"
-                                ) {
-                                  return "general";
-                                }
-                                return "special";
-                              };
-
-                              const formatCouponCategory = (category: string, type?: string): string => {
-                                const mapping: Record<string, string> = {
-                                  cash: "Cash credit",
-                                  gift: "Special gift",
-                                  birthday: "Birthday",
-                                  invite: "Invite credit",
-                                  custom: "Custom coupon",
-                                  invitee_gift: "Cash credit",
-                                };
-                                if (type && mapping[type]) {
-                                  return mapping[type];
-                                }
-                                return mapping[category] || category;
-                              };
-
                               const groups = new Map<string, typeof coupons>([
                                 ["cash", []],
                                 ["invite", []],
                                 ["special_gift", []],
                               ]);
-                              for (const coupon of coupons) {
-                                if (getCouponType(coupon) === "special") {
-                                  groups.get("special_gift")!.push(coupon);
-                                  continue;
-                                }
-                                const category =
-                                  coupon.category === "cash" ||
-                                  coupon.type === "cash" ||
-                                  coupon.type === "membership" ||
-                                  coupon.type === "membership_gift" ||
-                                  coupon.type === "invitee_gift" ||
-                                  coupon.category === "invitee_gift"
-                                    ? "cash"
-                                    : "invite";
-                                groups.get(category)!.push(coupon);
+                              const { general, special } = groupCoupons(coupons);
+                              for (const coupon of general) {
+                                groups.get(getGeneralCouponCategory(coupon))!.push(coupon);
                               }
+                              groups.get("special_gift")!.push(...special);
 
-                              const itemLabel = (c: (typeof coupons)[number]) => {
-                                if (c.category === "birthday" && c.type === "cash") return "Birthday";
-                                if (c.category === "gift" || c.category === "custom") {
-                                  if (c.type && c.type !== "gift" && c.type !== "custom") return c.type;
-                                  return formatCouponCategory(c.category, c.type);
-                                }
-                                return formatCouponCategory(c.category, c.type);
-                              };
                               const rows: React.ReactNode[] = [];
                               for (const [groupKey, list] of groups) {
                                 if (list.length === 0) continue;
@@ -1928,7 +1885,7 @@ export default function BookingDetail() {
                                   rows.push(
                                     <div key={`coupon-${c.id}`} className="flex items-center justify-between pl-4">
                                       <p className="font-comfortaa text-[12px] leading-[17.5px] text-[#4a3c2a]">
-                                        {itemLabel(c)}
+                                        {getCouponDisplayName(c)}
                                       </p>
                                       <p className="font-comfortaa font-bold text-[12px] text-[#4a3c2a]">
                                         -{formatAmount(c.amount, "$0.00")}

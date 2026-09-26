@@ -10,12 +10,17 @@ import {
   updateAwaitingPaymentBooking,
   createDepositSession,
   getPaymentSessionRedirectUrl,
-  type CouponOut,
 } from "@/lib/api";
 import { toast } from "sonner";
 import { calculateBookingDisplayPrice, getServicePrice } from "@/lib/pricing";
 import { formatPreferredTimeSlotLocal } from "@/lib/localDateTime";
 import { CheckCircleIcon } from "lucide-react";
+import {
+  formatCouponCategory,
+  getCouponDisplayName,
+  getGeneralCouponCategory,
+  groupCoupons,
+} from "@/lib/couponUtils";
 
 // Radio button component matching CustomRadio.tsx
 function RadioButton({ isChecked, className }: { isChecked: boolean; className?: string }) {
@@ -73,62 +78,6 @@ const formatCouponExpiration = (expiresAt: string | null | undefined): string | 
   } catch {
     return null;
   }
-};
-
-// Determine coupon type: general (通用券) or special (特殊节日券)
-const getCouponType = (coupon: CouponOut): "general" | "special" => {
-  // 通用券：邀请券(invite)、会员券(cash/membership)、邀请礼物券(invitee_gift)、会员礼物券(membership_gift)
-  if (
-    coupon.category === "invite" || 
-    coupon.category === "cash" || 
-    coupon.type === "invite" || 
-    coupon.type === "membership" ||
-    coupon.type === "invitee_gift" ||
-    coupon.type === "membership_gift" || // membership_gift should be classified as general coupon
-    coupon.category === "invitee_gift"
-  ) {
-    return "general";
-  }
-  // 特殊节日券：生日(birthday)和特殊节日(gift/custom)
-  // Note: gift category with membership_gift type is already handled above as general
-  return "special";
-};
-
-// Format coupon category for display
-const formatCouponCategory = (category: string, type?: string): string => {
-  const mapping: Record<string, string> = {
-    cash: "Cash credit",
-    gift: "Special gift",
-    birthday: "Birthday",
-    invite: "Invite credit",
-    custom: "Custom coupon",
-    invitee_gift: "Cash credit", // invitee_gift should display as Cash credit
-  };
-  if (type && mapping[type]) {
-    return mapping[type];
-  }
-  return mapping[category] || category;
-};
-
-// Get coupon display name (for special holiday coupons)
-const getCouponDisplayName = (coupon: CouponOut): string => {
-  if (coupon.category === "birthday" && coupon.type === "cash") {
-    return "Birthday";
-  }
-  if (coupon.category === "gift" || coupon.category === "custom") {
-    // For special gift coupons, show a more descriptive name
-    // Try notes first, then template name, then type, then category
-    if (coupon.notes && coupon.notes.trim()) {
-      return coupon.notes;
-    }
-    // If there's a template_id, we could show template name, but for now use type
-    if (coupon.type && coupon.type !== "gift" && coupon.type !== "custom") {
-      return coupon.type;
-    }
-    // Fallback to category formatted name
-    return formatCouponCategory(coupon.category, coupon.type);
-  }
-  return formatCouponCategory(coupon.category, coupon.type);
 };
 
 export function Step6() {
@@ -400,42 +349,13 @@ export function Step6() {
 
   // Group coupons by type: general (通用券) and special (特殊节日券)
   const couponGroups = useMemo(() => {
-    const generalCoupons: typeof allCoupons = [];
-    const specialCoupons: typeof allCoupons = [];
     const seenIds = new Set<number>();
-    
-    allCoupons
-      .filter((coupon) => {
-        // Avoid duplicates
-        if (seenIds.has(coupon.id)) {
-          return false;
-        }
-        seenIds.add(coupon.id);
-        
-        // Only include active coupons for real coupons
-        // Virtual coupons (id < 0) have status "pending" and should be included
-        if (coupon.id < 0) {
-          // Virtual coupons are always pending, include them
-          return coupon.status === "pending";
-        }
-        // Real coupons must be active
-        return coupon.status === "active";
-      })
-      .forEach((coupon) => {
-        const couponType = getCouponType(coupon);
-        console.log('[Coupon classification]', {
-          couponId: coupon.id,
-          category: coupon.category,
-          type: coupon.type,
-          status: coupon.status,
-          classifiedAs: couponType,
-        });
-        if (couponType === "general") {
-          generalCoupons.push(coupon);
-        } else {
-          specialCoupons.push(coupon);
-        }
-      });
+    const eligibleCoupons = allCoupons.filter((coupon) => {
+      if (seenIds.has(coupon.id)) return false;
+      seenIds.add(coupon.id);
+      return coupon.id < 0 ? coupon.status === "pending" : coupon.status === "active";
+    });
+    const { general: generalCoupons, special: specialCoupons } = groupCoupons(eligibleCoupons);
     
     // Sort general coupons by expiration date (closest to expire first)
     generalCoupons.sort((a, b) => {
@@ -461,14 +381,7 @@ export function Step6() {
         }
         groupSeenIds.add(coupon.id);
         
-        const category = (
-          coupon.category === "cash" || 
-          coupon.type === "cash" || 
-          coupon.type === "membership" ||
-          coupon.type === "membership_gift" || // membership_gift should be classified as cash category
-          coupon.type === "invitee_gift" ||
-          coupon.category === "invitee_gift"
-        ) ? "cash" : "invite";
+        const category = getGeneralCouponCategory(coupon);
         
         if (!generalGroups[category]) {
           generalGroups[category] = [];
