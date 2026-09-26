@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronDown, CircleAlert, Lightbulb } from "lucide-react";
+import { CircleAlert, Lightbulb } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import DEFAULT_PET_AVATAR from "@/assets/icons/icon-pet-avatar-placeholder.svg";
 import { Icon } from "@/components/common/Icon";
 import { OrangeButton } from "@/components/common/OrangeButton";
-import { HealthReportSection, PdfPreviewDialog, Spinner, type HealthReportItem } from "@/components/common";
+import { HealthReportSection, PdfPreviewDialog, Spinner, AccordionChevron, AccordionPanel, type HealthReportItem } from "@/components/common";
 import { usePdfPreview } from "@/components/common/usePdfPreview";
 import AccountContentContainer from "@/components/layout/AccountContentContainer";
 import {
@@ -331,17 +331,17 @@ function PetInfoCardMobile({
 
       {hasHealthDetails ? (
         <>
-          {isExpanded && detailsContent ? (
+          <AccordionPanel open={isExpanded && Boolean(detailsContent)}>
             <div className="mt-3 rounded-[14px] border border-[#E5E7EB] bg-[#F9FAFB] p-[18.5px]">
               {detailsContent}
             </div>
-          ) : null}
+          </AccordionPanel>
           <button
             type="button"
             onClick={() => setIsExpanded((current) => !current)}
             className="mt-2 flex w-full items-center justify-center gap-2 px-3 py-1 text-center"
           >
-            <ChevronDown className={`size-3 text-[#8B6357] transition-transform ${isExpanded ? "rotate-180" : "rotate-0"}`} strokeWidth={2} />
+            <AccordionChevron open={isExpanded} className="size-3 text-[#8B6357]" />
             <span className="font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#8B6357]">
               {isExpanded ? "Hide health details" : "Show health details"}
             </span>
@@ -915,13 +915,13 @@ export default function GroomerHealthDetailsPage() {
                 <Lightbulb className="size-4 text-[#DE6A07]" strokeWidth={2} />
                 <h2 className="font-comfortaa text-[15px] font-bold leading-6 text-[#DE6A07]">Insights from owner&apos;s report</h2>
               </div>
-              <ChevronDown
-                className={`size-4 shrink-0 text-[#8B6357] transition-transform ${isMobileInsightsExpanded ? "rotate-180" : "rotate-0"}`}
-                strokeWidth={2}
+              <AccordionChevron
+                open={isMobileInsightsExpanded}
+                className="size-4 shrink-0 text-[#8B6357]"
               />
             </button>
 
-            {isMobileInsightsExpanded ? (
+            <AccordionPanel open={isMobileInsightsExpanded}>
               <div className="mt-4 space-y-3">
                 <InsightPanel
                   title="Critical Alerts (Read Before Grooming)"
@@ -944,7 +944,7 @@ export default function GroomerHealthDetailsPage() {
                   noteText={joinedNotes}
                 />
               </div>
-            ) : null}
+            </AccordionPanel>
           </section>
         ) : null}
 
@@ -986,13 +986,13 @@ export default function GroomerHealthDetailsPage() {
                   <h2 className="font-comfortaa text-[14px] font-medium leading-[21px] text-[#314158]">
                     View Full Health Profile (Diet, Vaccines, Habits)
                   </h2>
-                  <ChevronDown
-                    className={`size-[17.5px] shrink-0 text-[#74829A] transition-transform ${isDesktopProfileExpanded ? "rotate-180" : "rotate-0"}`}
-                    strokeWidth={2}
+                  <AccordionChevron
+                    open={isDesktopProfileExpanded}
+                    className="size-[17.5px] shrink-0 text-[#74829A]"
                   />
                 </button>
 
-                {isDesktopProfileExpanded ? (
+                <AccordionPanel open={isDesktopProfileExpanded}>
                   <div className="mt-5 space-y-5">
                     <div>
                       <p className="font-comfortaa text-[12.25px] font-semibold uppercase leading-[17.5px] tracking-[0.3063px] text-[#0F172B]">
@@ -1036,7 +1036,7 @@ export default function GroomerHealthDetailsPage() {
                       </div>
                     </div>
                   </div>
-                ) : null}
+                </AccordionPanel>
               </section>
             </div>
           </section>

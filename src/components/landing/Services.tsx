@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useBookingStore, type ServicePackage } from "@/components/booking/bookingStore";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { OrangeButton } from "@/components/common";
+import { OrangeButton, AccordionChevron } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
 import {
   Carousel,
@@ -347,13 +347,10 @@ export default function Services() {
                   }
                 >
                   <div className="flex items-center justify-center relative shrink-0 size-[12px]">
-                    <div className={`flex-none ${showAllServicesDesktop ? "rotate-180" : ""}`}>
-                      <Icon
-                        name="chevron-down"
-                        aria-label="Arrow"
-                        className="size-[16px] text-[#8b6357]"
-                      />
-                    </div>
+                    <AccordionChevron
+                      open={showAllServicesDesktop}
+                      className="size-[16px] text-[#8b6357]"
+                    />
                   </div>
                   <p className="font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[#8b6357] text-[12px]">
                     {showAllServicesDesktop
@@ -370,13 +367,11 @@ export default function Services() {
                   }
                 >
                   <div className="flex items-center justify-center relative shrink-0 size-[12px]">
-                    <div className={`flex-none ${showAllServicesMobile ? "rotate-180" : "rotate-[90deg]"}`}>
-                      <Icon
-                        name="chevron-down"
-                        aria-label="Arrow"
-                        className="size-[12px] text-[#8b6357]"
-                      />
-                    </div>
+                    <AccordionChevron
+                      open={showAllServicesMobile}
+                      collapsedRotation={90}
+                      className="size-[12px] text-[#8b6357]"
+                    />
                   </div>
                   <p className="font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[#8b6357] text-[12px]">
                     {showAllServicesMobile

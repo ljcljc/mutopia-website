@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@/components/common/Icon";
+import { AccordionChevron, AccordionPanel } from "@/components/common";
 import { useAccountStore } from "../accountStore";
 import { buildImageUrl } from "@/lib/api";
 import type { PetOut } from "@/lib/api";
@@ -225,13 +226,12 @@ export default function DashboardMyPetsCard() {
             aria-expanded={isMemorializedOpen}
           >
             <span>Memorialized</span>
-            <Icon
-              name="chevron-down"
-              size={16}
-              className={`text-[#8B6357] transition-transform duration-200 ${isMemorializedOpen ? "rotate-180" : "rotate-0"}`}
+            <AccordionChevron
+              open={isMemorializedOpen}
+              className="size-[16px] text-[#8B6357]"
             />
           </button>
-          {isMemorializedOpen ? (
+          <AccordionPanel open={isMemorializedOpen}>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {memorializedPets.map((pet) => (
                 <MemorializedPetCard
@@ -241,7 +241,7 @@ export default function DashboardMyPetsCard() {
                 />
               ))}
             </div>
-          ) : null}
+          </AccordionPanel>
         </div>
       ) : null}
     </div>

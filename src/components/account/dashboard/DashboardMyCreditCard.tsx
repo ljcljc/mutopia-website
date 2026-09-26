@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { OrangeButton } from "@/components/common";
+import { OrangeButton, AccordionChevron } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
 import { useAccountStore } from "../accountStore";
 import { bindInvitation } from "@/lib/api";
@@ -476,10 +476,9 @@ export default function DashboardMyCreditCard() {
           onClick={() => setShowAllCashCredits((value) => !value)}
           className="mb-5 flex w-full items-center justify-center gap-1.5 font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#8B6357]"
         >
-          <Icon
-            name="chevron-down"
-            size={16}
-            className={`text-[#8B6357] transition-transform duration-200 ${showAllCashCredits ? "rotate-180" : "rotate-0"}`}
+          <AccordionChevron
+            open={showAllCashCredits}
+            className="size-[16px] text-[#8B6357]"
           />
           {showAllCashCredits ? "Show less cash credits" : "Show all cash credits"}
         </button>
@@ -520,10 +519,9 @@ export default function DashboardMyCreditCard() {
           onClick={() => setShowAllSpecialOffers((value) => !value)}
           className="mt-5 flex w-full items-center justify-center gap-1.5 font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#8B6357]"
         >
-          <Icon
-            name="chevron-down"
-            size={16}
-            className={`text-[#8B6357] transition-transform duration-200 ${showAllSpecialOffers ? "rotate-180" : "rotate-0"}`}
+          <AccordionChevron
+            open={showAllSpecialOffers}
+            className="size-[16px] text-[#8B6357]"
           />
           {showAllSpecialOffers ? "Show less special offers" : "Show all special offers"}
         </button>

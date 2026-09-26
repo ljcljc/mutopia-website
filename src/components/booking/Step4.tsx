@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { Icon } from "@/components/common/Icon";
-import { OrangeButton, TertiaryButton, Checkbox, MembershipCard, type FeatureItem } from "@/components/common";
+import { OrangeButton, TertiaryButton, Checkbox, MembershipCard, AccordionChevron, AccordionPanel, type FeatureItem } from "@/components/common";
 import { useBookingStore } from "./bookingStore";
 import { cn } from "@/components/ui/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -425,12 +425,10 @@ export function Step4() {
                   Full rooming package
                 </p>
                 <div className="flex items-center justify-center relative shrink-0 size-[calc(20*var(--px393))]">
-                  <div className={cn("flex-none", isPackageExpanded ? "rotate-180" : "")}>
-                    <Icon name="chevron-down" size="calc(16*var(--px393))" className="text-[#8b6357]" />
-                  </div>
+                  <AccordionChevron open={isPackageExpanded} className="size-[calc(16*var(--px393))] text-[#8b6357]" />
                 </div>
               </div>
-              {isPackageExpanded && (
+              <AccordionPanel open={isPackageExpanded} className="w-full">
                 <div className="flex flex-col gap-[calc(4*var(--px393))] items-start relative shrink-0 w-full">
                   <div className="h-0 relative shrink-0 w-full border-t border-[#e0e0e0] my-[calc(4*var(--px393))]" />
                   {selectedService && (
@@ -481,7 +479,7 @@ export function Step4() {
                     </p>
                   </div>
                 </div>
-              )}
+              </AccordionPanel>
             </div>
 
             <div className="flex flex-col gap-[calc(4*var(--px393))] items-start relative shrink-0 w-full">
@@ -493,12 +491,10 @@ export function Step4() {
                   Add-on
                 </p>
                 <div className="flex items-center justify-center relative shrink-0 size-[calc(20*var(--px393))]">
-                  <div className={cn("flex-none", isAddOnsExpanded ? "rotate-180" : "")}>
-                    <Icon name="chevron-down" size="calc(16*var(--px393))" className="text-[#8b6357]" />
-                  </div>
+                  <AccordionChevron open={isAddOnsExpanded} className="size-[calc(16*var(--px393))] text-[#8b6357]" />
                 </div>
               </div>
-              {isAddOnsExpanded && (
+              <AccordionPanel open={isAddOnsExpanded} className="w-full">
                 <div className="flex flex-col gap-[calc(4*var(--px393))] items-start relative shrink-0 w-full">
                   <div className="h-0 relative shrink-0 w-full border-t border-[#e0e0e0] my-[calc(4*var(--px393))]" />
                   {selectedAddOnsDetails.length > 0 && (
@@ -556,7 +552,7 @@ export function Step4() {
                     </p>
                   </div>
                 </div>
-              )}
+              </AccordionPanel>
             </div>
           </div>
 
@@ -765,17 +761,15 @@ export function Step4() {
                   Full rooming package
                 </p>
                 <div className="flex items-center justify-center relative shrink-0 size-[calc(20*var(--px393))]">
-                  <div className={cn("flex-none", isPackageExpanded ? "rotate-180" : "")}>
-                    <div className={cn(
-                      "flex items-center justify-center relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] size-[calc(20*var(--px393))] border border-transparent",
-                      "hover:border-[#8b6357] hover:border-solid transition-colors"
-                    )}>
-                      <Icon name="chevron-down" size={16} className="text-[#8b6357]" />
-                    </div>
+                  <div className={cn(
+                    "flex items-center justify-center relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] size-[calc(20*var(--px393))] border border-transparent",
+                    "hover:border-[#8b6357] hover:border-solid transition-colors"
+                  )}>
+                    <AccordionChevron open={isPackageExpanded} className="size-[16px] text-[#8b6357]" />
                   </div>
                 </div>
               </div>
-              {isPackageExpanded && (
+              <AccordionPanel open={isPackageExpanded} className="w-full">
                 <div className="flex flex-col gap-[4px] items-start relative shrink-0 w-full">
                   <div className="h-0 relative shrink-0 w-full border-t border-[#000000] my-[4px]" />
                   {selectedService && (
@@ -868,7 +862,7 @@ export function Step4() {
                     </p>
                   </div>
                 </div>
-              )}
+              </AccordionPanel>
             </div>
 
             {/* Add-on - Collapsible */}
@@ -881,17 +875,15 @@ export function Step4() {
                   Add-on
                 </p>
                 <div className="flex items-center justify-center relative shrink-0 size-[calc(20*var(--px393))]">
-                  <div className={cn("flex-none", isAddOnsExpanded ? "rotate-180" : "")}>
-                    <div className={cn(
-                      "flex items-center justify-center relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] size-[calc(20*var(--px393))] border border-transparent",
-                      "hover:border-[#8b6357] hover:border-solid transition-colors"
-                    )}>
-                      <Icon name="chevron-down" size={16} className="text-[#8b6357]" />
-                    </div>
+                  <div className={cn(
+                    "flex items-center justify-center relative rounded-[calc(8*var(--px393))] sm:rounded-[8px] size-[calc(20*var(--px393))] border border-transparent",
+                    "hover:border-[#8b6357] hover:border-solid transition-colors"
+                  )}>
+                    <AccordionChevron open={isAddOnsExpanded} className="size-[16px] text-[#8b6357]" />
                   </div>
                 </div>
               </div>
-              {isAddOnsExpanded && (
+              <AccordionPanel open={isAddOnsExpanded} className="w-full">
                 <div className="flex flex-col gap-[4px] items-start relative shrink-0 w-full">
                   <div className="h-0 relative shrink-0 w-full border-t border-[#000000] my-[4px]" />
                   {/* Add-ons list */}
@@ -959,7 +951,7 @@ export function Step4() {
                     </p>
                   </div>
                 </div>
-              )}
+              </AccordionPanel>
             </div>
             </div>
 

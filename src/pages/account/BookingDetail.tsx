@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import AccountContentContainer from "@/components/layout/AccountContentContainer";
-import { CustomInput, CustomRadio, OrangeButton } from "@/components/common";
+import { CustomInput, CustomRadio, OrangeButton, AccordionChevron, AccordionPanel } from "@/components/common";
 import { CustomTextarea } from "@/components/common/CustomTextarea";
 import { Icon } from "@/components/common/Icon";
 import { useAccountStore } from "@/components/account/accountStore";
@@ -1680,16 +1680,15 @@ export default function BookingDetail() {
                         aria-expanded={isPackageExpanded}
                         aria-label="Toggle package and add-on details"
                       >
-                        <Icon
-                          name="chevron-down"
-                          className={`size-5 text-[#4A3C2A] transition-transform ${isPackageExpanded ? "rotate-180" : ""}`}
+                        <AccordionChevron
+                          open={isPackageExpanded}
+                          className="size-5 text-[#4A3C2A]"
                         />
                       </button>
                     </div>
                   </div>
 
-                  {isPackageExpanded ? (
-                    <>
+                  <AccordionPanel open={isPackageExpanded} contentClassName="flex flex-col gap-3.5">
                       {packageComponentItems.length > 0 && (
                         <div className="flex flex-col gap-1">
                           <p className="font-comfortaa font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
@@ -1759,8 +1758,7 @@ export default function BookingDetail() {
                           <span className="font-comfortaa text-[12px] font-bold text-[#16A34A]">-{refundedAmount}</span>
                         </div>
                       )}
-                    </>
-                  ) : null}
+                  </AccordionPanel>
                 </div>
               </div>
 

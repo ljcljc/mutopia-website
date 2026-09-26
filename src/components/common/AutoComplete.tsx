@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/components/ui/utils";
-import { Icon } from "@/components/common/Icon";
+import { AccordionChevron } from "./Accordion";
 
 export interface AutoCompleteProps {
   label?: string;
@@ -177,12 +177,9 @@ export function AutoComplete({
             aria-label={isOpen ? "Close options" : "Open options"}
             disabled={disabled}
           >
-            <Icon
-              name="chevron-down"
-              className={cn(
-                "size-4 text-[#717182] transition-transform duration-200 ease-in-out",
-                isOpen ? "rotate-180" : ""
-              )}
+            <AccordionChevron
+              open={isOpen}
+              className="size-4 text-[#717182]"
             />
           </button>
         </div>

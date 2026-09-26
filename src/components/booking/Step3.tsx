@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import { Icon } from "@/components/common/Icon";
-import { CommonCheckbox, OrangeButton, CustomRadio, Spinner } from "@/components/common";
+import { CommonCheckbox, OrangeButton, CustomRadio, Spinner, AccordionChevron, AccordionPanel } from "@/components/common";
 import { useBookingStore } from "./bookingStore";
 import { useAuthStore } from "@/components/auth/authStore";
 import { LoginModal } from "@/components/auth/LoginModal";
@@ -436,20 +436,18 @@ export function Step3() {
                   ${totalPrice.toFixed(2)}
                 </p>
                 <div className="flex items-center justify-center relative shrink-0 size-[calc(20*var(--px393))] sm:size-[20px]">
-                  <div className={cn("flex-none", isEstimationExpanded ? "rotate-180" : "")}>
-                    <div className={cn(
-                      "flex items-center justify-center relative rounded-[8px] size-[20px]",
-                      "hover:border hover:border-[#8b6357] hover:border-solid transition-colors"
-                    )}>
-                      <Icon name="chevron-down" size={16} className="text-[#8b6357]" />
-                    </div>
+                  <div className={cn(
+                    "flex items-center justify-center relative rounded-[8px] size-[20px]",
+                    "hover:border hover:border-[#8b6357] hover:border-solid transition-colors"
+                  )}>
+                    <AccordionChevron open={isEstimationExpanded} className="size-[16px] text-[#8b6357]" />
                   </div>
                 </div>
               </div>
             </div>
             
             {/* Expanded Details */}
-            {isEstimationExpanded && (
+            <AccordionPanel open={isEstimationExpanded} className="w-full">
               <div className="flex flex-col gap-[calc(14*var(--px393))] sm:gap-[14px] items-start relative shrink-0 w-full">
                 {/* Full rooming package section */}
                 {selectedService && (
@@ -524,7 +522,7 @@ export function Step3() {
                   </div>
                 )}
               </div>
-            )}
+            </AccordionPanel>
         </div>
       </div>
 

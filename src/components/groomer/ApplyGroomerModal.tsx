@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Icon } from "@/components/common/Icon";
-import { OrangeButton, CustomSelect, CustomSelectItem, FileUpload, type FileUploadItem } from "@/components/common";
+import { OrangeButton, CustomSelect, CustomSelectItem, FileUpload, AccordionChevron, type FileUploadItem } from "@/components/common";
 import { buildImageUrl, getCurrentUser, submitGroomerApply, uploadGroomerApplyImage } from "@/lib/api";
 import { DatePicker } from "@/components/common/DatePicker";
 import { useAuthStore } from "@/components/auth/authStore";
@@ -120,12 +120,9 @@ function SearchableSelectField({
               }}
               aria-label="Toggle options"
             >
-              <Icon
-                name="chevron-down"
-                aria-label="Dropdown"
-                className={`block size-[16px] text-[#717182] transition-transform ${
-                  isOpen ? "rotate-180" : ""
-                }`}
+              <AccordionChevron
+                open={isOpen}
+                className="block size-[16px] text-[#717182]"
               />
             </button>
           </div>

@@ -6,6 +6,7 @@
  */
 
 export * from "./Checkbox";
+export * from "./Accordion";
 export * from "./CommonCheckbox";
 export {
   default as CustomAccordion,

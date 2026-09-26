@@ -9,6 +9,7 @@ import {
   CustomSelectItem,
   CustomTextarea,
   OrangeButton,
+  AccordionChevron,
   type FileUploadItem,
 } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
@@ -943,10 +944,7 @@ function TotalEstimationCard({
             aria-expanded={isExpanded}
             aria-label="Toggle total estimation details"
           >
-            <Icon
-              name="chevron-down"
-              className={`size-5 text-[#8B6357] transition-transform ${isExpanded ? "rotate-180" : ""}`}
-            />
+            <AccordionChevron open={isExpanded} className="size-5 text-[#8B6357]" />
           </button>
         </div>
       </div>

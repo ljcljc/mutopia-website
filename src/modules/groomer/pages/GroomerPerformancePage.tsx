@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactNode } from "react";
-import { OrangeButton } from "@/components/common";
+import { OrangeButton, AccordionChevron, AccordionPanel } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
 import AccountContentContainer from "@/components/layout/AccountContentContainer";
 import { useIsMobile } from "@/components/ui/use-mobile";
@@ -152,30 +152,18 @@ function PerformanceRadarCard({
           ) : null}
         </div>
         <div className="mt-0.5 flex size-5 shrink-0 items-center justify-center text-[#8B6357]">
-          <Icon
-            name="chevron-down"
-            className={`size-5 origin-center transform-gpu text-[#8B6357] transition-transform duration-300 ease-in-out ${isOpen ? "rotate-180" : ""} cursor-pointer`}
-            aria-hidden="true"
-          />
+          <AccordionChevron open={isOpen} className="size-5 cursor-pointer" />
         </div>
       </button>
 
-      <div
+      <AccordionPanel
         id="performance-radar-panel"
-        className={`grid overflow-hidden transition-[grid-template-rows,margin] duration-300 ease-out ${
-          isOpen ? "mt-4 grid-rows-[1fr]" : "mt-0 grid-rows-[0fr]"
-        }`}
+        open={isOpen}
+        className={isOpen ? "mt-4" : "mt-0"}
+        contentClassName="flex justify-center"
       >
-        <div className="min-h-0">
-          <div
-            className={`flex justify-center transition-[opacity,transform] duration-300 ease-out ${
-              isOpen ? "pointer-events-auto opacity-100 translate-y-0" : "pointer-events-none opacity-0 -translate-y-2"
-            }`}
-          >
-            <PerformanceRadarChart metrics={radarMetrics.map((metric) => ({ ...metric }))} />
-          </div>
-        </div>
-      </div>
+        <PerformanceRadarChart metrics={radarMetrics.map((metric) => ({ ...metric }))} />
+      </AccordionPanel>
     </article>
   );
 }

@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { Icon } from "@/components/common/Icon";
-import { OrangeButton, MembershipCard, Checkbox, BrownOutlineButton, type FeatureItem } from "@/components/common";
+import { OrangeButton, MembershipCard, Checkbox, BrownOutlineButton, AccordionChevron, AccordionPanel, type FeatureItem } from "@/components/common";
 import { useBookingStore } from "./bookingStore";
 import { useAuthStore } from "@/components/auth/authStore";
 import { cn } from "@/components/ui/utils";
@@ -1102,19 +1102,13 @@ export function Step6() {
                 onClick={() => setIsPackageExpanded(!isPackageExpanded)}
                 className="flex items-center justify-center relative shrink-0 size-[20px] cursor-pointer hover:border hover:border-[#8b6357] hover:border-solid transition-colors rounded-[8px]"
               >
-                <Icon
-                  name="chevron-down"
-                  className={cn(
-                    "size-[20px] text-[#4a3c2a] transition-transform",
-                    isPackageExpanded ? "rotate-180" : ""
-                  )}
-                />
+                <AccordionChevron open={isPackageExpanded} className="size-[20px] text-[#4a3c2a]" />
               </button>
             </div>
           </div>
 
           {/* Expanded content */}
-          {isPackageExpanded && (
+          <AccordionPanel open={isPackageExpanded} className="w-full">
             <div className="flex flex-col gap-[4px] items-start relative shrink-0 w-full">
               {/* Full rooming package */}
               {selectedService && (
@@ -1195,8 +1189,8 @@ export function Step6() {
                 </>
               )}
             </div>
-          )}
-          
+          </AccordionPanel>
+
           {/* Modify Button */}
           <BrownOutlineButton size="compact" onClick={() => handleModify(3)}>
             <span className="font-comfortaa font-medium leading-[17.5px] text-[12px] text-[#8b6357]">
@@ -1363,18 +1357,12 @@ export function Step6() {
                   isTotalExpanded ? "ml-[calc(8*var(--px393))] sm:ml-0" : "ml-[calc(8*var(--px393))] sm:ml-0"
                 )}
               >
-                <Icon
-                  name="chevron-down"
-                  className={cn(
-                    "size-[calc(20*var(--px393))] text-[#4a3c2a] transition-transform",
-                    isTotalExpanded ? "rotate-180" : ""
-                  )}
-                />
+                <AccordionChevron open={isTotalExpanded} className="size-[calc(20*var(--px393))] text-[#4a3c2a]" />
               </button>
             </div>
             
             {/* Second row: Save badge + Price breakdown */}
-            {isTotalExpanded && (
+            <AccordionPanel open={isTotalExpanded} className="w-full sm:w-auto">
               <div className="flex flex-col gap-0 items-end relative shrink-0 w-full sm:w-auto">
                 <div className="flex items-center gap-[calc(8*var(--px393))] sm:gap-[8px] relative shrink-0">
                   {/* Save percentage badge - show when there are savings */}
@@ -1398,19 +1386,22 @@ export function Step6() {
                   plus tax
                 </p>
               </div>
-            )}
-          
+            </AccordionPanel>
+
             {/* Horizontal divider line - between tax info and coupon options */}
-            {isTotalExpanded && (couponGroups.general.length > 0 || couponGroups.special.length > 0) && (
-              <div className="h-0 relative shrink-0 w-full">
-                <div className="absolute bottom-0 left-0 right-0 -top-px">
-                  <div className="bg-[rgba(0,0,0,0.1)] h-px w-full" />
+            {(couponGroups.general.length > 0 || couponGroups.special.length > 0) && (
+              <AccordionPanel open={isTotalExpanded} className="w-full">
+                <div className="h-0 relative shrink-0 w-full">
+                  <div className="absolute bottom-0 left-0 right-0 -top-px">
+                    <div className="bg-[rgba(0,0,0,0.1)] h-px w-full" />
+                  </div>
                 </div>
-              </div>
+              </AccordionPanel>
             )}
-          
+
             {/* Third row and below: Coupon selection - Grouped by type */}
-            {isTotalExpanded && (couponGroups.general.length > 0 || couponGroups.special.length > 0) && (
+            {(couponGroups.general.length > 0 || couponGroups.special.length > 0) && (
+              <AccordionPanel open={isTotalExpanded} className="w-full">
               <div className="flex flex-col gap-[calc(4*var(--px393))] sm:gap-[4px] items-end relative shrink-0 w-full mt-[calc(8*var(--px393))] sm:mt-[8px]">
                 {/* General Coupons (通用券) - Checkbox style, grouped by category */}
                 {couponGroups.generalGroups.map((group) => {
@@ -1451,16 +1442,7 @@ export function Step6() {
                   
                   // Check if any coupon from this category is selected
                   const hasSelectedCoupon = uniqueCoupons.some((c) => selectedCouponIds.includes(c.id));
-                  
-                  // Debug log for Cash credit state
-                  console.log('[Cash credit render]', {
-                    category: group.category,
-                    remainingCount,
-                    hasSelectedCoupon,
-                    selectedCouponIds,
-                    uniqueCoupons: uniqueCoupons.map(c => ({ id: c.id, type: c.type })),
-                  });
-                  
+
                   // Get the selected coupon amount (if any)
                   // Check both real coupons (id > 0) and virtual coupons (id < 0)
                   const selectedCoupon = uniqueCoupons.find((c) => selectedCouponIds.includes(c.id));
@@ -1473,58 +1455,26 @@ export function Step6() {
                   
                   // Handle category checkbox toggle
                   const handleCategoryToggle = (checked: boolean) => {
-                    console.log('[Cash credit toggle]', {
-                      checked,
-                      category: group.category,
-                      currentSelectedIds: selectedCouponIds,
-                      uniqueCoupons: uniqueCoupons.map(c => ({ id: c.id, type: c.type, status: c.status })),
-                      bestCouponId: bestCoupon?.id,
-                    });
-                    
                     const { setSelectedCouponIds } = useBookingStore.getState();
                     const currentIds = [...selectedCouponIds];
                     // Include both real coupons (id > 0) and virtual coupons (id < 0) from this category
                     const categoryCouponIds = uniqueCoupons.map(c => c.id);
-                    
-                    console.log('[Cash credit toggle] Category coupon IDs:', categoryCouponIds);
-                    
-                    if (checked) {
+
+                    if (checked && bestCoupon) {
                       // Select the best coupon: remove other coupons from this category first, then add the best one
-                      if (bestCoupon) {
-                        const filteredIds = currentIds.filter((id) => !categoryCouponIds.includes(id));
-                        const newIds = [...filteredIds, bestCoupon.id];
-                        console.log('[Cash credit toggle] Selecting - filtered IDs:', filteredIds, 'new IDs:', newIds, 'bestCoupon:', bestCoupon);
-                        setSelectedCouponIds(newIds);
-                      } else {
-                        console.warn('[Cash credit toggle] No best coupon available, cannot select');
-                      }
-                    } else {
-                      // Deselect all coupons from this category by removing them from selectedCouponIds
                       const filteredIds = currentIds.filter((id) => !categoryCouponIds.includes(id));
-                      console.log('[Cash credit toggle] Deselecting - filtered IDs:', filteredIds);
-                      setSelectedCouponIds(filteredIds);
+                      setSelectedCouponIds([...filteredIds, bestCoupon.id]);
+                    } else if (!checked) {
+                      // Deselect all coupons from this category by removing them from selectedCouponIds
+                      setSelectedCouponIds(currentIds.filter((id) => !categoryCouponIds.includes(id)));
                     }
-                    
-                    // Log state after update
-                    setTimeout(() => {
-                      const state = useBookingStore.getState();
-                      console.log('[Cash credit toggle] State after update:', state.selectedCouponIds);
-                    }, 0);
                   };
-                  
-                  console.log('[Cash credit render] Rendering checkbox', {
-                    checked: hasSelectedCoupon,
-                    label: remainingCount > 0 ? `${categoryText} (${remainingCount} left)` : categoryText,
-                  });
-                  
+
                   return (
                     <div key={group.category} className="flex items-center justify-between relative shrink-0 w-full">
                       <Checkbox
                         checked={hasSelectedCoupon}
-                        onCheckedChange={(checked) => {
-                          console.log('[Cash credit checkbox] onCheckedChange called', { checked, hasSelectedCoupon });
-                          handleCategoryToggle(checked);
-                        }}
+                        onCheckedChange={(checked) => handleCategoryToggle(checked)}
                         label={remainingCount > 0 ? `${categoryText} (${remainingCount} left)` : categoryText}
                         containerClassName="relative shrink-0"
                       />
@@ -1552,18 +1502,7 @@ export function Step6() {
                   const isSpecialGift = filteredGroup.groupKey === "special_gift";
                   const hasSelectedCoupon = filteredGroup.coupons.some((c) => selectedCouponIds.includes(c.id));
                   const bestCoupon = filteredGroup.coupons[0]; // Already sorted: expiring soon first, then earliest valid_from
-                  
-                  // Debug log for Special gift state
-                  if (isSpecialGift) {
-                    console.log('[Special gift render]', {
-                      groupKey: group.groupKey,
-                      hasSelectedCoupon,
-                      selectedCouponIds,
-                      groupCoupons: group.coupons.map(c => ({ id: c.id, type: c.type })),
-                      bestCouponId: bestCoupon?.id,
-                    });
-                  }
-                  
+
                   if (isSpecialGift) {
                     const availableSpecialCoupons = filteredGroup.coupons;
                     if (availableSpecialCoupons.length === 0) {
@@ -1573,58 +1512,29 @@ export function Step6() {
                     // Special gift: Checkbox style with nested radio buttons for individual coupons
                     // Handle Special gift toggle (similar to general coupons)
                     const handleSpecialGiftToggle = (checked: boolean) => {
-                      console.log('[Special gift toggle]', {
-                        checked,
-                        currentSelectedIds: selectedCouponIds,
-                        groupCoupons: group.coupons.map(c => ({ id: c.id, type: c.type })),
-                        bestCouponId: bestCoupon?.id,
-                        hasSelectedCoupon,
-                      });
-                      
                       const { setSelectedCouponIds } = useBookingStore.getState();
                       const currentIds = [...selectedCouponIds]; // Create a copy
                       const groupCouponIds = filteredGroup.coupons.map((c) => c.id);
-                      
-                      console.log('[Special gift toggle] Group coupon IDs:', groupCouponIds);
-                      
+
                       // Remove all coupons from this group first
                       const filteredIds = currentIds.filter((id) => !groupCouponIds.includes(id));
-                      
+
                       if (checked && bestCoupon) {
                         // Select the best coupon
-                        const newIds = [...filteredIds, bestCoupon.id];
-                        console.log('[Special gift toggle] Selecting - filtered IDs:', filteredIds, 'new IDs:', newIds);
-                        setSelectedCouponIds(newIds);
+                        setSelectedCouponIds([...filteredIds, bestCoupon.id]);
                       } else {
                         // Deselect all coupons from this group
-                        console.log('[Special gift toggle] Deselecting - filtered IDs:', filteredIds);
                         setSelectedCouponIds(filteredIds);
                       }
-                      
-                      // Log state after update
-                      setTimeout(() => {
-                        const state = useBookingStore.getState();
-                        console.log('[Special gift toggle] State after update:', state.selectedCouponIds);
-                      }, 0);
                     };
-                    
-                    console.log('[Special gift render] Rendering checkbox with sub-options', {
-                      checked: hasSelectedCoupon,
-                      label: group.groupName,
-                      couponsCount: group.coupons.length,
-                      availableCouponsCount: availableSpecialCoupons.length,
-                    });
-                    
+
 	                    return (
 	                      <div key={filteredGroup.groupKey} className="flex w-full flex-col gap-[4px] items-start relative shrink-0">
                         {/* Group header - Checkbox */}
                         <div className="flex items-center justify-between relative shrink-0 w-full">
                           <Checkbox
                             checked={hasSelectedCoupon}
-                            onCheckedChange={(checked) => {
-                              console.log('[Special gift checkbox] onCheckedChange called', { checked, hasSelectedCoupon });
-                              handleSpecialGiftToggle(checked);
-                            }}
+                            onCheckedChange={(checked) => handleSpecialGiftToggle(checked)}
                             label={filteredGroup.groupName}
                             containerClassName="relative shrink-0"
                           />
@@ -1649,16 +1559,7 @@ export function Step6() {
                                     displayName = `Special gift ${index + 1}`;
                                   }
                                 }
-                                
-                                console.log('[Special gift item]', {
-                                  couponId: coupon.id,
-                                  displayName,
-                                  type: coupon.type,
-                                  category: coupon.category,
-                                  notes: coupon.notes,
-                                  template_id: coupon.template_id,
-                                });
-                                
+
                                 return (
 	                                  <div key={coupon.id} className="flex w-full items-center justify-between gap-[calc(8*var(--px393))] sm:gap-[8px] relative shrink-0 pl-[calc(24*var(--px393))] sm:pl-[24px]">
 	                                    <div className="flex min-w-0 items-center gap-[calc(8*var(--px393))] sm:gap-[8px]">
@@ -1758,6 +1659,7 @@ export function Step6() {
                   }
                 })}
               </div>
+              </AccordionPanel>
             )}
           </div>
           
@@ -1766,13 +1668,7 @@ export function Step6() {
             onClick={() => setIsTotalExpanded(!isTotalExpanded)}
             className="hidden sm:flex items-center justify-center relative shrink-0 size-[20px] cursor-pointer hover:border hover:border-[#8b6357] hover:border-solid transition-colors rounded-[8px] self-start"
           >
-            <Icon
-              name="chevron-down"
-              className={cn(
-                "size-[20px] text-[#4a3c2a] transition-transform",
-                isTotalExpanded ? "rotate-180" : ""
-              )}
-            />
+            <AccordionChevron open={isTotalExpanded} className="size-[20px] text-[#4a3c2a]" />
           </button>
         </div>
       </div>

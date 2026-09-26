@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Icon } from "@/components/common/Icon";
+import { AccordionChevron } from "@/components/common";
 import { cn } from "@/components/ui/utils";
 import {
   AvailableTimeCombobox,
@@ -499,10 +500,9 @@ export function BookingRequestInteraction<TRequest extends BookingRequestContent
           aria-label={isExpanded ? "Collapse booking request" : "Expand booking request"}
           className="flex size-6 shrink-0 items-center justify-center rounded-full self-start cursor-pointer"
         >
-          <Icon
-            name="chevron-down"
-            className={cn("size-4 text-[#717182] cursor-pointer", isExpanded ? "rotate-180" : "")}
-            aria-hidden="true"
+          <AccordionChevron
+            open={isExpanded}
+            className="size-4 text-[#717182] cursor-pointer"
           />
         </button>
       }

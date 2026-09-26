@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Icon } from "@/components/common/Icon";
-import { CustomInput, CustomSelect, CustomSelectItem, CustomRadio, OrangeButton, FileUpload, type FileUploadItem } from "@/components/common";
+import { CustomInput, CustomSelect, CustomSelectItem, CustomRadio, OrangeButton, FileUpload, AccordionChevron, type FileUploadItem } from "@/components/common";
 import { AutoComplete } from "@/components/common/AutoComplete";
 import { CustomTextarea } from "@/components/common/CustomTextarea";
 import { DatePicker } from "@/components/common/DatePicker";
@@ -1284,10 +1284,9 @@ export function PetForm({
                                 setIsPetDropdownOpen(!isPetDropdownOpen);
                               }}
                             >
-                              <Icon
-                                name="chevron-down"
-                                aria-label="Dropdown"
-                                className={`block size-full text-[#717182] transition-transform ${isPetDropdownOpen ? "rotate-180" : ""}`}
+                              <AccordionChevron
+                                open={isPetDropdownOpen}
+                                className="block size-full text-[#717182]"
                               />
                             </div>
                           </div>

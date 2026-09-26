@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Icon } from "@/components/common/Icon";
+import { AccordionChevron, AccordionPanel } from "@/components/common";
 import { Spinner } from "@/components/common/Spinner";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { useIsMobile } from "@/components/ui/use-mobile";
@@ -376,11 +377,10 @@ export function HistoryDetailsModal({
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-3">
                           <h4 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">Package and add-on</h4>
-                          <Icon
-                            name="chevron-down"
-                            size={18}
-                            className={cn("mt-[5px] shrink-0 text-[#8B6357] transition-transform", !isBreakdownExpanded && "-rotate-90")}
-                            aria-hidden="true"
+                          <AccordionChevron
+                            open={isBreakdownExpanded}
+                            collapsedRotation={90}
+                            className="mt-[5px] size-[18px] shrink-0 text-[#8B6357]"
                           />
                         </div>
                         <div className="mt-[2px] flex items-center justify-between gap-4">
@@ -390,7 +390,7 @@ export function HistoryDetailsModal({
                       </div>
                     </button>
 
-                    {isBreakdownExpanded ? (
+                    <AccordionPanel open={isBreakdownExpanded}>
                       <div className="mt-3">
                         <p className="mb-[2px] font-comfortaa text-[10px] leading-[18px] text-[#8B6357]">{details.breakdown.packageLabel}</p>
                         <div className="space-y-px">
@@ -432,7 +432,7 @@ export function HistoryDetailsModal({
                           </div>
                         </div>
                       </div>
-                    ) : null}
+                    </AccordionPanel>
                   </section>
                 </>
               )}

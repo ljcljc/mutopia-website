@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { LoginModal } from "@/components/auth/LoginModal";
 import { Icon } from "@/components/common/Icon";
-import { CustomInput, CustomRadio, CustomSelect, CustomSelectItem } from "@/components/common";
+import { CustomInput, CustomRadio, CustomSelect, CustomSelectItem, AccordionChevron } from "@/components/common";
 import { OrangeButton } from "@/components/common/OrangeButton";
 import { useAuthStore } from "@/components/auth/authStore";
 import { formatCanadianPostalCodeInput, getCanadianPostalCodeError } from "@/lib/postalCode";
@@ -238,12 +238,9 @@ export function Step1AddressAndServiceType() {
                     setIsAddressDropdownOpen(!isAddressDropdownOpen);
                   }}
                 >
-                  <Icon
-                    name="chevron-down"
-                    aria-label="Dropdown"
-                    className={`block size-full text-[#717182] transition-transform ${
-                      isAddressDropdownOpen ? "rotate-180" : ""
-                    }`}
+                  <AccordionChevron
+                    open={isAddressDropdownOpen}
+                    className="block size-full text-[#717182]"
                   />
                 </div>
               </div>
