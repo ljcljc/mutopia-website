@@ -876,6 +876,14 @@ export default function BookingDetail() {
     setIsCardActionLoading(true);
     try {
       const session = await createDepositSession(detail.id);
+      // Saved-card direct charge succeeded — no redirect needed
+      if (session.status === "succeeded") {
+        const updated = await getBookingDetail(detail.id);
+        setDetail(updated);
+        toast.success("Payment received! Your booking is being processed.");
+        setIsCardActionLoading(false);
+        return;
+      }
       const redirectUrl = getPaymentSessionRedirectUrl(session);
       if (!redirectUrl) {
         throw new Error(`Invalid payment redirect URL: ${session.url}`);

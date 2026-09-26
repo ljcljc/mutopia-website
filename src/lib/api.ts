@@ -3052,15 +3052,18 @@ export interface PaymentIntentOut {
 }
 
 export interface PaymentSessionOut {
-  url: string;
-  session_id: string;
+  url?: string | null;
+  session_id?: string | null;
   payment_id: number;
+  status?: string | null;
+  booking_status?: string | null;
 }
 
 export function getPaymentSessionRedirectUrl(
   session: PaymentSessionOut
 ): string | null {
   try {
+    if (!session.url) return null;
     const parsedUrl = new URL(session.url);
     return parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:"
       ? parsedUrl.href

@@ -843,9 +843,19 @@ export function Step6() {
         booking
       );
       
-      // Create deposit payment session (Stripe Checkout)
+      // Create deposit payment session (Stripe Checkout), or direct-charge saved card
       const paymentSession = await createDepositSession(booking.id);
       console.log("Payment session created:", paymentSession);
+
+      // Saved-card direct charge succeeded — skip Stripe Checkout, go straight to dashboard
+      if (paymentSession.status === "succeeded") {
+        clearEditingBooking();
+        window.history.replaceState(window.history.state, "", "/account/dashboard");
+        window.location.assign("/account/dashboard");
+        toast.success("Booking confirmed! We're finding the best groomer for your pet.");
+        return;
+      }
+
       const redirectUrl = getPaymentSessionRedirectUrl(paymentSession);
       if (!redirectUrl) {
         throw new Error(`Invalid payment redirect URL: ${paymentSession.url}`);

@@ -26,6 +26,12 @@ export default function PaymentFail() {
     try {
       setIsRetrying(true);
       const paymentSession = await createDepositSession(bookingId);
+      // Saved-card direct charge succeeded on retry
+      if (paymentSession.status === "succeeded") {
+        toast.success("Payment received! Redirecting to your booking...");
+        navigate(`/account/bookings/${bookingId}`);
+        return;
+      }
       const redirectUrl = getPaymentSessionRedirectUrl(paymentSession);
       if (!redirectUrl) {
         throw new Error(`Invalid payment redirect URL: ${paymentSession.url}`);
