@@ -20,7 +20,7 @@ import { CheckCircleIcon } from "lucide-react";
 // Radio button component matching CustomRadio.tsx
 function RadioButton({ isChecked, className }: { isChecked: boolean; className?: string }) {
   return (
-    <div className={cn("relative shrink-0 size-[16px] mt-[2.5px]", className)}>
+    <div className={cn("relative shrink-0 size-[16px]", className)}>
       <div className="size-[16px] rounded-full border border-solid transition-colors border-[#717182] bg-white">
         {isChecked && (
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[8px] rounded-full bg-[#de6a07]" />
@@ -186,6 +186,7 @@ export function Step6() {
   } = useBookingStore();
 
   const [isTotalExpanded, setIsTotalExpanded] = useState(true);
+  const [isPackageExpanded, setIsPackageExpanded] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Check if user is logged in
@@ -755,14 +756,6 @@ export function Step6() {
   });
   const serviceTotal = displayPrice.preGstTotal;
   const finalTotal = displayPrice.payableTotal;
-  const gstAmount = displayPrice.gstAmount;
-
-  // Calculate savings
-  // Keep membership discount and coupon savings in the same pre-GST basis.
-  // `serviceTotal` is already after the coupon, so deriving savings from it
-  // can make the badge disagree with the displayed discount breakdown.
-  const totalSavings = displayPrice.discountAmount + displayPrice.couponAmount;
-  const savingsPercentage = originalTotal > 0 ? Math.round((totalSavings / originalTotal) * 100) : 0;
 
   // Check if user is a member or purchasing membership
   const isMemberOrPurchasing = hasMembershipBenefit;
@@ -1096,24 +1089,24 @@ export function Step6() {
             Package and add-on
           </p>
           
-          {/* Total estimation header */}
+          {/* Package breakdown header */}
           <div className="flex items-center justify-between relative shrink-0 w-full">
             <p className="font-comfortaa font-normal leading-[17.5px] relative shrink-0 text-[#4a5565] text-[12.25px]">
-              Total estimation for the service
+              Package and add-on breakdown
             </p>
             <div className="flex gap-[8px] items-center relative shrink-0">
               <p className="font-comfortaa font-semibold leading-[28px] relative shrink-0 text-[16px] text-[#de6a07]">
                 ${originalTotal.toFixed(2)}
               </p>
               <button
-                onClick={() => setIsTotalExpanded(!isTotalExpanded)}
+                onClick={() => setIsPackageExpanded(!isPackageExpanded)}
                 className="flex items-center justify-center relative shrink-0 size-[20px] cursor-pointer hover:border hover:border-[#8b6357] hover:border-solid transition-colors rounded-[8px]"
               >
                 <Icon
                   name="chevron-down"
                   className={cn(
                     "size-[20px] text-[#4a3c2a] transition-transform",
-                    isTotalExpanded ? "rotate-180" : ""
+                    isPackageExpanded ? "rotate-180" : ""
                   )}
                 />
               </button>
@@ -1121,7 +1114,7 @@ export function Step6() {
           </div>
 
           {/* Expanded content */}
-          {isTotalExpanded && (
+          {isPackageExpanded && (
             <div className="flex flex-col gap-[4px] items-start relative shrink-0 w-full">
               {/* Full rooming package */}
               {selectedService && (
@@ -1521,7 +1514,7 @@ export function Step6() {
                   
                   console.log('[Cash credit render] Rendering checkbox', {
                     checked: hasSelectedCoupon,
-                    label: `${categoryText} (${remainingCount} left)`,
+                    label: remainingCount > 0 ? `${categoryText} (${remainingCount} left)` : categoryText,
                   });
                   
                   return (
@@ -1532,7 +1525,7 @@ export function Step6() {
                           console.log('[Cash credit checkbox] onCheckedChange called', { checked, hasSelectedCoupon });
                           handleCategoryToggle(checked);
                         }}
-                        label={`${categoryText} (${remainingCount} left)`}
+                        label={remainingCount > 0 ? `${categoryText} (${remainingCount} left)` : categoryText}
                         containerClassName="relative shrink-0"
                       />
                       {hasSelectedCoupon && selectedAmount !== null && (
@@ -1669,28 +1662,28 @@ export function Step6() {
                                 return (
 	                                  <div key={coupon.id} className="flex w-full items-center justify-between gap-[calc(8*var(--px393))] sm:gap-[8px] relative shrink-0 pl-[calc(24*var(--px393))] sm:pl-[24px]">
 	                                    <div className="flex min-w-0 items-center gap-[calc(8*var(--px393))] sm:gap-[8px]">
-                                      {/* Expiration tag */}
-                                      {expirationText && expirationText !== "Expired" && (
-                                        <div className="bg-white border border-[#4C4C4C] border-solid flex h-[calc(20*var(--px393))] sm:h-[20px] items-center justify-center overflow-clip px-[calc(8*var(--px393))] sm:px-[8px] py-[calc(2*var(--px393))] sm:py-[2px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shrink-0">
-                                          <p className="font-comfortaa font-normal leading-[calc(12*var(--px393))] sm:leading-[12px] relative shrink-0 text-[#4C4C4C] text-[calc(10*var(--px393))] sm:text-[10px]">
-                                            {expirationText}
-                                          </p>
-                                        </div>
-                                      )}
-                                      <label className="flex min-w-0 items-center gap-[calc(8*var(--px393))] sm:gap-[8px] relative shrink cursor-pointer">
-                                        <input
-                                          type="radio"
-                                          name={`special-coupon-${filteredGroup.groupKey}`}
-                                          checked={isSelected}
-                                          onChange={() => handleSpecialCouponSelect(coupon.id, filteredGroup.groupKey)}
-                                          className="sr-only"
-                                        />
-                                        <RadioButton isChecked={isSelected} />
-                                        <span className="font-comfortaa font-normal leading-[calc(12*var(--px393))] sm:leading-[12px] relative min-w-0 truncate text-[#4a3c2a] text-[calc(10*var(--px393))] sm:text-[10px]">
-                                          {displayName}
-                                        </span>
-                                      </label>
-                                    </div>
+	                                      <label className="flex min-w-0 items-center gap-[calc(8*var(--px393))] sm:gap-[8px] relative shrink cursor-pointer">
+	                                        <input
+	                                          type="radio"
+	                                          name={`special-coupon-${filteredGroup.groupKey}`}
+	                                          checked={isSelected}
+	                                          onChange={() => handleSpecialCouponSelect(coupon.id, filteredGroup.groupKey)}
+	                                          className="sr-only"
+	                                        />
+	                                        <RadioButton isChecked={isSelected} />
+	                                        <span className="font-comfortaa font-normal leading-[calc(12*var(--px393))] sm:leading-[12px] relative min-w-0 truncate text-[#4a3c2a] text-[calc(10*var(--px393))] sm:text-[10px]">
+	                                          {displayName}
+	                                        </span>
+	                                        {/* Expiration tag, shown after the coupon label when expiring within 1 month */}
+	                                        {expirationText && expirationText !== "Expired" && (
+	                                          <span className="bg-white border border-[#4C4C4C] border-solid flex h-[calc(20*var(--px393))] sm:h-[20px] items-center justify-center overflow-clip px-[calc(8*var(--px393))] sm:px-[8px] py-[calc(2*var(--px393))] sm:py-[2px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shrink-0">
+	                                            <span className="font-comfortaa font-normal leading-[calc(12*var(--px393))] sm:leading-[12px] relative shrink-0 text-[#4C4C4C] text-[calc(10*var(--px393))] sm:text-[10px]">
+	                                              {expirationText}
+	                                            </span>
+	                                          </span>
+	                                        )}
+	                                      </label>
+	                                    </div>
                                     <span className="font-comfortaa font-normal leading-[calc(12*var(--px393))] sm:leading-[12px] relative shrink-0 text-[#4a3c2a] text-[calc(10*var(--px393))] sm:text-[10px]">
                                       -${couponAmount.toFixed(2)}
                                     </span>
@@ -1732,14 +1725,6 @@ export function Step6() {
                             
                             return (
                               <div key={coupon.id} className="flex items-center gap-[8px] relative shrink-0">
-                                {/* Expiration tag */}
-                                {expirationText && expirationText !== "Expired" && (
-                                  <div className="bg-white border border-[#4C4C4C] border-solid flex h-[calc(20*var(--px393))] sm:h-[20px] items-center justify-center overflow-clip px-[calc(8*var(--px393))] sm:px-[8px] py-[calc(2*var(--px393))] sm:py-[2px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shrink-0">
-                                    <p className="font-comfortaa font-normal leading-[calc(12*var(--px393))] sm:leading-[12px] relative shrink-0 text-[#4C4C4C] text-[calc(10*var(--px393))] sm:text-[10px]">
-                                      {expirationText}
-                                    </p>
-                                  </div>
-                                )}
                                 <label className="flex items-center gap-[calc(8*var(--px393))] sm:gap-[8px] relative shrink-0 cursor-pointer">
                                     <input
                                       type="radio"
@@ -1752,6 +1737,14 @@ export function Step6() {
                                   <span className="font-comfortaa font-normal leading-[calc(12*var(--px393))] sm:leading-[12px] relative shrink-0 text-[#4a3c2a] text-[calc(10*var(--px393))] sm:text-[10px]">
                                     {displayName}
                                   </span>
+                                  {/* Expiration tag, shown after the coupon label when expiring within 1 month */}
+                                  {expirationText && expirationText !== "Expired" && (
+                                    <span className="bg-white border border-[#4C4C4C] border-solid flex h-[calc(20*var(--px393))] sm:h-[20px] items-center justify-center overflow-clip px-[calc(8*var(--px393))] sm:px-[8px] py-[calc(2*var(--px393))] sm:py-[2px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shrink-0">
+                                      <span className="font-comfortaa font-normal leading-[calc(12*var(--px393))] sm:leading-[12px] relative shrink-0 text-[#4C4C4C] text-[calc(10*var(--px393))] sm:text-[10px]">
+                                        {expirationText}
+                                      </span>
+                                    </span>
+                                  )}
                                   <span className="font-comfortaa font-normal leading-[calc(12*var(--px393))] sm:leading-[12px] relative shrink-0 text-[#4a3c2a] text-[calc(10*var(--px393))] sm:text-[10px]">
                                     -${couponAmount.toFixed(2)}
                                   </span>
