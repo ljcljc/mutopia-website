@@ -210,7 +210,9 @@ export function Step4() {
     discountRate,
     couponAmount: cashCouponDiscount,
   });
-  const finalTotal = displayPrice.payableTotal;
+  // Step4 shows the pre-GST total so it reconciles with the package/add-on
+  // subtotals above; GST is presented at checkout (Step6).
+  const finalTotal = displayPrice.preGstTotal;
 
   const handleMembershipDiscountChange = (checked: boolean) => {
     hasInitializedDiscounts.current = true;
