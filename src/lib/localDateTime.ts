@@ -111,9 +111,7 @@ export function serviceTimeZoneLabel(value?: string | null, businessTimeZone?: s
   if (!instant || !businessTimeZone) return "";
   const short = new Intl.DateTimeFormat("en-US", { timeZone: businessTimeZone, timeZoneName: "short" })
     .formatToParts(instant).find((part) => part.type === "timeZoneName")?.value ?? businessTimeZone;
-  const offset = new Intl.DateTimeFormat("en-US", { timeZone: businessTimeZone, timeZoneName: "shortOffset" })
-    .formatToParts(instant).find((part) => part.type === "timeZoneName")?.value.replace("GMT", "UTC") ?? "";
-  return `${short} (${offset})`;
+  return short;
 }
 
 export function formatTimezoneChangeNotice(serviceZone?: string, viewerZone?: string, instantValue?: string): string {

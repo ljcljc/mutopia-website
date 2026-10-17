@@ -11,7 +11,7 @@ describe("GroomerUpNextCard", () => {
     render(
       <GroomerUpNextCard appointment={{
         petName: "Hugui", breed: "Affenpinscher", owner: "Owner", avatarUrl: "",
-        address: "Vancouver", service: "Grooming", duration: "", time: "11:00 AM PDT (UTC-7)",
+        address: "Vancouver", service: "Grooming", duration: "", time: "11:00 AM PDT",
         scheduledTime: "2026-10-17T18:00:00Z",
       }} />,
     );

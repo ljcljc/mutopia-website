@@ -58,7 +58,6 @@ export function GroomerUpNextCard({
   const timeLeft = formatTimeLeft(minutesLeft);
   const viewerZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const timezoneNotice = formatTimezoneChangeNotice(appointment.businessTimezone, viewerZone, appointment.scheduledTime);
-  const compactTime = appointment.time.replace(/ \(UTC[^)]*\)$/, "");
 
   return (
     <article className="rounded-[20px] bg-white px-4 py-5 shadow-[0px_4px_14px_rgba(0,0,0,0.1)] sm:px-6">
@@ -70,7 +69,7 @@ export function GroomerUpNextCard({
         <div className="shrink-0 text-right">
           <div className={isBlueTone ? "rounded-full bg-[#DBEAFE] px-3.5 py-2" : "rounded-full bg-[#FFF5EC] px-3.5 py-2"}>
             <span className={isBlueTone ? "font-comfortaa text-[14px] font-bold leading-[21px] text-[#5B7FE8]" : "font-comfortaa text-[14px] font-bold leading-[21px] text-[#C8842C]"}>
-              {compactTime}
+              {appointment.time}
             </span>
           </div>
           {timeLeft ? (

@@ -19,8 +19,8 @@ function expectedLocalLabel(value: string) {
 
 describe("local API date time formatting", () => {
   it("keeps a Vancouver appointment at 11:00 and uses the date's DST label", () => {
-    expect(formatApiServiceDateTime("2026-07-01 11:00", "America/Vancouver")).toBe("2026-07-01 at 11:00 PDT (UTC-7)");
-    expect(formatApiServiceDateTime("2026-01-01 11:00", "America/Vancouver")).toBe("2026-01-01 at 11:00 PST (UTC-8)");
+    expect(formatApiServiceDateTime("2026-07-01 11:00", "America/Vancouver")).toBe("2026-07-01 at 11:00 PDT");
+    expect(formatApiServiceDateTime("2026-01-01 11:00", "America/Vancouver")).toBe("2026-01-01 at 11:00 PST");
   });
 
   it("calculates today from the service area's timezone", () => {
