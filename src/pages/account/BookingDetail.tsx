@@ -49,7 +49,9 @@ import {
 import {
   addHoursToApiLocalDateTime,
   formatApiLocalDateTime,
+  formatApiServiceDateTime,
   formatPreferredTimeSlotLocal,
+  serviceTimeZoneLabel,
   toLocalDateTimeString,
 } from "@/lib/localDateTime";
 import { getBookingEstimateSummary } from "@/lib/bookingPricing";
@@ -192,8 +194,8 @@ type ProposedTimeOption = InvitationDecisionTimeOptionIn & {
   label: string;
 };
 
-function formatTimeOptionLabel(option: InvitationDecisionTimeOptionIn): string {
-  return `${option.date} at ${option.time}`;
+function formatTimeOptionLabel(option: InvitationDecisionTimeOptionIn, businessTimezone?: string | null): string {
+  return `${option.date} at ${option.time} ${serviceTimeZoneLabel(`${option.date} ${option.time}`, businessTimezone)}`.trim();
 }
 
 function getAdjustmentSummaryLines(adjustment: BookingAdjustmentOut): Array<{ label: string; amount: string }> {
@@ -215,13 +217,13 @@ function getAdjustmentSummaryLines(adjustment: BookingAdjustmentOut): Array<{ la
   return [{ label: formatAdjustmentKind(adjustment.kind), amount: formatAmount(adjustment.amount, "$0.00") }];
 }
 
-function normalizeProposedTimeOption(option: InvitationDecisionTimeOptionIn, index: number): ProposedTimeOption | null {
+function normalizeProposedTimeOption(option: InvitationDecisionTimeOptionIn, index: number, businessTimezone?: string | null): ProposedTimeOption | null {
   if (!option.date || !option.slot || !option.time) return null;
 
   return {
     ...option,
     key: `${option.date}-${option.slot}-${option.time}-${index}`,
-    label: formatTimeOptionLabel(option),
+    label: formatTimeOptionLabel(option, businessTimezone),
   };
 }
 
@@ -420,9 +422,11 @@ export default function BookingDetail() {
     (packageSnapshot.type as string | undefined) ??
     "Mobile";
   const serviceTypeLabel = formatServiceTypeLabel(serviceType);
-  const scheduledDisplay = formatApiLocalDateTime(detail?.scheduled_time) || "2026-04-03 at 10:00";
-  const estimatedCompletionDisplay =
-    addHoursToApiLocalDateTime(detail?.scheduled_time, 1) || "Estimated completion soon";
+  const scheduledDisplay = formatApiServiceDateTime(detail?.scheduled_time, detail?.business_timezone) || "2026-04-03 at 10:00";
+  const estimatedCompletionTime = addHoursToApiLocalDateTime(detail?.scheduled_time, 1);
+  const estimatedCompletionDisplay = estimatedCompletionTime
+    ? `${estimatedCompletionTime} ${serviceTimeZoneLabel(detail?.scheduled_time, detail?.business_timezone)}`.trim()
+    : "Estimated completion soon";
   const paymentDueDisplay = formatApiLocalDateTime(detail?.payment_due_at);
 
   const addressLine1 =
@@ -443,10 +447,10 @@ export default function BookingDetail() {
   const proposedTimeOptions = useMemo(() => {
     return (
       detail?.time_options
-        ?.map((option, index) => normalizeProposedTimeOption(option, index))
+        ?.map((option, index) => normalizeProposedTimeOption(option, index, detail?.business_timezone))
         .filter((option): option is ProposedTimeOption => Boolean(option)) ?? []
     );
-  }, [detail?.time_options]);
+  }, [detail?.time_options, detail?.business_timezone]);
 
   const pendingAdjustment = useMemo(() => {
     return detail?.adjustments?.find((adjustment) => normalizeBookingStatus(adjustment.status) === "pending") ?? null;
@@ -790,7 +794,7 @@ export default function BookingDetail() {
     "traveling",
   ].includes(normalizedStatus);
   const showGroomerOnTheWayCancelTag =
-    normalizedStatus === "traveling" || isWithinTwoHoursBefore(detail?.scheduled_time);
+    normalizedStatus === "traveling" || isWithinTwoHoursBefore(detail?.scheduled_time_utc || detail?.scheduled_time);
   const cancelFeeRateDisplay = cancelQuote ? formatPercentRate(cancelQuote.fee_rate) : null;
   const isInitialLoading = isLoading && !detail && !error;
 
@@ -1206,15 +1210,18 @@ export default function BookingDetail() {
                         Select new time proposed by groomer
                       </p>
                       <div className="flex flex-col gap-2">
-                        {proposedTimeOptions.map((option) => (
-                          <CustomRadio
-                            key={option.key}
-                            label={option.label}
-                            variant="inline"
-                            isSelected={selectedProposedTimeKey === option.key}
-                            onClick={() => setSelectedProposedTimeKey(option.key)}
-                          />
-                        ))}
+                        {proposedTimeOptions.map((option) => {
+                          return (
+                            <div key={option.key}>
+                              <CustomRadio
+                                label={option.label}
+                                variant="inline"
+                                isSelected={selectedProposedTimeKey === option.key}
+                                onClick={() => setSelectedProposedTimeKey(option.key)}
+                              />
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                     <OrangeButton

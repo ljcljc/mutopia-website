@@ -72,18 +72,16 @@ export const OrangeButton = forwardRef<HTMLButtonElement, OrangeButtonProps>(
                     {/* Content - invisible when loading but still takes up space */}
                     {typeof children === "string" ? (
                       <p
-                        className={`bg-clip-text font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[12px] text-nowrap whitespace-pre ${loading ? "invisible" : ""}`}
-                        style={{
-                          ...textStyle,
-                          backgroundImage:
-                            "linear-gradient(180deg, #FFF7ED 0%, #FFFBEB 100%)",
-                          WebkitTextFillColor: "transparent",
-                        }}
+                        className={`font-comfortaa font-medium leading-[17.5px] relative shrink-0 text-[#FFF7ED] text-[12px] text-nowrap whitespace-pre ${loading ? "invisible" : ""}`}
+                        style={textStyle}
                       >
                         {children}
                       </p>
                     ) : (
-                      <div className={loading ? "invisible" : ""}>
+                      <div
+                        className={`font-comfortaa font-medium leading-[17.5px] text-[#FFF7ED] text-[12px] text-nowrap whitespace-pre ${loading ? "invisible" : ""}`}
+                        style={textStyle}
+                      >
                         {children}
                       </div>
                     )}

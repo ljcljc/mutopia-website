@@ -27,7 +27,7 @@ import {
   parseGroomerDateTime,
 } from "@/modules/groomer/utils/time";
 import DEFAULT_PET_AVATAR from "@/assets/icons/icon-pet-avatar-placeholder.svg";
-import { formatPreferredTimeSlotLocal } from "@/lib/localDateTime";
+import { formatPreferredTimeSlotLocal, serviceTimeZoneLabel } from "@/lib/localDateTime";
 import { getBookingEstimateSummary } from "@/lib/bookingPricing";
 
 export type DashboardAppointment = GroomerUpNextAppointment & {
@@ -56,6 +56,7 @@ export type DashboardAppointment = GroomerUpNextAppointment & {
   invitationId?: number;
   proposalSlots?: string[];
   proposedTimeOptions?: Array<{ date: string; slot: "am" | "pm"; time: string; datetime_local: string }>;
+  businessTimezone?: string;
   invitationStatus?: string;
   expiresInLabel?: string;
 };
@@ -585,7 +586,9 @@ function mapDashboardAppointment(raw: unknown): DashboardAppointment | null {
     phone: getString(record, ["phone", "owner_phone", "user_phone", "contact_phone"]),
     service: getString(record, ["service_name"]),
     duration: formatDurationLabel({ ...service, ...record }),
-    time: formatTimeLabel(serviceScheduledTime),
+    time: [formatTimeLabel(serviceScheduledTime), serviceTimeZoneLabel(serviceScheduledTime, getString(record, ["business_timezone"]))]
+      .filter(Boolean).join(" "),
+    businessTimezone: getString(record, ["business_timezone"]),
     scheduledTime,
     status: getString(record, ["status"]),
     hasPublishedHealthReport: record.has_published_health_report === true,
@@ -655,6 +658,7 @@ function mapPendingBookingRequest(raw: unknown): DashboardAppointment | null {
     priceAdjustmentLines: [],
     proposalSlots: getPreferredTimeSlotLabels(record),
     proposedTimeOptions: getDecisionTimeOptions(record),
+    businessTimezone: getString(record, ["business_timezone"]),
     invitationStatus: getString(record, ["invitation_status", "status"]),
     expiresInLabel: getBookingRequestExpiresInLabel(getString(record, ["created_at"])),
   };

@@ -1,5 +1,6 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Icon, type IconName } from "@/components/common/Icon";
+import { formatTimezoneChangeNotice } from "@/lib/localDateTime";
 
 export type GroomerUpNextAppointment = {
   petName: string;
@@ -10,6 +11,8 @@ export type GroomerUpNextAppointment = {
   service: string;
   duration: string;
   time: string;
+  scheduledTime?: string;
+  businessTimezone?: string;
 };
 
 export function GroomerUpNextCard({
@@ -32,20 +35,45 @@ export function GroomerUpNextCard({
   onPetNameClick?: () => void;
 }) {
   const isBlueTone = timeBadgeTone === "blue";
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+  const start = appointment.scheduledTime ? Date.parse(appointment.scheduledTime) : NaN;
+  const minutesLeft = Number.isNaN(start) ? 0 : Math.ceil((start - now) / 60_000);
+  const timeLeft = minutesLeft > 0
+    ? `${minutesLeft >= 60 ? `${Math.floor(minutesLeft / 60)}h ` : ""}${minutesLeft % 60}m left`
+    : "";
+  const viewerZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const timezoneNotice = formatTimezoneChangeNotice(appointment.businessTimezone, viewerZone, appointment.scheduledTime);
+  const compactTime = appointment.time.replace(/ \(UTC[^)]*\)$/, "");
 
   return (
-    <article className="rounded-[16px] bg-white px-4 py-4 shadow-[0px_4px_14px_rgba(0,0,0,0.1)]">
+    <article className="rounded-[20px] bg-white px-4 py-5 shadow-[0px_4px_14px_rgba(0,0,0,0.1)] sm:px-6">
       <div className="flex items-start justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <p className="font-comfortaa text-[11px] leading-[16.5px] tracking-[0.5px] text-[#A07D72]">{eyebrow}</p>
           <h2 className="mt-1 font-comfortaa text-[18px] leading-[27px] text-[#4A2C55]">{title}</h2>
         </div>
-        <div className={isBlueTone ? "rounded-[12px] bg-[#DBEAFE] px-3.5 py-[7px]" : "rounded-full bg-[#FFF5EC] px-3.5 py-[7px]"}>
-          <span className={isBlueTone ? "font-comfortaa text-[14px] font-bold leading-[21px] text-[#5B7FE8]" : "font-comfortaa text-[14px] font-bold leading-[21px] text-[#F08A12]"}>
-            {appointment.time}
-          </span>
+        <div className="shrink-0 text-right">
+          <div className={isBlueTone ? "rounded-full bg-[#DBEAFE] px-3.5 py-2" : "rounded-full bg-[#FFF5EC] px-3.5 py-2"}>
+            <span className={isBlueTone ? "font-comfortaa text-[14px] font-bold leading-[21px] text-[#5B7FE8]" : "font-comfortaa text-[14px] font-bold leading-[21px] text-[#C8842C]"}>
+              {compactTime}
+            </span>
+          </div>
+          {timeLeft ? (
+            <p className="mt-1 font-comfortaa text-[11px] leading-4 text-[#4A2C55]">{timeLeft}</p>
+          ) : null}
         </div>
       </div>
+
+      {timezoneNotice ? (
+        <div className="mt-4 flex items-center gap-2 rounded-[12px] border border-[#D6B944] bg-[#FFFBEA] px-3 py-2 text-[#8B741F]">
+          <Icon name="alert-warning" className="size-4 shrink-0" aria-hidden="true" />
+          <p className="font-comfortaa text-[11px] leading-4">{timezoneNotice}</p>
+        </div>
+      ) : null}
 
       <div className="mt-4 rounded-[14px] bg-[#FAF8F4] px-3 py-3">
         <div className="flex items-center gap-3">
@@ -71,7 +99,7 @@ export function GroomerUpNextCard({
         </div>
       </div>
 
-      <div className="mt-4 space-y-3">
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 sm:gap-5">
         <div className="flex items-start gap-2.5">
           <Icon name="location" className="mt-[2px] size-4 text-[#F08A12]" aria-hidden="true" />
           <div>

@@ -22,7 +22,7 @@ import { useGroomerMyWorkStore } from "@/modules/groomer/stores/myWorkStore";
 import { formatGroomerTimeLabel, shouldShowCancelAppointment, shouldShowStartTravel } from "@/modules/groomer/utils/time";
 import { buildImageUrl } from "@/lib/api";
 import { HttpError } from "@/lib/http";
-import { formatPreferredTimeSlotLocal } from "@/lib/localDateTime";
+import { formatPreferredTimeSlotLocal, serviceTimeZoneLabel } from "@/lib/localDateTime";
 
 type WorkTab = "schedule" | "history";
 type CalendarMode = "collapsed" | "week" | "month";
@@ -44,6 +44,7 @@ type PendingJobCard = GroomerUpNextAppointment & {
   invitationId: number;
   proposalSlots: string[];
   proposedTimeOptions: BookingRequestDecisionTimeOption[];
+  businessTimezone?: string;
   invitationStatus: string;
   receivedAtLabel: string;
   expiresInLabel?: string;
@@ -308,6 +309,7 @@ function mapPendingJob(item: Record<string, unknown>, dateKey: string): PendingJ
     time: "Pending",
     proposalSlots,
     proposedTimeOptions: getDecisionTimeOptions(item),
+    businessTimezone: getString(item, ["business_timezone"]),
     invitationStatus: getString(item, ["invitation_status", "status"]),
     receivedAtLabel: formatReceivedAtLabel(createdAt),
     expiresInLabel: getBookingRequestExpiresInLabel(createdAt),
@@ -317,7 +319,8 @@ function mapPendingJob(item: Record<string, unknown>, dateKey: string): PendingJ
 function mapUpNext(item: Record<string, unknown>, dateKey: string): UpNextCard {
   const bookingId = getNumber(item, ["id", "booking_id"], 0);
   const petName = getString(item, ["pet_name"], "Pet");
-  const scheduledTime = getString(item, ["scheduled_time", "appointment_time", "time"]);
+  const scheduledTime = getString(item, ["scheduled_time_utc", "scheduled_time", "appointment_time", "time"]);
+  const serviceScheduledTime = getString(item, ["service_scheduled_time", "scheduled_time", "appointment_time", "time"]);
   const status = getString(item, ["status"]);
   return {
     id: `upnext-${bookingId || `${dateKey}-${petName}`}`,
@@ -329,7 +332,9 @@ function mapUpNext(item: Record<string, unknown>, dateKey: string): UpNextCard {
     address: getString(item, ["service_address", "address"], "Address unavailable"),
     service: getString(item, ["service_name", "service_type"], "Service"),
     duration: formatDurationLabel(item),
-    time: formatTimeLabel(scheduledTime),
+    time: [formatTimeLabel(serviceScheduledTime), serviceTimeZoneLabel(serviceScheduledTime, getString(item, ["business_timezone"]))]
+      .filter(Boolean).join(" "),
+    businessTimezone: getString(item, ["business_timezone"]),
     scheduledTime,
     status,
   };
@@ -807,7 +812,7 @@ function UpNextAppointmentItem({
       appointment={appointment}
       eyebrow={waitingForCustomer ? "BOOKING REQUEST" : undefined}
       title={waitingForCustomer ? "Waiting for customer confirmation" : undefined}
-      showDuration={false}
+      showDuration
       onPetNameClick={() => onViewHealthDetails(appointment)}
       footer={
         <>
@@ -883,6 +888,7 @@ export default function GroomerMyWorkPage() {
   );
   const [historySearchValue, setHistorySearchValue] = useState("");
   const [debouncedHistorySearch, setDebouncedHistorySearch] = useState("");
+  const [historyPage, setHistoryPage] = useState(1);
   const [selectedHistoryAppointment, setSelectedHistoryAppointment] = useState<HistoryDetailsAppointment | null>(null);
   const [appointmentToCancel, setAppointmentToCancel] = useState<UpNextCard | null>(null);
   const [scheduleError, setScheduleError] = useState("");
@@ -908,6 +914,7 @@ export default function GroomerMyWorkPage() {
   useEffect(() => {
     if (activeTab !== "history") return;
     setHistoryError("");
+    setHistoryPage(1);
     fetchHistory({
       pet_name: debouncedHistorySearch || undefined,
       date_to: todayDateKey,
@@ -936,6 +943,25 @@ export default function GroomerMyWorkPage() {
 
   const hasScheduleContent = scheduleSections.some((section) => section.pendingJobs.length > 0 || section.upNext.length > 0);
   const hasHistoryAppointments = historySections.some((section) => section.appointments.length > 0);
+  const historyTotal = Array.isArray(history) ? history.length : getNumber(asRecord(history), ["total"]);
+  const historyCount = getItems(history).length;
+
+  const handleLoadMoreHistory = async () => {
+    const nextPage = historyPage + 1;
+    setHistoryError("");
+    try {
+      await fetchHistory({
+        pet_name: debouncedHistorySearch || undefined,
+        date_to: todayDateKey,
+        page: nextPage,
+        page_size: HISTORY_PAGE_SIZE,
+      }, true);
+      setHistoryPage(nextPage);
+    } catch (error) {
+      console.error("Failed to load more groomer history:", error);
+      setHistoryError("Failed to load more history.");
+    }
+  };
 
   const handleCalendarDateClick = (day: CalendarDay) => {
     if (day.isPast || day.isOutsideMonth) return;
@@ -1151,13 +1177,13 @@ export default function GroomerMyWorkPage() {
             </>
           ) : (
             <>
-              {isLoadingHistory ? <PageLoadingCard label="Loading history..." /> : null}
-              {!isLoadingHistory && historyError ? <StatusCard title="History unavailable" description={historyError} /> : null}
+              {isLoadingHistory && !hasHistoryAppointments ? <PageLoadingCard label="Loading history..." /> : null}
+              {historyError ? <StatusCard title="History unavailable" description={historyError} /> : null}
               {!isLoadingHistory && !historyError && !hasHistoryAppointments ? (
                 <StatusCard title="No history found" description="No past bookings match the current filter." />
               ) : null}
 
-              {!isLoadingHistory && !historyError
+              {hasHistoryAppointments
                 ? historySections.map((section) => (
                     <section key={section.id} className="space-y-4">
                       <DateSectionHeader label={section.label} />
@@ -1188,6 +1214,16 @@ export default function GroomerMyWorkPage() {
                     </section>
                   ))
                 : null}
+              {historyCount < historyTotal ? (
+                <button
+                  type="button"
+                  onClick={() => void handleLoadMoreHistory()}
+                  disabled={isLoadingHistory}
+                  className="mx-auto block rounded-full bg-white px-6 py-2 font-comfortaa text-[14px] font-bold text-[#633479] disabled:opacity-60"
+                >
+                  {isLoadingHistory ? "Loading..." : "Load more"}
+                </button>
+              ) : null}
             </>
           )}
         </div>

@@ -6,7 +6,7 @@ import { useIsMobile } from "@/components/ui/use-mobile";
 import { cn } from "@/components/ui/utils";
 import { AvailableTimeCombobox, buildHalfHourOptions } from "@/modules/groomer/components/AvailableTimeCombobox";
 import type { BookingRequestDecisionTimeOption } from "@/modules/groomer/components/BookingRequestContent";
-import { toLocalDateTimeString } from "@/lib/localDateTime";
+import { serviceNowParts, serviceTimeZoneLabel, toLocalDateTimeString } from "@/lib/localDateTime";
 
 interface ProposeNewTimeModalProps {
   open: boolean;
@@ -17,6 +17,7 @@ interface ProposeNewTimeModalProps {
   onSubmit?: (timeOptions: BookingRequestDecisionTimeOption[]) => Promise<void> | void;
   onPassAppointment?: () => Promise<void> | void;
   isSubmitting?: boolean;
+  businessTimezone?: string;
 }
 
 type SelectedTimeEntry = {
@@ -28,9 +29,9 @@ type SelectedTimeEntry = {
 type TimeSuffix = SelectedTimeEntry["suffix"];
 
 const MAX_ENTRIES = 6;
-const FIRST_AVAILABLE_HOUR = 8;
-const LAST_AVAILABLE_HOUR = 21;
-const PROPOSED_TIME_OPTIONS = buildHalfHourOptions(FIRST_AVAILABLE_HOUR * 60, LAST_AVAILABLE_HOUR * 60);
+const FIRST_AVAILABLE_MINUTE = 0;
+const LAST_AVAILABLE_MINUTE = 23 * 60 + 30;
+const PROPOSED_TIME_OPTIONS = buildHalfHourOptions(FIRST_AVAILABLE_MINUTE, LAST_AVAILABLE_MINUTE);
 
 function isPmTime(value: string) {
   const normalized = normalizeTimeInput(value);
@@ -67,8 +68,10 @@ function parseInitialTimeOption(option: BookingRequestDecisionTimeOption): Selec
 function buildInitialModalState(
   initialServiceSlots: string[],
   initialTimeOptions: BookingRequestDecisionTimeOption[],
+  businessTimezone?: string,
 ) {
-  const now = new Date();
+  const serviceNow = serviceNowParts(businessTimezone);
+  const now = new Date(serviceNow.year, serviceNow.month - 1, serviceNow.day);
   const initialEntries = initialTimeOptions
     .map(parseInitialTimeOption)
     .filter((entry): entry is SelectedTimeEntry => Boolean(entry))
@@ -155,6 +158,7 @@ export function ProposeNewTimeModal({
   onSubmit,
   onPassAppointment,
   isSubmitting = false,
+  businessTimezone,
 }: ProposeNewTimeModalProps) {
   const isMobile = useIsMobile();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -164,6 +168,7 @@ export function ProposeNewTimeModal({
   const [validationError, setValidationError] = useState<string | null>(null);
   const [showYearPicker, setShowYearPicker] = useState(false);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
+  const [now, setNow] = useState(() => new Date());
 
   const closeCalendarPickers = () => {
     setShowYearPicker(false);
@@ -178,6 +183,7 @@ export function ProposeNewTimeModal({
     const initialState = buildInitialModalState(
       initialServiceSlots?.length ? initialServiceSlots : initialServiceSlot ? [initialServiceSlot] : [],
       initialTimeOptions,
+      businessTimezone,
     );
 
     setSelectedDate(initialState.selectedDate);
@@ -186,20 +192,38 @@ export function ProposeNewTimeModal({
     setPendingTime(initialState.selectedEntries.find((entry) => entry.time)?.time ?? "");
     setValidationError(null);
     closeCalendarPickers();
-  }, [initialServiceSlot, initialServiceSlots, initialTimeOptions, open]);
+  }, [initialServiceSlot, initialServiceSlots, initialTimeOptions, businessTimezone, open]);
+
+  useEffect(() => {
+    if (!open) return;
+    setNow(new Date());
+    const timer = window.setInterval(() => setNow(new Date()), 30_000);
+    return () => window.clearInterval(timer);
+  }, [open]);
 
   const remainingSlots = Math.max(0, MAX_ENTRIES - selectedEntries.length);
   const isMaxReached = selectedEntries.length >= MAX_ENTRIES;
   const calendarKey = `${currentDate.getFullYear()}-${currentDate.getMonth()}`;
 
   const minDate = useMemo(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  }, []);
+    const parts = serviceNowParts(businessTimezone, now);
+    return new Date(parts.year, parts.month - 1, parts.day);
+  }, [businessTimezone, now]);
   const maxDate = useMemo(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth() + 2, 0, 23, 59, 59, 999);
-  }, []);
+    const parts = serviceNowParts(businessTimezone, now);
+    return new Date(parts.year, parts.month + 1, 0, 23, 59, 59, 999);
+  }, [businessTimezone, now]);
+
+  const availableTimeOptions = useMemo(() => {
+    if (!selectedDate || selectedDate > minDate) return PROPOSED_TIME_OPTIONS;
+    if (selectedDate < minDate) return [];
+    const parts = serviceNowParts(businessTimezone, now);
+    const currentMinutes = parts.hour * 60 + parts.minute;
+    return PROPOSED_TIME_OPTIONS.filter((time) => {
+      const [hour, minute] = time.split(":").map(Number);
+      return hour * 60 + minute > currentMinutes;
+    });
+  }, [businessTimezone, minDate, now, selectedDate]);
 
   const handleDateChange = (date: Date) => {
     setSelectedDate(date);
@@ -218,7 +242,7 @@ export function ProposeNewTimeModal({
 
     const normalizedTime = normalizeTimeInput(value);
     if (!normalizedTime) return;
-    if (!PROPOSED_TIME_OPTIONS.includes(normalizedTime)) {
+    if (!availableTimeOptions.includes(normalizedTime)) {
       setValidationError("Please choose a listed time");
       return;
     }
@@ -257,7 +281,7 @@ export function ProposeNewTimeModal({
 
   const handleSubmit = async () => {
     if (!onSubmit) return;
-    if (pendingTime && !PROPOSED_TIME_OPTIONS.includes(normalizeTimeInput(pendingTime) ?? "")) {
+    if (pendingTime && !availableTimeOptions.includes(normalizeTimeInput(pendingTime) ?? "")) {
       setValidationError("Please choose a listed time");
       return;
     }
@@ -316,7 +340,10 @@ export function ProposeNewTimeModal({
           <div className="min-h-0 flex-1 overflow-y-auto px-[calc(20*var(--px393))] pb-[calc(20*var(--px393))] sm:px-5 sm:pb-5">
             <div className="rounded-[12px] border border-[#BBF7D0] bg-[#F0FDF4] p-3">
               <p className="font-comfortaa text-[14px] font-bold leading-[22px] text-[#4A3C2A]">Select date and time</p>
-              <p className="mt-1 font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">Choose up to 6 proposed times</p>
+              <p className="mt-1 font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
+                Choose up to 6 proposed times in the service area's time zone
+                {businessTimezone ? ` (${serviceTimeZoneLabel(`${formatDateToISO(selectedDate ?? minDate)} 12:00`, businessTimezone)})` : ""}
+              </p>
 
               {(initialServiceSlots?.length || initialServiceSlot) ? (
                 <div className="mt-3 font-comfortaa text-[12px] leading-5 text-[#4A3C2A]">
@@ -348,7 +375,7 @@ export function ProposeNewTimeModal({
                 <AvailableTimeCombobox
                   value={pendingTime}
                   onValueChange={handleAddTime}
-                  options={PROPOSED_TIME_OPTIONS}
+                  options={availableTimeOptions}
                   selectedValues={selectedEntries
                     .filter((entry) => selectedDate && entry.date === formatDateToISO(selectedDate))
                     .map((entry) => entry.time)
@@ -380,15 +407,17 @@ export function ProposeNewTimeModal({
                     {selectedEntries.map((entry) => {
                       const parsedDate = parseISODate(entry.date);
                       const tagLabel = entry.time
-                        ? `${formatDateForTag(parsedDate)} ${formatTimeForTag(entry.time)}`
+                        ? `${formatDateForTag(parsedDate)} ${formatTimeForTag(entry.time)} ${serviceTimeZoneLabel(`${entry.date} ${entry.time}`, businessTimezone)}`.trim()
                         : `${formatDateForTag(parsedDate)} ${entry.suffix}`;
 
                       return (
                         <div
                           key={`${entry.date}-${entry.suffix}-${entry.time ?? "pending"}`}
-                          className="inline-flex h-6 items-center gap-1 rounded-[12px] border border-[#4C4C4C] bg-white pl-[9px] pr-[5px]"
+                          className="inline-flex min-h-6 items-center gap-1 rounded-[12px] border border-[#4C4C4C] bg-white pl-[9px] pr-[5px]"
                         >
-                          <span className="font-comfortaa text-[14px] font-bold leading-5 text-[#4C4C4C]">{tagLabel}</span>
+                          <span className="font-comfortaa text-[14px] font-bold leading-5 text-[#4C4C4C]">
+                            {tagLabel}
+                          </span>
                           <button
                             type="button"
                             onClick={() => handleRemoveEntry(entry)}

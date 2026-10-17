@@ -2,6 +2,7 @@ import { TriangleAlert } from "lucide-react";
 import { cn } from "@/components/ui/utils";
 import DEFAULT_PET_AVATAR from "@/assets/icons/icon-pet-avatar-placeholder.svg";
 import { buildImageUrl, type BookingDetailOut } from "@/lib/api";
+import { formatApiServiceDateTime } from "@/lib/localDateTime";
 
 const BEHAVIOR_LABELS: Record<string, string> = {
   normal: "Normal",
@@ -92,12 +93,7 @@ export function PhotoHealthBookingPetCard({
   booking: BookingDetailOut | null;
 }) {
   const snapshot = booking?.pet_snapshot;
-  const scheduledDate = booking?.scheduled_time
-    ? new Date(booking.scheduled_time)
-    : null;
-  const scheduled = scheduledDate
-    ? `${scheduledDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${scheduledDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`
-    : "Time not provided";
+  const scheduled = formatApiServiceDateTime(booking?.scheduled_time, booking?.business_timezone) || "Time not provided";
   const behavior = text(snapshot, "behavior", "").trim().toLowerCase();
   const behaviorNeedsAttention = behavior !== "normal" && behavior !== "friendly";
 

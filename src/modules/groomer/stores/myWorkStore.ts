@@ -26,7 +26,7 @@ interface GroomerMyWorkState {
   isStartingTravel: boolean;
   cancelAppointment: (bookingId: number, data: GroomerCancelBookingIn) => Promise<void>;
   fetchMyWork: () => Promise<void>;
-  fetchHistory: (params?: GroomerHistoryIn) => Promise<void>;
+  fetchHistory: (params?: GroomerHistoryIn, append?: boolean) => Promise<void>;
   fetchHistoryDetail: (historyDetailRef: number | string) => Promise<void>;
   clearHistoryDetail: () => void;
   decideInvitation: (invitationId: number, data: InvitationDecisionIn) => Promise<void>;
@@ -79,11 +79,11 @@ export const useGroomerMyWorkStore = create<GroomerMyWorkState>((set) => ({
     }
   },
 
-  fetchHistory: async (params) => {
+  fetchHistory: async (params, append = false) => {
     const requestId = latestHistoryRequestId + 1;
     latestHistoryRequestId = requestId;
     const paramsKey = getHistoryParamsKey(params);
-    set({ isLoadingHistory: true });
+    set({ isLoadingHistory: true, ...(!append ? { history: null } : {}) });
 
     let requestPromise = inFlightHistoryRequests.get(paramsKey);
     if (!requestPromise) {
@@ -96,7 +96,12 @@ export const useGroomerMyWorkStore = create<GroomerMyWorkState>((set) => ({
     try {
       const history = await requestPromise;
       if (requestId === latestHistoryRequestId) {
-        set({ history });
+        set((state) => {
+          if (!append || !state.history || Array.isArray(history) || Array.isArray(state.history)) return { history };
+          const previousItems = Array.isArray(state.history.items) ? state.history.items : [];
+          const nextItems = Array.isArray(history.items) ? history.items : [];
+          return { history: { ...history, items: [...previousItems, ...nextItems] } };
+        });
       }
     } catch (error) {
       if (requestId === latestHistoryRequestId) {

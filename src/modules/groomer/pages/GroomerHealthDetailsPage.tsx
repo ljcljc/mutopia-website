@@ -16,7 +16,8 @@ import {
   startGroomerTravel,
   type GroomerBookingDetailOut,
 } from "@/lib/api";
-import { formatGroomerTimeLabel, isGroomerStartTravelStatus, shouldShowStartTravel } from "@/modules/groomer/utils/time";
+import { formatApiServiceDateTime } from "@/lib/localDateTime";
+import { isGroomerStartTravelStatus, shouldShowStartTravel } from "@/modules/groomer/utils/time";
 import { BOOKING_HEALTH_STEPS, normalizeQuestionnaire } from "@/pages/account/booking-health/questionnaire";
 import type { BookingHealthQuestionnaire, TimelineEntry } from "@/pages/account/booking-health/types";
 
@@ -668,7 +669,7 @@ export default function GroomerHealthDetailsPage() {
   const serviceTime = getString(packageSnapshot, ["service_time"]);
   const addressLabel = getString(addressSnapshot, ["address", "full_address"], "Address unavailable");
   const appointmentDateLabel = formatScheduleLabel(detail?.scheduled_time ?? "");
-  const appointmentTimeLabel = formatGroomerTimeLabel(detail?.scheduled_time ?? "", "-");
+  const appointmentTimeLabel = formatApiServiceDateTime(detail?.scheduled_time, detail?.business_timezone) || "-";
   const avatarUrl = getGroomerHealthDetailsAvatarUrl(detail, petSnapshot);
 
   const alerts = buildAlerts(questionnaire);
@@ -759,7 +760,7 @@ export default function GroomerHealthDetailsPage() {
     },
   ];
 
-  const scheduledTime = detail?.scheduled_time ?? "";
+  const scheduledTime = detail?.scheduled_time_utc ?? detail?.scheduled_time ?? "";
   const canStartTravel = Boolean(detail?.id) && shouldShowStartTravel(scheduledTime, new Date(), detail?.status);
   const showStartTravelButton = isGroomerStartTravelStatus(detail?.status);
   const joinedNotes = noteItems.length > 0 ? noteItems.join(". ") : "No special notes were provided.";
@@ -1083,7 +1084,7 @@ export default function GroomerHealthDetailsPage() {
                 <p className="font-comfortaa text-[16px] font-semibold leading-6 text-[#4A3C2A]">Ready to head out?</p>
                 <p className="mt-1 font-comfortaa text-[12px] leading-[18px] text-[#717182]">
                   {scheduledTime
-                    ? `${canStartTravel ? "Appointment time" : "Start travel available within 2 hours"} • ${appointmentDateLabel} ${appointmentTimeLabel}`
+                    ? `${canStartTravel ? "Appointment time" : "Start travel available within 2 hours"} • ${appointmentTimeLabel}`
                     : "Appointment time unavailable"}
                 </p>
               </div>

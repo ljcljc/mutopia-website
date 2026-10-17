@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@/components/common/Icon";
-import { formatApiLocalDateTime } from "@/lib/localDateTime";
+import { formatApiServiceDateTime } from "@/lib/localDateTime";
 import { useAccountStore } from "../accountStore";
 import { selectCurrentDashboardBooking, StatusBadge } from "./dashboardBookingUtils";
 
@@ -45,7 +45,7 @@ export default function DashboardHeroCard() {
   }
 
   const petName = currentBooking.pet_name || "-";
-  const dateTime = formatApiLocalDateTime(currentBooking.scheduled_time);
+  const dateTime = formatApiServiceDateTime(currentBooking.scheduled_time, currentBooking.business_timezone);
   const address = parseAddress(currentBooking.address);
 
   return (
@@ -63,7 +63,7 @@ export default function DashboardHeroCard() {
         }}
       >
         <div className="flex min-w-0 flex-1 flex-col gap-3">
-          <div className="flex max-w-[180px] flex-col gap-2">
+          <div className="flex max-w-[320px] flex-col gap-2">
             <p className="font-comfortaa font-bold text-[16px] leading-[28px] text-[#8B6357]">
               {petName}
             </p>
@@ -86,7 +86,7 @@ export default function DashboardHeroCard() {
           <StatusBadge
             status={currentBooking.status}
             heroStage={currentBooking.hero_stage}
-            scheduledTime={currentBooking.scheduled_time}
+            scheduledTime={currentBooking.scheduled_time_utc || currentBooking.scheduled_time}
           />
           <Icon name="nav-next" className="size-4 text-[#99A1AF]" />
         </div>

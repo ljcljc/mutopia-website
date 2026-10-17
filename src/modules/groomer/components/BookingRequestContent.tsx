@@ -9,7 +9,7 @@ import {
 import { PassAppointmentModal } from "@/modules/groomer/components/PassAppointmentModal";
 import { ProposeNewTimeModal } from "@/modules/groomer/components/ProposeNewTimeModal";
 import { getGroomerScheduleNearestConflict } from "@/lib/api";
-import { toLocalDateTimeString } from "@/lib/localDateTime";
+import { serviceTimeZoneLabel, toLocalDateTimeString } from "@/lib/localDateTime";
 import { toast } from "sonner";
 
 export type BookingRequestContentData = {
@@ -20,6 +20,7 @@ export type BookingRequestContentData = {
   address: string;
   service: string;
   duration: string;
+  businessTimezone?: string;
   proposalSlots?: string[];
   proposedTimeOptions?: BookingRequestDecisionTimeOption[];
   invitationStatus?: string;
@@ -77,7 +78,7 @@ function isProposedInvitation(request: BookingRequestContentData): boolean {
   return normalizeInvitationStatus(request.invitationStatus) === "accepted" && Boolean(request.proposedTimeOptions?.length);
 }
 
-function formatProposedTimeOption(option: BookingRequestDecisionTimeOption): string {
+function formatProposedTimeOption(option: BookingRequestDecisionTimeOption, businessTimezone?: string): string {
   const parsedDate = option.date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   const dateLabel = parsedDate ? `${parsedDate[1]}.${parsedDate[2]}.${parsedDate[3]}` : option.date;
   const [hoursText = "", minutes = ""] = option.time.split(":");
@@ -85,7 +86,7 @@ function formatProposedTimeOption(option: BookingRequestDecisionTimeOption): str
   if (!Number.isFinite(hours) || !minutes) return `${dateLabel} ${option.time}`;
   const suffix = hours >= 12 ? "PM" : "AM";
   const hours12 = hours % 12 || 12;
-  return `${dateLabel} ${hours12}:${minutes} ${suffix}`;
+  return `${dateLabel} ${hours12}:${minutes} ${suffix} ${serviceTimeZoneLabel(`${option.date} ${option.time}`, businessTimezone)}`.trim();
 }
 
 function normalizeTimeInput(value: string, period?: "am" | "pm"): string | null {
@@ -342,9 +343,9 @@ export function BookingRequestContent({
                   {request.proposedTimeOptions?.map((option) => (
                     <span
                       key={`${option.date}-${option.slot}-${option.time}`}
-                      className="inline-flex min-h-6 items-center rounded-[12px] border border-[#4C4C4C] bg-white px-[9px] font-comfortaa text-[12px] font-bold leading-5 text-[#4C4C4C]"
+                      className="inline-flex min-h-6 flex-col items-start rounded-[12px] border border-[#4C4C4C] bg-white px-[9px] font-comfortaa text-[12px] font-bold leading-5 text-[#4C4C4C]"
                     >
-                      {formatProposedTimeOption(option)}
+                      {formatProposedTimeOption(option, request.businessTimezone)}
                     </span>
                   ))}
                 </div>
@@ -459,6 +460,7 @@ export function BookingRequestContent({
         initialServiceSlot={request.proposalSlots?.includes(selectedProposalSlot) ? selectedProposalSlot : undefined}
         initialServiceSlots={request.proposalSlots ?? []}
         initialTimeOptions={request.proposedTimeOptions ?? []}
+        businessTimezone={request.businessTimezone}
         onSubmit={handleProposeNewTime}
         onPassAppointment={handleDecline}
         isSubmitting={isSubmittingAction === "propose" || isSubmittingAction === "decline"}

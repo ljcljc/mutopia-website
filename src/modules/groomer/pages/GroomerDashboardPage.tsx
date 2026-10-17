@@ -97,8 +97,7 @@ function AppointmentSummaryCard({
   return (
     <GroomerUpNextCard
       appointment={appointment}
-      timeBadgeTone="blue"
-      showDuration={false}
+      showDuration
       onPetNameClick={onViewHealthDetails}
       footer={
         <>

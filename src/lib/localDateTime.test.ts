@@ -6,6 +6,9 @@ import {
   formatLocalDateTimeForApi,
   getLocalOffsetMinutes,
   formatPreferredTimeSlotLocal,
+  formatApiServiceDateTime,
+  formatTimezoneChangeNotice,
+  serviceNowParts,
 } from "./localDateTime";
 
 function expectedLocalLabel(value: string) {
@@ -15,6 +18,25 @@ function expectedLocalLabel(value: string) {
 }
 
 describe("local API date time formatting", () => {
+  it("keeps a Vancouver appointment at 11:00 and uses the date's DST label", () => {
+    expect(formatApiServiceDateTime("2026-07-01 11:00", "America/Vancouver")).toBe("2026-07-01 at 11:00 PDT (UTC-7)");
+    expect(formatApiServiceDateTime("2026-01-01 11:00", "America/Vancouver")).toBe("2026-01-01 at 11:00 PST (UTC-8)");
+  });
+
+  it("calculates today from the service area's timezone", () => {
+    expect(serviceNowParts("America/Vancouver", new Date("2026-07-02T03:00:00Z")))
+      .toEqual({ year: 2026, month: 7, day: 1, hour: 20, minute: 0 });
+  });
+
+  it("uses the appointment date's offset for the cross-timezone notice", () => {
+    expect(formatTimezoneChangeNotice("America/Denver", "America/Vancouver", "2026-10-17T20:00:00Z"))
+      .toBe("Timezone Change: Next appointment is in Mountain Time (+1 hr).");
+    expect(formatTimezoneChangeNotice("America/Denver", "America/Vancouver", "2026-01-17T20:00:00Z"))
+      .toBe("Timezone Change: Next appointment is in Mountain Time (+1 hr).");
+    expect(formatTimezoneChangeNotice("America/Denver", "America/Edmonton", "2026-10-17T20:00:00Z"))
+      .toBe("");
+  });
+
   it("formats API UTC instants in the browser local timezone", () => {
     const value = "2026-04-26T01:30:00Z";
     expect(formatApiLocalDateTime(value)).toBe(expectedLocalLabel(value));

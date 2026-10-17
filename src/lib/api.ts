@@ -485,6 +485,8 @@ export interface BookingListOut {
   address?: string | null;
   service_type?: string | null;
   scheduled_time?: string | null;
+  scheduled_time_utc?: string | null;
+  business_timezone?: string | null;
   payment_summary?: BookingListPaymentSummaryOut | null;
   payment_due_at?: string | null;
   canceled_at?: string | null;
@@ -563,6 +565,8 @@ export interface BookingDetailOut {
   can_review?: boolean;
   review_deadline?: string | null;
   scheduled_time?: string | null;
+  scheduled_time_utc?: string | null;
+  business_timezone?: string | null;
   user_phone?: string | null;
   payment_due_at?: string | null;
   canceled_at?: string | null;

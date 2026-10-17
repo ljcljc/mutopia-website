@@ -77,11 +77,11 @@ function isNotStartedStatus(status: string): boolean {
 }
 
 export function isBookingAbnormal(
-  booking: Pick<BookingListOut, "status" | "scheduled_time">,
+  booking: Pick<BookingListOut, "status" | "scheduled_time"> & Pick<BookingListOut, "scheduled_time_utc">,
   now = new Date(),
 ): boolean {
   const unfinished = isStartedUnfinishedStatus(booking.status) || isNotStartedStatus(booking.status);
-  const scheduledTime = parseScheduledTime(booking.scheduled_time);
+  const scheduledTime = parseScheduledTime(booking.scheduled_time_utc || booking.scheduled_time);
   if (!unfinished || !scheduledTime || scheduledTime.getTime() >= now.getTime()) return false;
 
   return now.getTime() - scheduledTime.getTime() > 72 * 60 * 60 * 1000;
@@ -108,8 +108,8 @@ export function selectCurrentDashboardBooking(bookings: BookingListOut[]): Booki
 
       if (leftPriority !== rightPriority) return leftPriority - rightPriority;
 
-      const leftTime = parseScheduledTime(left.scheduled_time)?.getTime();
-      const rightTime = parseScheduledTime(right.scheduled_time)?.getTime();
+      const leftTime = parseScheduledTime(left.scheduled_time_utc || left.scheduled_time)?.getTime();
+      const rightTime = parseScheduledTime(right.scheduled_time_utc || right.scheduled_time)?.getTime();
 
       const leftDistance = leftTime === undefined ? Number.MAX_SAFE_INTEGER : Math.abs(leftTime - now.getTime());
       const rightDistance = rightTime === undefined ? Number.MAX_SAFE_INTEGER : Math.abs(rightTime - now.getTime());

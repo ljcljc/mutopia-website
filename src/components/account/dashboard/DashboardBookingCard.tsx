@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@/components/common/Icon";
-import { formatApiLocalDateTime } from "@/lib/localDateTime";
+import { formatApiServiceDateTime } from "@/lib/localDateTime";
 import { useAccountStore } from "../accountStore";
 import type { BookingListOut } from "@/lib/api";
 import { StatusBadge } from "./dashboardBookingUtils";
@@ -31,7 +31,7 @@ function BookingItem({ booking }: { booking: BookingListOut }) {
   const serviceName = booking.service_name || "-";
   const serviceType = booking.service_type || "";
   const serviceDisplay = serviceType ? `${serviceName} - ${serviceType.charAt(0).toUpperCase() + serviceType.slice(1)}` : serviceName;
-  const dateTime = formatApiLocalDateTime(booking.scheduled_time);
+  const dateTime = formatApiServiceDateTime(booking.scheduled_time, booking.business_timezone);
   const address = parseAddress(booking.address);
 
   return (
@@ -51,7 +51,7 @@ function BookingItem({ booking }: { booking: BookingListOut }) {
         <StatusBadge
           status={booking.status}
           heroStage={booking.hero_stage}
-          scheduledTime={booking.scheduled_time}
+          scheduledTime={booking.scheduled_time_utc || booking.scheduled_time}
         />
         <div className="flex items-center justify-between gap-[12px]">
           <div className="min-w-0 flex-1">
@@ -102,7 +102,7 @@ function BookingItem({ booking }: { booking: BookingListOut }) {
           <StatusBadge
             status={booking.status}
             heroStage={booking.hero_stage}
-            scheduledTime={booking.scheduled_time}
+            scheduledTime={booking.scheduled_time_utc || booking.scheduled_time}
           />
           <Icon name="nav-next" className="size-[16px] text-[#99A1AF]" />
         </div>
