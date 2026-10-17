@@ -665,7 +665,6 @@ export default function BookingDetail() {
   const estimateSummary = getBookingEstimateSummary(detail ?? {});
   const totalEstimation = formatAmount(pendingAdjustment?.quoted_total_amount ?? estimateSummary.finalAmount ?? 0, "$0.00");
   const packageSubtotal = formatAmount(detail?.package_amount, "$0.00");
-  const addOnSubtotal = formatAmount(detail?.addons_amount, "$0.00");
   const originalTotal = estimateSummary.originalAmount + adjustmentSubtotal;
   const originalTotalFormatted = formatAmount(originalTotal, "$0.00");
 
@@ -705,6 +704,27 @@ export default function BookingDetail() {
         : []),
     ],
     [detail?.mobile_van_service_amount, detail?.safety_insurance_amount, mobileVanAmount, packageSubtotal, safetyInsuranceAmount, serviceName],
+  );
+  const packageCardAdjustment = pendingAdjustment ?? detail?.adjustments?.filter(
+    (adjustment) => adjustment.kind === "check_up" && normalizeBookingStatus(adjustment.status) === "paid",
+  ).slice(-1)[0];
+  const settledCardAdjustment = normalizeBookingStatus(packageCardAdjustment?.status) === "paid";
+  const originalPackageSnapshot = settledCardAdjustment ? packageCardAdjustment?.details?.original_package_snapshot as Record<string, unknown> | undefined : undefined;
+  const originalAddonsSnapshot = settledCardAdjustment ? packageCardAdjustment?.details?.original_addons_snapshot as Array<Record<string, unknown>> | undefined : undefined;
+  const packageCardPackageItems = originalPackageSnapshot
+    ? [{ ...packageComponentItems[0], amount: formatAmount(originalPackageSnapshot.package_price as string | number | undefined ?? originalPackageSnapshot.price as string | number | undefined, packageSubtotal) }, ...packageComponentItems.slice(1)]
+    : packageComponentItems;
+  const packageCardAddOnItems = originalAddonsSnapshot
+    ? originalAddonsSnapshot.map((addon) => ({ label: String(addon.name ?? "Add-on service"), amount: formatAmount(addon.price as string | number | undefined, "$0.00") }))
+    : addOnItems;
+  const packageCardAdjustmentLines = (packageCardAdjustment?.display_items ?? []).map((item) => ({ label: item.label, amount: parseAmount(item.amount) }));
+  const packageCardAdjustmentSubtotal = packageCardAdjustmentLines.reduce((total, line) => total + line.amount, 0);
+  const packageCardManualAmount = parseAmount((originalPackageSnapshot ?? detail?.package_snapshot)?.manual_amount as string | number | undefined);
+  const packageAndAddonTotal = formatAmount(
+    packageCardPackageItems.reduce((sum, item) => sum + parseAmount(item.amount), 0) +
+      packageCardAddOnItems.reduce((sum, item) => sum + parseAmount(item.amount), 0) +
+      packageCardManualAmount + packageCardAdjustmentSubtotal,
+    "$0.00",
   );
 
   const receiptLines = useMemo(() => {
@@ -899,21 +919,6 @@ export default function BookingDetail() {
     } catch (actionError) {
       console.error("Failed to pay booking adjustment:", actionError);
       toast.error("Failed to start adjustment payment");
-    } finally {
-      setIsPayingAdjustment(false);
-    }
-  };
-
-  const handleRejectAdjustment = async () => {
-    if (!detail?.id || !pendingAdjustment) return;
-    setIsPayingAdjustment(true);
-    try {
-      await clientDecideAddOn(detail.id, pendingAdjustment.id, false);
-      setDetail(await getBookingDetail(detail.id));
-      toast.success("Adjustment declined");
-    } catch (actionError) {
-      console.error("Failed to decline booking adjustment:", actionError);
-      toast.error("Failed to decline adjustment");
     } finally {
       setIsPayingAdjustment(false);
     }
@@ -1289,7 +1294,7 @@ export default function BookingDetail() {
                         </p>
                       ))}
                       <p className="border-t border-[#4A3C2A] pt-1 font-comfortaa text-[12px] font-bold leading-4">
-                        {isRefundAdjustment ? "Refund" : "Additional payment"}: {formatAmount(Math.abs(parseAmount(pendingAdjustment?.amount)), "$0.00")} including GST
+                        {isRefundAdjustment ? "Refund" : "Total"}: {formatAmount(Math.abs(parseAmount(pendingAdjustment?.amount)), "$0.00")} including GST
                       </p>
                     </div>
                   ) : null}
@@ -1491,7 +1496,6 @@ export default function BookingDetail() {
                     </OrangeButton>
                   ) : null}
                   {detailCardConfig.actionKind === "pay_adjustment" ? (
-                    <>
                     <OrangeButton
                       type="button"
                       variant="primary"
@@ -1503,12 +1507,6 @@ export default function BookingDetail() {
                     >
                       {isRefundAdjustment ? "Confirm refund" : "Go pay for adjustment"}
                     </OrangeButton>
-                    {normalizeBookingStatus(pendingAdjustment?.status) === "pending" ? (
-                      <button type="button" onClick={handleRejectAdjustment} disabled={isPayingAdjustment} className="font-comfortaa text-[12px] text-[#8B6357] underline disabled:opacity-50">
-                        Decline adjustment
-                      </button>
-                    ) : null}
-                    </>
                   ) : null}
                 </div>
                 </div>
@@ -1666,7 +1664,7 @@ export default function BookingDetail() {
                     </p>
                     <div className="flex items-center gap-2">
                       <span className="font-comfortaa font-semibold text-[16px] leading-[28px] text-[#DE6A07]">
-                        {totalEstimation}
+                        {packageAndAddonTotal}
                       </span>
                       <button
                         type="button"
@@ -1684,13 +1682,13 @@ export default function BookingDetail() {
                   </div>
 
                   <AccordionPanel open={isPackageExpanded} contentClassName="flex flex-col gap-3.5">
-                      {packageComponentItems.length > 0 && (
+                      {packageCardPackageItems.length > 0 && (
                         <div className="flex flex-col gap-1">
                           <p className="font-comfortaa font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
                             {serviceName} package
                           </p>
                           <div className="flex flex-col gap-1">
-                            {packageComponentItems.map((item, index) => (
+                            {packageCardPackageItems.map((item, index) => (
                               <div key={`package-${index}`} className="flex items-center justify-between">
                                 <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
                                   {item.label}
@@ -1708,7 +1706,7 @@ export default function BookingDetail() {
                             </p>
                             <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
                               {formatAmount(
-                                parseAmount(detail?.package_amount) +
+                                parseAmount(packageCardPackageItems[0]?.amount) +
                                   parseAmount(detail?.mobile_van_service_amount) +
                                   parseAmount(detail?.safety_insurance_amount),
                                 "$0.00",
@@ -1718,13 +1716,13 @@ export default function BookingDetail() {
                         </div>
                       )}
 
-                      {addOnItems.length > 0 && (
+                      {packageCardAddOnItems.length > 0 && (
                         <div className="flex flex-col gap-1">
                           <p className="font-comfortaa font-normal text-[10px] leading-[12px] text-[#4A3C2A]">
                             Add-on
                           </p>
                           <div className="flex flex-col gap-1">
-                            {addOnItems.map((item, index) => (
+                            {packageCardAddOnItems.map((item, index) => (
                               <div key={`addon-${index}`} className="flex items-center justify-between">
                                 <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
                                   {item.label}
@@ -1741,16 +1739,23 @@ export default function BookingDetail() {
                               Subtotal
                             </p>
                             <p className="font-comfortaa font-bold text-[12px] leading-[16px] text-[#4A3C2A]">
-                              {addOnSubtotal}
+                              {formatAmount(packageCardAddOnItems.reduce((sum, item) => sum + parseAmount(item.amount), 0), "$0.00")}
                             </p>
                           </div>
                         </div>
                       )}
 
-                      {pendingAdjustment && adjustmentLines.length > 0 ? (
+                      {packageCardManualAmount > 0 && (
+                        <div className="flex items-center justify-between font-comfortaa text-[12px] font-bold leading-4 text-[#4A3C2A]">
+                          <span>Personalization</span>
+                          <span>{formatAmount(packageCardManualAmount, "$0.00")}</span>
+                        </div>
+                      )}
+
+                      {packageCardAdjustment && packageCardAdjustmentLines.length > 0 ? (
                         <div className="flex flex-col gap-1 border-t border-[#E5E7EB] pt-2 text-[#DE6A07]">
                           <p className="font-comfortaa text-[10px] leading-3">Check-in adjustment</p>
-                          {adjustmentLines.map((line, index) => (
+                          {packageCardAdjustmentLines.map((line, index) => (
                             <div key={`${line.label}-${index}`} className="flex justify-between gap-3 font-comfortaa text-[12px] font-bold leading-4">
                               <span>{line.label}</span>
                               <span>{line.amount < 0 ? "-" : ""}{formatAmount(Math.abs(line.amount), "$0.00")}</span>
@@ -1758,7 +1763,7 @@ export default function BookingDetail() {
                           ))}
                           <div className="flex justify-between gap-3 border-t border-[#4A3C2A] pt-1 font-comfortaa text-[12px] font-bold leading-4">
                             <span>Subtotal</span>
-                            <span>{formatAmount(adjustmentSubtotal, "$0.00")}</span>
+                            <span>{formatAmount(packageCardAdjustmentSubtotal, "$0.00")}</span>
                           </div>
                         </div>
                       ) : null}

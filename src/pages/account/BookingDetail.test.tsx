@@ -100,6 +100,45 @@ describe("BookingDetail", () => {
     useBookingStore.getState().reset();
   });
 
+  it("includes a settled personalization charge before a second check-in adjustment", async () => {
+    renderBookingDetail(makeCompletedBooking({
+      status: "checkup_adjustment_pending",
+      package_snapshot: { name: "Full grooming", manual_amount: "10.00", manual_items: [{ label: "Matted coat", amount: "10.00" }] },
+      adjustments: [
+        { id: 6, kind: "check_up", status: "paid", amount: "10.00", created_at: "2026-05-24T07:00:00Z" },
+        { id: 7, kind: "check_up", status: "pending", amount: "5.00", created_at: "2026-05-24T08:30:00Z", display_items: [{ label: "Extra brushing", amount: "5.00" }] },
+      ],
+    }));
+
+    expect(await screen.findByText("Package and add-on")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Toggle package and add-on details" }).parentElement)
+      .toHaveTextContent("$120.00");
+  });
+
+  it("keeps the original order and check-in adjustment separate after payment", async () => {
+    renderBookingDetail(makeCompletedBooking({
+      package_amount: "105.00",
+      addons_amount: "15.00",
+      addons_snapshot: [{ name: "Teeth brushing", price: "15.00" }],
+      adjustments: [{
+        id: 7, kind: "check_up", status: "paid", amount: "25.00", created_at: "2026-05-24T08:30:00Z",
+        display_items: [{ label: "Package adjustment", amount: "10.00" }, { label: "Teeth brushing", amount: "5.00" }, { label: "Matted coat", amount: "10.00" }],
+        details: {
+          original_package_snapshot: { name: "Full grooming", price: "95.00" },
+          original_addons_snapshot: [{ id: 1, name: "Teeth brushing", price: "10.00" }],
+        },
+      }],
+    }));
+
+    expect(await screen.findByText("Package and add-on")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Toggle package and add-on details" }));
+    expect(screen.getByText("Package adjustment")).toBeInTheDocument();
+    expect(screen.getByText("Matted coat")).toBeInTheDocument();
+    expect(screen.getAllByText("$95.00").length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: "Toggle package and add-on details" }).parentElement)
+      .toHaveTextContent("$130.00");
+  });
+
   it("shows a pending check-in charge in the hero and adjusted prices", async () => {
     renderBookingDetail(makeCompletedBooking({
       status: "checkup_adjustment_pending",
