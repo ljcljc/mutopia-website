@@ -705,9 +705,9 @@ export default function BookingDetail() {
     ],
     [detail?.mobile_van_service_amount, detail?.safety_insurance_amount, mobileVanAmount, packageSubtotal, safetyInsuranceAmount, serviceName],
   );
-  const packageCardAdjustment = pendingAdjustment ?? detail?.adjustments?.filter(
+  const packageCardAdjustment = pendingAdjustment ?? detail?.adjustments?.find(
     (adjustment) => adjustment.kind === "check_up" && normalizeBookingStatus(adjustment.status) === "paid",
-  ).slice(-1)[0];
+  );
   const settledCardAdjustment = normalizeBookingStatus(packageCardAdjustment?.status) === "paid";
   const originalPackageSnapshot = settledCardAdjustment ? packageCardAdjustment?.details?.original_package_snapshot as Record<string, unknown> | undefined : undefined;
   const originalAddonsSnapshot = settledCardAdjustment ? packageCardAdjustment?.details?.original_addons_snapshot as Array<Record<string, unknown>> | undefined : undefined;
