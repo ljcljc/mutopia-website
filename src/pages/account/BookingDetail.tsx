@@ -20,7 +20,6 @@ import {
   getPaymentSessionRedirectUrl,
   updateReview,
   type AddressOut,
-  type BookingAdjustmentOut,
   type BookingDetailOut,
   type CancelQuoteOut,
   type BookingPaymentOut,
@@ -78,21 +77,6 @@ function formatPaymentKind(kind: string) {
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
-}
-
-function formatAdjustmentKind(kind?: string) {
-  switch (normalizeBookingStatus(kind)) {
-    case "weight":
-      return "Weight adjustment";
-    case "add_ons":
-      return "Add-ons";
-    case "personalization":
-      return "Personalization";
-    case "check_up":
-      return "Check-up update";
-    default:
-      return "Booking update";
-  }
 }
 
 function normalizeBookingStatus(status?: string | null) {
@@ -198,25 +182,6 @@ function formatTimeOptionLabel(option: InvitationDecisionTimeOptionIn, businessT
   return `${option.date} at ${option.time} ${serviceTimeZoneLabel(`${option.date} ${option.time}`, businessTimezone)}`.trim();
 }
 
-function getAdjustmentSummaryLines(adjustment: BookingAdjustmentOut): Array<{ label: string; amount: string }> {
-  const details = adjustment.details ?? {};
-  const rawItems = Array.isArray(details.items) ? details.items : [];
-  const lines = rawItems
-    .map((item) => {
-      const record = item && typeof item === "object" && !Array.isArray(item)
-        ? item as Record<string, unknown>
-        : null;
-      if (!record) return null;
-      const kind = formatAdjustmentKind(typeof record.kind === "string" ? record.kind : "");
-      const amount = formatAmount(record.amount as number | string | undefined, "$0.00");
-      return { label: kind, amount };
-    })
-    .filter((item): item is { label: string; amount: string } => Boolean(item));
-
-  if (lines.length > 0) return lines;
-  return [{ label: formatAdjustmentKind(adjustment.kind), amount: formatAmount(adjustment.amount, "$0.00") }];
-}
-
 function normalizeProposedTimeOption(option: InvitationDecisionTimeOptionIn, index: number, businessTimezone?: string | null): ProposedTimeOption | null {
   if (!option.date || !option.slot || !option.time) return null;
 
@@ -237,7 +202,7 @@ type DetailCardConfig = {
   badgeTone: DetailBadgeTone;
   nextStep?: string;
   showNextStep: boolean;
-  actionKind: "none" | "cancel" | "confirm" | "review" | "comment" | "pay";
+  actionKind: "none" | "cancel" | "confirm" | "review" | "comment" | "pay" | "pay_adjustment";
 };
 
 function StatusBadge({ label, tone }: { label: string; tone: DetailBadgeTone }) {
@@ -374,10 +339,9 @@ export default function BookingDetail() {
   const [isAddAddressOpen, setIsAddAddressOpen] = useState(false);
   const [selectedProposedTimeKey, setSelectedProposedTimeKey] = useState<string>("");
   const [isCardActionLoading, setIsCardActionLoading] = useState(false);
+  const [isPayingAdjustment, setIsPayingAdjustment] = useState(false);
   const [isConfirmingProposedTime, setIsConfirmingProposedTime] = useState(false);
   const [isRejectingProposedTime, setIsRejectingProposedTime] = useState(false);
-  const [isAdjustmentDialogOpen, setIsAdjustmentDialogOpen] = useState(false);
-  const [isApprovingAdjustment, setIsApprovingAdjustment] = useState(false);
   const [isReceiptOpen, setIsReceiptOpen] = useState(false);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [rating, setRating] = useState(5);
@@ -454,6 +418,17 @@ export default function BookingDetail() {
       .join(" ") || "MIRAMICHI NB E1N 2E5";
 
   const normalizedStatus = normalizeBookingStatus(detail?.status);
+  const pendingAdjustment = detail?.adjustments?.find(
+    (adjustment) => adjustment.kind === "check_up" && ["pending", "approved", "refund_pending"].includes(normalizeBookingStatus(adjustment.status)) && parseAmount(adjustment.amount) !== 0,
+  );
+  const isRefundAdjustment = parseAmount(pendingAdjustment?.amount) < 0;
+  const isRefundProcessing = normalizeBookingStatus(pendingAdjustment?.status) === "refund_pending";
+  const adjustmentDetails = pendingAdjustment?.details;
+  const adjustmentLines = (pendingAdjustment?.display_items ?? []).map((item) => ({
+    label: item.label,
+    amount: parseAmount(item.amount),
+  }));
+  const adjustmentSubtotal = adjustmentLines.reduce((total, line) => total + line.amount, 0);
 
   const proposedTimeOptions = useMemo(() => {
     return (
@@ -462,10 +437,6 @@ export default function BookingDetail() {
         .filter((option): option is ProposedTimeOption => Boolean(option)) ?? []
     );
   }, [detail?.time_options, detail?.business_timezone]);
-
-  const pendingAdjustment = useMemo(() => {
-    return detail?.adjustments?.find((adjustment) => normalizeBookingStatus(adjustment.status) === "pending") ?? null;
-  }, [detail?.adjustments]);
 
   const preferredTimeSlotLabels = useMemo(() => {
     return (
@@ -540,8 +511,18 @@ export default function BookingDetail() {
           showNextStep: true,
           actionKind: "cancel",
         };
-      case "checked_in":
       case "checkup_adjustment_pending":
+      case "checked_in":
+        if (pendingAdjustment && normalizedStatus === "checkup_adjustment_pending") return {
+          subtitleIncludesScheduled: false,
+          progressColor: "#DE6A07",
+          progressWidth: 83.1,
+          badgeLabel: isRefundProcessing ? "Refund processing" : isRefundAdjustment ? "Refund confirmation needed" : "Waiting for payment",
+          badgeTone: "orange",
+          nextStep: isRefundProcessing ? "Refund is being processed" : "Start grooming",
+          showNextStep: true,
+          actionKind: isRefundProcessing ? "none" : "pay_adjustment",
+        };
         return {
           subtitleIncludesScheduled: true,
           progressColor: "#633479",
@@ -646,7 +627,7 @@ export default function BookingDetail() {
           actionKind: "none",
         };
     }
-  }, [detail?.hero_stage, detail?.notes, detail?.review, detail?.scheduled_time, detail?.status, estimatedCompletionDisplay, normalizedStatus, paymentDueDisplay, scheduledDisplay]);
+  }, [detail?.hero_stage, detail?.notes, detail?.review, detail?.scheduled_time, detail?.status, estimatedCompletionDisplay, isRefundAdjustment, isRefundProcessing, normalizedStatus, paymentDueDisplay, pendingAdjustment, scheduledDisplay]);
 
   const reviewedDisplay = formatApiLocalDateTime(detail?.review?.created_at);
   const recommendationLabel = formatRecommendationMonth(detail?.scheduled_time);
@@ -678,14 +659,14 @@ export default function BookingDetail() {
       ? rawCanceledReason.replace(/^cancel\s+reason:\s*/i, "").trim()
       : "";
   const canModifyAddress = normalizedStatus === "pending_assignment";
-  const hasCheckedIn = ["checked_in", "in_progress", "pending_report", "completed", "terminated", "canceled", "refunded"].includes(normalizedStatus);
+  const hasCheckedIn = ["checked_in", "checkup_adjustment_pending", "in_progress", "pending_report", "completed", "terminated", "canceled", "refunded"].includes(normalizedStatus);
   
   // 价格信息（需要在 useMemo 之前定义）
   const estimateSummary = getBookingEstimateSummary(detail ?? {});
-  const totalEstimation = formatAmount(estimateSummary.finalAmount ?? 0, "$0.00");
+  const totalEstimation = formatAmount(pendingAdjustment?.quoted_total_amount ?? estimateSummary.finalAmount ?? 0, "$0.00");
   const packageSubtotal = formatAmount(detail?.package_amount, "$0.00");
   const addOnSubtotal = formatAmount(detail?.addons_amount, "$0.00");
-  const originalTotal = estimateSummary.originalAmount;
+  const originalTotal = estimateSummary.originalAmount + adjustmentSubtotal;
   const originalTotalFormatted = formatAmount(originalTotal, "$0.00");
 
   // 从 addons_snapshot 中提取附加服务列表
@@ -707,7 +688,10 @@ export default function BookingDetail() {
   const membershipFee = formatAmount(detail?.membership_fee, "$0.00");
   const mobileVanAmount = formatAmount(detail?.mobile_van_service_amount, "$0.00");
   const safetyInsuranceAmount = formatAmount(detail?.safety_insurance_amount, "$0.00");
-  const preGstTotal = formatAmount(estimateSummary.preGstAmount ?? 0, "$0.00");
+  const preGstTotal = formatAmount(pendingAdjustment
+    ? parseAmount(adjustmentDetails?.pre_gst_total as string | number | undefined) ||
+      parseAmount(pendingAdjustment.quoted_total_amount) - parseAmount(pendingAdjustment.gst_amount) - parseAmount(detail?.membership_fee)
+    : estimateSummary.preGstAmount ?? 0, "$0.00");
   const refundedAmount = formatAmount(detail?.refunded_amount, "$0.00");
 
   const packageComponentItems = useMemo(
@@ -769,11 +753,6 @@ export default function BookingDetail() {
     detail?.tip_status === "succeeded" || detail?.payments?.some((payment) => payment.kind.toLowerCase() === "tip" && isPaidPaymentStatus(payment.status)),
   );
   const isTipDecisionComplete = hasPaidTip || detail?.tip_decision === "declined" || detail?.tip_decision === "system_closed";
-
-  const pendingAdjustmentAmount = pendingAdjustment ? parseAmount(pendingAdjustment.amount) : 0;
-  const pendingAdjustmentDirection = pendingAdjustmentAmount > 0 ? "payment" : pendingAdjustmentAmount < 0 ? "refund" : "none";
-  const proposedTotalAmount = parseAmount(detail?.final_amount) + pendingAdjustmentAmount;
-  const pendingAdjustmentSummaryLines = pendingAdjustment ? getAdjustmentSummaryLines(pendingAdjustment) : [];
 
   useEffect(() => {
     if (!isModifyOpen) return;
@@ -867,34 +846,6 @@ export default function BookingDetail() {
     }
   };
 
-  const refreshBookingDetail = async () => {
-    if (!detail?.id) return;
-    const updatedDetail = await getBookingDetail(detail.id);
-    setDetail(updatedDetail);
-  };
-
-  const handleApproveAdjustment = async () => {
-    if (!detail?.id || !pendingAdjustment) return;
-
-    setIsApprovingAdjustment(true);
-    try {
-      const response = await clientDecideAddOn(detail.id, pendingAdjustment.id, true);
-      if (response.status === "payment_required" && response.payment_url) {
-        window.location.assign(response.payment_url);
-        return;
-      }
-      await refreshBookingDetail();
-      setIsAdjustmentDialogOpen(false);
-      toast.success(response.status === "refund_processed" ? "Refund is being processed" : "Booking update confirmed");
-    } catch (actionError) {
-      console.error("Failed to approve booking adjustment:", actionError);
-      toast.error("Failed to confirm booking update");
-    } finally {
-      setIsApprovingAdjustment(false);
-    }
-  };
-
-
   const handleGoPay = async () => {
     if (!detail?.id) return;
 
@@ -924,6 +875,47 @@ export default function BookingDetail() {
         toast.error("Failed to start payment");
       }
       setIsCardActionLoading(false);
+    }
+  };
+
+  const handlePayAdjustment = async () => {
+    if (!detail?.id || !pendingAdjustment) return;
+    setIsPayingAdjustment(true);
+    try {
+      const result = await clientDecideAddOn(detail.id, pendingAdjustment.id, true);
+      if (result.status === "payment_required") {
+        if (!result.payment_url) throw new Error("Missing adjustment payment URL");
+        window.location.assign(result.payment_url);
+        return;
+      }
+      setDetail(await getBookingDetail(detail.id));
+      if (result.status === "payment_verification_required") {
+        toast.info("Checking the payment result. Please try again shortly.");
+      } else if (result.status === "refund_pending") {
+        toast.info("Refund is processing. Grooming can start when it succeeds.");
+      } else {
+        toast.success(isRefundAdjustment ? "Refund confirmed" : "Adjustment payment received");
+      }
+    } catch (actionError) {
+      console.error("Failed to pay booking adjustment:", actionError);
+      toast.error("Failed to start adjustment payment");
+    } finally {
+      setIsPayingAdjustment(false);
+    }
+  };
+
+  const handleRejectAdjustment = async () => {
+    if (!detail?.id || !pendingAdjustment) return;
+    setIsPayingAdjustment(true);
+    try {
+      await clientDecideAddOn(detail.id, pendingAdjustment.id, false);
+      setDetail(await getBookingDetail(detail.id));
+      toast.success("Adjustment declined");
+    } catch (actionError) {
+      console.error("Failed to decline booking adjustment:", actionError);
+      toast.error("Failed to decline adjustment");
+    } finally {
+      setIsPayingAdjustment(false);
     }
   };
 
@@ -1288,6 +1280,20 @@ export default function BookingDetail() {
                     </div>
                   ) : null}
 
+                  {detailCardConfig.actionKind === "pay_adjustment" ? (
+                    <div className="flex flex-col gap-1 text-[#4A3C2A]">
+                      <p className="font-comfortaa text-[10px] leading-3">Check-in adjustment</p>
+                      {adjustmentLines.map((line, index) => (
+                        <p key={`${line.label}-${index}`} className="font-comfortaa text-[12px] leading-4">
+                          {line.label} {line.amount < 0 ? "-" : ""}{formatAmount(Math.abs(line.amount), "$0.00")}
+                        </p>
+                      ))}
+                      <p className="border-t border-[#4A3C2A] pt-1 font-comfortaa text-[12px] font-bold leading-4">
+                        {isRefundAdjustment ? "Refund" : "Additional payment"}: {formatAmount(Math.abs(parseAmount(pendingAdjustment?.amount)), "$0.00")} including GST
+                      </p>
+                    </div>
+                  ) : null}
+
                 <div className="flex flex-wrap items-center gap-2">
                   {detailCardConfig.showNextStep ? (
                     <div className="flex min-w-[220px] flex-1 flex-col gap-1 text-[#4A3C2A]">
@@ -1484,6 +1490,26 @@ export default function BookingDetail() {
                       Go pay
                     </OrangeButton>
                   ) : null}
+                  {detailCardConfig.actionKind === "pay_adjustment" ? (
+                    <>
+                    <OrangeButton
+                      type="button"
+                      variant="primary"
+                      size="compact"
+                      className="min-w-[180px] bg-[#8B6357] hover:bg-[#8B6357]/90"
+                      showArrow
+                      loading={isPayingAdjustment}
+                      onClick={handlePayAdjustment}
+                    >
+                      {isRefundAdjustment ? "Confirm refund" : "Go pay for adjustment"}
+                    </OrangeButton>
+                    {normalizeBookingStatus(pendingAdjustment?.status) === "pending" ? (
+                      <button type="button" onClick={handleRejectAdjustment} disabled={isPayingAdjustment} className="font-comfortaa text-[12px] text-[#8B6357] underline disabled:opacity-50">
+                        Decline adjustment
+                      </button>
+                    ) : null}
+                    </>
+                  ) : null}
                 </div>
                 </div>
               )}
@@ -1495,73 +1521,6 @@ export default function BookingDetail() {
               ) : null}
             </div>
           </div>
-
-          {pendingAdjustment ? (
-            <div className="rounded-xl border border-[#F3D5B5] bg-[#FFF8F1] p-6 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.06)]">
-              <div className="flex flex-col gap-3">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="flex flex-col gap-1">
-                    <p className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">
-                      Booking update waiting your confirmation
-                    </p>
-                    <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#6B7280]">
-                      Your groomer updated the order after check-in. Please review before we process {pendingAdjustmentDirection === "refund" ? "the refund" : "the payment"}.
-                    </p>
-                  </div>
-                  <div className={`inline-flex h-7 items-center rounded-full px-3 py-1 ${
-                    pendingAdjustmentDirection === "refund" ? "bg-[#DCFCE7]" : "bg-[#FDEBD3]"
-                  }`}>
-                    <span className={`font-comfortaa text-[10px] font-bold leading-[14px] ${
-                      pendingAdjustmentDirection === "refund" ? "text-[#16A34A]" : "text-[#DE6A07]"
-                    }`}>
-                      {pendingAdjustmentDirection === "refund" ? "Refund pending" : "Payment pending"}
-                    </span>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  <div className="rounded-[12px] bg-white px-4 py-3">
-                    <p className="font-comfortaa text-[10px] leading-[12px] text-[#6B7280]">Original total</p>
-                    <p className="mt-1 font-comfortaa text-[16px] font-bold leading-6 text-[#4A3C2A]">
-                      {formatAmount(detail?.final_amount, "$0.00")}
-                    </p>
-                  </div>
-                  <div className="rounded-[12px] bg-white px-4 py-3">
-                    <p className="font-comfortaa text-[10px] leading-[12px] text-[#6B7280]">Amount change</p>
-                    <p className={`mt-1 font-comfortaa text-[16px] font-bold leading-6 ${
-                      pendingAdjustmentDirection === "refund" ? "text-[#16A34A]" : "text-[#DE6A07]"
-                    }`}>
-                      {pendingAdjustmentAmount > 0 ? "+" : ""}{formatAmount(pendingAdjustment.amount, "$0.00")}
-                    </p>
-                  </div>
-                  <div className="rounded-[12px] bg-white px-4 py-3">
-                    <p className="font-comfortaa text-[10px] leading-[12px] text-[#6B7280]">New total</p>
-                    <p className="mt-1 font-comfortaa text-[16px] font-bold leading-6 text-[#4A3C2A]">
-                      {formatAmount(pendingAdjustment.quoted_total_amount ?? proposedTotalAmount, "$0.00")}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <div className="min-w-[220px] flex-1">
-                    <p className="font-comfortaa text-[10px] leading-[12px] text-[#4A3C2A]">Next step</p>
-                    <p className="mt-1 font-comfortaa text-[12px] font-bold leading-4 text-[#4A3C2A]">
-                      {pendingAdjustmentDirection === "refund"
-                        ? "Confirm the update and we will process the refund."
-                        : "Confirm the update and continue to payment."}
-                    </p>
-                  </div>
-                  <OrangeButton
-                    type="button"
-                    variant="primary"
-                    size="compact"
-                    className="min-w-[140px]"
-                    onClick={() => setIsAdjustmentDialogOpen(true)}
-                  >
-                    Review update
-                  </OrangeButton>
-                </div>
-              </div>
-            </div>
-          ) : null}
 
           {detail?.review && detail?.can_review !== false ? (
             <div className="rounded-xl bg-white p-6 shadow-[0px_8px_6px_0px_rgba(0,0,0,0.1)]">
@@ -1788,6 +1747,22 @@ export default function BookingDetail() {
                         </div>
                       )}
 
+                      {pendingAdjustment && adjustmentLines.length > 0 ? (
+                        <div className="flex flex-col gap-1 border-t border-[#E5E7EB] pt-2 text-[#DE6A07]">
+                          <p className="font-comfortaa text-[10px] leading-3">Check-in adjustment</p>
+                          {adjustmentLines.map((line, index) => (
+                            <div key={`${line.label}-${index}`} className="flex justify-between gap-3 font-comfortaa text-[12px] font-bold leading-4">
+                              <span>{line.label}</span>
+                              <span>{line.amount < 0 ? "-" : ""}{formatAmount(Math.abs(line.amount), "$0.00")}</span>
+                            </div>
+                          ))}
+                          <div className="flex justify-between gap-3 border-t border-[#4A3C2A] pt-1 font-comfortaa text-[12px] font-bold leading-4">
+                            <span>Subtotal</span>
+                            <span>{formatAmount(adjustmentSubtotal, "$0.00")}</span>
+                          </div>
+                        </div>
+                      ) : null}
+
                       {parseAmount(detail?.refunded_amount) > 0 && (
                         <div className="flex items-center justify-between">
                           <span className="font-comfortaa text-[12px] text-[#4A3C2A]">Refunded</span>
@@ -1943,92 +1918,6 @@ export default function BookingDetail() {
           )}
         </div>
       </AccountContentContainer>
-
-      <AlertDialog open={isAdjustmentDialogOpen} onOpenChange={(open) => !isApprovingAdjustment && setIsAdjustmentDialogOpen(open)}>
-        <AlertDialogContent className="max-w-[calc(100%-32px)] rounded-[20px] border-[rgba(0,0,0,0.2)] px-0 py-0 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] sm:max-w-[560px]">
-          <div className="flex flex-col gap-4 pb-8 pt-3">
-            <AlertDialogHeader className="gap-2 px-3">
-              <div className="flex items-center justify-between w-full">
-                <AlertDialogPrimitive.Cancel asChild>
-                  <button
-                    type="button"
-                    className="flex size-4 items-center justify-center border-0 bg-transparent p-0 text-[#4A3C2A] opacity-70 hover:opacity-100"
-                    aria-label="Close booking update dialog"
-                  >
-                    <XIcon className="size-4 stroke-[1.5]" />
-                  </button>
-                </AlertDialogPrimitive.Cancel>
-                <AlertDialogTitle className="flex-1 text-center font-comfortaa font-normal text-[14px] leading-[22.75px] text-[#4C4C4C]">
-                  Confirm booking update
-                </AlertDialogTitle>
-                <span className="size-4" />
-              </div>
-            </AlertDialogHeader>
-            <div className="h-px bg-[rgba(0,0,0,0.1)]" />
-            <div className="flex flex-col gap-4 px-6 text-[#4A5565]">
-              <AlertDialogDescription className="flex flex-col gap-1 text-[#4A5565]">
-                <p className="font-comfortaa text-[14px] font-bold leading-[22px]">
-                  Your groomer updated this booking after checking your pet.
-                </p>
-                <p className="font-comfortaa text-[12.25px] font-normal leading-[17.5px]">
-                  Confirm this update before we process {pendingAdjustmentDirection === "refund" ? "the refund" : "the payment"}.
-                </p>
-              </AlertDialogDescription>
-              <div className="rounded-[12px] bg-[#FFF8F1] p-4">
-                <div className="flex flex-col gap-2">
-                  {pendingAdjustmentSummaryLines.map((line) => (
-                    <div key={`${line.label}-${line.amount}`} className="flex items-center justify-between gap-3">
-                      <p className="font-comfortaa text-[12px] font-bold leading-4 text-[#4A3C2A]">{line.label}</p>
-                      <p className="font-comfortaa text-[12px] font-bold leading-4 text-[#DE6A07]">{line.amount}</p>
-                    </div>
-                  ))}
-                  <div className="mt-1 border-t border-[#E5D3C5] pt-2">
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="font-comfortaa text-[12px] font-bold leading-4 text-[#4A3C2A]">Current total</p>
-                      <p className="font-comfortaa text-[12px] font-bold leading-4 text-[#4A3C2A]">{formatAmount(detail?.final_amount, "$0.00")}</p>
-                    </div>
-                    <div className="mt-1 flex items-center justify-between gap-3">
-                      <p className="font-comfortaa text-[12px] font-bold leading-4 text-[#4A3C2A]">New total</p>
-                      <p className="font-comfortaa text-[12px] font-bold leading-4 text-[#DE6A07]">{formatAmount(pendingAdjustment?.quoted_total_amount ?? proposedTotalAmount, "$0.00")}</p>
-                    </div>
-                    {pendingAdjustment?.subtotal_amount !== undefined ? (
-                      <>
-                        <div className="mt-1 flex items-center justify-between gap-3">
-                          <p className="font-comfortaa text-[12px] leading-4 text-[#4A3C2A]">Subtotal before GST</p>
-                          <p className="font-comfortaa text-[12px] leading-4 text-[#4A3C2A]">{formatAmount(pendingAdjustment?.subtotal_amount, "$0.00")}</p>
-                        </div>
-                        <div className="mt-1 flex items-center justify-between gap-3">
-                          <p className="font-comfortaa text-[12px] leading-4 text-[#4A3C2A]">Membership discount</p>
-                          <p className="font-comfortaa text-[12px] leading-4 text-[#4A3C2A]">-{formatAmount(pendingAdjustment?.discount_amount, "$0.00")}</p>
-                        </div>
-                        <div className="mt-1 flex items-center justify-between gap-3">
-                          <p className="font-comfortaa text-[12px] leading-4 text-[#4A3C2A]">GST (5%)</p>
-                          <p className="font-comfortaa text-[12px] leading-4 text-[#4A3C2A]">{formatAmount(pendingAdjustment?.gst_amount, "$0.00")}</p>
-                        </div>
-                      </>
-                    ) : null}
-                  </div>
-                </div>
-              </div>
-            </div>
-            <AlertDialogFooter className="px-6">
-              <div className="flex w-full items-center justify-end gap-2.5">
-                <OrangeButton
-                  variant="primary"
-                  size="medium"
-                  textSize={14}
-                  className="min-w-[177px]"
-                  onClick={handleApproveAdjustment}
-                  loading={isApprovingAdjustment}
-                  disabled={false}
-                >
-                  {pendingAdjustmentDirection === "refund" ? "Confirm refund" : "Confirm and pay"}
-                </OrangeButton>
-              </div>
-            </AlertDialogFooter>
-          </div>
-        </AlertDialogContent>
-      </AlertDialog>
 
       <AlertDialog open={isCancelDialogOpen} onOpenChange={handleCancelDialogOpenChange}>
         <AlertDialogContent className="max-w-[calc(100%-32px)] rounded-[20px] border-[rgba(0,0,0,0.2)] px-0 py-0 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] sm:max-w-[520px]">

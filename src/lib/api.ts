@@ -529,6 +529,7 @@ export interface BookingAdjustmentOut {
   status: string;
   description?: string | null;
   details?: Record<string, unknown>;
+  display_items?: Array<{ label: string; amount: number | string }>;
   created_at: string;
   decided_at?: string | null;
   paid_at?: string | null;

@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import BookingDetail from "./BookingDetail";
-import { clientConfirmBookingTime, createDepositSession, createReview, createTipSession, getBookingDetail, getCancelQuote, updateReview, type BookingDetailOut } from "@/lib/api";
+import { clientConfirmBookingTime, clientDecideAddOn, createDepositSession, createReview, createTipSession, getBookingDetail, getCancelQuote, updateReview, type BookingDetailOut } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
 import { useBookingStore } from "@/components/booking/bookingStore";
@@ -13,6 +13,7 @@ vi.mock("@/lib/api", async (importOriginal) => {
   return {
     ...actual,
     clientConfirmBookingTime: vi.fn(),
+    clientDecideAddOn: vi.fn(),
     createDepositSession: vi.fn(),
     createReview: vi.fn(),
     createTipSession: vi.fn(),
@@ -97,6 +98,66 @@ describe("BookingDetail", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     useBookingStore.getState().reset();
+  });
+
+  it("shows a pending check-in charge in the hero and adjusted prices", async () => {
+    renderBookingDetail(makeCompletedBooking({
+      status: "checkup_adjustment_pending",
+      pre_gst_total: "100.00",
+      discount_rate: "0.90",
+      adjustments: [{
+        id: 7,
+        kind: "check_up",
+        status: "pending",
+        amount: "25.00",
+        created_at: "2026-05-24T08:30:00Z",
+        quoted_total_amount: "130.00",
+        gst_amount: "6.19",
+        display_items: [
+          { label: "Package adjustment", amount: "10.00" },
+          { label: "Teeth brushing", amount: "5.00" },
+          { label: "Severely matted", amount: "10.00" },
+        ],
+        details: {
+          package_price: "105.00",
+          original_addons_snapshot: [{ id: 1, name: "Teeth brushing", price: "10.00" }],
+          addons: [{ id: 1, name: "Teeth brushing", price: "15.00" }],
+          manual_items: [{ label: "Severely matted", amount: "10.00" }],
+          pre_gst_total: "123.81",
+        },
+      }],
+    }));
+
+    expect(await screen.findByText("Waiting for payment")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Go pay for adjustment" })).toBeInTheDocument();
+    expect(screen.getByText("Severely matted $10.00")).toBeInTheDocument();
+    expect(screen.getByText("Severely matted")).toBeInTheDocument();
+    expect(screen.getAllByText("$130.00").length).toBeGreaterThan(0);
+    expect(screen.getByText("($123.81)")).toBeInTheDocument();
+    expect(screen.getByText("Final price includes check-in adjustment")).toBeInTheDocument();
+
+    vi.mocked(clientDecideAddOn).mockResolvedValue({ ok: true, status: "paid" });
+    vi.mocked(getBookingDetail).mockResolvedValueOnce(makeCompletedBooking({ status: "checked_in" }));
+    fireEvent.click(screen.getByRole("button", { name: "Go pay for adjustment" }));
+    await waitFor(() => expect(clientDecideAddOn).toHaveBeenCalledWith(127, 7, true));
+  });
+
+  it("keeps a confirmed refund visible while Stripe is still processing it", async () => {
+    renderBookingDetail(makeCompletedBooking({
+      status: "checkup_adjustment_pending",
+      adjustments: [{
+        id: 8,
+        kind: "check_up",
+        status: "refund_pending",
+        amount: "-5.00",
+        created_at: "2026-05-24T08:30:00Z",
+        display_items: [{ label: "Removed add-on", amount: "-5.00" }],
+      }],
+    }));
+
+    expect(await screen.findByText("Refund processing")).toBeInTheDocument();
+    expect(screen.getByText("Refund is being processed")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Confirm refund" })).not.toBeInTheDocument();
   });
 
   it("shows the on-the-way status in the booking Hero", async () => {

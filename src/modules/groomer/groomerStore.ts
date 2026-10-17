@@ -36,7 +36,11 @@ export type DashboardAppointment = GroomerUpNextAppointment & {
   status?: string;
   weightValue?: string;
   weightUnit?: string;
+  serviceId?: number;
+  petType?: string;
   addonIds?: number[];
+  addonQuantities?: Record<number, number>;
+  currentPersonalization?: Record<string, string>;
   phone: string;
   totalEstimate: string;
   originalEstimate?: string;
@@ -69,6 +73,7 @@ export type DashboardAmountLine = {
 
 export type PendingCheckUpSummary = {
   amount: string;
+  displayItems: DashboardAmountLine[];
   actionLabel: string;
   direction: "charge" | "refund";
   details?: {
@@ -79,6 +84,14 @@ export type PendingCheckUpSummary = {
       details?: Record<string, unknown>;
     }>;
     proposed_final_amount?: string;
+    service_id?: number;
+    addons?: Array<{ id: number; quantity?: number }>;
+    refund_requires_manual?: boolean;
+    proposedAddonIds?: number[];
+    proposedPersonalization?: Record<string, string>;
+    description?: string;
+    original_package_snapshot?: Record<string, unknown>;
+    original_addons_snapshot?: Record<string, unknown>[];
   };
   statusLabel: string;
   summary: string;
@@ -393,6 +406,7 @@ function mapPackageAndAddonBreakdown(record: Record<string, unknown>) {
       : [{ label: packageName, amount: formatBreakdownAmount(packageAmount) }],
     packageSubtotal: formatBreakdownAmount(packageAmount),
     addonIds: getAddonIds(addonItems),
+    addonQuantities: Object.fromEntries(addonItems.map((item) => [getOptionalNumber(item, ["id", "add_on_id", "addon_id"]), getNumber(item, ["quantity"], 1)]).filter(([id]) => id !== null)) as Record<number, number>,
     addonLines,
     addonSubtotal: formatBreakdownAmount(getAmount(record, ["addons_amount"])),
     priceAdjustmentLines,
@@ -431,10 +445,12 @@ function buildPendingCheckUpSummary({
   amount,
   summary,
   details,
+  status,
 }: {
   amount: unknown;
   summary?: string;
   details?: Record<string, unknown>;
+  status?: string;
 }): PendingCheckUpSummary | null {
   const parsedAmount = parseAmount(amount);
   if (parsedAmount === null || parsedAmount === 0) return null;
@@ -444,23 +460,50 @@ function buildPendingCheckUpSummary({
 
   return {
     amount: displayAmount,
+    displayItems: Array.isArray(details?.display_items)
+      ? details.display_items
+          .map((item) => asRecord(item))
+          .filter((item) => getString(item, ["label"]) && parseAmount(item.amount) !== null)
+          .map((item) => ({
+            label: getString(item, ["label"]),
+            amount: formatSignedBreakdownAmount(parseAmount(item.amount) ?? 0),
+          }))
+      : [],
     actionLabel: direction === "refund" ? `Refund ${displayAmount}` : `Go pay ${displayAmount}`,
     direction,
-    statusLabel: direction === "refund" ? "Waiting for refund" : "Waiting for payment",
+    statusLabel: status === "refund_pending"
+      ? details?.refund_requires_manual === true ? "Refund needs support" : "Refund processing"
+      : status === "pending"
+        ? "Waiting for pet owner confirmation"
+        : direction === "refund" ? "Waiting for refund" : "Waiting for payment",
     summary: summary?.trim() || `Check-in adjustment ${direction === "refund" ? "refund" : "payment"} pending`,
     details: details
       ? {
           items: Array.isArray(details.items) ? details.items.filter((item): item is NonNullable<(typeof details.items)[number]> => Boolean(item)) : [],
           proposed_final_amount:
             typeof details.proposed_final_amount === "string" ? details.proposed_final_amount : undefined,
+          service_id: getOptionalNumber(details, ["service_id"]) ?? undefined,
+          addons: Array.isArray(details.addons)
+            ? details.addons.map((item) => ({ id: getNumber(asRecord(item), ["id"], 0), quantity: getNumber(asRecord(item), ["quantity"], 1) })).filter((item) => item.id > 0)
+            : undefined,
+          refund_requires_manual: details.refund_requires_manual === true,
+          proposedAddonIds: Array.isArray(details.addons)
+            ? details.addons.map((item) => getOptionalNumber(asRecord(item), ["id"])).filter((id): id is number => id !== null)
+            : undefined,
+          proposedPersonalization: Array.isArray(details.manual_items)
+            ? Object.fromEntries(details.manual_items.map((item) => {
+                const entry = asRecord(item);
+                return [getString(entry, ["key"]), getString(entry, ["amount"])];
+              }).filter(([key]) => key))
+            : undefined,
+          description: typeof details.description === "string" ? details.description : undefined,
+          original_package_snapshot: asRecord(details.original_package_snapshot),
+          original_addons_snapshot: Array.isArray(details.original_addons_snapshot)
+            ? details.original_addons_snapshot.map((item) => asRecord(item))
+            : undefined,
         }
       : undefined,
   };
-}
-
-function getBasePriceAdjustmentLines(lines: DashboardAmountLine[]): DashboardAmountLine[] {
-  const staticLabels = new Set(["membership", "discount", "coupon"]);
-  return lines.filter((line) => staticLabels.has(line.label.trim().toLowerCase()));
 }
 
 function buildCheckUpAddonLines(addOns: AddOnOut[], selectedAddOnIds: number[]): DashboardAmountLine[] {
@@ -486,6 +529,7 @@ function isActiveDashboardAppointmentStatus(status: string): boolean {
     "en_route",
     "on_the_way",
     "checked_in",
+    "checkup_adjustment_pending",
     "in_progress",
     "pending_report",
     "completed",
@@ -572,6 +616,7 @@ function mapDashboardAppointment(raw: unknown): DashboardAppointment | null {
   const serviceScheduledTime = getString(record, ["service_scheduled_time", "scheduled_time", "appointment_time", "time"]);
   const estimate = mapEstimateFromPrice({ ...price, ...record });
   const packageAndAddonBreakdown = mapPackageAndAddonBreakdown({ ...price, ...record });
+  const packageSnapshot = asRecord(record.package_snapshot);
 
   const appointmentId =
     getNumber(record, ["id", "booking_id"], Number.NaN) ||
@@ -600,12 +645,19 @@ function mapDashboardAppointment(raw: unknown): DashboardAppointment | null {
         : undefined,
     weightValue: getString(record, ["weight_value", "weight_kg", "weight"], getString(pet, ["weight_value", "weight_kg", "weight"])),
     weightUnit: getString(record, ["weight_unit"], getString(pet, ["weight_unit"])),
+    serviceId: getOptionalNumber(record, ["service_id"]) ?? getOptionalNumber(service, ["id", "service_id"]) ?? undefined,
+    petType: getString(record, ["pet_type"], getString(pet, ["pet_type"])),
+    currentPersonalization: Object.fromEntries(getRecordArray(packageSnapshot, ["manual_items"]).map((item) => [getString(item, ["key"]), getAmount(item, ["amount"])]).filter(([key]) => key)),
     ...estimate,
     ...packageAndAddonBreakdown,
     pendingCheckUp: buildPendingCheckUpSummary({
       amount: getAmount(pendingCheckUp, ["amount"]),
       summary: getString(pendingCheckUp, ["summary"]),
-      details: asRecord(pendingCheckUp.details),
+      details: {
+        ...asRecord(pendingCheckUp.details),
+        proposed_final_amount: getAmount(pendingCheckUp, ["proposed_final_amount", "quoted_total_amount"]) ?? getAmount(asRecord(pendingCheckUp.details), ["quoted_total"]),
+      },
+      status: getString(pendingCheckUp, ["status"]),
     }),
     estimateBreakdown: getString(record, ["estimate_breakdown"]) || getString(price, ["estimate_breakdown"]) || estimate.estimateBreakdown,
     review: record.review ? (record.review as ReviewSummaryOut) : null,
@@ -787,7 +839,14 @@ async function enrichDashboardAppointment(nextAppointment: DashboardAppointment 
     const detailRecord = { ...price, ...asRecord(bookingDetail) };
     const detailAppointment = mapDashboardAppointment(bookingDetail);
     const estimate = mapEstimateFromPrice(detailRecord);
-    const packageAndAddonBreakdown = mapPackageAndAddonBreakdown(detailRecord);
+    const originalDetails = nextAppointment.pendingCheckUp?.details;
+    const packageAndAddonBreakdown = mapPackageAndAddonBreakdown({
+      ...detailRecord,
+      package_snapshot: originalDetails?.original_package_snapshot && Object.keys(originalDetails.original_package_snapshot).length
+        ? originalDetails.original_package_snapshot
+        : detailRecord.package_snapshot,
+      addons_snapshot: originalDetails?.original_addons_snapshot ?? detailRecord.addons_snapshot,
+    });
 
     return {
       ...nextAppointment,
@@ -950,34 +1009,31 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
   }) => {
     set((state) => ({
       nextAppointment: updateMatchingNextAppointment(state.nextAppointment, bookingId, (appointment) => {
-        const addonLines = buildCheckUpAddonLines(addOns, selectedAddOnIds);
-        const addonSubtotalAmount = addonLines.reduce<number>((total, line) => total + (parseAmount(line.amount) ?? 0), 0);
         const personalizationLines = buildCheckUpPersonalizationLines(personalization, description);
-        const totalEstimateAmount =
-          parseAmount(result.final_amount) ??
-          sumAmounts(parseAmount(appointment.totalEstimate) ?? 0, result.amount);
-
+        const addedAddonLines = buildCheckUpAddonLines(
+          addOns,
+          selectedAddOnIds.filter((id) => !appointment.addonIds?.includes(id)),
+        );
+        const displayItems = [...addedAddonLines, ...personalizationLines];
         return {
           ...appointment,
           status: result.status === "client_confirmation_required" ? "checkup_adjustment_pending" : "checked_in",
           hasCheckUp: true,
-          weightValue,
+          weightValue: weightValue || appointment.weightValue,
           weightUnit,
-          totalEstimate: formatBreakdownAmount(totalEstimateAmount),
-          addonIds: selectedAddOnIds,
-          addonLines,
-          addonSubtotal: formatBreakdownAmount(addonSubtotalAmount),
           pendingCheckUp: buildPendingCheckUpSummary({
             amount: result.amount,
+            details: {
+              display_items: displayItems.map((line) => ({ label: line.label, amount: parseAmount(line.amount) ?? 0 })),
+              proposed_final_amount: String(result.final_amount),
+              addons: selectedAddOnIds.map((id) => ({ id })),
+              manual_items: Object.entries(personalization).map(([key, amount]) => ({ key, amount })),
+              description,
+            },
             summary: [
-              ...addonLines.map((line) => `${line.label} ${line.amount ?? ""}`.trim()),
-              ...personalizationLines.map((line) => `${line.label} ${line.amount ?? ""}`.trim()),
+              ...displayItems.map((line) => `${line.label} ${line.amount ?? ""}`.trim()),
             ].join(" + "),
           }),
-          priceAdjustmentLines: [
-            ...getBasePriceAdjustmentLines(appointment.priceAdjustmentLines),
-            ...personalizationLines,
-          ],
         };
       }),
     }));

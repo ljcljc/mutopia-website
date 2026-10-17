@@ -58,6 +58,28 @@ describe("groomer dashboard current booking selection", () => {
     vi.useRealTimers();
   });
 
+  it("keeps a booking awaiting check-up adjustment in the Hero", async () => {
+    apiMocks.getGroomerDashboardSummary.mockResolvedValue({});
+    apiMocks.getGroomerPerformance.mockResolvedValue({});
+    apiMocks.getGroomerPendingBookingInvitations.mockResolvedValue({ items: [] });
+    apiMocks.getGroomerBookingDetail.mockResolvedValue({});
+    apiMocks.getGroomerCurrentBooking.mockResolvedValue({
+      booking: {
+        id: 94,
+        status: "checkup_adjustment_pending",
+        scheduled_time_utc: "2026-05-16T12:00:00Z",
+        pet_name: "Mochi",
+      },
+    });
+
+    await useGroomerDashboardStore.getState().fetchDashboard();
+
+    expect(useGroomerDashboardStore.getState().nextAppointment).toMatchObject({
+      id: 94,
+      status: "checkup_adjustment_pending",
+    });
+  });
+
   it("keeps an overdue confirmed booking ahead of a closer upcoming confirmed booking", async () => {
     apiMocks.getGroomerDashboardSummary.mockResolvedValue({});
     apiMocks.getGroomerPerformance.mockResolvedValue({
@@ -169,6 +191,51 @@ describe("groomer dashboard current booking selection", () => {
     expect(useGroomerDashboardStore.getState().nextAppointment).toMatchObject({
       id: 123,
       addonIds: [7],
+    });
+  });
+
+  it("keeps original order lines above a pending check-up adjustment", async () => {
+    apiMocks.getGroomerDashboardSummary.mockResolvedValue({});
+    apiMocks.getGroomerPerformance.mockResolvedValue({});
+    apiMocks.getGroomerPendingBookingInvitations.mockResolvedValue({ items: [] });
+    apiMocks.getGroomerCurrentBooking.mockResolvedValue({
+      id: 94,
+      status: "checkup_adjustment_pending",
+      pending_check_up: {
+        amount: "18.90",
+        quoted_total_amount: "118.90",
+        details: {
+          quoted_total: "118.90",
+          display_items: [{ label: "New add-on", amount: "18.00" }],
+          addons: [{ id: 1 }, { id: 2 }],
+          manual_items: [{ key: "parking", amount: "5.00" }],
+          original_package_snapshot: { service_name: "Original service" },
+          original_addons_snapshot: [{ id: 1, name: "Original add-on", price: "10.00" }],
+        },
+      },
+    });
+    apiMocks.getGroomerBookingDetail.mockResolvedValue({
+      id: 94,
+      status: "checkup_adjustment_pending",
+      package_amount: "90.00",
+      addons_amount: "10.00",
+      final_amount: "100.00",
+      payable_amount: "100.00",
+      package_snapshot: { service_name: "Proposed service" },
+      addons_snapshot: [{ id: 1, name: "Original add-on", price: "10.00" }, { id: 2, name: "New add-on", price: "18.00" }],
+    });
+
+    await useGroomerDashboardStore.getState().fetchDashboard();
+
+    expect(useGroomerDashboardStore.getState().nextAppointment).toMatchObject({
+      totalEstimate: "$100.00",
+      packageLabel: "Original service package",
+      addonIds: [1],
+      addonLines: [{ label: "Original add-on", amount: "$10.00" }],
+      pendingCheckUp: {
+        displayItems: [{ label: "New add-on", amount: "$18.00" }],
+        details: { proposed_final_amount: "118.90", proposedAddonIds: [1, 2], proposedPersonalization: { parking: "5.00" } },
+      },
     });
   });
 

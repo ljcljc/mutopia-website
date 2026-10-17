@@ -157,15 +157,49 @@ describe("GroomerDashboardPage complete service", () => {
     vi.mocked(getAddOns).mockResolvedValue([]);
     vi.mocked(groomerPortalCheckIn).mockResolvedValue({ ok: true });
 
-    render(<MemoryRouter><GroomerDashboardPage /></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <GroomerDashboardPage />
+      </MemoryRouter>
+    );
 
     fireEvent.click(await screen.findByRole("button", { name: "I'm arrived" }));
     await waitFor(() => expect(groomerPortalCheckIn).toHaveBeenCalledWith(123));
-    expect(screen.queryByRole("dialog", { name: "Groomer check up" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Start grooming/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("dialog", { name: "Groomer check up" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /Start grooming/i })
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("UP NEXT")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Check up" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Total estimation for the service" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("Verify package and add-on")
+    ).not.toBeInTheDocument();
 
-    fireEvent.click(await screen.findByRole("button", { name: "Check up Momo" }));
-    expect(await screen.findByRole("dialog", { name: "Groomer check up" })).toBeInTheDocument();
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Check up Momo" })
+    );
+    expect(
+      await screen.findByRole("dialog", { name: "Groomer check up" })
+    ).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Close groomer check up dialog" })
+    );
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("dialog", { name: "Groomer check up" })
+      ).not.toBeInTheDocument()
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Check up Momo" }));
+    expect(
+      await screen.findByRole("dialog", { name: "Groomer check up" })
+    ).toBeInTheDocument();
   });
 
   it("restores the start service action after a completed check up", async () => {
@@ -180,9 +214,42 @@ describe("GroomerDashboardPage complete service", () => {
       service_name: "Full grooming",
     });
 
-    render(<MemoryRouter><GroomerDashboardPage /></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <GroomerDashboardPage />
+      </MemoryRouter>
+    );
 
-    expect(await screen.findByRole("button", { name: "Start grooming" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("button", { name: "Start grooming" })
+    ).toBeEnabled();
+    expect(
+      screen.getByRole("heading", { name: "Checking Momo" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Verify package and add-on")).toBeInTheDocument();
+  });
+
+  it("disables start grooming while a check-up adjustment awaits payment", async () => {
+    vi.mocked(getGroomerDashboardSummary).mockResolvedValue({});
+    vi.mocked(getGroomerPendingBookingInvitations).mockResolvedValue([]);
+    vi.mocked(getGroomerCurrentBooking).mockResolvedValue({
+      id: 123,
+      status: "checkup_adjustment_pending",
+      has_check_up: true,
+      pet_name: "Momo",
+      service_name: "Full grooming",
+    });
+
+    render(
+      <MemoryRouter>
+        <GroomerDashboardPage />
+      </MemoryRouter>
+    );
+
+    const button = await screen.findByRole("button", {
+      name: "Start grooming",
+    });
+    expect(button).toBeDisabled();
   });
 
   it("calls complete service and updates the dashboard card when the button is clicked", async () => {
@@ -447,7 +514,9 @@ describe("GroomerDashboardPage complete service", () => {
       </MemoryRouter>
     );
 
-    fireEvent.click(await screen.findByRole("button", { name: "Modify" }));
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Check up Momo" })
+    );
     await selectBeforePhoto();
     await advanceFromPhoto();
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
@@ -462,6 +531,7 @@ describe("GroomerDashboardPage complete service", () => {
         123,
         expect.objectContaining({
           add_on_ids: [7],
+          weight_value: undefined,
         })
       );
     });
@@ -518,11 +588,9 @@ describe("GroomerDashboardPage complete service", () => {
       </MemoryRouter>
     );
 
-    expect(
-      await screen.findByText("Verify package and add-on")
-    ).toBeInTheDocument();
-
-    fireEvent.click(await screen.findByRole("button", { name: "Modify" }));
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Check up Momo" })
+    );
     await selectBeforePhoto();
     await advanceFromPhoto();
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
@@ -539,9 +607,28 @@ describe("GroomerDashboardPage complete service", () => {
       );
     });
 
-    expect(await screen.findByText("$115.00")).toBeInTheDocument();
-    expect(screen.getByText("Special add-on")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Start grooming/i })).not.toBeInTheDocument();
+    expect(await screen.findByText("$95.00 + $20.00")).toBeInTheDocument();
+    expect(screen.getByText("Verify package and add-on")).toBeInTheDocument();
+    expect(screen.getAllByText("Special add-on")).toHaveLength(1);
+    expect(screen.getAllByText("Subtotal")).toHaveLength(2);
+    const estimateToggle = screen.getByRole("button", {
+      name: /Total estimation for the service\s*\$95\.00 \+ \$20\.00/,
+    });
+    expect(estimateToggle).toHaveAttribute("aria-expanded", "true");
+    fireEvent.click(estimateToggle);
+    expect(estimateToggle).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(estimateToggle);
+    expect(estimateToggle).toHaveAttribute("aria-expanded", "true");
+    expect(screen.queryByText("Additional charge")).not.toBeInTheDocument();
+    expect(screen.queryByText("GST")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Waiting for client payment")
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Service paid 2")).not.toBeInTheDocument();
+    expect(screen.queryByText("Subtotal 2")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Start grooming" })
+    ).toBeDisabled();
   });
 
   it("shows a pending refund summary after a negative check-up adjustment", async () => {
@@ -593,15 +680,17 @@ describe("GroomerDashboardPage complete service", () => {
       </MemoryRouter>
     );
 
-    fireEvent.click(await screen.findByRole("button", { name: "Modify" }));
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Check up Momo" })
+    );
     await selectBeforePhoto();
     await advanceFromPhoto();
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     fireEvent.click(screen.getByRole("button", { name: "Submit" }));
 
-    expect(await screen.findByText("Waiting for refund")).toBeInTheDocument();
-    expect(screen.getByText("-$8.00")).toBeInTheDocument();
-    expect(screen.getByText("$87.00")).toBeInTheDocument();
+    expect(await screen.findByText("$95.00 − $8.00")).toBeInTheDocument();
+    expect(screen.queryByText("Refund")).not.toBeInTheDocument();
+    expect(screen.queryByText("Waiting for refund")).not.toBeInTheDocument();
   });
 });

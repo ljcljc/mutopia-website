@@ -10,6 +10,7 @@ import {
   CustomTextarea,
   OrangeButton,
   AccordionChevron,
+  AccordionPanel,
   type FileUploadItem,
 } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
@@ -45,12 +46,14 @@ import {
   decideGroomerInvitation,
   deleteCheckInObservationPhoto,
   getAddOns,
+  getServices,
   getCheckInObservation,
   replyGroomerReview,
   saveCheckInObservation,
   submitGroomerCheckUpCheckout,
   uploadCheckInObservationPhoto,
   type AddOnOut,
+  type ServiceOut,
   type TerminateServiceIn,
 } from "@/lib/api";
 import { HttpError } from "@/lib/http";
@@ -284,14 +287,16 @@ function CurrentJobCard({
   onCheckUp: () => void;
   onStartGrooming: () => void;
 }) {
+  const needsCheckUp = !appointment.hasCheckUp;
+
   return (
     <article className="rounded-[16px] bg-white p-5 shadow-[0px_4px_6px_rgba(0,0,0,0.08)]">
       <div>
         <p className="font-comfortaa text-[12px] leading-[18px] text-[#8B6357]">
-          CURRENT JOB
+          {needsCheckUp ? "UP NEXT" : "CURRENT JOB"}
         </p>
         <h2 className="mt-1 font-comfortaa text-[20px] font-bold leading-[30px] text-[#4A2C55]">
-          Check up {appointment.petName}
+          {needsCheckUp ? "Check up" : `Checking ${appointment.petName}`}
         </h2>
       </div>
 
@@ -317,18 +322,25 @@ function CurrentJobCard({
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={onCheckUp}
-        className="mt-4 flex h-12 w-full items-center justify-center gap-3 rounded-full bg-[#3B82F6] font-comfortaa text-[16px] font-bold leading-6 text-white shadow-[0px_4px_6px_rgba(59,130,246,0.30)] transition-transform active:scale-[0.99]"
-      >
-        Check up {appointment.petName}
-      </button>
-      {appointment.hasCheckUp && normalizeStatus(appointment.status) === "checked_in" && (
+      {needsCheckUp ? (
+        <button
+          type="button"
+          onClick={onCheckUp}
+          className="mt-4 flex h-12 w-full items-center justify-center gap-3 rounded-full bg-[#6B82E9] font-comfortaa text-[16px] leading-6 text-white shadow-[0px_4px_8px_rgba(73,91,179,0.28)] transition-transform active:scale-[0.99]"
+        >
+          <Icon name="target" className="size-5" aria-hidden="true" />
+          Check up {appointment.petName}
+        </button>
+      ) : ["checked_in", "checkup_adjustment_pending"].includes(
+          normalizeStatus(appointment.status)
+        ) ? (
         <button
           type="button"
           onClick={onStartGrooming}
-          disabled={isStartingGrooming}
+          disabled={
+            isStartingGrooming ||
+            normalizeStatus(appointment.status) === "checkup_adjustment_pending"
+          }
           className="mt-4 flex h-12 w-full items-center justify-center gap-3 rounded-full bg-[#3B82F6] font-comfortaa text-[16px] font-bold leading-6 text-white shadow-[0px_4px_6px_rgba(59,130,246,0.30)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
         >
           {isStartingGrooming ? (
@@ -340,7 +352,7 @@ function CurrentJobCard({
             </>
           )}
         </button>
-      )}
+      ) : null}
     </article>
   );
 }
@@ -891,13 +903,17 @@ function ServiceTerminationModal({
 
 function TotalEstimationCard({
   appointment,
+  plain = false,
 }: {
   appointment: DashboardAppointment;
+  plain?: boolean;
 }) {
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
-    <article className="rounded-[calc(12*var(--px393))] border-2 border-solid border-[#DE6A07] bg-white p-[calc(20*var(--px393))] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] sm:rounded-xl sm:p-6">
+    <article
+      className={`rounded-[calc(12*var(--px393))] bg-white p-[calc(20*var(--px393))] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] sm:rounded-xl sm:p-6 ${plain ? "" : "border-2 border-solid border-[#DE6A07]"}`}
+    >
       <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
         <div className="flex flex-col gap-1 text-[#4A5565]">
           <h2 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">
@@ -925,7 +941,10 @@ function TotalEstimationCard({
               aria-expanded={isExpanded}
               aria-label="Toggle total estimation details"
             >
-              <AccordionChevron open={isExpanded} className="size-5 text-[#4A3C2A]" />
+              <AccordionChevron
+                open={isExpanded}
+                className="size-5 text-[#4A3C2A]"
+              />
             </button>
           </div>
 
@@ -935,7 +954,11 @@ function TotalEstimationCard({
                 <div className="flex items-center gap-2">
                   {appointment.savingsLabel ? (
                     <span className="inline-flex h-6 items-center justify-center gap-1 rounded-xl bg-[#DCFCE7] px-3 py-1 font-comfortaa text-[10px] font-bold leading-[14px] text-[#27AE60]">
-                      <Icon name="target" className="size-3.5" aria-hidden="true" />
+                      <Icon
+                        name="target"
+                        className="size-3.5"
+                        aria-hidden="true"
+                      />
                       {appointment.savingsLabel}
                     </span>
                   ) : null}
@@ -953,7 +976,10 @@ function TotalEstimationCard({
               {appointment.priceAdjustmentLines.length > 0 ? (
                 <div className="mt-2 flex w-full flex-col gap-2 border-t border-[rgba(0,0,0,0.1)] pt-2">
                   {appointment.priceAdjustmentLines.map((line) => (
-                    <AmountRow key={`${line.label}-${line.amount}`} line={line} />
+                    <AmountRow
+                      key={`${line.label}-${line.amount}`}
+                      line={line}
+                    />
                   ))}
                 </div>
               ) : null}
@@ -965,9 +991,17 @@ function TotalEstimationCard({
   );
 }
 
-function AmountRow({ line }: { line: DashboardAmountLine }) {
+function AmountRow({
+  line,
+  className = "text-[#4A3C2A]",
+}: {
+  line: DashboardAmountLine;
+  className?: string;
+}) {
   return (
-    <div className="flex items-start justify-between gap-3 font-comfortaa text-[12px] font-bold leading-4 text-[#4A3C2A]">
+    <div
+      className={`flex items-start justify-between gap-3 font-comfortaa text-[12px] font-bold leading-4 ${className}`}
+    >
       <p className="min-w-0 flex-1 break-words">{line.label}</p>
       {line.amount ? (
         <p className="shrink-0 text-right">{line.amount}</p>
@@ -1045,6 +1079,7 @@ function PriceInput({
       label={label}
       type="number"
       step="0.01"
+      min="0"
       value={value}
       onChange={(event) => onChange(event.target.value)}
       placeholder="Enter price"
@@ -1098,10 +1133,17 @@ function GroomerCheckUpModal({
   const [arrivalObservationNote, setArrivalObservationNote] = useState("");
   const [observationLocked, setObservationLocked] = useState(false);
   const [beforePhotoError, setBeforePhotoError] = useState("");
-  const [weightValue, setWeightValue] = useState("60");
+  const [weightValue, setWeightValue] = useState("");
   const [weightUnit, setWeightUnit] = useState("lbs");
+  const [services, setServices] = useState<ServiceOut[]>([]);
+  const [selectedServiceId, setSelectedServiceId] = useState<number | null>(
+    null
+  );
   const [addOns, setAddOns] = useState<AddOnOut[]>([]);
   const [selectedAddOnIds, setSelectedAddOnIds] = useState<number[]>([]);
+  const [addOnQuantities, setAddOnQuantities] = useState<
+    Record<number, number>
+  >({});
   const [personalization, setPersonalization] = useState<
     Record<string, string>
   >({});
@@ -1116,13 +1158,41 @@ function GroomerCheckUpModal({
     setArrivalObservationNote("");
     setObservationLocked(false);
     setBeforePhotoError("");
-    setWeightValue(appointment?.weightValue || "60");
+    setWeightValue(appointment?.weightValue || "");
     setWeightUnit(normalizeCheckUpWeightUnit(appointment?.weightUnit));
+    setSelectedServiceId(
+      appointment?.pendingCheckUp?.details?.service_id ??
+        appointment?.serviceId ??
+        null
+    );
+    getServices(
+      appointment?.petType === "dog" || appointment?.petType === "cat"
+        ? { pet_type: appointment.petType }
+        : undefined
+    )
+      .then(setServices)
+      .catch(() => setServices([]));
     setAddOns([]);
-    const initialSelectedAddOnIds = appointment?.addonIds ?? [];
+    const initialSelectedAddOnIds =
+      appointment?.pendingCheckUp?.details?.proposedAddonIds ??
+      appointment?.addonIds ??
+      [];
     setSelectedAddOnIds(initialSelectedAddOnIds);
-    setPersonalization({});
-    setDescription("");
+    setAddOnQuantities({
+      ...(appointment?.addonQuantities ?? {}),
+      ...Object.fromEntries(
+        (appointment?.pendingCheckUp?.details?.addons ?? []).map((item) => [
+          item.id,
+          item.quantity ?? 1,
+        ])
+      ),
+    });
+    setPersonalization(
+      appointment?.pendingCheckUp?.details?.proposedPersonalization ??
+        appointment?.currentPersonalization ??
+        {}
+    );
+    setDescription(appointment?.pendingCheckUp?.details?.description ?? "");
     setIsApproved(true);
     setIsSubmitting(false);
     getAddOns()
@@ -1164,9 +1234,18 @@ function GroomerCheckUpModal({
     }
   }, [
     appointment?.addonIds,
+    appointment?.addonQuantities,
+    appointment?.currentPersonalization,
     appointment?.id,
+    appointment?.pendingCheckUp?.details?.description,
+    appointment?.pendingCheckUp?.details?.addons,
+    appointment?.pendingCheckUp?.details?.service_id,
+    appointment?.pendingCheckUp?.details?.proposedAddonIds,
+    appointment?.pendingCheckUp?.details?.proposedPersonalization,
     appointment?.weightUnit,
     appointment?.weightValue,
+    appointment?.serviceId,
+    appointment?.petType,
     open,
   ]);
 
@@ -1311,6 +1390,14 @@ function GroomerCheckUpModal({
 
     setIsSubmitting(true);
     try {
+      if (
+        Object.values(personalization).some(
+          (value) => value.trim() !== "" && Number(value) < 0
+        )
+      ) {
+        toast.error("Manual amounts cannot be negative");
+        return;
+      }
       const normalizedPersonalization = Object.entries(personalization).reduce<
         Record<string, string>
       >((next, [key, value]) => {
@@ -1320,9 +1407,13 @@ function GroomerCheckUpModal({
         return next;
       }, {});
       const result = await submitGroomerCheckUpCheckout(bookingId, {
-        weight_value: weightValue,
+        service_id: selectedServiceId,
+        weight_value: weightValue.trim() || undefined,
         weight_unit: weightUnit,
         add_on_ids: selectedAddOnIds,
+        add_on_quantities: Object.fromEntries(
+          selectedAddOnIds.map((id) => [id, addOnQuantities[id] || 1])
+        ),
         personalization: normalizedPersonalization,
         description,
       });
@@ -1355,10 +1446,7 @@ function GroomerCheckUpModal({
   };
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(nextOpen) => !nextOpen && onClose()}
-    >
+    <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
       <DialogContent
         showCloseButton={false}
         overlayClassName={isMobile ? "service-area-dialog-overlay" : undefined}
@@ -1376,13 +1464,23 @@ function GroomerCheckUpModal({
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="shrink-0 px-[calc(24*var(--px393))] pb-[calc(12*var(--px393))] pt-[calc(24*var(--px393))] sm:px-6 sm:pb-3 sm:pt-6">
             <div className="flex flex-col gap-[14px]">
-              <div>
-                <h2 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">
-                  Groomer check up
-                </h2>
-                <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
-                  We&apos;ll show before and after photo to pet owner
-                </p>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="font-comfortaa text-[16px] font-semibold leading-7 text-[#4A3C2A]">
+                    Groomer check up
+                  </h2>
+                  <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
+                    We&apos;ll show before and after photo to pet owner
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex size-5 shrink-0 items-center justify-center text-[#4A5565] transition-colors hover:text-[#4A3C2A]"
+                  aria-label="Close groomer check up dialog"
+                >
+                  <XIcon className="size-4 stroke-[1.5]" aria-hidden="true" />
+                </button>
               </div>
 
               <div className="flex flex-wrap gap-2">
@@ -1428,6 +1526,23 @@ function GroomerCheckUpModal({
 
               {activeTab === "weight" ? (
                 <div className="flex min-h-[130px] flex-col gap-3 rounded-[12px] bg-white p-5 shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)]">
+                  <label className="flex w-full flex-col gap-2 font-comfortaa text-[14px] text-[#4a3c2a]">
+                    Service
+                    <select
+                      aria-label="Service"
+                      value={selectedServiceId ?? ""}
+                      onChange={(event) =>
+                        setSelectedServiceId(Number(event.target.value))
+                      }
+                      className="h-9 rounded-xl border border-gray-200 bg-white px-3"
+                    >
+                      {services.map((service) => (
+                        <option key={service.id} value={service.id}>
+                          {service.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
                   <p className="font-comfortaa text-[14px] font-bold leading-5 text-[#DE6A07]">
                     Verify weight with pet owner
                   </p>
@@ -1487,17 +1602,40 @@ function GroomerCheckUpModal({
                   </div>
                   <div className="grid w-full grid-cols-1 gap-4">
                     {addOns.map((addOn) => (
-                      <CommonCheckbox
-                        key={addOn.id}
-                        name={addOn.name}
-                        description={addOn.description ?? undefined}
-                        price={formatAddOnPrice(addOn.price)}
-                        duration={addOn.service_time || undefined}
-                        checked={selectedAddOnIds.includes(addOn.id)}
-                        onCheckedChange={(checked) =>
-                          toggleAddOn(addOn.id, checked)
-                        }
-                      />
+                      <div key={addOn.id} className="flex items-center gap-3">
+                        <div className="min-w-0 flex-1">
+                          <CommonCheckbox
+                            key={addOn.id}
+                            name={addOn.name}
+                            description={addOn.description ?? undefined}
+                            price={formatAddOnPrice(addOn.price)}
+                            duration={addOn.service_time || undefined}
+                            checked={selectedAddOnIds.includes(addOn.id)}
+                            onCheckedChange={(checked) =>
+                              toggleAddOn(addOn.id, checked)
+                            }
+                          />
+                        </div>
+                        {selectedAddOnIds.includes(addOn.id) && (
+                          <input
+                            aria-label={`${addOn.name} quantity`}
+                            type="number"
+                            min={1}
+                            step={1}
+                            value={addOnQuantities[addOn.id] || 1}
+                            onChange={(event) =>
+                              setAddOnQuantities((current) => ({
+                                ...current,
+                                [addOn.id]: Math.max(
+                                  1,
+                                  Math.floor(Number(event.target.value) || 1)
+                                ),
+                              }))
+                            }
+                            className="h-9 w-16 rounded-lg border border-gray-200 px-2"
+                          />
+                        )}
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -1509,7 +1647,7 @@ function GroomerCheckUpModal({
                     Personalized service
                   </p>
                   <p className="font-comfortaa text-[10px] leading-4 text-[#4A5565]">
-                    Enter a negative amount when this item should be refunded.
+                    Enter a non-negative amount for each applicable item.
                   </p>
                   {PERSONALIZATION_FIELDS.map((field) => (
                     <PriceInput
@@ -1588,8 +1726,18 @@ function PackageAndAddonCard({
   appointment: DashboardAppointment;
   onModify: () => void;
 }) {
+  const [isExpanded, setIsExpanded] = useState(true);
   const hasAddons = appointment.addonLines.length > 0;
   const pendingCheckUp = appointment.pendingCheckUp;
+  const adjustment = pendingCheckUp
+    ? parseMoneyValue(pendingCheckUp.amount) *
+      (pendingCheckUp.direction === "refund" ? -1 : 1)
+    : 0;
+  const proposedTotal =
+    pendingCheckUp?.details?.proposed_final_amount ?? appointment.totalEstimate;
+  const totalLabel = pendingCheckUp
+    ? `${formatMoneyValue(parseMoneyValue(proposedTotal) - adjustment)} ${adjustment < 0 ? "−" : "+"} ${formatMoneyValue(Math.abs(adjustment))}`
+    : appointment.totalEstimate;
 
   return (
     <article className="rounded-[12px] bg-white p-6 shadow-[0px_8px_6px_rgba(0,0,0,0.10)]">
@@ -1598,77 +1746,92 @@ function PackageAndAddonCard({
           Verify package and add-on
         </h2>
 
-        <div className="flex items-center justify-between gap-3">
-          <p className="min-w-0 flex-1 font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
+        <button
+          type="button"
+          onClick={() => setIsExpanded((value) => !value)}
+          aria-expanded={isExpanded}
+          className="flex w-full cursor-pointer items-center justify-between gap-3 text-left"
+        >
+          <span className="min-w-0 flex-1 font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">
             Total estimation for the service
-          </p>
-          <div className="flex shrink-0 items-start gap-2">
-            <p className="text-right font-comfortaa text-[16px] font-semibold leading-7 text-[#DE6A07]">
-              {appointment.totalEstimate}
-            </p>
-            <Icon
-              name="chevron-down"
-              className="mt-1 size-5 rotate-180 text-[#8B6357]"
-              aria-hidden="true"
+          </span>
+          <span className="flex shrink-0 items-start gap-2">
+            <span className="text-right font-comfortaa text-[16px] font-semibold leading-7 text-[#DE6A07]">
+              {totalLabel}
+            </span>
+            <AccordionChevron
+              open={isExpanded}
+              className="mt-1 size-5 text-[#8B6357]"
             />
-          </div>
-        </div>
+          </span>
+        </button>
 
-        <div className="flex flex-col gap-1">
-          <p className="font-comfortaa text-[10px] leading-3 text-[#4A3C2A]">
-            {appointment.packageLabel}
-          </p>
-          <div>
-            {appointment.packageLines.map((line) => (
-              <AmountRow key={`${line.label}-${line.amount}`} line={line} />
-            ))}
-          </div>
-          <div className="border-t border-[#4A3C2A] pt-1">
-            <AmountRow
-              line={{ label: "Subtotal", amount: appointment.packageSubtotal }}
-            />
-          </div>
-        </div>
-
-        {hasAddons ? (
+        <AccordionPanel
+          open={isExpanded}
+          contentClassName="flex flex-col gap-3"
+        >
           <div className="flex flex-col gap-1">
             <p className="font-comfortaa text-[10px] leading-3 text-[#4A3C2A]">
-              Add-on
+              {appointment.packageLabel}
             </p>
             <div>
-              {appointment.addonLines.map((line) => (
+              {appointment.packageLines.map((line) => (
                 <AmountRow key={`${line.label}-${line.amount}`} line={line} />
               ))}
             </div>
             <div className="border-t border-[#4A3C2A] pt-1">
               <AmountRow
-                line={{ label: "Subtotal", amount: appointment.addonSubtotal }}
+                line={{
+                  label: "Subtotal",
+                  amount: appointment.packageSubtotal,
+                }}
               />
             </div>
           </div>
-        ) : null}
 
-        {appointment.priceAdjustmentLines.length > 0 ? (
-          <div className="border-t border-[#4A3C2A] pt-1">
-            {appointment.priceAdjustmentLines.map((line) => (
-              <AmountRow key={`${line.label}-${line.amount}`} line={line} />
-            ))}
-          </div>
-        ) : null}
+          {hasAddons ? (
+            <div className="flex flex-col gap-1">
+              <p className="font-comfortaa text-[10px] leading-3 text-[#4A3C2A]">
+                Add-on
+              </p>
+              <div>
+                {appointment.addonLines.map((line) => (
+                  <AmountRow key={`${line.label}-${line.amount}`} line={line} />
+                ))}
+              </div>
+              <div className="border-t border-[#4A3C2A] pt-1">
+                <AmountRow
+                  line={{
+                    label: "Subtotal",
+                    amount: appointment.addonSubtotal,
+                  }}
+                />
+              </div>
+            </div>
+          ) : null}
 
-        {pendingCheckUp ? (
-          <PendingCheckUpBill pendingCheckUp={pendingCheckUp} />
-        ) : null}
+          {appointment.priceAdjustmentLines.length > 0 ? (
+            <div className="border-t border-[#4A3C2A] pt-1">
+              {appointment.priceAdjustmentLines.map((line) => (
+                <AmountRow key={`${line.label}-${line.amount}`} line={line} />
+              ))}
+            </div>
+          ) : null}
 
-        <OrangeButton
-          type="button"
-          variant="secondary"
-          size="compact"
-          className="mt-1 w-[87px]"
-          onClick={onModify}
-        >
-          Modify
-        </OrangeButton>
+          {pendingCheckUp?.displayItems.length ? (
+            <PendingCheckUpBill pendingCheckUp={pendingCheckUp} />
+          ) : null}
+
+          <OrangeButton
+            type="button"
+            variant="secondary"
+            size="compact"
+            className="mt-1 w-[87px]"
+            onClick={onModify}
+          >
+            Modify
+          </OrangeButton>
+        </AccordionPanel>
       </div>
     </article>
   );
@@ -1679,84 +1842,31 @@ function PendingCheckUpBill({
 }: {
   pendingCheckUp: PendingCheckUpSummary;
 }) {
-  const isRefund = pendingCheckUp.direction === "refund";
-  const statusText = isRefund
-    ? "Waiting for refund"
-    : "Waiting for client payment";
-  const billLabel = isRefund ? "Service refund 2" : "Service paid 2";
-  const detailItems = pendingCheckUp.details?.items ?? [];
-  const proposedFinalAmount = pendingCheckUp.details?.proposed_final_amount;
-  const displayItems =
-    detailItems.length > 0
-      ? detailItems
-      : [{ description: "Check-in adjustment", amount: pendingCheckUp.amount }];
-
+  const subtotal = pendingCheckUp.displayItems.reduce(
+    (sum, item) => sum + parseMoneyValue(item.amount),
+    0
+  );
   return (
-    <div className="flex flex-col gap-3 rounded-[12px] bg-[#FAF9F7] p-4 shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)]">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="font-comfortaa text-[10px] leading-3 text-[#4A3C2A]">
-            Check-in adjustment
-          </p>
-          <p className="mt-1 font-comfortaa text-[12px] font-bold leading-[17.5px] text-[#4A3C2A]">
-            {billLabel}
-          </p>
-        </div>
-        <span
-          className={`inline-flex rounded-[12px] px-2 py-1 text-center font-comfortaa text-[10px] font-bold leading-[14px] text-white ${isRefund ? "bg-[#2563EB]" : "bg-[#DE6A07]"}`}
-        >
-          {statusText}
-        </span>
-      </div>
-
-      <div className="rounded-[12px] bg-white px-4 py-3">
-        <p className="font-comfortaa text-[10px] leading-3 text-[#4A3C2A]">
-          Add-on
-        </p>
-        <div className="mt-2 space-y-1.5">
-          {displayItems.map((item, index) => {
-            const itemAmount =
-              typeof item.amount === "string" ? item.amount : "";
-            const itemLabel =
-              typeof item.description === "string" && item.description.trim()
-                ? item.description.trim()
-                : typeof item.kind === "string" && item.kind.trim()
-                  ? item.kind.trim()
-                  : "Check-in adjustment";
-
-            return (
-              <div
-                key={`${itemLabel}-${index}`}
-                className="flex items-start justify-between gap-3 font-comfortaa text-[12px] leading-[18px] text-[#4A3C2A]"
-              >
-                <p className="min-w-0 flex-1 break-words">{itemLabel}</p>
-                <p className="shrink-0 text-right">
-                  {itemAmount || pendingCheckUp.amount}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-        <div className="mt-3 border-t border-[#E5E7EB] pt-2">
-          <div className="flex items-center justify-between gap-3">
-            <span className="font-comfortaa text-[10px] leading-[12px] text-[#6B7280]">
-              {isRefund ? "Refund total" : "Subtotal 2"}
-            </span>
-            <span
-              className={`font-comfortaa text-[16px] font-bold leading-6 ${isRefund ? "text-[#2563EB]" : "text-[#4A2C55]"}`}
-            >
-              {isRefund ? `-${pendingCheckUp.amount}` : pendingCheckUp.amount}
-            </span>
-          </div>
-          {proposedFinalAmount ? (
-            <p className="mt-1 font-comfortaa text-[10px] leading-[12px] text-[#6B7280]">
-              New total:{" "}
-              {proposedFinalAmount.startsWith("$")
-                ? proposedFinalAmount
-                : `$${proposedFinalAmount}`}
-            </p>
-          ) : null}
-        </div>
+    <div className="flex flex-col gap-1 border-t border-[#4A3C2A] pt-2 font-comfortaa text-[#DE6A07]">
+      <p className="text-[10px] leading-3">Check-in adjustment</p>
+      {pendingCheckUp.displayItems.map((item) => (
+        <AmountRow
+          key={`${item.label}-${item.amount}`}
+          line={item}
+          className="text-[#DE6A07]"
+        />
+      ))}
+      <div className="border-t border-[#4A3C2A] pt-1">
+        <AmountRow
+          line={{
+            label: "Subtotal",
+            amount:
+              subtotal < 0
+                ? `-${formatMoneyValue(-subtotal)}`
+                : formatMoneyValue(subtotal),
+          }}
+          className="text-[#DE6A07]"
+        />
       </div>
     </div>
   );
@@ -2090,7 +2200,9 @@ export default function GroomerDashboardPage() {
     "on_the_way",
     "checked_in",
   ].includes(normalizedAppointmentStatus);
-  const showCurrentJob = ["checked_in", "checkup_adjustment_pending"].includes(normalizedAppointmentStatus);
+  const showCurrentJob = ["checked_in", "checkup_adjustment_pending"].includes(
+    normalizedAppointmentStatus
+  );
   const showInProgressJob = normalizedAppointmentStatus === "in_progress";
   const showPendingReportJob = normalizedAppointmentStatus === "pending_report";
   const showCompletedServiceJob = ["completed", "reviewed"].includes(
@@ -2405,16 +2517,24 @@ export default function GroomerDashboardPage() {
                 />
               ) : effectiveAppointment && showCurrentJob ? (
                 <>
-                  <PackageAndAddonCard
-                    appointment={effectiveAppointment}
-                    onModify={() => setIsCheckUpOpen(true)}
-                  />
+                  {effectiveAppointment.hasCheckUp ? (
+                    <PackageAndAddonCard
+                      appointment={effectiveAppointment}
+                      onModify={() => setIsCheckUpOpen(true)}
+                    />
+                  ) : null}
                   <CurrentJobCard
                     appointment={effectiveAppointment}
                     isStartingGrooming={isStartingGrooming}
                     onCheckUp={() => setIsCheckUpOpen(true)}
                     onStartGrooming={handleStartGrooming}
                   />
+                  {!effectiveAppointment.hasCheckUp ? (
+                    <TotalEstimationCard
+                      appointment={effectiveAppointment}
+                      plain
+                    />
+                  ) : null}
                 </>
               ) : effectiveAppointment && showTravelActions ? (
                 <>
