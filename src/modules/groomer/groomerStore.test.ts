@@ -218,6 +218,8 @@ describe("groomer dashboard current booking selection", () => {
       id: 94,
       status: "checkup_adjustment_pending",
       package_amount: "90.00",
+      mobile_van_service_amount: "25.00",
+      safety_insurance_amount: "10.00",
       addons_amount: "10.00",
       final_amount: "100.00",
       payable_amount: "100.00",
@@ -230,6 +232,12 @@ describe("groomer dashboard current booking selection", () => {
     expect(useGroomerDashboardStore.getState().nextAppointment).toMatchObject({
       totalEstimate: "$100.00",
       packageLabel: "Original service package",
+      packageLines: [
+        { label: "Original service", amount: "$90.00" },
+        { label: "Mobile van service", amount: "$25.00" },
+        { label: "Safety insurance", amount: "$10.00" },
+      ],
+      packageSubtotal: "$125.00",
       addonIds: [1],
       addonLines: [{ label: "Original add-on", amount: "$10.00" }],
       pendingCheckUp: {

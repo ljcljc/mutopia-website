@@ -386,10 +386,15 @@ function getAddonIds(items: Record<string, unknown>[]): number[] {
 
 function mapPackageAndAddonBreakdown(record: Record<string, unknown>) {
   const packageSnapshot = getNestedRecord(record, ["package_snapshot", "package", "service_detail", "service"]);
-  const packageItems = getRecordArray(packageSnapshot, ["items", "package_items"]);
   const packageName = getString(packageSnapshot, ["service_name", "name"], getString(record, ["service_name"], "Package"));
   const packageAmount = getAmount(record, ["package_amount"]) ?? getAmount(packageSnapshot, ["price"]);
-  const packageLines = mapAmountLines(packageItems);
+  const mobileVanAmount = getAmount(record, ["mobile_van_service_amount"]);
+  const safetyInsuranceAmount = getAmount(record, ["safety_insurance_amount"]);
+  const packageLines = [
+    { label: packageName, amount: formatBreakdownAmount(packageAmount) },
+    ...(sumAmounts(mobileVanAmount) > 0 ? [{ label: "Mobile van service", amount: formatBreakdownAmount(mobileVanAmount) }] : []),
+    ...(sumAmounts(safetyInsuranceAmount) > 0 ? [{ label: "Safety insurance", amount: formatBreakdownAmount(safetyInsuranceAmount) }] : []),
+  ];
   const addonItems = getRecordArray(record, ["addons_snapshot", "addons", "add_ons"]);
   const addonLines = mapAmountLines(addonItems);
   const membershipFee = parseAmount(getAmount(record, ["membership_fee"])) ?? 0;
@@ -401,10 +406,8 @@ function mapPackageAndAddonBreakdown(record: Record<string, unknown>) {
 
   return {
     packageLabel: `${packageName} package`,
-    packageLines: packageLines.length > 0
-      ? packageLines
-      : [{ label: packageName, amount: formatBreakdownAmount(packageAmount) }],
-    packageSubtotal: formatBreakdownAmount(packageAmount),
+    packageLines,
+    packageSubtotal: formatBreakdownAmount(sumAmounts(packageAmount, mobileVanAmount, safetyInsuranceAmount)),
     addonIds: getAddonIds(addonItems),
     addonQuantities: Object.fromEntries(addonItems.map((item) => [getOptionalNumber(item, ["id", "add_on_id", "addon_id"]), getNumber(item, ["quantity"], 1)]).filter(([id]) => id !== null)) as Record<number, number>,
     addonLines,
