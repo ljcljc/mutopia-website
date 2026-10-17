@@ -530,6 +530,7 @@ export default function BookingDetail() {
           actionKind: "cancel",
         };
       case "checked_in":
+      case "checkup_adjustment_pending":
         return {
           subtitleIncludesScheduled: true,
           progressColor: "#633479",

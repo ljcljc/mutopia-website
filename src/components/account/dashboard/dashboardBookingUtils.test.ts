@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { BookingListOut } from "@/lib/api";
-import { isBookingAbnormal, selectCurrentDashboardBooking } from "./dashboardBookingUtils";
+import { getStatusBadgeConfig, isBookingAbnormal, selectCurrentDashboardBooking } from "./dashboardBookingUtils";
 
 function makeBooking(overrides: Partial<BookingListOut>): BookingListOut {
   return {
@@ -14,6 +14,17 @@ function makeBooking(overrides: Partial<BookingListOut>): BookingListOut {
 }
 
 describe("selectCurrentDashboardBooking", () => {
+  it("shows a pending checkup adjustment as a checked-in current booking", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-30T08:00:00Z"));
+
+    const booking = makeBooking({ id: 2, status: "checkup_adjustment_pending", scheduled_time: "2026-05-30T09:00:00Z" });
+    expect(selectCurrentDashboardBooking([makeBooking({ id: 1, status: "confirmed" }), booking])?.id).toBe(2);
+    expect(getStatusBadgeConfig(booking.status)).toEqual({ label: "Groomer checked in", tone: "purple" });
+
+    vi.useRealTimers();
+  });
+
   it("prioritizes the nearest started unfinished booking over a not-started booking", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-05-30T08:00:00Z"));

@@ -29,6 +29,7 @@ export function getStatusBadgeConfig(
     case "on_the_way":
       return { label: "Traveling", tone: "green" };
     case "checked_in":
+    case "checkup_adjustment_pending":
       return { label: "Groomer checked in", tone: "purple" };
     case "in_progress":
       return { label: "Service started", tone: "purple" };
@@ -65,6 +66,7 @@ function isStartedUnfinishedStatus(status: string): boolean {
     "en_route",
     "on_the_way",
     "checked_in",
+    "checkup_adjustment_pending",
     "in_progress",
     "pending_report",
   ].includes(normalizeBookingStatus(status));
