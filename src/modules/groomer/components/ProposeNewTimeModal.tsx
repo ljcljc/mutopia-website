@@ -4,10 +4,7 @@ import { Icon } from "@/components/common/Icon";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { useIsMobile } from "@/components/ui/use-mobile";
 import { cn } from "@/components/ui/utils";
-import {
-  ALL_AVAILABLE_TIME_OPTIONS,
-  AvailableTimeCombobox,
-} from "@/modules/groomer/components/AvailableTimeCombobox";
+import { AvailableTimeCombobox, buildHalfHourOptions } from "@/modules/groomer/components/AvailableTimeCombobox";
 import type { BookingRequestDecisionTimeOption } from "@/modules/groomer/components/BookingRequestContent";
 import { toLocalDateTimeString } from "@/lib/localDateTime";
 
@@ -31,6 +28,9 @@ type SelectedTimeEntry = {
 type TimeSuffix = SelectedTimeEntry["suffix"];
 
 const MAX_ENTRIES = 6;
+const FIRST_AVAILABLE_HOUR = 8;
+const LAST_AVAILABLE_HOUR = 21;
+const PROPOSED_TIME_OPTIONS = buildHalfHourOptions(FIRST_AVAILABLE_HOUR * 60, LAST_AVAILABLE_HOUR * 60);
 
 function isPmTime(value: string) {
   const normalized = normalizeTimeInput(value);
@@ -72,6 +72,9 @@ function buildInitialModalState(
   const initialEntries = initialTimeOptions
     .map(parseInitialTimeOption)
     .filter((entry): entry is SelectedTimeEntry => Boolean(entry))
+    .filter((entry, index, entries) =>
+      entries.findIndex((candidate) => candidate.date === entry.date && candidate.time === entry.time) === index,
+    )
     .slice(0, MAX_ENTRIES);
   const parsedSlots = initialServiceSlots
     .map((slot) => parseServiceSlot(slot))
@@ -84,13 +87,7 @@ function buildInitialModalState(
   return {
     selectedDate: baseDate,
     currentDate: new Date(baseDate.getFullYear(), baseDate.getMonth(), 1),
-    selectedEntries: initialEntries.length
-      ? initialEntries
-      : parsedSlots.slice(0, MAX_ENTRIES).map((slot) => ({
-          date: formatDateToISO(slot.date),
-          suffix: slot.suffix,
-          time: null,
-        })),
+    selectedEntries: initialEntries,
   };
 }
 
@@ -207,7 +204,7 @@ export function ProposeNewTimeModal({
   const handleDateChange = (date: Date) => {
     setSelectedDate(date);
     const dateKey = formatDateToISO(date);
-    const existingEntry = selectedEntries.find((entry) => entry.date === dateKey && entry.time);
+    const existingEntry = selectedEntries.find((entry) => entry.date === dateKey);
     setPendingTime(existingEntry?.time ?? "");
   };
 
@@ -221,6 +218,10 @@ export function ProposeNewTimeModal({
 
     const normalizedTime = normalizeTimeInput(value);
     if (!normalizedTime) return;
+    if (!PROPOSED_TIME_OPTIONS.includes(normalizedTime)) {
+      setValidationError("Please choose a listed time");
+      return;
+    }
 
     const nextEntry = {
       date: formatDateToISO(selectedDate),
@@ -228,20 +229,8 @@ export function ProposeNewTimeModal({
       time: normalizedTime,
     };
 
-    const alreadySelected = selectedEntries.some((entry) => entry.date === nextEntry.date && entry.time === nextEntry.time);
-
-    if (alreadySelected) {
-      setPendingTime(normalizedTime);
-      return;
-    }
-
     setSelectedEntries((current) => {
-      const emptyDateEntryIndex = current.findIndex(
-        (entry) => entry.date === nextEntry.date && entry.suffix === nextEntry.suffix && !entry.time,
-      );
-      if (emptyDateEntryIndex !== -1) {
-        return current.map((entry, index) => (index === emptyDateEntryIndex ? nextEntry : entry));
-      }
+      if (current.some((entry) => entry.date === nextEntry.date && entry.time === nextEntry.time)) return current;
 
       if (current.length >= MAX_ENTRIES) return current;
 
@@ -251,6 +240,9 @@ export function ProposeNewTimeModal({
   };
 
   const handleRemoveEntry = (entryToRemove: SelectedTimeEntry) => {
+    if (selectedDate && formatDateToISO(selectedDate) === entryToRemove.date && pendingTime === entryToRemove.time) {
+      setPendingTime("");
+    }
     setSelectedEntries((current) =>
       current.filter(
         (entry) =>
@@ -265,6 +257,10 @@ export function ProposeNewTimeModal({
 
   const handleSubmit = async () => {
     if (!onSubmit) return;
+    if (pendingTime && !PROPOSED_TIME_OPTIONS.includes(normalizeTimeInput(pendingTime) ?? "")) {
+      setValidationError("Please choose a listed time");
+      return;
+    }
 
     const timeOptions = selectedEntries
       .map((entry) => buildDecisionTimeOption(entry))
@@ -319,8 +315,15 @@ export function ProposeNewTimeModal({
 
           <div className="min-h-0 flex-1 overflow-y-auto px-[calc(20*var(--px393))] pb-[calc(20*var(--px393))] sm:px-5 sm:pb-5">
             <div className="rounded-[12px] border border-[#BBF7D0] bg-[#F0FDF4] p-3">
-              <p className="font-comfortaa text-[14px] font-bold leading-[22px] text-[#4A3C2A]">Select date and time period</p>
-              <p className="mt-1 font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">Choose up to 6 dates and time periods</p>
+              <p className="font-comfortaa text-[14px] font-bold leading-[22px] text-[#4A3C2A]">Select date and time</p>
+              <p className="mt-1 font-comfortaa text-[12.25px] leading-[17.5px] text-[#4A5565]">Choose up to 6 proposed times</p>
+
+              {(initialServiceSlots?.length || initialServiceSlot) ? (
+                <div className="mt-3 font-comfortaa text-[12px] leading-5 text-[#4A3C2A]">
+                  <span className="font-bold">Customer requested: </span>
+                  {(initialServiceSlots?.length ? initialServiceSlots : [initialServiceSlot]).join(", ")}
+                </div>
+              ) : null}
 
               <div className="mt-3 rounded-[16px] bg-white px-4 py-3" onClick={(event) => event.stopPropagation()}>
                 <Calendar
@@ -345,7 +348,11 @@ export function ProposeNewTimeModal({
                 <AvailableTimeCombobox
                   value={pendingTime}
                   onValueChange={handleAddTime}
-                  options={ALL_AVAILABLE_TIME_OPTIONS}
+                  options={PROPOSED_TIME_OPTIONS}
+                  selectedValues={selectedEntries
+                    .filter((entry) => selectedDate && entry.date === formatDateToISO(selectedDate))
+                    .map((entry) => entry.time)
+                    .filter((time): time is string => Boolean(time))}
                 />
                 {validationError ? (
                   <p role="alert" className="mt-2 font-comfortaa text-[12px] font-bold leading-4 text-[#DE1507]">
@@ -362,7 +369,7 @@ export function ProposeNewTimeModal({
                         <Icon name="check" className="size-[8px] text-white" aria-hidden="true" />
                       </div>
                       <p className="font-comfortaa text-[12px] font-bold leading-4 text-[#467900]">
-                        {selectedEntries.length} periods selected.
+                        {selectedEntries.length} times selected.
                         <br />
                         {isMaxReached ? "You have reached the maximum available times." : `You can choose ${remainingSlots} more available times.`}
                       </p>

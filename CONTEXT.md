@@ -21,3 +21,13 @@ _Avoid_: Published report, preliminary client report
 **Published Health Report**:
 The groomer-approved health report available to the pet owner.
 _Avoid_: Draft report, generated report
+
+## Booking Requests
+
+**Requested time period**:
+A date and AM or PM period selected by the customer as an acceptable appointment window. It is a preference, not a specific appointment time.
+_Avoid_: Proposed time
+
+**Proposed time**:
+A specific date and clock time offered by the groomer for the customer to confirm. Several proposed times may fall on the same date.
+_Avoid_: Requested time period

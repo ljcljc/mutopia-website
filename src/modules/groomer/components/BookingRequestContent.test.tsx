@@ -81,4 +81,32 @@ describe("BookingRequestInteraction", () => {
     expect(screen.queryByRole("button", { name: "Propose new time" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Pass appointment" })).toBeInTheDocument();
   });
+
+  it("recalculates expanded details height when proposed times replace the booking form", () => {
+    let measuredHeight = 300;
+    const scrollHeight = vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation(() => measuredHeight);
+    const props = {
+      expanded: true,
+      passAppointmentContextLabel: "BOOKING REQUEST",
+      passAppointmentReturnLabel: "Go back",
+      onConfirmOriginalTime: vi.fn(),
+      onProposeNewTime: vi.fn(),
+      onDecline: vi.fn(),
+    };
+
+    try {
+      const { container, rerender } = render(
+        <BookingRequestInteraction {...props} request={{ ...proposedRequest, invitationStatus: "pending", proposedTimeOptions: [] }} />,
+      );
+      expect(container.querySelector('[style*="height: 300px"]')).not.toBeNull();
+
+      measuredHeight = 120;
+      rerender(<BookingRequestInteraction {...props} request={proposedRequest} />);
+
+      expect(screen.getByText("Waiting for pet owner confirmation")).toBeInTheDocument();
+      expect(container.querySelector('[style*="height: 120px"]')).not.toBeNull();
+    } finally {
+      scrollHeight.mockRestore();
+    }
+  });
 });

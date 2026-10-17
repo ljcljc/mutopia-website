@@ -192,7 +192,7 @@ export function BookingRequestContent({
       element.removeEventListener("transitionend", handleTransitionEnd);
       if (frameId) window.cancelAnimationFrame(frameId);
     };
-  }, [expanded]);
+  }, [expanded, hasProposedTime, request.proposedTimeOptions?.length]);
 
   useEffect(() => {
     if (!selectedTimeOption) {

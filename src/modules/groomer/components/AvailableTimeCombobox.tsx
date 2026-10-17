@@ -9,7 +9,7 @@ function formatTimeOption(totalMinutes: number): string {
   return `${String(hours24).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 }
 
-function buildHalfHourOptions(startMinutes: number, endMinutes: number): string[] {
+export function buildHalfHourOptions(startMinutes: number, endMinutes: number): string[] {
   const options: string[] = [];
   for (let minutes = startMinutes; minutes <= endMinutes; minutes += 30) {
     options.push(formatTimeOption(minutes));
@@ -31,14 +31,17 @@ export function AvailableTimeCombobox({
   value,
   onValueChange,
   options,
+  selectedValues = [value],
 }: {
   value: string;
   onValueChange: (value: string) => void;
   options: string[];
+  selectedValues?: string[];
 }) {
   const [open, setOpen] = useState(false);
-  const filteredOptions = value
-    ? options.filter((option) => option.toLowerCase().includes(value.toLowerCase()))
+  const [search, setSearch] = useState<string | null>(null);
+  const filteredOptions = search
+    ? options.filter((option) => option.toLowerCase().includes(search.toLowerCase()))
     : options;
 
   return (
@@ -49,9 +52,13 @@ export function AvailableTimeCombobox({
             value={value}
             onChange={(event) => {
               onValueChange(event.target.value);
+              setSearch(event.target.value);
               setOpen(true);
             }}
-            onFocus={() => setOpen(true)}
+            onFocus={() => {
+              setSearch(null);
+              setOpen(true);
+            }}
             onKeyDown={(event) => {
               if (event.key === "Enter") setOpen(false);
             }}
@@ -60,7 +67,10 @@ export function AvailableTimeCombobox({
           />
           <button
             type="button"
-            onClick={() => setOpen((current) => !current)}
+            onClick={() => {
+              setSearch(null);
+              setOpen((current) => !current);
+            }}
             aria-label="Toggle available time options"
             className="absolute inset-y-0 right-0 flex w-8 items-center justify-center rounded-r-[8px]"
           >
@@ -82,11 +92,12 @@ export function AvailableTimeCombobox({
               type="button"
               onClick={() => {
                 onValueChange(option);
+                setSearch(null);
                 setOpen(false);
               }}
               className={cn(
                 "flex h-9 w-full items-center rounded-[4px] px-2 text-left font-comfortaa text-[14px] leading-5 text-[#6B6B6B] hover:bg-amber-50",
-                value === option ? "text-[#DE6A07]" : "",
+                selectedValues.includes(option) ? "bg-amber-50 text-[#DE6A07]" : "",
               )}
             >
               {option}
