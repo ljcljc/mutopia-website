@@ -51,7 +51,7 @@ export default function DashboardHeroCard() {
   return (
     <div className="rounded-xl bg-[#E2FFE8] p-5 shadow-[0px_8px_12px_0px_rgba(0,0,0,0.1)]">
       <div
-        className="flex cursor-pointer items-center justify-between rounded-[14px] border border-[#4A5565] p-[13px] transition-colors duration-200 hover:bg-white/40"
+        className="flex cursor-pointer flex-col items-start gap-3 rounded-[14px] border border-[#4A5565] p-[13px] transition-colors duration-200 hover:bg-white/40 sm:flex-row sm:items-center sm:justify-between"
         role="button"
         tabIndex={0}
         onClick={() => navigate(`/account/bookings/${currentBooking.id}`)}
@@ -82,11 +82,14 @@ export default function DashboardHeroCard() {
             )}
           </div>
         </div>
-        <div className="ml-3 flex shrink-0 items-center gap-1.5">
+        <div className="flex w-full min-w-0 items-center justify-between gap-1.5 sm:ml-3 sm:w-auto sm:shrink-0 sm:justify-start">
           <StatusBadge
+            monochrome
             status={currentBooking.status}
             heroStage={currentBooking.hero_stage}
             scheduledTime={currentBooking.scheduled_time_utc || currentBooking.scheduled_time}
+            hasHealthReport={currentBooking.has_health_report}
+            refundedAmount={currentBooking.refunded_amount}
           />
           <Icon name="nav-next" className="size-4 text-[#99A1AF]" />
         </div>

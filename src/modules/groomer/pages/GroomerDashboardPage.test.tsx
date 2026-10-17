@@ -13,6 +13,7 @@ import {
   getGroomerDashboardSummary,
   getGroomerPerformance,
   getGroomerPendingBookingInvitations,
+  groomerPortalCheckIn,
   saveCheckInObservation,
   submitGroomerCheckUpCheckout,
   uploadCheckInObservationPhoto,
@@ -33,6 +34,7 @@ vi.mock("@/lib/api", async (importOriginal) => {
     getGroomerDashboardSummary: vi.fn(),
     getGroomerPerformance: vi.fn(),
     getGroomerPendingBookingInvitations: vi.fn(),
+    groomerPortalCheckIn: vi.fn(),
     saveCheckInObservation: vi.fn(),
     submitGroomerCheckUpCheckout: vi.fn(),
     uploadCheckInObservationPhoto: vi.fn(),
@@ -140,6 +142,47 @@ describe("GroomerDashboardPage complete service", () => {
       isCompletingService: false,
       isTerminatingService: false,
     });
+  });
+
+  it("checks in on arrival and opens check up only from the next action", async () => {
+    vi.mocked(getGroomerDashboardSummary).mockResolvedValue({});
+    vi.mocked(getGroomerPendingBookingInvitations).mockResolvedValue([]);
+    vi.mocked(getGroomerCurrentBooking).mockResolvedValue({
+      id: 123,
+      status: "traveling",
+      pet_name: "Momo",
+      pet_breed: "Poodle",
+      service_name: "Full grooming",
+    });
+    vi.mocked(getAddOns).mockResolvedValue([]);
+    vi.mocked(groomerPortalCheckIn).mockResolvedValue({ ok: true });
+
+    render(<MemoryRouter><GroomerDashboardPage /></MemoryRouter>);
+
+    fireEvent.click(await screen.findByRole("button", { name: "I'm arrived" }));
+    await waitFor(() => expect(groomerPortalCheckIn).toHaveBeenCalledWith(123));
+    expect(screen.queryByRole("dialog", { name: "Groomer check up" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Start grooming/i })).not.toBeInTheDocument();
+
+    fireEvent.click(await screen.findByRole("button", { name: "Check up Momo" }));
+    expect(await screen.findByRole("dialog", { name: "Groomer check up" })).toBeInTheDocument();
+  });
+
+  it("restores the start service action after a completed check up", async () => {
+    vi.mocked(getGroomerDashboardSummary).mockResolvedValue({});
+    vi.mocked(getGroomerPendingBookingInvitations).mockResolvedValue([]);
+    vi.mocked(getGroomerCurrentBooking).mockResolvedValue({
+      id: 123,
+      status: "checked_in",
+      has_check_up: true,
+      pet_name: "Momo",
+      pet_breed: "Poodle",
+      service_name: "Full grooming",
+    });
+
+    render(<MemoryRouter><GroomerDashboardPage /></MemoryRouter>);
+
+    expect(await screen.findByRole("button", { name: "Start grooming" })).toBeInTheDocument();
   });
 
   it("calls complete service and updates the dashboard card when the button is clicked", async () => {
@@ -498,6 +541,7 @@ describe("GroomerDashboardPage complete service", () => {
 
     expect(await screen.findByText("$115.00")).toBeInTheDocument();
     expect(screen.getByText("Special add-on")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Start grooming/i })).not.toBeInTheDocument();
   });
 
   it("shows a pending refund summary after a negative check-up adjustment", async () => {

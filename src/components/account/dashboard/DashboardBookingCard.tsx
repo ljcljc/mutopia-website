@@ -52,6 +52,8 @@ function BookingItem({ booking }: { booking: BookingListOut }) {
           status={booking.status}
           heroStage={booking.hero_stage}
           scheduledTime={booking.scheduled_time_utc || booking.scheduled_time}
+          hasHealthReport={booking.has_health_report}
+          refundedAmount={booking.refunded_amount}
         />
         <div className="flex items-center justify-between gap-[12px]">
           <div className="min-w-0 flex-1">
@@ -103,6 +105,8 @@ function BookingItem({ booking }: { booking: BookingListOut }) {
             status={booking.status}
             heroStage={booking.hero_stage}
             scheduledTime={booking.scheduled_time_utc || booking.scheduled_time}
+            hasHealthReport={booking.has_health_report}
+            refundedAmount={booking.refunded_amount}
           />
           <Icon name="nav-next" className="size-[16px] text-[#99A1AF]" />
         </div>

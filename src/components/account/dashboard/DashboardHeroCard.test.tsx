@@ -60,7 +60,9 @@ describe("DashboardHeroCard", () => {
     renderHeroCard();
 
     expect(screen.getByText("Bravo")).toBeInTheDocument();
-    expect(screen.getByText("Traveling")).toBeInTheDocument();
+    const badge = screen.getByText("Groomer is on the way").parentElement;
+    expect(badge).toHaveClass("border-[#4C4C4C]", "text-[#4C4C4C]");
+    expect(badge?.querySelector("svg")).toBeInTheDocument();
     expect(screen.queryByText("Alpha")).not.toBeInTheDocument();
   });
 
@@ -76,6 +78,16 @@ describe("DashboardHeroCard", () => {
     fireEvent.click(screen.getByRole("button"));
 
     expect(screen.getByText("Booking detail page")).toBeInTheDocument();
+  });
+
+  it("shows Ready for service with a green check badge", () => {
+    useAccountStore.setState({ upcomingBookings: [makeBooking({ status: "confirmed" })] });
+
+    renderHeroCard();
+
+    const badge = screen.getByText("Ready for service").parentElement;
+    expect(badge).toHaveClass("bg-[#E8FAE9]", "text-[#427D3E]", "rounded-xl");
+    expect(badge?.querySelector("svg")).toBeInTheDocument();
   });
 
   it("renders the nearest not-started booking when there is no started booking", () => {
@@ -94,7 +106,7 @@ describe("DashboardHeroCard", () => {
     );
 
     expect(screen.getByText("Mochi")).toBeInTheDocument();
-    expect(screen.getByText("Waiting for groomer match")).toBeInTheDocument();
+    expect(screen.getByText("Waiting for groomer match").parentElement).toHaveClass("border-[#4C4C4C]", "text-[#4C4C4C]");
   });
 
   it("renders the latest completed booking from history", () => {
@@ -113,5 +125,24 @@ describe("DashboardHeroCard", () => {
 
     expect(screen.getByText("Mochi completed")).toBeInTheDocument();
     expect(screen.getByText("Service completed!")).toBeInTheDocument();
+  });
+
+  it.each([
+    ["awaiting_payment", undefined, false, "Waiting for payment"],
+    ["terminated", undefined, false, "Service terminated"],
+    ["terminated", "10.00", false, "Service terminated and refunded"],
+    ["canceled", undefined, false, "Service canceled"],
+    ["refunded", "10.00", false, "Service canceled and refunded"],
+    ["completed", undefined, true, "Service completed and report filled"],
+  ])("renders %s with the requested Hero label", (status, refundedAmount, hasHealthReport, label) => {
+    const booking = makeBooking({ status, refunded_amount: refundedAmount, has_health_report: hasHealthReport });
+    useAccountStore.setState({
+      upcomingBookings: status === "awaiting_payment" ? [booking] : [],
+      historyBookings: status === "awaiting_payment" ? [] : [booking],
+    });
+
+    renderHeroCard();
+
+    expect(screen.getByText(label)).toBeInTheDocument();
   });
 });

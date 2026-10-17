@@ -235,7 +235,7 @@ function TravelMapCard({
           ) : (
             <>
               <Icon name="target" className="size-5" aria-hidden="true" />
-              {isCheckedIn ? "Checked in" : "Check in"}
+              {isCheckedIn ? "Checked in" : "I'm arrived"}
             </>
           )}
         </button>
@@ -276,14 +276,14 @@ function getCompactDurationLabel(duration: string): string {
 function CurrentJobCard({
   appointment,
   isStartingGrooming,
+  onCheckUp,
   onStartGrooming,
 }: {
   appointment: DashboardAppointment;
   isStartingGrooming: boolean;
+  onCheckUp: () => void;
   onStartGrooming: () => void;
 }) {
-  const isInProgress = normalizeStatus(appointment.status) === "in_progress";
-
   return (
     <article className="rounded-[16px] bg-white p-5 shadow-[0px_4px_6px_rgba(0,0,0,0.08)]">
       <div>
@@ -291,7 +291,7 @@ function CurrentJobCard({
           CURRENT JOB
         </p>
         <h2 className="mt-1 font-comfortaa text-[20px] font-bold leading-[30px] text-[#4A2C55]">
-          Checking {appointment.petName}
+          Check up {appointment.petName}
         </h2>
       </div>
 
@@ -319,21 +319,28 @@ function CurrentJobCard({
 
       <button
         type="button"
-        onClick={onStartGrooming}
-        disabled={isStartingGrooming || isInProgress}
-        className="mt-4 flex h-12 w-full items-center justify-center gap-3 rounded-full bg-[#3B82F6] font-comfortaa text-[16px] font-bold leading-6 text-white shadow-[0px_4px_6px_rgba(59,130,246,0.30)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
+        onClick={onCheckUp}
+        className="mt-4 flex h-12 w-full items-center justify-center gap-3 rounded-full bg-[#3B82F6] font-comfortaa text-[16px] font-bold leading-6 text-white shadow-[0px_4px_6px_rgba(59,130,246,0.30)] transition-transform active:scale-[0.99]"
       >
-        {isStartingGrooming ? (
-          <Spinner size="small" color="white" />
-        ) : (
-          <>
-            <Icon name="target" className="size-5" aria-hidden="true" />
-            {isInProgress
-              ? "Service in progress"
-              : getStartServiceLabel(appointment.service)}
-          </>
-        )}
+        Check up {appointment.petName}
       </button>
+      {appointment.hasCheckUp && normalizeStatus(appointment.status) === "checked_in" && (
+        <button
+          type="button"
+          onClick={onStartGrooming}
+          disabled={isStartingGrooming}
+          className="mt-4 flex h-12 w-full items-center justify-center gap-3 rounded-full bg-[#3B82F6] font-comfortaa text-[16px] font-bold leading-6 text-white shadow-[0px_4px_6px_rgba(59,130,246,0.30)] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          {isStartingGrooming ? (
+            <Spinner size="small" color="white" />
+          ) : (
+            <>
+              <Icon name="target" className="size-5" aria-hidden="true" />
+              {getStartServiceLabel(appointment.service)}
+            </>
+          )}
+        </button>
+      )}
     </article>
   );
 }
@@ -1066,13 +1073,11 @@ function buildVisibleAddOns(
 function GroomerCheckUpModal({
   open,
   appointment,
-  dismissible = true,
   onClose,
   onSubmitted,
 }: {
   open: boolean;
   appointment: DashboardAppointment | null;
-  dismissible?: boolean;
   onClose: () => void;
   onSubmitted: (payload: {
     bookingId: number;
@@ -1352,16 +1357,10 @@ function GroomerCheckUpModal({
   return (
     <Dialog
       open={open}
-      onOpenChange={(nextOpen) => !nextOpen && dismissible && onClose()}
+      onOpenChange={(nextOpen) => !nextOpen && onClose()}
     >
       <DialogContent
         showCloseButton={false}
-        onEscapeKeyDown={
-          dismissible ? undefined : (event) => event.preventDefault()
-        }
-        onInteractOutside={
-          dismissible ? undefined : (event) => event.preventDefault()
-        }
         overlayClassName={isMobile ? "service-area-dialog-overlay" : undefined}
         className={cn(
           "border-0! bg-white! p-0! gap-0! [&>button]:top-[calc(24*var(--px393))] [&>button]:right-[calc(24*var(--px393))] sm:[&>button]:top-6 sm:[&>button]:right-6",
@@ -1564,17 +1563,15 @@ function GroomerCheckUpModal({
                 >
                   {activeTab === "personalization" ? "Submit" : "Next"}
                 </OrangeButton>
-                {dismissible ? (
-                  <OrangeButton
-                    type="button"
-                    variant="outline"
-                    fullWidth
-                    textSize={14}
-                    onClick={onClose}
-                  >
-                    Cancel
-                  </OrangeButton>
-                ) : null}
+                <OrangeButton
+                  type="button"
+                  variant="outline"
+                  fullWidth
+                  textSize={14}
+                  onClick={onClose}
+                >
+                  Cancel
+                </OrangeButton>
               </div>
             </div>
           </div>
@@ -2018,7 +2015,6 @@ export default function GroomerDashboardPage() {
   const [isCancelAppointmentModalOpen, setIsCancelAppointmentModalOpen] =
     useState(false);
   const [isCheckUpOpen, setIsCheckUpOpen] = useState(false);
-  const [isCheckUpRequired, setIsCheckUpRequired] = useState(false);
   const [isTerminateServiceOpen, setIsTerminateServiceOpen] = useState(false);
   const [bookingRequestSuccessAlert, setBookingRequestSuccessAlert] =
     useState<BookingRequestSuccessAlertKind | null>(null);
@@ -2042,6 +2038,7 @@ export default function GroomerDashboardPage() {
     applyCheckUpCheckoutPreview,
     startTravel,
     cancelTravel,
+    checkIn,
     startGrooming,
     completeService,
     terminateService,
@@ -2093,7 +2090,7 @@ export default function GroomerDashboardPage() {
     "on_the_way",
     "checked_in",
   ].includes(normalizedAppointmentStatus);
-  const showCurrentJob = normalizedAppointmentStatus === "checked_in";
+  const showCurrentJob = ["checked_in", "checkup_adjustment_pending"].includes(normalizedAppointmentStatus);
   const showInProgressJob = normalizedAppointmentStatus === "in_progress";
   const showPendingReportJob = normalizedAppointmentStatus === "pending_report";
   const showCompletedServiceJob = ["completed", "reviewed"].includes(
@@ -2152,9 +2149,18 @@ export default function GroomerDashboardPage() {
 
   const handleCheckIn = async () => {
     if (!effectiveAppointment?.id || isCheckingIn) return;
-
-    setIsCheckUpRequired(true);
-    setIsCheckUpOpen(true);
+    const bookingId = Number(effectiveAppointment.id);
+    if (!Number.isFinite(bookingId)) return;
+    try {
+      if (enableDevTravelTest) {
+        setDevTravelStatus("checked_in");
+        return;
+      }
+      await checkIn(bookingId);
+    } catch (error) {
+      console.error("Failed to check in:", error);
+      toast.error("Failed to check in");
+    }
   };
 
   const handleStartGrooming = async () => {
@@ -2401,14 +2407,12 @@ export default function GroomerDashboardPage() {
                 <>
                   <PackageAndAddonCard
                     appointment={effectiveAppointment}
-                    onModify={() => {
-                      setIsCheckUpRequired(false);
-                      setIsCheckUpOpen(true);
-                    }}
+                    onModify={() => setIsCheckUpOpen(true)}
                   />
                   <CurrentJobCard
                     appointment={effectiveAppointment}
                     isStartingGrooming={isStartingGrooming}
+                    onCheckUp={() => setIsCheckUpOpen(true)}
                     onStartGrooming={handleStartGrooming}
                   />
                 </>
@@ -2488,11 +2492,7 @@ export default function GroomerDashboardPage() {
       <GroomerCheckUpModal
         open={isCheckUpOpen}
         appointment={effectiveAppointment}
-        dismissible={!isCheckUpRequired}
-        onClose={() => {
-          setIsCheckUpRequired(false);
-          setIsCheckUpOpen(false);
-        }}
+        onClose={() => setIsCheckUpOpen(false)}
         onSubmitted={(payload) => {
           applyCheckUpCheckoutPreview(payload);
         }}

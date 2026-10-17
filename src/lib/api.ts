@@ -480,6 +480,9 @@ export interface BookingListOut {
   order_code?: string | null;
   status: string;
   hero_stage?: "handover_checkout" | "service_completed" | null;
+  has_health_report?: boolean;
+  refunded_amount?: number | string;
+  status_updated_at?: string | null;
   pet_name?: string | null;
   service_name?: string | null;
   address?: string | null;

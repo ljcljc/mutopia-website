@@ -54,19 +54,46 @@ describe("selectCurrentDashboardBooking", () => {
     vi.useRealTimers();
   });
 
-  it("returns null when there is no eligible booking", () => {
+  it("shows the latest finished booking when there is no active booking", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-30T08:00:00Z"));
+
+    const result = selectCurrentDashboardBooking([
+      makeBooking({ id: 1, status: "completed", status_updated_at: "2026-05-29T10:00:00Z" }),
+      makeBooking({ id: 2, status: "terminated", status_updated_at: "2026-05-30T07:00:00Z" }),
+      makeBooking({ id: 3, status: "canceled", status_updated_at: "2026-05-28T10:00:00Z" }),
+    ]);
+
+    expect(result?.id).toBe(2);
+
+    vi.useRealTimers();
+  });
+
+  it("prioritizes payment over future bookings and finished bookings", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-05-30T08:00:00Z"));
 
     const result = selectCurrentDashboardBooking([
       makeBooking({ id: 1, status: "completed" }),
-      makeBooking({ id: 2, status: "terminated" }),
-      makeBooking({ id: 3, status: "canceled" }),
+      makeBooking({ id: 2, status: "confirmed" }),
+      makeBooking({ id: 3, status: "awaiting_payment" }),
     ]);
 
-    expect(result).toBeNull();
+    expect(result?.id).toBe(3);
 
     vi.useRealTimers();
+  });
+
+  it("uses refund and report facts for the requested Hero labels", () => {
+    expect(getStatusBadgeConfig("terminated", null, { refunded_amount: "10.00" }).label).toBe("Service terminated and refunded");
+    expect(getStatusBadgeConfig("terminated").label).toBe("Service terminated");
+    expect(getStatusBadgeConfig("canceled", null, { refunded_amount: "10.00" }).label).toBe("Service canceled and refunded");
+    expect(getStatusBadgeConfig("canceled").label).toBe("Service canceled");
+    expect(getStatusBadgeConfig("refunded").label).toBe("Service canceled and refunded");
+    expect(getStatusBadgeConfig("completed", "service_completed", { has_health_report: true }).label).toBe("Service completed and report filled");
+    expect(getStatusBadgeConfig("completed", "service_completed", { has_health_report: false }).label).toBe("Service completed!");
+    expect(getStatusBadgeConfig("reviewed", null, { has_health_report: true }).label).toBe("Service completed and report filled");
+    expect(getStatusBadgeConfig("awaiting_payment").label).toBe("Waiting for payment");
   });
 
   it("excludes an unfinished booking more than 72 hours after its scheduled time", () => {

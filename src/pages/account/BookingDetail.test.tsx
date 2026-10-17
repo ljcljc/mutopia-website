@@ -99,6 +99,14 @@ describe("BookingDetail", () => {
     useBookingStore.getState().reset();
   });
 
+  it("shows the on-the-way status in the booking Hero", async () => {
+    renderBookingDetail(makeCompletedBooking({ status: "traveling" }));
+
+    const badgeLabel = await screen.findByText("Groomer is on the way");
+    expect(badgeLabel.parentElement).toHaveClass("bg-[#E8FAE9]");
+    expect(screen.queryByText("Traveling")).not.toBeInTheDocument();
+  });
+
   it("shows the selected appointment time for an unpaid booking after the scheduled time has passed", async () => {
     renderBookingDetail({
       id: 123,

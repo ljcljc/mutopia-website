@@ -227,7 +227,7 @@ function normalizeProposedTimeOption(option: InvitationDecisionTimeOptionIn, ind
   };
 }
 
-type DetailBadgeTone = "orange" | "green" | "purple" | "brown" | "outlined";
+type DetailBadgeTone = "orange" | "green" | "on_the_way" | "purple" | "brown" | "outlined";
 
 type DetailCardConfig = {
   subtitleIncludesScheduled: boolean;
@@ -241,6 +241,17 @@ type DetailCardConfig = {
 };
 
 function StatusBadge({ label, tone }: { label: string; tone: DetailBadgeTone }) {
+  if (tone === "on_the_way") {
+    return (
+      <div className="inline-flex h-6 w-fit items-center gap-1 rounded-xl bg-[#E8FAE9] px-3 py-1">
+        <CheckCircleIcon className="size-3.5 text-[#427D3E]" aria-hidden="true" />
+        <span className="font-comfortaa text-[10px] font-bold leading-[14px] text-[#427D3E]">
+          {label}
+        </span>
+      </div>
+    );
+  }
+
   if (tone === "green") {
     return (
       <div className="inline-flex h-6 w-fit items-center gap-1 rounded-xl bg-[#DCFCE7] px-4 py-1">
@@ -523,8 +534,8 @@ export default function BookingDetail() {
           subtitleIncludesScheduled: true,
           progressColor: "#388B5E",
           progressWidth: 74,
-          badgeLabel: "Traveling",
-          badgeTone: "green",
+          badgeLabel: "Groomer is on the way",
+          badgeTone: "on_the_way",
           nextStep: `Check in: ${scheduledDisplay}`,
           showNextStep: true,
           actionKind: "cancel",

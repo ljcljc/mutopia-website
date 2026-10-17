@@ -49,6 +49,7 @@ export type DashboardAppointment = GroomerUpNextAppointment & {
   addonSubtotal: string;
   priceAdjustmentLines: DashboardAmountLine[];
   pendingCheckUp?: PendingCheckUpSummary | null;
+  hasCheckUp?: boolean;
   review?: ReviewSummaryOut | null;
   reportInteractionState?: "awaiting_review" | "awaiting_reply";
   hasPublishedHealthReport?: boolean;
@@ -591,6 +592,7 @@ function mapDashboardAppointment(raw: unknown): DashboardAppointment | null {
     businessTimezone: getString(record, ["business_timezone"]),
     scheduledTime,
     status: getString(record, ["status"]),
+    hasCheckUp: record.has_check_up === true,
     hasPublishedHealthReport: record.has_published_health_report === true,
     healthReportPreparationStatus:
       record.health_report_preparation_status === "preparing" || record.health_report_preparation_status === "failed"
@@ -957,7 +959,8 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
 
         return {
           ...appointment,
-          status: "checked_in",
+          status: result.status === "client_confirmation_required" ? "checkup_adjustment_pending" : "checked_in",
+          hasCheckUp: true,
           weightValue,
           weightUnit,
           totalEstimate: formatBreakdownAmount(totalEstimateAmount),
@@ -1015,6 +1018,7 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
         nextAppointment: updateMatchingNextAppointment(state.nextAppointment, bookingId, (appointment) => ({
           ...appointment,
           status: "checked_in",
+          hasCheckUp: false,
         })),
       }));
     } finally {
