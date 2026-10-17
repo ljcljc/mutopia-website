@@ -475,7 +475,7 @@ describe("GroomerDashboardPage complete service", () => {
       payable_amount: "107.00",
       deposit_amount: "20.00",
       final_amount: "107.00",
-      addons_snapshot: [{ id: 7, name: "Selected add-on", price: "12.00" }],
+      addons_snapshot: [{ id: 7, name: "Selected add-on", quantity: 2, price: "12.00" }],
     } as BookingDetailOut);
     vi.mocked(getGroomerCurrentBooking).mockResolvedValue({
       id: 123,
@@ -523,6 +523,9 @@ describe("GroomerDashboardPage complete service", () => {
     await waitFor(() => {
       expect(screen.getAllByText("Selected add-on").length).toBeGreaterThan(0);
     });
+    const quantityInput = screen.getByRole("spinbutton", { name: "Selected add-on quantity" });
+    expect(quantityInput).toHaveValue(2);
+    fireEvent.change(quantityInput, { target: { value: "3" } });
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     fireEvent.click(screen.getByRole("button", { name: "Submit" }));
 
@@ -531,6 +534,7 @@ describe("GroomerDashboardPage complete service", () => {
         123,
         expect.objectContaining({
           add_on_ids: [7],
+          add_on_quantities: { 7: 3 },
           weight_value: undefined,
         })
       );
@@ -607,12 +611,12 @@ describe("GroomerDashboardPage complete service", () => {
       );
     });
 
-    expect(await screen.findByText("$95.00 + $20.00")).toBeInTheDocument();
+    expect(await screen.findByText("$115.00")).toBeInTheDocument();
     expect(screen.getByText("Verify package and add-on")).toBeInTheDocument();
     expect(screen.getAllByText("Special add-on")).toHaveLength(1);
     expect(screen.getAllByText("Subtotal")).toHaveLength(2);
     const estimateToggle = screen.getByRole("button", {
-      name: /Total estimation for the service\s*\$95\.00 \+ \$20\.00/,
+      name: /Total estimation for the service\s*\$115\.00/,
     });
     expect(estimateToggle).toHaveAttribute("aria-expanded", "true");
     fireEvent.click(estimateToggle);
@@ -689,7 +693,10 @@ describe("GroomerDashboardPage complete service", () => {
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     fireEvent.click(screen.getByRole("button", { name: "Submit" }));
 
-    expect(await screen.findByText("$95.00 − $8.00")).toBeInTheDocument();
+    expect(await screen.findByText("Verify package and add-on")).toBeInTheDocument();
+    expect(screen.getByRole("button", {
+      name: /Total estimation for the service\s*\$87\.00/,
+    })).toBeInTheDocument();
     expect(screen.queryByText("Refund")).not.toBeInTheDocument();
     expect(screen.queryByText("Waiting for refund")).not.toBeInTheDocument();
   });

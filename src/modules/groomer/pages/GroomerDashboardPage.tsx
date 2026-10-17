@@ -1141,9 +1141,7 @@ function GroomerCheckUpModal({
   );
   const [addOns, setAddOns] = useState<AddOnOut[]>([]);
   const [selectedAddOnIds, setSelectedAddOnIds] = useState<number[]>([]);
-  const [addOnQuantities, setAddOnQuantities] = useState<
-    Record<number, number>
-  >({});
+  const [addOnQuantities, setAddOnQuantities] = useState<Record<number, number>>({});
   const [personalization, setPersonalization] = useState<
     Record<string, string>
   >({});
@@ -1729,15 +1727,13 @@ function PackageAndAddonCard({
   const [isExpanded, setIsExpanded] = useState(true);
   const hasAddons = appointment.addonLines.length > 0;
   const pendingCheckUp = appointment.pendingCheckUp;
-  const adjustment = pendingCheckUp
-    ? parseMoneyValue(pendingCheckUp.amount) *
-      (pendingCheckUp.direction === "refund" ? -1 : 1)
-    : 0;
-  const proposedTotal =
-    pendingCheckUp?.details?.proposed_final_amount ?? appointment.totalEstimate;
-  const totalLabel = pendingCheckUp
-    ? `${formatMoneyValue(parseMoneyValue(proposedTotal) - adjustment)} ${adjustment < 0 ? "−" : "+"} ${formatMoneyValue(Math.abs(adjustment))}`
-    : appointment.totalEstimate;
+  const totalLabel = pendingCheckUp?.details?.proposed_final_amount
+    ? formatMoneyValue(pendingCheckUp.details.proposed_final_amount)
+    : formatMoneyValue(
+        appointment.packageLines.reduce((sum, line) => sum + parseMoneyValue(line.amount), 0) +
+          appointment.addonLines.reduce((sum, line) => sum + parseMoneyValue(line.amount), 0) +
+          appointment.priceAdjustmentLines.reduce((sum, line) => sum + parseMoneyValue(line.amount), 0)
+      );
 
   return (
     <article className="rounded-[12px] bg-white p-6 shadow-[0px_8px_6px_rgba(0,0,0,0.10)]">

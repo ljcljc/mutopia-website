@@ -100,6 +100,19 @@ describe("BookingDetail", () => {
     useBookingStore.getState().reset();
   });
 
+  it("shows the sum of package and add-ons before discounts in the package card", async () => {
+    renderBookingDetail(makeCompletedBooking({
+      discount_rate: "0.90",
+      discount_amount: "10.00",
+      final_amount: "95.00",
+      payable_amount: "95.00",
+    }));
+
+    expect(await screen.findByText("Package and add-on")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Toggle package and add-on details" }).parentElement)
+      .toHaveTextContent("$105.00");
+  });
+
   it("includes a settled personalization charge before a second check-in adjustment", async () => {
     renderBookingDetail(makeCompletedBooking({
       status: "checkup_adjustment_pending",
