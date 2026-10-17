@@ -15,6 +15,19 @@ export type GroomerUpNextAppointment = {
   businessTimezone?: string;
 };
 
+function formatTimeLeft(minutesLeft: number): string {
+  if (minutesLeft <= 0) return "";
+  const days = Math.floor(minutesLeft / 1_440);
+  const hours = Math.floor((minutesLeft % 1_440) / 60);
+  const minutes = minutesLeft % 60;
+  const parts = [
+    days > 0 ? `${days} ${days === 1 ? "day" : "days"}` : "",
+    hours > 0 ? `${hours} ${hours === 1 ? "hour" : "hours"}` : "",
+    minutes > 0 ? `${minutes} min` : "",
+  ].filter(Boolean);
+  return `${parts.join(" ")} left`;
+}
+
 export function GroomerUpNextCard({
   appointment,
   footer,
@@ -42,9 +55,7 @@ export function GroomerUpNextCard({
   }, []);
   const start = appointment.scheduledTime ? Date.parse(appointment.scheduledTime) : NaN;
   const minutesLeft = Number.isNaN(start) ? 0 : Math.ceil((start - now) / 60_000);
-  const timeLeft = minutesLeft > 0
-    ? `${minutesLeft >= 60 ? `${Math.floor(minutesLeft / 60)}h ` : ""}${minutesLeft % 60}m left`
-    : "";
+  const timeLeft = formatTimeLeft(minutesLeft);
   const viewerZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const timezoneNotice = formatTimezoneChangeNotice(appointment.businessTimezone, viewerZone, appointment.scheduledTime);
   const compactTime = appointment.time.replace(/ \(UTC[^)]*\)$/, "");
