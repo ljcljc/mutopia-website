@@ -1,3 +1,4 @@
+import { LoadingImage } from "./LoadingImage";
 import { useState, useEffect, useMemo } from "react";
 import { Icon } from "./Icon";
 import { cn } from "@/components/ui/utils";
@@ -285,7 +286,7 @@ export function FileUpload({
                             setPreviewOpen(true);
                           }}
                         >
-                          <img
+                          <LoadingImage
                             className={cn(
                               "absolute inset-0 size-full max-w-none pointer-events-none rounded-[calc(8*var(--px393))] object-cover object-center sm:rounded-[8px]",
                               layout === "inspection" &&

@@ -1,3 +1,4 @@
+import { LoadingImage } from "@/components/common/LoadingImage";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -1256,7 +1257,7 @@ export default function GroomerPhotoHealthInspectionPage() {
                               className="absolute inset-0 cursor-pointer overflow-hidden rounded-[14px]"
                               onClick={() => setReviewQueue([photo.id])}
                             >
-                              <img
+                              <LoadingImage
                                 src={photo.url}
                                 alt={photo.original_filename}
                                 className="size-full object-cover object-center"

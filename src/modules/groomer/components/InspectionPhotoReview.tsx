@@ -1,3 +1,4 @@
+import { LoadingImage } from "@/components/common/LoadingImage";
 import {
   useEffect,
   useMemo,
@@ -758,7 +759,7 @@ export function InspectionPhotoReview({
                         className="relative h-full shrink-0 overflow-hidden"
                         style={{ width: carouselSlideWidth }}
                       >
-                        <img
+                        <LoadingImage
                           src={carouselPhoto.url}
                           alt={carouselPhoto.original_filename || config.label}
                           draggable={false}

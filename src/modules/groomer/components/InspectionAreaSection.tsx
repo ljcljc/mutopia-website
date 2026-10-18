@@ -1,3 +1,4 @@
+import { LoadingImage } from "@/components/common/LoadingImage";
 import { useRef } from "react";
 import { FileUpload, Icon, type FileUploadItem } from "@/components/common";
 import type { InspectionPhotoOut } from "@/lib/api";
@@ -152,7 +153,7 @@ export function InspectionAreaSection({
               className="absolute inset-0 cursor-pointer overflow-hidden rounded-[14px]"
               onClick={() => onOpen(areaPhoto)}
             >
-              <img
+              <LoadingImage
                 src={areaPhoto.url}
                 alt={areaPhoto.original_filename}
                 className="absolute inset-0 size-full max-w-none pointer-events-none rounded-[14px] object-cover object-top"
@@ -228,7 +229,7 @@ export function InspectionAreaSection({
               className="absolute inset-0 cursor-pointer overflow-hidden rounded-[14px]"
               onClick={() => onOpen(photo)}
             >
-              <img
+              <LoadingImage
                 src={photo.url}
                 alt={photo.original_filename}
                 className="absolute inset-0 size-full max-w-none pointer-events-none rounded-[14px] object-cover object-center"
