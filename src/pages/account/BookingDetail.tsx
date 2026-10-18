@@ -549,7 +549,7 @@ export default function BookingDetail() {
           subtitleIncludesScheduled: true,
           progressColor: "#633479",
           progressWidth: 98.5,
-          badgeLabel: detail?.hero_stage === "handover_checkout" ? "Handover & Checkout" : "Health report pending",
+          badgeLabel: detail?.hero_stage === "handover_checkout" ? "Handover & Checkout" : "Service completed",
           badgeTone: "purple",
           nextStep: detail?.hero_stage === "handover_checkout" ? "Review health report and tip your groomer" : "Waiting for health report",
           showNextStep: true,

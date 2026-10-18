@@ -85,6 +85,8 @@ describe("selectCurrentDashboardBooking", () => {
   });
 
   it("uses refund and report facts for the requested Hero labels", () => {
+    expect(getStatusBadgeConfig("pending_report")).toEqual({ label: "Service completed", tone: "orange" });
+    expect(getStatusBadgeConfig("pending_report", "handover_checkout")).toEqual({ label: "Handover & Checkout", tone: "purple" });
     expect(getStatusBadgeConfig("terminated", null, { refunded_amount: "10.00" }).label).toBe("Service terminated and refunded");
     expect(getStatusBadgeConfig("terminated").label).toBe("Service terminated");
     expect(getStatusBadgeConfig("canceled", null, { refunded_amount: "10.00" }).label).toBe("Service canceled and refunded");

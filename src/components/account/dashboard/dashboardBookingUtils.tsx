@@ -37,7 +37,7 @@ export function getStatusBadgeConfig(
       return { label: "Waiting for payment", tone: "orange" };
     case "pending_report":
       if (heroStage === "handover_checkout") return { label: "Handover & Checkout", tone: "purple" };
-      return { label: "Health report pending", tone: "orange" };
+      return { label: "Service completed", tone: "orange" };
     case "waiting_tip":
       return { label: "Handover & Checkout", tone: "purple" };
     case "completed":

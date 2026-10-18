@@ -558,6 +558,13 @@ describe("BookingDetail", () => {
     });
   });
 
+  it("shows Service completed while waiting for the health report", async () => {
+    renderBookingDetail(makeCompletedBooking({ status: "pending_report" }));
+
+    expect(await screen.findByText("Service completed")).toBeInTheDocument();
+    expect(screen.getByText("Waiting for health report")).toBeInTheDocument();
+  });
+
   it("keeps the optional tip entry available when the owner enters zero", async () => {
     renderBookingDetail(makeCompletedBooking());
 

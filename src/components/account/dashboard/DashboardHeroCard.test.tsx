@@ -127,6 +127,16 @@ describe("DashboardHeroCard", () => {
     expect(screen.getByText("Service completed!")).toBeInTheDocument();
   });
 
+  it("shows Service completed while the health report is pending", () => {
+    useAccountStore.setState({
+      upcomingBookings: [makeBooking({ status: "pending_report" })],
+    });
+
+    renderHeroCard();
+
+    expect(screen.getByText("Service completed")).toBeInTheDocument();
+  });
+
   it.each([
     ["awaiting_payment", undefined, false, "Waiting for payment"],
     ["terminated", undefined, false, "Service terminated"],
