@@ -128,7 +128,7 @@ function isPaidPaymentStatus(status: string) {
 }
 
 function isPendingCheckoutStatus(status: string) {
-  return ["open", "created", "pending", "requires_payment_method", "requires_confirmation", "requires_action", "processing"].includes(
+  return ["open", "created", "pending", "requires_confirmation", "requires_action", "processing"].includes(
     status.toLowerCase(),
   );
 }
@@ -769,6 +769,20 @@ export default function BookingDetail() {
         }, null) ?? null
     );
   }, [detail?.payments]);
+  const canCheckTipPayment = Boolean(pendingTipPayment?.retryable);
+  const isTipPaymentProcessing = Boolean(pendingTipPayment && pendingTipPayment.status.toLowerCase() !== "open");
+
+  useEffect(() => {
+    if (!pendingTipPayment || (pendingTipPayment.status.toLowerCase() !== "open" && !pendingTipPayment.retryable)) return;
+    const amount = parseAmount(pendingTipPayment.amount);
+    const matchingOption = tipOptions.find((option) => option.amount === amount);
+    if (matchingOption) {
+      setSelectedTipPercent(matchingOption.percent);
+      setCustomTipAmount("");
+    } else {
+      setCustomTipAmount(amount.toFixed(2));
+    }
+  }, [pendingTipPayment, tipOptions]);
   const hasPaidTip = Boolean(
     detail?.tip_status === "succeeded" || detail?.payments?.some((payment) => payment.kind.toLowerCase() === "tip" && isPaidPaymentStatus(payment.status)),
   );
@@ -927,17 +941,33 @@ export default function BookingDetail() {
   const handleCreateTipSession = async () => {
     if (!detail?.id || isCreatingTipSession) return;
 
-    if (selectedTipAmount < 0) {
+    const amount = canCheckTipPayment && pendingTipPayment ? parseAmount(pendingTipPayment.amount) : selectedTipAmount;
+    if (amount < 0) {
       toast.error("Tip amount cannot be negative");
       return;
     }
 
     setIsCreatingTipSession(true);
     try {
-      const session = await createTipSession(detail.id, selectedTipAmount.toFixed(2));
+      const session = await createTipSession(detail.id, amount.toFixed(2));
+      if (!session) {
+        throw new Error("Tip payment returned an empty response");
+      }
       if ("tip_decision" in session && session.tip_decision === "declined") {
         setDetail(await getBookingDetail(detail.id));
         toast.success("No tip added");
+        setIsCreatingTipSession(false);
+        return;
+      }
+      if ("status" in session && session.status === "succeeded") {
+        setDetail(await getBookingDetail(detail.id));
+        toast.success("Tip payment received");
+        setIsCreatingTipSession(false);
+        return;
+      }
+      if ("status" in session && session.status === "verification_required") {
+        setDetail(await getBookingDetail(detail.id));
+        toast.info("Checking your tip payment. Please try again shortly.");
         setIsCreatingTipSession(false);
         return;
       }
@@ -954,7 +984,13 @@ export default function BookingDetail() {
       if (actionError instanceof HttpError && actionError.status === 409) {
         const updatedDetail = await getBookingDetail(detail.id);
         setDetail(updatedDetail);
-        toast.error("Tip is not available for this booking");
+        if (actionError.message.includes("manual verification")) {
+          toast.error("Please contact support to confirm the previous tip payment before trying again.");
+        } else if (actionError.message.includes("previous tip")) {
+          toast.error("We could not confirm the previous payment status. Please try again shortly.");
+        } else {
+          toast.error("Tip is not available for this booking");
+        }
       } else {
         toast.error("Failed to start tip payment");
       }
@@ -1415,7 +1451,7 @@ export default function BookingDetail() {
                                   <button
                                     key={option.percent}
                                     type="button"
-                                    disabled={Boolean(pendingTipPayment) || isCreatingTipSession}
+                                    disabled={isTipPaymentProcessing || isCreatingTipSession}
                                     onClick={() => {
                                       setSelectedTipPercent(option.percent);
                                       setCustomTipAmount("");
@@ -1439,7 +1475,7 @@ export default function BookingDetail() {
                               step="0.01"
                               value={customTipAmount}
                               onChange={(event) => setCustomTipAmount(event.target.value)}
-                              disabled={Boolean(pendingTipPayment) || isCreatingTipSession}
+                              disabled={isTipPaymentProcessing || isCreatingTipSession}
                               placeholder="Enter tip"
                               leftElement={<span className="mr-1 font-comfortaa text-[12.25px] text-[#717182]">$</span>}
                               inputClassName="font-normal"
@@ -1447,7 +1483,11 @@ export default function BookingDetail() {
 
                             {pendingTipPayment ? (
                               <p className="font-comfortaa text-[11px] font-normal leading-4 text-[#8B6357]">
-                                Your tip payment is processing. The tip entry will update after payment confirmation.
+                                {isTipPaymentProcessing
+                                  ? canCheckTipPayment
+                                    ? "Your tip payment needs confirmation. Check its status before changing the amount."
+                                    : "Your tip payment is processing. The tip entry will update after payment confirmation."
+                                  : "Your tip payment was not completed. Continue to checkout or change the tip amount."}
                               </p>
                             ) : null}
 
@@ -1458,10 +1498,10 @@ export default function BookingDetail() {
                               fullWidth
                               className="bg-[#8B6357] hover:bg-[#8B6357]/90 active:bg-[#8B6357]/90 focus-visible:bg-[#8B6357]/90"
                               loading={isCreatingTipSession}
-                              disabled={Boolean(pendingTipPayment)}
+                              disabled={isTipPaymentProcessing && !canCheckTipPayment}
                               onClick={handleCreateTipSession}
                             >
-                              {pendingTipPayment ? "Tip payment processing" : "Confirm & release Groomer"}
+                              {canCheckTipPayment ? "Check tip payment" : isTipPaymentProcessing ? "Tip payment processing" : pendingTipPayment ? "Continue tip payment" : "Confirm & release Groomer"}
                             </OrangeButton>
                           </>
                         </div>

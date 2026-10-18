@@ -519,6 +519,7 @@ export interface BookingPaymentOut {
   amount: number | string;
   currency: string;
   status: string;
+  retryable?: boolean;
   payment_method?: PaymentMethodOut | null;
 }
 
