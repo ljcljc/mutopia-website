@@ -448,12 +448,24 @@ function CompletedServiceCard({
     !appointment.review;
 
   return (
-    <article className="rounded-[16px] bg-[linear-gradient(180deg,#633479_0%,#7A4777_52%,#8B6357_100%)] p-5 shadow-[0px_4px_6px_rgba(74,44,85,0.3)]">
+    <article
+      className={cn(
+        "rounded-[16px] p-5 shadow-[0px_4px_6px_rgba(74,44,85,0.3)]",
+        isPendingReport
+          ? "bg-[linear-gradient(180deg,#5C3D6D_0%,#6E4F69_52%,#806354_100%)]"
+          : "bg-[linear-gradient(180deg,#633479_0%,#7A4777_52%,#8B6357_100%)]"
+      )}
+    >
       <div className="min-w-0">
         <p className="font-comfortaa text-[12px] leading-[18px] text-white/70">
           IN PROGRESS
         </p>
-        <h2 className="truncate font-comfortaa text-[20px] font-bold leading-[30px] text-white">
+        <h2
+          className={cn(
+            "truncate font-comfortaa text-[20px] leading-[30px] text-white",
+            !isPendingReport && "font-bold"
+          )}
+        >
           {isPendingReport
             ? "Pending report"
             : isHandoverCheckout
@@ -470,7 +482,12 @@ function CompletedServiceCard({
             className="size-14 rounded-full object-cover"
           />
           <div className="min-w-0">
-            <p className="truncate font-comfortaa text-[16px] font-bold leading-6 text-white">
+            <p
+              className={cn(
+                "truncate font-comfortaa text-[16px] leading-6 text-white",
+                !isPendingReport && "font-bold"
+              )}
+            >
               {appointment.petName}
             </p>
             <p className="truncate font-comfortaa text-[13px] leading-[19.5px] text-white/70">
@@ -501,7 +518,7 @@ function CompletedServiceCard({
         <button
           type="button"
           onClick={onFillReport}
-          className={dashboardWhiteButtonClass}
+          className="mt-4 flex h-12 w-full cursor-pointer items-center justify-center rounded-full bg-[linear-gradient(180deg,#C58B35_0%,#DEA83E_100%)] font-comfortaa text-[16px] leading-6 text-white shadow-[0px_4px_8px_rgba(0,0,0,0.14)] transition-transform hover:brightness-105 active:scale-[0.99]"
         >
           Let's finish AI health report
         </button>
