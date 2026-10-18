@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import AccountContentContainer from "@/components/layout/AccountContentContainer";
 import { CustomInput, CustomRadio, OrangeButton, AccordionChevron, AccordionPanel } from "@/components/common";
@@ -17,6 +17,7 @@ import {
   createTipSession,
   getCancelQuote,
   getBookingDetail,
+  getTipPaymentStatus,
   getPaymentSessionRedirectUrl,
   updateReview,
   type AddressOut,
@@ -128,7 +129,7 @@ function isPaidPaymentStatus(status: string) {
 }
 
 function isPendingCheckoutStatus(status: string) {
-  return ["open", "created", "pending", "requires_confirmation", "requires_action", "processing"].includes(
+  return ["open", "complete", "unpaid", "created", "pending", "requires_confirmation", "requires_action", "processing"].includes(
     status.toLowerCase(),
   );
 }
@@ -356,10 +357,18 @@ export default function BookingDetail() {
   const [selectedTipPercent, setSelectedTipPercent] = useState(12);
   const [customTipAmount, setCustomTipAmount] = useState("");
   const [isCreatingTipSession, setIsCreatingTipSession] = useState(false);
+  const [tipPaymentStatus, setTipPaymentStatus] = useState<"available" | "open" | "verification_required" | "succeeded" | null>(null);
+  const [tipVerificationTimedOut, setTipVerificationTimedOut] = useState(false);
+  const tipStatusRequestInFlight = useRef(false);
+  const initialTipStatusCheckedFor = useRef<number | null>(null);
   const { addresses, isLoadingAddresses, fetchAddresses } = useAccountStore();
   const loadBookingDetailForEdit = useBookingStore((state) => state.loadBookingDetailForEdit);
 
   const isForbiddenError = (error: unknown) => error instanceof HttpError && error.status === 403;
+
+  const hasTipPaymentRecord = detail?.payments?.some((payment) =>
+    payment.kind.toLowerCase() === "tip" && isPendingCheckoutStatus(payment.status)
+  ) ?? false;
 
   useEffect(() => {
     const id = Number(bookingId);
@@ -383,6 +392,69 @@ export default function BookingDetail() {
         setIsLoading(false);
       });
   }, [bookingId]);
+
+  const refreshTipPayment = useCallback(async () => {
+    const id = Number(bookingId);
+    if (!id || tipStatusRequestInFlight.current) return;
+    tipStatusRequestInFlight.current = true;
+    try {
+      const result = await getTipPaymentStatus(id);
+      setTipPaymentStatus(result.status);
+      if (result.status === "succeeded" || result.status === "available") {
+        sessionStorage.removeItem(`tip-checkout-${id}`);
+      }
+      try {
+        setDetail(await getBookingDetail(id));
+      } catch (error) {
+        console.error("Failed to refresh booking detail after tip status check:", error);
+      }
+    } catch (error) {
+      console.error("Failed to check tip payment:", error);
+      if (hasTipPaymentRecord) setTipPaymentStatus("verification_required");
+    } finally {
+      tipStatusRequestInFlight.current = false;
+    }
+  }, [bookingId, hasTipPaymentRecord]);
+
+  useEffect(() => {
+    if (!detail?.id) return;
+    const handleReturn = () => {
+      setIsCreatingTipSession(false);
+      setTipVerificationTimedOut(false);
+      void refreshTipPayment();
+    };
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") handleReturn();
+    };
+    window.addEventListener("pageshow", handleReturn);
+    window.addEventListener("focus", handleReturn);
+    document.addEventListener("visibilitychange", handleVisibility);
+    const returningFromTipCheckout = sessionStorage.getItem(`tip-checkout-${detail.id}`) === "1" ||
+      new URLSearchParams(window.location.search).has("tip_payment");
+    if (initialTipStatusCheckedFor.current !== detail.id && (hasTipPaymentRecord || returningFromTipCheckout)) {
+      initialTipStatusCheckedFor.current = detail.id;
+      void refreshTipPayment();
+    }
+    return () => {
+      window.removeEventListener("pageshow", handleReturn);
+      window.removeEventListener("focus", handleReturn);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [detail?.id, hasTipPaymentRecord, refreshTipPayment]);
+
+  useEffect(() => {
+    if (tipPaymentStatus !== "verification_required" || tipVerificationTimedOut) return;
+    const startedAt = Date.now();
+    const timer = window.setInterval(() => {
+      if (Date.now() - startedAt >= 30000) {
+        window.clearInterval(timer);
+        setTipVerificationTimedOut(true);
+        return;
+      }
+      void refreshTipPayment();
+    }, 3000);
+    return () => window.clearInterval(timer);
+  }, [tipPaymentStatus, tipVerificationTimedOut, refreshTipPayment]);
 
   const petSnapshot = (detail?.pet_snapshot as Record<string, unknown> | undefined) ?? {};
   const addressSnapshot = (detail?.address_snapshot as Record<string, unknown> | undefined) ?? {};
@@ -761,6 +833,7 @@ export default function BookingDetail() {
     tipOptions.find((option) => option.percent === selectedTipPercent)?.amount ?? 0;
   const selectedTipAmount = customTipAmount.trim() ? parseAmount(customTipAmount) : selectedPresetTipAmount;
   const pendingTipPayment = useMemo(() => {
+    if (tipPaymentStatus === "available" || tipPaymentStatus === "succeeded") return null;
     return (
       detail?.payments
         ?.filter((payment) => payment.kind.toLowerCase() === "tip" && isPendingCheckoutStatus(payment.status))
@@ -768,9 +841,11 @@ export default function BookingDetail() {
           return !latest || payment.id > latest.id ? payment : latest;
         }, null) ?? null
     );
-  }, [detail?.payments]);
-  const canCheckTipPayment = Boolean(pendingTipPayment?.retryable);
-  const isTipPaymentProcessing = Boolean(pendingTipPayment && pendingTipPayment.status.toLowerCase() !== "open");
+  }, [detail?.payments, tipPaymentStatus]);
+  const isTipPaymentProcessing = tipPaymentStatus === "verification_required" || Boolean(
+    pendingTipPayment && tipPaymentStatus !== "open" && pendingTipPayment.status.toLowerCase() !== "open"
+  );
+  const canCheckTipPayment = isTipPaymentProcessing;
 
   useEffect(() => {
     if (!pendingTipPayment || (pendingTipPayment.status.toLowerCase() !== "open" && !pendingTipPayment.retryable)) return;
@@ -783,7 +858,7 @@ export default function BookingDetail() {
       setCustomTipAmount(amount.toFixed(2));
     }
   }, [pendingTipPayment, tipOptions]);
-  const hasPaidTip = Boolean(
+  const hasPaidTip = tipPaymentStatus === "succeeded" || Boolean(
     detail?.tip_status === "succeeded" || detail?.payments?.some((payment) => payment.kind.toLowerCase() === "tip" && isPaidPaymentStatus(payment.status)),
   );
   const isTipDecisionComplete = hasPaidTip || detail?.tip_decision === "declined" || detail?.tip_decision === "system_closed";
@@ -941,7 +1016,12 @@ export default function BookingDetail() {
   const handleCreateTipSession = async () => {
     if (!detail?.id || isCreatingTipSession) return;
 
-    const amount = canCheckTipPayment && pendingTipPayment ? parseAmount(pendingTipPayment.amount) : selectedTipAmount;
+    if (canCheckTipPayment) {
+      await refreshTipPayment();
+      return;
+    }
+
+    const amount = selectedTipAmount;
     if (amount < 0) {
       toast.error("Tip amount cannot be negative");
       return;
@@ -978,6 +1058,7 @@ export default function BookingDetail() {
       if (!redirectUrl) {
         throw new Error(`Invalid tip payment redirect URL: ${session.url}`);
       }
+      sessionStorage.setItem(`tip-checkout-${detail.id}`, "1");
       window.location.assign(redirectUrl);
     } catch (actionError) {
       console.error("Failed to create tip session:", actionError);
@@ -1481,12 +1562,12 @@ export default function BookingDetail() {
                               inputClassName="font-normal"
                             />
 
-                            {pendingTipPayment ? (
+                            {isTipPaymentProcessing || pendingTipPayment ? (
                               <p className="font-comfortaa text-[11px] font-normal leading-4 text-[#8B6357]">
                                 {isTipPaymentProcessing
-                                  ? canCheckTipPayment
-                                    ? "Your tip payment needs confirmation. Check its status before changing the amount."
-                                    : "Your tip payment is processing. The tip entry will update after payment confirmation."
+                                  ? tipVerificationTimedOut
+                                    ? "We could not confirm your tip payment yet. Check again or contact support before retrying."
+                                    : "Your tip payment needs confirmation. Check its status before changing the amount."
                                   : "Your tip payment was not completed. Continue to checkout or change the tip amount."}
                               </p>
                             ) : null}
@@ -1498,10 +1579,9 @@ export default function BookingDetail() {
                               fullWidth
                               className="bg-[#8B6357] hover:bg-[#8B6357]/90 active:bg-[#8B6357]/90 focus-visible:bg-[#8B6357]/90"
                               loading={isCreatingTipSession}
-                              disabled={isTipPaymentProcessing && !canCheckTipPayment}
                               onClick={handleCreateTipSession}
                             >
-                              {canCheckTipPayment ? "Check tip payment" : isTipPaymentProcessing ? "Tip payment processing" : pendingTipPayment ? "Continue tip payment" : "Confirm & release Groomer"}
+                              {canCheckTipPayment ? "Check tip payment" : pendingTipPayment ? "Continue tip payment" : "Confirm & release Groomer"}
                             </OrangeButton>
                           </>
                         </div>

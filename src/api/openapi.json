@@ -1506,7 +1506,7 @@
             "description": "OK",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PaymentSessionOut" }
+                "schema": { "$ref": "#/components/schemas/TipPaymentSessionOut" }
               }
             }
           }
@@ -1520,6 +1520,32 @@
           },
           "required": true
         },
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/payments/payments/tip_status": {
+      "get": {
+        "operationId": "api_payments_tip_payment_status",
+        "summary": "Tip Payment Status",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "booking_id",
+            "schema": { "title": "Booking Id", "type": "integer" },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TipPaymentStatusOut" }
+              }
+            }
+          }
+        },
+        "tags": ["payments"],
         "security": [{ "JWTAuth": [] }]
       }
     },
@@ -5387,6 +5413,27 @@
         },
         "required": ["url", "session_id", "payment_id"],
         "title": "PaymentSessionOut",
+        "type": "object"
+      },
+      "TipPaymentSessionOut": {
+        "properties": {
+          "url": { "anyOf": [{ "type": "string" }, { "type": "null" }], "default": null, "title": "Url" },
+          "session_id": { "anyOf": [{ "type": "string" }, { "type": "null" }], "default": null, "title": "Session Id" },
+          "payment_id": { "anyOf": [{ "type": "integer" }, { "type": "null" }], "title": "Payment Id" },
+          "status": { "anyOf": [{ "type": "string" }, { "type": "null" }], "default": null, "title": "Status" },
+          "booking_status": { "anyOf": [{ "type": "string" }, { "type": "null" }], "default": null, "title": "Booking Status" },
+          "tip_decision": { "anyOf": [{ "type": "string" }, { "type": "null" }], "default": null, "title": "Tip Decision" }
+        },
+        "required": ["payment_id"],
+        "title": "TipPaymentSessionOut",
+        "type": "object"
+      },
+      "TipPaymentStatusOut": {
+        "properties": {
+          "status": { "title": "Status", "type": "string" }
+        },
+        "required": ["status"],
+        "title": "TipPaymentStatusOut",
         "type": "object"
       },
       "TipSessionIn": {

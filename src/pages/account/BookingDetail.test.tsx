@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import BookingDetail from "./BookingDetail";
-import { clientConfirmBookingTime, clientDecideAddOn, createDepositSession, createReview, createTipSession, getBookingDetail, getCancelQuote, updateReview, type BookingDetailOut } from "@/lib/api";
+import { clientConfirmBookingTime, clientDecideAddOn, createDepositSession, createReview, createTipSession, getBookingDetail, getTipPaymentStatus, getCancelQuote, updateReview, type BookingDetailOut } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
 import { useBookingStore } from "@/components/booking/bookingStore";
@@ -19,6 +19,7 @@ vi.mock("@/lib/api", async (importOriginal) => {
     createTipSession: vi.fn(),
     getCancelQuote: vi.fn(),
     getBookingDetail: vi.fn(),
+    getTipPaymentStatus: vi.fn(),
     updateReview: vi.fn(),
   };
 });
@@ -45,7 +46,7 @@ function apiLocalDateTime(value: Date) {
 }
 
 function renderBookingDetail(booking: BookingDetailOut) {
-  vi.mocked(getBookingDetail).mockResolvedValueOnce(booking);
+  vi.mocked(getBookingDetail).mockResolvedValue(booking);
 
   render(
     <MemoryRouter initialEntries={[`/account/bookings/${booking.id}`]}>
@@ -98,6 +99,8 @@ function makeCompletedBooking(overrides: Partial<BookingDetailOut> = {}): Bookin
 describe("BookingDetail", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    sessionStorage.clear();
+    vi.mocked(getTipPaymentStatus).mockResolvedValue({ status: "open" });
     useBookingStore.getState().reset();
   });
 
@@ -788,6 +791,26 @@ describe("BookingDetail", () => {
     expect(createTipSession).toHaveBeenCalledWith(127, "12.60");
   });
 
+  it("clears the tip button loading state when returning from checkout", async () => {
+    renderBookingDetail(makeCompletedBooking({
+      payments: [
+        { id: 1, kind: "deposit", amount: "20.00", currency: "usd", status: "paid" },
+        { id: 7, kind: "tip", amount: "12.60", currency: "usd", status: "open" },
+      ],
+    }));
+    vi.mocked(createTipSession).mockReturnValue(new Promise(() => {}));
+
+    fireEvent.click(await screen.findByRole("button", { name: "Continue tip payment" }));
+    expect(createTipSession).toHaveBeenCalledWith(127, "12.60");
+
+    fireEvent(window, new Event("pageshow"));
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Continue tip payment" })).toBeEnabled();
+      expect(getTipPaymentStatus).toHaveBeenCalledWith(127);
+    });
+  });
+
   it("lets the owner change the amount of an open tip checkout", async () => {
     renderBookingDetail(
       makeCompletedBooking({
@@ -808,6 +831,7 @@ describe("BookingDetail", () => {
   });
 
   it("keeps the tip entry disabled for a payment still processing", async () => {
+    vi.mocked(getTipPaymentStatus).mockResolvedValue({ status: "verification_required" });
     renderBookingDetail(makeCompletedBooking({
       payments: [
         { id: 1, kind: "deposit", amount: "20.00", currency: "usd", status: "paid" },
@@ -815,24 +839,47 @@ describe("BookingDetail", () => {
       ],
     }));
 
-    expect(await screen.findByText("Your tip payment is processing. The tip entry will update after payment confirmation.")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Tip payment processing" })).toBeDisabled();
+    expect(await screen.findByText("Your tip payment needs confirmation. Check its status before changing the amount.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Check tip payment" })).toBeEnabled();
     expect(screen.getByPlaceholderText("Enter tip")).toBeDisabled();
   });
 
+  it("allows a new tip attempt after the previous checkout expires", async () => {
+    vi.mocked(getTipPaymentStatus).mockResolvedValue({ status: "available" });
+    renderBookingDetail(makeCompletedBooking({
+      payments: [
+        { id: 1, kind: "deposit", amount: "20.00", currency: "usd", status: "paid" },
+        { id: 7, kind: "tip", amount: "12.60", currency: "usd", status: "open" },
+      ],
+    }));
+
+    await waitFor(() => expect(getTipPaymentStatus).toHaveBeenCalledWith(127));
+    expect(await screen.findByRole("button", { name: "Confirm & release Groomer" })).toBeEnabled();
+  });
+
+  it("checks Stripe after returning from checkout even if the initial detail has no tip row", async () => {
+    sessionStorage.setItem("tip-checkout-127", "1");
+    vi.mocked(getTipPaymentStatus).mockResolvedValue({ status: "verification_required" });
+    renderBookingDetail(makeCompletedBooking());
+
+    await waitFor(() => expect(getTipPaymentStatus).toHaveBeenCalledWith(127));
+    expect(screen.getByRole("button", { name: "Check tip payment" })).toBeEnabled();
+    expect(createTipSession).not.toHaveBeenCalled();
+  });
+
   it("lets the owner safely recheck an uncertain direct tip payment", async () => {
+    vi.mocked(getTipPaymentStatus).mockResolvedValue({ status: "verification_required" });
     renderBookingDetail(makeCompletedBooking({
       payments: [
         { id: 1, kind: "deposit", amount: "20.00", currency: "usd", status: "paid" },
         { id: 7, kind: "tip", amount: "12.60", currency: "usd", status: "processing", retryable: true },
       ],
     }));
-    vi.mocked(createTipSession).mockReturnValue(new Promise(() => {}));
-
     expect(await screen.findByText("Your tip payment needs confirmation. Check its status before changing the amount.")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Enter tip")).toBeDisabled();
     fireEvent.click(screen.getByRole("button", { name: "Check tip payment" }));
-    expect(createTipSession).toHaveBeenCalledWith(127, "12.60");
+    expect(getTipPaymentStatus).toHaveBeenCalledWith(127);
+    expect(createTipSession).not.toHaveBeenCalled();
   });
 
   it("submits a review for a completed booking", async () => {

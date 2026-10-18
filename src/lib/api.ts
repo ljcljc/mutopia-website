@@ -3150,6 +3150,17 @@ export async function createTipSession(
   return response.data;
 }
 
+export interface TipPaymentStatusOut {
+  status: "available" | "open" | "verification_required" | "succeeded";
+}
+
+export async function getTipPaymentStatus(bookingId: number): Promise<TipPaymentStatusOut> {
+  const response = await http.get<TipPaymentStatusOut>(
+    `/api/payments/payments/tip_status?booking_id=${bookingId}`
+  );
+  return response.data;
+}
+
 /**
  * 获取支付方式列表（分页）
  */
