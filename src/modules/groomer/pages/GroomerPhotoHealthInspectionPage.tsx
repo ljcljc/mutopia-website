@@ -246,6 +246,7 @@ function ReportGenerationLoadingScreen() {
 
 function InspectionStepActions({
   disabled,
+  previousDisabled = false,
   nextDisabled = false,
   nextLabel,
   previousLabel = "Previous",
@@ -253,6 +254,7 @@ function InspectionStepActions({
   onPrevious,
 }: {
   disabled: boolean;
+  previousDisabled?: boolean;
   nextDisabled?: boolean;
   nextLabel: string;
   previousLabel?: string;
@@ -263,7 +265,7 @@ function InspectionStepActions({
     <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-between">
       <button
         type="button"
-        disabled={disabled}
+        disabled={disabled || previousDisabled}
         onClick={onPrevious}
         className="h-12 w-full cursor-pointer rounded-full border border-white bg-transparent px-5 font-comfortaa text-[14px] text-white transition-colors hover:bg-white/10 active:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#633479] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 sm:max-w-[228px]"
       >
@@ -1090,6 +1092,20 @@ export default function GroomerPhotoHealthInspectionPage() {
   const submit = async () => {
     const latestInspection = inspectionRef.current ?? inspection;
     if (!latestInspection) return;
+    if (latestInspection.status === "analysis_failed") {
+      setSubmitting(true);
+      try {
+        await retryPhotoHealthAnalysis(bookingId);
+        setAnalysisFailed(false);
+        setInspection((current) =>
+          current ? { ...current, status: "analyzing" } : current
+        );
+      } catch {
+        setSubmitting(false);
+        setAnalysisFailed(true);
+      }
+      return;
+    }
     if (!currentNote.trim()) {
       setErrors((current) => ({
         ...current,
@@ -1357,37 +1373,6 @@ export default function GroomerPhotoHealthInspectionPage() {
               {errors.page}
             </p>
           ) : null}
-          {analysisFailed ? (
-            <div
-              role="alert"
-              className="mt-4 rounded-xl bg-red-50 p-4 text-red-700"
-            >
-              <p>
-                Health report generation failed. Your inspection is saved and
-                locked.
-              </p>
-              <button
-                type="button"
-                className="mt-3 rounded-full border border-red-700 px-4 py-2"
-                onClick={() => {
-                  setAnalysisFailed(false);
-                  setSubmitting(true);
-                  void retryPhotoHealthAnalysis(bookingId)
-                    .then(() =>
-                      setInspection((current) =>
-                        current ? { ...current, status: "analyzing" } : current
-                      )
-                    )
-                    .catch(() => {
-                      setSubmitting(false);
-                      setAnalysisFailed(true);
-                    });
-                }}
-              >
-                Retry generating report
-              </button>
-            </div>
-          ) : null}
           <InspectionStepActions
             disabled={saving}
             nextLabel={
@@ -1501,12 +1486,20 @@ export default function GroomerPhotoHealthInspectionPage() {
               {errors.page}
             </p>
           ) : null}
+          {analysisFailed ? (
+            <p
+              role="alert"
+              className="mt-4 rounded-xl bg-red-50 p-4 text-red-700"
+            >
+              Health report generation failed. Your inspection is saved and
+              locked.
+            </p>
+          ) : null}
           <InspectionStepActions
             disabled={
-              saving ||
-              submitting ||
-              inspection.locked
+              saving || submitting || (inspection.locked && !analysisFailed)
             }
+            previousDisabled={inspection.locked}
             nextDisabled={
               step6Phase === "impression" && !overallProfessionalImpression
             }

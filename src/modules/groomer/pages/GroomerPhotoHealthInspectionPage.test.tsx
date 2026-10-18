@@ -9,6 +9,7 @@ import {
   getGroomerBookingDetail,
   getPhotoHealthAnalysis,
   getPhotoHealthInspection,
+  retryPhotoHealthAnalysis,
   startPhotoHealthInspection,
   submitPhotoHealthInspection,
   updateInspectionPhoto,
@@ -24,6 +25,7 @@ vi.mock("@/lib/api", async (importOriginal) => {
     getGroomerBookingDetail: vi.fn(),
     getPhotoHealthAnalysis: vi.fn(),
     getPhotoHealthInspection: vi.fn(),
+    retryPhotoHealthAnalysis: vi.fn(),
     startPhotoHealthInspection: vi.fn(),
     updateInspectionPhoto: vi.fn(),
     uploadInspectionPhoto: vi.fn(),
@@ -420,6 +422,48 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     expect(screen.getByRole("navigation", { name: "Breadcrumb" })).toHaveTextContent(
       /Step 5 of 6 - Posture/
     );
+  });
+
+  it("retries a failed analysis from the Step 6 generate button", async () => {
+    vi.mocked(getPhotoHealthInspection).mockResolvedValue({
+      exists: true,
+      inspection: {
+        ...inspection,
+        status: "analysis_failed",
+        current_step: 6,
+        step6_phase: "notes",
+        current_note: "Coat looks healthy.",
+        overall_professional_impression: "grade_a",
+        locked: true,
+      },
+    });
+    vi.mocked(retryPhotoHealthAnalysis)
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValueOnce({ status: "pending" } as never);
+    renderPage();
+
+    const generate = await screen.findByRole("button", {
+      name: "All good! Generate Report",
+    });
+    await screen.findByText(/Health report generation failed/);
+    expect(generate).toBeEnabled();
+    expect(
+      screen.getByRole("button", { name: "Previous: Summary" })
+    ).toBeDisabled();
+    expect(
+      screen.queryByRole("button", { name: "Retry generating report" })
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(generate);
+    await waitFor(() => expect(retryPhotoHealthAnalysis).toHaveBeenCalledWith(42));
+    expect(submitPhotoHealthInspection).not.toHaveBeenCalled();
+    fireEvent.click(
+      await screen.findByRole("button", { name: "All good! Generate Report" })
+    );
+    await waitFor(() => expect(retryPhotoHealthAnalysis).toHaveBeenCalledTimes(2));
+    expect(
+      await screen.findByRole("status", { name: "Generating health report" })
+    ).toBeInTheDocument();
   });
 
   it("requires a groomer note and skips unconfirmed photo review before final report generation", async () => {
