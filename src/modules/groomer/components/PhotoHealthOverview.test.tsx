@@ -95,6 +95,20 @@ describe("PhotoHealthOverview", () => {
     expect(screen.getByText("Normal")).toHaveClass("text-[#3D8056]");
   });
 
+  it("shows Service completed on the pet card while the report is pending", () => {
+    render(
+      <PhotoHealthOverview
+        booking={{ ...booking, status: "pending_report" }}
+        arrival={arrival}
+        saving={false}
+        startLabel="Start inspection"
+        onStart={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText("Service completed")).toBeInTheDocument();
+  });
+
   it("opens the shared read-only preview at the clicked photo", () => {
     render(
       <PhotoHealthOverview

@@ -21,7 +21,7 @@ const BOOKING_STATUS_LABELS: Record<string, string> = {
   checked_in: "Checked In",
   in_progress: "In Progress",
   awaiting_payment: "Awaiting Payment",
-  pending_report: "Pending report",
+  pending_report: "Service completed",
   completed: "Completed",
   terminated: "Terminated",
   canceled: "Canceled",
