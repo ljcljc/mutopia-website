@@ -4,16 +4,25 @@ import type { PhotoHealthAreaResult } from "@/lib/api";
 export function WellnessSummaryCard({
   label,
   result,
+  assessed = true,
   iconName,
   onViewPhotos,
 }: {
   label: string;
   result: PhotoHealthAreaResult;
+  assessed?: boolean;
   iconName: IconName;
   onViewPhotos: () => void;
 }) {
-  const attention = result.status === "attention_needed";
-  const statusStyles = attention
+  const attention = assessed && result.status === "attention_needed";
+  const statusStyles = !assessed
+    ? {
+        iconBackground: "bg-[#F3F4F6]",
+        iconForeground: "text-[#6B7280]",
+        pill: "bg-[#F3F4F6] text-[#6B7280]",
+        dot: "bg-[#6B7280]",
+      }
+    : attention
     ? {
         iconBackground: "bg-[#FEF3C7]",
         iconForeground: "text-[#F59E0B]",
@@ -48,7 +57,7 @@ export function WellnessSummaryCard({
           className={`ml-auto inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 font-comfortaa text-[11px] font-medium leading-[16.5px] ${statusStyles.pill}`}
         >
           <span className={`size-1.5 rounded-full ${statusStyles.dot}`} />
-          {attention ? "Attention Needed" : "Normal"}
+          {!assessed ? "Not assessed" : attention ? "Attention Needed" : "Normal"}
         </span>
       </div>
       {attention ? (

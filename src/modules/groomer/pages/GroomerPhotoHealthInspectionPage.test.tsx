@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import GroomerPhotoHealthInspectionPage from "./GroomerPhotoHealthInspectionPage";
+import { createInspectionImagePreview } from "@/lib/imageCompression";
 import {
   deleteInspectionPhoto,
   getCheckInObservation,
@@ -222,7 +223,7 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     renderPage();
 
     fireEvent.click(await screen.findByRole("img", { name: "photo.jpg" }));
-    fireEvent.click(screen.getAllByRole("button", { name: /AI Scan/ })[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: /Run AI Check/ })[0]);
 
     await waitFor(() =>
       expect(updateInspectionPhoto).toHaveBeenCalledWith(42, 1, {
@@ -316,7 +317,7 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     ).toHaveTextContent(/Step 1 of 6 - Skin inspection/);
   });
 
-  it("allows Step 5 posture photos without an AI Scan description", async () => {
+  it("requires a description for a Step 5 posture AI check", async () => {
     vi.mocked(getPhotoHealthInspection).mockResolvedValue({
       exists: true,
       inspection: {
@@ -345,16 +346,80 @@ describe("GroomerPhotoHealthInspectionPage", () => {
       })
     );
 
-    await waitFor(() =>
-      expect(
-        screen.getByRole("navigation", { name: "Breadcrumb" })
-      ).toHaveTextContent(/Step 6 of 6 - Summary & notes/)
-    );
     expect(
-      screen.queryByText(
+      await screen.findByText(
         "Add a description for every AI Scan photo before continuing."
       )
-    ).not.toBeInTheDocument();
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("navigation", { name: "Breadcrumb" })
+    ).toHaveTextContent(/Step 5 of 6 - Posture/);
+  });
+
+  it("advances from the Step 5 posture preview when Next - Add notes is clicked", async () => {
+    vi.mocked(getPhotoHealthInspection).mockResolvedValue({
+      exists: true,
+      inspection: {
+        ...inspection,
+        current_step: 5,
+        photos: [
+          {
+            id: 81,
+            area: "posture",
+            url: "/posture.jpg",
+            original_filename: "posture.jpg",
+            normalized_mime_type: "image/jpeg",
+            classification: null,
+            finding_hints: [],
+            confirmed: false,
+          },
+        ],
+      },
+    });
+    renderPage();
+
+    fireEvent.click(await screen.findByRole("button", { name: "posture.jpg" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "Next - Add notes" })[0]);
+
+    await waitFor(() =>
+      expect(screen.getByRole("navigation", { name: "Breadcrumb" })).toHaveTextContent(
+        /Step 6 of 6 - Summary & notes/
+      )
+    );
+    expect(screen.queryByRole("dialog", { name: "Posture photo review" })).not.toBeInTheDocument();
+  });
+
+  it("keeps the Step 5 posture preview open when confirming the photo fails", async () => {
+    vi.mocked(getPhotoHealthInspection).mockResolvedValue({
+      exists: true,
+      inspection: {
+        ...inspection,
+        current_step: 5,
+        photos: [
+          {
+            id: 82,
+            area: "posture",
+            url: "/posture.jpg",
+            original_filename: "posture.jpg",
+            normalized_mime_type: "image/jpeg",
+            classification: null,
+            finding_hints: [],
+            confirmed: false,
+          },
+        ],
+      },
+    });
+    vi.mocked(updateInspectionPhoto).mockRejectedValueOnce(new Error("Save failed"));
+    renderPage();
+
+    fireEvent.click(await screen.findByRole("button", { name: "posture.jpg" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "Next - Add notes" })[0]);
+
+    await waitFor(() => expect(updateInspectionPhoto).toHaveBeenCalledOnce());
+    expect(screen.getByRole("dialog", { name: "Posture photo review" })).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "Breadcrumb" })).toHaveTextContent(
+      /Step 5 of 6 - Posture/
+    );
   });
 
   it("requires a groomer note and skips unconfirmed photo review before final report generation", async () => {
@@ -735,5 +800,21 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     ).toBeInTheDocument();
     expect(screen.getByLabelText("Upload Left eye")).toContainHTML("<svg");
     expect(screen.getByLabelText("Upload Right eye")).toContainHTML("<svg");
+
+    vi.mocked(createInspectionImagePreview).mockImplementationOnce(
+      () => new Promise(() => {})
+    );
+    const input = screen
+      .getByLabelText("Upload Left eye")
+      .parentElement?.querySelector<HTMLInputElement>('input[type="file"]');
+    expect(input).not.toBeNull();
+    fireEvent.change(input!, {
+      target: {
+        files: [new File(["image"], "left-eye.jpg", { type: "image/jpeg" })],
+      },
+    });
+
+    expect(await screen.findByText("Uploading")).toBeInTheDocument();
+    expect(screen.queryByText("Preparing image")).not.toBeInTheDocument();
   });
 });

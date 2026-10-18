@@ -45,12 +45,12 @@ describe("InspectionPhotoReview", () => {
       screen.getByRole("heading", { name: "Skin photo review" })
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getAllByRole("button", { name: /AI Scan/ })[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: /Run AI Check/ })[0]);
     expect(
-      screen.getAllByRole("button", { name: /Normal/ })[0]
+      screen.getAllByRole("button", { name: /Mark as Healthy/ })[0]
     ).toHaveAttribute("aria-pressed", "false");
     expect(
-      screen.getAllByRole("button", { name: /AI Scan/ })[0]
+      screen.getAllByRole("button", { name: /Run AI Check/ })[0]
     ).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(screen.getAllByRole("button", { name: "Redness" })[0]);
 
@@ -75,14 +75,14 @@ describe("InspectionPhotoReview", () => {
       />
     );
 
-    fireEvent.click(screen.getAllByRole("button", { name: /AI Scan/ })[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: /Run AI Check/ })[0]);
     expect(screen.getAllByText("*")).toHaveLength(2);
     expect(screen.getAllByText("*").every((marker) => marker.classList.contains("text-[#de1507]"))).toBe(true);
     fireEvent.change(screen.getAllByRole("textbox", { name: "AI Scan description" })[0], {
       target: { value: "Redness near the collar" },
     });
-    fireEvent.click(screen.getAllByRole("button", { name: /Normal/ })[0]);
-    fireEvent.click(screen.getAllByRole("button", { name: /AI Scan/ })[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: /Mark as Healthy/ })[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: /Run AI Check/ })[0]);
 
     expect(screen.getAllByRole("textbox", { name: "AI Scan description" })[0]).toHaveValue(
       "Redness near the collar"
@@ -99,7 +99,7 @@ describe("InspectionPhotoReview", () => {
     const onChange = vi.fn();
     render(
       <InspectionPhotoReview
-        photos={[photo({ area: "posture" })]}
+        photos={[photo({ area: "posture", classification: null })]}
         activePhotoId={1}
         config={{ area: "posture", label: "Posture photo", hints: [] }}
         open
@@ -124,13 +124,51 @@ describe("InspectionPhotoReview", () => {
     expect(
       screen.getAllByRole("button", { name: "Paw licking" })[0]
     ).toHaveClass("text-[13px]");
+    expect(screen.getAllByRole("button", { name: /Mark as Healthy/ })).toHaveLength(2);
+    expect(screen.getAllByRole("button", { name: /Mark as Healthy/ })[0]).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getAllByRole("button", { name: /Run AI Check/ })[0]).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(screen.getAllByRole("button", { name: /Run AI Check/ })[0]);
+    expect(onChange).toHaveBeenCalledWith(1, "ai_scan", [], "");
+    expect(screen.getAllByRole("textbox", { name: "AI Scan description" })).toHaveLength(2);
 
     fireEvent.click(
       screen.getAllByRole("button", { name: "Next - Add notes" })[0]
     );
 
     await waitFor(() => expect(onProceedToNotes).toHaveBeenCalled());
-    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("shows loading on both posture Next buttons and prevents duplicate requests", async () => {
+    let finishRequest!: () => void;
+    const onProceedToNotes = vi.fn(
+      () => new Promise<void>((resolve) => { finishRequest = resolve; })
+    );
+    render(
+      <InspectionPhotoReview
+        photos={[photo({ area: "posture" })]}
+        activePhotoId={1}
+        config={{ area: "posture", label: "Posture photo", hints: [] }}
+        open
+        onActivePhotoChange={vi.fn()}
+        onClose={vi.fn()}
+        onChange={vi.fn()}
+        onAddPhoto={vi.fn()}
+        onProceedToNotes={onProceedToNotes}
+      />
+    );
+
+    const nextButtons = screen.getAllByRole("button", { name: "Next - Add notes" });
+    fireEvent.click(nextButtons[0]);
+    expect(nextButtons[0]).toBeDisabled();
+    expect(nextButtons[1]).toBeDisabled();
+    fireEvent.click(nextButtons[1]);
+    expect(onProceedToNotes).toHaveBeenCalledTimes(1);
+
+    finishRequest();
+    await waitFor(() => {
+      expect(nextButtons[0]).toBeEnabled();
+      expect(nextButtons[1]).toBeEnabled();
+    });
   });
 
   it("uses the summary label when posture observations are selected", () => {
@@ -380,7 +418,7 @@ describe("InspectionPhotoReview", () => {
       />
     );
 
-    fireEvent.click(screen.getAllByRole("button", { name: /AI Scan/ })[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: /Run AI Check/ })[0]);
     fireEvent.click(screen.getAllByRole("button", { name: "Redness" })[0]);
 
     expect(toast).toHaveBeenCalledWith(

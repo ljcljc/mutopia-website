@@ -221,7 +221,7 @@ describe("InspectionAreaSection", () => {
     expect(screen.getAllByText("AI Scan")).toHaveLength(1);
   });
 
-  it("renders Posture as a cumulative storage-only upload card", () => {
+  it("keeps the Posture upload slot after three photos and marks AI selections", () => {
     const photos: InspectionPhotoOut[] = [
       {
         id: 15,
@@ -255,11 +255,12 @@ describe("InspectionAreaSection", () => {
       },
     ];
 
-    render(
+    const onFilesSelected = vi.fn();
+    const { container } = render(
       <InspectionAreaSection
         config={{ area: "posture", label: "Posture photo", hints: [] }}
         photos={photos}
-        onFilesSelected={vi.fn()}
+        onFilesSelected={onFilesSelected}
         onRemove={vi.fn()}
         onOpen={vi.fn()}
       />
@@ -273,6 +274,10 @@ describe("InspectionAreaSection", () => {
     ).toBeInTheDocument();
     expect(screen.getByAltText("posture-3.jpg")).toBeInTheDocument();
     expect(screen.getByLabelText("Add Posture photo")).toBeInTheDocument();
-    expect(screen.queryByText("AI Scan")).not.toBeInTheDocument();
+    expect(screen.getByText("AI Scan")).toBeInTheDocument();
+    const input = container.querySelector<HTMLInputElement>('input[type="file"]');
+    expect(input).not.toBeNull();
+    fireEvent.change(input!, { target: { files: [new File(["image"], "posture-4.jpg", { type: "image/jpeg" })] } });
+    expect(onFilesSelected).toHaveBeenCalledWith([expect.objectContaining({ name: "posture-4.jpg" })]);
   });
 });

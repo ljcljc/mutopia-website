@@ -641,11 +641,7 @@ export default function GroomerPhotoHealthInspectionPage() {
         <div className="pointer-events-none absolute inset-0 z-10 rounded-[14px] bg-[rgba(0,0,0,0.2)] backdrop-blur-[2px]" />
         <div className="pointer-events-none absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2">
           <p className="text-center font-comfortaa text-[11px] font-medium leading-4 text-white">
-            {uploadState.status === "deleting"
-              ? "Removing"
-              : uploadState.phase === "compressing"
-                ? "Preparing image"
-                : "Uploading"}
+            {uploadState.status === "deleting" ? "Removing" : "Uploading"}
           </p>
           <div className="relative h-1 w-20 overflow-clip rounded-2xl border border-neutral-200 bg-white">
             <div
@@ -828,7 +824,7 @@ export default function GroomerPhotoHealthInspectionPage() {
               ...current,
               photos: current.photos.map((photo) =>
                 photo.id === tempId
-                  ? { ...uploaded, url: previewUrl }
+                  ? { ...uploaded, classification: "normal" as const, url: previewUrl }
                   : photo
               ),
             };
@@ -868,9 +864,9 @@ export default function GroomerPhotoHealthInspectionPage() {
     description: string
   ) => {
     const current = inspectionRef.current;
-    if (!current) return;
+    if (!current) return false;
     const photo = current.photos.find((item) => item.id === photoId);
-    if (!photo) return;
+    if (!photo) return false;
     const normalizedHints = classification === "normal" ? [] : findingHints;
     try {
       if (photoId >= 0) {
@@ -885,7 +881,7 @@ export default function GroomerPhotoHealthInspectionPage() {
         ...currentErrors,
         [photo.area]: "Could not confirm this photo. Please try again.",
       }));
-      return;
+      return false;
     }
     const nextInspection = {
       ...current,
@@ -904,6 +900,7 @@ export default function GroomerPhotoHealthInspectionPage() {
     inspectionRef.current = nextInspection;
     setInspection(nextInspection);
     persistLocalDraft(nextInspection);
+    return true;
   };
 
   const updatePhotoDescription = (photoId: number, description: string) => {
@@ -1003,7 +1000,6 @@ export default function GroomerPhotoHealthInspectionPage() {
       const missingDescription = latestInspection.photos.find(
         (photo) =>
           stepConfig.areas.some((area) => area.area === photo.area) &&
-          photo.area !== "posture" &&
           photo.classification === "ai_scan" &&
           !photo.description?.trim()
       );
@@ -1021,7 +1017,7 @@ export default function GroomerPhotoHealthInspectionPage() {
         return {
           ...photo,
           description:
-            photo.area !== "posture" && photo.classification === "ai_scan"
+            photo.classification === "ai_scan"
               ? (photo.description?.trim() ?? "")
               : "",
         };
@@ -1106,10 +1102,7 @@ export default function GroomerPhotoHealthInspectionPage() {
       await submitPhotoHealthInspection(bookingId, {
         photos: latestInspection.photos.map((photo) => ({
           id: photo.id,
-          classification:
-            photo.area === "posture"
-              ? null
-              : (photo.classification ?? "normal"),
+          classification: photo.classification ?? "normal",
           finding_hints:
             photo.classification === "ai_scan" ? photo.finding_hints : [],
           description:
@@ -1563,14 +1556,17 @@ export default function GroomerPhotoHealthInspectionPage() {
             ? booking.pet_snapshot.breed
             : undefined
         }
-        onProceedToNotes={() => {
-          if (activeReviewPhoto)
-            void confirmPhoto(
-              activeReviewPhoto.id,
-              activeReviewPhoto.classification ?? "normal",
-              activeReviewPhoto.finding_hints,
-              activeReviewPhoto.description ?? ""
-            );
+        onProceedToNotes={async () => {
+          if (!activeReviewPhoto) return;
+          const confirmed = await confirmPhoto(
+            activeReviewPhoto.id,
+            activeReviewPhoto.classification ?? "normal",
+            activeReviewPhoto.finding_hints,
+            activeReviewPhoto.description ?? ""
+          );
+          if (!confirmed) return;
+          setReviewQueue([]);
+          await saveStep(6);
         }}
       />
     </ReportPageShell>

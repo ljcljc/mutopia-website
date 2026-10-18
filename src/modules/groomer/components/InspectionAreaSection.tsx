@@ -128,9 +128,9 @@ export function InspectionAreaSection({
         const selected = Array.from(event.currentTarget.files ?? []);
         if (selected.length > 0) {
           onFilesSelected(
-            config.area === "skin"
-              ? selected
-              : selected.slice(0, Math.max(0, 2 - photos.length))
+            config.area === "mouth"
+              ? selected.slice(0, Math.max(0, 1 - photos.length))
+              : selected
           );
         }
         event.currentTarget.value = "";
@@ -248,7 +248,7 @@ export function InspectionAreaSection({
                 <span className="absolute h-[1.5px] w-full rotate-[-45deg] bg-[#4c4c4c]" />
               </span>
             </button>
-            {!isPostureSection && photo.classification === "ai_scan" ? (
+            {photo.classification === "ai_scan" ? (
               <div className="pointer-events-none absolute bottom-[-8px] left-[12px] z-30 flex items-center gap-1 rounded-full border border-[#F1C9CC] bg-[#FFF6F6] px-3 py-1 font-comfortaa text-xs text-[#B23A48] shadow-sm">
                 <Icon name="alert-ai-scan" className="size-[13px]" />
                 AI Scan
@@ -330,14 +330,8 @@ export function InspectionAreaSection({
                 layout="inspection"
                 inputAriaLabel={`Upload ${config.label}`}
                 accept="image/jpeg,image/jpg,image/png,image/heic,image/heif"
-                multiple={config.area !== "posture"}
-                maxFiles={
-                  config.area === "posture"
-                    ? 2
-                    : config.area === "mouth"
-                      ? 1
-                      : undefined
-                }
+                multiple={config.area !== "mouth"}
+                maxFiles={config.area === "mouth" ? 1 : undefined}
                 maxSizeMB={100}
                 disabled={disabled}
                 uploadItems={items}

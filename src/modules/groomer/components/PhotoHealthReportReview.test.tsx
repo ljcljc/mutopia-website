@@ -85,4 +85,37 @@ describe("PhotoHealthReportReview", () => {
       screen.getByRole("button", { name: "Retry publish" })
     ).toBeEnabled();
   });
+
+  it("shows Mobility as unassessed until a posture photo was selected for AI", () => {
+    const props = {
+      booking,
+      onSaveInsights: vi.fn(),
+      onViewPdf: vi.fn(),
+      onPublish: vi.fn(),
+    };
+    const { rerender } = render(<PhotoHealthReportReview draft={draft} {...props} />);
+    expect(screen.getByRole("heading", { name: "Mobility" }).closest("article"))
+      .toHaveTextContent("Not assessed");
+
+    rerender(
+      <PhotoHealthReportReview
+        draft={{
+          ...draft,
+          photos: [{
+            id: 7,
+            area: "posture",
+            url: "/posture.jpg",
+            original_filename: "posture.jpg",
+            normalized_mime_type: "image/jpeg",
+            classification: "ai_scan",
+            finding_hints: [],
+            confirmed: true,
+          }],
+        }}
+        {...props}
+      />
+    );
+    expect(screen.getByRole("heading", { name: "Mobility" }).closest("article"))
+      .toHaveTextContent("Normal");
+  });
 });

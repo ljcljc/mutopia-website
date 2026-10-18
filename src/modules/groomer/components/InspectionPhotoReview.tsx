@@ -39,7 +39,7 @@ export interface InspectionPhotoReviewProps {
   onAddPhoto: (files: File[]) => void;
   observationTags?: string[];
   onObservationTagsChange?: (tags: string[]) => void;
-  onProceedToNotes?: () => void;
+  onProceedToNotes?: () => Promise<void> | void;
   initialPanelSnap?: PanelSnap;
   onPanelSnapChange?: (snap: PanelSnap) => void;
   petName?: string;
@@ -80,6 +80,8 @@ export function InspectionPhotoReview({
     useState<InspectionPhotoClassification>("normal");
   const [hints, setHints] = useState<string[]>([]);
   const [description, setDescription] = useState("");
+  const [proceedingToNotes, setProceedingToNotes] = useState(false);
+  const proceedingToNotesRef = useRef(false);
   const [panelSnap, setPanelSnap] = useState<PanelSnap>(initialPanelSnap);
   const [slideDirection, setSlideDirection] = useState<SlideDirection | null>(
     null
@@ -557,6 +559,17 @@ export function InspectionPhotoReview({
   const carouselSlideWidth = carouselTarget ? "50%" : "100%";
   const postureNextLabel =
     observationTags.length > 0 ? "Next - Summary & notes" : "Next - Add notes";
+  const handleProceedToNotes = async () => {
+    if (proceedingToNotesRef.current || !onProceedToNotes) return;
+    proceedingToNotesRef.current = true;
+    setProceedingToNotes(true);
+    try {
+      await onProceedToNotes();
+    } finally {
+      proceedingToNotesRef.current = false;
+      setProceedingToNotes(false);
+    }
+  };
   const controls = (
     <>
       {!isPosture ? (
@@ -579,8 +592,7 @@ export function InspectionPhotoReview({
           ))}
         </div>
       ) : null}
-      {!isPosture ? (
-        <div className="mt-4 grid grid-cols-2 gap-3">
+      <div className="mt-4 grid grid-cols-2 gap-3">
           <button
             type="button"
             aria-pressed={classification === "normal"}
@@ -588,7 +600,7 @@ export function InspectionPhotoReview({
             className={`min-h-[94px] cursor-pointer rounded-[22px] border-2 px-3 font-comfortaa transition-colors ${classification === "normal" ? "border-[#C97A1B] text-[#DE8A19]" : "border-[#5D5D64] text-white hover:bg-white/10 active:bg-white/20 md:text-[#4F5060]"}`}
           >
             <span className="block text-[15px] font-bold leading-[18px]">
-              Normal
+              Mark as Healthy
             </span>
             <span className="mt-1 block text-[11px] leading-[14px]">
               Archives photo
@@ -607,15 +619,14 @@ export function InspectionPhotoReview({
             className={`min-h-[94px] cursor-pointer rounded-[22px] border-2 px-3 font-comfortaa transition-colors ${classification === "ai_scan" ? "border-[#C97A1B] text-[#DE8A19]" : "border-[#5D5D64] text-white hover:bg-white/10 active:bg-white/20 md:text-[#4F5060]"}`}
           >
             <span className="block text-[15px] font-bold leading-[18px]">
-              AI Scan
+              Run AI Check
             </span>
             <span className="mt-1 block text-[11px] leading-[14px]">
               Generates report
             </span>
           </button>
-        </div>
-      ) : null}
-      {!isPosture && classification === "ai_scan" ? (
+      </div>
+      {classification === "ai_scan" ? (
         <label className="mt-4 block font-comfortaa text-[14px] font-semibold text-inherit">
           Description <span aria-hidden="true" className="text-[#de1507]">*</span>
           <textarea
@@ -646,7 +657,8 @@ export function InspectionPhotoReview({
             type="button"
             fullWidth
             textSize={14}
-            onClick={() => onProceedToNotes?.()}
+            onClick={handleProceedToNotes}
+            loading={proceedingToNotes}
             className="bg-gradient-to-b from-[#E67E22] to-[#F39C12] font-bold hover:from-[#D8751F] hover:to-[#E89010]"
           >
             {postureNextLabel}
