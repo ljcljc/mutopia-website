@@ -1903,8 +1903,8 @@ export default function BookingDetail() {
               </div>
 
               <div className="rounded-[calc(12*var(--px393))] border-2 border-solid border-[#de6a07] bg-white p-[calc(20*var(--px393))] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] sm:rounded-xl sm:p-6">
-                <div className="flex items-start justify-between gap-6">
-                  {/* Left side: Title and subtitle */}
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+                  {/* Title and subtitle */}
                   <div className="flex flex-col gap-1 text-[#4a5565]">
                     <p className="font-comfortaa font-semibold leading-[28px] text-[16px] text-[#4a3c2a]">
                       Total estimation for the service
@@ -1916,8 +1916,8 @@ export default function BookingDetail() {
                     </p>
                   </div>
 
-                  {/* Right side: Price + Accordion */}
-                  <div className="flex w-[428px] flex-col items-end gap-1.5">
+                  {/* Price + Accordion */}
+                  <div className="flex w-full flex-col items-end gap-1.5 sm:w-[428px]">
                     <EstimationPriceSummary
                       original={originalTotal}
                       service={serviceEstimation}
