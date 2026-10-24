@@ -227,7 +227,7 @@ function ReportGenerationLoadingScreen() {
       aria-live="polite"
       aria-label="Generating health report"
     >
-      <div className="flex w-full max-w-[238px] flex-col items-center gap-5 px-6 py-10 text-center">
+      <div className="flex w-full max-w-[400px] flex-col items-center gap-5 py-10 text-center">
         <Spinner
           size={48}
           color="#7DE0C3"
