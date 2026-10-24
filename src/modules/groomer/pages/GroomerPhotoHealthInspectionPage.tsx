@@ -84,11 +84,9 @@ async function waitForPublishedHealthReport(bookingId: number) {
     if (draft.pdf_generation_status === "failed") {
       throw new Error("Health report PDF generation failed.");
     }
-    try {
+    if (draft.pdf_generation_status === "succeeded") {
       const published = await getPublishedPhotoHealthReport(bookingId);
       if (published.published) return published;
-    } catch {
-      // The PDF worker may still be generating the report.
     }
     await new Promise((resolve) => window.setTimeout(resolve, 2000));
   }
