@@ -462,7 +462,7 @@ export default function BookingDetail() {
   const packageSnapshot = (detail?.package_snapshot as Record<string, unknown> | undefined) ?? {};
 
   const petName = (petSnapshot.name as string | undefined) ?? "Duke";
-  const hasHealthQuestionnaire = Boolean(petSnapshot.health_questionnaire);
+  const hasHealthQuestionnaire = Boolean(petSnapshot.health_questionnaire) && petSnapshot.health_questionnaire_prefilled !== true;
   const bookingCode = formatBookingCode(detail?.order_code, detail?.id);
   const serviceName = (packageSnapshot.name as string | undefined) ?? "Full grooming";
   const serviceType =

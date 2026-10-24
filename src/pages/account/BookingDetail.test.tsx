@@ -104,6 +104,17 @@ describe("BookingDetail", () => {
     useBookingStore.getState().reset();
   });
 
+  it.each([
+    ["empty", { name: "Hugui" }, true],
+    ["prefilled from a previous booking", { name: "Hugui", health_questionnaire: { lifestyle: {} }, health_questionnaire_prefilled: true }, true],
+    ["submitted for this booking", { name: "Hugui", health_questionnaire: { lifestyle: {} } }, false],
+  ])("shows the care form entry only when the %s questionnaire is unsubmitted", async (_case, petSnapshot, visible) => {
+    renderBookingDetail(makeCompletedBooking({ status: "confirmed", pet_snapshot: petSnapshot }));
+
+    expect(await screen.findByText("Ready for service")).toBeInTheDocument();
+    expect(Boolean(screen.queryByRole("button", { name: "Personalize Hugui's care" }))).toBe(visible);
+  });
+
   it("shows the sum of package and add-ons before discounts in the package card", async () => {
     renderBookingDetail(makeCompletedBooking({
       discount_rate: "0.90",
