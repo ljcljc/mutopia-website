@@ -254,6 +254,7 @@ export function Step5() {
                     setCurrentDate(new Date(year, month, 1));
                   }}
                   allowToggle={true}
+                  allowOutsideMonthSelection={true}
                   showYearPicker={showYearPicker}
                   showMonthPicker={showMonthPicker}
                   onShowYearPickerChange={setShowYearPicker}
@@ -441,6 +442,7 @@ export function Step5() {
                   setCurrentDate(new Date(year, month, 1));
                 }}
                 allowToggle={true}
+                allowOutsideMonthSelection={true}
                 showYearPicker={showYearPicker}
                 showMonthPicker={showMonthPicker}
                 onShowYearPickerChange={setShowYearPicker}

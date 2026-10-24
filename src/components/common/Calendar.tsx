@@ -14,6 +14,7 @@ export interface CalendarProps {
   yearRange?: { min: number; max: number };
   onMonthChange?: (year: number, month: number) => void;
   allowToggle?: boolean; // 是否允许取消选择（Step5需要，DatePicker不需要）
+  allowOutsideMonthSelection?: boolean;
   disabled?: boolean;
   className?: string;
   variant?: "default" | "mobile" | "compact";
@@ -34,6 +35,7 @@ export function Calendar({
   yearRange,
   onMonthChange,
   allowToggle = false,
+  allowOutsideMonthSelection = false,
   disabled = false,
   className,
   variant = "default",
@@ -139,7 +141,7 @@ export function Calendar({
 
   const handleDateClick = (dayInfo: CalendarDay) => {
     if (disabled) return;
-    if (!dayInfo.isCurrentMonth) return;
+    if (!dayInfo.isCurrentMonth && !allowOutsideMonthSelection) return;
     if (calendar.isDateDisabled(dayInfo.date)) return;
     
     if (allowToggle && calendar.isDateSelected(dayInfo.date)) {
@@ -512,12 +514,13 @@ export function Calendar({
               )}
             >
               {rowDays.map((dayInfo) => {
-                const isSelected = dayInfo.isCurrentMonth && calendar.isDateSelected(dayInfo.date);
+                const isSelectableMonth = dayInfo.isCurrentMonth || allowOutsideMonthSelection;
+                const isSelected = isSelectableMonth && calendar.isDateSelected(dayInfo.date);
                 const isRangeStart = dayInfo.isCurrentMonth && isSameDate(dayInfo.date, rangeStartDate);
                 const isRangeEnd = dayInfo.isCurrentMonth && isSameDate(dayInfo.date, rangeEndDate);
                 const isRangeBoundary = isRangeStart || isRangeEnd;
                 const isInRange = dayInfo.isCurrentMonth && isDateWithinRange(dayInfo.date);
-                const isDisabled = disabled || (dayInfo.isCurrentMonth && calendar.isDateDisabled(dayInfo.date));
+                const isDisabled = disabled || (isSelectableMonth && calendar.isDateDisabled(dayInfo.date));
                 
                 return (
                   <div
@@ -537,13 +540,13 @@ export function Calendar({
                         : isCompactVariant
                           ? "h-[34px] text-[15px]"
                           : "h-[38.286px] text-[16px]",
-                      dayInfo.isCurrentMonth && !isDisabled && "cursor-pointer",
+                      isSelectableMonth && !isDisabled && "cursor-pointer",
                       isDisabled && "cursor-not-allowed",
                       isInRange && !isRangeBoundary && (isMobileVariant ? "bg-[#FDE8D6]" : "bg-[#FDE8D6]"),
                       isSelected && (isMobileVariant ? "bg-[#de6a07] rounded-[calc(8*var(--px393))] text-white" : "bg-[#de6a07] rounded-[8px] text-white"),
                       isRangeBoundary && (isMobileVariant ? "bg-[#de6a07] rounded-[calc(8*var(--px393))] text-white" : "bg-[#de6a07] rounded-[8px] text-white"),
                       isInRange && !isRangeBoundary && "text-[#4A2C55]",
-                      !dayInfo.isCurrentMonth && "text-[grey]",
+                      !dayInfo.isCurrentMonth && !isSelected && "text-[grey]",
                       isDisabled && "text-[grey] opacity-50"
                     )}
                   >
