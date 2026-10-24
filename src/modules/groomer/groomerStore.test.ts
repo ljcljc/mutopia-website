@@ -247,6 +247,35 @@ describe("groomer dashboard current booking selection", () => {
     });
   });
 
+  it("keeps a paid check-up in its own section after dashboard refresh", async () => {
+    apiMocks.getGroomerDashboardSummary.mockResolvedValue({});
+    apiMocks.getGroomerPerformance.mockResolvedValue({});
+    apiMocks.getGroomerPendingBookingInvitations.mockResolvedValue({ items: [] });
+    apiMocks.getGroomerCurrentBooking.mockResolvedValue({ id: 102, status: "checked_in" });
+    apiMocks.getGroomerBookingDetail.mockResolvedValue({
+      id: 102, status: "checked_in", package_amount: "124.53", addons_amount: "22.00",
+      mobile_van_service_amount: "25.00", safety_insurance_amount: "10.00",
+      final_amount: "166.30", package_snapshot: { service_name: "Full grooming" },
+      addons_snapshot: [
+        { id: 2, name: "De-shedding treatment", price: "10.00" },
+        { id: 5, name: "Anal Gland Expression", price: "12.00" },
+      ],
+      adjustments: [{ id: 12, kind: "check_up", status: "paid", amount: "11.34",
+        details: { original_package_snapshot: { package_price: "124.53" },
+          original_addons_snapshot: [{ id: 2, name: "De-shedding treatment", price: "10.00" }] },
+        display_items: [{ label: "Anal Gland Expression", amount: "12.00" }],
+      }],
+    });
+
+    await useGroomerDashboardStore.getState().fetchDashboard();
+
+    expect(useGroomerDashboardStore.getState().nextAppointment).toMatchObject({
+      addonLines: [{ label: "De-shedding treatment", amount: "$10.00", addonId: 2 }],
+      addonSubtotal: "$10.00",
+      settledCheckUp: { displayItems: [{ label: "Anal Gland Expression", amount: "$12.00" }] },
+    });
+  });
+
   it("uses final amount when estimate fields disagree with booking details", async () => {
     apiMocks.getGroomerDashboardSummary.mockResolvedValue({});
     apiMocks.getGroomerPerformance.mockResolvedValue({

@@ -51,6 +51,7 @@ export type DashboardAppointment = GroomerUpNextAppointment & {
   addonSubtotal: string;
   priceAdjustmentLines: DashboardAmountLine[];
   pendingCheckUp?: PendingCheckUpSummary | null;
+  settledCheckUp?: PendingCheckUpSummary | null;
   hasCheckUp?: boolean;
   review?: ReviewSummaryOut | null;
   reportInteractionState?: "awaiting_review" | "awaiting_reply";
@@ -376,8 +377,12 @@ function mapPackageAndAddonBreakdown(record: Record<string, unknown>) {
   const addonItems = getRecordArray(record, ["addons_snapshot", "addons", "add_ons"]);
   const addonLines = mapAmountLines(addonItems);
   const membershipFee = parseAmount(getAmount(record, ["membership_fee"])) ?? 0;
+  const manualAmount = parseAmount(getAmount(packageSnapshot, ["manual_amount"])) ?? 0;
   const priceAdjustmentLines: DashboardAmountLine[] = [];
 
+  if (manualAmount > 0) {
+    priceAdjustmentLines.push({ label: "Personalization", amount: formatBreakdownAmount(manualAmount) });
+  }
   if (membershipFee > 0) {
     priceAdjustmentLines.push({ label: "Membership", amount: formatBreakdownAmount(membershipFee) });
   }
@@ -389,7 +394,7 @@ function mapPackageAndAddonBreakdown(record: Record<string, unknown>) {
     addonIds: getAddonIds(addonItems),
     addonQuantities: Object.fromEntries(addonItems.map((item) => [getOptionalNumber(item, ["id", "add_on_id", "addon_id"]), getNumber(item, ["quantity"], 1)]).filter(([id]) => id !== null)) as Record<number, number>,
     addonLines,
-    addonSubtotal: formatBreakdownAmount(getAmount(record, ["addons_amount"])),
+    addonSubtotal: formatBreakdownAmount(addonLines.reduce((sum, line) => sum + (parseAmount(line.amount) ?? 0), 0)),
     priceAdjustmentLines,
   };
 }
@@ -820,11 +825,24 @@ async function enrichDashboardAppointment(nextAppointment: DashboardAppointment 
     const detailRecord = { ...price, ...asRecord(bookingDetail) };
     const detailAppointment = mapDashboardAppointment(bookingDetail);
     const estimate = mapEstimateFromPrice(detailRecord);
-    const originalDetails = nextAppointment.pendingCheckUp?.details;
+    const settledAdjustment = (bookingDetail.adjustments ?? []).find(
+      (adjustment) => adjustment.kind === "check_up" && adjustment.status === "paid",
+    );
+    const settledCheckUp = settledAdjustment ? buildPendingCheckUpSummary({
+      amount: settledAdjustment.amount,
+      details: {
+        ...asRecord(settledAdjustment.details),
+        display_items: settledAdjustment.display_items,
+      },
+      status: settledAdjustment.status,
+    }) : null;
+    const originalDetails = nextAppointment.pendingCheckUp?.details ?? settledCheckUp?.details;
+    const originalPackage = originalDetails?.original_package_snapshot;
     const packageAndAddonBreakdown = mapPackageAndAddonBreakdown({
       ...detailRecord,
-      package_snapshot: originalDetails?.original_package_snapshot && Object.keys(originalDetails.original_package_snapshot).length
-        ? originalDetails.original_package_snapshot
+      package_amount: originalPackage?.package_price ?? originalPackage?.price ?? detailRecord.package_amount,
+      package_snapshot: originalPackage && Object.keys(originalPackage).length
+        ? originalPackage
         : detailRecord.package_snapshot,
       addons_snapshot: originalDetails?.original_addons_snapshot ?? detailRecord.addons_snapshot,
     });
@@ -837,6 +855,7 @@ async function enrichDashboardAppointment(nextAppointment: DashboardAppointment 
       priceSummary: estimate.priceSummary,
       review: detailAppointment?.review ?? nextAppointment.review,
       ...packageAndAddonBreakdown,
+      settledCheckUp,
     };
   } catch (error) {
     console.error("Failed to load groomer current booking detail:", error);

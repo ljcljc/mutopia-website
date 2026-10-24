@@ -1657,12 +1657,14 @@ function PackageAndAddonCard({
   const [isExpanded, setIsExpanded] = useState(true);
   const hasAddons = appointment.addonLines.length > 0;
   const pendingCheckUp = appointment.pendingCheckUp;
+  const checkUpBill = pendingCheckUp ?? appointment.settledCheckUp;
   const totalLabel = pendingCheckUp?.details?.proposed_final_amount
     ? formatMoneyValue(pendingCheckUp.details.proposed_final_amount)
     : formatMoneyValue(
         appointment.packageLines.reduce((sum, line) => sum + parseMoneyValue(line.amount), 0) +
           appointment.addonLines.reduce((sum, line) => sum + parseMoneyValue(line.amount), 0) +
-          appointment.priceAdjustmentLines.reduce((sum, line) => sum + parseMoneyValue(line.amount), 0)
+          appointment.priceAdjustmentLines.reduce((sum, line) => sum + parseMoneyValue(line.amount), 0) +
+          (appointment.settledCheckUp?.displayItems.reduce((sum, line) => sum + parseMoneyValue(line.amount), 0) ?? 0)
       );
 
   return (
@@ -1744,8 +1746,8 @@ function PackageAndAddonCard({
             </div>
           ) : null}
 
-          {pendingCheckUp?.displayItems.length ? (
-            <PendingCheckUpBill pendingCheckUp={pendingCheckUp} />
+          {checkUpBill?.displayItems.length ? (
+            <PendingCheckUpBill pendingCheckUp={checkUpBill} />
           ) : null}
 
           <OrangeButton

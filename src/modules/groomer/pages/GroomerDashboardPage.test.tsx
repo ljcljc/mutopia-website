@@ -229,6 +229,38 @@ describe("GroomerDashboardPage complete service", () => {
     expect(screen.getByText("Verify package and add-on")).toBeInTheDocument();
   });
 
+  it("keeps prior personalization alongside a paid check-up after refresh", async () => {
+    vi.mocked(getGroomerDashboardSummary).mockResolvedValue({});
+    vi.mocked(getGroomerPendingBookingInvitations).mockResolvedValue([]);
+    vi.mocked(getGroomerCurrentBooking).mockResolvedValue({
+      id: 102, status: "checked_in", has_check_up: true,
+      pet_name: "Momo", service_name: "Full grooming",
+    });
+    vi.mocked(getGroomerBookingDetail).mockResolvedValue({
+      id: 102, status: "checked_in", package_amount: "124.53", addons_amount: "22.00",
+      mobile_van_service_amount: "25.00", safety_insurance_amount: "10.00",
+      membership_fee: "0.00", discount_rate: "1.00", discount_amount: "0.00",
+      coupon_amount: "0.00", payable_amount: "166.30", deposit_amount: "0.00",
+      final_amount: "166.30", package_snapshot: { service_name: "Full grooming", manual_amount: "5.00" },
+      addons_snapshot: [{ id: 2, name: "De-shedding treatment", price: "10.00" },
+        { id: 5, name: "Anal Gland Expression", price: "12.00" }],
+      adjustments: [{ id: 12, kind: "check_up", status: "paid", amount: "11.34",
+        created_at: "2026-10-24T13:18:25Z",
+        details: { original_package_snapshot: { service_name: "Full grooming", package_price: "124.53", manual_amount: "5.00" },
+          original_addons_snapshot: [{ id: 2, name: "De-shedding treatment", price: "10.00" }] },
+        display_items: [{ label: "Anal Gland Expression", amount: "12.00" }],
+      }],
+    } as BookingDetailOut);
+
+    render(<MemoryRouter><GroomerDashboardPage /></MemoryRouter>);
+
+    expect(await screen.findByText("Check-in adjustment")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Total estimation for the service\s*\$186\.53/ })).toBeInTheDocument();
+    expect(screen.getByText("Personalization")).toBeInTheDocument();
+    expect(screen.getAllByText("Anal Gland Expression")).toHaveLength(1);
+    expect(screen.getAllByText("Subtotal")).toHaveLength(3);
+  });
+
   it("disables start grooming while a check-up adjustment awaits payment", async () => {
     vi.mocked(getGroomerDashboardSummary).mockResolvedValue({});
     vi.mocked(getGroomerPendingBookingInvitations).mockResolvedValue([]);
