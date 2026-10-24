@@ -26,6 +26,17 @@ function parsePricingAmount(value: unknown): number | null {
   return null;
 }
 
+export function getCheckUpAdjustmentBeforeTax(
+  amount: number | string,
+  originalGst: number | string | null | undefined,
+  adjustedGst: number | string | null | undefined,
+): number {
+  const delta = parsePricingAmount(amount) ?? 0;
+  const originalTax = parsePricingAmount(originalGst);
+  const adjustedTax = parsePricingAmount(adjustedGst);
+  return originalTax === null || adjustedTax === null ? delta : delta - (adjustedTax - originalTax);
+}
+
 function sumPricingAmounts(...values: unknown[]): number {
   return values.reduce<number>(
     (total, value) => total + (parsePricingAmount(value) ?? 0),

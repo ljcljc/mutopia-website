@@ -46,14 +46,12 @@ import {
   decideGroomerInvitation,
   deleteCheckInObservationPhoto,
   getAddOns,
-  getServices,
   getCheckInObservation,
   replyGroomerReview,
   saveCheckInObservation,
   submitGroomerCheckUpCheckout,
   uploadCheckInObservationPhoto,
   type AddOnOut,
-  type ServiceOut,
   type TerminateServiceIn,
 } from "@/lib/api";
 import { HttpError } from "@/lib/http";
@@ -1125,13 +1123,11 @@ function GroomerCheckUpModal({
   const [beforePhotoError, setBeforePhotoError] = useState("");
   const [weightValue, setWeightValue] = useState("");
   const [weightUnit, setWeightUnit] = useState("lbs");
-  const [services, setServices] = useState<ServiceOut[]>([]);
   const [selectedServiceId, setSelectedServiceId] = useState<number | null>(
     null
   );
   const [addOns, setAddOns] = useState<AddOnOut[]>([]);
   const [selectedAddOnIds, setSelectedAddOnIds] = useState<number[]>([]);
-  const [addOnQuantities, setAddOnQuantities] = useState<Record<number, number>>({});
   const [personalization, setPersonalization] = useState<
     Record<string, string>
   >({});
@@ -1153,28 +1149,12 @@ function GroomerCheckUpModal({
         appointment?.serviceId ??
         null
     );
-    getServices(
-      appointment?.petType === "dog" || appointment?.petType === "cat"
-        ? { pet_type: appointment.petType }
-        : undefined
-    )
-      .then(setServices)
-      .catch(() => setServices([]));
     setAddOns([]);
     const initialSelectedAddOnIds =
       appointment?.pendingCheckUp?.details?.proposedAddonIds ??
       appointment?.addonIds ??
       [];
     setSelectedAddOnIds(initialSelectedAddOnIds);
-    setAddOnQuantities({
-      ...(appointment?.addonQuantities ?? {}),
-      ...Object.fromEntries(
-        (appointment?.pendingCheckUp?.details?.addons ?? []).map((item) => [
-          item.id,
-          item.quantity ?? 1,
-        ])
-      ),
-    });
     setPersonalization(
       appointment?.pendingCheckUp?.details?.proposedPersonalization ??
         appointment?.currentPersonalization ??
@@ -1400,7 +1380,7 @@ function GroomerCheckUpModal({
         weight_unit: weightUnit,
         add_on_ids: selectedAddOnIds,
         add_on_quantities: Object.fromEntries(
-          selectedAddOnIds.map((id) => [id, addOnQuantities[id] || 1])
+          selectedAddOnIds.map((id) => [id, 1])
         ),
         personalization: normalizedPersonalization,
         description,
@@ -1514,23 +1494,6 @@ function GroomerCheckUpModal({
 
               {activeTab === "weight" ? (
                 <div className="flex min-h-[130px] flex-col gap-3 rounded-[12px] bg-white p-5 shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)]">
-                  <label className="flex w-full flex-col gap-2 font-comfortaa text-[14px] text-[#4a3c2a]">
-                    Service
-                    <select
-                      aria-label="Service"
-                      value={selectedServiceId ?? ""}
-                      onChange={(event) =>
-                        setSelectedServiceId(Number(event.target.value))
-                      }
-                      className="h-9 rounded-xl border border-gray-200 bg-white px-3"
-                    >
-                      {services.map((service) => (
-                        <option key={service.id} value={service.id}>
-                          {service.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
                   <p className="font-comfortaa text-[14px] font-bold leading-5 text-[#DE6A07]">
                     Verify weight with pet owner
                   </p>
@@ -1590,40 +1553,17 @@ function GroomerCheckUpModal({
                   </div>
                   <div className="grid w-full grid-cols-1 gap-4">
                     {addOns.map((addOn) => (
-                      <div key={addOn.id} className="flex items-center gap-3">
-                        <div className="min-w-0 flex-1">
-                          <CommonCheckbox
-                            key={addOn.id}
-                            name={addOn.name}
-                            description={addOn.description ?? undefined}
-                            price={formatAddOnPrice(addOn.price)}
-                            duration={addOn.service_time || undefined}
-                            checked={selectedAddOnIds.includes(addOn.id)}
-                            onCheckedChange={(checked) =>
-                              toggleAddOn(addOn.id, checked)
-                            }
-                          />
-                        </div>
-                        {selectedAddOnIds.includes(addOn.id) && (
-                          <input
-                            aria-label={`${addOn.name} quantity`}
-                            type="number"
-                            min={1}
-                            step={1}
-                            value={addOnQuantities[addOn.id] || 1}
-                            onChange={(event) =>
-                              setAddOnQuantities((current) => ({
-                                ...current,
-                                [addOn.id]: Math.max(
-                                  1,
-                                  Math.floor(Number(event.target.value) || 1)
-                                ),
-                              }))
-                            }
-                            className="h-9 w-16 rounded-lg border border-gray-200 px-2"
-                          />
-                        )}
-                      </div>
+                      <CommonCheckbox
+                        key={addOn.id}
+                        name={addOn.name}
+                        description={addOn.description ?? undefined}
+                        price={formatAddOnPrice(addOn.price)}
+                        duration={addOn.service_time || undefined}
+                        checked={selectedAddOnIds.includes(addOn.id)}
+                        onCheckedChange={(checked) =>
+                          toggleAddOn(addOn.id, checked)
+                        }
+                      />
                     ))}
                   </div>
                 </div>

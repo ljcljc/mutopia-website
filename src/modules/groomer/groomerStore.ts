@@ -67,6 +67,7 @@ export type DashboardAppointment = GroomerUpNextAppointment & {
 export type DashboardAmountLine = {
   label: string;
   amount?: string;
+  addonId?: number;
 };
 
 export type PendingCheckUpSummary = {
@@ -346,7 +347,8 @@ function mapAmountLines(items: Record<string, unknown>[]): DashboardAmountLine[]
 
     const rawAmount = getAmount(item, ["price", "amount", "total"]);
     const amount = parseAmount(rawAmount) === null ? undefined : formatBreakdownAmount(rawAmount);
-    lines.push({ label, amount });
+    const addonId = getOptionalNumber(item, ["id", "add_on_id", "addon_id"]);
+    lines.push({ label, amount, ...(addonId === null ? {} : { addonId }) });
     return lines;
   }, []);
 }
@@ -990,7 +992,13 @@ export const useGroomerDashboardStore = create<GroomerDashboardState>((set) => (
           addOns,
           selectedAddOnIds.filter((id) => !appointment.addonIds?.includes(id)),
         );
-        const displayItems = [...addedAddonLines, ...personalizationLines];
+        const removedAddonLines = appointment.addonLines
+          .filter((line) => line.addonId !== undefined && !selectedAddOnIds.includes(line.addonId))
+          .map((line) => ({
+            label: line.label,
+            amount: formatSignedBreakdownAmount(-(parseAmount(line.amount) ?? 0)),
+          }));
+        const displayItems = [...addedAddonLines, ...removedAddonLines, ...personalizationLines];
         return {
           ...appointment,
           status: result.status === "client_confirmation_required" ? "checkup_adjustment_pending" : "checked_in",

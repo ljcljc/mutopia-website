@@ -20,7 +20,7 @@ describe("selectCurrentDashboardBooking", () => {
 
     const booking = makeBooking({ id: 2, status: "checkup_adjustment_pending", scheduled_time: "2026-05-30T09:00:00Z" });
     expect(selectCurrentDashboardBooking([makeBooking({ id: 1, status: "confirmed" }), booking])?.id).toBe(2);
-    expect(getStatusBadgeConfig(booking.status)).toEqual({ label: "Groomer checked in", tone: "purple" });
+    expect(getStatusBadgeConfig(booking.status)).toEqual({ label: "Waiting for payment", tone: "orange" });
 
     vi.useRealTimers();
   });

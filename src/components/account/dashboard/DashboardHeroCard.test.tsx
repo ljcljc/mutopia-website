@@ -1,9 +1,14 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { BookingListOut } from "@/lib/api";
+import { getBookingDetail, type BookingListOut, type BookingDetailOut } from "@/lib/api";
 import { useAccountStore } from "../accountStore";
 import DashboardHeroCard from "./DashboardHeroCard";
+
+vi.mock("@/lib/api", async (importOriginal) => ({
+  ...await importOriginal<typeof import("@/lib/api")>(),
+  getBookingDetail: vi.fn(),
+}));
 
 function makeBooking(overrides: Partial<BookingListOut> = {}): BookingListOut {
   return {
@@ -88,6 +93,35 @@ describe("DashboardHeroCard", () => {
     const badge = screen.getByText("Ready for service").parentElement;
     expect(badge).toHaveClass("bg-[#E8FAE9]", "text-[#427D3E]", "rounded-xl");
     expect(badge?.querySelector("svg")).toBeInTheDocument();
+  });
+
+  it("shows the pending refund before GST", async () => {
+    vi.useRealTimers();
+    useAccountStore.setState({ upcomingBookings: [makeBooking({ id: 99, status: "checkup_adjustment_pending", scheduled_time: "2099-05-30T10:00:00Z" })] });
+    vi.mocked(getBookingDetail).mockResolvedValue({
+      id: 99,
+      gst_amount: "8.55",
+      adjustments: [{ id: 11, kind: "check_up", status: "pending", amount: "-9.45", gst_amount: "8.10", created_at: "2026-10-24T08:30:00Z" }],
+    } as BookingDetailOut);
+
+    renderHeroCard();
+
+    expect(await screen.findByText("Check-in adjustment: Refund $9.00 plus tax = $9.45")).toBeInTheDocument();
+  });
+
+  it("shows Refund processing after the refund is confirmed", async () => {
+    vi.useRealTimers();
+    useAccountStore.setState({ upcomingBookings: [makeBooking({ id: 99, status: "checkup_adjustment_pending", scheduled_time: "2099-05-30T10:00:00Z" })] });
+    vi.mocked(getBookingDetail).mockResolvedValue({
+      id: 99,
+      gst_amount: "8.55",
+      adjustments: [{ id: 11, kind: "check_up", status: "refund_pending", amount: "-9.45", gst_amount: "8.10", created_at: "2026-10-24T08:30:00Z" }],
+    } as BookingDetailOut);
+
+    renderHeroCard();
+
+    expect(await screen.findByText("Refund processing")).toBeInTheDocument();
+    expect(screen.getByText("Check-in adjustment: Refund $9.00 plus tax = $9.45")).toBeInTheDocument();
   });
 
   it("renders the nearest not-started booking when there is no started booking", () => {

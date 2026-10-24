@@ -54,7 +54,7 @@ import {
   serviceTimeZoneLabel,
   toLocalDateTimeString,
 } from "@/lib/localDateTime";
-import { getBookingEstimateSummary } from "@/lib/bookingPricing";
+import { getBookingEstimateSummary, getCheckUpAdjustmentBeforeTax } from "@/lib/bookingPricing";
 import { EstimationPriceSummary } from "@/components/booking/EstimationPriceSummary";
 
 function formatAmount(value: number | string | undefined, fallback: string) {
@@ -502,6 +502,9 @@ export default function BookingDetail() {
     amount: parseAmount(item.amount),
   }));
   const adjustmentSubtotal = adjustmentLines.reduce((total, line) => total + line.amount, 0);
+  const adjustmentBeforeTax = pendingAdjustment
+    ? getCheckUpAdjustmentBeforeTax(pendingAdjustment.amount, detail?.gst_amount, pendingAdjustment.gst_amount)
+    : 0;
 
   const proposedTimeOptions = useMemo(() => {
     return (
@@ -590,7 +593,7 @@ export default function BookingDetail() {
           subtitleIncludesScheduled: false,
           progressColor: "#DE6A07",
           progressWidth: 83.1,
-          badgeLabel: isRefundProcessing ? "Refund processing" : isRefundAdjustment ? "Refund confirmation needed" : "Waiting for payment",
+          badgeLabel: isRefundProcessing ? "Refund processing" : "Waiting for payment",
           badgeTone: "orange",
           nextStep: isRefundProcessing ? "Refund is being processed" : "Start grooming",
           showNextStep: true,
@@ -700,7 +703,7 @@ export default function BookingDetail() {
           actionKind: "none",
         };
     }
-  }, [detail?.hero_stage, detail?.notes, detail?.review, detail?.scheduled_time, detail?.status, estimatedCompletionDisplay, isRefundAdjustment, isRefundProcessing, normalizedStatus, paymentDueDisplay, pendingAdjustment, scheduledDisplay]);
+  }, [detail?.hero_stage, detail?.notes, detail?.review, detail?.scheduled_time, detail?.status, estimatedCompletionDisplay, isRefundProcessing, normalizedStatus, paymentDueDisplay, pendingAdjustment, scheduledDisplay]);
 
   const reviewedDisplay = formatApiLocalDateTime(detail?.review?.created_at);
   const recommendationLabel = formatRecommendationMonth(detail?.scheduled_time);
@@ -1403,7 +1406,7 @@ export default function BookingDetail() {
                     </div>
                   ) : null}
 
-                  {detailCardConfig.actionKind === "pay_adjustment" ? (
+                  {pendingAdjustment && normalizedStatus === "checkup_adjustment_pending" ? (
                     <div className="flex flex-col gap-1 text-[#4A3C2A]">
                       <p className="font-comfortaa text-[10px] leading-3">Check-in adjustment</p>
                       {adjustmentLines.map((line, index) => (
@@ -1412,7 +1415,7 @@ export default function BookingDetail() {
                         </p>
                       ))}
                       <p className="border-t border-[#4A3C2A] pt-1 font-comfortaa text-[12px] font-bold leading-4">
-                        {isRefundAdjustment ? "Refund" : "Total"}: {formatAmount(Math.abs(parseAmount(pendingAdjustment?.amount)), "$0.00")} including GST
+                        {isRefundAdjustment ? "Refund" : "To pay"}: {formatAmount(Math.abs(adjustmentBeforeTax), "$0.00")} plus tax = {formatAmount(Math.abs(parseAmount(pendingAdjustment?.amount)), "$0.00")}
                       </p>
                     </div>
                   ) : null}
@@ -1626,7 +1629,7 @@ export default function BookingDetail() {
                       loading={isPayingAdjustment}
                       onClick={handlePayAdjustment}
                     >
-                      {isRefundAdjustment ? "Confirm refund" : "Go pay for adjustment"}
+                      Go pay for adjustment
                     </OrangeButton>
                   ) : null}
                 </div>

@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@/components/common/Icon";
 import { formatApiServiceDateTime } from "@/lib/localDateTime";
 import { useAccountStore } from "../accountStore";
+import { getBookingDetail } from "@/lib/api";
+import { getCheckUpAdjustmentBeforeTax } from "@/lib/bookingPricing";
 import { selectCurrentDashboardBooking, StatusBadge } from "./dashboardBookingUtils";
 
 /**
@@ -26,6 +28,7 @@ export default function DashboardHeroCard() {
   const navigate = useNavigate();
   const { upcomingBookings, historyBookings, fetchHistoryBookings } = useAccountStore();
   const hasFetchedHistoryRef = useRef(false);
+  const [checkUpAmount, setCheckUpAmount] = useState<{ bookingId: number; amount: number; total: number; status: string } | null>(null);
 
   useEffect(() => {
     if (hasFetchedHistoryRef.current) return;
@@ -39,6 +42,27 @@ export default function DashboardHeroCard() {
     () => selectCurrentDashboardBooking([...upcomingBookings, ...historyBookings]),
     [upcomingBookings, historyBookings]
   );
+  const currentBookingId = currentBooking?.id;
+  const currentBookingStatus = currentBooking?.status;
+
+  useEffect(() => {
+    if (currentBookingId === undefined || currentBookingStatus !== "checkup_adjustment_pending") return;
+    let active = true;
+    getBookingDetail(currentBookingId).then((detail) => {
+      const adjustment = detail.adjustments?.find(
+        (item) => item.kind === "check_up" && ["pending", "approved", "refund_pending"].includes(item.status),
+      );
+      if (active && adjustment) {
+        setCheckUpAmount({
+          bookingId: currentBookingId,
+          amount: getCheckUpAdjustmentBeforeTax(adjustment.amount, detail.gst_amount, adjustment.gst_amount),
+          total: Number(adjustment.amount),
+          status: adjustment.status,
+        });
+      }
+    }).catch((error) => console.error("Failed to load check-in adjustment:", error));
+    return () => { active = false; };
+  }, [currentBookingId, currentBookingStatus]);
 
   if (!currentBooking) {
     return null;
@@ -81,6 +105,11 @@ export default function DashboardHeroCard() {
               </p>
             )}
           </div>
+          {checkUpAmount?.bookingId === currentBooking.id && currentBooking.status === "checkup_adjustment_pending" && (
+            <p className="font-comfortaa text-[12.25px] text-[#4A3C2A]">
+              Check-in adjustment: {checkUpAmount.amount < 0 ? "Refund" : "To pay"} ${Math.abs(checkUpAmount.amount).toFixed(2)} plus tax = ${Math.abs(checkUpAmount.total).toFixed(2)}
+            </p>
+          )}
         </div>
         <div className="flex w-full min-w-0 items-center justify-between gap-1.5 sm:ml-3 sm:w-auto sm:shrink-0 sm:justify-start">
           <StatusBadge
@@ -90,6 +119,7 @@ export default function DashboardHeroCard() {
             scheduledTime={currentBooking.scheduled_time_utc || currentBooking.scheduled_time}
             hasHealthReport={currentBooking.has_health_report}
             refundedAmount={currentBooking.refunded_amount}
+            adjustmentStatus={checkUpAmount?.bookingId === currentBooking.id ? checkUpAmount.status : undefined}
           />
           <Icon name="nav-next" className="size-4 text-[#99A1AF]" />
         </div>

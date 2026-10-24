@@ -523,9 +523,7 @@ describe("GroomerDashboardPage complete service", () => {
     await waitFor(() => {
       expect(screen.getAllByText("Selected add-on").length).toBeGreaterThan(0);
     });
-    const quantityInput = screen.getByRole("spinbutton", { name: "Selected add-on quantity" });
-    expect(quantityInput).toHaveValue(2);
-    fireEvent.change(quantityInput, { target: { value: "3" } });
+    expect(screen.queryByRole("spinbutton", { name: "Selected add-on quantity" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     fireEvent.click(screen.getByRole("button", { name: "Submit" }));
 
@@ -534,7 +532,7 @@ describe("GroomerDashboardPage complete service", () => {
         123,
         expect.objectContaining({
           add_on_ids: [7],
-          add_on_quantities: { 7: 3 },
+          add_on_quantities: { 7: 1 },
           weight_value: undefined,
         })
       );
@@ -635,21 +633,25 @@ describe("GroomerDashboardPage complete service", () => {
     ).toBeDisabled();
   });
 
-  it("shows a pending refund summary after a negative check-up adjustment", async () => {
+  it("shows the removed add-on refund after check-up submission", async () => {
     vi.mocked(getGroomerDashboardSummary).mockResolvedValue({});
     vi.mocked(getGroomerPendingBookingInvitations).mockResolvedValue([]);
     vi.mocked(getGroomerBookingDetail).mockResolvedValue({
       id: 123,
       status: "checked_in",
       package_amount: "95.00",
-      addons_amount: "0.00",
+      addons_amount: "8.00",
       membership_fee: "0.00",
       discount_rate: "0",
       discount_amount: "0.00",
       coupon_amount: "0.00",
-      payable_amount: "95.00",
+      payable_amount: "103.00",
       deposit_amount: "20.00",
-      final_amount: "95.00",
+      final_amount: "103.00",
+      addons_snapshot: [
+        { id: 8, quantity: 1, price: "4.00" },
+        { id: 7, name: "Selected add-on", quantity: 1, price: "8.00" },
+      ],
       package_snapshot: {
         service_name: "Full grooming",
       },
@@ -669,13 +671,15 @@ describe("GroomerDashboardPage complete service", () => {
       normalized_mime_type: "image/jpeg",
       size_bytes: 5,
     });
-    vi.mocked(getAddOns).mockResolvedValue([]);
+    vi.mocked(getAddOns).mockResolvedValue([
+      { id: 7, name: "Selected add-on", price: "8.00", is_variable: false },
+    ]);
     vi.mocked(submitGroomerCheckUpCheckout).mockResolvedValue({
       ok: true,
       request_ids: [1],
       amount: "-8.00",
       status: "client_confirmation_required",
-      final_amount: "87.00",
+      final_amount: "95.00",
     });
 
     render(
@@ -690,14 +694,15 @@ describe("GroomerDashboardPage complete service", () => {
     await selectBeforePhoto();
     await advanceFromPhoto();
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    fireEvent.click(await screen.findByRole("checkbox"));
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     fireEvent.click(screen.getByRole("button", { name: "Submit" }));
 
     expect(await screen.findByText("Verify package and add-on")).toBeInTheDocument();
     expect(screen.getByRole("button", {
-      name: /Total estimation for the service\s*\$87\.00/,
+      name: /Total estimation for the service\s*\$95\.00/,
     })).toBeInTheDocument();
-    expect(screen.queryByText("Refund")).not.toBeInTheDocument();
-    expect(screen.queryByText("Waiting for refund")).not.toBeInTheDocument();
+    expect(screen.getByText("Check-in adjustment")).toBeInTheDocument();
+    expect(screen.getAllByText("-$8.00")).toHaveLength(2);
   });
 });

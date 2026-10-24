@@ -241,11 +241,13 @@ describe("BookingDetail", () => {
   it("keeps a confirmed refund visible while Stripe is still processing it", async () => {
     renderBookingDetail(makeCompletedBooking({
       status: "checkup_adjustment_pending",
+      gst_amount: "5.00",
       adjustments: [{
         id: 8,
         kind: "check_up",
         status: "refund_pending",
         amount: "-5.00",
+        gst_amount: "4.76",
         created_at: "2026-05-24T08:30:00Z",
         display_items: [{ label: "Removed add-on", amount: "-5.00" }],
       }],
@@ -253,7 +255,46 @@ describe("BookingDetail", () => {
 
     expect(await screen.findByText("Refund processing")).toBeInTheDocument();
     expect(screen.getByText("Refund is being processed")).toBeInTheDocument();
+    expect(screen.getByText("Refund: $4.76 plus tax = $5.00")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Confirm refund" })).not.toBeInTheDocument();
+  });
+
+  it("shows the refund before GST in the check-in hero", async () => {
+    renderBookingDetail(makeCompletedBooking({
+      status: "checkup_adjustment_pending",
+      gst_amount: "8.55",
+      adjustments: [{
+        id: 11,
+        kind: "check_up",
+        status: "pending",
+        amount: "-9.45",
+        gst_amount: "8.10",
+        created_at: "2026-10-24T08:30:00Z",
+        display_items: [{ label: "Add-on adjustment", amount: "-10.00" }],
+      }],
+    }));
+
+    expect(await screen.findByText("Refund: $9.00 plus tax = $9.45")).toBeInTheDocument();
+    expect(screen.getByText("Waiting for payment")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Go pay for adjustment" })).toBeInTheDocument();
+  });
+
+  it("shows an additional charge before GST in the check-in hero", async () => {
+    renderBookingDetail(makeCompletedBooking({
+      status: "checkup_adjustment_pending",
+      gst_amount: "5.00",
+      adjustments: [{
+        id: 12,
+        kind: "check_up",
+        status: "pending",
+        amount: "10.50",
+        gst_amount: "5.50",
+        created_at: "2026-10-24T08:30:00Z",
+        display_items: [{ label: "Add-on adjustment", amount: "10.00" }],
+      }],
+    }));
+
+    expect(await screen.findByText("To pay: $10.00 plus tax = $10.50")).toBeInTheDocument();
   });
 
   it("shows the on-the-way status in the booking Hero", async () => {
