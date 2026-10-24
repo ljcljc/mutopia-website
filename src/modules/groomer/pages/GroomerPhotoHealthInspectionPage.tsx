@@ -1235,114 +1235,112 @@ export default function GroomerPhotoHealthInspectionPage() {
           {isPairedInspection ? (
             <section className="rounded-xl bg-white pb-[14px] pl-[13.995px] pr-[13.995px] pt-[13.995px] shadow-[0px_8px_6px_0px_rgba(0,0,0,0.1)]">
               <div className="flex flex-col gap-3">
-                <div className="flex w-full justify-center">
-                  <p className="w-[323px] text-[0px] leading-[0] font-comfortaa font-semibold text-[#4A3C2A]">
-                    <span className="block text-[16px] leading-[28px]">
-                      {pairedAreaName} - After grooming photos
-                    </span>
-                    <span className="block font-comfortaa text-[12px] font-normal leading-[16px]">
-                      Add at least 1 photo of each{" "}
-                      {pairedAreaName.toLowerCase()} for AI health inspection
-                    </span>
-                  </p>
-                </div>
-                <div className="flex flex-col gap-0">
-                  <p className="font-comfortaa text-[14px] leading-[22.75px] text-[#4A3C2A]">
-                    {pairedAreaName} photo
-                  </p>
-                  <div className="rounded-[16px] border border-[#633479] bg-[#FAFAFA] p-4 shadow-[0px_4px_5px_0px_rgba(0,0,0,0.15)]">
-                    <div className="grid w-full grid-cols-2 gap-x-1 gap-y-6 overflow-visible">
-                      {inspection.photos
-                        .filter((photo) =>
-                          pairedAreas.some((area) => area.area === photo.area)
-                        )
-                        .map((photo) => (
-                          <div
-                            key={photo.id}
-                            className="relative h-[84px] min-w-0 overflow-visible rounded-[14px] border border-[#D4C9E0]"
-                          >
-                            <button
-                              type="button"
-                              className="absolute inset-0 cursor-pointer overflow-hidden rounded-[14px]"
-                              onClick={() => setReviewQueue([photo.id])}
-                            >
-                              <LoadingImage
-                                src={photo.url}
-                                alt={photo.original_filename}
-                                className="size-full object-cover object-center"
-                              />
-                            </button>
-                            {renderPhotoUploadState(photo)}
-                            {photo.classification === "ai_scan" ? (
-                              <span className="pointer-events-none absolute bottom-[-8px] left-[12px] z-30 rounded-full border border-[#F1C9CC] bg-[#FFF6F6] px-3 py-1 font-comfortaa text-xs text-[#B23A48] shadow-sm">
-                                AI Scan
-                              </span>
-                            ) : null}
-                            <button
-                              type="button"
-                              aria-label={`Remove ${photo.original_filename}`}
-                              className="absolute right-[-4px] top-[-4px] z-20 flex size-[20px] cursor-pointer items-center justify-center rounded-[8px] border border-[#4c4c4c] bg-neutral-100 shadow-[0px_2px_4px_0px_rgba(0,0,0,0.1)]"
-                              disabled={
-                                photoUploadStates[photo.id]?.status ===
-                                "deleting"
-                              }
-                              onClick={() => void removePhoto(photo)}
-                            >
-                              <span className="relative flex size-[10px] items-center justify-center">
-                                <span className="absolute h-[1.5px] w-full rotate-45 bg-[#4c4c4c]" />
-                                <span className="absolute h-[1.5px] w-full rotate-[-45deg] bg-[#4c4c4c]" />
-                              </span>
-                            </button>
-                          </div>
-                        ))}
-                      {pairedAreas.map((area) => {
-                        return (
-                          <div
-                            key={area.area}
-                            className="relative flex h-[84px] min-w-0"
-                          >
-                            <button
-                              type="button"
-                              className="flex h-full w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-[14px] border-[1.451px] border-dashed border-[#D4C9E0] bg-white shadow-[0px_1px_2.5px_0px_rgba(0,0,0,0.05)]"
-                              onClick={() =>
-                                openFilePicker(
-                                  pairedInputRefs.current[area.area]
-                                )
-                              }
-                              aria-label={`Upload ${area.label}`}
-                            >
-                              <div className="flex h-[29px] w-[28px] items-center justify-center rounded-full bg-[#F0EBF7]">
-                                <Icon
-                                  name="add-inspection"
-                                  className="size-[28px]"
-                                />
+                <p className="text-[0px] leading-[0] font-comfortaa font-semibold text-[#4A3C2A]">
+                  <span className="block text-[16px] leading-[28px]">
+                    {pairedAreaName} - After grooming photos
+                  </span>
+                  <span className="block font-comfortaa text-[12px] font-normal leading-[16px]">
+                    Add at least 2 photos of each{" "}
+                    {pairedAreaName.toLowerCase()} for AI health inspection
+                  </span>
+                </p>
+                <div className="flex flex-col gap-2">
+                  {pairedAreas.map((area) => {
+                    const areaPhotos = inspection.photos.filter(
+                      (photo) => photo.area === area.area
+                    );
+                    return (
+                      <div key={area.area} role="group" aria-label={area.label}>
+                        <p className="font-comfortaa text-[14px] leading-[22.75px] text-[#4A3C2A]">
+                          {area.label}
+                        </p>
+                        <div className="rounded-[16px] border border-[#633479] bg-[#FAFAFA] p-4 shadow-[0px_4px_5px_0px_rgba(0,0,0,0.15)]">
+                          <div className="grid w-full grid-cols-2 gap-x-1 gap-y-6 overflow-visible">
+                            {areaPhotos.map((photo) => (
+                              <div
+                                key={photo.id}
+                                className="relative h-[84px] min-w-0 overflow-visible rounded-[14px] border border-[#D4C9E0]"
+                              >
+                                <button
+                                  type="button"
+                                  className="absolute inset-0 cursor-pointer overflow-hidden rounded-[14px]"
+                                  onClick={() => setReviewQueue([photo.id])}
+                                >
+                                  <LoadingImage
+                                    src={photo.url}
+                                    alt={photo.original_filename}
+                                    className="size-full object-cover object-center"
+                                  />
+                                </button>
+                                {renderPhotoUploadState(photo)}
+                                {photo.classification === "ai_scan" ? (
+                                  <span className="pointer-events-none absolute bottom-[-8px] left-[12px] z-30 rounded-full border border-[#F1C9CC] bg-[#FFF6F6] px-3 py-1 font-comfortaa text-xs text-[#B23A48] shadow-sm">
+                                    AI Scan
+                                  </span>
+                                ) : null}
+                                <button
+                                  type="button"
+                                  aria-label={`Remove ${photo.original_filename}`}
+                                  className="absolute right-[-4px] top-[-4px] z-20 flex size-[20px] cursor-pointer items-center justify-center rounded-[8px] border border-[#4c4c4c] bg-neutral-100 shadow-[0px_2px_4px_0px_rgba(0,0,0,0.1)]"
+                                  disabled={
+                                    photoUploadStates[photo.id]?.status ===
+                                    "deleting"
+                                  }
+                                  onClick={() => void removePhoto(photo)}
+                                >
+                                  <span className="relative flex size-[10px] items-center justify-center">
+                                    <span className="absolute h-[1.5px] w-full rotate-45 bg-[#4c4c4c]" />
+                                    <span className="absolute h-[1.5px] w-full rotate-[-45deg] bg-[#4c4c4c]" />
+                                  </span>
+                                </button>
                               </div>
-                              <span className="font-comfortaa text-[12px] font-medium leading-[18px] text-[#633479]">
-                                {area.label}
-                              </span>
-                            </button>
-                            <input
-                              ref={(element) => {
-                                pairedInputRefs.current[area.area] = element;
-                              }}
-                              type="file"
-                              accept="image/jpeg,image/jpg,image/png,image/heic,image/heif"
-                              multiple
-                              className="hidden"
-                              onChange={(event) => {
-                                const selected = Array.from(
-                                  event.currentTarget.files ?? []
-                                );
-                                if (selected.length > 0)
-                                  void upload(area.area, selected);
-                                event.currentTarget.value = "";
-                              }}
-                            />
+                            ))}
+                            <div
+                              className={`relative flex h-[84px] min-w-0 ${areaPhotos.length === 0 ? "col-span-2" : ""}`}
+                            >
+                              <button
+                                type="button"
+                                className="flex h-full w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-[14px] border-[1.451px] border-dashed border-[#D4C9E0] bg-white shadow-[0px_1px_2.5px_0px_rgba(0,0,0,0.05)]"
+                                onClick={() =>
+                                  openFilePicker(
+                                    pairedInputRefs.current[area.area]
+                                  )
+                                }
+                                aria-label={`Upload ${area.label}`}
+                              >
+                                <div className="flex h-[29px] w-[28px] items-center justify-center rounded-full bg-[#F0EBF7]">
+                                  <Icon
+                                    name="add-inspection"
+                                    className="size-[28px]"
+                                  />
+                                </div>
+                                <span className="font-comfortaa text-[12px] font-medium leading-[18px] text-[#633479]">
+                                  {area.label}
+                                </span>
+                              </button>
+                              <input
+                                ref={(element) => {
+                                  pairedInputRefs.current[area.area] = element;
+                                }}
+                                type="file"
+                                accept="image/jpeg,image/jpg,image/png,image/heic,image/heif"
+                                multiple
+                                className="hidden"
+                                onChange={(event) => {
+                                  const selected = Array.from(
+                                    event.currentTarget.files ?? []
+                                  );
+                                  if (selected.length > 0)
+                                    void upload(area.area, selected);
+                                  event.currentTarget.value = "";
+                                }}
+                              />
+                            </div>
                           </div>
-                        );
-                      })}
-                    </div>
-                  </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </section>
@@ -1549,18 +1547,6 @@ export default function GroomerPhotoHealthInspectionPage() {
             ? booking.pet_snapshot.breed
             : undefined
         }
-        onProceedToNotes={async () => {
-          if (!activeReviewPhoto) return;
-          const confirmed = await confirmPhoto(
-            activeReviewPhoto.id,
-            activeReviewPhoto.classification ?? "normal",
-            activeReviewPhoto.finding_hints,
-            activeReviewPhoto.description ?? ""
-          );
-          if (!confirmed) return;
-          setReviewQueue([]);
-          await saveStep(6);
-        }}
       />
     </ReportPageShell>
   );

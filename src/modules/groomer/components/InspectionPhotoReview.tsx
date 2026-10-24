@@ -39,7 +39,6 @@ export interface InspectionPhotoReviewProps {
   onAddPhoto: (files: File[]) => void;
   observationTags?: string[];
   onObservationTagsChange?: (tags: string[]) => void;
-  onProceedToNotes?: () => Promise<void> | void;
   initialPanelSnap?: PanelSnap;
   onPanelSnapChange?: (snap: PanelSnap) => void;
   petName?: string;
@@ -64,7 +63,6 @@ export function InspectionPhotoReview({
   onAddPhoto,
   observationTags = [],
   onObservationTagsChange,
-  onProceedToNotes,
   initialPanelSnap = "default",
   onPanelSnapChange,
   petName = "Current pet",
@@ -80,8 +78,6 @@ export function InspectionPhotoReview({
     useState<InspectionPhotoClassification>("normal");
   const [hints, setHints] = useState<string[]>([]);
   const [description, setDescription] = useState("");
-  const [proceedingToNotes, setProceedingToNotes] = useState(false);
-  const proceedingToNotesRef = useRef(false);
   const [panelSnap, setPanelSnap] = useState<PanelSnap>(initialPanelSnap);
   const [slideDirection, setSlideDirection] = useState<SlideDirection | null>(
     null
@@ -557,19 +553,6 @@ export function InspectionPhotoReview({
       : [photo, carouselTarget]
     : [photo];
   const carouselSlideWidth = carouselTarget ? "50%" : "100%";
-  const postureNextLabel =
-    observationTags.length > 0 ? "Next - Summary & notes" : "Next - Add notes";
-  const handleProceedToNotes = async () => {
-    if (proceedingToNotesRef.current || !onProceedToNotes) return;
-    proceedingToNotesRef.current = true;
-    setProceedingToNotes(true);
-    try {
-      await onProceedToNotes();
-    } finally {
-      proceedingToNotesRef.current = false;
-      setProceedingToNotes(false);
-    }
-  };
   const controls = (
     <>
       {!isPosture ? (
@@ -649,21 +632,7 @@ export function InspectionPhotoReview({
           </span>
         </label>
       ) : null}
-      <div
-        className={`mt-5 justify-end gap-3 ${isPosture ? "flex" : "hidden md:flex"}`}
-      >
-        {isPosture ? (
-          <OrangeButton
-            type="button"
-            fullWidth
-            textSize={14}
-            onClick={handleProceedToNotes}
-            loading={proceedingToNotes}
-            className="bg-gradient-to-b from-[#E67E22] to-[#F39C12] font-bold hover:from-[#D8751F] hover:to-[#E89010]"
-          >
-            {postureNextLabel}
-          </OrangeButton>
-        ) : null}
+      <div className="mt-5 hidden justify-end gap-3 md:flex">
         <OrangeButton
           type="button"
           variant="outline"

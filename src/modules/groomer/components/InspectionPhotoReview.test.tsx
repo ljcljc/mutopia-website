@@ -95,7 +95,6 @@ describe("InspectionPhotoReview", () => {
 
   it("uses the approved posture preview actions", async () => {
     const onClose = vi.fn();
-    const onProceedToNotes = vi.fn();
     const onChange = vi.fn();
     render(
       <InspectionPhotoReview
@@ -109,7 +108,6 @@ describe("InspectionPhotoReview", () => {
         onAddPhoto={vi.fn()}
         observationTags={[]}
         onObservationTagsChange={vi.fn()}
-        onProceedToNotes={onProceedToNotes}
       />
     );
 
@@ -131,66 +129,7 @@ describe("InspectionPhotoReview", () => {
     expect(onChange).toHaveBeenCalledWith(1, "ai_scan", [], "");
     expect(screen.getAllByRole("textbox", { name: "AI Scan description" })).toHaveLength(2);
 
-    fireEvent.click(
-      screen.getAllByRole("button", { name: "Next - Add notes" })[0]
-    );
-
-    await waitFor(() => expect(onProceedToNotes).toHaveBeenCalled());
-  });
-
-  it("shows loading on both posture Next buttons and prevents duplicate requests", async () => {
-    let finishRequest!: () => void;
-    const onProceedToNotes = vi.fn(
-      () => new Promise<void>((resolve) => { finishRequest = resolve; })
-    );
-    render(
-      <InspectionPhotoReview
-        photos={[photo({ area: "posture" })]}
-        activePhotoId={1}
-        config={{ area: "posture", label: "Posture photo", hints: [] }}
-        open
-        onActivePhotoChange={vi.fn()}
-        onClose={vi.fn()}
-        onChange={vi.fn()}
-        onAddPhoto={vi.fn()}
-        onProceedToNotes={onProceedToNotes}
-      />
-    );
-
-    const nextButtons = screen.getAllByRole("button", { name: "Next - Add notes" });
-    fireEvent.click(nextButtons[0]);
-    expect(nextButtons[0]).toBeDisabled();
-    expect(nextButtons[1]).toBeDisabled();
-    fireEvent.click(nextButtons[1]);
-    expect(onProceedToNotes).toHaveBeenCalledTimes(1);
-
-    finishRequest();
-    await waitFor(() => {
-      expect(nextButtons[0]).toBeEnabled();
-      expect(nextButtons[1]).toBeEnabled();
-    });
-  });
-
-  it("uses the summary label when posture observations are selected", () => {
-    render(
-      <InspectionPhotoReview
-        photos={[photo({ area: "posture", confirmed: true })]}
-        activePhotoId={1}
-        config={{ area: "posture", label: "Posture photo", hints: [] }}
-        open
-        onActivePhotoChange={vi.fn()}
-        onClose={vi.fn()}
-        onChange={vi.fn()}
-        onAddPhoto={vi.fn()}
-        observationTags={["paw_licking"]}
-        onObservationTagsChange={vi.fn()}
-        onProceedToNotes={vi.fn()}
-      />
-    );
-
-    expect(
-      screen.getAllByRole("button", { name: "Next - Summary & notes" })
-    ).toHaveLength(2);
+    expect(screen.queryByRole("button", { name: /Next -/ })).not.toBeInTheDocument();
   });
 
   it("cycles through photos in the current area", () => {

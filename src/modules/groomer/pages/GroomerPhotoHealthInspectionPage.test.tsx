@@ -358,7 +358,7 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     ).toHaveTextContent(/Step 5 of 6 - Posture/);
   });
 
-  it("advances from the Step 5 posture preview when Next - Add notes is clicked", async () => {
+  it("hides Next in the Step 5 posture preview", async () => {
     vi.mocked(getPhotoHealthInspection).mockResolvedValue({
       exists: true,
       inspection: {
@@ -381,47 +381,9 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     renderPage();
 
     fireEvent.click(await screen.findByRole("button", { name: "posture.jpg" }));
-    fireEvent.click(screen.getAllByRole("button", { name: "Next - Add notes" })[0]);
-
-    await waitFor(() =>
-      expect(screen.getByRole("navigation", { name: "Breadcrumb" })).toHaveTextContent(
-        /Step 6 of 6 - Summary & notes/
-      )
-    );
-    expect(screen.queryByRole("dialog", { name: "Posture photo review" })).not.toBeInTheDocument();
-  });
-
-  it("keeps the Step 5 posture preview open when confirming the photo fails", async () => {
-    vi.mocked(getPhotoHealthInspection).mockResolvedValue({
-      exists: true,
-      inspection: {
-        ...inspection,
-        current_step: 5,
-        photos: [
-          {
-            id: 82,
-            area: "posture",
-            url: "/posture.jpg",
-            original_filename: "posture.jpg",
-            normalized_mime_type: "image/jpeg",
-            classification: null,
-            finding_hints: [],
-            confirmed: false,
-          },
-        ],
-      },
-    });
-    vi.mocked(updateInspectionPhoto).mockRejectedValueOnce(new Error("Save failed"));
-    renderPage();
-
-    fireEvent.click(await screen.findByRole("button", { name: "posture.jpg" }));
-    fireEvent.click(screen.getAllByRole("button", { name: "Next - Add notes" })[0]);
-
-    await waitFor(() => expect(updateInspectionPhoto).toHaveBeenCalledOnce());
     expect(screen.getByRole("dialog", { name: "Posture photo review" })).toBeInTheDocument();
-    expect(screen.getByRole("navigation", { name: "Breadcrumb" })).toHaveTextContent(
-      /Step 5 of 6 - Posture/
-    );
+    expect(screen.queryByRole("button", { name: /Next - Add notes/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add Notes & Generate Report" })).toBeInTheDocument();
   });
 
   it("retries a failed analysis from the Step 6 generate button", async () => {
@@ -789,10 +751,15 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "Add at least 1 photo of each ear for AI health inspection"
+        "Add at least 2 photos of each ear for AI health inspection"
       )
     ).toBeInTheDocument();
-    expect(screen.getByText("Ear photo")).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Left ear" })).toContainElement(
+      screen.getByLabelText("Upload Left ear")
+    );
+    expect(screen.getByRole("group", { name: "Right ear" })).toContainElement(
+      screen.getByLabelText("Upload Right ear")
+    );
     expect(screen.getByLabelText("Upload Left ear")).toContainHTML("<svg");
     expect(screen.getByLabelText("Upload Right ear")).toContainHTML("<svg");
     const previous = screen.getByRole("button", { name: "Previous" });
@@ -839,11 +806,17 @@ describe("GroomerPhotoHealthInspectionPage", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "Add at least 1 photo of each eye for AI health inspection"
+        "Add at least 2 photos of each eye for AI health inspection"
       )
     ).toBeInTheDocument();
     expect(screen.getByLabelText("Upload Left eye")).toContainHTML("<svg");
     expect(screen.getByLabelText("Upload Right eye")).toContainHTML("<svg");
+    expect(screen.getByRole("group", { name: "Left eye" })).toContainElement(
+      screen.getByLabelText("Upload Left eye")
+    );
+    expect(screen.getByRole("group", { name: "Right eye" })).toContainElement(
+      screen.getByLabelText("Upload Right eye")
+    );
 
     vi.mocked(createInspectionImagePreview).mockImplementationOnce(
       () => new Promise(() => {})
