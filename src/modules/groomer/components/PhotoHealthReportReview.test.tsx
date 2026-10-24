@@ -86,36 +86,18 @@ describe("PhotoHealthReportReview", () => {
     ).toBeEnabled();
   });
 
-  it("shows Mobility as unassessed until a posture photo was selected for AI", () => {
-    const props = {
-      booking,
-      onSaveInsights: vi.fn(),
-      onViewPdf: vi.fn(),
-      onPublish: vi.fn(),
-    };
-    const { rerender } = render(<PhotoHealthReportReview draft={draft} {...props} />);
-    expect(screen.getByRole("heading", { name: "Mobility" }).closest("article"))
-      .toHaveTextContent("Not assessed");
-
-    rerender(
+  it("shows Mobility as normal without an AI Scan photo", () => {
+    render(
       <PhotoHealthReportReview
-        draft={{
-          ...draft,
-          photos: [{
-            id: 7,
-            area: "posture",
-            url: "/posture.jpg",
-            original_filename: "posture.jpg",
-            normalized_mime_type: "image/jpeg",
-            classification: "ai_scan",
-            finding_hints: [],
-            confirmed: true,
-          }],
-        }}
-        {...props}
+        draft={draft}
+        booking={booking}
+        onSaveInsights={vi.fn()}
+        onViewPdf={vi.fn()}
+        onPublish={vi.fn()}
       />
     );
     expect(screen.getByRole("heading", { name: "Mobility" }).closest("article"))
       .toHaveTextContent("Normal");
+    expect(screen.getAllByText("No issue observed.")).toHaveLength(5);
   });
 });

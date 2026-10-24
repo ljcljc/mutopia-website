@@ -198,7 +198,6 @@ export function PhotoHealthReportReview({
             key={area.key}
             label={area.label}
             result={draft.wellness_summary[area.key]}
-            assessed={area.key !== "mobility" || draft.photos.some((photo) => photo.area === "posture" && photo.classification === "ai_scan")}
             iconName={area.iconName}
             onViewPhotos={() =>
               setViewing(
