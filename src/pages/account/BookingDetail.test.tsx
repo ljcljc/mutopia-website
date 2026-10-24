@@ -117,6 +117,46 @@ describe("BookingDetail", () => {
       .toHaveTextContent("$105.00");
   });
 
+  it("shows persisted service discounts and the tax-inclusive payable amount", async () => {
+    renderBookingDetail(makeCompletedBooking({
+      id: 99,
+      status: "checked_in",
+      package_amount: "124.53",
+      addons_amount: "36.00",
+      mobile_van_service_amount: "25.00",
+      safety_insurance_amount: "10.00",
+      discount_rate: "0.90",
+      discount_amount: "19.55",
+      coupon_amount: "5.00",
+      pre_gst_total: "170.98",
+      gst_amount: "8.55",
+      final_amount: "179.53",
+      used_coupons: [{ id: 93, template_name: "Cash credit", category: "cash", type: "cash", amount: "5.00" }],
+    }));
+
+    const priceRow = (await screen.findByRole("button", { name: "Toggle total estimation details" })).parentElement;
+    expect(priceRow).toHaveTextContent("was $195.53");
+    expect(priceRow).toHaveTextContent("$170.98");
+    expect(priceRow).not.toHaveTextContent("$179.53");
+    expect(screen.getByLabelText("Applied offers")).toHaveTextContent("10% OFF");
+    expect(screen.getByLabelText("Applied offers")).toHaveTextContent("-$5.00 Cash credit");
+    expect(screen.getByText("Total payable: $170.98 + $8.55 tax = $179.53")).toBeInTheDocument();
+    expect(screen.queryByText(/Membership fee was added/)).not.toBeInTheDocument();
+  });
+
+  it("omits absent offer rows and includes a purchased membership in the payable formula", async () => {
+    renderBookingDetail(makeCompletedBooking({
+      membership_fee: "99.00",
+      pre_gst_total: "105.00",
+      gst_amount: "10.20",
+      final_amount: "214.20",
+    }));
+
+    expect(await screen.findByText("* $99.00 Membership fee was added.")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Applied offers")).not.toBeInTheDocument();
+    expect(screen.getByText("Total payable: $105.00 + $99.00 + $10.20 tax = $214.20")).toBeInTheDocument();
+  });
+
   it("includes a settled personalization charge before a second check-in adjustment", async () => {
     renderBookingDetail(makeCompletedBooking({
       status: "checkup_adjustment_pending",
@@ -189,7 +229,7 @@ describe("BookingDetail", () => {
     expect(screen.getByText("Severely matted $10.00")).toBeInTheDocument();
     expect(screen.getByText("Severely matted")).toBeInTheDocument();
     expect(screen.getAllByText("$130.00").length).toBeGreaterThan(0);
-    expect(screen.getByText("($123.81)")).toBeInTheDocument();
+    expect(screen.getByText("Total payable: $123.81 + $6.19 tax = $130.00")).toBeInTheDocument();
     expect(screen.getByText("Final price includes check-in adjustment")).toBeInTheDocument();
 
     vi.mocked(clientDecideAddOn).mockResolvedValue({ ok: true, status: "paid" });

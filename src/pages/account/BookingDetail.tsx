@@ -753,16 +753,24 @@ export default function BookingDetail() {
   }, [detail?.addons_snapshot]);
 
   // 计算折扣信息
-  const percentOff = estimateSummary.discountPercent;
-  const discountAmount = formatAmount(detail?.discount_amount, "$0.00");
-  const couponAmount = formatAmount(detail?.coupon_amount, "$0.00");
+  const percentOff = adjustmentDetails?.discount_rate !== undefined
+    ? getBookingEstimateSummary({ discount_rate: adjustmentDetails.discount_rate as string | number }).discountPercent
+    : estimateSummary.discountPercent;
+  const discountAmount = formatAmount((adjustmentDetails?.discount_amount as string | number | undefined) ?? detail?.discount_amount, "$0.00");
+  const couponAmount = formatAmount((adjustmentDetails?.coupon_amount as string | number | undefined) ?? detail?.coupon_amount, "$0.00");
   const membershipFee = formatAmount(detail?.membership_fee, "$0.00");
   const mobileVanAmount = formatAmount(detail?.mobile_van_service_amount, "$0.00");
   const safetyInsuranceAmount = formatAmount(detail?.safety_insurance_amount, "$0.00");
-  const preGstTotal = formatAmount(pendingAdjustment
+  const serviceEstimation = pendingAdjustment
     ? parseAmount(adjustmentDetails?.pre_gst_total as string | number | undefined) ||
-      parseAmount(pendingAdjustment.quoted_total_amount) - parseAmount(pendingAdjustment.gst_amount) - parseAmount(detail?.membership_fee)
-    : estimateSummary.preGstAmount ?? 0, "$0.00");
+      parseAmount(totalEstimation) - parseAmount(pendingAdjustment.gst_amount) - parseAmount(membershipFee)
+    : estimateSummary.preGstAmount ?? originalTotal - parseAmount(discountAmount) - parseAmount(couponAmount);
+  const preGstTotal = formatAmount(serviceEstimation, "$0.00");
+  const gstAmount = formatAmount(
+    pendingAdjustment?.gst_amount ?? detail?.gst_amount ?? Math.max(0, parseAmount(totalEstimation) - serviceEstimation - parseAmount(membershipFee)),
+    "$0.00",
+  );
+  const couponLabel = detail?.used_coupons?.length === 1 ? getCouponDisplayName(detail.used_coupons[0]) : "Coupon discount";
   const refundedAmount = formatAmount(detail?.refunded_amount, "$0.00");
 
   const packageComponentItems = useMemo(
@@ -882,9 +890,7 @@ export default function BookingDetail() {
   };
 
   // 会员和优惠券信息
-  const membershipSnapshot = (detail?.membership_snapshot as Record<string, unknown> | undefined) ?? {};
   const couponSnapshot = (detail?.coupon_snapshot as Record<string, unknown> | undefined) ?? {};
-  const hasMembership = Object.keys(membershipSnapshot).length > 0;
   const hasCoupon = Object.keys(couponSnapshot).length > 0;
   
   const canCancel = [
@@ -1914,15 +1920,15 @@ export default function BookingDetail() {
 
                   {/* Right side: Price + Accordion */}
                   <div className="flex w-[428px] flex-col items-end gap-1.5">
-                    {/* Top row: was + final price + chevron */}
+                    {/* Top row: service prices before tax */}
                     <div className="flex items-center justify-end gap-2">
-                      {originalTotal > parseAmount(totalEstimation) && (
+                      {originalTotal > serviceEstimation && (
                         <span className="font-comfortaa font-normal leading-[17.5px] text-[12.25px] text-[#4a3c2a]">
                           was {originalTotalFormatted}
                         </span>
                       )}
                       <p className="font-comfortaa font-bold leading-[24.5px] text-[16px] text-[#de6a07]">
-                        {totalEstimation}
+                        {preGstTotal}
                       </p>
                       <button
                         type="button"
@@ -1938,28 +1944,29 @@ export default function BookingDetail() {
                       </button>
                     </div>
 
-                    {/* Second row: badge + breakdown + plus tax */}
-                    <AccordionPanel open={isTotalExpanded} className="w-full">
-                      <div className="flex flex-col items-end gap-0">
-                        <div className="flex items-center gap-2">
-                          {percentOff > 0 && (
-                            <div className="flex h-6 items-center justify-center gap-1 rounded-xl bg-[#dcfce7] px-3 py-1">
-                              <CheckCircleIcon className="size-3.5 text-[#27ae60]" aria-hidden="true" />
-                              <span className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#27ae60]">
-                                {percentOff}% OFF
-                              </span>
-                            </div>
-                          )}
-                          <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#DE6A07]">
-                            ({preGstTotal}
-                            {hasMembership && membershipFee !== "$0.00" && ` + ${membershipFee}`})
-                          </p>
-                        </div>
-                        <p className="font-comfortaa font-bold text-[10px] leading-[14px] text-[#4a5565]">
-                          plus tax
-                        </p>
+                    <p className="font-comfortaa text-[10px] text-[#de6a07]">Plus tax</p>
+                    {(parseAmount(discountAmount) > 0 || parseAmount(couponAmount) > 0) && (
+                      <div className="flex flex-wrap justify-end gap-2" aria-label="Applied offers">
+                        {parseAmount(discountAmount) > 0 && (
+                          <span className="flex items-center gap-1 rounded-xl bg-[#dcfce7] px-3 py-1 font-comfortaa text-[10px] text-[#27ae60]">
+                            <CheckCircleIcon className="size-3.5" aria-hidden="true" />
+                            {percentOff > 0 ? `${percentOff}% OFF` : `-${discountAmount} Service discount`}
+                          </span>
+                        )}
+                        {parseAmount(couponAmount) > 0 && (
+                          <span className="flex items-center gap-1 rounded-xl bg-[#dcfce7] px-3 py-1 font-comfortaa text-[10px] text-[#27ae60]">
+                            <CheckCircleIcon className="size-3.5" aria-hidden="true" />
+                            -{couponAmount} {couponLabel}
+                          </span>
+                        )}
                       </div>
-                    </AccordionPanel>
+                    )}
+                    {parseAmount(membershipFee) > 0 && (
+                      <p className="font-comfortaa text-[12px] text-[#4a5565]">* {membershipFee} Membership fee was added.</p>
+                    )}
+                    <p className="font-comfortaa text-[12px] text-[#de6a07]">
+                      Total payable: {preGstTotal}{parseAmount(membershipFee) > 0 && ` + ${membershipFee}`} + {gstAmount} tax = {totalEstimation}
+                    </p>
 
                     {/* Divider + 券明细 —— 对齐 Figma：只有券分组，不单独显示 Discount/Membership */}
                     <AccordionPanel open={isTotalExpanded} className="w-full">
