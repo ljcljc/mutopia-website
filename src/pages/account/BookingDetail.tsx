@@ -635,7 +635,7 @@ export default function BookingDetail() {
         return {
           subtitleIncludesScheduled: true,
           progressColor: detail?.review ? "#8B6357" : "#633479",
-          progressWidth: 98.5,
+          progressWidth: 100,
           badgeLabel: detail?.review ? "Service completed and reviewed" : "Service completed!",
           badgeTone: detail?.review ? "brown" : "purple",
           nextStep: detail?.review ? "Review submitted" : "Pending review",
@@ -674,7 +674,7 @@ export default function BookingDetail() {
         return {
           subtitleIncludesScheduled: true,
           progressColor: "#EAB308",
-          progressWidth: 98.5,
+          progressWidth: 100,
           badgeLabel: getRefundedBadgeLabel(normalizedStatus, detail?.notes),
           badgeTone: "outlined",
           showNextStep: false,

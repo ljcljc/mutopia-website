@@ -259,6 +259,27 @@ describe("BookingDetail", () => {
     expect(screen.queryByRole("button", { name: "Confirm refund" })).not.toBeInTheDocument();
   });
 
+  it("fills the history hero progress for a canceled and refunded booking", async () => {
+    renderBookingDetail(makeCompletedBooking({ status: "canceled_and_refunded" }));
+
+    const badge = await screen.findByText("Service canceled and refunded");
+    expect(badge.parentElement?.parentElement?.querySelector('[style*="width: 100%"]')).toBeInTheDocument();
+  });
+
+  it("fills the history hero progress for a terminated and refunded booking", async () => {
+    renderBookingDetail(makeCompletedBooking({ status: "terminated_and_refunded" }));
+
+    const badge = await screen.findByText("Service terminated and refunded");
+    expect(badge.parentElement?.parentElement?.querySelector('[style*="width: 100%"]')).toBeInTheDocument();
+  });
+
+  it("fills the history hero progress for a completed booking", async () => {
+    renderBookingDetail(makeCompletedBooking({ status: "completed" }));
+
+    const badge = await screen.findByText("Service completed!");
+    expect(badge.parentElement?.parentElement?.querySelector('[style*="width: 100%"]')).toBeInTheDocument();
+  });
+
   it("shows the refund before GST in the check-in hero", async () => {
     renderBookingDetail(makeCompletedBooking({
       status: "checkup_adjustment_pending",
