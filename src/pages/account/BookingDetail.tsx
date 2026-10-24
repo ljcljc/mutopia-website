@@ -765,10 +765,6 @@ export default function BookingDetail() {
     ? parseAmount(adjustmentDetails?.pre_gst_total as string | number | undefined) ||
       parseAmount(totalEstimation) - parseAmount(pendingAdjustment.gst_amount) - parseAmount(membershipFee)
     : estimateSummary.preGstAmount ?? originalTotal - parseAmount(discountAmount) - parseAmount(couponAmount);
-  const gstAmount = formatAmount(
-    pendingAdjustment?.gst_amount ?? detail?.gst_amount ?? Math.max(0, parseAmount(totalEstimation) - serviceEstimation - parseAmount(membershipFee)),
-    "$0.00",
-  );
   const couponLabel = detail?.used_coupons?.length === 1 ? getCouponDisplayName(detail.used_coupons[0]) : "Coupon discount";
   const refundedAmount = formatAmount(detail?.refunded_amount, "$0.00");
 
@@ -1923,7 +1919,6 @@ export default function BookingDetail() {
                       original={originalTotal}
                       service={serviceEstimation}
                       membership={parseAmount(membershipFee)}
-                      tax={parseAmount(gstAmount)}
                       payable={parseAmount(totalEstimation)}
                       offers={[
                         ...(parseAmount(discountAmount) > 0 ? [percentOff > 0 ? `${percentOff}% OFF` : `-${discountAmount} Service discount`] : []),

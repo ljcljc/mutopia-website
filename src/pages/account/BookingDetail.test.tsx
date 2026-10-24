@@ -140,7 +140,7 @@ describe("BookingDetail", () => {
     expect(priceRow).not.toHaveTextContent("$179.53");
     expect(screen.getByLabelText("Applied offers")).toHaveTextContent("10% OFF");
     expect(screen.getByLabelText("Applied offers")).toHaveTextContent("-$5.00 Cash credit");
-    expect(screen.getByText("Total payable: $170.98 + $8.55 tax = $179.53")).toBeInTheDocument();
+    expect(screen.getByText("Total payable: $170.98 plus tax = $179.53")).toBeInTheDocument();
     expect(screen.queryByText(/Membership fee was added/)).not.toBeInTheDocument();
   });
 
@@ -154,7 +154,7 @@ describe("BookingDetail", () => {
 
     expect(await screen.findByText("* $99.00 Membership fee was added.")).toBeInTheDocument();
     expect(screen.queryByLabelText("Applied offers")).not.toBeInTheDocument();
-    expect(screen.getByText("Total payable: $105.00 + $99.00 + $10.20 tax = $214.20")).toBeInTheDocument();
+    expect(screen.getByText("Total payable: $105.00 + $99.00 plus tax = $214.20")).toBeInTheDocument();
   });
 
   it("includes a settled personalization charge before a second check-in adjustment", async () => {
@@ -229,7 +229,7 @@ describe("BookingDetail", () => {
     expect(screen.getByText("Severely matted $10.00")).toBeInTheDocument();
     expect(screen.getByText("Severely matted")).toBeInTheDocument();
     expect(screen.getAllByText("$130.00").length).toBeGreaterThan(0);
-    expect(screen.getByText("Total payable: $123.81 + $6.19 tax = $130.00")).toBeInTheDocument();
+    expect(screen.getByText("Total payable: $123.81 plus tax = $130.00")).toBeInTheDocument();
     expect(screen.getByText("Final price includes check-in adjustment")).toBeInTheDocument();
 
     vi.mocked(clientDecideAddOn).mockResolvedValue({ ok: true, status: "paid" });

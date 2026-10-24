@@ -1265,7 +1265,6 @@ export function Step6() {
               original={originalTotal}
               service={serviceTotal}
               membership={displayPrice.membershipFee}
-              tax={displayPrice.gstAmount}
               payable={finalTotal}
               offers={appliedOffers}
               membershipVerb="will be"

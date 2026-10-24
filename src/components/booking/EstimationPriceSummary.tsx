@@ -5,7 +5,6 @@ type Props = {
   original: number;
   service: number;
   membership: number;
-  tax: number;
   payable: number;
   offers: string[];
   paymentLabel: string;
@@ -15,7 +14,7 @@ type Props = {
 
 const money = (amount: number) => `$${amount.toFixed(2)}`;
 
-export function EstimationPriceSummary({ original, service, membership, tax, payable, offers, paymentLabel, membershipVerb, toggle }: Props) {
+export function EstimationPriceSummary({ original, service, membership, payable, offers, paymentLabel, membershipVerb, toggle }: Props) {
   return (
     <>
       <div className="flex items-center justify-end gap-2">
@@ -35,7 +34,7 @@ export function EstimationPriceSummary({ original, service, membership, tax, pay
       )}
       {membership > 0 && <p className="font-comfortaa text-[12px] text-[#4a5565]">* {money(membership)} Membership fee {membershipVerb} added.</p>}
       <p className="font-comfortaa text-[12px] text-[#de6a07]">
-        {paymentLabel}: {money(service)}{membership > 0 && ` + ${money(membership)}`} + {money(tax)} tax = {money(payable)}
+        {paymentLabel}: {money(service)}{membership > 0 && ` + ${money(membership)}`} plus tax = {money(payable)}
       </p>
     </>
   );
