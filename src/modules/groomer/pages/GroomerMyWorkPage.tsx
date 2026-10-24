@@ -335,6 +335,7 @@ function mapUpNext(item: Record<string, unknown>, dateKey: string): UpNextCard {
     time: [formatTimeLabel(serviceScheduledTime), serviceTimeZoneLabel(serviceScheduledTime, getString(item, ["business_timezone"]))]
       .filter(Boolean).join(" "),
     businessTimezone: getString(item, ["business_timezone"]),
+    previousBusinessTimezone: getString(item, ["previous_business_timezone"]),
     scheduledTime,
     status,
   };

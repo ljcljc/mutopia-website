@@ -34,4 +34,18 @@ describe("GroomerUpNextCard", () => {
 
     expect(screen.getByText("1 day 2 hours 5 min left")).toBeTruthy();
   });
+
+  it("compares the current service area with the previous appointment", () => {
+    render(
+      <GroomerUpNextCard appointment={{
+        petName: "Hugui", breed: "Affenpinscher", owner: "Owner", avatarUrl: "",
+        address: "Denver", service: "Grooming", duration: "", time: "11:00 AM MDT",
+        scheduledTime: "2026-10-17T20:00:00Z",
+        businessTimezone: "America/Denver",
+        previousBusinessTimezone: "America/Vancouver",
+      }} />,
+    );
+
+    expect(screen.getByText("Timezone Change: Next appointment is in Mountain Time (+1 hr vs previous appointment).")).toBeTruthy();
+  });
 });

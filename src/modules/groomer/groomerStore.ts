@@ -616,6 +616,7 @@ function mapDashboardAppointment(raw: unknown): DashboardAppointment | null {
     time: [formatTimeLabel(serviceScheduledTime), serviceTimeZoneLabel(serviceScheduledTime, getString(record, ["business_timezone"]))]
       .filter(Boolean).join(" "),
     businessTimezone: getString(record, ["business_timezone"]),
+    previousBusinessTimezone: getString(record, ["previous_business_timezone"]),
     scheduledTime,
     status: getString(record, ["status"]),
     hasCheckUp: record.has_check_up === true,

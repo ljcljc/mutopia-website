@@ -13,6 +13,7 @@ export type GroomerUpNextAppointment = {
   time: string;
   scheduledTime?: string;
   businessTimezone?: string;
+  previousBusinessTimezone?: string;
 };
 
 function formatTimeLeft(minutesLeft: number): string {
@@ -56,8 +57,7 @@ export function GroomerUpNextCard({
   const start = appointment.scheduledTime ? Date.parse(appointment.scheduledTime) : NaN;
   const minutesLeft = Number.isNaN(start) ? 0 : Math.ceil((start - now) / 60_000);
   const timeLeft = formatTimeLeft(minutesLeft);
-  const viewerZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const timezoneNotice = formatTimezoneChangeNotice(appointment.businessTimezone, viewerZone, appointment.scheduledTime);
+  const timezoneNotice = formatTimezoneChangeNotice(appointment.businessTimezone, appointment.previousBusinessTimezone, appointment.scheduledTime);
 
   return (
     <article className="rounded-[20px] bg-white px-4 py-5 shadow-[0px_4px_14px_rgba(0,0,0,0.1)] sm:px-6">

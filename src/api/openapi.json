@@ -2171,7 +2171,35 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Current same-day dashboard booking plus report_interactions for published health-report bookings awaiting an owner review or groomer reply."
+            "description": "Current same-day dashboard booking plus report_interactions for published health-report bookings awaiting an owner review or groomer reply. The booking includes previous_business_timezone (string or null): the service-area timezone of the immediately preceding valid groomer booking on the current booking's service-area date, ordered by scheduled time; canceled bookings are excluded."
+          }
+        },
+        "tags": ["groomer-portal"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/groomers/my_work": {
+      "get": {
+        "operationId": "api_groomer_portal_groomer_my_work",
+        "summary": "Groomer My Work",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Calendar and schedule sections. Each up_next booking includes previous_business_timezone (string or null): the service-area timezone of the immediately preceding valid groomer booking on that booking's service-area date, ordered by scheduled time; canceled bookings are excluded."
+          }
+        },
+        "tags": ["groomer-portal"],
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
+    "/api/groomers/my_work/schedule": {
+      "get": {
+        "operationId": "api_groomer_portal_groomer_my_work_schedule",
+        "summary": "Groomer My Work Schedule",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Schedule sections. Each up_next booking includes previous_business_timezone (string or null): the service-area timezone of the immediately preceding valid groomer booking on that booking's service-area date, ordered by scheduled time; canceled bookings are excluded."
           }
         },
         "tags": ["groomer-portal"],

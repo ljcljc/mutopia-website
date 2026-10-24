@@ -114,8 +114,8 @@ export function serviceTimeZoneLabel(value?: string | null, businessTimeZone?: s
   return short;
 }
 
-export function formatTimezoneChangeNotice(serviceZone?: string, viewerZone?: string, instantValue?: string): string {
-  if (!serviceZone || !viewerZone || !instantValue) return "";
+export function formatTimezoneChangeNotice(serviceZone?: string, previousZone?: string, instantValue?: string): string {
+  if (!serviceZone || !previousZone || !instantValue) return "";
   const instant = new Date(instantValue);
   if (Number.isNaN(instant.getTime())) return "";
   try {
@@ -127,14 +127,14 @@ export function formatTimezoneChangeNotice(serviceZone?: string, viewerZone?: st
       return match[1] ? (match[1] === "+" ? 1 : -1) * (Number(match[2]) * 60 + Number(match[3] ?? 0)) : 0;
     };
     const serviceOffset = offsetMinutes(serviceZone);
-    const viewerOffset = offsetMinutes(viewerZone);
-    if (serviceOffset === null || viewerOffset === null || serviceOffset === viewerOffset) return "";
+    const previousOffset = offsetMinutes(previousZone);
+    if (serviceOffset === null || previousOffset === null || serviceOffset === previousOffset) return "";
     const zoneName = new Intl.DateTimeFormat("en-US", { timeZone: serviceZone, timeZoneName: "longGeneric" })
       .formatToParts(instant).find((part) => part.type === "timeZoneName")?.value;
     if (!zoneName) return "";
-    const hours = Number((Math.abs(serviceOffset - viewerOffset) / 60).toFixed(2));
-    const direction = serviceOffset > viewerOffset ? "+" : "-";
-    return `Timezone Change: Next appointment is in ${zoneName} (${direction}${hours} hr).`;
+    const hours = Number((Math.abs(serviceOffset - previousOffset) / 60).toFixed(2));
+    const direction = serviceOffset > previousOffset ? "+" : "-";
+    return `Timezone Change: Next appointment is in ${zoneName} (${direction}${hours} hr vs previous appointment).`;
   } catch {
     return "";
   }

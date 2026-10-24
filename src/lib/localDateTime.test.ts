@@ -30,9 +30,9 @@ describe("local API date time formatting", () => {
 
   it("uses the appointment date's offset for the cross-timezone notice", () => {
     expect(formatTimezoneChangeNotice("America/Denver", "America/Vancouver", "2026-10-17T20:00:00Z"))
-      .toBe("Timezone Change: Next appointment is in Mountain Time (+1 hr).");
+      .toBe("Timezone Change: Next appointment is in Mountain Time (+1 hr vs previous appointment).");
     expect(formatTimezoneChangeNotice("America/Denver", "America/Vancouver", "2026-01-17T20:00:00Z"))
-      .toBe("Timezone Change: Next appointment is in Mountain Time (+1 hr).");
+      .toBe("Timezone Change: Next appointment is in Mountain Time (+1 hr vs previous appointment).");
     expect(formatTimezoneChangeNotice("America/Denver", "America/Edmonton", "2026-10-17T20:00:00Z"))
       .toBe("");
   });
