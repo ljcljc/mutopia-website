@@ -6,7 +6,8 @@ import { PhotoHealthOverview } from "./PhotoHealthOverview";
 const booking = {
   id: 71,
   status: "checked_in",
-  scheduled_time: "2026-08-09T02:30:00Z",
+  scheduled_time: "2026-08-09 10:30",
+  business_timezone: "America/Vancouver",
   pet_snapshot: {
     name: "Max",
     breed: "Yorkie",
@@ -50,30 +51,57 @@ const arrival: CheckInObservationOut = {
 };
 
 describe("PhotoHealthOverview", () => {
-  it("renders the booking snapshot behavior as read-only", () => {
-    render(
-      <PhotoHealthOverview
-        booking={booking}
-        arrival={arrival}
-        saving={false}
-        startLabel="Start inspection"
-        onStart={vi.fn()}
-      />
-    );
+  it("uses Today for appointments on the business's current date", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-08-09T18:00:00Z"));
+    try {
+      render(
+        <PhotoHealthOverview
+          booking={booking}
+          arrival={arrival}
+          saving={false}
+          startLabel="Start inspection"
+          onStart={vi.fn()}
+        />
+      );
+      expect(
+        screen.getByText("Today, 10:30 AM · Full Groom")
+      ).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 
-    expect(screen.getByText("Hard to handle")).toBeInTheDocument();
-    expect(screen.getByRole("img", { name: "Max" })).toHaveClass("size-14");
-    expect(screen.getByRole("img", { name: "Max" })).toHaveAttribute(
-      "src",
-      expect.stringContaining("/media/max.jpg")
-    );
-    expect(
-      screen.getByText(/Aug 9, 10:30 AM · Full Groom/)
-    ).toBeInTheDocument();
-    expect(screen.getByText("Checked In")).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: /edit/i })
-    ).not.toBeInTheDocument();
+  it("renders the booking snapshot behavior as read-only", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-08-10T18:00:00Z"));
+    try {
+      render(
+        <PhotoHealthOverview
+          booking={booking}
+          arrival={arrival}
+          saving={false}
+          startLabel="Start inspection"
+          onStart={vi.fn()}
+        />
+      );
+
+      expect(screen.getByText("Hard to handle")).toBeInTheDocument();
+      expect(screen.getByRole("img", { name: "Max" })).toHaveClass("size-14");
+      expect(screen.getByRole("img", { name: "Max" })).toHaveAttribute(
+        "src",
+        expect.stringContaining("/media/max.jpg")
+      );
+      expect(
+        screen.getByText(/Aug 9, 10:30 AM · Full Groom/)
+      ).toBeInTheDocument();
+      expect(screen.getByText("Checked In")).toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /edit/i })
+      ).not.toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("uses the green normal styling for a normal pet", () => {
@@ -140,7 +168,9 @@ describe("PhotoHealthOverview", () => {
       />
     );
 
-    expect(screen.queryByText("Note - Before grooming")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Note - Before grooming")
+    ).not.toBeInTheDocument();
     expect(screen.queryByText("No note provided")).not.toBeInTheDocument();
   });
 

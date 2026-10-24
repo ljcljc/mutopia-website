@@ -2,7 +2,8 @@ import { TriangleAlert } from "lucide-react";
 import { cn } from "@/components/ui/utils";
 import DEFAULT_PET_AVATAR from "@/assets/icons/icon-pet-avatar-placeholder.svg";
 import { buildImageUrl, type BookingDetailOut } from "@/lib/api";
-import { formatApiServiceDateTime } from "@/lib/localDateTime";
+import { serviceNowParts } from "@/lib/localDateTime";
+import { parseGroomerDateTime } from "@/modules/groomer/utils/time";
 
 const BEHAVIOR_LABELS: Record<string, string> = {
   normal: "Normal",
@@ -93,9 +94,25 @@ export function PhotoHealthBookingPetCard({
   booking: BookingDetailOut | null;
 }) {
   const snapshot = booking?.pet_snapshot;
-  const scheduled = formatApiServiceDateTime(booking?.scheduled_time, booking?.business_timezone) || "Time not provided";
+  const appointment = booking?.scheduled_time
+    ? parseGroomerDateTime(booking.scheduled_time)
+    : null;
+  const today = serviceNowParts(booking?.business_timezone);
+  const scheduled = appointment
+    ? `${
+        appointment.getFullYear() === today.year &&
+        appointment.getMonth() + 1 === today.month &&
+        appointment.getDate() === today.day
+          ? "Today"
+          : appointment.toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+            })
+      }, ${appointment.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`
+    : "Time not provided";
   const behavior = text(snapshot, "behavior", "").trim().toLowerCase();
-  const behaviorNeedsAttention = behavior !== "normal" && behavior !== "friendly";
+  const behaviorNeedsAttention =
+    behavior !== "normal" && behavior !== "friendly";
 
   return (
     <section className="rounded-[12px] border-2 border-[#DE6A07] bg-white px-[22px] py-[14px] shadow-[0px_8px_6px_rgba(0,0,0,0.1)]">
