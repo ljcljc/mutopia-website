@@ -2031,7 +2031,7 @@ export default function BookingDetail() {
                 <AlertDialogPrimitive.Cancel asChild>
                   <button
                     type="button"
-                    className="flex size-4 items-center justify-center border-0 bg-transparent p-0 text-[#4A3C2A] opacity-70 hover:opacity-100"
+                    className="flex size-4 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-[#4A3C2A] opacity-70 hover:opacity-100"
                     aria-label="Close cancel booking dialog"
                   >
                     <XIcon className="size-4 stroke-[1.5]" />
