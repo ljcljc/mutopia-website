@@ -60,6 +60,14 @@ export function getCouponDisplayName(coupon: CouponLike): string {
   return coupon.type || coupon.template_name || "Coupon";
 }
 
+export function selectAppliedBookingCoupons<T extends CouponLike & { id: number }>(coupons: readonly T[]): T[] {
+  const gift = coupons.find((coupon) => coupon.id > 0 && ["gift", "membership_gift"].some((type) => coupon.category === type || coupon.type === type))
+    ?? coupons.find((coupon) => coupon.id < 0);
+  const nonGift = coupons.find((coupon) => coupon.category === "birthday" || coupon.type === "birthday")
+    ?? coupons.find((coupon) => coupon.category === "custom" || coupon.type === "custom");
+  return [gift, nonGift].filter((coupon): coupon is T => Boolean(coupon));
+}
+
 export function groupCoupons<T extends CouponLike>(coupons: readonly T[]) {
   const general: T[] = [];
   const special: T[] = [];

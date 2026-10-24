@@ -17,7 +17,7 @@ describe("calculateBookingDisplayPrice", () => {
     expect(result.payableTotal).toBe(121.4);
   });
 
-  it("keeps membership fee separate from the GST base", () => {
+  it("taxes a new membership fee with the service", () => {
     const result = calculateBookingDisplayPrice({
       serviceFee: 100,
       addons: 0,
@@ -27,7 +27,19 @@ describe("calculateBookingDisplayPrice", () => {
     });
 
     expect(result.preGstTotal).toBe(100);
+    expect(result.gstAmount).toBe(6.5);
+    expect(result.payableTotal).toBe(136.5);
+  });
+
+  it("keeps the old tax base when editing a legacy booking", () => {
+    const result = calculateBookingDisplayPrice({ serviceFee: 100, addons: 0, mobileVanService: 0, safetyInsurance: 0, membershipFee: 30, taxMembership: false });
     expect(result.gstAmount).toBe(5);
     expect(result.payableTotal).toBe(135);
+  });
+
+  it("matches the service, membership, and tax example", () => {
+    const result = calculateBookingDisplayPrice({ serviceFee: 104.7, addons: 0, mobileVanService: 0, safetyInsurance: 0, membershipFee: 99 });
+    expect(result.gstAmount).toBe(10.19);
+    expect(result.payableTotal).toBe(213.89);
   });
 });

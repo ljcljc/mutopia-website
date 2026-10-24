@@ -1,5 +1,7 @@
 import type { ServiceOut } from "./api";
 
+export const isNewMembershipPurchase = (selected: boolean, alreadyMember: boolean) => selected && !alreadyMember;
+
 export interface BookingDisplayPriceInput {
   serviceFee: number;
   addons: number;
@@ -8,6 +10,7 @@ export interface BookingDisplayPriceInput {
   discountRate?: number;
   couponAmount?: number;
   membershipFee?: number;
+  taxMembership?: boolean;
 }
 
 export interface BookingDisplayPrice {
@@ -30,14 +33,11 @@ export function calculateBookingDisplayPrice(input: BookingDisplayPriceInput): B
   const addons = Math.max(0, input.addons);
   const mobileVanService = Math.max(0, input.mobileVanService);
   const safetyInsurance = Math.max(0, input.safetyInsurance);
-  const couponAmount = Math.min(
-    Math.max(0, input.couponAmount ?? 0),
-    (serviceFee + addons + mobileVanService + safetyInsurance) * rate,
-  );
   const discountedServiceFee = Math.round(serviceFee * rate * 100) / 100;
   const discountedAddons = Math.round(addons * rate * 100) / 100;
   const discountedMobileVanService = Math.round(mobileVanService * rate * 100) / 100;
   const discountedSafetyInsurance = Math.round(safetyInsurance * rate * 100) / 100;
+  const couponAmount = Math.min(Math.max(0, input.couponAmount ?? 0), discountedServiceFee);
   const discountAmount = Math.round(
     (serviceFee + addons + mobileVanService + safetyInsurance) * (1 - rate) * 100,
   ) / 100;
@@ -47,8 +47,8 @@ export function calculateBookingDisplayPrice(input: BookingDisplayPriceInput): B
       (discountedServiceFee + discountedAddons + discountedMobileVanService + discountedSafetyInsurance - couponAmount) * 100,
     ) / 100,
   );
-  const gstAmount = Math.round(preGstTotal * 0.05 * 100) / 100;
   const membershipFee = Math.max(0, input.membershipFee ?? 0);
+  const gstAmount = Math.round((preGstTotal + (input.taxMembership === false ? 0 : membershipFee)) * 0.05 * 100) / 100;
   return {
     discountedServiceFee,
     discountedAddons,

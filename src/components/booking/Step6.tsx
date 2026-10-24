@@ -12,7 +12,7 @@ import {
   getPaymentSessionRedirectUrl,
 } from "@/lib/api";
 import { toast } from "sonner";
-import { calculateBookingDisplayPrice, getServicePrice } from "@/lib/pricing";
+import { calculateBookingDisplayPrice, getServicePrice, isNewMembershipPurchase } from "@/lib/pricing";
 import { formatPreferredTimeSlotLocal } from "@/lib/localDateTime";
 import { CheckCircleIcon } from "lucide-react";
 import {
@@ -20,6 +20,7 @@ import {
   getCouponDisplayName,
   getGeneralCouponCategory,
   groupCoupons,
+  selectAppliedBookingCoupons,
 } from "@/lib/couponUtils";
 
 // Radio button component matching CustomRadio.tsx
@@ -127,6 +128,7 @@ export function Step6() {
     editingOrderCode,
     editingOriginalPayload,
     editingHasExistingMembershipBenefit,
+    editingTaxMembership,
     clearEditingBooking,
     loadServices,
     loadAddOns,
@@ -275,7 +277,11 @@ export function Step6() {
 
   // Calculate prices with discount
   const addOnsPrice = selectedAddOnsDetails.reduce((total, addOn) => total + addOn.price, 0);
-  const originalTotal = packagePrice + addOnsPrice + mobileVanServiceAmount + safetyInsuranceAmount;
+  const originalAddOnsPrice = selectedAddOns.reduce((total, id) => {
+    const addOn = addOnsList.find((item) => item.id === id);
+    return total + (addOn ? Number(addOn.price) : 0);
+  }, 0);
+  const originalTotal = packagePrice + originalAddOnsPrice + mobileVanServiceAmount + safetyInsuranceAmount;
   
   
   // Generate virtual Cash credit coupons if user is purchasing membership
@@ -641,22 +647,15 @@ export function Step6() {
     setSelectedCouponIds([...filteredIds, couponId]);
   };
 
-  // Calculate coupon discount from selected coupons
-  const couponDiscount = useMemo(() => {
-    return selectedCouponIds.reduce((total, couponId) => {
-      // Handle both real coupons (positive IDs) and virtual coupons (negative IDs)
-      const coupon = allCoupons.find((c) => c.id === couponId);
-      // Only count active coupons (real coupons) or pending coupons (virtual coupons)
-      if (coupon) {
-        const isActive = coupon.id > 0 ? coupon.status === "active" : coupon.status === "pending";
-        if (isActive) {
-          const amount = typeof coupon.amount === "string" ? parseFloat(coupon.amount) : coupon.amount;
-          return total + amount;
-        }
-      }
-      return total;
-    }, 0);
-  }, [selectedCouponIds, allCoupons]);
+  const newMembershipPurchase = isNewMembershipPurchase(useMembership, Boolean(userInfo?.is_member || editingHasExistingMembershipBenefit));
+  const eligibleCoupons = selectedCouponIds
+    .map((id) => allCoupons.find((coupon) => coupon.id === id))
+    .filter((coupon): coupon is NonNullable<typeof coupon> => Boolean(coupon))
+    .filter((coupon) => coupon.id < 0
+      ? newMembershipPurchase
+      : coupon.status === "active" && ["gift", "birthday", "custom", "membership_gift"].some((type) => coupon.category === type || coupon.type === type));
+  const appliedCoupons = selectAppliedBookingCoupons(eligibleCoupons);
+  const couponDiscount = appliedCoupons.reduce((total, coupon) => total + Number(coupon.amount), 0);
   const displayPrice = calculateBookingDisplayPrice({
     serviceFee: packagePrice,
     addons: addOnsPrice,
@@ -664,13 +663,21 @@ export function Step6() {
     safetyInsurance: safetyInsuranceAmount,
     discountRate,
     couponAmount: couponDiscount,
-    membershipFee: useMembership ? membershipPrice : 0,
+    membershipFee: newMembershipPurchase ? membershipPrice : 0,
+    taxMembership: editingBookingId === null || editingTaxMembership,
   });
   const serviceTotal = displayPrice.preGstTotal;
   const finalTotal = displayPrice.payableTotal;
-
-  // Check if user is a member or purchasing membership
-  const isMemberOrPurchasing = hasMembershipBenefit;
+  const appliedOffers = [
+    ...(displayPrice.discountAmount > 0 ? [`${Math.round((1 - discountRate) * 100)}% OFF`] : []),
+    ...(originalAddOnsPrice > addOnsPrice ? [`-$${(originalAddOnsPrice - addOnsPrice).toFixed(2)} Included add-ons`] : []),
+    ...appliedCoupons.reduce<{ label: string; amount: number }[]>((offers, coupon) => {
+      const used = offers.reduce((sum, offer) => sum + offer.amount, 0);
+      const amount = Math.min(Number(coupon.amount), Math.max(0, displayPrice.couponAmount - used));
+      if (amount > 0) offers.push({ label: getCouponDisplayName(coupon), amount });
+      return offers;
+    }, []).map(({ label, amount }) => `-$${amount.toFixed(2)} ${label}`),
+  ];
 
   // Get current address or store for display
   const currentAddress = selectedServiceAddress;
@@ -1257,18 +1264,13 @@ export function Step6() {
             {/* First row: Price with original price and dropdown button */}
             <div className="flex items-center justify-end gap-[calc(8*var(--px393))] sm:gap-0 relative shrink-0 w-full sm:w-auto">
               <div className="flex items-center gap-[calc(8*var(--px393))] sm:gap-0 relative shrink-0">
-                {isMemberOrPurchasing && originalTotal > 0 && (
+                {originalTotal > serviceTotal && (
                   <span className="font-comfortaa font-normal leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[#4A5565] text-[calc(12.25*var(--px393))] sm:text-[12.25px] mr-0 sm:mr-[8px]">
                     was ${originalTotal.toFixed(2)}
                   </span>
                 )}
-                {!isMemberOrPurchasing && originalTotal > finalTotal && (
-                  <span className="font-comfortaa font-normal leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[#4a3c2a] text-[calc(12.25*var(--px393))] sm:text-[12.25px] line-through mr-0 sm:mr-[8px]">
-                    was ${originalTotal.toFixed(2)}
-                  </span>
-                )}
                 <p className="font-comfortaa font-bold leading-[calc(24.5*var(--px393))] sm:leading-[24.5px] relative shrink-0 text-[#de6a07] text-[calc(16*var(--px393))] sm:text-[16px]">
-                  ${finalTotal.toFixed(2)}
+                  ${serviceTotal.toFixed(2)}
                 </p>
               </div>
               {/* Dropdown button - mobile only */}
@@ -1283,30 +1285,22 @@ export function Step6() {
               </button>
             </div>
             
-            {/* Second row: Save badge + Price breakdown */}
-            <AccordionPanel open={isTotalExpanded} className="w-full sm:w-auto">
-              <div className="flex flex-col gap-0 items-end relative shrink-0 w-full sm:w-auto">
-                <div className="flex items-center gap-[calc(8*var(--px393))] sm:gap-[8px] relative shrink-0">
-                  {/* Save percentage badge - show when there are savings */}
-                  {useMembershipDiscount && discountRate < 1 && (
-                    <div className="bg-[#dcfce7] flex h-[calc(24*var(--px393))] sm:h-[24px] items-center justify-center gap-[4px] overflow-clip px-[calc(12*var(--px393))] sm:px-[12px] py-[calc(4*var(--px393))] sm:py-[4px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shrink-0">
-                      <CheckCircleIcon className="size-[14px] text-[#27ae60]" aria-hidden="true" />
-                      <p className="font-comfortaa font-bold leading-[calc(14*var(--px393))] sm:leading-[14px] relative shrink-0 text-[#27ae60] text-[calc(10*var(--px393))] sm:text-[10px]">
-                        {Math.round((1 - discountRate) * 100)}% OFF
-                      </p>
-                    </div>
-                  )}
-                  {/* Price breakdown - always show */}
-                  <p className="font-comfortaa font-normal leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[#DE6A07] text-[calc(12.25*var(--px393))] sm:text-[12.25px]">
-                    (${serviceTotal.toFixed(2)}{useMembership && ` + $${Math.floor(membershipPrice)}`})
-                  </p>
-                </div>
-                {/* Tax included */}
-                <p className="font-comfortaa font-bold leading-[calc(14*var(--px393))] sm:leading-[14px] relative shrink-0 text-[#4a5565] text-[calc(10*var(--px393))] sm:text-[10px]">
-                  plus tax
-                </p>
+            <p className="font-comfortaa text-[10px] text-[#de6a07]">Plus tax</p>
+            {appliedOffers.length > 0 && (
+              <div className="flex flex-wrap justify-end gap-2" aria-label="Applied offers">
+                {appliedOffers.map((offer, index) => (
+                  <span key={`${offer}-${index}`} className="flex items-center gap-1 rounded-xl bg-[#dcfce7] px-3 py-1 font-comfortaa text-[10px] text-[#27ae60]">
+                    <CheckCircleIcon className="size-[14px]" aria-hidden="true" />{offer}
+                  </span>
+                ))}
               </div>
-            </AccordionPanel>
+            )}
+            {useMembership && displayPrice.membershipFee > 0 && (
+              <p className="font-comfortaa text-[12px] text-[#4a5565]">* ${displayPrice.membershipFee.toFixed(2)} Membership fee will be added.</p>
+            )}
+            <p className="font-comfortaa text-[12px] text-[#de6a07]">
+              Pay in next step: ${serviceTotal.toFixed(2)}{displayPrice.membershipFee > 0 && ` + $${displayPrice.membershipFee.toFixed(2)}`} + ${displayPrice.gstAmount.toFixed(2)} tax = ${finalTotal.toFixed(2)}
+            </p>
 
             {/* Horizontal divider line - between tax info and coupon options */}
             <AccordionPanel open={isTotalExpanded} className="w-full">

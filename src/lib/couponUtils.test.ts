@@ -5,6 +5,7 @@ import {
   getCouponType,
   getGeneralCouponCategory,
   groupCoupons,
+  selectAppliedBookingCoupons,
 } from "./couponUtils";
 
 describe("coupon utils", () => {
@@ -40,5 +41,13 @@ describe("coupon utils", () => {
     expect(getCouponDisplayName({ category: "custom", type: "custom", template_name: "Late arrival compensation" })).toBe("Custom coupon");
     expect(getCouponDisplayName({ category: "future", type: "future", template_name: "Future coupon" })).toBe("future");
     expect(getCouponDisplayName({ category: "future", template_name: "Future coupon" })).toBe("Future coupon");
+  });
+
+  it("uses only one gift credit when a real and virtual gift are selected", () => {
+    expect(selectAppliedBookingCoupons([
+      { id: -1, category: "cash", type: "cash" },
+      { id: 2, category: "gift", type: "gift" },
+      { id: 3, category: "birthday", type: "birthday" },
+    ]).map((coupon) => coupon.id)).toEqual([2, 3]);
   });
 });

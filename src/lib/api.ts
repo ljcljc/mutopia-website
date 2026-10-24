@@ -426,6 +426,7 @@ export interface BookingSubmitIn {
   breed?: string | null;
   membership_plan_id?: number | null;
   open_membership?: boolean; // default: false
+  use_membership_discount?: boolean; // default: true
   use_gift_coupon?: boolean; // default: false
   use_birthday_coupon?: boolean; // default: false
   use_custom_coupon?: boolean; // default: false
@@ -446,6 +447,7 @@ export interface BookingQuoteIn {
   breed?: string | null;
   membership_plan_id?: number | null;
   open_membership?: boolean; // default: false
+  use_membership_discount?: boolean; // default: true
   use_gift_coupon?: boolean; // default: false
   use_birthday_coupon?: boolean; // default: false
   use_custom_coupon?: boolean; // default: false

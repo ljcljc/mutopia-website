@@ -23,6 +23,7 @@ import {
   type TimeSlotIn,
 } from "@/lib/api";
 import { normalizeCanadianPostalCode } from "@/lib/postalCode";
+import { isNewMembershipPurchase } from "@/lib/pricing";
 import { useAuthStore } from "@/components/auth/authStore";
 
 let servicesRequestId = 0;
@@ -136,6 +137,7 @@ interface BookingState {
   editingOrderCode: string | null;
   editingOriginalPayload: string | null;
   editingHasExistingMembershipBenefit: boolean;
+  editingTaxMembership: boolean;
 
   // Actions
   setAddress: (address: string) => void;
@@ -341,6 +343,7 @@ const initialState = {
   editingOrderCode: null as string | null,
   editingOriginalPayload: null as string | null,
   editingHasExistingMembershipBenefit: false,
+  editingTaxMembership: true,
 };
 
 export const useBookingStore = create<BookingState>((set) => ({
@@ -594,13 +597,13 @@ export const useBookingStore = create<BookingState>((set) => ({
     const weightValue = state.weight ? parseFloat(state.weight) : null;
     
     // Determine coupon usage based on selected coupons
-    // Only check real coupons (positive IDs), ignore virtual coupons (negative IDs)
+    // Real coupons supply the server flags; a new membership gift is virtual.
     const selectedRealCoupons = state.coupons.filter(
       (c) => state.selectedCouponIds.includes(c.id) && c.id > 0 && c.status === "active"
     );
     
     // Check if any special gift coupons are selected (category: "gift" or type: "gift")
-    const useGiftCoupon = selectedRealCoupons.some(
+    const useGiftCoupon = (isNewMembershipPurchase(state.useMembership, Boolean(state.userInfo?.is_member || state.editingHasExistingMembershipBenefit)) && state.selectedCouponIds.some((id) => id < 0)) || selectedRealCoupons.some(
       (c) => c.category === "gift" || c.type === "gift" || c.type === "membership_gift"
     );
     
@@ -629,6 +632,7 @@ export const useBookingStore = create<BookingState>((set) => ({
       weight_unit: state.weightUnit,
       membership_plan_id: state.membershipPlanId,
       open_membership: state.useMembership,
+      use_membership_discount: state.useMembershipDiscount,
       use_gift_coupon: useGiftCoupon,
       use_birthday_coupon: useBirthdayCoupon,
       use_custom_coupon: useCustomCoupon,
@@ -645,6 +649,7 @@ export const useBookingStore = create<BookingState>((set) => ({
     const petSnapshot = (detail.pet_snapshot as Record<string, unknown> | undefined) ?? {};
     const packageSnapshot = (detail.package_snapshot as Record<string, unknown> | undefined) ?? {};
     const membershipSnapshot = (detail.membership_snapshot as Record<string, unknown> | undefined) ?? {};
+    const pricingSnapshot = (detail.pricing_snapshot as Record<string, unknown> | undefined) ?? {};
     const couponSnapshot = (detail.coupon_snapshot as Record<string, unknown> | undefined) ?? {};
     const serviceType = normalizeServiceType(getStringValue(addressSnapshot, ["service_type"], getStringValue(packageSnapshot, ["service_type", "type"], "mobile")));
     const serviceId = getNumberValue(packageSnapshot, ["service_id", "id", "package_id"]);
@@ -667,6 +672,7 @@ export const useBookingStore = create<BookingState>((set) => ({
     set({
       currentStep: 6,
       editingBookingId: detail.id,
+      editingTaxMembership: pricingSnapshot.tax_membership === true,
       editingOrderCode: detail.order_code ?? null,
       editingOriginalPayload: null,
       editingHasExistingMembershipBenefit: hasExistingMembershipBenefit,
@@ -710,7 +716,7 @@ export const useBookingStore = create<BookingState>((set) => ({
       membershipPlanId,
       selectedCouponIds,
       useCashCoupon: selectedCouponIds.length > 0,
-      useMembershipDiscount: selectedCouponIds.length > 0 || membershipPlanId !== null,
+      useMembershipDiscount: pricingSnapshot.use_membership_discount !== false && (selectedCouponIds.length > 0 || membershipPlanId !== null),
       couponType: selectedCouponIds.length > 0 ? "cash" : null,
       selectedTimeSlots: normalizeTimeSlots(detail.preferred_time_slots),
       notes: detail.notes ?? "",
@@ -727,6 +733,7 @@ export const useBookingStore = create<BookingState>((set) => ({
       editingOrderCode: null,
       editingOriginalPayload: null,
       editingHasExistingMembershipBenefit: false,
+      editingTaxMembership: true,
     }),
 
   loadUserInfo: async () => {

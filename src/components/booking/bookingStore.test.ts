@@ -226,3 +226,19 @@ describe("bookingStore loadBookingDetailForEdit", () => {
     expect(state.editingHasExistingMembershipBenefit).toBe(true);
   });
 });
+
+describe("bookingStore checkout payload", () => {
+  it("submits a new membership gift and the selected discount setting", () => {
+    useBookingStore.getState().reset();
+    useBookingStore.setState({
+      userInfo: mockUserInfo,
+      useMembership: true,
+      useMembershipDiscount: false,
+      selectedCouponIds: [-1],
+    });
+
+    const payload = useBookingStore.getState().getBookingSubmitPayload();
+    expect(payload.use_gift_coupon).toBe(true);
+    expect(payload.use_membership_discount).toBe(false);
+  });
+});
