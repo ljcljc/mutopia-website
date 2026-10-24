@@ -359,6 +359,28 @@ describe("GroomerDashboardPage complete service", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows a pending report only once when it is also the current booking", async () => {
+    vi.mocked(getGroomerDashboardSummary).mockResolvedValue({});
+    vi.mocked(getGroomerPendingBookingInvitations).mockResolvedValue([]);
+    const report = {
+      id: 102,
+      status: "pending_report",
+      pet_name: "Hugui",
+      pet_breed: "Affenpinscher",
+      service_name: "Full grooming",
+    };
+    vi.mocked(getGroomerCurrentBooking).mockResolvedValue({
+      booking: report,
+      pending_reports: [report],
+      report_interactions: [],
+    });
+
+    render(<MemoryRouter><GroomerDashboardPage /></MemoryRouter>);
+
+    expect(await screen.findByRole("button", { name: "Let's finish AI health report" })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Let's finish AI health report" })).toHaveLength(1);
+  });
+
   it("opens the photo health inspection flow from a completed booking", async () => {
     vi.mocked(getGroomerDashboardSummary).mockResolvedValue({});
     vi.mocked(getGroomerPendingBookingInvitations).mockResolvedValue([]);

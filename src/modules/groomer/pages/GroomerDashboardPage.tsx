@@ -2138,6 +2138,11 @@ export default function GroomerDashboardPage() {
   );
   const showReviewedServiceJob =
     showCompletedServiceJob && Boolean(effectiveAppointment?.review);
+  const visiblePendingReports = pendingReports.filter(
+    (appointment) =>
+      !effectiveAppointment ||
+      Number(appointment.id) !== Number(effectiveAppointment.id)
+  );
   const visibleReportInteractions = reportInteractions.filter(
     (appointment) =>
       !effectiveAppointment ||
@@ -2489,7 +2494,7 @@ export default function GroomerDashboardPage() {
                 />
               ) : null}
 
-              {pendingReports.map((appointment) => (
+              {visiblePendingReports.map((appointment) => (
                 <CompletedServiceCard
                   key={`pending-report-${appointment.id}`}
                   appointment={appointment}
