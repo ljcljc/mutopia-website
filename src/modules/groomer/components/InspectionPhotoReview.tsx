@@ -692,6 +692,9 @@ export function InspectionPhotoReview({
           Add photo
         </OrangeButton>
       </div>
+      <OrangeButton type="button" fullWidth className="mt-4" onClick={onClose}>
+        Confirm
+      </OrangeButton>
     </>
   );
 

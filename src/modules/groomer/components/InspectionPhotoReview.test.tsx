@@ -375,6 +375,7 @@ describe("InspectionPhotoReview", () => {
   });
 
   it("anchors the close action to the right on mobile", () => {
+    const onClose = vi.fn();
     render(
       <InspectionPhotoReview
         photos={[photo({ confirmed: true })]}
@@ -382,7 +383,7 @@ describe("InspectionPhotoReview", () => {
         config={{ area: "skin", label: "Skin photo", hints: [] }}
         open
         onActivePhotoChange={vi.fn()}
-        onClose={vi.fn()}
+        onClose={onClose}
         onChange={vi.fn()}
         onAddPhoto={vi.fn()}
       />
@@ -393,6 +394,8 @@ describe("InspectionPhotoReview", () => {
     expect(
       screen.getByRole("button", { name: "Close photo review" })
     ).toHaveClass("rounded-full");
+    fireEvent.click(screen.getAllByRole("button", { name: "Confirm" })[0]);
+    expect(onClose).toHaveBeenCalledOnce();
   });
 
   it("keeps a third photo unchanged and shows a toast when the AI limit is reached", () => {
