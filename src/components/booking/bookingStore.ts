@@ -636,6 +636,7 @@ export const useBookingStore = create<BookingState>((set) => ({
       use_gift_coupon: useGiftCoupon,
       use_birthday_coupon: useBirthdayCoupon,
       use_custom_coupon: useCustomCoupon,
+      selected_coupon_ids: state.selectedCouponIds,
       address: useBookingStore.getState().getAddressPayload(),
       pet: useBookingStore.getState().getPetPayload(),
       preferred_time_slots: state.selectedTimeSlots,

@@ -228,17 +228,19 @@ describe("bookingStore loadBookingDetailForEdit", () => {
 });
 
 describe("bookingStore checkout payload", () => {
-  it("submits a new membership gift and the selected discount setting", () => {
+  it("submits the selected virtual gift even when another real gift is available", () => {
     useBookingStore.getState().reset();
     useBookingStore.setState({
       userInfo: mockUserInfo,
       useMembership: true,
       useMembershipDiscount: false,
+      coupons: [{ id: 93, template_id: 1, type: "register_gift", category: "gift", apply_scope: "all", amount: "10.00", status: "active" }],
       selectedCouponIds: [-1],
     });
 
     const payload = useBookingStore.getState().getBookingSubmitPayload();
     expect(payload.use_gift_coupon).toBe(true);
     expect(payload.use_membership_discount).toBe(false);
+    expect(payload.selected_coupon_ids).toEqual([-1]);
   });
 });

@@ -290,9 +290,7 @@ describe("groomer dashboard current booking selection", () => {
     expect(useGroomerDashboardStore.getState().nextAppointment).toMatchObject({
       id: 456,
       totalEstimate: "$71.25",
-      originalEstimate: "$80.96",
-      savingsLabel: "10% OFF",
-      estimateBreakdown: "($67.86 + $5.00)",
+      priceSummary: undefined,
     });
   });
 

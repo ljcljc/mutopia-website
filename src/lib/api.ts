@@ -430,6 +430,7 @@ export interface BookingSubmitIn {
   use_gift_coupon?: boolean; // default: false
   use_birthday_coupon?: boolean; // default: false
   use_custom_coupon?: boolean; // default: false
+  selected_coupon_ids?: number[];
   address: AddressIn;
   pet: PetPayload;
   preferred_time_slots?: TimeSlotIn[];
@@ -451,6 +452,7 @@ export interface BookingQuoteIn {
   use_gift_coupon?: boolean; // default: false
   use_birthday_coupon?: boolean; // default: false
   use_custom_coupon?: boolean; // default: false
+  selected_coupon_ids?: number[];
   service_area_id?: number | null;
   service_type?: string;
 }

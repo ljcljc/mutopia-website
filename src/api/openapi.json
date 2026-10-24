@@ -4582,6 +4582,10 @@
             "title": "Use Custom Coupon",
             "type": "boolean"
           },
+          "selected_coupon_ids": {
+            "anyOf": [{ "items": { "type": "integer" }, "type": "array" }, { "type": "null" }],
+            "title": "Selected Coupon Ids"
+          },
           "service_area_id": {
             "anyOf": [{ "type": "integer" }, { "type": "null" }],
             "title": "Service Area Id"
@@ -4716,6 +4720,10 @@
             "default": false,
             "title": "Use Custom Coupon",
             "type": "boolean"
+          },
+          "selected_coupon_ids": {
+            "anyOf": [{ "items": { "type": "integer" }, "type": "array" }, { "type": "null" }],
+            "title": "Selected Coupon Ids"
           },
           "address": { "$ref": "#/components/schemas/AddressIn" },
           "pet": { "$ref": "#/components/schemas/PetPayload" },
