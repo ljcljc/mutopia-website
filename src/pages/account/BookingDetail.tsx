@@ -55,6 +55,7 @@ import {
   toLocalDateTimeString,
 } from "@/lib/localDateTime";
 import { getBookingEstimateSummary } from "@/lib/bookingPricing";
+import { EstimationPriceSummary } from "@/components/booking/EstimationPriceSummary";
 
 function formatAmount(value: number | string | undefined, fallback: string) {
   if (value === undefined || value === null || value === "") return fallback;
@@ -738,7 +739,6 @@ export default function BookingDetail() {
   const totalEstimation = formatAmount(pendingAdjustment?.quoted_total_amount ?? estimateSummary.finalAmount ?? 0, "$0.00");
   const packageSubtotal = formatAmount(detail?.package_amount, "$0.00");
   const originalTotal = estimateSummary.originalAmount + adjustmentSubtotal;
-  const originalTotalFormatted = formatAmount(originalTotal, "$0.00");
 
   // 从 addons_snapshot 中提取附加服务列表
   const addOnItems = useMemo(() => {
@@ -765,7 +765,6 @@ export default function BookingDetail() {
     ? parseAmount(adjustmentDetails?.pre_gst_total as string | number | undefined) ||
       parseAmount(totalEstimation) - parseAmount(pendingAdjustment.gst_amount) - parseAmount(membershipFee)
     : estimateSummary.preGstAmount ?? originalTotal - parseAmount(discountAmount) - parseAmount(couponAmount);
-  const preGstTotal = formatAmount(serviceEstimation, "$0.00");
   const gstAmount = formatAmount(
     pendingAdjustment?.gst_amount ?? detail?.gst_amount ?? Math.max(0, parseAmount(totalEstimation) - serviceEstimation - parseAmount(membershipFee)),
     "$0.00",
@@ -1920,17 +1919,19 @@ export default function BookingDetail() {
 
                   {/* Right side: Price + Accordion */}
                   <div className="flex w-[428px] flex-col items-end gap-1.5">
-                    {/* Top row: service prices before tax */}
-                    <div className="flex items-center justify-end gap-2">
-                      {originalTotal > serviceEstimation && (
-                        <span className="font-comfortaa font-normal leading-[17.5px] text-[12.25px] text-[#4a3c2a]">
-                          was {originalTotalFormatted}
-                        </span>
-                      )}
-                      <p className="font-comfortaa font-bold leading-[24.5px] text-[16px] text-[#de6a07]">
-                        {preGstTotal}
-                      </p>
-                      <button
+                    <EstimationPriceSummary
+                      original={originalTotal}
+                      service={serviceEstimation}
+                      membership={parseAmount(membershipFee)}
+                      tax={parseAmount(gstAmount)}
+                      payable={parseAmount(totalEstimation)}
+                      offers={[
+                        ...(parseAmount(discountAmount) > 0 ? [percentOff > 0 ? `${percentOff}% OFF` : `-${discountAmount} Service discount`] : []),
+                        ...(parseAmount(couponAmount) > 0 ? [`-${couponAmount} ${couponLabel}`] : []),
+                      ]}
+                      membershipVerb="was"
+                      paymentLabel="Total payable"
+                      toggle={<button
                         type="button"
                         onClick={() => setIsTotalExpanded((value) => !value)}
                         className="flex size-5 cursor-pointer items-center justify-center rounded-[8px] hover:border hover:border-[#8b6357] hover:border-solid transition-colors"
@@ -1941,32 +1942,8 @@ export default function BookingDetail() {
                           open={isTotalExpanded}
                           className="size-5 text-[#4A3C2A]"
                         />
-                      </button>
-                    </div>
-
-                    <p className="font-comfortaa text-[10px] text-[#de6a07]">Plus tax</p>
-                    {(parseAmount(discountAmount) > 0 || parseAmount(couponAmount) > 0) && (
-                      <div className="flex flex-wrap justify-end gap-2" aria-label="Applied offers">
-                        {parseAmount(discountAmount) > 0 && (
-                          <span className="flex items-center gap-1 rounded-xl bg-[#dcfce7] px-3 py-1 font-comfortaa text-[10px] text-[#27ae60]">
-                            <CheckCircleIcon className="size-3.5" aria-hidden="true" />
-                            {percentOff > 0 ? `${percentOff}% OFF` : `-${discountAmount} Service discount`}
-                          </span>
-                        )}
-                        {parseAmount(couponAmount) > 0 && (
-                          <span className="flex items-center gap-1 rounded-xl bg-[#dcfce7] px-3 py-1 font-comfortaa text-[10px] text-[#27ae60]">
-                            <CheckCircleIcon className="size-3.5" aria-hidden="true" />
-                            -{couponAmount} {couponLabel}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                    {parseAmount(membershipFee) > 0 && (
-                      <p className="font-comfortaa text-[12px] text-[#4a5565]">* {membershipFee} Membership fee was added.</p>
-                    )}
-                    <p className="font-comfortaa text-[12px] text-[#de6a07]">
-                      Total payable: {preGstTotal}{parseAmount(membershipFee) > 0 && ` + ${membershipFee}`} + {gstAmount} tax = {totalEstimation}
-                    </p>
+                      </button>}
+                    />
 
                     {/* Divider + 券明细 —— 对齐 Figma：只有券分组，不单独显示 Discount/Membership */}
                     <AccordionPanel open={isTotalExpanded} className="w-full">

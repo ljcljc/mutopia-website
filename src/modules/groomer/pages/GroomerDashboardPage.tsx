@@ -60,6 +60,7 @@ import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
 import { StarIcon, XIcon } from "lucide-react";
 import { PageLoadingCard } from "@/modules/groomer/components/PageLoadingCard";
+import { EstimationPriceSummary } from "@/components/booking/EstimationPriceSummary";
 
 type BookingRequest = DashboardAppointment;
 type CheckUpTab = "photo" | "weight" | "add-ons" | "personalization";
@@ -942,16 +943,11 @@ function TotalEstimationCard({
         </div>
 
         <div className="flex w-full flex-col items-end gap-1.5 sm:w-[428px]">
-          <div className="flex items-center justify-end gap-2">
-            {appointment.originalEstimate ? (
-              <span className="font-comfortaa text-[12.25px] font-normal leading-[17.5px] text-[#4A3C2A]">
-                was {appointment.originalEstimate}
-              </span>
-            ) : null}
-            <p className="font-comfortaa text-[16px] font-bold leading-[24.5px] text-[#DE6A07]">
-              {appointment.totalEstimate}
-            </p>
-            <button
+          {appointment.priceSummary ? <EstimationPriceSummary
+            {...appointment.priceSummary}
+            membershipVerb="was"
+            paymentLabel="Total payable"
+            toggle={<button
               type="button"
               onClick={() => setIsExpanded((value) => !value)}
               className="flex size-5 cursor-pointer items-center justify-center rounded-[8px] transition-colors hover:border hover:border-[#8B6357]"
@@ -962,34 +958,11 @@ function TotalEstimationCard({
                 open={isExpanded}
                 className="size-5 text-[#4A3C2A]"
               />
-            </button>
-          </div>
+            </button>}
+          /> : <p className="font-comfortaa text-[16px] font-bold text-[#DE6A07]">{appointment.totalEstimate}</p>}
 
           {isExpanded ? (
             <>
-              <div className="flex w-full flex-col items-end gap-0">
-                <div className="flex items-center gap-2">
-                  {appointment.savingsLabel ? (
-                    <span className="inline-flex h-6 items-center justify-center gap-1 rounded-xl bg-[#DCFCE7] px-3 py-1 font-comfortaa text-[10px] font-bold leading-[14px] text-[#27AE60]">
-                      <Icon
-                        name="target"
-                        className="size-3.5"
-                        aria-hidden="true"
-                      />
-                      {appointment.savingsLabel}
-                    </span>
-                  ) : null}
-                  {appointment.estimateBreakdown ? (
-                    <p className="font-comfortaa text-[12.25px] leading-[17.5px] text-[#DE6A07]">
-                      {appointment.estimateBreakdown}
-                    </p>
-                  ) : null}
-                </div>
-                <p className="font-comfortaa text-[10px] font-bold leading-[14px] text-[#4A5565]">
-                  plus tax
-                </p>
-              </div>
-
               {appointment.priceAdjustmentLines.length > 0 ? (
                 <div className="mt-2 flex w-full flex-col gap-2 border-t border-[rgba(0,0,0,0.1)] pt-2">
                   {appointment.priceAdjustmentLines.map((line) => (

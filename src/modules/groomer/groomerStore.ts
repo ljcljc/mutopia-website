@@ -46,6 +46,7 @@ export type DashboardAppointment = GroomerUpNextAppointment & {
   originalEstimate?: string;
   savingsLabel?: string;
   estimateBreakdown?: string;
+  priceSummary?: { original: number; service: number; membership: number; tax: number; payable: number; offers: string[] };
   packageLabel: string;
   packageLines: DashboardAmountLine[];
   packageSubtotal: string;
@@ -341,8 +342,26 @@ function mapEstimateFromPrice(price: Record<string, unknown>) {
       0,
     );
   const totalAmount = finalAmount ?? explicitEstimate ?? serviceTotal + membershipFee;
+  const explicitTax = parseAmount(getAmount(price, ["gst_amount"]));
+  const service = estimateSummary.preGstAmount ?? (finalAmount !== null && explicitTax !== null
+    ? Math.max(0, finalAmount - explicitTax - membershipFee)
+    : null);
+  const discountAmount = parseAmount(getAmount(price, ["discount_amount"])) ?? 0;
+  const couponAmount = parseAmount(getAmount(price, ["coupon_amount"])) ?? 0;
+  const tax = explicitTax ?? (service !== null ? Math.max(0, totalAmount - service - membershipFee) : null);
 
   return {
+    priceSummary: service !== null && tax !== null && finalAmount !== null && Math.abs(totalAmount - service - membershipFee - tax) < 0.011 ? {
+      original: serviceSubtotal,
+      service,
+      membership: membershipFee,
+      tax,
+      payable: totalAmount,
+      offers: [
+        ...(discountAmount > 0 ? [estimateSummary.discountPercent > 0 ? `${formatDiscountRate(estimateSummary.discountPercent)}% OFF` : `-${formatAmount(discountAmount)} Service discount`] : []),
+        ...(couponAmount > 0 ? [`-${formatAmount(couponAmount)} Coupon discount`] : []),
+      ],
+    } : undefined,
     totalEstimate: formatAmount(totalAmount),
     originalEstimate:
       serviceSubtotal > 0 && (finalAmount === null || serviceSubtotal > finalAmount)
@@ -859,6 +878,7 @@ async function enrichDashboardAppointment(nextAppointment: DashboardAppointment 
       originalEstimate: estimate.originalEstimate ?? nextAppointment.originalEstimate,
       savingsLabel: estimate.savingsLabel ?? nextAppointment.savingsLabel,
       estimateBreakdown: estimate.estimateBreakdown ?? nextAppointment.estimateBreakdown,
+      priceSummary: estimate.priceSummary,
       review: detailAppointment?.review ?? nextAppointment.review,
       ...packageAndAddonBreakdown,
     };

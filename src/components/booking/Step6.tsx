@@ -14,7 +14,7 @@ import {
 import { toast } from "sonner";
 import { calculateBookingDisplayPrice, getServicePrice, isNewMembershipPurchase } from "@/lib/pricing";
 import { formatPreferredTimeSlotLocal } from "@/lib/localDateTime";
-import { CheckCircleIcon } from "lucide-react";
+import { EstimationPriceSummary } from "@/components/booking/EstimationPriceSummary";
 import {
   formatCouponCategory,
   getCouponDisplayName,
@@ -1261,20 +1261,16 @@ export function Step6() {
         <div className="flex flex-col sm:flex-row flex-[1_0_0] items-start gap-[calc(8*var(--px393))] sm:gap-[8px] relative shrink-0 w-full sm:flex-none sm:w-[428px]">
           {/* Left: All content rows */}
           <div className="flex flex-col gap-[calc(4*var(--px393))] sm:gap-[4px] items-end relative shrink-0 flex-1 w-full sm:w-[400px]">
-            {/* First row: Price with original price and dropdown button */}
-            <div className="flex items-center justify-end gap-[calc(8*var(--px393))] sm:gap-0 relative shrink-0 w-full sm:w-auto">
-              <div className="flex items-center gap-[calc(8*var(--px393))] sm:gap-0 relative shrink-0">
-                {originalTotal > serviceTotal && (
-                  <span className="font-comfortaa font-normal leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] relative shrink-0 text-[#4A5565] text-[calc(12.25*var(--px393))] sm:text-[12.25px] mr-0 sm:mr-[8px]">
-                    was ${originalTotal.toFixed(2)}
-                  </span>
-                )}
-                <p className="font-comfortaa font-bold leading-[calc(24.5*var(--px393))] sm:leading-[24.5px] relative shrink-0 text-[#de6a07] text-[calc(16*var(--px393))] sm:text-[16px]">
-                  ${serviceTotal.toFixed(2)}
-                </p>
-              </div>
-              {/* Dropdown button - mobile only */}
-              <button
+            <EstimationPriceSummary
+              original={originalTotal}
+              service={serviceTotal}
+              membership={displayPrice.membershipFee}
+              tax={displayPrice.gstAmount}
+              payable={finalTotal}
+              offers={appliedOffers}
+              membershipVerb="will be"
+              paymentLabel="Pay in next step"
+              toggle={<button
                 onClick={() => setIsTotalExpanded(!isTotalExpanded)}
                 className={cn(
                   "flex sm:hidden items-center justify-center relative shrink-0 size-[calc(20*var(--px393))] cursor-pointer hover:border hover:border-[#8b6357] hover:border-solid transition-colors rounded-[calc(8*var(--px393))]",
@@ -1282,25 +1278,8 @@ export function Step6() {
                 )}
               >
                 <AccordionChevron open={isTotalExpanded} className="size-[calc(20*var(--px393))] text-[#4a3c2a]" />
-              </button>
-            </div>
-            
-            <p className="font-comfortaa text-[10px] text-[#de6a07]">Plus tax</p>
-            {appliedOffers.length > 0 && (
-              <div className="flex flex-wrap justify-end gap-2" aria-label="Applied offers">
-                {appliedOffers.map((offer, index) => (
-                  <span key={`${offer}-${index}`} className="flex items-center gap-1 rounded-xl bg-[#dcfce7] px-3 py-1 font-comfortaa text-[10px] text-[#27ae60]">
-                    <CheckCircleIcon className="size-[14px]" aria-hidden="true" />{offer}
-                  </span>
-                ))}
-              </div>
-            )}
-            {useMembership && displayPrice.membershipFee > 0 && (
-              <p className="font-comfortaa text-[12px] text-[#4a5565]">* ${displayPrice.membershipFee.toFixed(2)} Membership fee will be added.</p>
-            )}
-            <p className="font-comfortaa text-[12px] text-[#de6a07]">
-              Pay in next step: ${serviceTotal.toFixed(2)}{displayPrice.membershipFee > 0 && ` + $${displayPrice.membershipFee.toFixed(2)}`} + ${displayPrice.gstAmount.toFixed(2)} tax = ${finalTotal.toFixed(2)}
-            </p>
+              </button>}
+            />
 
             {/* Horizontal divider line - between tax info and coupon options */}
             <AccordionPanel open={isTotalExpanded} className="w-full">
