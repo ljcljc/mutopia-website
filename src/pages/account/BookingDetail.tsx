@@ -625,9 +625,20 @@ export default function BookingDetail() {
           subtitleIncludesScheduled: true,
           progressColor: "#633479",
           progressWidth: 98.5,
-          badgeLabel: detail?.hero_stage === "handover_checkout" ? "Handover & Checkout" : "Service completed",
-          badgeTone: "purple",
+          badgeLabel: detail?.hero_stage === "handover_checkout" ? "Waiting for payment" : "Service completed",
+          badgeTone: detail?.hero_stage === "handover_checkout" ? "orange" : "purple",
           nextStep: detail?.hero_stage === "handover_checkout" ? "Review health report and tip your groomer" : "Waiting for health report",
+          showNextStep: true,
+          actionKind: "review",
+        };
+      case "waiting_tip":
+        return {
+          subtitleIncludesScheduled: true,
+          progressColor: "#DE6A07",
+          progressWidth: 98.5,
+          badgeLabel: "Waiting for payment",
+          badgeTone: "orange",
+          nextStep: "Review health report and tip your groomer",
           showNextStep: true,
           actionKind: "review",
         };

@@ -696,6 +696,21 @@ describe("BookingDetail", () => {
     expect(screen.getByText("Waiting for health report")).toBeInTheDocument();
   });
 
+  it("shows Waiting for payment and the tip action while waiting for the owner tip", async () => {
+    renderBookingDetail(makeCompletedBooking({ status: "waiting_tip", hero_stage: "handover_checkout" }));
+
+    expect(await screen.findByText("Waiting for payment")).toBeInTheDocument();
+    expect(screen.getByText("Review health report and tip your groomer")).toBeInTheDocument();
+    expect(screen.getByText("Tip your groomer?")).toBeInTheDocument();
+  });
+
+  it("shows the completed status and Review action in history details", async () => {
+    renderBookingDetail(makeCompletedBooking({ tip_decision: "system_closed", can_review: true }));
+
+    expect(await screen.findByText("Service completed!")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Review" })).toBeInTheDocument();
+  });
+
   it("keeps the optional tip entry available when the owner enters zero", async () => {
     renderBookingDetail(makeCompletedBooking());
 

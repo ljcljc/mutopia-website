@@ -171,13 +171,23 @@ describe("DashboardHeroCard", () => {
     expect(screen.getByText("Service completed")).toBeInTheDocument();
   });
 
+  it("shows Waiting for payment while the owner tip is pending", () => {
+    useAccountStore.setState({
+      upcomingBookings: [makeBooking({ status: "waiting_tip", hero_stage: "handover_checkout" })],
+    });
+
+    renderHeroCard();
+
+    expect(screen.getByText("Waiting for payment")).toBeInTheDocument();
+  });
+
   it.each([
     ["awaiting_payment", undefined, false, "Waiting for payment"],
     ["terminated", undefined, false, "Service terminated"],
     ["terminated", "10.00", false, "Service terminated and refunded"],
     ["canceled", undefined, false, "Service canceled"],
     ["refunded", "10.00", false, "Service canceled and refunded"],
-    ["completed", undefined, true, "Service completed and report filled"],
+    ["completed", undefined, true, "Service completed"],
   ])("renders %s with the requested Hero label", (status, refundedAmount, hasHealthReport, label) => {
     const booking = makeBooking({ status, refunded_amount: refundedAmount, has_health_report: hasHealthReport });
     useAccountStore.setState({
