@@ -178,7 +178,7 @@ export function Step2() {
   };
 
   return (
-    <div data-booking-pet-form>
+    <div className="w-full px-5 sm:px-0" data-booking-pet-form>
     <PetForm
       petOptions={user && pets.length > 0 ? pets : undefined}
       selectedPetId={selectedPetId}
