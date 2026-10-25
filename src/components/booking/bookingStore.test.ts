@@ -97,6 +97,7 @@ describe("bookingStore loadUserInfo", () => {
     expect(state.city).toBe("");
     expect(state.postCode).toBe("");
     expect(state.userInfo).toEqual(mockUserInfo);
+    expect(state.hasUnsavedChanges()).toBe(false);
   });
 });
 
@@ -171,6 +172,11 @@ describe("bookingStore loadBookingDetailForEdit", () => {
     expect(submitPayload.membership_plan_id).toBe(1);
     expect(submitPayload.preferred_time_slots).toEqual([{ date: "2026-05-12", slot: "am" }]);
     expect(state.editingOriginalPayload).toBe(JSON.stringify(submitPayload));
+    expect(state.hasUnsavedChanges()).toBe(false);
+    state.setNotes("Changed note");
+    expect(state.hasUnsavedChanges()).toBe(true);
+    state.setNotes("");
+    expect(state.hasUnsavedChanges()).toBe(false);
   });
 
   it("treats legacy membership snapshots as an existing membership benefit", () => {
@@ -205,7 +211,7 @@ describe("bookingStore loadBookingDetailForEdit", () => {
         membership_id: 8,
         coupon_ids: [21],
       },
-      coupon_snapshot: {},
+      coupon_snapshot: { used_coupon_ids: [21] },
       package_amount: "80.00",
       addons_amount: "0.00",
       membership_fee: "0.00",
@@ -224,6 +230,11 @@ describe("bookingStore loadBookingDetailForEdit", () => {
     expect(state.useMembership).toBe(false);
     expect(state.membershipPlanId).toBe(null);
     expect(state.editingHasExistingMembershipBenefit).toBe(true);
+    expect(state.hasUnsavedChanges()).toBe(false);
+    useBookingStore.setState({
+      coupons: [{ id: 21, template_id: 1, type: "gift", category: "gift", apply_scope: "all", amount: "10.00", status: "active" }],
+    });
+    expect(state.hasUnsavedChanges()).toBe(false);
   });
 });
 
@@ -242,5 +253,35 @@ describe("bookingStore checkout payload", () => {
     expect(payload.use_gift_coupon).toBe(true);
     expect(payload.use_membership_discount).toBe(false);
     expect(payload.selected_coupon_ids).toEqual([-1]);
+  });
+});
+
+describe("bookingStore leave warning", () => {
+  beforeEach(() => useBookingStore.getState().reset());
+
+  it("ignores automatic defaults and progress, but detects an unreverted edit", () => {
+    const store = useBookingStore.getState();
+    expect(store.hasUnsavedChanges()).toBe(false);
+    useBookingStore.setState({ province: "BC", currentStep: 2 });
+    expect(store.hasUnsavedChanges()).toBe(false);
+
+    useBookingStore.setState({
+      addresses: [{ id: 7, address: "123 Pet Street", city: "Vancouver", province: "BC", postal_code: "V1V 1V1", service_type: "mobile", is_default: true }],
+      selectedAddressId: 7,
+      address: "123 Pet Street",
+      city: "Vancouver",
+      postCode: "V1V 1V1",
+    });
+    expect(store.hasUnsavedChanges()).toBe(false);
+
+    store.setPetName("Buddy");
+    expect(store.hasUnsavedChanges()).toBe(true);
+    store.setPetName("");
+    expect(store.hasUnsavedChanges()).toBe(false);
+
+    store.setServiceType("in_home");
+    expect(store.hasUnsavedChanges()).toBe(true);
+    store.setServiceType("mobile");
+    expect(store.hasUnsavedChanges()).toBe(false);
   });
 });

@@ -198,7 +198,7 @@ interface BookingState {
   loadBookingDetailForEdit: (detail: BookingDetailOut) => void;
   clearEditingBooking: () => void;
   reset: () => void;
-  hasFormData: () => boolean; // 检查表单是否有内容
+  hasUnsavedChanges: () => boolean;
 }
 
 function getStringValue(record: Record<string, unknown>, keys: string[], fallback = ""): string {
@@ -751,7 +751,7 @@ export const useBookingStore = create<BookingState>((set) => ({
       if (info) {
         set({ userInfo: info, isLoadingUserInfo: false });
         // Auto-fill address if available
-        if (info.address) {
+        if (info.address && !state.address && state.selectedAddressId === null && state.editingBookingId === null) {
           set({ address: info.address });
         }
       } else {
@@ -921,21 +921,40 @@ export const useBookingStore = create<BookingState>((set) => ({
 
   reset: () => set(initialState),
 
-  hasFormData: (): boolean => {
+  hasUnsavedChanges: (): boolean => {
     const state = useBookingStore.getState();
-    // 检查关键字段是否有内容（排除初始默认值）
-    const hasAddressData: boolean = state.address !== initialState.address || 
-      state.city !== initialState.city || 
-      state.province !== initialState.province || 
-      state.postCode !== initialState.postCode ||
-      state.selectedAddressId !== null ||
+    if (state.editingOriginalPayload !== null) {
+      const original = JSON.parse(state.editingOriginalPayload) as BookingSubmitIn;
+      const current = state.getBookingSubmitPayload();
+      // These flags depend on coupons loaded after the saved booking is opened.
+      const comparable = {
+        ...current,
+        use_gift_coupon: original.use_gift_coupon,
+        use_birthday_coupon: original.use_birthday_coupon,
+        use_custom_coupon: original.use_custom_coupon,
+      };
+      return state.editingOriginalPayload !== JSON.stringify(comparable) ||
+        state.petPhoto !== null || state.referenceStyles.length > 0;
+    }
+
+    const defaultAddress = state.addresses.find((address) => address.is_default);
+    const hasAddressData: boolean = state.address !== (defaultAddress?.address ?? state.userInfo?.address ?? "") ||
+      state.city !== (defaultAddress?.city ?? "") ||
+      (state.province !== "" && state.province !== (defaultAddress?.province ?? "BC")) ||
+      state.postCode !== (defaultAddress?.postal_code ?? "") ||
+      state.selectedAddressId !== (defaultAddress?.id ?? null) ||
       state.selectedStoreId !== null;
     
     const hasPetData: boolean = state.petName !== "" ||
+      state.selectedPetId !== null ||
+      state.petType !== initialState.petType ||
       state.breed !== "" ||
+      state.isMixedBreed ||
+      state.precisePetType !== "" ||
       state.dateOfBirth !== "" ||
       state.gender !== "" ||
       state.weight !== "" ||
+      state.weightUnit !== initialState.weightUnit ||
       state.coatCondition !== "" ||
       state.approveShave !== null ||
       state.behavior !== "" ||
@@ -944,9 +963,13 @@ export const useBookingStore = create<BookingState>((set) => ({
       state.referenceStyles.length > 0 ||
       state.photoIds.length > 0 ||
       state.referencePhotoIds.length > 0 ||
+      state.photoUrls.length > 0 ||
+      state.referencePhotoUrls.length > 0 ||
       state.specialNotes !== "";
     
-    const hasServiceData: boolean = state.serviceId !== null ||
+    const hasServiceData: boolean = state.serviceType !== initialState.serviceType ||
+      state.servicePackage !== "" ||
+      state.serviceId !== null ||
       state.addOns.length > 0 ||
       state.selectedTimeSlots.length > 0 ||
       state.notes !== "";
@@ -955,11 +978,9 @@ export const useBookingStore = create<BookingState>((set) => ({
       state.membershipPlanId !== null ||
       state.useMembershipDiscount ||
       state.useCashCoupon ||
-      state.couponType !== null;
+      state.couponType !== null ||
+      state.selectedCouponIds.length > 0;
     
-    // 如果当前步骤大于1，也认为有数据（用户至少进入了Step2）
-    const hasProgress: boolean = state.currentStep > 1;
-    
-    return hasAddressData || hasPetData || hasServiceData || hasMembershipData || hasProgress;
+    return hasAddressData || hasPetData || hasServiceData || hasMembershipData;
   },
 }));

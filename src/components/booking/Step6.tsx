@@ -530,6 +530,7 @@ export function Step6() {
 
   // Auto-select default coupons (both general and special) when coupons are loaded
   useEffect(() => {
+    if (editingBookingId !== null) return;
     // Only run if coupons are loaded (not loading and has coupons, or loading finished)
     if (isLoadingCoupons) {
       return; // Wait for coupons to load
@@ -616,7 +617,7 @@ export function Step6() {
       setSelectedCouponIds(newSelectedIds);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoadingCoupons, Array.isArray(coupons) ? coupons.length : 0, couponGroups.general.length, couponGroups.special.length, useCashCoupon]); // Re-run when coupons are loaded or change
+  }, [editingBookingId, isLoadingCoupons, Array.isArray(coupons) ? coupons.length : 0, couponGroups.general.length, couponGroups.special.length, useCashCoupon]); // Re-run when coupons are loaded or change
 
   useEffect(() => {
     if (useCashCoupon) return;

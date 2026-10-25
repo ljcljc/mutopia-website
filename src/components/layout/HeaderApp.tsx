@@ -51,7 +51,7 @@ export default function HeaderApp() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<"home" | "back">("home");
   const navigate = useNavigate();
-  const hasFormData = useBookingStore((state) => state.hasFormData);
+  const hasUnsavedChanges = useBookingStore((state) => state.hasUnsavedChanges);
   const reset = useBookingStore((state) => state.reset);
   
   // Get user info from authStore (globally maintained)
@@ -130,7 +130,7 @@ export default function HeaderApp() {
   const handleHomeClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     const isBookingPage = window.location.pathname.includes("/booking");
 
-    if (isBookingPage && hasFormData()) {
+    if (isBookingPage && hasUnsavedChanges()) {
       e.preventDefault();
       e.currentTarget.blur();
       setPendingNavigation("home");
@@ -150,7 +150,7 @@ export default function HeaderApp() {
     e.preventDefault();
     const isBookingPage = window.location.pathname.includes("/booking");
 
-    if (isBookingPage && hasFormData()) {
+    if (isBookingPage && hasUnsavedChanges()) {
       e.currentTarget.blur();
       setPendingNavigation("back");
       setIsDialogOpen(true);
