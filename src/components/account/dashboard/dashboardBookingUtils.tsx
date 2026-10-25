@@ -2,16 +2,23 @@ import type { BookingListOut } from "@/lib/api";
 import { Icon } from "@/components/common/Icon";
 import { CheckCircleIcon } from "lucide-react";
 
-export type BookingStatusTone = "orange" | "green" | "on_the_way" | "purple" | "outlined";
+export type BookingStatusTone = "orange" | "green" | "on_the_way" | "purple" | "brown" | "outlined";
 
 export function normalizeBookingStatus(status: string): string {
   return status.trim().toLowerCase().replace(/[\s-]+/g, "_");
 }
 
+export function getRefundedBadgeLabel(normalizedStatus: string, notes?: string | null): string {
+  const notesLower = notes?.toLowerCase() ?? "";
+  if (normalizedStatus.includes("terminated") || notesLower.includes("terminate")) return "Service terminated and refunded";
+  if (normalizedStatus.includes("cancel") || notesLower.includes("cancel")) return "Service canceled and refunded";
+  return "Refunded";
+}
+
 export function getStatusBadgeConfig(
   status: string,
   heroStage?: "handover_checkout" | "service_completed" | null,
-  booking?: Pick<BookingListOut, "has_health_report" | "refunded_amount"> & { adjustment_status?: string },
+  booking?: Pick<BookingListOut, "has_health_report" | "has_review" | "refunded_amount" | "notes" | "adjustment_status">,
 ): { label: string; tone: BookingStatusTone } {
   const normalized = normalizeBookingStatus(status);
   const hasRefund = Number(booking?.refunded_amount ?? 0) > 0;
@@ -31,23 +38,25 @@ export function getStatusBadgeConfig(
     case "checked_in":
       return { label: "Groomer checked in", tone: "purple" };
     case "checkup_adjustment_pending":
-      return { label: booking?.adjustment_status === "refund_pending" ? "Refund processing" : "Waiting for payment", tone: "orange" };
+      if (!booking?.adjustment_status) return { label: "Groomer checked in", tone: "purple" };
+      return { label: booking.adjustment_status === "refund_pending" ? "Refund processing" : "Waiting for payment", tone: "orange" };
     case "in_progress":
       return { label: "Service started", tone: "purple" };
     case "awaiting_payment":
       return { label: "Waiting for payment", tone: "orange" };
     case "pending_report":
       if (heroStage === "handover_checkout") return { label: "Waiting for payment", tone: "orange" };
-      return { label: "Service completed", tone: "orange" };
+      return { label: "Service completed", tone: "purple" };
     case "waiting_tip":
       return { label: "Waiting for payment", tone: "orange" };
     case "completed":
+      if (booking?.has_review) return { label: "Service completed and reviewed", tone: "brown" };
       return { label: booking?.has_health_report ? "Service completed" : "Service completed!", tone: "purple" };
     case "reviewed":
       return { label: booking?.has_health_report ? "Service completed and report filled" : "Service completed", tone: "purple" };
     case "terminated":
     case "terminated_and_refunded":
-      return { label: hasRefund || normalized === "terminated_and_refunded" ? "Service terminated and refunded" : "Service terminated", tone: "outlined" };
+      return { label: hasRefund || normalized === "terminated_and_refunded" ? "Service terminated and refunded" : "Service Terminated", tone: "outlined" };
     case "canceled":
     case "cancelled":
     case "booking_canceled":
@@ -55,7 +64,7 @@ export function getStatusBadgeConfig(
     case "cancelled_and_refunded":
       return { label: hasRefund || normalized.includes("refunded") ? "Service canceled and refunded" : "Service canceled", tone: "outlined" };
     case "refunded":
-      return { label: "Service canceled and refunded", tone: "outlined" };
+      return { label: getRefundedBadgeLabel(normalized, booking?.notes), tone: "outlined" };
     default:
       return { label: status || "Waiting for groomer match", tone: "orange" };
   }
@@ -145,7 +154,9 @@ export function StatusBadge({
   heroStage,
   scheduledTime,
   hasHealthReport,
+  hasReview,
   refundedAmount,
+  notes,
   adjustmentStatus,
   monochrome = false,
 }: {
@@ -153,14 +164,16 @@ export function StatusBadge({
   heroStage?: "handover_checkout" | "service_completed" | null;
   scheduledTime?: string | null;
   hasHealthReport?: boolean;
+  hasReview?: boolean;
   refundedAmount?: number | string;
-  adjustmentStatus?: string;
+  notes?: string | null;
+  adjustmentStatus?: string | null;
   monochrome?: boolean;
 }) {
   const abnormal = isBookingAbnormal({ status, scheduled_time: scheduledTime });
   const { label, tone } = abnormal
     ? { label: "Service issue", tone: "outlined" as BookingStatusTone }
-    : getStatusBadgeConfig(status, heroStage, { has_health_report: hasHealthReport, refunded_amount: refundedAmount, adjustment_status: adjustmentStatus });
+    : getStatusBadgeConfig(status, heroStage, { has_health_report: hasHealthReport, has_review: hasReview, refunded_amount: refundedAmount, notes, adjustment_status: adjustmentStatus });
 
   if (monochrome && tone === "green") {
     return (
@@ -208,6 +221,14 @@ export function StatusBadge({
         <span className="min-w-0 break-words font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-white">
           {label}
         </span>
+      </div>
+    );
+  }
+
+  if (tone === "brown") {
+    return (
+      <div className="inline-flex min-h-6 max-w-full items-center rounded-[12px] bg-[#8B6357] px-[12px] py-[5px]">
+        <span className="min-w-0 break-words font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-white">{label}</span>
       </div>
     );
   }

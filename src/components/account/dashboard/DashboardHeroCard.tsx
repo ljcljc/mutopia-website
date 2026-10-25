@@ -118,8 +118,10 @@ export default function DashboardHeroCard() {
             heroStage={currentBooking.hero_stage}
             scheduledTime={currentBooking.scheduled_time_utc || currentBooking.scheduled_time}
             hasHealthReport={currentBooking.has_health_report}
+            hasReview={currentBooking.has_review}
             refundedAmount={currentBooking.refunded_amount}
-            adjustmentStatus={checkUpAmount?.bookingId === currentBooking.id ? checkUpAmount.status : undefined}
+            notes={currentBooking.notes}
+            adjustmentStatus={checkUpAmount?.bookingId === currentBooking.id ? checkUpAmount.status : currentBooking.adjustment_status}
           />
           <Icon name="nav-next" className="size-4 text-[#99A1AF]" />
         </div>

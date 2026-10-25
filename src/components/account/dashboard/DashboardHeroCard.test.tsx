@@ -183,13 +183,13 @@ describe("DashboardHeroCard", () => {
 
   it.each([
     ["awaiting_payment", undefined, false, "Waiting for payment"],
-    ["terminated", undefined, false, "Service terminated"],
+    ["terminated", undefined, false, "Service Terminated"],
     ["terminated", "10.00", false, "Service terminated and refunded"],
     ["canceled", undefined, false, "Service canceled"],
     ["refunded", "10.00", false, "Service canceled and refunded"],
     ["completed", undefined, true, "Service completed"],
   ])("renders %s with the requested Hero label", (status, refundedAmount, hasHealthReport, label) => {
-    const booking = makeBooking({ status, refunded_amount: refundedAmount, has_health_report: hasHealthReport });
+    const booking = makeBooking({ status, refunded_amount: refundedAmount, has_health_report: hasHealthReport, notes: status === "refunded" ? "Service canceled" : undefined });
     useAccountStore.setState({
       upcomingBookings: status === "awaiting_payment" ? [booking] : [],
       historyBookings: status === "awaiting_payment" ? [] : [booking],

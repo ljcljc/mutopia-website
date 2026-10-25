@@ -4898,10 +4898,23 @@
             "title": "Has Health Report",
             "type": "boolean"
           },
+          "has_review": {
+            "default": false,
+            "title": "Has Review",
+            "type": "boolean"
+          },
           "refunded_amount": {
             "anyOf": [{ "type": "number" }, { "type": "string" }],
             "default": "0.00",
             "title": "Refunded Amount"
+          },
+          "notes": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Notes"
+          },
+          "adjustment_status": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Adjustment Status"
           },
           "status_updated_at": {
             "anyOf": [{ "type": "string" }, { "type": "null" }],
@@ -4973,6 +4986,11 @@
           "hero_stage": {
             "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Hero Stage"
+          },
+          "has_health_report": {
+            "default": false,
+            "title": "Has Health Report",
+            "type": "boolean"
           },
           "tip_status": {
             "anyOf": [{ "type": "string" }, { "type": "null" }],

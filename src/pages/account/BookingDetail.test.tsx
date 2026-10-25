@@ -711,6 +711,12 @@ describe("BookingDetail", () => {
     expect(screen.getByRole("button", { name: "Review" })).toBeInTheDocument();
   });
 
+  it("matches the history label when a completed booking has a health report", async () => {
+    renderBookingDetail(makeCompletedBooking({ has_health_report: true }));
+
+    expect(await screen.findByText("Service completed")).toBeInTheDocument();
+  });
+
   it("keeps the optional tip entry available when the owner enters zero", async () => {
     renderBookingDetail(makeCompletedBooking());
 

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import AccountContentContainer from "@/components/layout/AccountContentContainer";
+import { getRefundedBadgeLabel } from "@/components/account/dashboard/dashboardBookingUtils";
 import { CustomInput, CustomRadio, OrangeButton, AccordionChevron, AccordionPanel } from "@/components/common";
 import { CustomTextarea } from "@/components/common/CustomTextarea";
 import { Icon } from "@/components/common/Icon";
@@ -299,26 +300,6 @@ function RatingControl({
       </div>
     </div>
   );
-}
-
-function getRefundedBadgeLabel(normalizedStatus: string, notes?: string | null) {
-  const notesLower = notes?.toLowerCase() ?? "";
-
-  if (
-    normalizedStatus.includes("terminated") ||
-    notesLower.includes("terminate")
-  ) {
-    return "Service terminated and refunded";
-  }
-
-  if (
-    normalizedStatus.includes("cancel") ||
-    notesLower.includes("cancel")
-  ) {
-    return "Service canceled and refunded";
-  }
-
-  return "Refunded";
 }
 
 export default function BookingDetail() {
@@ -647,7 +628,7 @@ export default function BookingDetail() {
           subtitleIncludesScheduled: true,
           progressColor: detail?.review ? "#8B6357" : "#633479",
           progressWidth: 100,
-          badgeLabel: detail?.review ? "Service completed and reviewed" : "Service completed!",
+          badgeLabel: detail?.review ? "Service completed and reviewed" : detail?.has_health_report ? "Service completed" : "Service completed!",
           badgeTone: detail?.review ? "brown" : "purple",
           nextStep: detail?.review ? "Review submitted" : "Pending review",
           showNextStep: !detail?.review,
@@ -660,7 +641,7 @@ export default function BookingDetail() {
           subtitleIncludesScheduled: true,
           progressColor: "#EAB308",
           progressWidth: 98.5,
-          badgeLabel: "Service Terminated",
+          badgeLabel: Number(detail?.refunded_amount ?? 0) > 0 ? "Service terminated and refunded" : "Service Terminated",
           badgeTone: "outlined",
           nextStep: "Sorry, we’ll contact you shortly.",
           showNextStep: true,
@@ -673,7 +654,7 @@ export default function BookingDetail() {
           subtitleIncludesScheduled: true,
           progressColor: "#EAB308",
           progressWidth: 98.5,
-          badgeLabel: "Service canceled",
+          badgeLabel: Number(detail?.refunded_amount ?? 0) > 0 ? "Service canceled and refunded" : "Service canceled",
           badgeTone: "outlined",
           showNextStep: false,
           actionKind: "none",
@@ -714,7 +695,7 @@ export default function BookingDetail() {
           actionKind: "none",
         };
     }
-  }, [detail?.hero_stage, detail?.notes, detail?.review, detail?.scheduled_time, detail?.status, estimatedCompletionDisplay, isRefundProcessing, normalizedStatus, paymentDueDisplay, pendingAdjustment, scheduledDisplay]);
+  }, [detail?.has_health_report, detail?.hero_stage, detail?.notes, detail?.refunded_amount, detail?.review, detail?.scheduled_time, detail?.status, estimatedCompletionDisplay, isRefundProcessing, normalizedStatus, paymentDueDisplay, pendingAdjustment, scheduledDisplay]);
 
   const reviewedDisplay = formatApiLocalDateTime(detail?.review?.created_at);
   const recommendationLabel = formatRecommendationMonth(detail?.scheduled_time);

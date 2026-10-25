@@ -18,9 +18,9 @@ describe("selectCurrentDashboardBooking", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-05-30T08:00:00Z"));
 
-    const booking = makeBooking({ id: 2, status: "checkup_adjustment_pending", scheduled_time: "2026-05-30T09:00:00Z" });
+    const booking = makeBooking({ id: 2, status: "checkup_adjustment_pending", adjustment_status: "pending", scheduled_time: "2026-05-30T09:00:00Z" });
     expect(selectCurrentDashboardBooking([makeBooking({ id: 1, status: "confirmed" }), booking])?.id).toBe(2);
-    expect(getStatusBadgeConfig(booking.status)).toEqual({ label: "Waiting for payment", tone: "orange" });
+    expect(getStatusBadgeConfig(booking.status, null, booking)).toEqual({ label: "Waiting for payment", tone: "orange" });
 
     vi.useRealTimers();
   });
@@ -85,15 +85,19 @@ describe("selectCurrentDashboardBooking", () => {
   });
 
   it("uses refund and report facts for the requested Hero labels", () => {
-    expect(getStatusBadgeConfig("pending_report")).toEqual({ label: "Service completed", tone: "orange" });
+    expect(getStatusBadgeConfig("pending_report")).toEqual({ label: "Service completed", tone: "purple" });
     expect(getStatusBadgeConfig("pending_report", "handover_checkout")).toEqual({ label: "Waiting for payment", tone: "orange" });
     expect(getStatusBadgeConfig("waiting_tip")).toEqual({ label: "Waiting for payment", tone: "orange" });
+    expect(getStatusBadgeConfig("checkup_adjustment_pending", null, { adjustment_status: "refund_pending" }).label).toBe("Refund processing");
+    expect(getStatusBadgeConfig("checkup_adjustment_pending").label).toBe("Groomer checked in");
     expect(getStatusBadgeConfig("terminated", null, { refunded_amount: "10.00" }).label).toBe("Service terminated and refunded");
-    expect(getStatusBadgeConfig("terminated").label).toBe("Service terminated");
+    expect(getStatusBadgeConfig("terminated").label).toBe("Service Terminated");
     expect(getStatusBadgeConfig("canceled", null, { refunded_amount: "10.00" }).label).toBe("Service canceled and refunded");
     expect(getStatusBadgeConfig("canceled").label).toBe("Service canceled");
-    expect(getStatusBadgeConfig("refunded").label).toBe("Service canceled and refunded");
+    expect(getStatusBadgeConfig("refunded").label).toBe("Refunded");
+    expect(getStatusBadgeConfig("refunded", null, { notes: "Service terminated" }).label).toBe("Service terminated and refunded");
     expect(getStatusBadgeConfig("completed", "service_completed", { has_health_report: true }).label).toBe("Service completed");
+    expect(getStatusBadgeConfig("completed", "service_completed", { has_health_report: true, has_review: true })).toEqual({ label: "Service completed and reviewed", tone: "brown" });
     expect(getStatusBadgeConfig("completed", "service_completed", { has_health_report: false }).label).toBe("Service completed!");
     expect(getStatusBadgeConfig("reviewed", null, { has_health_report: true }).label).toBe("Service completed and report filled");
     expect(getStatusBadgeConfig("awaiting_payment").label).toBe("Waiting for payment");

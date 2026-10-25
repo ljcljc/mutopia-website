@@ -485,7 +485,10 @@ export interface BookingListOut {
   status: string;
   hero_stage?: "handover_checkout" | "service_completed" | null;
   has_health_report?: boolean;
+  has_review?: boolean;
   refunded_amount?: number | string;
+  notes?: string | null;
+  adjustment_status?: string | null;
   status_updated_at?: string | null;
   pet_name?: string | null;
   service_name?: string | null;
@@ -569,6 +572,7 @@ export interface BookingDetailOut {
   order_code?: string | null;
   status: string;
   hero_stage?: "handover_checkout" | "service_completed" | null;
+  has_health_report?: boolean;
   tip_status?: "not_tipped" | "processing" | "succeeded" | "failed";
   tip_decision?: "" | "tipped" | "declined" | "system_closed";
   can_review?: boolean;
