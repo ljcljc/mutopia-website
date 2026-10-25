@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { toast } from "sonner";
 import GroomerDashboardPage from "./GroomerDashboardPage";
@@ -19,6 +19,11 @@ import {
   uploadCheckInObservationPhoto,
 } from "@/lib/api";
 import { useGroomerDashboardStore } from "@/modules/groomer/groomerStore";
+
+function PerformanceRoute() {
+  const location = useLocation();
+  return <div>Performance review route {location.search}</div>;
+}
 
 vi.mock("@/lib/api", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/api")>();
@@ -493,8 +498,11 @@ describe("GroomerDashboardPage complete service", () => {
     });
 
     render(
-      <MemoryRouter>
-        <GroomerDashboardPage />
+      <MemoryRouter initialEntries={["/groomer/dashboard"]}>
+        <Routes>
+          <Route path="/groomer/dashboard" element={<GroomerDashboardPage />} />
+          <Route path="/groomer/account/performance" element={<PerformanceRoute />} />
+        </Routes>
       </MemoryRouter>
     );
 
@@ -509,6 +517,8 @@ describe("GroomerDashboardPage complete service", () => {
     expect(
       screen.getByRole("button", { name: "Add a quick review" })
     ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Add a quick review" }));
+    expect(await screen.findByText("Performance review route ?reviewId=9")).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "View next job" })
     ).not.toBeInTheDocument();

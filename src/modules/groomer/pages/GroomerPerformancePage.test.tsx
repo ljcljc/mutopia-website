@@ -25,9 +25,9 @@ vi.mock("sonner", () => ({
   }),
 }));
 
-function renderPage() {
+function renderPage(entry = "/groomer/account/performance") {
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={[entry]}>
       <GroomerPerformancePage />
     </MemoryRouter>,
   );
@@ -83,6 +83,46 @@ describe("GroomerPerformancePage review actions", () => {
     expect(toast.success).toHaveBeenCalledWith("Reply sent");
     expect(await screen.findByText("Your reply")).toBeInTheDocument();
     expect(screen.getByText("Thanks for the feedback.")).toBeInTheDocument();
+  });
+
+  it("opens and focuses the requested review instead of the latest one", async () => {
+    const scrollIntoView = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+    vi.mocked(getGroomerPerformance).mockResolvedValue({
+      score: 92,
+      level_label: "Premium",
+      breakdown: {},
+      punctuality: { on_time_rate: 92, late_arrival_count: 1, latest_late_minutes: 4 },
+      recent_feedback: [
+        { review_id: 19, booking_id: 502, user_name: "Latest", rating: 5, comment: "Newer review" },
+        { review_id: 18, booking_id: 501, user_name: "Target", rating: 5, comment: "Target review" },
+      ],
+    });
+
+    renderPage("/groomer/account/performance?reviewId=18");
+
+    expect(await screen.findByText("Target")).toBeInTheDocument();
+    expect(screen.queryByText("Latest")).not.toBeInTheDocument();
+    expect(await screen.findByRole("textbox", { name: "Reply to client review" })).toHaveFocus();
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: "end" });
+  });
+
+  it("shows an existing reply without reopening the editor", async () => {
+    Element.prototype.scrollIntoView = vi.fn();
+    vi.mocked(getGroomerPerformance).mockResolvedValue({
+      score: 92,
+      level_label: "Premium",
+      breakdown: {},
+      punctuality: { on_time_rate: 92, late_arrival_count: 1, latest_late_minutes: 4 },
+      recent_feedback: [
+        { review_id: 18, booking_id: 501, user_name: "Target", rating: 5, comment: "Great service", reply: "Thank you!" },
+      ],
+    });
+
+    renderPage("/groomer/account/performance?reviewId=18");
+
+    expect(await screen.findByText("Thank you!")).toBeInTheDocument();
+    expect(screen.queryByRole("textbox", { name: "Reply to client review" })).not.toBeInTheDocument();
   });
 
   it("submits a report for the latest feedback", async () => {

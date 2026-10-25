@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { OrangeButton, AccordionChevron, AccordionPanel } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
 import AccountContentContainer from "@/components/layout/AccountContentContainer";
@@ -12,7 +12,7 @@ import {
   getGroomerPerformancePresentation,
 } from "@/modules/groomer/utils/performance";
 import { useGroomerPerformance } from "@/modules/groomer/hooks/useGroomerPerformance";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { buildImageUrl, reportGroomerReview, replyGroomerReview, submitGroomerTechnicalSkillUpdate, uploadGroomerApplyImage } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
@@ -330,6 +330,11 @@ function getTechnicalSkillPresentation(technicalSkill: {
 
 export default function GroomerPerformancePage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const reviewIdParam = searchParams.get("reviewId");
+  const requestedReviewId = reviewIdParam === null ? null : Number(reviewIdParam);
+  const feedbackCardRef = useRef<HTMLElement>(null);
+  const replyInputRef = useRef<HTMLTextAreaElement>(null);
   const isMobile = useIsMobile();
   const [isPerformanceRadarOpen, setIsPerformanceRadarOpen] = useState(false);
   const [isReplying, setIsReplying] = useState(false);
@@ -566,8 +571,21 @@ export default function GroomerPerformancePage() {
       },
     ];
   }, [performance]);
-  const firstFeedback = performance?.feedbackHistory[0] ?? null;
-  const hasExistingReply = Boolean(firstFeedback?.reply?.trim());
+  const selectedFeedback = requestedReviewId !== null
+    ? performance?.feedbackHistory.find((feedback) => feedback.reviewId === requestedReviewId) ?? null
+    : performance?.feedbackHistory[0] ?? null;
+  const hasExistingReply = Boolean(selectedFeedback?.reply?.trim());
+
+  useEffect(() => {
+    if (requestedReviewId === null || !selectedFeedback) return;
+    if (!selectedFeedback.reply?.trim()) setIsReplying(true);
+  }, [requestedReviewId, selectedFeedback]);
+
+  useEffect(() => {
+    if (requestedReviewId === null || !selectedFeedback) return;
+    feedbackCardRef.current?.scrollIntoView({ block: "end" });
+    if (isReplying) replyInputRef.current?.focus();
+  }, [requestedReviewId, selectedFeedback, isReplying]);
 
   const updateFeedbackReply = (reviewId: number, reply: string) => {
     setPerformance((current) => {
@@ -605,7 +623,7 @@ export default function GroomerPerformancePage() {
   };
 
   const handleReplySubmit = async () => {
-    if (!firstFeedback || isSubmittingReply) return;
+    if (!selectedFeedback || isSubmittingReply) return;
 
     const trimmedReply = replyText.trim();
     if (!trimmedReply) {
@@ -615,8 +633,8 @@ export default function GroomerPerformancePage() {
 
     setIsSubmittingReply(true);
     try {
-      await replyGroomerReview(firstFeedback.reviewId, { reply: trimmedReply });
-      updateFeedbackReply(firstFeedback.reviewId, trimmedReply);
+      await replyGroomerReview(selectedFeedback.reviewId, { reply: trimmedReply });
+      updateFeedbackReply(selectedFeedback.reviewId, trimmedReply);
       setIsReplying(false);
       setReplyText("");
       toast.success("Reply sent");
@@ -629,7 +647,7 @@ export default function GroomerPerformancePage() {
   };
 
   const handleReportReviewSubmit = async () => {
-    if (!firstFeedback || isSubmittingReportReview) return;
+    if (!selectedFeedback || isSubmittingReportReview) return;
 
     const trimmedReason = reportReason.trim();
     if (!trimmedReason) {
@@ -639,7 +657,7 @@ export default function GroomerPerformancePage() {
 
     setIsSubmittingReportReview(true);
     try {
-      await reportGroomerReview(firstFeedback.reviewId, {
+      await reportGroomerReview(selectedFeedback.reviewId, {
         why: trimmedReason,
         evidenceFile: reportEvidenceFile,
       });
@@ -760,31 +778,31 @@ export default function GroomerPerformancePage() {
             </section>
 
             <section className="mt-[26px] lg:mt-5">
-              <article className="mt-[15px] rounded-[24px] bg-white px-5 py-5 shadow-[0px_8px_24px_rgba(0,0,0,0.15)] lg:px-6 lg:py-6">
-                {!firstFeedback ? (
-                  <p className="font-comfortaa text-[14px] leading-[21px] text-[#8B6357]">No client feedback yet.</p>
+              <article ref={feedbackCardRef} className="mt-[15px] rounded-[24px] bg-white px-5 py-5 shadow-[0px_8px_24px_rgba(0,0,0,0.15)] lg:px-6 lg:py-6">
+                {!selectedFeedback ? (
+                  <p className="font-comfortaa text-[14px] leading-[21px] text-[#8B6357]">{requestedReviewId !== null ? "Review unavailable." : "No client feedback yet."}</p>
                 ) : (
                   <>
               <div className="flex items-start gap-3">
                 <img
-                  src={firstFeedback.avatarUrl ? buildImageUrl(firstFeedback.avatarUrl) : REVIEW_AVATAR_URL}
-                  alt={firstFeedback.userName}
+                  src={selectedFeedback.avatarUrl ? buildImageUrl(selectedFeedback.avatarUrl) : REVIEW_AVATAR_URL}
+                  alt={selectedFeedback.userName}
                   className="size-12 rounded-full border border-white object-cover shadow-[0px_1px_3px_rgba(0,0,0,0.1)]"
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="font-comfortaa text-[15px] font-bold leading-[22.5px] text-[#4A2C55]">{firstFeedback.userName}</p>
+                  <p className="font-comfortaa text-[15px] font-bold leading-[22.5px] text-[#4A2C55]">{selectedFeedback.userName}</p>
                   <div className="mt-1 flex items-center gap-0.5">
                     {Array.from({ length: 5 }).map((_, index) => (
                       <Icon
                         key={index}
                         name="star-2"
-                        className={`size-3 ${index < Math.round(firstFeedback.rating) ? "text-[#E67E22]" : "text-[#E7DED8]"}`}
+                        className={`size-3 ${index < Math.round(selectedFeedback.rating) ? "text-[#E67E22]" : "text-[#E7DED8]"}`}
                         aria-hidden="true"
                       />
                     ))}
                   </div>
                   <p className="mt-1.5 max-w-[244px] font-comfortaa text-[14px] leading-[21px] text-[#8B6357]">
-                    {firstFeedback.comment ? `"${firstFeedback.comment}"` : "No written comment."}
+                    {selectedFeedback.comment ? `"${selectedFeedback.comment}"` : "No written comment."}
                   </p>
                 </div>
               </div>
@@ -793,9 +811,11 @@ export default function GroomerPerformancePage() {
                 <div className="mt-4 flex flex-col items-end">
                   <div className="w-full pl-[52px]">
                     <textarea
+                      ref={replyInputRef}
                       value={replyText}
                       onChange={(event) => setReplyText(event.target.value)}
                       placeholder="Reply here"
+                      aria-label="Reply to client review"
                       disabled={isSubmittingReply}
                       className="h-[88px] w-full resize-none rounded-[12px] border border-[#DE6A07] bg-white px-4 py-3 font-comfortaa text-[12px] leading-[18px] text-[#4A2C55] outline-none placeholder:text-[#717182]"
                     />
@@ -825,7 +845,7 @@ export default function GroomerPerformancePage() {
               ) : hasExistingReply ? (
                 <div className="mt-4 rounded-[12px] bg-[#FAF9F7] px-4 py-4">
                   <p className="font-comfortaa text-[12px] font-bold leading-[18px] text-[#8B6357]">Your reply</p>
-                  <p className="mt-2 font-comfortaa text-[13px] leading-[19.5px] text-[#4A2C55]">{firstFeedback.reply}</p>
+                  <p className="mt-2 font-comfortaa text-[13px] leading-[19.5px] text-[#4A2C55]">{selectedFeedback.reply}</p>
                 </div>
               ) : (
                 <>

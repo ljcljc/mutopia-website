@@ -2416,7 +2416,7 @@ export default function GroomerDashboardPage() {
                 <ReviewedServiceCard
                   appointment={effectiveAppointment}
                   onAddQuickReview={() =>
-                    toast("Waiting for the client's review.")
+                    navigate(`/groomer/account/performance?reviewId=${effectiveAppointment.review?.id}`)
                   }
                 />
               ) : effectiveAppointment && showPendingReportJob ? (
