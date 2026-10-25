@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Icon, type IconName } from "@/components/common/Icon";
 import { Spinner } from "@/components/common/Spinner";
@@ -109,18 +110,21 @@ function getNotificationStyle(type: string): {
   return { iconName: "notification-refund", iconBg: "#DBEAFE", iconSize: 20 };
 }
 
-function buildNotificationBody(message: MessageOut): ReactNode {
+function buildNotificationBody(message: MessageOut, onRead: (id: number) => void): ReactNode {
   if (message.link_text && message.link_uri) {
     const isCopyReferCode = message.link_text.toLowerCase().includes("copy unique refer code");
     const linkUri = message.link_uri;
     return (
       <>
         {message.content}{" "}
-        <a
-          href={message.link_uri}
+        <Link
+          to={message.link_uri}
           className={linkClassName}
           onClick={(event) => {
-            if (!isCopyReferCode) return;
+            if (!isCopyReferCode) {
+              onRead(message.id);
+              return;
+            }
             event.preventDefault();
             const clipboard = (
               globalThis as unknown as {
@@ -142,7 +146,7 @@ function buildNotificationBody(message: MessageOut): ReactNode {
           }}
         >
           {message.link_text}
-        </a>
+        </Link>
       </>
     );
   }
@@ -352,25 +356,23 @@ export default function Notifications({
     }
   }, [messages.length, hasMore, isInitialLoading]);
 
-  const notifications: NotificationItem[] = useMemo(() => {
-    return messages.map((message) => {
-      const style = getNotificationStyle(message.type);
-      return {
-        id: message.id,
-        title: message.title,
-        body: buildNotificationBody(message),
-        time: formatNotificationDateTime(message.sent_at),
-        iconName: style.iconName,
-        iconBg: style.iconBg,
-        iconSize: style.iconSize,
-        showUnreadDot: !message.is_read,
-        dotTop: "2px",
-        dotLeft: "32.5px",
-        showCheck: !message.is_read,
-        showClose: true,
-      };
-    });
-  }, [messages]);
+  const notifications: NotificationItem[] = messages.map((message) => {
+    const style = getNotificationStyle(message.type);
+    return {
+      id: message.id,
+      title: message.title,
+      body: buildNotificationBody(message, handleMarkRead),
+      time: formatNotificationDateTime(message.sent_at),
+      iconName: style.iconName,
+      iconBg: style.iconBg,
+      iconSize: style.iconSize,
+      showUnreadDot: !message.is_read,
+      dotTop: "2px",
+      dotLeft: "32.5px",
+      showCheck: !message.is_read,
+      showClose: true,
+    };
+  });
 
   const handleMarkAllAsRead = () => {
     markAllMessagesRead({ channel, scope: scopeParam }).then(() => {
@@ -386,20 +388,20 @@ export default function Notifications({
     });
   };
 
-  const handleMarkRead = (id: number) => {
+  function handleMarkRead(id: number) {
     setSwipedId(null);
+    if (messagesRef.current.find((item) => item.id === id)?.is_read) return;
     markMessageRead(id).then(() => {
       const target = messagesRef.current.find((item) => item.id === id);
       if (target && !target.is_read) adjustUnreadCount(scope, -1);
-      setMessages((prev) => {
-        const nextItems = prev.map((item) => (item.id === id ? { ...item, is_read: true } : item));
-        syncCache(nextItems, totalCountRef.current, nextPageRef.current, hasMoreRef.current);
-        return nextItems;
-      });
+      notificationsCache[scope].items = notificationsCache[scope].items.map((item) => (
+        item.id === id ? { ...item, is_read: true } : item
+      ));
+      setMessages(notificationsCache[scope].items);
     }).catch((error) => {
       console.error("Failed to mark message read:", error);
     });
-  };
+  }
 
   const handleDelete = async (id: number) => {
     if (deletingId === id) return;
