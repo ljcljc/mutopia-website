@@ -1003,7 +1003,6 @@ export function Step6() {
           <BrownOutlineButton
             size="compact"
             onClick={() => handleModify(2)}
-            className="w-full sm:w-auto"
           >
             <span className="font-comfortaa font-medium leading-[17.5px] text-[12px] text-[#8b6357]">
               Modify
