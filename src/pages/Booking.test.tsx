@@ -60,4 +60,20 @@ describe("Booking step 1 validation", () => {
     expect(screen.getAllByText("Select at least one date and time period")[0]).toBeInTheDocument();
     expect(useBookingStore.getState().currentStep).toBe(5);
   });
+
+  it("requires agreement before proceeding from step 6", () => {
+    useBookingStore.setState({ currentStep: 6 });
+    render(<Booking />);
+
+    const proceedButton = screen.getByRole("button", { name: /Proceed to payment/i });
+    const agreement = screen.getByRole("checkbox", { name: /I understand and agree/i });
+    expect(proceedButton).toBeDisabled();
+    expect(screen.getByRole("link", { name: "Cancellation Policy" })).toHaveAttribute("href", "#");
+    expect(screen.getByRole("link", { name: "Terms of Service" })).toHaveAttribute("href", "#");
+
+    fireEvent.click(agreement);
+    expect(proceedButton).toBeEnabled();
+    fireEvent.click(agreement);
+    expect(proceedButton).toBeDisabled();
+  });
 });

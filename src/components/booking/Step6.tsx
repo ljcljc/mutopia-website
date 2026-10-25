@@ -138,6 +138,7 @@ export function Step6() {
   const [isTotalExpanded, setIsTotalExpanded] = useState(true);
   const [isPackageExpanded, setIsPackageExpanded] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasAgreedToTerms, setHasAgreedToTerms] = useState(false);
   
   // Check if user is logged in
   const user = useAuthStore((state) => state.user);
@@ -728,7 +729,7 @@ export function Step6() {
 
   // Handle proceed to payment
   const handleProceedToPayment = async () => {
-    if (isSubmitting) return;
+    if (isSubmitting || !hasAgreedToTerms) return;
     
     try {
       setIsSubmitting(true);
@@ -1561,11 +1562,31 @@ export function Step6() {
       </div>
       </div>
 
+      <div className="flex items-start gap-[8px] text-[#4a3c2a] font-comfortaa text-[12px] sm:text-[14px] leading-[1.5]">
+        <Checkbox
+          checked={hasAgreedToTerms}
+          onCheckedChange={setHasAgreedToTerms}
+          aria-labelledby="booking-terms-agreement"
+          containerClassName="mt-[2px] shrink-0"
+        />
+        <span id="booking-terms-agreement">
+          I understand and agree to the Mutopia{" "}
+          <a href="#" onClick={(event) => event.preventDefault()} className="underline underline-offset-2">
+            Cancellation Policy
+          </a>{" "}
+          and{" "}
+          <a href="#" onClick={(event) => event.preventDefault()} className="underline underline-offset-2">
+            Terms of Service
+          </a>
+          .
+        </span>
+      </div>
+
       {/* Bottom buttons */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-[calc(12*var(--px393))] sm:gap-[20px] relative shrink-0 w-full">
-        <OrangeButton size="medium" onClick={handleProceedToPayment} disabled={isSubmitting} loading={isSubmitting} className="w-[220px] sm:w-auto">
+        <OrangeButton size="medium" onClick={handleProceedToPayment} disabled={isSubmitting || !hasAgreedToTerms} loading={isSubmitting} className="w-[240px]">
           <div className="flex gap-[calc(4*var(--px393))] sm:gap-[4px] items-center">
-            <p className="font-comfortaa font-medium leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] text-[calc(14*var(--px393))] sm:text-[14px] text-white">
+            <p className="font-comfortaa font-medium leading-[calc(17.5*var(--px393))] sm:leading-[17.5px] text-[calc(14*var(--px393))] sm:text-[14px] text-white whitespace-nowrap">
               Proceed to payment
             </p>
             <Icon
@@ -1580,7 +1601,7 @@ export function Step6() {
           variant="outline"
           onClick={() => setCurrentStep(5)}
           disabled={isSubmitting}
-          className="w-[220px] sm:w-auto"
+          className="w-[240px]"
         >
           Back
         </OrangeButton>
