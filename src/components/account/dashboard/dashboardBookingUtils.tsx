@@ -215,20 +215,12 @@ export function StatusBadge({
     );
   }
 
-  if (tone === "purple") {
+  if (tone === "purple" || tone === "brown") {
     return (
-      <div className="inline-flex min-h-6 max-w-full items-center rounded-[12px] bg-[#633479] px-[12px] py-[5px]">
+      <div className={`inline-flex min-h-6 max-w-full items-center rounded-[12px] px-[12px] py-[5px] ${tone === "brown" ? "bg-[#8B6357]" : "bg-[#633479]"}`}>
         <span className="min-w-0 break-words font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-white">
           {label}
         </span>
-      </div>
-    );
-  }
-
-  if (tone === "brown") {
-    return (
-      <div className="inline-flex min-h-6 max-w-full items-center rounded-[12px] bg-[#8B6357] px-[12px] py-[5px]">
-        <span className="min-w-0 break-words font-['Comfortaa:Bold',sans-serif] font-bold text-[10px] leading-[14px] text-white">{label}</span>
       </div>
     );
   }
