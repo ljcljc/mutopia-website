@@ -52,14 +52,6 @@ interface AccountState {
   upcomingBookingsLastFetchedAt: number;
   upcomingBookingsFetchPromise: Promise<void> | null;
   
-  // 支付方式列表（❌ 仅 UI，使用模拟数据）
-  paymentMethods: Array<{
-    id: number;
-    cardNumber: string; // 例如 "8383 **** **** 9288"
-    cardType: string; // 例如 "VISA"
-    isDefault: boolean;
-  }>;
-  
   // Actions（仅实现已存在接口）
   fetchAddresses: () => Promise<void>;
   fetchMembershipPlans: () => Promise<void>;
@@ -109,27 +101,6 @@ export const useAccountStore = create<AccountState>((set, get: () => AccountStat
   petsFetchPromise: null,
   upcomingBookingsLastFetchedAt: 0,
   upcomingBookingsFetchPromise: null,
-  paymentMethods: [
-    {
-      id: 1,
-      cardNumber: "8383 **** **** 9288",
-      cardType: "VISA",
-      isDefault: true,
-    },
-    {
-      id: 2,
-      cardNumber: "4532 **** **** 5678",
-      cardType: "MASTERCARD",
-      isDefault: false,
-    },
-    {
-      id: 3,
-      cardNumber: "6011 **** **** 9012",
-      cardType: "AMEX",
-      isDefault: false,
-    },
-  ],
-  
   fetchAddresses: async () => {
     set({ isLoadingAddresses: true });
     try {

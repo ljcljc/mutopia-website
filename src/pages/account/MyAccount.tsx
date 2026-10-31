@@ -55,10 +55,8 @@ export default function MyAccount() {
           <AddressesCard />
         </div>
 
-        {/* Payment Method Card (mobile only) */}
-        <div className="mb-5 sm:mb-6 sm:hidden">
-          <PaymentMethodCard />
-        </div>
+        {/* Payment Method Card */}
+        <PaymentMethodCard />
 
         {/* Bottom Cards Section - Share & Earn and Membership */}
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 sm:gap-6">
