@@ -9,6 +9,39 @@ futureDate.setDate(futureDate.getDate() + 3);
 const futureServiceSlot = `${futureDate.getFullYear()}.${String(futureDate.getMonth() + 1).padStart(2, "0")}.${String(futureDate.getDate()).padStart(2, "0")} AM`;
 
 describe("ProposeNewTimeModal", () => {
+  it("selects today from the previous month while keeping the requested month visible", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-31T10:00:00Z"));
+    try {
+      const onSubmit = vi.fn();
+      render(
+        <ProposeNewTimeModal
+          open
+          onClose={vi.fn()}
+          initialServiceSlot="2026.11.07 AM"
+          initialTimeOptions={noInitialTimeOptions}
+          businessTimezone="UTC"
+          onSubmit={onSubmit}
+        />,
+      );
+
+      expect(screen.getByText("November")).toBeInTheDocument();
+      fireEvent.click(screen.getByText("31"));
+      expect(screen.getByText("November")).toBeInTheDocument();
+      expect(screen.getByText("31").parentElement).toHaveClass("bg-[#de6a07]");
+
+      fireEvent.click(screen.getByRole("button", { name: "Toggle available time options" }));
+      expect(screen.queryByRole("button", { name: "10:00" })).not.toBeInTheDocument();
+      fireEvent.click(screen.getByRole("button", { name: "10:30" }));
+      fireEvent.click(screen.getByRole("button", { name: "Send new time" }));
+      expect(onSubmit).toHaveBeenCalledWith([
+        expect.objectContaining({ date: "2026-10-31", time: "10:30" }),
+      ]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("does not list times that have passed today", () => {
     const now = serviceNowParts("UTC");
     const todaySlot = `${now.year}.${String(now.month).padStart(2, "0")}.${String(now.day).padStart(2, "0")} AM`;
@@ -56,17 +89,18 @@ describe("ProposeNewTimeModal", () => {
 
   it("keeps customer slots separate and allows different times on the same date", async () => {
     const onSubmit = vi.fn();
+    const serviceDay = futureServiceSlot.slice(0, 10);
     render(
       <ProposeNewTimeModal
         open
         onClose={vi.fn()}
-        initialServiceSlots={["2026.10.20 AM", "2026.10.20 PM"]}
+        initialServiceSlots={[`${serviceDay} AM`, `${serviceDay} PM`]}
         initialTimeOptions={noInitialTimeOptions}
         onSubmit={onSubmit}
       />,
     );
 
-    expect(screen.getByText(/2026.10.20 AM, 2026.10.20 PM/)).toBeInTheDocument();
+    expect(screen.getByText(`${serviceDay} AM, ${serviceDay} PM`)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Remove/ })).not.toBeInTheDocument();
 
     fireEvent.click(await screen.findByRole("button", { name: "Toggle available time options" }));

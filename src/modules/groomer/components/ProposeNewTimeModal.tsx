@@ -360,6 +360,7 @@ export function ProposeNewTimeModal({
                   selectedDate={selectedDate}
                   minDate={minDate}
                   maxDate={maxDate}
+                  allowOutsideMonthSelection
                   onMonthChange={(year, month) => setCurrentDate(new Date(year, month, 1))}
                   showYearPicker={showYearPicker}
                   showMonthPicker={showMonthPicker}
