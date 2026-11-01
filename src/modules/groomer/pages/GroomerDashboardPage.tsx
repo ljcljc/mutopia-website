@@ -1500,7 +1500,7 @@ function GroomerCheckUpModal({
                   <div className="flex w-full flex-col items-start gap-2">
                     <div className="flex h-[12.25px] w-full items-center gap-[7px]">
                       <p className="font-comfortaa text-[14px] leading-[22.75px] text-[#4a3c2a]">
-                        Weight (lb or kg)
+                        Weight (lbs or kg)
                       </p>
                     </div>
                     <div className="group flex w-full items-start sm:w-[200px]">
@@ -1525,15 +1525,12 @@ function GroomerCheckUpModal({
                         <CustomSelect
                           placeholder="Select"
                           value={weightUnit}
-                          displayValue={
-                            weightUnit === "lbs" ? "lb" : weightUnit
-                          }
                           onValueChange={(value) => setWeightUnit(value)}
                           className="w-auto"
                           noLeftRadius
                         >
                           <CustomSelectItem value="kg">kg</CustomSelectItem>
-                          <CustomSelectItem value="lbs">lb</CustomSelectItem>
+                          <CustomSelectItem value="lbs">lbs</CustomSelectItem>
                         </CustomSelect>
                       </div>
                     </div>

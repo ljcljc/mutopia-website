@@ -1,6 +1,7 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useBookingStore } from "./bookingStore";
 import { useAuthStore } from "@/components/auth/authStore";
+import * as api from "@/lib/api";
 import type { BookingDetailOut, MeOut } from "@/lib/api";
 
 const mockUserInfo: MeOut = {
@@ -98,6 +99,27 @@ describe("bookingStore loadUserInfo", () => {
     expect(state.postCode).toBe("");
     expect(state.userInfo).toEqual(mockUserInfo);
     expect(state.hasUnsavedChanges()).toBe(false);
+  });
+});
+
+describe("bookingStore weight units", () => {
+  it("sends lbs consistently when loading services and building a booking", async () => {
+    const getServices = vi.spyOn(api, "getServices").mockResolvedValue([]);
+    try {
+      useBookingStore.getState().reset();
+      useBookingStore.setState({ weight: "12", weightUnit: "lbs", serviceId: 5 });
+
+      await useBookingStore.getState().loadServices();
+
+      expect(getServices).toHaveBeenCalledWith(expect.objectContaining({
+        weight: "12",
+        weight_unit: "lbs",
+      }));
+      expect(useBookingStore.getState().getPetPayload().weight_unit).toBe("lbs");
+      expect(useBookingStore.getState().getBookingSubmitPayload().weight_unit).toBe("lbs");
+    } finally {
+      getServices.mockRestore();
+    }
   });
 });
 

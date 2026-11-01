@@ -1443,7 +1443,7 @@ export function PetForm({
               <div data-booking-pet-field="weight" className="flex flex-col gap-[calc(8*var(--px393))] sm:gap-[8px] items-start relative shrink-0 w-full">
                 <div className="flex gap-[7px] h-[calc(12.25*var(--px393))] sm:h-[12.25px] items-center relative shrink-0 w-full">
                   <p className="font-comfortaa font-normal leading-[calc(22.75*var(--px393))] sm:leading-[22.75px] relative shrink-0 text-[#4a3c2a] text-[calc(14*var(--px393))] sm:text-[14px]">
-                    <span className={validationErrors.weight ? "text-[#de1507]" : undefined}>Weight (lb or kg)</span>
+                    <span className={validationErrors.weight ? "text-[#de1507]" : undefined}>Weight (lbs or kg)</span>
                   </p>
                 </div>
                 <div className="flex items-start relative shrink-0 w-full sm:w-[200px] group">
@@ -1472,7 +1472,7 @@ export function PetForm({
                       noLeftRadius={true}
                     >
                       <CustomSelectItem value="kg">kg</CustomSelectItem>
-                      <CustomSelectItem value="lb">lb</CustomSelectItem>
+                      <CustomSelectItem value="lbs">lbs</CustomSelectItem>
                     </CustomSelect>
                   </div>
                 </div>

@@ -34,7 +34,7 @@ export type PetType = "dog" | "cat" | "other";
 export type CoatCondition = "not_matted" | "matted" | "severely_matted";
 export type Behavior = "friendly" | "anxious" | "hard_to_handle" | "senior_pets";
 export type GroomingFrequency = "weekly" | "bi_weekly" | "monthly" | "occasionally";
-export type WeightUnit = "kg" | "lbs"; // 后端使用 "lb" 而不是 "lbs"
+export type WeightUnit = "kg" | "lbs"; // 与后端体重单位保持一致
 export type Gender = "male" | "female" | "unknown"; // 与后端枚举一致
 export type ServicePackage = "premium-bath" | "full-grooming";
 
@@ -786,12 +786,11 @@ export const useBookingStore = create<BookingState>((set) => ({
     try {
       set({ isLoadingServices: true });
       const weight = state.weight.trim();
-      const weightUnit = state.weightUnit === "lbs" ? "lb" : state.weightUnit;
       const services = await getServices({
         pet_type: state.petType,
         breed: state.breed.trim() || undefined,
         weight: weight || undefined,
-        weight_unit: weight ? weightUnit : undefined,
+        weight_unit: weight ? state.weightUnit : undefined,
         service_area_id: state.selectedServiceAreaId,
       });
       const currentState = useBookingStore.getState();
