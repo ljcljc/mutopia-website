@@ -307,3 +307,33 @@ describe("bookingStore leave warning", () => {
     expect(store.hasUnsavedChanges()).toBe(false);
   });
 });
+
+describe("bookingStore loadAddresses", () => {
+  it("selects the default initially but preserves an edited address when step 1 reloads", async () => {
+    const getAddresses = vi.spyOn(api, "getAddresses").mockResolvedValue({
+      items: [
+        { id: 7, address: "Default Street", city: "Vancouver", province: "BC", postal_code: "V1V 1V1", service_type: "mobile", is_default: true },
+        { id: 8, address: "Other Street", city: "Burnaby", province: "BC", postal_code: "V2V 2V2", service_type: "mobile", is_default: false },
+      ],
+      total: 2, page: 1, page_size: 10,
+    });
+    try {
+      useBookingStore.getState().reset();
+      await useBookingStore.getState().loadAddresses();
+      expect(useBookingStore.getState().selectedAddressId).toBe(7);
+
+      useBookingStore.getState().setSelectedAddressId(8);
+      await useBookingStore.getState().loadAddresses();
+      expect(useBookingStore.getState().selectedAddressId).toBe(8);
+      expect(useBookingStore.getState().address).toBe("Other Street");
+
+      useBookingStore.getState().setAddress("Edited Street");
+      useBookingStore.getState().setSelectedAddressId(null);
+      await useBookingStore.getState().loadAddresses();
+      expect(useBookingStore.getState().selectedAddressId).toBeNull();
+      expect(useBookingStore.getState().address).toBe("Edited Street");
+    } finally {
+      getAddresses.mockRestore();
+    }
+  });
+});

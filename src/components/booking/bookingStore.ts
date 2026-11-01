@@ -436,7 +436,9 @@ export const useBookingStore = create<BookingState>((set) => ({
       set({ addresses, isLoadingAddresses: false });
       // 如果有默认地址，自动选择
       const defaultAddress = addresses.find((addr) => addr.is_default);
-      if (defaultAddress) {
+      const current = useBookingStore.getState();
+      if (defaultAddress && current.selectedAddressId === null &&
+          (!current.address || (current.address === current.userInfo?.address && !current.city && !current.postCode))) {
         useBookingStore.getState().setSelectedAddressId(defaultAddress.id);
       }
     } catch (error) {
