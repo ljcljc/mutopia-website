@@ -281,7 +281,7 @@ export function Step5() {
                           onClick={() => !isDisabled && toggleTimePeriod(period.id)}
                         >
                           <div className="flex gap-[calc(8*var(--px393))] items-start relative shrink-0 w-full">
-                            <div className="flex h-[calc(21*var(--px393))] items-center relative shrink-0">
+                            <div className="flex h-[calc(21*var(--px393))] items-center relative shrink-0" onClick={(e) => e.stopPropagation()}>
                               <Checkbox
                                 checked={isSelected}
                                 onCheckedChange={() => !isDisabled && toggleTimePeriod(period.id)}
@@ -470,7 +470,7 @@ export function Step5() {
                           <div className="flex gap-[123.758px] items-start relative shrink-0 w-full">
                             <div className="relative shrink-0">
                               <div className="bg-clip-padding border-0 border-transparent border-solid flex gap-[8px] items-start relative">
-                                <div className="flex h-[21px] items-center relative shrink-0">
+                                <div className="flex h-[21px] items-center relative shrink-0" onClick={(e) => e.stopPropagation()}>
                                   <Checkbox
                                     checked={isSelected}
                                     onCheckedChange={() => !isDisabled && toggleTimePeriod(period.id)}

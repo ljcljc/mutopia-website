@@ -61,6 +61,22 @@ describe("Booking step 1 validation", () => {
     expect(useBookingStore.getState().currentStep).toBe(5);
   });
 
+  it("toggles step 5 time slots once when clicking either layout's checkbox", () => {
+    const date = "2026-11-15";
+    useBookingStore.setState({ currentStep: 5, selectedTimeSlots: [{ date, slot: "afternoon" }] });
+    render(<Booking />);
+
+    const checkboxes = screen.getAllByRole("checkbox");
+    expect(checkboxes).toHaveLength(4);
+    fireEvent.click(checkboxes[0]); // Mobile morning
+    expect(useBookingStore.getState().selectedTimeSlots).toEqual([
+      { date, slot: "afternoon" },
+      { date, slot: "morning" },
+    ]);
+    fireEvent.click(checkboxes[3]); // Desktop afternoon
+    expect(useBookingStore.getState().selectedTimeSlots).toEqual([{ date, slot: "morning" }]);
+  });
+
   it("requires agreement before proceeding from step 6", () => {
     useBookingStore.setState({ currentStep: 6 });
     render(<Booking />);
