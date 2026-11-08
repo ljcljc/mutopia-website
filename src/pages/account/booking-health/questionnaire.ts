@@ -1,3 +1,5 @@
+export const HEALTH_INFO_EDITABLE_STATUSES = new Set(["confirmed", "checked_in", "in_progress", "completed", "terminated"]);
+
 import type { BookingHealthQuestionnaire, TimelineEntry } from "./types";
 
 export interface StepMeta {

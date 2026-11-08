@@ -481,6 +481,8 @@ export interface BookingPriceBreakdown {
 
 export interface BookingListOut {
   id: number;
+  pet_id?: number | null;
+  has_health_questionnaire?: boolean;
   order_code?: string | null;
   status: string;
   hero_stage?: "handover_checkout" | "service_completed" | null;

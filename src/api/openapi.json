@@ -4868,6 +4868,8 @@
       "BookingListOut": {
         "properties": {
           "id": { "title": "Id", "type": "integer" },
+          "pet_id": { "anyOf": [{ "type": "integer" }, { "type": "null" }], "default": null, "title": "Pet Id" },
+          "has_health_questionnaire": { "default": false, "title": "Has Health Questionnaire", "type": "boolean" },
           "status": { "title": "Status", "type": "string" },
           "pet_name": {
             "anyOf": [{ "type": "string" }, { "type": "null" }],

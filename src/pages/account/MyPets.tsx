@@ -12,8 +12,9 @@ import { usePdfPreview } from "@/components/common/usePdfPreview";
 import { PetForm } from "@/components/common/PetForm";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { useBookingStore } from "@/components/booking/bookingStore";
+import { HEALTH_INFO_EDITABLE_STATUSES } from "./booking-health/questionnaire";
 import type { Behavior, CoatCondition, Gender, PetType, WeightUnit, GroomingFrequency } from "@/components/booking/bookingStore";
-import { buildImageUrl, getPetBreeds, updatePet, deletePet, memorializePet, uploadPetPhoto, uploadReferencePhoto, listPetHealthReports, getPetHealthReportPdf, type PetBreedOut, type PetOut, type PublishedPetHealthReportOut } from "@/lib/api";
+import { buildImageUrl, getPetBreeds, getMyBookings, updatePet, deletePet, memorializePet, uploadPetPhoto, uploadReferencePhoto, listPetHealthReports, getPetHealthReportPdf, type BookingListOut, type PetBreedOut, type PetOut, type PublishedPetHealthReportOut } from "@/lib/api";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -108,6 +109,7 @@ export default function MyPets() {
   const [petPhoto, setPetPhoto] = useState<File | null>(null);
   const [referenceStyles, setReferenceStyles] = useState<File[]>([]);
   const [healthReports, setHealthReports] = useState<PublishedPetHealthReportOut[]>([]);
+  const [careBookings, setCareBookings] = useState<BookingListOut[]>([]);
   const { blobUrl: reportPdfUrl, open: reportPdfOpen, loading: reportPdfLoading, openWithBlob: openReportPdf, close: closeReportPdf } = usePdfPreview();
   const healthReportRef = useRef<HTMLDivElement>(null);
   const {
@@ -206,8 +208,27 @@ export default function MyPets() {
   };
 
   const activePet = useMemo(() => pets.find((pet) => pet.id === activePetId) || null, [pets, activePetId]);
+  const careBooking = careBookings.find((booking) => booking.pet_id === activePetId && !booking.has_health_report && HEALTH_INFO_EDITABLE_STATUSES.has(booking.status));
   const isMemorialized = Boolean(activePet?.is_memorialized);
   const isPetSelectDropdown = pets.length > 3;
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const first = await getMyBookings({ page_size: 100 });
+        const bookings = [...first.items];
+        for (let page = 2; page <= Math.ceil(first.total / first.page_size); page++) {
+          bookings.push(...(await getMyBookings({ page, page_size: 100 })).items);
+        }
+        if (!cancelled) setCareBookings(bookings);
+      } catch {
+        if (!cancelled) setCareBookings([]);
+      }
+    };
+    void load();
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     if (!activePetId) {
@@ -957,6 +978,30 @@ export default function MyPets() {
                   showDragHint
                 />
               </div>
+            </div>
+          </div>
+
+          <div className="relative min-h-[260px] rounded-[12px] bg-white p-5 shadow-[0_8px_12px_rgba(0,0,0,0.1)] font-['Comfortaa']">
+            <div className="flex flex-wrap items-center gap-3">
+              <h2 className="text-[16px] font-normal text-[#4A3C2A]">{activePet?.name ?? "Your pet"}'s care passport</h2>
+              {careBooking?.has_health_questionnaire && <span className="rounded-full bg-[#DCFCE7] px-3 py-1 text-[10px] text-[#27AE60]">✓ Completed</span>}
+            </div>
+            <div className="mt-6 flex items-start gap-5">
+              <div className="min-w-0 flex-1 text-[12px] leading-[1.4] text-[#4A5565]">
+                <p className="text-[14px] text-[#DE6A07]">Why is {activePet?.name ?? "your pet"}'s passport required?</p>
+                <p>Mutopia does not believe in one-size-fits-all grooming.</p>
+                <ul className="ml-5 list-disc">
+                  <li>To calibrate custom water temperature, hypoallergenic shampoo, and gentle handling based on {activePet?.name ?? "your pet"}'s needs.</li>
+                  <li>To activate {activePet?.name ?? "your pet"}'s predictive AI Health Triage &amp; wellness tracking.</li>
+                </ul>
+                {careBooking?.has_health_questionnaire && <p className="mt-4 max-w-[430px] text-[#DE6A07]">Your intake details are locked in. Our mobile salon and assigned groomer are now fully briefed for safe, personalized care.</p>}
+              </div>
+              <img src="/images/care-passport.png" alt="" className="h-[124px] w-[102px] shrink-0 object-contain" />
+            </div>
+            <div className="mt-4 flex justify-end">
+              <button type="button" disabled={!careBooking} onClick={() => careBooking && navigate(`/health-form/${careBooking.id}`)} className="rounded-full bg-[#B97829] px-7 py-2 text-[14px] font-normal text-white disabled:cursor-not-allowed disabled:opacity-50">
+                View or edit passport →
+              </button>
             </div>
           </div>
 

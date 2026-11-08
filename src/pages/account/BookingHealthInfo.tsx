@@ -13,6 +13,7 @@ import {
 } from "@/lib/api";
 import {
   BOOKING_HEALTH_STEPS,
+  HEALTH_INFO_EDITABLE_STATUSES,
   createDefaultQuestionnaire,
   normalizeQuestionnaire,
 } from "./booking-health/questionnaire";
@@ -29,14 +30,6 @@ function getSnapshotValue(
   const value = snapshot?.[key];
   return typeof value === "string" ? value : "";
 }
-
-const HEALTH_INFO_EDITABLE_STATUSES = new Set([
-  "confirmed",
-  "checked_in",
-  "in_progress",
-  "completed",
-  "terminated",
-]);
 
 function buildLegacyHealthFields(
   questionnaire: BookingHealthQuestionnaire
