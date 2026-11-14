@@ -246,18 +246,7 @@ export function Step2() {
   return (
     <div className="w-full px-5 sm:px-0" data-booking-pet-form>
     <PetForm
-      carePassportSlot={<>
-        <CarePassportCard petId={selectedPetId} petName={petName} onOpen={() => void openPassport()} />
-        <LoginModal open={passportLoginOpen} onOpenChange={(open) => { setPassportLoginOpen(open); if (!open && !user) setPendingPassport(false); }}><span /></LoginModal>
-        {matchingPets.length > 0 && <div role="dialog" aria-modal="true" aria-label="Possible existing pets" className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-            <h3 className="mb-3 text-lg font-semibold">Is this pet already in My Pets?</h3>
-            {matchingPets.map((pet) => <button key={pet.id} type="button" onClick={() => { setMatchingPets([]); handleSelectPet(pet); setSelectedPetId(pet.id); navigate(`/care-passport/${pet.id}`, { state: { returnTo: "/booking" } }); }} className="mb-2 block w-full rounded-lg border p-3 text-left">{pet.name} · {pet.breed || pet.precise_type || pet.pet_type} · {pet.birthday || "Birthday unknown"}</button>)}
-            <button type="button" onClick={() => { setMatchingPets([]); void createAndOpenPassport(); }} className="mt-2 rounded-full bg-[#B97829] px-5 py-2 text-white">None of these — add a new pet</button>
-            <button type="button" onClick={() => setMatchingPets([])} className="ml-3 rounded-full border border-[#8B6357] px-5 py-2 text-[#8B6357]">Cancel</button>
-          </div>
-        </div>}
-      </>}
+      carePassportSlot={<CarePassportCard petId={selectedPetId} petName={petName} onOpen={() => void openPassport()} />}
       petOptions={user && pets.length > 0 ? pets : undefined}
       selectedPetId={selectedPetId}
       setSelectedPetId={setSelectedPetId}
@@ -310,6 +299,15 @@ export function Step2() {
       onPrimaryAction={handleContinue}
       onBackAction={previousStep}
     />
+    <LoginModal open={passportLoginOpen} onOpenChange={(open) => { setPassportLoginOpen(open); if (!open && !user) setPendingPassport(false); }}><span /></LoginModal>
+    {matchingPets.length > 0 && <div role="dialog" aria-modal="true" aria-label="Possible existing pets" className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+        <h3 className="mb-3 text-lg font-semibold">Is this pet already in My Pets?</h3>
+        {matchingPets.map((pet) => <button key={pet.id} type="button" onClick={() => { setMatchingPets([]); handleSelectPet(pet); setSelectedPetId(pet.id); navigate(`/care-passport/${pet.id}`, { state: { returnTo: "/booking" } }); }} className="mb-2 block w-full rounded-lg border p-3 text-left">{pet.name} · {pet.breed || pet.precise_type || pet.pet_type} · {pet.birthday || "Birthday unknown"}</button>)}
+        <button type="button" onClick={() => { setMatchingPets([]); void createAndOpenPassport(); }} className="mt-2 rounded-full bg-[#B97829] px-5 py-2 text-white">None of these — add a new pet</button>
+        <button type="button" onClick={() => setMatchingPets([])} className="ml-3 rounded-full border border-[#8B6357] px-5 py-2 text-[#8B6357]">Cancel</button>
+      </div>
+    </div>}
     </div>
   );
 }
