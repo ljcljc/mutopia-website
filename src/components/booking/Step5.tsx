@@ -17,7 +17,8 @@ export function Step5() {
   
   const buildMinDate = () => {
     const date = new Date();
-    date.setDate(date.getDate() + 7);
+    // Temporary for testing: restore +7 before production launch.
+    date.setDate(date.getDate() + 1);
     date.setHours(0, 0, 0, 0);
     return date;
   };
