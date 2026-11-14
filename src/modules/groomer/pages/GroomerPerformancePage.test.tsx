@@ -59,7 +59,7 @@ describe("GroomerPerformancePage review actions", () => {
       punctuality: { on_time_rate: 92, late_arrival_count: 1, latest_late_minutes: 4 },
       recent_feedback: [
         {
-          review_id: 18,
+          review_id: 18, created_at: new Date().toISOString(),
           booking_id: 501,
           user_name: "Taylor",
           rating: 5,
@@ -94,17 +94,18 @@ describe("GroomerPerformancePage review actions", () => {
       breakdown: {},
       punctuality: { on_time_rate: 92, late_arrival_count: 1, latest_late_minutes: 4 },
       recent_feedback: [
-        { review_id: 19, booking_id: 502, user_name: "Latest", rating: 5, comment: "Newer review" },
-        { review_id: 18, booking_id: 501, user_name: "Target", rating: 5, comment: "Target review" },
+        { review_id: 19, created_at: new Date().toISOString(), booking_id: 502, user_name: "Latest", rating: 5, comment: "Newer review" },
+        { review_id: 18, created_at: new Date().toISOString(), booking_id: 501, user_name: "Target", rating: 5, comment: "Target review" },
       ],
     });
 
     renderPage("/groomer/account/performance?reviewId=18");
 
     expect(await screen.findByText("Target")).toBeInTheDocument();
-    expect(screen.queryByText("Latest")).not.toBeInTheDocument();
-    expect(await screen.findByRole("textbox", { name: "Reply to client review" })).toHaveFocus();
-    expect(scrollIntoView).toHaveBeenCalledWith({ block: "end" });
+    expect(screen.getByText("Latest")).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Reply" })).toHaveLength(1);
+    expect(screen.getByRole("textbox", { name: "Reply to Target's review" })).toHaveFocus();
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: "center" });
   });
 
   it("shows an existing reply without reopening the editor", async () => {
@@ -115,14 +116,15 @@ describe("GroomerPerformancePage review actions", () => {
       breakdown: {},
       punctuality: { on_time_rate: 92, late_arrival_count: 1, latest_late_minutes: 4 },
       recent_feedback: [
-        { review_id: 18, booking_id: 501, user_name: "Target", rating: 5, comment: "Great service", reply: "Thank you!" },
+        { review_id: 18, created_at: new Date().toISOString(), booking_id: 501, user_name: "Target", rating: 5, comment: "Great service", reply: "Thank you!" },
       ],
     });
 
     renderPage("/groomer/account/performance?reviewId=18");
 
     expect(await screen.findByText("Thank you!")).toBeInTheDocument();
-    expect(screen.queryByRole("textbox", { name: "Reply to client review" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("textbox", { name: "Reply to Target's review" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Report review" })).toBeInTheDocument();
   });
 
   it("submits a report for the latest feedback", async () => {
@@ -133,7 +135,7 @@ describe("GroomerPerformancePage review actions", () => {
       punctuality: { on_time_rate: 92, late_arrival_count: 1, latest_late_minutes: 4 },
       recent_feedback: [
         {
-          review_id: 21,
+          review_id: 21, created_at: new Date().toISOString(),
           booking_id: 502,
           user_name: "Jordan",
           rating: 2,
@@ -171,7 +173,7 @@ describe("GroomerPerformancePage review actions", () => {
       punctuality: { on_time_rate: 100, late_arrival_count: 0, latest_late_minutes: null },
       recent_feedback: [
         {
-          review_id: 22,
+          review_id: 22, created_at: new Date().toISOString(),
           booking_id: 503,
           user_name: "Alex",
           rating: 5,
@@ -186,6 +188,25 @@ describe("GroomerPerformancePage review actions", () => {
     expect(await screen.findByText("Your reply")).toBeInTheDocument();
     expect(screen.getByText("Appreciate your support.")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Reply" })).not.toBeInTheDocument();
+  });
+
+  it("shows one card per recent review and explains an expired deep link", async () => {
+    const recent = new Date().toISOString();
+    const expired = new Date(Date.now() - 73 * 60 * 60 * 1000).toISOString();
+    vi.mocked(getGroomerPerformance).mockResolvedValue({
+      score: 92, level_label: "Premium", breakdown: {},
+      punctuality: { on_time_rate: 100, late_arrival_count: 0, latest_late_minutes: null },
+      recent_feedback: [
+        { review_id: 1, booking_id: 1, user_name: "A", rating: 5, comment: "First", created_at: recent },
+        { review_id: 2, booking_id: 2, user_name: "B", rating: 4, comment: "Second", created_at: recent },
+        { review_id: 3, booking_id: 3, user_name: "C", rating: 3, comment: "Old", created_at: expired },
+      ],
+    });
+    renderPage("/groomer/account/performance?reviewId=3");
+    expect(await screen.findByText("Client feedback in 72 hours")).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Reply" })).toHaveLength(2);
+    expect(screen.queryByText("C")).not.toBeInTheDocument();
+    expect(screen.getByText(/outside the last 72 hours/)).toBeInTheDocument();
   });
 
   it("submits a technical skill update and refreshes the status badge", async () => {

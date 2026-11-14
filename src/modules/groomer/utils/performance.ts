@@ -1,3 +1,17 @@
+export type GroomerReview = {
+    reviewId: number;
+    bookingId: number;
+    userName: string;
+    avatarUrl: string | null;
+    rating: number;
+    technicalRating: number;
+    attitudeRating: number;
+    environmentRating: number;
+    comment: string;
+    reply: string | null;
+    createdAt: string;
+};
+
 export type GroomerPerformanceSummary = {
   score: number;
   level: string;
@@ -22,18 +36,7 @@ export type GroomerPerformanceSummary = {
     lateArrivalCount: number;
     latestLateMinutes: number | null;
   };
-  feedbackHistory: Array<{
-    reviewId: number;
-    bookingId: number;
-    userName: string;
-    avatarUrl: string | null;
-    rating: number;
-    technicalRating: number;
-    attitudeRating: number;
-    environmentRating: number;
-    comment: string;
-    reply: string | null;
-  }>;
+  feedbackHistory: GroomerReview[];
   technicalSkill: {
     certificationTitle: string;
     status: string;
@@ -157,6 +160,7 @@ export function mapGroomerPerformanceData(raw: unknown): GroomerPerformanceSumma
         environmentRating: getNumber(review, "environment_rating"),
         comment: getString(review, "comment"),
         reply: getString(review, "reply") || getString(review, "groomer_reply") || null,
+        createdAt: getString(review, "created_at"),
       };
     }),
     technicalSkill: {

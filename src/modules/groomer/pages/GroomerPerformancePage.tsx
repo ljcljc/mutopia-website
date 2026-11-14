@@ -1,23 +1,19 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { OrangeButton, AccordionChevron, AccordionPanel } from "@/components/common";
+import { useMemo, useState, type ReactNode } from "react";
+import { AccordionChevron, AccordionPanel } from "@/components/common";
 import { Icon } from "@/components/common/Icon";
 import AccountContentContainer from "@/components/layout/AccountContentContainer";
 import { useIsMobile } from "@/components/ui/use-mobile";
-import { GroomerLinkButton } from "@/modules/groomer/components/GroomerLinkButton";
-import { GroomerPrimaryActionButton } from "@/modules/groomer/components/GroomerPrimaryActionButton";
 import { PerformanceRadarChart } from "@/modules/groomer/components/PerformanceRadarChart";
-import { ReportReviewModal } from "@/modules/groomer/components/ReportReviewModal";
 import { UpdateTechnicalSkillModal } from "@/modules/groomer/components/UpdateTechnicalSkillModal";
 import {
   getGroomerPerformancePresentation,
 } from "@/modules/groomer/utils/performance";
 import { useGroomerPerformance } from "@/modules/groomer/hooks/useGroomerPerformance";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { buildImageUrl, reportGroomerReview, replyGroomerReview, submitGroomerTechnicalSkillUpdate, uploadGroomerApplyImage } from "@/lib/api";
+import { submitGroomerTechnicalSkillUpdate, uploadGroomerApplyImage } from "@/lib/api";
+import { RecentClientFeedback } from "@/modules/groomer/components/RecentClientFeedback";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
-
-const REVIEW_AVATAR_URL = "https://www.figma.com/api/mcp/asset/2d6c06cd-b66a-4365-9ebb-501b695cd90d";
 
 type ScoreCard = {
   title: string;
@@ -336,17 +332,8 @@ export default function GroomerPerformancePage() {
   const reviewIdParam = searchParams.get("reviewId");
   const showReviews = searchParams.get("section") === "reviews";
   const requestedReviewId = reviewIdParam === null ? null : Number(reviewIdParam);
-  const feedbackCardRef = useRef<HTMLElement>(null);
-  const replyInputRef = useRef<HTMLTextAreaElement>(null);
   const isMobile = useIsMobile();
   const [isPerformanceRadarOpen, setIsPerformanceRadarOpen] = useState(false);
-  const [isReplying, setIsReplying] = useState(false);
-  const [isSubmittingReply, setIsSubmittingReply] = useState(false);
-  const [replyText, setReplyText] = useState("");
-  const [isReportReviewOpen, setIsReportReviewOpen] = useState(false);
-  const [isSubmittingReportReview, setIsSubmittingReportReview] = useState(false);
-  const [reportReason, setReportReason] = useState("");
-  const [reportEvidenceFile, setReportEvidenceFile] = useState<File | null>(null);
   const [isTechnicalSkillModalOpen, setIsTechnicalSkillModalOpen] = useState(false);
   const [technicalSkillDescription, setTechnicalSkillDescription] = useState("");
   const [technicalSkillEvidenceFile, setTechnicalSkillEvidenceFile] = useState<File | null>(null);
@@ -574,27 +561,6 @@ export default function GroomerPerformancePage() {
       },
     ];
   }, [performance]);
-  const selectedFeedback = requestedReviewId !== null
-    ? performance?.feedbackHistory.find((feedback) => feedback.reviewId === requestedReviewId) ?? null
-    : performance?.feedbackHistory[0] ?? null;
-  const hasExistingReply = Boolean(selectedFeedback?.reply?.trim());
-
-  useEffect(() => {
-    if (requestedReviewId === null || !selectedFeedback) return;
-    if (!selectedFeedback.reply?.trim()) setIsReplying(true);
-  }, [requestedReviewId, selectedFeedback]);
-
-  useEffect(() => {
-    if (requestedReviewId === null || !selectedFeedback) return;
-    feedbackCardRef.current?.scrollIntoView({ block: "end" });
-    if (isReplying) replyInputRef.current?.focus();
-  }, [requestedReviewId, selectedFeedback, isReplying]);
-
-  useEffect(() => {
-    if (!showReviews || !performance) return;
-    feedbackCardRef.current?.scrollIntoView({ block: "start" });
-  }, [showReviews, performance]);
-
   const updateFeedbackReply = (reviewId: number, reply: string) => {
     setPerformance((current) => {
       if (!current) return current;
@@ -618,65 +584,10 @@ export default function GroomerPerformancePage() {
     });
   };
 
-  const resetReportReviewForm = () => {
-    setIsReportReviewOpen(false);
-    setReportReason("");
-    setReportEvidenceFile(null);
-  };
-
   const resetTechnicalSkillForm = () => {
     setIsTechnicalSkillModalOpen(false);
     setTechnicalSkillDescription("");
     setTechnicalSkillEvidenceFile(null);
-  };
-
-  const handleReplySubmit = async () => {
-    if (!selectedFeedback || isSubmittingReply) return;
-
-    const trimmedReply = replyText.trim();
-    if (!trimmedReply) {
-      toast.error("Please enter your reply");
-      return;
-    }
-
-    setIsSubmittingReply(true);
-    try {
-      await replyGroomerReview(selectedFeedback.reviewId, { reply: trimmedReply });
-      updateFeedbackReply(selectedFeedback.reviewId, trimmedReply);
-      setIsReplying(false);
-      setReplyText("");
-      toast.success("Reply sent");
-    } catch (error) {
-      console.error("Failed to reply review:", error);
-      toast.error(getActionErrorMessage(error, "Failed to send reply"));
-    } finally {
-      setIsSubmittingReply(false);
-    }
-  };
-
-  const handleReportReviewSubmit = async () => {
-    if (!selectedFeedback || isSubmittingReportReview) return;
-
-    const trimmedReason = reportReason.trim();
-    if (!trimmedReason) {
-      toast.error("Please share your reasons");
-      return;
-    }
-
-    setIsSubmittingReportReview(true);
-    try {
-      await reportGroomerReview(selectedFeedback.reviewId, {
-        why: trimmedReason,
-        evidenceFile: reportEvidenceFile,
-      });
-      resetReportReviewForm();
-      toast.success("Review reported");
-    } catch (error) {
-      console.error("Failed to report review:", error);
-      toast.error(getActionErrorMessage(error, "Failed to report review"));
-    } finally {
-      setIsSubmittingReportReview(false);
-    }
   };
 
   const handleTechnicalSkillSubmit = async () => {
@@ -785,127 +696,11 @@ export default function GroomerPerformancePage() {
               </div>
             </section>
 
-            <section className="mt-[26px] lg:mt-5">
-              <article ref={feedbackCardRef} className="mt-[15px] rounded-[24px] bg-white px-5 py-5 shadow-[0px_8px_24px_rgba(0,0,0,0.15)] lg:px-6 lg:py-6">
-                {!selectedFeedback ? (
-                  <p className="font-comfortaa text-[14px] leading-[21px] text-[#8B6357]">{requestedReviewId !== null ? "Review unavailable." : "No client feedback yet."}</p>
-                ) : (
-                  <>
-              <div className="flex items-start gap-3">
-                <img
-                  src={selectedFeedback.avatarUrl ? buildImageUrl(selectedFeedback.avatarUrl) : REVIEW_AVATAR_URL}
-                  alt={selectedFeedback.userName}
-                  className="size-12 rounded-full border border-white object-cover shadow-[0px_1px_3px_rgba(0,0,0,0.1)]"
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="font-comfortaa text-[15px] font-bold leading-[22.5px] text-[#4A2C55]">{selectedFeedback.userName}</p>
-                  <div className="mt-1 flex items-center gap-0.5">
-                    {Array.from({ length: 5 }).map((_, index) => (
-                      <Icon
-                        key={index}
-                        name="star-2"
-                        className={`size-3 ${index < Math.round(selectedFeedback.rating) ? "text-[#E67E22]" : "text-[#E7DED8]"}`}
-                        aria-hidden="true"
-                      />
-                    ))}
-                  </div>
-                  <p className="mt-1.5 max-w-[244px] font-comfortaa text-[14px] leading-[21px] text-[#8B6357]">
-                    {selectedFeedback.comment ? `"${selectedFeedback.comment}"` : "No written comment."}
-                  </p>
-                </div>
-              </div>
-
-              {isReplying ? (
-                <div className="mt-4 flex flex-col items-end">
-                  <div className="w-full pl-[52px]">
-                    <textarea
-                      ref={replyInputRef}
-                      value={replyText}
-                      onChange={(event) => setReplyText(event.target.value)}
-                      placeholder="Reply here"
-                      aria-label="Reply to client review"
-                      disabled={isSubmittingReply}
-                      className="h-[88px] w-full resize-none rounded-[12px] border border-[#DE6A07] bg-white px-4 py-3 font-comfortaa text-[12px] leading-[18px] text-[#4A2C55] outline-none placeholder:text-[#717182]"
-                    />
-                  </div>
-                  <div className="mt-4 w-[266px]">
-                    <GroomerPrimaryActionButton
-                      fullWidth
-                      onClick={handleReplySubmit}
-                      disabled={isSubmittingReply}
-                      loading={isSubmittingReply}
-                    >
-                      Send
-                    </GroomerPrimaryActionButton>
-                    <div className="mt-[10px] flex h-12 items-center justify-center">
-                      <GroomerLinkButton
-                        disabled={isSubmittingReply}
-                        onClick={() => {
-                          setIsReplying(false);
-                          setReplyText("");
-                        }}
-                      >
-                        <span className="font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357] underline">Cancel</span>
-                      </GroomerLinkButton>
-                    </div>
-                  </div>
-                </div>
-              ) : hasExistingReply ? (
-                <div className="mt-4 rounded-[12px] bg-[#FAF9F7] px-4 py-4">
-                  <p className="font-comfortaa text-[12px] font-bold leading-[18px] text-[#8B6357]">Your reply</p>
-                  <p className="mt-2 font-comfortaa text-[13px] leading-[19.5px] text-[#4A2C55]">{selectedFeedback.reply}</p>
-                </div>
-              ) : (
-                <>
-                  <OrangeButton
-                    type="button"
-                    variant="outline"
-                    size="standard"
-                    onClick={() => setIsReplying(true)}
-                    className="mt-[20px] h-[48px] w-full"
-                  >
-                    <span className="flex items-center justify-center gap-2 font-comfortaa text-[15px] font-bold leading-[22.5px] text-[#E67E22]">
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                        <path
-                          d="M6 5L3 8L6 11M3.5 8H9.25C11.3211 8 13 9.67893 13 11.75V12"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                      <span>Reply</span>
-                    </span>
-                  </OrangeButton>
-
-                  <div className="mt-[11px] flex justify-center">
-                    <GroomerLinkButton type="button" onClick={() => setIsReportReviewOpen(true)}>
-                      <span className="font-comfortaa text-[13px] leading-[19.5px] text-[#8B6357] underline decoration-from-font">
-                        Report review
-                      </span>
-                    </GroomerLinkButton>
-                  </div>
-                </>
-              )}
-                </>
-              )}
-            </article>
-          </section>
+            <RecentClientFeedback reviews={performance?.feedbackHistory ?? []} requestedReviewId={requestedReviewId} showReviews={showReviews} onReply={updateFeedbackReply} />
           </div>
         </div>
         </AccountContentContainer>
       </div>
-
-      <ReportReviewModal
-        open={isReportReviewOpen}
-        reason={reportReason}
-        evidenceName={reportEvidenceFile?.name ?? ""}
-        onReasonChange={setReportReason}
-        onEvidenceChange={setReportEvidenceFile}
-        onSubmit={handleReportReviewSubmit}
-        isSubmitting={isSubmittingReportReview}
-        onClose={resetReportReviewForm}
-      />
 
       <UpdateTechnicalSkillModal
         open={isTechnicalSkillModalOpen}
