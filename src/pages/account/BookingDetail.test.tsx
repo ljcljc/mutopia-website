@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import BookingDetail from "./BookingDetail";
-import { clientConfirmBookingTime, clientDecideAddOn, createDepositSession, createReview, createTipSession, getBookingDetail, getTipPaymentStatus, getCancelQuote, updateReview, type BookingDetailOut } from "@/lib/api";
+import { clientConfirmBookingTime, clientDecideAddOn, createDepositSession, createReview, createTipSession, getBookingDetail, getCarePassport, getTipPaymentStatus, getCancelQuote, updateReview, type BookingDetailOut } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
 import { useBookingStore } from "@/components/booking/bookingStore";
@@ -19,6 +19,7 @@ vi.mock("@/lib/api", async (importOriginal) => {
     createTipSession: vi.fn(),
     getCancelQuote: vi.fn(),
     getBookingDetail: vi.fn(),
+    getCarePassport: vi.fn(),
     getTipPaymentStatus: vi.fn(),
     updateReview: vi.fn(),
   };
@@ -61,6 +62,7 @@ function renderBookingDetail(booking: BookingDetailOut) {
 function makeCompletedBooking(overrides: Partial<BookingDetailOut> = {}): BookingDetailOut {
   return {
     id: 127,
+    pet_id: 7,
     order_code: "BT260523PJQ",
     status: "completed",
     scheduled_time: "2026-05-24T08:00:00Z",
@@ -101,18 +103,15 @@ describe("BookingDetail", () => {
     vi.clearAllMocks();
     sessionStorage.clear();
     vi.mocked(getTipPaymentStatus).mockResolvedValue({ status: "open" });
+    vi.mocked(getCarePassport).mockResolvedValue({ questionnaire: {}, completed: false, progress: 0, version: 0 });
     useBookingStore.getState().reset();
   });
 
-  it.each([
-    ["empty", { name: "Hugui" }, true],
-    ["prefilled from a previous booking", { name: "Hugui", health_questionnaire: { lifestyle: {} }, health_questionnaire_prefilled: true }, true],
-    ["submitted for this booking", { name: "Hugui", health_questionnaire: { lifestyle: {} } }, false],
-  ])("shows the care form entry only when the %s questionnaire is unsubmitted", async (_case, petSnapshot, visible) => {
-    renderBookingDetail(makeCompletedBooking({ status: "confirmed", pet_snapshot: petSnapshot }));
+  it("shows the pet passport entry for a confirmed booking", async () => {
+    renderBookingDetail(makeCompletedBooking({ status: "confirmed" }));
 
     expect(await screen.findByText("Ready for service")).toBeInTheDocument();
-    expect(Boolean(screen.queryByRole("button", { name: "Personalize Hugui's care" }))).toBe(visible);
+    expect(screen.getByRole("button", { name: /Complete care passport/ })).toBeInTheDocument();
   });
 
   it("shows the sum of package and add-ons before discounts in the package card", async () => {

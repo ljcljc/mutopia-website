@@ -751,6 +751,25 @@
         "security": [{ "JWTAuth": [] }]
       }
     },
+    "/api/pets/pets/{pet_id}/care-passport": {
+      "get": {
+        "operationId": "api_pets_get_care_passport",
+        "summary": "Get Care Passport",
+        "parameters": [{ "in": "path", "name": "pet_id", "schema": { "title": "Pet Id", "type": "integer" }, "required": true }],
+        "responses": { "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CarePassportOut" } } } } },
+        "tags": ["pets"],
+        "security": [{ "JWTAuth": [] }]
+      },
+      "patch": {
+        "operationId": "api_pets_save_care_passport",
+        "summary": "Save Care Passport",
+        "parameters": [{ "in": "path", "name": "pet_id", "schema": { "title": "Pet Id", "type": "integer" }, "required": true }],
+        "responses": { "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CarePassportOut" } } } } },
+        "tags": ["pets"],
+        "requestBody": { "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CarePassportPageIn" } } }, "required": true },
+        "security": [{ "JWTAuth": [] }]
+      }
+    },
     "/api/pets/pets/{pet_id}/memorialize": {
       "post": {
         "operationId": "api_pets_memorialize_pet",
@@ -4981,9 +5000,30 @@
         "title": "BookingAdjustmentOut",
         "type": "object"
       },
+      "CarePassportPageIn": {
+        "properties": {
+          "questionnaire": { "additionalProperties": true, "title": "Questionnaire", "type": "object" },
+          "page": { "title": "Page", "type": "integer" }
+        },
+        "required": ["questionnaire", "page"],
+        "title": "CarePassportPageIn",
+        "type": "object"
+      },
+      "CarePassportOut": {
+        "properties": {
+          "questionnaire": { "additionalProperties": true, "title": "Questionnaire", "type": "object" },
+          "progress": { "title": "Progress", "type": "integer" },
+          "completed": { "title": "Completed", "type": "boolean" },
+          "version": { "title": "Version", "type": "integer" }
+        },
+        "required": ["questionnaire", "progress", "completed", "version"],
+        "title": "CarePassportOut",
+        "type": "object"
+      },
       "BookingDetailOut": {
         "properties": {
           "id": { "title": "Id", "type": "integer" },
+          "pet_id": { "anyOf": [{ "type": "integer" }, { "type": "null" }], "title": "Pet Id" },
           "status": { "title": "Status", "type": "string" },
           "hero_stage": {
             "anyOf": [{ "type": "string" }, { "type": "null" }],

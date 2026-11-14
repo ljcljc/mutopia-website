@@ -226,6 +226,23 @@ export interface PetOut {
   reference_photo_ids?: number[]; // 参考照片 ID 数组
 }
 
+export interface CarePassportOut {
+  questionnaire: Record<string, unknown>;
+  progress: number;
+  completed: boolean;
+  version: number;
+}
+
+export async function getCarePassport(petId: number): Promise<CarePassportOut> {
+  const response = await http.get<CarePassportOut>(`/api/pets/pets/${petId}/care-passport`);
+  return response.data;
+}
+
+export async function saveCarePassport(petId: number, questionnaire: Record<string, unknown>, page: number): Promise<CarePassportOut> {
+  const response = await http.patch<CarePassportOut>(`/api/pets/pets/${petId}/care-passport`, { questionnaire, page });
+  return response.data;
+}
+
 export interface PetPageOut {
   total: number;
   page: number;
@@ -571,6 +588,7 @@ export interface PetOwnerComplaintOut {
 
 export interface BookingDetailOut {
   id: number;
+  pet_id?: number | null;
   order_code?: string | null;
   status: string;
   hero_stage?: "handover_checkout" | "service_completed" | null;

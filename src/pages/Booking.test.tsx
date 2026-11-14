@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import Booking from "./Booking";
 import { useAuthStore } from "@/components/auth/authStore";
 import { useBookingStore } from "@/components/booking/bookingStore";
@@ -22,7 +23,7 @@ describe("Booking step 1 validation", () => {
   });
 
   it("keeps Continue clickable and displays all required errors without advancing", () => {
-    render(<Booking />);
+    render(<MemoryRouter><Booking /></MemoryRouter>);
 
     const continueButton = screen.getByRole("button", { name: "Continue" });
     expect(continueButton).not.toBeDisabled();
@@ -36,7 +37,7 @@ describe("Booking step 1 validation", () => {
 
   it("shows every required pet-field error and remains on step 2", () => {
     useBookingStore.setState({ currentStep: 2 });
-    render(<Booking />);
+    render(<MemoryRouter><Booking /></MemoryRouter>);
 
     fireEvent.click(screen.getAllByRole("button", { name: /^Continue/ })[0]);
 
@@ -53,7 +54,7 @@ describe("Booking step 1 validation", () => {
 
   it("requires a preferred time slot before leaving step 5", () => {
     useBookingStore.setState({ currentStep: 5, selectedTimeSlots: [] });
-    render(<Booking />);
+    render(<MemoryRouter><Booking /></MemoryRouter>);
 
     fireEvent.click(screen.getAllByRole("button", { name: /^Continue/ })[0]);
 
@@ -64,7 +65,7 @@ describe("Booking step 1 validation", () => {
   it("toggles step 5 time slots once when clicking either layout's checkbox", () => {
     const date = "2026-11-15";
     useBookingStore.setState({ currentStep: 5, selectedTimeSlots: [{ date, slot: "afternoon" }] });
-    render(<Booking />);
+    render(<MemoryRouter><Booking /></MemoryRouter>);
 
     const checkboxes = screen.getAllByRole("checkbox");
     expect(checkboxes).toHaveLength(4);
@@ -79,7 +80,7 @@ describe("Booking step 1 validation", () => {
 
   it("requires agreement before proceeding from step 6", () => {
     useBookingStore.setState({ currentStep: 6 });
-    render(<Booking />);
+    render(<MemoryRouter><Booking /></MemoryRouter>);
 
     const proceedButton = screen.getByRole("button", { name: /Proceed to payment/i });
     const agreement = screen.getByRole("checkbox", { name: /I understand and agree/i });

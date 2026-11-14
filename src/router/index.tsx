@@ -28,6 +28,10 @@ export const router = createBrowserRouter([
         element: <BookingHealthInfo />,
       },
       {
+        path: "care-passport/:petId",
+        element: <BookingHealthInfo />,
+      },
+      {
         path: "how-it-works",
         element: <HowItWorks />,
       },

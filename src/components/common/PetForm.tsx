@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import { Icon } from "@/components/common/Icon";
 import { CustomInput, CustomSelect, CustomSelectItem, CustomRadio, OrangeButton, FileUpload, AccordionChevron, type FileUploadItem } from "@/components/common";
 import { AutoComplete } from "@/components/common/AutoComplete";
@@ -26,6 +26,7 @@ function getBreedOptions(petType: PetType, breeds: PetBreedOut[]): string[] {
 }
 
 export interface PetFormProps {
+  carePassportSlot?: ReactNode;
   petName: string;
   petOptions?: PetOut[];
   selectedPetId?: number | null;
@@ -93,6 +94,7 @@ export interface PetFormProps {
 }
 
 export function PetForm({
+  carePassportSlot,
   petName,
   petOptions,
   selectedPetId,
@@ -1803,6 +1805,8 @@ export function PetForm({
               onChange={handleReferenceStylesChange}
               uploadItems={referenceStyleItems}
             />
+
+            {carePassportSlot}
 
             {/* Special Notes Card */}
             <div className="bg-white flex flex-col gap-[calc(20*var(--px393))] sm:gap-[20px] items-start p-[calc(20*var(--px393))] sm:p-[24px] relative rounded-[calc(12*var(--px393))] sm:rounded-[12px] shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.1)] w-full">

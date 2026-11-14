@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import IconButtonArrow from "@/assets/icons/icon-button-arrow.svg?react";
 import { BrownOutlineButton } from "@/components/common/BrownOutlineButton";
 import { OrangeButton } from "@/components/common/OrangeButton";
 import {
   getBookingDetail,
+  getPet,
+  getCarePassport,
+  saveCarePassport,
   updateBookingHealthInfo,
   type BookingDetailOut,
   type BookingHealthInfoUpdateIn,
@@ -87,9 +90,15 @@ function getLifestyleStepIssues(
 
 export default function BookingHealthInfo() {
   const navigate = useNavigate();
-  const { bookingId } = useParams();
+  const location = useLocation();
+  const { bookingId, petId } = useParams();
+  const passportPetId = Number(petId);
+  const isPassport = Boolean(petId);
+  const returnTo = (location.state as { returnTo?: string } | null)?.returnTo;
   const parsedBookingId = Number(bookingId);
   const [detail, setDetail] = useState<BookingDetailOut | null>(null);
+  const [passportPetName, setPassportPetName] = useState("");
+  const [savedProgress, setSavedProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -98,6 +107,19 @@ export default function BookingHealthInfo() {
     useState<BookingHealthQuestionnaire>(createDefaultQuestionnaire());
 
   useEffect(() => {
+    if (isPassport) {
+      let cancelled = false;
+      Promise.all([getPet(passportPetId), getCarePassport(passportPetId)])
+        .then(([pet, passport]) => {
+          if (cancelled) return;
+          setPassportPetName(pet.name);
+          setSavedProgress(passport.progress);
+          setQuestionnaire(normalizeQuestionnaire(passport.questionnaire));
+          setIsLoading(false);
+        })
+        .catch(() => { toast.error("Failed to load care passport."); navigate(`/account/pets?pet=${passportPetId}`); });
+      return () => { cancelled = true; };
+    }
     if (!Number.isFinite(parsedBookingId)) {
       toast.error("Invalid booking.");
       navigate("/");
@@ -133,19 +155,18 @@ export default function BookingHealthInfo() {
     return () => {
       cancelled = true;
     };
-  }, [navigate, parsedBookingId]);
+  }, [navigate, parsedBookingId, isPassport, passportPetId]);
 
-  const canSubmit =
-    detail != null &&
+  const canSubmit = isPassport || (detail != null &&
     detail.health_report == null &&
-    HEALTH_INFO_EDITABLE_STATUSES.has(detail.status);
+    HEALTH_INFO_EDITABLE_STATUSES.has(detail.status));
   const petSnapshot = useMemo(
     () => (detail?.pet_snapshot ?? {}) as Record<string, unknown>,
     [detail]
   );
   const isPrefilled =
     petSnapshot.health_questionnaire_prefilled === true && !didClearPrefill;
-  const petName = getSnapshotValue(petSnapshot, "name") || "Your pet";
+  const petName = passportPetName || getSnapshotValue(petSnapshot, "name") || "Your pet";
   const stepMeta = BOOKING_HEALTH_STEPS[currentStep];
   const visualProgressStep = currentStep;
   const visualProgressSegments = BOOKING_HEALTH_STEPS.length;
@@ -159,31 +180,43 @@ export default function BookingHealthInfo() {
   }, [currentStep, lifestyleStepIssues]);
 
   const handleSubmit = async (
-    nextQuestionnaire: BookingHealthQuestionnaire = questionnaire
+    nextQuestionnaire: BookingHealthQuestionnaire = questionnaire,
+    page = currentStep
   ) => {
-    if (!detail) return;
+    if (!detail && !isPassport) return false;
     if (!canSubmit) {
       console.log("[health-form] submit blocked: booking not editable", {
         bookingStatus: detail?.status ?? null,
-        bookingId: detail.id,
+        bookingId: detail?.id,
       });
       toast.error(
         "Health information can no longer be submitted for this appointment."
       );
-      return;
+      return false;
     }
 
     setIsSaving(true);
     try {
-      await updateBookingHealthInfo(detail.id, {
+      if (isPassport) {
+        const saved = await saveCarePassport(passportPetId, nextQuestionnaire as unknown as Record<string, unknown>, page);
+        setSavedProgress(saved.progress);
+        if (page === BOOKING_HEALTH_STEPS.length - 1) {
+          toast.success("Care passport updated.");
+          navigate(returnTo || `/account/pets?pet=${passportPetId}`);
+        }
+        return true;
+      }
+      await updateBookingHealthInfo(detail!.id, {
         questionnaire: nextQuestionnaire,
         ...buildLegacyHealthFields(nextQuestionnaire),
       });
       toast.success("Health information updated.");
-      navigate(`/account/bookings/${detail.id}`);
+      navigate(`/account/bookings/${detail!.id}`);
+      return true;
     } catch (error) {
       console.error("Failed to update booking health info:", error);
       toast.error("Failed to update health information.");
+      return false;
     } finally {
       setIsSaving(false);
     }
@@ -238,6 +271,7 @@ export default function BookingHealthInfo() {
 
   const handleNext = async () => {
     if (currentStep === 0 && lifestyleStepIssues.length > 0) {
+      if (isPassport && savedProgress > 0) await handleSubmit(questionnaire, 0);
       toast.error(`Please complete: ${lifestyleStepIssues.join(", ")}`);
       return;
     }
@@ -245,6 +279,9 @@ export default function BookingHealthInfo() {
     if (currentStep === BOOKING_HEALTH_STEPS.length - 1) {
       await handleSubmit();
       return;
+    }
+    if (isPassport) {
+      if (!await handleSubmit(questionnaire, currentStep)) return;
     }
     setCurrentStep((step) =>
       Math.min(step + 1, BOOKING_HEALTH_STEPS.length - 1)
@@ -267,10 +304,10 @@ export default function BookingHealthInfo() {
               <div className="border-b border-[#e5e7eb] bg-white">
                 <div className="mx-auto w-full max-w-[588px] px-4 pb-7 pt-4 sm:px-[21px] sm:pb-[28px] sm:pt-[14px]">
                   <div className="flex items-center gap-[14px]">
-                    {currentStep > 0 ? (
+                    {currentStep > 0 || isPassport ? (
                       <button
                         type="button"
-                        onClick={() => setCurrentStep((step) => step - 1)}
+                        onClick={() => currentStep > 0 ? setCurrentStep((step) => step - 1) : navigate(returnTo || `/account/pets?pet=${passportPetId}`)}
                         className="inline-flex size-[31px] cursor-pointer items-center justify-center rounded-full text-[#25314c] hover:bg-[rgba(37,49,76,0.10)]"
                         aria-label="Go back"
                       >
@@ -344,7 +381,7 @@ export default function BookingHealthInfo() {
                     ) : null}
                     <OrangeButton
                       onClick={() => void handleNext()}
-                      disabled={!canProceedCurrentStep}
+                      disabled={!isPassport && !canProceedCurrentStep}
                       loading={isSaving}
                       fullWidth
                       className="min-h-[52px] w-full rounded-[16777200px] bg-[#8B6357] px-6 py-4 text-[15px] font-semibold text-white shadow-[0_4px_6px_-1px_rgba(0,0,0,0.10),0_2px_4px_-2px_rgba(0,0,0,0.10)] hover:bg-[#8B6357CC] active:bg-[#6F4B41] focus-visible:bg-[#8B6357CC] disabled:hover:bg-[#8B6357] disabled:active:bg-[#8B6357] disabled:focus-visible:bg-[#8B6357] sm:w-auto sm:min-w-[330px]"

@@ -4,6 +4,7 @@ import AccountContentContainer from "@/components/layout/AccountContentContainer
 import { getRefundedBadgeLabel } from "@/components/account/dashboard/dashboardBookingUtils";
 import { CustomInput, CustomRadio, OrangeButton, AccordionChevron, AccordionPanel } from "@/components/common";
 import { CustomTextarea } from "@/components/common/CustomTextarea";
+import { CarePassportCard } from "@/components/common/CarePassportCard";
 import { Icon } from "@/components/common/Icon";
 import { useAccountStore } from "@/components/account/accountStore";
 import { useBookingStore } from "@/components/booking/bookingStore";
@@ -443,7 +444,6 @@ export default function BookingDetail() {
   const packageSnapshot = (detail?.package_snapshot as Record<string, unknown> | undefined) ?? {};
 
   const petName = (petSnapshot.name as string | undefined) ?? "Duke";
-  const hasHealthQuestionnaire = Boolean(petSnapshot.health_questionnaire) && petSnapshot.health_questionnaire_prefilled !== true;
   const bookingCode = formatBookingCode(detail?.order_code, detail?.id);
   const serviceName = (packageSnapshot.name as string | undefined) ?? "Full grooming";
   const serviceType =
@@ -1446,18 +1446,7 @@ export default function BookingDetail() {
                       >
                         Cancel
                       </OrangeButton>
-                      {normalizedStatus === "confirmed" && detail?.id && !hasHealthQuestionnaire ? (
-                        <OrangeButton
-                          type="button"
-                          variant="primary"
-                          size="compact"
-                          textSize={12}
-                          className="min-w-[100px]"
-                          onClick={() => navigate(`/health-form/${detail.id}`)}
-                        >
-                          {`Personalize ${petName}'s care`}
-                        </OrangeButton>
-                      ) : null}
+                      {detail?.pet_id ? <CarePassportCard petId={detail.pet_id} petName={petName} /> : null}
                     </>
                   ) : null}
 

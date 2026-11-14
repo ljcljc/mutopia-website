@@ -2228,7 +2228,7 @@ export default function GroomerDashboardPage() {
       toast.success("Service started");
     } catch (error) {
       console.error("Failed to start grooming:", error);
-      toast.error("Failed to start service");
+      toast.error(getInvitationErrorMessage(error, "Failed to start service"));
     }
   };
 
