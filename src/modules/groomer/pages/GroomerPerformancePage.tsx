@@ -12,7 +12,7 @@ import {
   getGroomerPerformancePresentation,
 } from "@/modules/groomer/utils/performance";
 import { useGroomerPerformance } from "@/modules/groomer/hooks/useGroomerPerformance";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { buildImageUrl, reportGroomerReview, replyGroomerReview, submitGroomerTechnicalSkillUpdate, uploadGroomerApplyImage } from "@/lib/api";
 import { HttpError } from "@/lib/http";
 import { toast } from "sonner";
@@ -330,8 +330,11 @@ function getTechnicalSkillPresentation(technicalSkill: {
 
 export default function GroomerPerformancePage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnPath = location.state?.from === "/groomer/dashboard" ? "/groomer/dashboard" : "/groomer/account";
   const [searchParams] = useSearchParams();
   const reviewIdParam = searchParams.get("reviewId");
+  const showReviews = searchParams.get("section") === "reviews";
   const requestedReviewId = reviewIdParam === null ? null : Number(reviewIdParam);
   const feedbackCardRef = useRef<HTMLElement>(null);
   const replyInputRef = useRef<HTMLTextAreaElement>(null);
@@ -587,6 +590,11 @@ export default function GroomerPerformancePage() {
     if (isReplying) replyInputRef.current?.focus();
   }, [requestedReviewId, selectedFeedback, isReplying]);
 
+  useEffect(() => {
+    if (!showReviews || !performance) return;
+    feedbackCardRef.current?.scrollIntoView({ block: "start" });
+  }, [showReviews, performance]);
+
   const updateFeedbackReply = (reviewId: number, reply: string) => {
     setPerformance((current) => {
       if (!current) return current;
@@ -727,9 +735,9 @@ export default function GroomerPerformancePage() {
             <div className="flex items-center gap-2 lg:px-0">
               <button
                 type="button"
-                onClick={() => navigate("/groomer/account")}
+                onClick={() => navigate(returnPath)}
                 className="flex size-5 items-center justify-center text-white lg:hidden"
-                aria-label="Go back to my account"
+                aria-label="Go back"
               >
                 <Icon name="nav-prev" className="size-5 text-white" aria-hidden="true" />
               </button>
@@ -740,10 +748,10 @@ export default function GroomerPerformancePage() {
               >
                 <button
                   type="button"
-                  onClick={() => navigate("/groomer/account")}
+                  onClick={() => navigate(returnPath)}
                   className="transition-opacity hover:opacity-80"
                 >
-                  My account
+                  {returnPath === "/groomer/dashboard" ? "Dashboard" : "My account"}
                 </button>
                 <span aria-hidden="true">&gt;</span>
                 <span>Performance details</span>

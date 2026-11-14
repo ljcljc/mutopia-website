@@ -1970,13 +1970,15 @@ function DashboardMetricCard({
   icon,
   value,
   label,
+  onClick,
 }: {
   icon: "logo-mark" | "star-2";
   value: string;
   label: string;
+  onClick: () => void;
 }) {
   return (
-    <article className="rounded-[16px] bg-white px-4 py-4 text-center shadow-[0px_4px_12px_rgba(0,0,0,0.08)]">
+    <button type="button" onClick={onClick} className="w-full cursor-pointer rounded-[16px] bg-white px-4 py-4 text-center shadow-[0px_4px_12px_rgba(0,0,0,0.08)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#633479]">
       <div className="flex justify-center">
         {icon === "logo-mark" ? (
           <Icon
@@ -2000,7 +2002,7 @@ function DashboardMetricCard({
       <p className="mt-1 font-comfortaa text-[11px] leading-[16.5px] text-[#8B6357]">
         {label}
       </p>
-    </article>
+    </button>
   );
 }
 
@@ -2413,7 +2415,7 @@ export default function GroomerDashboardPage() {
                 <ReviewedServiceCard
                   appointment={effectiveAppointment}
                   onAddQuickReview={() =>
-                    navigate(`/groomer/account/performance?reviewId=${effectiveAppointment.review?.id}`)
+                    navigate(`/groomer/account/performance?reviewId=${effectiveAppointment.review?.id}`, { state: { from: "/groomer/dashboard" } })
                   }
                 />
               ) : effectiveAppointment && showPendingReportJob ? (
@@ -2528,11 +2530,13 @@ export default function GroomerDashboardPage() {
                   icon="logo-mark"
                   value={metrics.partnerScore}
                   label="Mutopia partner score"
+                  onClick={() => navigate("/groomer/account/performance", { state: { from: "/groomer/dashboard" } })}
                 />
                 <DashboardMetricCard
                   icon="star-2"
                   value={metrics.rating}
                   label="Rating & review"
+                  onClick={() => navigate("/groomer/account/performance?section=reviews", { state: { from: "/groomer/dashboard" } })}
                 />
               </div>
             </>
