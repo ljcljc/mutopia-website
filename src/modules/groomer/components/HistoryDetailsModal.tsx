@@ -5,6 +5,7 @@ import { Spinner } from "@/components/common/Spinner";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { useIsMobile } from "@/components/ui/use-mobile";
 import { cn } from "@/components/ui/utils";
+import { ClientReviewCard, type ClientReviewCardData } from "@/modules/groomer/components/ClientReviewCard";
 
 interface HistoryDetailsLineItem {
   label: string;
@@ -262,6 +263,21 @@ export function HistoryDetailsModal({
 }: HistoryDetailsModalProps) {
   const isMobile = useIsMobile();
   const [isBreakdownExpanded, setIsBreakdownExpanded] = useState(true);
+  const [localReply, setLocalReply] = useState<{ reviewId: number; reply: string } | null>(null);
+
+  const review = useMemo<ClientReviewCardData | null>(() => {
+    const raw = asRecord(detail?.review);
+    const reviewId = Number(raw.id);
+    if (!Number.isInteger(reviewId) || reviewId <= 0) return null;
+    return {
+      reviewId,
+      userName: getString(detail ?? {}, ["user_name"], "Client"),
+      avatarUrl: getString(raw, ["avatar_url"]) || null,
+      rating: Number(raw.rating) || 0,
+      comment: getString(raw, ["comment"]),
+      reply: localReply?.reviewId === reviewId ? localReply.reply : getString(raw, ["groomer_reply"]) || null,
+    };
+  }, [detail, localReply]);
 
   const details = useMemo(() => {
     const apiDetails = buildDetailsFromApi(detail);
@@ -434,6 +450,7 @@ export function HistoryDetailsModal({
                       </div>
                     </AccordionPanel>
                   </section>
+                  {review && <ClientReviewCard review={review} onReply={(reviewId, reply) => setLocalReply({ reviewId, reply })} className="rounded-[12px] bg-white px-5 py-5 shadow-[0px_8px_12px_-5px_rgba(0,0,0,0.10)]" />}
                 </>
               )}
             </div>
